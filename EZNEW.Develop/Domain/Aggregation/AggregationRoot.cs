@@ -109,6 +109,10 @@ namespace EZNEW.Develop.Domain.Aggregation
             {
                 return loadLazyMember;
             }
+            set
+            {
+                loadLazyMember = value;
+            }
         }
 
         /// <summary>
@@ -119,6 +123,10 @@ namespace EZNEW.Develop.Domain.Aggregation
             get
             {
                 return allowLoadPropertys;
+            }
+            set
+            {
+                allowLoadPropertys = value;
             }
         }
 

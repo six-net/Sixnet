@@ -85,7 +85,7 @@ namespace EZNEW.Develop.Domain.Repository.Event
             var eventProperty = dataOperationEventHandlerType.GetProperty("EventType");
             eventProperty.SetValue(dataOperationEventHandler, eventType);
             var handlerRepositoryTypeProperty = dataOperationEventHandlerType.GetProperty("HandlerRepositoryType");
-            handlerRepositoryTypeProperty.SetValue(dataOperationEventHandler, eventSource.GetType());
+            handlerRepositoryTypeProperty.SetValue(dataOperationEventHandler, eventHandler.GetType());
             var objectTypeProperty = dataOperationEventHandlerType.GetProperty("ObjectType");
             objectTypeProperty.SetValue(dataOperationEventHandler, objectType);
             var operationProperty = dataOperationEventHandlerType.GetProperty("Operation");
@@ -112,15 +112,36 @@ namespace EZNEW.Develop.Domain.Repository.Event
         }
 
         /// <summary>
-        /// subscribe save
+        /// subscribe object remove
         /// </summary>
         /// <typeparam name="EventSource">event source</typeparam>
         /// <typeparam name="EventHandler">event handler</typeparam>
         /// <typeparam name="T"></typeparam>
         /// <param name="action">action</param>
-        public static void SubscribeRemove<EventSource, EventHandler, T>(Expression<Func<EventHandler, DataOperation<T>>> action)
+        public static void SubscribeObjectRemove<EventSource, EventHandler, T>(Expression<Func<EventHandler, DataOperation<T>>> action)
         {
             SubscribeDataOperation<EventSource, EventHandler, T>(EventType.RemoveObject, action);
+        }
+
+        /// <summary>
+        /// subscribe remove(both object and condition)
+        /// </summary>
+        /// <typeparam name="EventSource">event source</typeparam>
+        /// <typeparam name="EventHandler">event handler</typeparam>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="action">action</param>
+        public static void SubscribeRemove<EventSource, EventHandler, T>(Expression<Func<EventHandler, DataOperation<T>>> objectRemoveAction = null, Expression<Func<EventHandler, ConditionOperation>> conditionRemoveAction = null)
+        {
+            //object remove
+            if (objectRemoveAction != null)
+            {
+                SubscribeObjectRemove<EventSource, EventHandler, T>(objectRemoveAction);
+            }
+            //condition remove
+            if (conditionRemoveAction != null)
+            {
+                SubscribeConditionRemove<EventSource, EventHandler, T>(conditionRemoveAction);
+            }
         }
 
         #endregion
@@ -160,7 +181,7 @@ namespace EZNEW.Develop.Domain.Repository.Event
             var conditionEventHandler = new ConditionEventHandler()
             {
                 EventType = eventType,
-                HandlerRepositoryType = eventSource.GetType(),
+                HandlerRepositoryType = eventHandler.GetType(),
                 ObjectType = objectType,
                 Operation = (ConditionOperation)handlerAction
             };
@@ -229,7 +250,7 @@ namespace EZNEW.Develop.Domain.Repository.Event
             var modifyEventHandler = new ModifyEventHandler()
             {
                 EventType = EventType.ModifyExpression,
-                HandlerRepositoryType = eventSource.GetType(),
+                HandlerRepositoryType = eventHandler.GetType(),
                 ObjectType = objectType,
                 Operation = (ModifyOperation)handlerAction
             };
@@ -288,7 +309,7 @@ namespace EZNEW.Develop.Domain.Repository.Event
             var eventProperty = queryEventHandlerType.GetProperty("EventType");
             eventProperty.SetValue(dataOperationEventHandler, EventType.QueryData);
             var handlerRepositoryTypeProperty = queryEventHandlerType.GetProperty("HandlerRepositoryType");
-            handlerRepositoryTypeProperty.SetValue(dataOperationEventHandler, eventSource.GetType());
+            handlerRepositoryTypeProperty.SetValue(dataOperationEventHandler, eventHandler.GetType());
             var objectTypeProperty = queryEventHandlerType.GetProperty("ObjectType");
             objectTypeProperty.SetValue(dataOperationEventHandler, objectType);
             var operationProperty = queryEventHandlerType.GetProperty("Operation");

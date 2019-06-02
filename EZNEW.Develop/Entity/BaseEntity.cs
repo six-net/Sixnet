@@ -116,7 +116,7 @@ namespace EZNEW.Develop.Entity
             {
                 return Guid.NewGuid().ToString();
             }
-            return string.Join("_", primaryValues.Values.OrderBy(c => c).ToArray());
+            return string.Join("_", primaryValues.Values.OrderBy(c => c.ToString()).ToArray());
         }
 
         public override int GetHashCode()

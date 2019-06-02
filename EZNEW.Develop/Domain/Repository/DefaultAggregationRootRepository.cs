@@ -48,7 +48,7 @@ namespace EZNEW.Develop.Domain.Repository
             {
                 if (obj == null)
                 {
-                    throw new Exception("save object data is null");
+                    continue;
                 }
                 if (!obj.CanBeSave)
                 {
