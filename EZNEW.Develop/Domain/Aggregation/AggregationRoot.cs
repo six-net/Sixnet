@@ -40,6 +40,10 @@ namespace EZNEW.Develop.Domain.Aggregation
         /// </summary>
         protected IAggregationRepository<T> repository = null;
 
+        /// <summary>
+        /// default identity
+        /// </summary>
+        private Guid defaultIdentity = Guid.NewGuid();
 
         #endregion
 
@@ -109,10 +113,6 @@ namespace EZNEW.Develop.Domain.Aggregation
             {
                 return loadLazyMember;
             }
-            set
-            {
-                loadLazyMember = value;
-            }
         }
 
         /// <summary>
@@ -123,10 +123,6 @@ namespace EZNEW.Develop.Domain.Aggregation
             get
             {
                 return allowLoadPropertys;
-            }
-            set
-            {
-                allowLoadPropertys = value;
             }
         }
 
@@ -377,7 +373,10 @@ namespace EZNEW.Develop.Domain.Aggregation
         /// Primary Value Is None
         /// </summary>
         /// <returns></returns>
-        public abstract bool IdentityValueIsNone();
+        public virtual bool IdentityValueIsNone()
+        {
+            return true;
+        }
 
         /// <summary>
         /// compare two objects
@@ -416,7 +415,10 @@ namespace EZNEW.Develop.Domain.Aggregation
         /// get identity value
         /// </summary>
         /// <returns></returns>
-        protected abstract string GetIdentityValue();
+        protected virtual string GetIdentityValue()
+        {
+            return defaultIdentity.ToString();
+        }
 
         #endregion
     }
