@@ -71,39 +71,6 @@ namespace EZNEW.Develop.Domain.Aggregation
             }
         }
 
-        ///// <summary>
-        ///// Model Life Status
-        ///// </summary>
-        //public LifeStatus LifeStatus
-        //{
-        //    get
-        //    {
-        //        return repository?.GetLifeStatus(this) ?? LifeStatus.Save;
-        //    }
-        //}
-
-        ///// <summary>
-        ///// LifStatus Is New
-        ///// </summary>
-        //public bool IsNew
-        //{
-        //    get
-        //    {
-        //        return LifeStatus == LifeStatus.Save;
-        //    }
-        //}
-
-        ///// <summary>
-        ///// LifStatus Is Remove
-        ///// </summary>
-        //public bool IsRemove
-        //{
-        //    get
-        //    {
-        //        return LifeStatus == LifeStatus.Remove;
-        //    }
-        //}
-
         /// <summary>
         /// Allow Lazy Data Load
         /// </summary>
@@ -112,6 +79,10 @@ namespace EZNEW.Develop.Domain.Aggregation
             get
             {
                 return loadLazyMember;
+            }
+            set
+            {
+                loadLazyMember = value;
             }
         }
 
@@ -123,6 +94,10 @@ namespace EZNEW.Develop.Domain.Aggregation
             get
             {
                 return allowLoadPropertys;
+            }
+            set
+            {
+                allowLoadPropertys = value;
             }
         }
 
@@ -158,10 +133,6 @@ namespace EZNEW.Develop.Domain.Aggregation
         /// <returns></returns>
         protected virtual bool SaveValidation()
         {
-            if (this == null)
-            {
-                return false;
-            }
             //validate object primary value
             if (IdentityValueIsNone())
             {
@@ -189,7 +160,7 @@ namespace EZNEW.Develop.Domain.Aggregation
         /// <returns></returns>
         protected virtual bool RemoveValidation()
         {
-            return this != null;
+            return !IdentityValueIsNone();
         }
 
         /// <summary>

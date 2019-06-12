@@ -431,6 +431,17 @@ namespace EZNEW.Develop.CQuery
         /// <summary>
         /// Equal Condition
         /// </summary>
+        /// <param name="fieldName">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <returns>return newest instance</returns>
+        public IQuery Equal(string fieldName, IQuery subQuery)
+        {
+            return And(fieldName, CriteriaOperator.Equal, subQuery);
+        }
+
+        /// <summary>
+        /// Equal Condition
+        /// </summary>
         /// <param name="field">field</param>
         /// <param name="value">value</param>
         /// <param name="or">connect with 'and'(true/default) or 'or'(false)</param>
@@ -439,6 +450,17 @@ namespace EZNEW.Develop.CQuery
         {
             AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, ExpressionHelper.GetExpressionPropertyName(field.Body), CriteriaOperator.Equal, value, convert);
             return this;
+        }
+
+        /// <summary>
+        /// Equal Condition
+        /// </summary>
+        /// <param name="field">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <returns>return newest instance</returns>
+        public IQuery Equal<T>(Expression<Func<T, dynamic>> field, IQuery subQuery) where T : QueryModel<T>
+        {
+            return And<T>(field, CriteriaOperator.Equal, subQuery);
         }
 
         #endregion
@@ -461,6 +483,17 @@ namespace EZNEW.Develop.CQuery
         /// <summary>
         /// Not Equal Condition
         /// </summary>
+        /// <param name="fieldName">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <returns>return newest instance</returns>
+        public IQuery NotEqual(string fieldName, IQuery subQuery)
+        {
+            return And(fieldName, CriteriaOperator.NotEqual, subQuery);
+        }
+
+        /// <summary>
+        /// Not Equal Condition
+        /// </summary>
         /// <param name="field">field</param>
         /// <param name="value">value</param>
         /// <param name="or">connect with 'and'(true/default) or 'or'(false)</param>
@@ -469,6 +502,17 @@ namespace EZNEW.Develop.CQuery
         {
             AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, ExpressionHelper.GetExpressionPropertyName(field.Body), CriteriaOperator.NotEqual, value, convert);
             return this;
+        }
+
+        /// <summary>
+        /// Not Equal Condition
+        /// </summary>
+        /// <param name="field">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <returns>return newest instance</returns>
+        public IQuery NotEqual<T>(Expression<Func<T, dynamic>> field, IQuery subQuery) where T : QueryModel<T>
+        {
+            return And<T>(field, CriteriaOperator.NotEqual, subQuery); ;
         }
 
         #endregion
@@ -611,6 +655,17 @@ namespace EZNEW.Develop.CQuery
         /// <summary>
         /// Include Condition
         /// </summary>
+        /// <param name="fieldName">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <returns>return newest instance</returns>
+        public IQuery In(string fieldName, IQuery subQuery)
+        {
+            return And(fieldName, CriteriaOperator.In, subQuery);
+        }
+
+        /// <summary>
+        /// Include Condition
+        /// </summary>
         /// <param name="field">field</param>
         /// <param name="value">value</param>
         /// <param name="or">connect with 'and'(true/default) or 'or'(false)</param>
@@ -619,6 +674,17 @@ namespace EZNEW.Develop.CQuery
         {
             AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, ExpressionHelper.GetExpressionPropertyName(field.Body), CriteriaOperator.In, value, convert);
             return this;
+        }
+
+        /// <summary>
+        /// Include Condition
+        /// </summary>
+        /// <param name="field">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <returns>return newest instance</returns>
+        public IQuery In<T>(Expression<Func<T, dynamic>> field, IQuery subQuery) where T : QueryModel<T>
+        {
+            return And<T>(field, CriteriaOperator.In, subQuery);
         }
 
         #endregion
@@ -641,6 +707,17 @@ namespace EZNEW.Develop.CQuery
         /// <summary>
         /// Not Include
         /// </summary>
+        /// <param name="fieldName">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <returns>return newest instance</returns>
+        public IQuery NotIn(string fieldName, IQuery subQuery)
+        {
+            return And(fieldName, CriteriaOperator.NotIn, subQuery);
+        }
+
+        /// <summary>
+        /// Not Include
+        /// </summary>
         /// <param name="field">field</param>
         /// <param name="value">value</param>
         /// <param name="or">connect with 'and'(true/default) or 'or'(false)</param>
@@ -649,6 +726,17 @@ namespace EZNEW.Develop.CQuery
         {
             AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, ExpressionHelper.GetExpressionPropertyName(field.Body), CriteriaOperator.NotIn, value, convert);
             return this;
+        }
+
+        /// <summary>
+        /// Not Include
+        /// </summary>
+        /// <param name="field">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <returns>return newest instance</returns>
+        public IQuery NotIn<T>(Expression<Func<T, dynamic>> field, IQuery subQuery) where T : QueryModel<T>
+        {
+            return And<T>(field, CriteriaOperator.NotIn, subQuery);
         }
 
         #endregion

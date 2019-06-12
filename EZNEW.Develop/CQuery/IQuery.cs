@@ -295,12 +295,28 @@ namespace EZNEW.Develop.CQuery
         /// <summary>
         /// Equal Condition
         /// </summary>
+        /// <param name="fieldName">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <returns>return newest instance</returns>
+        IQuery Equal(string fieldName, IQuery subQuery);
+
+        /// <summary>
+        /// Equal Condition
+        /// </summary>
         /// <param name="field">field</param>
         /// <param name="value">value</param>
         /// <param name="or">connect with 'and'(true/default) or 'or'(false)</param>
         /// <param name="convert">criterial convert</param>
         /// <returns>return newest instance</returns>
         IQuery Equal<T>(Expression<Func<T, dynamic>> field, dynamic value, bool or = false, ICriteriaConvert convert = null) where T : QueryModel<T>;
+
+        /// <summary>
+        /// Equal Condition
+        /// </summary>
+        /// <param name="field">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <returns>return newest instance</returns>
+        IQuery Equal<T>(Expression<Func<T, dynamic>> field, IQuery subQuery) where T : QueryModel<T>;
 
         #endregion
 
@@ -319,12 +335,28 @@ namespace EZNEW.Develop.CQuery
         /// <summary>
         /// Not Equal Condition
         /// </summary>
+        /// <param name="fieldName">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <returns>return newest instance</returns>
+        IQuery NotEqual(string fieldName, IQuery subQuery);
+
+        /// <summary>
+        /// Not Equal Condition
+        /// </summary>
         /// <param name="field">field</param>
         /// <param name="value">value</param>
         /// <param name="or">connect with 'and'(true/default) or 'or'(false)</param>
         /// <param name="convert">criterial convert</param>
         /// <returns>return newest instance</returns>
         IQuery NotEqual<T>(Expression<Func<T, dynamic>> field, dynamic value, bool or = false, ICriteriaConvert convert = null) where T : QueryModel<T>;
+
+        /// <summary>
+        /// Not Equal Condition
+        /// </summary>
+        /// <param name="field">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <returns>return newest instance</returns>
+        IQuery NotEqual<T>(Expression<Func<T, dynamic>> field, IQuery subQuery) where T : QueryModel<T>;
 
         #endregion
 
@@ -439,12 +471,28 @@ namespace EZNEW.Develop.CQuery
         /// <summary>
         /// Include Condition
         /// </summary>
+        /// <param name="fieldName">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <returns>return newest instance</returns>
+        IQuery In(string fieldName, IQuery subQuery);
+
+        /// <summary>
+        /// Include Condition
+        /// </summary>
         /// <param name="field">field</param>
         /// <param name="value">value</param>
         /// <param name="or">connect with 'and'(true/default) or 'or'(false)</param>
         /// <param name="convert">criterial convert</param>
         /// <returns>return newest instance</returns>
         IQuery In<T>(Expression<Func<T, dynamic>> field, IEnumerable value, bool or = false, ICriteriaConvert convert = null) where T : QueryModel<T>;
+
+        /// <summary>
+        /// Include Condition
+        /// </summary>
+        /// <param name="field">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <returns>return newest instance</returns>
+        IQuery In<T>(Expression<Func<T, dynamic>> field, IQuery subQuery) where T : QueryModel<T>;
 
         #endregion
 
@@ -463,12 +511,28 @@ namespace EZNEW.Develop.CQuery
         /// <summary>
         /// Not Include
         /// </summary>
+        /// <param name="fieldName">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <returns>return newest instance</returns>
+        IQuery NotIn(string fieldName, IQuery subQuery);
+
+        /// <summary>
+        /// Not Include
+        /// </summary>
         /// <param name="field">field</param>
         /// <param name="value">value</param>
         /// <param name="or">connect with 'and'(true/default) or 'or'(false)</param>
         /// <param name="convert">criterial convert</param>
         /// <returns>return newest instance</returns>
         IQuery NotIn<T>(Expression<Func<T, dynamic>> field, IEnumerable value, bool or = false, ICriteriaConvert convert = null) where T : QueryModel<T>;
+
+        /// <summary>
+        /// Not Include
+        /// </summary>
+        /// <param name="field">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <returns>return newest instance</returns>
+        IQuery NotIn<T>(Expression<Func<T, dynamic>> field, IQuery subQuery) where T : QueryModel<T>;
 
         #endregion
 

@@ -352,7 +352,7 @@ namespace EZNEW.Develop.Command
                 }
                 throw new EZNEWException("GetCommandEnginesMethodAsync didn't set any value");
             }
-            var cmdEngineDic = new Dictionary<string, Tuple<ICommandEngine, List<ICommand>>>();
+            var cmdEngineDict = new Dictionary<string, Tuple<ICommandEngine, List<ICommand>>>();
             foreach (var command in commands)
             {
                 if (command == null)
@@ -371,16 +371,16 @@ namespace EZNEW.Develop.Command
                         continue;
                     }
                     var engineKey = engine.IdentityKey;
-                    cmdEngineDic.TryGetValue(engineKey, out Tuple<ICommandEngine, List<ICommand>> engineValues);
+                    cmdEngineDict.TryGetValue(engineKey, out Tuple<ICommandEngine, List<ICommand>> engineValues);
                     if (engineValues == null)
                     {
                         engineValues = new Tuple<ICommandEngine, List<ICommand>>(engine, new List<ICommand>());
                     }
                     engineValues.Item2.Add(command);
-                    cmdEngineDic[engineKey] = engineValues;
+                    cmdEngineDict[engineKey] = engineValues;
                 }
             }
-            return cmdEngineDic;
+            return cmdEngineDict;
         }
 
         #endregion
