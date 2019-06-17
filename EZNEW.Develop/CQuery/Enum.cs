@@ -53,4 +53,29 @@ namespace EZNEW.Develop.CQuery
         multiply,
         divide
     }
+
+    /// <summary>
+    /// join type
+    /// </summary>
+    public enum JoinType
+    {
+        InnerJoin = 2,
+        LeftJoin = 4,
+        RightJoin = 8,
+        FullJoin = 16,
+        CrossJoin = 32
+    }
+
+    /// <summary>
+    /// Join Operator
+    /// </summary>
+    public enum JoinOperator
+    {
+        Equal,              //=  
+        NotEqual,      //<>  
+        LessThanOrEqual,    //<=  
+        LessThan,           //<  
+        GreaterThan,        //>  
+        GreaterThanOrEqual //>=
+    }
 }

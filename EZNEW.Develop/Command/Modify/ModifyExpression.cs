@@ -224,7 +224,7 @@ namespace EZNEW.Develop.Command.Modify
             {
                 return;
             }
-            modifyValues.Clear();
+            modifyValues?.Clear();
             items.Add(item);
         }
 

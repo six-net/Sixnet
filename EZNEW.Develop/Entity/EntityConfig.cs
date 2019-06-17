@@ -76,9 +76,11 @@ namespace EZNEW.Develop.Entity
         }
 
         /// <summary>
-        /// relation keys
+        /// relation fields
+        /// key:relation type id
+        /// value: key->field,value:relation field
         /// </summary>
-        public Dictionary<string, RelationEntity> RelationKeys
+        public Dictionary<Guid, Dictionary<string,string>> RelationFields
         {
             get; set;
         }

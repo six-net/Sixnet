@@ -33,6 +33,7 @@ namespace EZNEW.Develop.CQuery
         static MethodInfo endWithMethod = null;
         static MethodInfo collectionContainsMethod = null;
         Dictionary<Guid, dynamic> queryExpressionDict = new Dictionary<Guid, dynamic>();
+        int joinSort = 0;
 
         #region Constructor
 
@@ -190,6 +191,11 @@ namespace EZNEW.Develop.CQuery
         /// direct return if query is obsolete
         /// </summary>
         public bool IsObsolete { get; internal set; } = false;
+
+        /// <summary>
+        /// join items
+        /// </summary>
+        public List<JoinItem> JoinItems { get; private set; } = new List<JoinItem>();
 
         #endregion
 
@@ -433,9 +439,19 @@ namespace EZNEW.Develop.CQuery
         /// </summary>
         /// <param name="fieldName">field</param>
         /// <param name="subQuery">sub query</param>
+        /// <param name="subQueryFieldName">sub query field</param>
         /// <returns>return newest instance</returns>
-        public IQuery Equal(string fieldName, IQuery subQuery)
+        public IQuery Equal(string fieldName, IQuery subQuery, string subQueryFieldName = "")
         {
+            if (subQuery == null)
+            {
+                return this;
+            }
+            if (!subQueryFieldName.IsNullOrEmpty())
+            {
+                subQuery.QueryFields?.Clear();
+                subQuery.AddQueryFields(subQueryFieldName);
+            }
             return And(fieldName, CriteriaOperator.Equal, subQuery);
         }
 
@@ -460,7 +476,27 @@ namespace EZNEW.Develop.CQuery
         /// <returns>return newest instance</returns>
         public IQuery Equal<T>(Expression<Func<T, dynamic>> field, IQuery subQuery) where T : QueryModel<T>
         {
-            return And<T>(field, CriteriaOperator.Equal, subQuery);
+            return And(field, CriteriaOperator.Equal, subQuery);
+        }
+
+        /// <summary>
+        /// Equal Condition
+        /// </summary>
+        /// <typeparam name="SourceQueryModel">source query model</typeparam>
+        /// <typeparam name="SubQueryModel">sub query model</typeparam>
+        /// <param name="field">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <param name="subQueryfield">sub query field</param>
+        /// <returns></returns>
+        public IQuery Equal<SourceQueryModel, SubQueryModel>(Expression<Func<SourceQueryModel, dynamic>> field, IQuery subQuery, Expression<Func<SubQueryModel, dynamic>> subQueryfield) where SourceQueryModel : QueryModel<SourceQueryModel> where SubQueryModel : QueryModel<SubQueryModel>
+        {
+            if (field == null || subQuery == null || subQueryfield == null)
+            {
+                return this;
+            }
+            var fieldName = ExpressionHelper.GetExpressionPropertyName(field);
+            var subFieldName = ExpressionHelper.GetExpressionPropertyName(subQueryfield);
+            return Equal(fieldName, subQuery, subFieldName);
         }
 
         #endregion
@@ -485,9 +521,19 @@ namespace EZNEW.Develop.CQuery
         /// </summary>
         /// <param name="fieldName">field</param>
         /// <param name="subQuery">sub query</param>
+        /// <param name="subQueryFieldName">sub query field</param>
         /// <returns>return newest instance</returns>
-        public IQuery NotEqual(string fieldName, IQuery subQuery)
+        public IQuery NotEqual(string fieldName, IQuery subQuery, string subQueryFieldName = "")
         {
+            if (subQuery == null)
+            {
+                return this;
+            }
+            if (!subQueryFieldName.IsNullOrEmpty())
+            {
+                subQuery.QueryFields?.Clear();
+                subQuery.AddQueryFields(subQueryFieldName);
+            }
             return And(fieldName, CriteriaOperator.NotEqual, subQuery);
         }
 
@@ -515,6 +561,26 @@ namespace EZNEW.Develop.CQuery
             return And<T>(field, CriteriaOperator.NotEqual, subQuery); ;
         }
 
+        /// <summary>
+        /// Not Equal Condition
+        /// </summary>
+        /// <typeparam name="SourceQueryModel">source query model</typeparam>
+        /// <typeparam name="SubQueryModel">sub query model</typeparam>
+        /// <param name="field">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <param name="subQueryfield">sub query field</param>
+        /// <returns></returns>
+        public IQuery NotEqual<SourceQueryModel, SubQueryModel>(Expression<Func<SourceQueryModel, dynamic>> field, IQuery subQuery, Expression<Func<SubQueryModel, dynamic>> subQueryfield) where SourceQueryModel : QueryModel<SourceQueryModel> where SubQueryModel : QueryModel<SubQueryModel>
+        {
+            if (field == null || subQuery == null || subQueryfield == null)
+            {
+                return this;
+            }
+            var fieldName = ExpressionHelper.GetExpressionPropertyName(field);
+            var subFieldName = ExpressionHelper.GetExpressionPropertyName(subQueryfield);
+            return NotEqual(fieldName, subQuery, subFieldName);
+        }
+
         #endregion
 
         #region LessThan
@@ -535,6 +601,27 @@ namespace EZNEW.Develop.CQuery
         /// <summary>
         /// Less Than Condition
         /// </summary>
+        /// <param name="fieldName">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <param name="subQueryFieldName">sub query field</param>
+        /// <returns>return newest instance</returns>
+        public IQuery LessThan(string fieldName, IQuery subQuery, string subQueryFieldName = "")
+        {
+            if (subQuery == null)
+            {
+                return this;
+            }
+            if (!subQueryFieldName.IsNullOrEmpty())
+            {
+                subQuery.QueryFields?.Clear();
+                subQuery.AddQueryFields(subQueryFieldName);
+            }
+            return And(fieldName, CriteriaOperator.LessThan, subQuery);
+        }
+
+        /// <summary>
+        /// Less Than Condition
+        /// </summary>
         /// <param name="field">field</param>
         /// <param name="value">value</param>
         /// <param name="or">connect with 'and'(true/default) or 'or'(false)</param>
@@ -543,6 +630,37 @@ namespace EZNEW.Develop.CQuery
         {
             AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, ExpressionHelper.GetExpressionPropertyName(field.Body), CriteriaOperator.LessThan, value, convert);
             return this;
+        }
+
+        /// <summary>
+        /// Less Than Condition
+        /// </summary>
+        /// <param name="field">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <returns>return newest instance</returns>
+        public IQuery LessThan<T>(Expression<Func<T, dynamic>> field, IQuery subQuery) where T : QueryModel<T>
+        {
+            return And(field, CriteriaOperator.LessThan, subQuery);
+        }
+
+        /// <summary>
+        /// Less Than Condition
+        /// </summary>
+        /// <typeparam name="SourceQueryModel">source query model</typeparam>
+        /// <typeparam name="SubQueryModel">sub query model</typeparam>
+        /// <param name="field">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <param name="subQueryfield">sub query field</param>
+        /// <returns></returns>
+        public IQuery LessThan<SourceQueryModel, SubQueryModel>(Expression<Func<SourceQueryModel, dynamic>> field, IQuery subQuery, Expression<Func<SubQueryModel, dynamic>> subQueryfield) where SourceQueryModel : QueryModel<SourceQueryModel> where SubQueryModel : QueryModel<SubQueryModel>
+        {
+            if (field == null || subQuery == null || subQueryfield == null)
+            {
+                return this;
+            }
+            var fieldName = ExpressionHelper.GetExpressionPropertyName(field);
+            var subFieldName = ExpressionHelper.GetExpressionPropertyName(subQueryfield);
+            return LessThan(fieldName, subQuery, subFieldName);
         }
 
         #endregion
@@ -565,6 +683,27 @@ namespace EZNEW.Develop.CQuery
         /// <summary>
         /// Less Than Or Equal Condition
         /// </summary>
+        /// <param name="fieldName">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <param name="subQueryFieldName">sub query field</param>
+        /// <returns>return newest instance</returns>
+        public IQuery LessThanOrEqual(string fieldName, IQuery subQuery, string subQueryFieldName = "")
+        {
+            if (subQuery == null)
+            {
+                return this;
+            }
+            if (!subQueryFieldName.IsNullOrEmpty())
+            {
+                subQuery.QueryFields?.Clear();
+                subQuery.AddQueryFields(subQueryFieldName);
+            }
+            return And(fieldName, CriteriaOperator.LessThanOrEqual, subQuery);
+        }
+
+        /// <summary>
+        /// Less Than Or Equal Condition
+        /// </summary>
         /// <param name="field">field</param>
         /// <param name="value">value</param>
         /// <param name="or">connect with 'and'(true/default) or 'or'(false)</param>
@@ -573,6 +712,37 @@ namespace EZNEW.Develop.CQuery
         {
             AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, ExpressionHelper.GetExpressionPropertyName(field.Body), CriteriaOperator.LessThanOrEqual, value, convert);
             return this;
+        }
+
+        /// <summary>
+        /// Less Than Or Equal Condition
+        /// </summary>
+        /// <param name="field">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <returns>return newest instance</returns>
+        public IQuery LessThanOrEqual<T>(Expression<Func<T, dynamic>> field, IQuery subQuery) where T : QueryModel<T>
+        {
+            return And(field, CriteriaOperator.LessThanOrEqual, subQuery);
+        }
+
+        /// <summary>
+        /// Less Than Or Equal Condition
+        /// </summary>
+        /// <typeparam name="SourceQueryModel">source query model</typeparam>
+        /// <typeparam name="SubQueryModel">sub query model</typeparam>
+        /// <param name="field">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <param name="subQueryfield">sub query field</param>
+        /// <returns></returns>
+        public IQuery LessThanOrEqual<SourceQueryModel, SubQueryModel>(Expression<Func<SourceQueryModel, dynamic>> field, IQuery subQuery, Expression<Func<SubQueryModel, dynamic>> subQueryfield) where SourceQueryModel : QueryModel<SourceQueryModel> where SubQueryModel : QueryModel<SubQueryModel>
+        {
+            if (field == null || subQuery == null || subQueryfield == null)
+            {
+                return this;
+            }
+            var fieldName = ExpressionHelper.GetExpressionPropertyName(field);
+            var subFieldName = ExpressionHelper.GetExpressionPropertyName(subQueryfield);
+            return LessThanOrEqual(fieldName, subQuery, subFieldName);
         }
 
         #endregion
@@ -595,6 +765,27 @@ namespace EZNEW.Develop.CQuery
         /// <summary>
         /// Greater Than Condition
         /// </summary>
+        /// <param name="fieldName">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <param name="subQueryFieldName">sub query field</param>
+        /// <returns>return newest instance</returns>
+        public IQuery GreaterThan(string fieldName, IQuery subQuery, string subQueryFieldName = "")
+        {
+            if (subQuery == null)
+            {
+                return this;
+            }
+            if (!subQueryFieldName.IsNullOrEmpty())
+            {
+                subQuery.QueryFields?.Clear();
+                subQuery.AddQueryFields(subQueryFieldName);
+            }
+            return And(fieldName, CriteriaOperator.GreaterThan, subQuery);
+        }
+
+        /// <summary>
+        /// Greater Than Condition
+        /// </summary>
         /// <param name="field">field</param>
         /// <param name="value">value</param>
         /// <param name="or">connect with 'and'(true/default) or 'or'(false)</param>
@@ -605,9 +796,61 @@ namespace EZNEW.Develop.CQuery
             return this;
         }
 
+        /// <summary>
+        /// Greater Than Condition
+        /// </summary>
+        /// <param name="field">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <returns>return newest instance</returns>
+        public IQuery GreaterThan<T>(Expression<Func<T, dynamic>> field, IQuery subQuery) where T : QueryModel<T>
+        {
+            return And(field, CriteriaOperator.GreaterThan, subQuery);
+        }
+
+        /// <summary>
+        /// Greater Than Condition
+        /// </summary>
+        /// <typeparam name="SourceQueryModel">source query model</typeparam>
+        /// <typeparam name="SubQueryModel">sub query model</typeparam>
+        /// <param name="field">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <param name="subQueryfield">sub query field</param>
+        /// <returns></returns>
+        public IQuery GreaterThan<SourceQueryModel, SubQueryModel>(Expression<Func<SourceQueryModel, dynamic>> field, IQuery subQuery, Expression<Func<SubQueryModel, dynamic>> subQueryfield) where SourceQueryModel : QueryModel<SourceQueryModel> where SubQueryModel : QueryModel<SubQueryModel>
+        {
+            if (field == null || subQuery == null || subQueryfield == null)
+            {
+                return this;
+            }
+            var fieldName = ExpressionHelper.GetExpressionPropertyName(field);
+            var subFieldName = ExpressionHelper.GetExpressionPropertyName(subQueryfield);
+            return GreaterThan(fieldName, subQuery, subFieldName);
+        }
+
         #endregion
 
         #region GreaterThanOrEqual
+
+        /// <summary>
+        /// Greater Than Or Equal Condition
+        /// </summary>
+        /// <param name="fieldName">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <param name="subQueryFieldName">sub query field</param>
+        /// <returns>return newest instance</returns>
+        public IQuery GreaterThanOrEqual(string fieldName, IQuery subQuery, string subQueryFieldName = "")
+        {
+            if (subQuery == null)
+            {
+                return this;
+            }
+            if (!subQueryFieldName.IsNullOrEmpty())
+            {
+                subQuery.QueryFields?.Clear();
+                subQuery.AddQueryFields(subQueryFieldName);
+            }
+            return And(fieldName, CriteriaOperator.GreaterThanOrEqual, subQuery);
+        }
 
         /// <summary>
         /// Greater Than Or Equal Condition
@@ -635,6 +878,37 @@ namespace EZNEW.Develop.CQuery
             return this;
         }
 
+        /// <summary>
+        /// Greater Than Or Equal Condition
+        /// </summary>
+        /// <param name="field">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <returns>return newest instance</returns>
+        public IQuery GreaterThanOrEqual<T>(Expression<Func<T, dynamic>> field, IQuery subQuery) where T : QueryModel<T>
+        {
+            return And(field, CriteriaOperator.GreaterThanOrEqual, subQuery);
+        }
+
+        /// <summary>
+        /// Greater Than Or Equal Condition
+        /// </summary>
+        /// <typeparam name="SourceQueryModel">source query model</typeparam>
+        /// <typeparam name="SubQueryModel">sub query model</typeparam>
+        /// <param name="field">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <param name="subQueryfield">sub query field</param>
+        /// <returns></returns>
+        public IQuery GreaterThanOrEqual<SourceQueryModel, SubQueryModel>(Expression<Func<SourceQueryModel, dynamic>> field, IQuery subQuery, Expression<Func<SubQueryModel, dynamic>> subQueryfield) where SourceQueryModel : QueryModel<SourceQueryModel> where SubQueryModel : QueryModel<SubQueryModel>
+        {
+            if (field == null || subQuery == null || subQueryfield == null)
+            {
+                return this;
+            }
+            var fieldName = ExpressionHelper.GetExpressionPropertyName(field);
+            var subFieldName = ExpressionHelper.GetExpressionPropertyName(subQueryfield);
+            return GreaterThanOrEqual(fieldName, subQuery, subFieldName);
+        }
+
         #endregion
 
         #region IN
@@ -657,9 +931,19 @@ namespace EZNEW.Develop.CQuery
         /// </summary>
         /// <param name="fieldName">field</param>
         /// <param name="subQuery">sub query</param>
+        /// <param name="subQueryFieldName">sub query field</param>
         /// <returns>return newest instance</returns>
-        public IQuery In(string fieldName, IQuery subQuery)
+        public IQuery In(string fieldName, IQuery subQuery, string subQueryFieldName = "")
         {
+            if (subQuery == null)
+            {
+                return this;
+            }
+            if (!subQueryFieldName.IsNullOrEmpty())
+            {
+                subQuery.QueryFields?.Clear();
+                subQuery.AddQueryFields(subQueryFieldName);
+            }
             return And(fieldName, CriteriaOperator.In, subQuery);
         }
 
@@ -687,6 +971,26 @@ namespace EZNEW.Develop.CQuery
             return And<T>(field, CriteriaOperator.In, subQuery);
         }
 
+        /// <summary>
+        /// Include Condition
+        /// </summary>
+        /// <typeparam name="SourceQueryModel">source query model</typeparam>
+        /// <typeparam name="SubQueryModel">sub query model</typeparam>
+        /// <param name="field">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <param name="subQueryfield">sub query field</param>
+        /// <returns></returns>
+        public IQuery In<SourceQueryModel, SubQueryModel>(Expression<Func<SourceQueryModel, dynamic>> field, IQuery subQuery, Expression<Func<SubQueryModel, dynamic>> subQueryfield) where SourceQueryModel : QueryModel<SourceQueryModel> where SubQueryModel : QueryModel<SubQueryModel>
+        {
+            if (field == null || subQuery == null || subQueryfield == null)
+            {
+                return this;
+            }
+            var fieldName = ExpressionHelper.GetExpressionPropertyName(field);
+            var subFieldName = ExpressionHelper.GetExpressionPropertyName(subQueryfield);
+            return In(fieldName, subQuery, subFieldName);
+        }
+
         #endregion
 
         #region Not In
@@ -709,9 +1013,19 @@ namespace EZNEW.Develop.CQuery
         /// </summary>
         /// <param name="fieldName">field</param>
         /// <param name="subQuery">sub query</param>
+        /// <param name="subQueryFieldName">sub query field</param>
         /// <returns>return newest instance</returns>
-        public IQuery NotIn(string fieldName, IQuery subQuery)
+        public IQuery NotIn(string fieldName, IQuery subQuery, string subQueryFieldName = "")
         {
+            if (subQuery == null)
+            {
+                return this;
+            }
+            if (!subQueryFieldName.IsNullOrEmpty())
+            {
+                subQuery.QueryFields?.Clear();
+                subQuery.AddQueryFields(subQueryFieldName);
+            }
             return And(fieldName, CriteriaOperator.NotIn, subQuery);
         }
 
@@ -737,6 +1051,26 @@ namespace EZNEW.Develop.CQuery
         public IQuery NotIn<T>(Expression<Func<T, dynamic>> field, IQuery subQuery) where T : QueryModel<T>
         {
             return And<T>(field, CriteriaOperator.NotIn, subQuery);
+        }
+
+        /// <summary>
+        /// Not Include
+        /// </summary>
+        /// <typeparam name="SourceQueryModel">source query model</typeparam>
+        /// <typeparam name="SubQueryModel">sub query model</typeparam>
+        /// <param name="field">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <param name="subQueryfield">sub query field</param>
+        /// <returns></returns>
+        public IQuery NotIn<SourceQueryModel, SubQueryModel>(Expression<Func<SourceQueryModel, dynamic>> field, IQuery subQuery, Expression<Func<SubQueryModel, dynamic>> subQueryfield) where SourceQueryModel : QueryModel<SourceQueryModel> where SubQueryModel : QueryModel<SubQueryModel>
+        {
+            if (field == null || subQuery == null || subQueryfield == null)
+            {
+                return this;
+            }
+            var fieldName = ExpressionHelper.GetExpressionPropertyName(field);
+            var subFieldName = ExpressionHelper.GetExpressionPropertyName(subQueryfield);
+            return NotIn(fieldName, subQuery, subFieldName);
         }
 
         #endregion
@@ -1457,25 +1791,2069 @@ namespace EZNEW.Develop.CQuery
         public IQuery Clone()
         {
             QueryInfo newQuery = new QueryInfo();
-            newQuery.criterias = new List<Tuple<QueryOperator, IQueryItem>>(this.criterias);
-            newQuery.orders = new List<OrderCriteria>(this.orders);
-            newQuery.queryFields = new List<string>(this.queryFields);
-            newQuery.notQueryFields = new List<string>(this.notQueryFields);
-            newQuery.loadPropertys = new Dictionary<string, bool>(this.loadPropertys);
-            newQuery.equalCriteriaList = new List<Criteria>(this.equalCriteriaList);
-            newQuery.queryExpressionDict = new Dictionary<Guid, dynamic>(this.queryExpressionDict);
-            newQuery.QueryModelType = this.QueryModelType;
-            newQuery.PagingInfo = this.PagingInfo;
-            newQuery.QueryText = this.QueryText;
-            newQuery.QueryTextParameters = this.QueryTextParameters;
-            newQuery.QueryType = this.QueryType;
-            newQuery.QuerySize = this.QuerySize;
-            newQuery.HasSubQuery = this.HasSubQuery;
-            newQuery.RecurveCriteria = this.RecurveCriteria;
-            newQuery.VerifyResult = this.VerifyResult;
-
+            newQuery.criterias = new List<Tuple<QueryOperator, IQueryItem>>(criterias);
+            newQuery.orders = new List<OrderCriteria>(orders);
+            newQuery.queryFields = new List<string>(queryFields);
+            newQuery.notQueryFields = new List<string>(notQueryFields);
+            newQuery.loadPropertys = new Dictionary<string, bool>(loadPropertys);
+            newQuery.equalCriteriaList = new List<Criteria>(equalCriteriaList);
+            newQuery.queryExpressionDict = new Dictionary<Guid, dynamic>(queryExpressionDict);
+            newQuery.QueryModelType = QueryModelType;
+            newQuery.PagingInfo = PagingInfo;
+            newQuery.QueryText = QueryText;
+            newQuery.QueryTextParameters = QueryTextParameters;
+            newQuery.QueryType = QueryType;
+            newQuery.QuerySize = QuerySize;
+            newQuery.HasSubQuery = HasSubQuery;
+            newQuery.RecurveCriteria = RecurveCriteria;
+            newQuery.VerifyResult = VerifyResult;
+            newQuery.JoinItems = JoinItems;
             return newQuery;
         }
+
+        #endregion
+
+        #region join
+
+        #region join util
+
+        /// <summary>
+        /// join
+        /// </summary>
+        /// <param name="joinFields">join fields</param>
+        /// <param name="joinType">join type</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery Join(Dictionary<string, string> joinFields, JoinType joinType, JoinOperator joinOperator, IQuery joinQuery)
+        {
+            JoinItems.Add(new JoinItem()
+            {
+                JoinType = joinType,
+                Operator = joinOperator,
+                JoinFields = joinFields,
+                JoinQuery = joinQuery,
+                Sort = joinSort++
+            });
+            return this;
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinType">join type</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery Join(string sourceField, string targetField, JoinType joinType, JoinOperator joinOperator, IQuery joinQuery)
+        {
+            return Join(new Dictionary<string, string>()
+                {
+                    { sourceField,targetField }
+                }, joinType, joinOperator, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinType">join type</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery Join<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, JoinType joinType, JoinOperator joinOperator, IQuery joinQuery)
+        {
+            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
+            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
+            return Join(sourceFieldName, targetFieldName, joinType, joinOperator, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinType">join type</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery Join(JoinType joinType, JoinOperator joinOperator, IQuery joinQuery)
+        {
+            return Join(string.Empty, string.Empty, joinType, joinOperator, joinQuery);
+        }
+
+        #endregion
+
+        #region Inner Join
+
+        #region InnerJoin helper
+
+        /// <summary>
+        /// inner join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery InnerJoin(string sourceField, string targetField, JoinOperator joinOperator, IQuery joinQuery)
+        {
+            return Join(sourceField, targetField, JoinType.InnerJoin, joinOperator, joinQuery);
+        }
+
+        /// <summary>
+        /// inner join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery InnerJoin(string joinField, JoinOperator joinOperator, IQuery joinQuery)
+        {
+            return InnerJoin(joinField, joinField, joinOperator, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery InnerJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, JoinOperator joinOperator, IQuery joinQuery)
+        {
+            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
+            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
+            return InnerJoin(sourceFieldName, targetFieldName, joinOperator, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery InnerJoin<T>(Expression<Func<T, dynamic>> joinField, JoinOperator joinOperator, IQuery joinQuery)
+        {
+            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
+            return InnerJoin(joinFieldName, joinFieldName, joinOperator, joinQuery);
+        }
+
+        #endregion
+
+        #region Equal InnerJoin
+
+        /// <summary>
+        /// inner join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery EqualInnerJoin(string sourceField, string targetField, IQuery joinQuery)
+        {
+            return InnerJoin(sourceField, targetField, JoinOperator.Equal, joinQuery);
+        }
+
+        /// <summary>
+        /// inner join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery EqualInnerJoin(string joinField, IQuery joinQuery)
+        {
+            return EqualInnerJoin(joinField, joinField, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery EqualInnerJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery)
+        {
+            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
+            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
+            return EqualInnerJoin(sourceFieldName, targetFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery EqualInnerJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery)
+        {
+            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
+            return EqualInnerJoin(joinFieldName, joinFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        public IQuery EqualInnerJoin(params IQuery[] joinQuerys)
+        {
+            if (joinQuerys.IsNullOrEmpty())
+            {
+                return this;
+            }
+            foreach (var query in joinQuerys)
+            {
+                EqualInnerJoin(string.Empty, string.Empty, query);
+            }
+            return this;
+        }
+
+        #endregion
+
+        #region NotEqual InnerJoin
+
+        /// <summary>
+        /// inner join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery NotEqualInnerJoin(string sourceField, string targetField, IQuery joinQuery)
+        {
+            return InnerJoin(sourceField, targetField, JoinOperator.NotEqual, joinQuery);
+        }
+
+        /// <summary>
+        /// inner join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery NotEqualInnerJoin(string joinField, IQuery joinQuery)
+        {
+            return NotEqualInnerJoin(joinField, joinField, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery NotEqualInnerJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery)
+        {
+            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
+            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
+            return NotEqualInnerJoin(sourceFieldName, targetFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery NotEqualInnerJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery)
+        {
+            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
+            return NotEqualInnerJoin(joinFieldName, joinFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        public IQuery NotEqualInnerJoin(params IQuery[] joinQuerys)
+        {
+            if (joinQuerys.IsNullOrEmpty())
+            {
+                return this;
+            }
+            foreach (var query in joinQuerys)
+            {
+                NotEqualInnerJoin(string.Empty, string.Empty, query);
+            }
+            return this;
+        }
+
+        #endregion
+
+        #region LessThanOrEqual InnerJoin
+
+        /// <summary>
+        /// inner join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanOrEqualInnerJoin(string sourceField, string targetField, IQuery joinQuery)
+        {
+            return InnerJoin(sourceField, targetField, JoinOperator.LessThanOrEqual, joinQuery);
+        }
+
+        /// <summary>
+        /// inner join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanOrEqualInnerJoin(string joinField, IQuery joinQuery)
+        {
+            return LessThanOrEqualInnerJoin(joinField, joinField, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanOrEqualInnerJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery)
+        {
+            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
+            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
+            return LessThanOrEqualInnerJoin(sourceFieldName, targetFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanOrEqualInnerJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery)
+        {
+            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
+            return LessThanOrEqualInnerJoin(joinFieldName, joinFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanOrEqualInnerJoin(params IQuery[] joinQuerys)
+        {
+            if (joinQuerys.IsNullOrEmpty())
+            {
+                return this;
+            }
+            foreach (var query in joinQuerys)
+            {
+                LessThanOrEqualInnerJoin(string.Empty, string.Empty, query);
+            }
+            return this;
+        }
+
+        #endregion
+
+        #region LessThan InnerJoin
+
+        /// <summary>
+        /// inner join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanInnerJoin(string sourceField, string targetField, IQuery joinQuery)
+        {
+            return InnerJoin(sourceField, targetField, JoinOperator.LessThan, joinQuery);
+        }
+
+        /// <summary>
+        /// inner join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanInnerJoin(string joinField, IQuery joinQuery)
+        {
+            return LessThanInnerJoin(joinField, joinField, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanInnerJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery)
+        {
+            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
+            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
+            return LessThanInnerJoin(sourceFieldName, targetFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanInnerJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery)
+        {
+            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
+            return LessThanInnerJoin(joinFieldName, joinFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanInnerJoin(params IQuery[] joinQuerys)
+        {
+            if (joinQuerys.IsNullOrEmpty())
+            {
+                return this;
+            }
+            foreach (var query in joinQuerys)
+            {
+                LessThanInnerJoin(string.Empty, string.Empty, query);
+            }
+            return this;
+        }
+
+        #endregion
+
+        #region GreaterThan InnerJoin
+
+        /// <summary>
+        /// inner join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanInnerJoin(string sourceField, string targetField, IQuery joinQuery)
+        {
+            return InnerJoin(sourceField, targetField, JoinOperator.GreaterThan, joinQuery);
+        }
+
+        /// <summary>
+        /// inner join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanInnerJoin(string joinField, IQuery joinQuery)
+        {
+            return GreaterThanInnerJoin(joinField, joinField, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanInnerJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery)
+        {
+            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
+            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
+            return GreaterThanInnerJoin(sourceFieldName, targetFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanInnerJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery)
+        {
+            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
+            return GreaterThanInnerJoin(joinFieldName, joinFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanInnerJoin(params IQuery[] joinQuerys)
+        {
+            if (joinQuerys.IsNullOrEmpty())
+            {
+                return this;
+            }
+            foreach (var query in joinQuerys)
+            {
+                GreaterThanInnerJoin(string.Empty, string.Empty, query);
+            }
+            return this;
+        }
+
+        #endregion
+
+        #region GreaterThanOrEqual InnerJoin
+
+        /// <summary>
+        /// inner join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanOrEqualInnerJoin(string sourceField, string targetField, IQuery joinQuery)
+        {
+            return InnerJoin(sourceField, targetField, JoinOperator.GreaterThanOrEqual, joinQuery);
+        }
+
+        /// <summary>
+        /// inner join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanOrEqualInnerJoin(string joinField, IQuery joinQuery)
+        {
+            return GreaterThanOrEqualInnerJoin(joinField, joinField, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanOrEqualInnerJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery)
+        {
+            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
+            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
+            return GreaterThanOrEqualInnerJoin(sourceFieldName, targetFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanOrEqualInnerJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery)
+        {
+            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
+            return GreaterThanOrEqualInnerJoin(joinFieldName, joinFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanOrEqualInnerJoin(params IQuery[] joinQuerys)
+        {
+            if (joinQuerys.IsNullOrEmpty())
+            {
+                return this;
+            }
+            foreach (var query in joinQuerys)
+            {
+                GreaterThanOrEqualInnerJoin(string.Empty, string.Empty, query);
+            }
+            return this;
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Left Join
+
+        #region Left Join helper
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery LeftJoin(string sourceField, string targetField, JoinOperator joinOperator, IQuery joinQuery)
+        {
+            return Join(sourceField, targetField, JoinType.LeftJoin, joinOperator, joinQuery);
+        }
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery LeftJoin(string joinField, JoinOperator joinOperator, IQuery joinQuery)
+        {
+            return LeftJoin(joinField, joinField, joinOperator, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery LeftJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, JoinOperator joinOperator, IQuery joinQuery)
+        {
+            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
+            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
+            return LeftJoin(sourceFieldName, targetFieldName, joinOperator, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery LeftJoin<T>(Expression<Func<T, dynamic>> joinField, JoinOperator joinOperator, IQuery joinQuery)
+        {
+            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
+            return LeftJoin(joinFieldName, joinFieldName, joinOperator, joinQuery);
+        }
+
+        #endregion
+
+        #region Equal LeftJoin
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery EqualLeftJoin(string sourceField, string targetField, IQuery joinQuery)
+        {
+            return LeftJoin(sourceField, targetField, JoinOperator.Equal, joinQuery);
+        }
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery EqualLeftJoin(string joinField, IQuery joinQuery)
+        {
+            return EqualLeftJoin(joinField, joinField, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery EqualLeftJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery)
+        {
+            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
+            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
+            return EqualLeftJoin(sourceFieldName, targetFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery EqualLeftJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery)
+        {
+            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
+            return EqualLeftJoin(joinFieldName, joinFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        public IQuery EqualLeftJoin(params IQuery[] joinQuerys)
+        {
+            if (joinQuerys.IsNullOrEmpty())
+            {
+                return this;
+            }
+            foreach (var query in joinQuerys)
+            {
+                EqualLeftJoin(string.Empty, string.Empty, query);
+            }
+            return this;
+        }
+
+        #endregion
+
+        #region NotEqual LeftJoin
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery NotEqualLeftJoin(string sourceField, string targetField, IQuery joinQuery)
+        {
+            return LeftJoin(sourceField, targetField, JoinOperator.NotEqual, joinQuery);
+        }
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery NotEqualLeftJoin(string joinField, IQuery joinQuery)
+        {
+            return NotEqualLeftJoin(joinField, joinField, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery NotEqualLeftJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery)
+        {
+            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
+            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
+            return NotEqualLeftJoin(sourceFieldName, targetFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery NotEqualLeftJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery)
+        {
+            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
+            return NotEqualLeftJoin(joinFieldName, joinFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        public IQuery NotEqualLeftJoin(params IQuery[] joinQuerys)
+        {
+            if (joinQuerys.IsNullOrEmpty())
+            {
+                return this;
+            }
+            foreach (var query in joinQuerys)
+            {
+                NotEqualLeftJoin(string.Empty, string.Empty, query);
+            }
+            return this;
+        }
+
+        #endregion
+
+        #region LessThanOrEqual LeftJoin
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanOrEqualLeftJoin(string sourceField, string targetField, IQuery joinQuery)
+        {
+            return LeftJoin(sourceField, targetField, JoinOperator.LessThanOrEqual, joinQuery);
+        }
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanOrEqualLeftJoin(string joinField, IQuery joinQuery)
+        {
+            return LessThanOrEqualLeftJoin(joinField, joinField, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanOrEqualLeftJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery)
+        {
+            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
+            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
+            return LessThanOrEqualLeftJoin(sourceFieldName, targetFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanOrEqualLeftJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery)
+        {
+            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
+            return LessThanOrEqualLeftJoin(joinFieldName, joinFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanOrEqualLeftJoin(params IQuery[] joinQuerys)
+        {
+            if (joinQuerys.IsNullOrEmpty())
+            {
+                return this;
+            }
+            foreach (var query in joinQuerys)
+            {
+                LessThanOrEqualLeftJoin(string.Empty, string.Empty, query);
+            }
+            return this;
+        }
+
+        #endregion
+
+        #region LessThan LeftJoin
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanLeftJoin(string sourceField, string targetField, IQuery joinQuery)
+        {
+            return LeftJoin(sourceField, targetField, JoinOperator.LessThan, joinQuery);
+        }
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanLeftJoin(string joinField, IQuery joinQuery)
+        {
+            return LessThanLeftJoin(joinField, joinField, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanLeftJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery)
+        {
+            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
+            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
+            return LessThanLeftJoin(sourceFieldName, targetFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanLeftJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery)
+        {
+            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
+            return LessThanLeftJoin(joinFieldName, joinFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanLeftJoin(params IQuery[] joinQuerys)
+        {
+            if (joinQuerys.IsNullOrEmpty())
+            {
+                return this;
+            }
+            foreach (var query in joinQuerys)
+            {
+                LessThanLeftJoin(string.Empty, string.Empty, query);
+            }
+            return this;
+        }
+
+        #endregion
+
+        #region GreaterThan LeftJoin
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanLeftJoin(string sourceField, string targetField, IQuery joinQuery)
+        {
+            return LeftJoin(sourceField, targetField, JoinOperator.GreaterThan, joinQuery);
+        }
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanLeftJoin(string joinField, IQuery joinQuery)
+        {
+            return GreaterThanLeftJoin(joinField, joinField, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanLeftJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery)
+        {
+            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
+            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
+            return GreaterThanLeftJoin(sourceFieldName, targetFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanLeftJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery)
+        {
+            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
+            return GreaterThanLeftJoin(joinFieldName, joinFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanLeftJoin(params IQuery[] joinQuerys)
+        {
+            if (joinQuerys.IsNullOrEmpty())
+            {
+                return this;
+            }
+            foreach (var query in joinQuerys)
+            {
+                GreaterThanLeftJoin(string.Empty, string.Empty, query);
+            }
+            return this;
+        }
+
+        #endregion
+
+        #region GreaterThanOrEqual LeftJoin
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanOrEqualLeftJoin(string sourceField, string targetField, IQuery joinQuery)
+        {
+            return LeftJoin(sourceField, targetField, JoinOperator.GreaterThanOrEqual, joinQuery);
+        }
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanOrEqualLeftJoin(string joinField, IQuery joinQuery)
+        {
+            return GreaterThanOrEqualLeftJoin(joinField, joinField, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanOrEqualLeftJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery)
+        {
+            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
+            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
+            return GreaterThanOrEqualLeftJoin(sourceFieldName, targetFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanOrEqualLeftJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery)
+        {
+            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
+            return GreaterThanOrEqualLeftJoin(joinFieldName, joinFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanOrEqualLeftJoin(params IQuery[] joinQuerys)
+        {
+            if (joinQuerys.IsNullOrEmpty())
+            {
+                return this;
+            }
+            foreach (var query in joinQuerys)
+            {
+                GreaterThanOrEqualLeftJoin(string.Empty, string.Empty, query);
+            }
+            return this;
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Right Join
+
+        #region Right Join helper
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery RightJoin(string sourceField, string targetField, JoinOperator joinOperator, IQuery joinQuery)
+        {
+            return Join(sourceField, targetField, JoinType.RightJoin, joinOperator, joinQuery);
+        }
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery RightJoin(string joinField, JoinOperator joinOperator, IQuery joinQuery)
+        {
+            return RightJoin(joinField, joinField, joinOperator, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery RightJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, JoinOperator joinOperator, IQuery joinQuery)
+        {
+            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
+            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
+            return RightJoin(sourceFieldName, targetFieldName, joinOperator, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery RightJoin<T>(Expression<Func<T, dynamic>> joinField, JoinOperator joinOperator, IQuery joinQuery)
+        {
+            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
+            return RightJoin(joinFieldName, joinFieldName, joinOperator, joinQuery);
+        }
+
+        #endregion
+
+        #region Equal RightJoin
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery EqualRightJoin(string sourceField, string targetField, IQuery joinQuery)
+        {
+            return RightJoin(sourceField, targetField, JoinOperator.Equal, joinQuery);
+        }
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery EqualRightJoin(string joinField, IQuery joinQuery)
+        {
+            return EqualRightJoin(joinField, joinField, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery EqualRightJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery)
+        {
+            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
+            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
+            return EqualRightJoin(sourceFieldName, targetFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery EqualRightJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery)
+        {
+            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
+            return EqualRightJoin(joinFieldName, joinFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        public IQuery EqualRightJoin(params IQuery[] joinQuerys)
+        {
+            if (joinQuerys.IsNullOrEmpty())
+            {
+                return this;
+            }
+            foreach (var query in joinQuerys)
+            {
+                EqualRightJoin(string.Empty, string.Empty, query);
+            }
+            return this;
+        }
+
+        #endregion
+
+        #region NotEqual RightJoin
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery NotEqualRightJoin(string sourceField, string targetField, IQuery joinQuery)
+        {
+            return RightJoin(sourceField, targetField, JoinOperator.NotEqual, joinQuery);
+        }
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery NotEqualRightJoin(string joinField, IQuery joinQuery)
+        {
+            return NotEqualRightJoin(joinField, joinField, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery NotEqualRightJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery)
+        {
+            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
+            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
+            return NotEqualRightJoin(sourceFieldName, targetFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery NotEqualRightJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery)
+        {
+            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
+            return NotEqualRightJoin(joinFieldName, joinFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        public IQuery NotEqualRightJoin(params IQuery[] joinQuerys)
+        {
+            if (joinQuerys.IsNullOrEmpty())
+            {
+                return this;
+            }
+            foreach (var query in joinQuerys)
+            {
+                NotEqualRightJoin(string.Empty, string.Empty, query);
+            }
+            return this;
+        }
+
+        #endregion
+
+        #region LessThanOrEqual RightJoin
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanOrEqualRightJoin(string sourceField, string targetField, IQuery joinQuery)
+        {
+            return RightJoin(sourceField, targetField, JoinOperator.LessThanOrEqual, joinQuery);
+        }
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanOrEqualRightJoin(string joinField, IQuery joinQuery)
+        {
+            return LessThanOrEqualRightJoin(joinField, joinField, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanOrEqualRightJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery)
+        {
+            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
+            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
+            return LessThanOrEqualRightJoin(sourceFieldName, targetFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanOrEqualRightJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery)
+        {
+            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
+            return LessThanOrEqualRightJoin(joinFieldName, joinFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanOrEqualRightJoin(params IQuery[] joinQuerys)
+        {
+            if (joinQuerys.IsNullOrEmpty())
+            {
+                return this;
+            }
+            foreach (var query in joinQuerys)
+            {
+                LessThanOrEqualRightJoin(string.Empty, string.Empty, query);
+            }
+            return this;
+        }
+
+        #endregion
+
+        #region LessThan RightJoin
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanRightJoin(string sourceField, string targetField, IQuery joinQuery)
+        {
+            return RightJoin(sourceField, targetField, JoinOperator.LessThan, joinQuery);
+        }
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanRightJoin(string joinField, IQuery joinQuery)
+        {
+            return LessThanRightJoin(joinField, joinField, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanRightJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery)
+        {
+            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
+            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
+            return LessThanRightJoin(sourceFieldName, targetFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanRightJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery)
+        {
+            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
+            return LessThanRightJoin(joinFieldName, joinFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanRightJoin(params IQuery[] joinQuerys)
+        {
+            if (joinQuerys.IsNullOrEmpty())
+            {
+                return this;
+            }
+            foreach (var query in joinQuerys)
+            {
+                LessThanRightJoin(string.Empty, string.Empty, query);
+            }
+            return this;
+        }
+
+        #endregion
+
+        #region GreaterThan RightJoin
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanRightJoin(string sourceField, string targetField, IQuery joinQuery)
+        {
+            return RightJoin(sourceField, targetField, JoinOperator.GreaterThan, joinQuery);
+        }
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanRightJoin(string joinField, IQuery joinQuery)
+        {
+            return GreaterThanRightJoin(joinField, joinField, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanRightJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery)
+        {
+            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
+            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
+            return GreaterThanRightJoin(sourceFieldName, targetFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanRightJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery)
+        {
+            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
+            return GreaterThanRightJoin(joinFieldName, joinFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanRightJoin(params IQuery[] joinQuerys)
+        {
+            if (joinQuerys.IsNullOrEmpty())
+            {
+                return this;
+            }
+            foreach (var query in joinQuerys)
+            {
+                GreaterThanRightJoin(string.Empty, string.Empty, query);
+            }
+            return this;
+        }
+
+        #endregion
+
+        #region GreaterThanOrEqual RightJoin
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanOrEqualRightJoin(string sourceField, string targetField, IQuery joinQuery)
+        {
+            return RightJoin(sourceField, targetField, JoinOperator.GreaterThanOrEqual, joinQuery);
+        }
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanOrEqualRightJoin(string joinField, IQuery joinQuery)
+        {
+            return GreaterThanOrEqualRightJoin(joinField, joinField, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanOrEqualRightJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery)
+        {
+            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
+            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
+            return GreaterThanOrEqualRightJoin(sourceFieldName, targetFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanOrEqualRightJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery)
+        {
+            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
+            return GreaterThanOrEqualRightJoin(joinFieldName, joinFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanOrEqualRightJoin(params IQuery[] joinQuerys)
+        {
+            if (joinQuerys.IsNullOrEmpty())
+            {
+                return this;
+            }
+            foreach (var query in joinQuerys)
+            {
+                GreaterThanOrEqualRightJoin(string.Empty, string.Empty, query);
+            }
+            return this;
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Full Join
+
+        #region Full Join helper
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery FullJoin(string sourceField, string targetField, JoinOperator joinOperator, IQuery joinQuery)
+        {
+            return Join(sourceField, targetField, JoinType.FullJoin, joinOperator, joinQuery);
+        }
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery FullJoin(string joinField, JoinOperator joinOperator, IQuery joinQuery)
+        {
+            return FullJoin(joinField, joinField, joinOperator, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery FullJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, JoinOperator joinOperator, IQuery joinQuery)
+        {
+            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
+            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
+            return FullJoin(sourceFieldName, targetFieldName, joinOperator, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery FullJoin<T>(Expression<Func<T, dynamic>> joinField, JoinOperator joinOperator, IQuery joinQuery)
+        {
+            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
+            return FullJoin(joinFieldName, joinFieldName, joinOperator, joinQuery);
+        }
+
+        #endregion
+
+        #region Equal FullJoin
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery EqualFullJoin(string sourceField, string targetField, IQuery joinQuery)
+        {
+            return FullJoin(sourceField, targetField, JoinOperator.Equal, joinQuery);
+        }
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery EqualFullJoin(string joinField, IQuery joinQuery)
+        {
+            return EqualFullJoin(joinField, joinField, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery EqualFullJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery)
+        {
+            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
+            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
+            return EqualFullJoin(sourceFieldName, targetFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery EqualFullJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery)
+        {
+            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
+            return EqualFullJoin(joinFieldName, joinFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        public IQuery EqualFullJoin(params IQuery[] joinQuerys)
+        {
+            if (joinQuerys.IsNullOrEmpty())
+            {
+                return this;
+            }
+            foreach (var query in joinQuerys)
+            {
+                EqualFullJoin(string.Empty, string.Empty, query);
+            }
+            return this;
+        }
+
+        #endregion
+
+        #region NotEqual FullJoin
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery NotEqualFullJoin(string sourceField, string targetField, IQuery joinQuery)
+        {
+            return FullJoin(sourceField, targetField, JoinOperator.NotEqual, joinQuery);
+        }
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery NotEqualFullJoin(string joinField, IQuery joinQuery)
+        {
+            return NotEqualFullJoin(joinField, joinField, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery NotEqualFullJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery)
+        {
+            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
+            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
+            return NotEqualFullJoin(sourceFieldName, targetFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery NotEqualFullJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery)
+        {
+            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
+            return NotEqualFullJoin(joinFieldName, joinFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        public IQuery NotEqualFullJoin(params IQuery[] joinQuerys)
+        {
+            if (joinQuerys.IsNullOrEmpty())
+            {
+                return this;
+            }
+            foreach (var query in joinQuerys)
+            {
+                NotEqualFullJoin(string.Empty, string.Empty, query);
+            }
+            return this;
+        }
+
+        #endregion
+
+        #region LessThanOrEqual FullJoin
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanOrEqualFullJoin(string sourceField, string targetField, IQuery joinQuery)
+        {
+            return FullJoin(sourceField, targetField, JoinOperator.LessThanOrEqual, joinQuery);
+        }
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanOrEqualFullJoin(string joinField, IQuery joinQuery)
+        {
+            return LessThanOrEqualFullJoin(joinField, joinField, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanOrEqualFullJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery)
+        {
+            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
+            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
+            return LessThanOrEqualFullJoin(sourceFieldName, targetFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanOrEqualFullJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery)
+        {
+            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
+            return LessThanOrEqualFullJoin(joinFieldName, joinFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanOrEqualFullJoin(params IQuery[] joinQuerys)
+        {
+            if (joinQuerys.IsNullOrEmpty())
+            {
+                return this;
+            }
+            foreach (var query in joinQuerys)
+            {
+                LessThanOrEqualFullJoin(string.Empty, string.Empty, query);
+            }
+            return this;
+        }
+
+        #endregion
+
+        #region LessThan FullJoin
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanFullJoin(string sourceField, string targetField, IQuery joinQuery)
+        {
+            return FullJoin(sourceField, targetField, JoinOperator.LessThan, joinQuery);
+        }
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanFullJoin(string joinField, IQuery joinQuery)
+        {
+            return LessThanFullJoin(joinField, joinField, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanFullJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery)
+        {
+            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
+            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
+            return LessThanFullJoin(sourceFieldName, targetFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanFullJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery)
+        {
+            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
+            return LessThanFullJoin(joinFieldName, joinFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        public IQuery LessThanFullJoin(params IQuery[] joinQuerys)
+        {
+            if (joinQuerys.IsNullOrEmpty())
+            {
+                return this;
+            }
+            foreach (var query in joinQuerys)
+            {
+                LessThanFullJoin(string.Empty, string.Empty, query);
+            }
+            return this;
+        }
+
+        #endregion
+
+        #region GreaterThan FullJoin
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanFullJoin(string sourceField, string targetField, IQuery joinQuery)
+        {
+            return FullJoin(sourceField, targetField, JoinOperator.GreaterThan, joinQuery);
+        }
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanFullJoin(string joinField, IQuery joinQuery)
+        {
+            return GreaterThanFullJoin(joinField, joinField, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanFullJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery)
+        {
+            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
+            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
+            return GreaterThanFullJoin(sourceFieldName, targetFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanFullJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery)
+        {
+            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
+            return GreaterThanFullJoin(joinFieldName, joinFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanFullJoin(params IQuery[] joinQuerys)
+        {
+            if (joinQuerys.IsNullOrEmpty())
+            {
+                return this;
+            }
+            foreach (var query in joinQuerys)
+            {
+                GreaterThanFullJoin(string.Empty, string.Empty, query);
+            }
+            return this;
+        }
+
+        #endregion
+
+        #region GreaterThanOrEqual FullJoin
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanOrEqualFullJoin(string sourceField, string targetField, IQuery joinQuery)
+        {
+            return FullJoin(sourceField, targetField, JoinOperator.GreaterThanOrEqual, joinQuery);
+        }
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanOrEqualFullJoin(string joinField, IQuery joinQuery)
+        {
+            return GreaterThanOrEqualFullJoin(joinField, joinField, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanOrEqualFullJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery)
+        {
+            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
+            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
+            return GreaterThanOrEqualFullJoin(sourceFieldName, targetFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanOrEqualFullJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery)
+        {
+            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
+            return GreaterThanOrEqualFullJoin(joinFieldName, joinFieldName, joinQuery);
+        }
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        public IQuery GreaterThanOrEqualFullJoin(params IQuery[] joinQuerys)
+        {
+            if (joinQuerys.IsNullOrEmpty())
+            {
+                return this;
+            }
+            foreach (var query in joinQuerys)
+            {
+                GreaterThanOrEqualFullJoin(string.Empty, string.Empty, query);
+            }
+            return this;
+        }
+
+        #endregion
+
+        #endregion
+
+        #region CrossJoin
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        public IQuery CrossJoin(params IQuery[] joinQuerys)
+        {
+            if (joinQuerys.IsNullOrEmpty())
+            {
+                return this;
+            }
+            foreach (var query in joinQuerys)
+            {
+                Join(string.Empty, string.Empty, JoinType.CrossJoin, JoinOperator.Equal, query);
+            }
+            return this;
+        }
+
+        #endregion
 
         #endregion
 

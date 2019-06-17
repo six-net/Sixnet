@@ -147,7 +147,7 @@ namespace EZNEW.Develop.Domain.Repository
             {
                 return;
             }
-            RepositoryEventBus.PublishRemove<First>(GetType(), datas);
+            RepositoryEventBus.PublishRemove(GetType(), datas);
             WorkFactory.RegisterActivationRecord(removeRecord);
         }
 
@@ -172,7 +172,7 @@ namespace EZNEW.Develop.Domain.Repository
             {
                 return;
             }
-            RepositoryEventBus.PublishRemove<Second>(GetType(), datas);
+            RepositoryEventBus.PublishRemove(GetType(), datas);
             WorkFactory.RegisterActivationRecord(removeRecord);
         }
 

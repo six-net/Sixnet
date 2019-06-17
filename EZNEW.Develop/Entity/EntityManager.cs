@@ -81,10 +81,11 @@ namespace EZNEW.Develop.Entity
             //fields
             List<EntityField> editFields = new List<EntityField>();
             List<EntityField> queryFields = new List<EntityField>();
-            List<EntityField> allFiedls = new List<EntityField>();
+            List<EntityField> allFields = new List<EntityField>();
             List<EntityField> primaryKeys = new List<EntityField>();
             EntityField versionField = null;
             EntityField refreshDateField = null;
+
             foreach (var property in propertys)
             {
                 var name = property.Name;
@@ -115,7 +116,7 @@ namespace EZNEW.Develop.Entity
                     PropertyName = propertyName,
                     QueryFormat = queryFormat
                 };
-                allFiedls.Add(propertyField);
+                allFields.Add(propertyField);
                 if (primaryKey)
                 {
                     primaryKeys.Add(propertyField);
@@ -136,11 +137,46 @@ namespace EZNEW.Develop.Entity
                 {
                     refreshDateField = propertyField;
                 }
+
+                //relation config
+                var relationAttributes = property.GetCustomAttributes(typeof(EntityRelationAttribute), false);
+                if (relationAttributes.IsNullOrEmpty())
+                {
+                    continue;
+                }
+                if (entityConfig.RelationFields.IsNullOrEmpty())
+                {
+                    entityConfig.RelationFields = new Dictionary<Guid, Dictionary<string, string>>();
+                }
+                foreach (var attrObj in relationAttributes)
+                {
+                    EntityRelationAttribute relationAttr = attrObj as EntityRelationAttribute;
+                    if (relationAttr == null || relationAttr.RelationType == null || string.IsNullOrWhiteSpace(relationAttr.RelationField))
+                    {
+                        continue;
+                    }
+                    var relationTypeId = relationAttr.RelationType.GUID;
+                    entityConfig.RelationFields.TryGetValue(relationTypeId, out var values);
+                    values = values ?? new Dictionary<string, string>();
+                    if (values.ContainsKey(propertyName))
+                    {
+                        continue;
+                    }
+                    values.Add(propertyName, relationAttr.RelationField);
+                    if (entityConfig.RelationFields.ContainsKey(relationTypeId))
+                    {
+                        entityConfig.RelationFields[relationTypeId] = values;
+                    }
+                    else
+                    {
+                        entityConfig.RelationFields.Add(relationTypeId, values);
+                    }
+                }
             }
             entityConfig.PrimaryKeys = primaryKeys;
             if (entityConfig.AllFields.IsNullOrEmpty())
             {
-                entityConfig.AllFields = allFiedls;
+                entityConfig.AllFields = allFields;
             }
             if (entityConfig.EditFields.IsNullOrEmpty())
             {
@@ -904,6 +940,28 @@ namespace EZNEW.Develop.Entity
                 return new List<EntityField>(0);
             }
             return allFields.Intersect(propertyNames.Select<string, EntityField>(c => c)).ToList();
+        }
+
+        #endregion
+
+        #region relation fields
+
+        /// <summary>
+        /// get relation fields
+        /// </summary>
+        /// <param name="sourceType">source type</param>
+        /// <param name="relationType">relation type</param>
+        /// <returns></returns>
+        public static Dictionary<string, string> GetRelationFields(Type sourceType, Type relationType)
+        {
+            if (sourceType == null || relationType == null)
+            {
+                return new Dictionary<string, string>(0);
+            }
+            var entityConfig = GetEntityConfig(sourceType);
+            Dictionary<string, string> relationFields = null;
+            entityConfig?.RelationFields?.TryGetValue(relationType.GUID, out relationFields);
+            return relationFields ?? new Dictionary<string, string>(0);
         }
 
         #endregion

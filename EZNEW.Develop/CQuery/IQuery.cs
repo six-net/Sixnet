@@ -148,6 +148,11 @@ namespace EZNEW.Develop.CQuery
         /// </summary>
         bool IsObsolete { get; }
 
+        /// <summary>
+        /// join items
+        /// </summary>
+        List<JoinItem> JoinItems { get; }
+
         #endregion
 
         #region Method
@@ -297,8 +302,9 @@ namespace EZNEW.Develop.CQuery
         /// </summary>
         /// <param name="fieldName">field</param>
         /// <param name="subQuery">sub query</param>
+        /// <param name="subQueryFieldName">sub query field</param>
         /// <returns>return newest instance</returns>
-        IQuery Equal(string fieldName, IQuery subQuery);
+        IQuery Equal(string fieldName, IQuery subQuery, string subQueryFieldName = "");
 
         /// <summary>
         /// Equal Condition
@@ -317,6 +323,17 @@ namespace EZNEW.Develop.CQuery
         /// <param name="subQuery">sub query</param>
         /// <returns>return newest instance</returns>
         IQuery Equal<T>(Expression<Func<T, dynamic>> field, IQuery subQuery) where T : QueryModel<T>;
+
+        /// <summary>
+        /// Equal Condition
+        /// </summary>
+        /// <typeparam name="SourceQueryModel">source query model</typeparam>
+        /// <typeparam name="SubQueryModel">sub query model</typeparam>
+        /// <param name="field">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <param name="subQueryfield">sub query field</param>
+        /// <returns></returns>
+        IQuery Equal<SourceQueryModel, SubQueryModel>(Expression<Func<SourceQueryModel, dynamic>> field, IQuery subQuery, Expression<Func<SubQueryModel, dynamic>> subQueryfield) where SourceQueryModel : QueryModel<SourceQueryModel> where SubQueryModel : QueryModel<SubQueryModel>;
 
         #endregion
 
@@ -337,8 +354,9 @@ namespace EZNEW.Develop.CQuery
         /// </summary>
         /// <param name="fieldName">field</param>
         /// <param name="subQuery">sub query</param>
+        /// <param name="subQueryFieldName">sub query field</param>
         /// <returns>return newest instance</returns>
-        IQuery NotEqual(string fieldName, IQuery subQuery);
+        IQuery NotEqual(string fieldName, IQuery subQuery, string subQueryFieldName = "");
 
         /// <summary>
         /// Not Equal Condition
@@ -358,6 +376,17 @@ namespace EZNEW.Develop.CQuery
         /// <returns>return newest instance</returns>
         IQuery NotEqual<T>(Expression<Func<T, dynamic>> field, IQuery subQuery) where T : QueryModel<T>;
 
+        /// <summary>
+        /// Not Equal Condition
+        /// </summary>
+        /// <typeparam name="SourceQueryModel">source query model</typeparam>
+        /// <typeparam name="SubQueryModel">sub query model</typeparam>
+        /// <param name="field">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <param name="subQueryfield">sub query field</param>
+        /// <returns></returns>
+        IQuery NotEqual<SourceQueryModel, SubQueryModel>(Expression<Func<SourceQueryModel, dynamic>> field, IQuery subQuery, Expression<Func<SubQueryModel, dynamic>> subQueryfield) where SourceQueryModel : QueryModel<SourceQueryModel> where SubQueryModel : QueryModel<SubQueryModel>;
+
         #endregion
 
         #region LessThan
@@ -375,12 +404,40 @@ namespace EZNEW.Develop.CQuery
         /// <summary>
         /// Less Than Condition
         /// </summary>
+        /// <param name="fieldName">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <param name="subQueryField">sub query field</param>
+        /// <returns>return newest instance</returns>
+        IQuery LessThan(string fieldName, IQuery subQuery, string subQueryField = "");
+
+        /// <summary>
+        /// Less Than Condition
+        /// </summary>
         /// <param name="field">field</param>
         /// <param name="value">value</param>
         /// <param name="or">connect with 'and'(true/default) or 'or'(false)</param>
         /// <param name="convert">criterial convert</param>
         /// <returns>return newest instance</returns>
         IQuery LessThan<T>(Expression<Func<T, dynamic>> field, dynamic value, bool or = false, ICriteriaConvert convert = null) where T : QueryModel<T>;
+
+        /// <summary>
+        /// Less Than Condition
+        /// </summary>
+        /// <param name="field">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <returns>return newest instance</returns>
+        IQuery LessThan<T>(Expression<Func<T, dynamic>> field, IQuery subQuery) where T : QueryModel<T>;
+
+        /// <summary>
+        /// Less Than Condition
+        /// </summary>
+        /// <typeparam name="SourceQueryModel">source query model</typeparam>
+        /// <typeparam name="SubQueryModel">sub query model</typeparam>
+        /// <param name="field">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <param name="subQueryfield">sub query field</param>
+        /// <returns></returns>
+        IQuery LessThan<SourceQueryModel, SubQueryModel>(Expression<Func<SourceQueryModel, dynamic>> field, IQuery subQuery, Expression<Func<SubQueryModel, dynamic>> subQueryfield) where SourceQueryModel : QueryModel<SourceQueryModel> where SubQueryModel : QueryModel<SubQueryModel>;
 
         #endregion
 
@@ -399,12 +456,40 @@ namespace EZNEW.Develop.CQuery
         /// <summary>
         /// Less Than Or Equal Condition
         /// </summary>
+        /// <param name="fieldName">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <param name="subQueryField">sub query field</param>
+        /// <returns>return newest instance</returns>
+        IQuery LessThanOrEqual(string fieldName, IQuery subQuery, string subQueryField = "");
+
+        /// <summary>
+        /// Less Than Or Equal Condition
+        /// </summary>
+        /// <param name="field">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <returns>return newest instance</returns>
+        IQuery LessThanOrEqual<T>(Expression<Func<T, dynamic>> field, IQuery subQuery) where T : QueryModel<T>;
+
+        /// <summary>
+        /// Less Than Or Equal Condition
+        /// </summary>
         /// <param name="field">field</param>
         /// <param name="value">value</param>
         /// <param name="or">connect with 'and'(true/default) or 'or'(false)</param>
         /// <param name="convert">criterial convert</param>
         /// <returns>return newest instance</returns>
         IQuery LessThanOrEqual<T>(Expression<Func<T, dynamic>> field, dynamic value, bool or = false, ICriteriaConvert convert = null) where T : QueryModel<T>;
+
+        /// <summary>
+        /// Less Than Or Equal Condition
+        /// </summary>
+        /// <typeparam name="SourceQueryModel">source query model</typeparam>
+        /// <typeparam name="SubQueryModel">sub query model</typeparam>
+        /// <param name="field">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <param name="subQueryfield">sub query field</param>
+        /// <returns></returns>
+        IQuery LessThanOrEqual<SourceQueryModel, SubQueryModel>(Expression<Func<SourceQueryModel, dynamic>> field, IQuery subQuery, Expression<Func<SubQueryModel, dynamic>> subQueryfield) where SourceQueryModel : QueryModel<SourceQueryModel> where SubQueryModel : QueryModel<SubQueryModel>;
 
         #endregion
 
@@ -423,12 +508,40 @@ namespace EZNEW.Develop.CQuery
         /// <summary>
         /// Greater Than Condition
         /// </summary>
+        /// <param name="fieldName">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <param name="subQueryField">sub query field</param>
+        /// <returns>return newest instance</returns>
+        IQuery GreaterThan(string fieldName, IQuery subQuery, string subQueryField = "");
+
+        /// <summary>
+        /// Greater Than Condition
+        /// </summary>
         /// <param name="field">field</param>
         /// <param name="value">value</param>
         /// <param name="or">connect with 'and'(true/default) or 'or'(false)</param>
         /// <param name="convert">criterial convert</param>
         /// <returns>return newest instance</returns>
         IQuery GreaterThan<T>(Expression<Func<T, dynamic>> field, dynamic value, bool or = false, ICriteriaConvert convert = null) where T : QueryModel<T>;
+
+        /// <summary>
+        /// Greater Than Condition
+        /// </summary>
+        /// <param name="field">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <returns>return newest instance</returns>
+        IQuery GreaterThan<T>(Expression<Func<T, dynamic>> field, IQuery subQuery) where T : QueryModel<T>;
+
+        /// <summary>
+        /// Greater Than Condition
+        /// </summary>
+        /// <typeparam name="SourceQueryModel">source query model</typeparam>
+        /// <typeparam name="SubQueryModel">sub query model</typeparam>
+        /// <param name="field">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <param name="subQueryfield">sub query field</param>
+        /// <returns></returns>
+        IQuery GreaterThan<SourceQueryModel, SubQueryModel>(Expression<Func<SourceQueryModel, dynamic>> field, IQuery subQuery, Expression<Func<SubQueryModel, dynamic>> subQueryfield) where SourceQueryModel : QueryModel<SourceQueryModel> where SubQueryModel : QueryModel<SubQueryModel>;
 
         #endregion
 
@@ -447,12 +560,40 @@ namespace EZNEW.Develop.CQuery
         /// <summary>
         /// Greater Than Or Equal Condition
         /// </summary>
+        /// <param name="fieldName">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <param name="subQueryField">sub query field</param>
+        /// <returns>return newest instance</returns>
+        IQuery GreaterThanOrEqual(string fieldName, IQuery subQuery, string subQueryField = "");
+
+        /// <summary>
+        /// Greater Than Or Equal Condition
+        /// </summary>
         /// <param name="field">field</param>
         /// <param name="value">value</param>
         /// <param name="or">connect with 'and'(true/default) or 'or'(false)</param>
         /// <param name="convert">criterial convert</param>
         /// <returns>return newest instance</returns>
         IQuery GreaterThanOrEqual<T>(Expression<Func<T, dynamic>> field, dynamic value, bool or = false, ICriteriaConvert convert = null) where T : QueryModel<T>;
+
+        /// <summary>
+        /// Greater Than Or Equal Condition
+        /// </summary>
+        /// <param name="field">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <returns>return newest instance</returns>
+        IQuery GreaterThanOrEqual<T>(Expression<Func<T, dynamic>> field, IQuery subQuery) where T : QueryModel<T>;
+
+        /// <summary>
+        /// Greater Than Or Equal Condition
+        /// </summary>
+        /// <typeparam name="SourceQueryModel">source query model</typeparam>
+        /// <typeparam name="SubQueryModel">sub query model</typeparam>
+        /// <param name="field">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <param name="subQueryfield">sub query field</param>
+        /// <returns></returns>
+        IQuery GreaterThanOrEqual<SourceQueryModel, SubQueryModel>(Expression<Func<SourceQueryModel, dynamic>> field, IQuery subQuery, Expression<Func<SubQueryModel, dynamic>> subQueryfield) where SourceQueryModel : QueryModel<SourceQueryModel> where SubQueryModel : QueryModel<SubQueryModel>;
 
         #endregion
 
@@ -473,8 +614,9 @@ namespace EZNEW.Develop.CQuery
         /// </summary>
         /// <param name="fieldName">field</param>
         /// <param name="subQuery">sub query</param>
+        /// <param name="subQueryFieldName">sub query field name</param>
         /// <returns>return newest instance</returns>
-        IQuery In(string fieldName, IQuery subQuery);
+        IQuery In(string fieldName, IQuery subQuery, string subQueryFieldName = "");
 
         /// <summary>
         /// Include Condition
@@ -494,6 +636,15 @@ namespace EZNEW.Develop.CQuery
         /// <returns>return newest instance</returns>
         IQuery In<T>(Expression<Func<T, dynamic>> field, IQuery subQuery) where T : QueryModel<T>;
 
+        /// <summary>
+        /// Include Condition
+        /// </summary>
+        /// <param name="field">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <param name="subQueryField">sub query field</param>
+        /// <returns>return newest instance</returns>
+        IQuery In<SourceQueryModel, SubQueryModel>(Expression<Func<SourceQueryModel, dynamic>> field, IQuery subQuery, Expression<Func<SubQueryModel, dynamic>> subQueryField) where SourceQueryModel : QueryModel<SourceQueryModel> where SubQueryModel : QueryModel<SubQueryModel>;
+
         #endregion
 
         #region Not In
@@ -509,12 +660,13 @@ namespace EZNEW.Develop.CQuery
         IQuery NotIn(string fieldName, IEnumerable value, bool or = false, ICriteriaConvert convert = null);
 
         /// <summary>
-        /// Not Include
+        /// Include Condition
         /// </summary>
         /// <param name="fieldName">field</param>
         /// <param name="subQuery">sub query</param>
+        /// <param name="subQueryFieldName">sub query field name</param>
         /// <returns>return newest instance</returns>
-        IQuery NotIn(string fieldName, IQuery subQuery);
+        IQuery NotIn(string fieldName, IQuery subQuery, string subQueryFieldName = "");
 
         /// <summary>
         /// Not Include
@@ -533,6 +685,15 @@ namespace EZNEW.Develop.CQuery
         /// <param name="subQuery">sub query</param>
         /// <returns>return newest instance</returns>
         IQuery NotIn<T>(Expression<Func<T, dynamic>> field, IQuery subQuery) where T : QueryModel<T>;
+
+        /// <summary>
+        /// Include Condition
+        /// </summary>
+        /// <param name="field">field</param>
+        /// <param name="subQuery">sub query</param>
+        /// <param name="subQueryField">sub query field</param>
+        /// <returns>return newest instance</returns>
+        IQuery NotIn<SourceQueryModel, SubQueryModel>(Expression<Func<SourceQueryModel, dynamic>> field, IQuery subQuery, Expression<Func<SubQueryModel, dynamic>> subQueryField) where SourceQueryModel : QueryModel<SourceQueryModel> where SubQueryModel : QueryModel<SubQueryModel>;
 
         #endregion
 
@@ -822,6 +983,1330 @@ namespace EZNEW.Develop.CQuery
         /// </summary>
         /// <returns></returns>
         IQuery Clone();
+
+        #endregion
+
+        #region join
+
+        #region join util
+
+        /// <summary>
+        /// join
+        /// </summary>
+        /// <param name="joinFields">join fields</param>
+        /// <param name="joinType">join type</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery Join(Dictionary<string, string> joinFields, JoinType joinType, JoinOperator joinOperator, IQuery joinQuery);
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinType">join type</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery Join(string sourceField, string targetField, JoinType joinType, JoinOperator joinOperator, IQuery joinQuery);
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinType">join type</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery Join<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, JoinType joinType, JoinOperator joinOperator, IQuery joinQuery);
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinType">join type</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery Join(JoinType joinType, JoinOperator joinOperator, IQuery joinQuery);
+
+        #endregion
+
+        #region Inner Join
+
+        #region InnerJoin helper
+
+        /// <summary>
+        /// inner join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery InnerJoin(string sourceField, string targetField, JoinOperator joinOperator, IQuery joinQuery);
+
+        /// <summary>
+        /// inner join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery InnerJoin(string joinField, JoinOperator joinOperator, IQuery joinQuery);
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery InnerJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, JoinOperator joinOperator, IQuery joinQuery);
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery InnerJoin<T>(Expression<Func<T, dynamic>> joinField, JoinOperator joinOperator, IQuery joinQuery);
+
+        #endregion
+
+        #region Equal InnerJoin
+
+        /// <summary>
+        /// inner join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery EqualInnerJoin(string sourceField, string targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// inner join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery EqualInnerJoin(string joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery EqualInnerJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery EqualInnerJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        IQuery EqualInnerJoin(params IQuery[] joinQuerys);
+
+        #endregion
+
+        #region NotEqual InnerJoin
+
+        /// <summary>
+        /// inner join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery NotEqualInnerJoin(string sourceField, string targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// inner join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery NotEqualInnerJoin(string joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery NotEqualInnerJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery NotEqualInnerJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        IQuery NotEqualInnerJoin(params IQuery[] joinQuerys);
+
+        #endregion
+
+        #region LessThanOrEqual InnerJoin
+
+        /// <summary>
+        /// inner join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery LessThanOrEqualInnerJoin(string sourceField, string targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// inner join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery LessThanOrEqualInnerJoin(string joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery LessThanOrEqualInnerJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery LessThanOrEqualInnerJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        IQuery LessThanOrEqualInnerJoin(params IQuery[] joinQuerys);
+
+        #endregion
+
+        #region LessThan InnerJoin
+
+        /// <summary>
+        /// inner join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery LessThanInnerJoin(string sourceField, string targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// inner join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery LessThanInnerJoin(string joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery LessThanInnerJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery LessThanInnerJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        IQuery LessThanInnerJoin(params IQuery[] joinQuerys);
+
+        #endregion
+
+        #region GreaterThan InnerJoin
+
+        /// <summary>
+        /// inner join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanInnerJoin(string sourceField, string targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// inner join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanInnerJoin(string joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanInnerJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanInnerJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanInnerJoin(params IQuery[] joinQuerys);
+
+        #endregion
+
+        #region GreaterThanOrEqual InnerJoin
+
+        /// <summary>
+        /// inner join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanOrEqualInnerJoin(string sourceField, string targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// inner join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanOrEqualInnerJoin(string joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanOrEqualInnerJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanOrEqualInnerJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanOrEqualInnerJoin(params IQuery[] joinQuerys);
+
+        #endregion
+
+        #endregion
+
+        #region Left Join
+
+        #region Left Join Helper
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery LeftJoin(string sourceField, string targetField, JoinOperator joinOperator, IQuery joinQuery);
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery LeftJoin(string joinField, JoinOperator joinOperator, IQuery joinQuery);
+
+        /// <summary>
+        /// left query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery LeftJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, JoinOperator joinOperator, IQuery joinQuery);
+
+        /// <summary>
+        /// left query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery LeftJoin<T>(Expression<Func<T, dynamic>> joinField, JoinOperator joinOperator, IQuery joinQuery);
+
+        #endregion
+
+        #region Equal LeftJoin
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery EqualLeftJoin(string sourceField, string targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery EqualLeftJoin(string joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery EqualLeftJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery EqualLeftJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        IQuery EqualLeftJoin(params IQuery[] joinQuerys);
+
+        #endregion
+
+        #region NotEqual LeftJoin
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery NotEqualLeftJoin(string sourceField, string targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery NotEqualLeftJoin(string joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// left query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery NotEqualLeftJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// left query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery NotEqualLeftJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// left query
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        IQuery NotEqualLeftJoin(params IQuery[] joinQuerys);
+
+        #endregion
+
+        #region LessThanOrEqual LeftJoin
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery LessThanOrEqualLeftJoin(string sourceField, string targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery LessThanOrEqualLeftJoin(string joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery LessThanOrEqualLeftJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery LessThanOrEqualLeftJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        IQuery LessThanOrEqualLeftJoin(params IQuery[] joinQuerys);
+
+        #endregion
+
+        #region LessThan LeftJoin
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery LessThanLeftJoin(string sourceField, string targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery LessThanLeftJoin(string joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery LessThanLeftJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery LessThanLeftJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        IQuery LessThanLeftJoin(params IQuery[] joinQuerys);
+
+        #endregion
+
+        #region GreaterThan LeftJoin
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanLeftJoin(string sourceField, string targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanLeftJoin(string joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanLeftJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanLeftJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanLeftJoin(params IQuery[] joinQuerys);
+
+        #endregion
+
+        #region GreaterThanOrEqual LeftJoin
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanOrEqualLeftJoin(string sourceField, string targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanOrEqualLeftJoin(string joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanOrEqualLeftJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanOrEqualLeftJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanOrEqualLeftJoin(params IQuery[] joinQuerys);
+
+        #endregion
+
+        #endregion
+
+        #region Right Join
+
+        #region Right Join Helper
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery RightJoin(string sourceField, string targetField, JoinOperator joinOperator, IQuery joinQuery);
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery RightJoin(string joinField, JoinOperator joinOperator, IQuery joinQuery);
+
+        /// <summary>
+        /// right query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery RightJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, JoinOperator joinOperator, IQuery joinQuery);
+
+        /// <summary>
+        /// right query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery RightJoin<T>(Expression<Func<T, dynamic>> joinField, JoinOperator joinOperator, IQuery joinQuery);
+
+        #endregion
+
+        #region Equal RightJoin
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery EqualRightJoin(string sourceField, string targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery EqualRightJoin(string joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery EqualRightJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery EqualRightJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        IQuery EqualRightJoin(params IQuery[] joinQuerys);
+
+        #endregion
+
+        #region NotEqual RightJoin
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery NotEqualRightJoin(string sourceField, string targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery NotEqualRightJoin(string joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// right query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery NotEqualRightJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// right query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery NotEqualRightJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// right query
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        IQuery NotEqualRightJoin(params IQuery[] joinQuerys);
+
+        #endregion
+
+        #region LessThanOrEqual RightJoin
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery LessThanOrEqualRightJoin(string sourceField, string targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery LessThanOrEqualRightJoin(string joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery LessThanOrEqualRightJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery LessThanOrEqualRightJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        IQuery LessThanOrEqualRightJoin(params IQuery[] joinQuerys);
+
+        #endregion
+
+        #region LessThan RightJoin
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery LessThanRightJoin(string sourceField, string targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery LessThanRightJoin(string joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery LessThanRightJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery LessThanRightJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        IQuery LessThanRightJoin(params IQuery[] joinQuerys);
+
+        #endregion
+
+        #region GreaterThan RightJoin
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanRightJoin(string sourceField, string targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanRightJoin(string joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanRightJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanRightJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanRightJoin(params IQuery[] joinQuerys);
+
+        #endregion
+
+        #region GreaterThanOrEqual RightJoin
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanOrEqualRightJoin(string sourceField, string targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanOrEqualRightJoin(string joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanOrEqualRightJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanOrEqualRightJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// right join
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanOrEqualRightJoin(params IQuery[] joinQuerys);
+
+        #endregion
+
+        #endregion
+
+        #region Full Join
+
+        #region Full Join Helper
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery FullJoin(string sourceField, string targetField, JoinOperator joinOperator, IQuery joinQuery);
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery FullJoin(string joinField, JoinOperator joinOperator, IQuery joinQuery);
+
+        /// <summary>
+        /// full query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery FullJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, JoinOperator joinOperator, IQuery joinQuery);
+
+        /// <summary>
+        /// full query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery FullJoin<T>(Expression<Func<T, dynamic>> joinField, JoinOperator joinOperator, IQuery joinQuery);
+
+        #endregion
+
+        #region Equal FullJoin
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery EqualFullJoin(string sourceField, string targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery EqualFullJoin(string joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery EqualFullJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery EqualFullJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        IQuery EqualFullJoin(params IQuery[] joinQuerys);
+
+        #endregion
+
+        #region NotEqual FullJoin
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery NotEqualFullJoin(string sourceField, string targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery NotEqualFullJoin(string joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// full query
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery NotEqualFullJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// full query
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery NotEqualFullJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// full query
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        IQuery NotEqualFullJoin(params IQuery[] joinQuerys);
+
+        #endregion
+
+        #region LessThanOrEqual FullJoin
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery LessThanOrEqualFullJoin(string sourceField, string targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery LessThanOrEqualFullJoin(string joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery LessThanOrEqualFullJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery LessThanOrEqualFullJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        IQuery LessThanOrEqualFullJoin(params IQuery[] joinQuerys);
+
+        #endregion
+
+        #region LessThan FullJoin
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery LessThanFullJoin(string sourceField, string targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery LessThanFullJoin(string joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery LessThanFullJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery LessThanFullJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        IQuery LessThanFullJoin(params IQuery[] joinQuerys);
+
+        #endregion
+
+        #region GreaterThan FullJoin
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanFullJoin(string sourceField, string targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanFullJoin(string joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanFullJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanFullJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanFullJoin(params IQuery[] joinQuerys);
+
+        #endregion
+
+        #region GreaterThanOrEqual FullJoin
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanOrEqualFullJoin(string sourceField, string targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanOrEqualFullJoin(string joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="sourceField">source field</param>
+        /// <param name="targetField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanOrEqualFullJoin<Source, Target>(Expression<Func<Source, dynamic>> sourceField, Expression<Func<Target, dynamic>> targetField, IQuery joinQuery);
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="joinField">target field</param>
+        /// <param name="joinQuery">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanOrEqualFullJoin<T>(Expression<Func<T, dynamic>> joinField, IQuery joinQuery);
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        IQuery GreaterThanOrEqualFullJoin(params IQuery[] joinQuerys);
+
+        #endregion
+
+        #endregion
+
+        #region CrossJoin
+
+        /// <summary>
+        /// join query
+        /// </summary>
+        /// <param name="joinQuerys">join query</param>
+        /// <returns></returns>
+        IQuery CrossJoin(params IQuery[] joinQuerys);
+
+        #endregion
 
         #endregion
 

@@ -43,6 +43,46 @@ namespace EZNEW.Develop.CQuery.Translator
             get;set;
         }
 
+        /// <summary>
+        /// join value
+        /// </summary>
+        public string JoinScript
+        {
+            get;set;
+        }
+
+        /// <summary>
+        /// allow join
+        /// </summary>
+        public bool AllowJoin
+        {
+            get;set;
+        }
+
+        /// <summary>
+        /// with scripts
+        /// </summary>
+        public List<string> WithScripts
+        {
+            get;set;
+        }
+
+        /// <summary>
+        /// recurve object name
+        /// </summary>
+        public string RecurveObjectName
+        {
+            get;set;
+        }
+
+        /// <summary>
+        /// recurve pet name
+        /// </summary>
+        public string RecurvePetName
+        {
+            get;set;
+        }
+
         #endregion
 
         private TranslateResult()
