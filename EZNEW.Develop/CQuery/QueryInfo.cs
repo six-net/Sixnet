@@ -34,6 +34,7 @@ namespace EZNEW.Develop.CQuery
         static MethodInfo collectionContainsMethod = null;
         Dictionary<Guid, dynamic> queryExpressionDict = new Dictionary<Guid, dynamic>();
         int joinSort = 0;
+        static Dictionary<Guid, Action<QueryInfo, IQueryItem>> addQueryItemHandlers = null;
 
         #region Constructor
 
@@ -55,6 +56,11 @@ namespace EZNEW.Develop.CQuery
             stringIndexOfMethod = typeof(string).GetMethods().FirstOrDefault(c => c.Name == "IndexOf" && c.GetParameters().Length == 1 && c.GetParameters()[0].ParameterType.FullName == typeof(string).FullName);
             endWithMethod = typeof(string).GetMethods().FirstOrDefault(c => c.Name == "EndsWith" && c.GetParameters().Length == 1 && c.GetParameters()[0].ParameterType.FullName == typeof(string).FullName);
             collectionContainsMethod = typeof(Enumerable).GetMethods().FirstOrDefault(c => c.Name == "Contains" && c.GetParameters().Length == 2);
+            addQueryItemHandlers = new Dictionary<Guid, Action<QueryInfo, IQueryItem>>()
+            {
+                { typeof(Criteria).GUID,new Action<QueryInfo,IQueryItem>(AddCriteriaQueryItemHandler)},
+                { typeof(QueryInfo).GUID,new Action<QueryInfo,IQueryItem>(AddQueryInfoQueryItemHandler)}
+            };
         }
 
         #endregion
@@ -175,6 +181,27 @@ namespace EZNEW.Develop.CQuery
         public bool HasSubQuery { get; private set; } = false;
 
         /// <summary>
+        /// has recurve criteria
+        /// </summary>
+        public bool HasRecurveCriteria { get; private set; } = false;
+
+        /// <summary>
+        /// has join
+        /// </summary>
+        public bool HasJoin { get; private set; } = false;
+
+        /// <summary>
+        /// complex query
+        /// </summary>
+        public bool IsComplexQuery
+        {
+            get
+            {
+                return GetIsComplexQuery();
+            }
+        }
+
+        /// <summary>
         /// Recurve Criteria
         /// </summary>
         public RecurveCriteria RecurveCriteria
@@ -212,7 +239,7 @@ namespace EZNEW.Develop.CQuery
         /// <returns>return newest instance</returns>
         public IQuery And(string fieldName, CriteriaOperator @operator, dynamic value, ICriteriaConvert convert = null)
         {
-            AddCriteria(QueryOperator.AND, fieldName, @operator, value);
+            AddCriteria(QueryOperator.AND, fieldName, @operator, value, convert);
             return this;
         }
 
@@ -1273,7 +1300,7 @@ namespace EZNEW.Develop.CQuery
         /// get actually query fields
         /// </summary>
         /// <returns></returns>
-        public List<string> GetActuallyQueryFields<ET>(bool forcePrimaryKey = true, bool forceVersionKey = true)
+        public List<EntityField> GetActuallyQueryFields<ET>(bool forcePrimaryKey = true, bool forceVersionKey = true)
         {
             return GetActuallyQueryFields(typeof(ET), forcePrimaryKey, forceVersionKey);
         }
@@ -1282,30 +1309,18 @@ namespace EZNEW.Develop.CQuery
         /// get actually query fields
         /// </summary>
         /// <returns></returns>
-        public List<string> GetActuallyQueryFields(Type entityType, bool forcePrimaryKey = true, bool forceVersionKey = true)
+        public List<EntityField> GetActuallyQueryFields(Type entityType, bool forcePrimaryKey = true, bool forceVersionKey = true)
         {
-            List<string> actuallyFields = queryFields?.Select(c => c).ToList();
+            List<EntityField> fields = null;
             if (queryFields.IsNullOrEmpty())
             {
-                actuallyFields = EntityManager.GetEntityQueryFields(entityType).Select<EntityField, string>(c => c).ToList();
+                fields = EntityManager.GetEntityQueryFields(entityType);
             }
             else
             {
-                if (forcePrimaryKey)
-                {
-                    var primaryKeys = EntityManager.GetPrimaryKeys(entityType);
-                    actuallyFields.AddRange(primaryKeys.Select(c => c.PropertyName));
-                }
-                if (forceVersionKey)
-                {
-                    actuallyFields.Add(EntityManager.GetVersionField(entityType));
-                }
+                fields = EntityManager.GetEntityQueryFields(entityType, queryFields, forcePrimaryKey, forceVersionKey);
             }
-            if (!notQueryFields.IsNullOrEmpty())
-            {
-                actuallyFields = actuallyFields.Except(notQueryFields).ToList();
-            }
-            return actuallyFields;
+            return fields;
         }
 
         #endregion
@@ -1509,7 +1524,7 @@ namespace EZNEW.Develop.CQuery
             {
                 return queryExpressionDict[modelType.GUID];
             }
-            if (HasSubQuery)
+            if (IsComplexQuery)
             {
                 Func<T, bool> falseFunc = (data) => false;
                 queryExpressionDict.Add(modelType.GUID, falseFunc);
@@ -1601,7 +1616,7 @@ namespace EZNEW.Develop.CQuery
         {
             Expression property = Expression.PropertyOrField(parameter, criteria.Name);
             object criteriaValue = criteria.GetCriteriaRealValue();
-            Expression valueExpression = Expression.Constant(criteriaValue, criteriaValue.GetType());
+            Expression valueExpression = Expression.Constant(criteriaValue, criteriaValue?.GetType() ?? typeof(object));
             switch (criteria.Operator)
             {
                 case CriteriaOperator.Equal:
@@ -1745,7 +1760,8 @@ namespace EZNEW.Develop.CQuery
                 RelationKey = relationKey,
                 Direction = direction
             };
-            return null;
+            HasRecurveCriteria = true;
+            return this;
         }
 
         /// <summary>
@@ -1835,6 +1851,7 @@ namespace EZNEW.Develop.CQuery
                 JoinQuery = joinQuery,
                 Sort = joinSort++
             });
+            HasJoin = true;
             return this;
         }
 
@@ -3890,34 +3907,94 @@ namespace EZNEW.Develop.CQuery
             {
                 return;
             }
-            if (queryItem is Criteria)
-            {
-                Criteria criteria = queryItem as Criteria;
-                var queryValue = criteria.Value is IQueryItem;
-                HasSubQuery = HasSubQuery || queryValue;
-                if (!queryValue)
-                {
-                    switch (criteria.Operator)
-                    {
-                        case CriteriaOperator.Equal:
-                        case CriteriaOperator.In:
-                            equalCriteriaList.Add(criteria);
-                            break;
-                    }
-                }
-            }
-            else if (queryItem is QueryInfo)
-            {
-                QueryInfo valueQuery = queryItem as QueryInfo;
-                HasSubQuery = HasSubQuery || valueQuery.HasSubQuery;
-                if (!HasSubQuery)
-                {
-                    equalCriteriaList.AddRange(valueQuery.equalCriteriaList);
-                }
-            }
+
+            //invoke handler
+            var queryItemTypeId = queryItem.GetType().GUID;
+            Action<QueryInfo, IQueryItem> handler = null;
+            addQueryItemHandlers?.TryGetValue(queryItemTypeId, out handler);
+            handler?.Invoke(this, queryItem);
+
             //clear data
-            queryExpressionDict.Clear();
+            queryExpressionDict?.Clear();
             criterias.Add(new Tuple<QueryOperator, IQueryItem>(queryOperator, queryItem));
+        }
+
+        /// <summary>
+        /// set has sub query
+        /// </summary>
+        /// <param name="hasSubQuery"></param>
+        internal void SetHasSubQuery(bool hasSubQuery)
+        {
+            HasSubQuery = hasSubQuery;
+        }
+
+        /// <summary>
+        /// set has join
+        /// </summary>
+        /// <param name="hasJoin"></param>
+        internal void SetHasJoin(bool hasJoin)
+        {
+            HasJoin = hasJoin;
+        }
+
+        /// <summary>
+        /// set has recurve criteria
+        /// </summary>
+        /// <param name="hasRecurveCriteria"></param>
+        internal void SetHasRecurveCriteria(bool hasRecurveCriteria)
+        {
+            HasRecurveCriteria = hasRecurveCriteria;
+        }
+
+        /// <summary>
+        /// get is complex query
+        /// </summary>
+        /// <returns></returns>
+        bool GetIsComplexQuery()
+        {
+            return HasSubQuery || HasRecurveCriteria || HasJoin;
+        }
+
+        /// <summary>
+        /// add criteria query item handler
+        /// </summary>
+        /// <param name="queryItem"></param>
+        static void AddCriteriaQueryItemHandler(QueryInfo query, IQueryItem queryItem)
+        {
+            Criteria criteria = queryItem as Criteria;
+            var queryValue = criteria.Value as IQuery;
+            if (queryValue != null)
+            {
+                query.SetHasSubQuery(true);
+                query.SetHasJoin(query.HasJoin || queryValue.HasJoin);
+                query.SetHasRecurveCriteria(query.HasRecurveCriteria || queryValue.HasRecurveCriteria);
+            }
+            else
+            {
+                switch (criteria.Operator)
+                {
+                    case CriteriaOperator.Equal:
+                    case CriteriaOperator.In:
+                        query.equalCriteriaList.Add(criteria);
+                        break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// add queryInfo query item handler
+        /// </summary>
+        /// <param name="queryItem"></param>
+        static void AddQueryInfoQueryItemHandler(QueryInfo query, IQueryItem queryItem)
+        {
+            QueryInfo valueQuery = queryItem as QueryInfo;
+            query.SetHasSubQuery(query.HasSubQuery || valueQuery.HasSubQuery);
+            query.SetHasJoin(query.HasJoin || valueQuery.HasJoin);
+            query.SetHasRecurveCriteria(query.HasRecurveCriteria || valueQuery.HasRecurveCriteria);
+            if (!query.HasSubQuery)
+            {
+                query.equalCriteriaList.AddRange(valueQuery.equalCriteriaList);
+            }
         }
 
         /// <summary>

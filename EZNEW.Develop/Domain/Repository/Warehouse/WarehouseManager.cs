@@ -107,7 +107,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// <returns></returns>
         public static async Task SaveAsync<ET>(params ET[] datas) where ET : BaseEntity<ET>
         {
-            if (datas == null)
+            if (datas.IsNullOrEmpty())
             {
                 return;
             }

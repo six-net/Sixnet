@@ -21,6 +21,11 @@ namespace EZNEW.Develop.Command
         /// </summary>
         public static Func<ICommand, Task<List<ICommandEngine>>> GetCommandEnginesAsync { get; set; }
 
+        /// <summary>
+        /// allow none command engine
+        /// </summary>
+        public static bool AllowNoneCommandEngine { get; set; } = false;
+
         #region execute
 
         /// <summary>
@@ -53,6 +58,25 @@ namespace EZNEW.Develop.Command
             foreach (var engineGroup in cmdGroupEngines)
             {
                 result += await engineGroup.Value.Item1.ExecuteAsync(engineGroup.Value.Item2.ToArray()).ConfigureAwait(false);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// execute command
+        /// </summary>
+        /// <param name="commands">commands</param>
+        /// <returns></returns>
+        internal static async Task<int> ExecuteAsync(IEnumerable<Tuple<ICommandEngine, List<ICommand>>> commands)
+        {
+            if (commands.IsNullOrEmpty())
+            {
+                return 0;
+            }
+            int result = 0;
+            foreach (var cmdItem in commands)
+            {
+                result += await cmdItem.Item1.ExecuteAsync(cmdItem.Item2.ToArray()).ConfigureAwait(false);
             }
             return result;
         }
@@ -381,6 +405,37 @@ namespace EZNEW.Develop.Command
                 }
             }
             return cmdEngineDict;
+        }
+
+        /// <summary>
+        /// get command engine
+        /// </summary>
+        /// <param name="command">command</param>
+        /// <returns></returns>
+        internal static List<ICommandEngine> GetCommandEngines(ICommand command)
+        {
+            if (command == null)
+            {
+                return new List<ICommandEngine>(0);
+            }
+            List<ICommandEngine> commandEngines = null;
+            if (GetCommandEnginesAsync == null)
+            {
+                var defaultCmdEngine = ContainerManager.Resolve<ICommandEngine>();
+                if (defaultCmdEngine != null)
+                {
+                    commandEngines = new List<ICommandEngine>(1) { defaultCmdEngine };
+                }
+            }
+            else
+            {
+                commandEngines = GetCommandEnginesAsync(command).Result;
+            }
+            if (!AllowNoneCommandEngine && commandEngines.IsNullOrEmpty())
+            {
+                throw new EZNEWException("didn't set any command engines");
+            }
+            return commandEngines ?? new List<ICommandEngine>(0);
         }
 
         #endregion

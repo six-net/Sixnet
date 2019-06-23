@@ -39,14 +39,7 @@ namespace EZNEW.Develop.CQuery
             {
                 return;
             }
-            if (queryModelEntityRelations.ContainsKey(typeGuid))
-            {
-                queryModelEntityRelations[typeGuid] = entityType;
-            }
-            else
-            {
-                queryModelEntityRelations.Add(typeGuid, entityType);
-            }
+            queryModelEntityRelations[typeGuid] = entityType;
         }
 
         /// <summary>

@@ -572,14 +572,38 @@ namespace EZNEW.Develop.Entity
         /// </summary>
         /// <param name="type">entity type</param>
         /// <returns></returns>
-        public static List<EntityField> GetEntityQueryFields(Type type)
+        public static List<EntityField> GetEntityQueryFields(Type type, IEnumerable<string> queryPropertyNames = null, bool forcePrimaryKey = false, bool forceVersionKey = false)
         {
-            if (type == null)
+            var entityConfig = GetEntityConfig(type);
+            var allQueryFields = entityConfig?.QueryFields;
+            if (allQueryFields.IsNullOrEmpty())
             {
                 return new List<EntityField>(0);
             }
-            var entityConfig = GetEntityConfig(type);
-            return entityConfig?.QueryFields ?? new List<EntityField>(0);
+            if (!queryPropertyNames.IsNullOrEmpty())
+            {
+                if (forcePrimaryKey)
+                {
+                    var primaryKeys = GetPrimaryKeys(type)?.Select(c => c.PropertyName);
+                    if (!primaryKeys.IsNullOrEmpty())
+                    {
+                        queryPropertyNames = queryPropertyNames.Union(primaryKeys);
+                    }
+                }
+                if (forceVersionKey)
+                {
+                    var versionKey = GetVersionField(type);
+                    if (!string.IsNullOrWhiteSpace(versionKey))
+                    {
+                        queryPropertyNames = queryPropertyNames.Union(new List<string>(1) { versionKey });
+                    }
+                }
+            }
+            if (!queryPropertyNames.IsNullOrEmpty())
+            {
+                allQueryFields = allQueryFields.Intersect(queryPropertyNames.Select<string, EntityField>(c => c)).ToList();
+            }
+            return allQueryFields;
         }
 
         /// <summary>
@@ -706,6 +730,33 @@ namespace EZNEW.Develop.Entity
         public static List<EntityField> GetPrimaryKeys<ET>()
         {
             return GetPrimaryKeys(typeof(ET));
+        }
+
+        /// <summary>
+        /// property is primary key
+        /// </summary>
+        /// <typeparam name="ET">entity type</typeparam>
+        /// <param name="propertyName">property name</param>
+        /// <returns></returns>
+        public static bool IsPrimaryKey<ET>(string propertyName)
+        {
+            return IsPrimaryKey(typeof(ET), propertyName);
+        }
+
+        /// <summary>
+        /// property is primary key
+        /// </summary>
+        /// <param name="type">entity type</param>
+        /// <param name="propertyName">property name</param>
+        /// <returns></returns>
+        public static bool IsPrimaryKey(Type type, string propertyName)
+        {
+            if (type == null || string.IsNullOrWhiteSpace(propertyName))
+            {
+                return false;
+            }
+            var primaryKeys = GetPrimaryKeys(type);
+            return primaryKeys?.Exists(r => r == propertyName) ?? false;
         }
 
         #endregion

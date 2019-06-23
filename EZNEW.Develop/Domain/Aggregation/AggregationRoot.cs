@@ -25,6 +25,11 @@ namespace EZNEW.Develop.Domain.Aggregation
     [Serializable]
     public abstract class AggregationRoot<T> : IAggregationRoot<T> where T : AggregationRoot<T>
     {
+        static AggregationRoot()
+        {
+            AggregationManager.ConfigAggregationConfig<T>();
+        }
+
         #region fields
 
         /// <summary>
@@ -119,7 +124,8 @@ namespace EZNEW.Develop.Domain.Aggregation
         {
             get
             {
-                return repository.GetLifeSource(this) == DataLifeSource.New;
+                var isVirtual = AggregationManager.IsVirtualAggregation(GetType());
+                return isVirtual || repository.GetLifeSource(this) == DataLifeSource.New;
             }
         }
 

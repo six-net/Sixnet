@@ -76,11 +76,6 @@ namespace EZNEW.Develop.Command
         List<string> Fields { get; set; }
 
         /// <summary>
-        /// Verify Result Method
-        /// </summary>
-        Func<int, bool> VerifyResult { get; set; }
-
-        /// <summary>
         /// Success Callback
         /// </summary>
         event ExecuteCommandCallback SuccessCallbackAsync;
@@ -114,6 +109,11 @@ namespace EZNEW.Develop.Command
         /// entity type
         /// </summary>
         Type EntityType { get; set; }
+
+        /// <summary>
+        /// must return value on success
+        /// </summary>
+        bool MustReturnValueOnSuccess { get; set; }
 
         #endregion
 

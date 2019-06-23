@@ -16,11 +16,6 @@ namespace EZNEW.Develop.Domain.Repository
 {
     public abstract class DefaultAggregationRootRepository<DT> : BaseAggregationRepository<DT> where DT : IAggregationRoot<DT>
     {
-        public DefaultAggregationRootRepository()
-        {
-            BindEvent();
-        }
-
         #region Impl Methods
 
         /// <summary>
@@ -40,7 +35,7 @@ namespace EZNEW.Develop.Domain.Repository
         {
             #region Verify Parameters
 
-            if (objDatas == null || objDatas.Length <= 0)
+            if (objDatas.IsNullOrEmpty())
             {
                 throw new Exception("objDatas is null or empty");
             }
@@ -391,14 +386,6 @@ namespace EZNEW.Develop.Domain.Repository
             return await AvgValueAsync<VT>(query).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Bind Event
-        /// </summary>
-        protected virtual void BindEvent()
-        {
-
-        }
-
         #endregion
 
         #region Functions
@@ -509,6 +496,10 @@ namespace EZNEW.Develop.Domain.Repository
             }
             foreach (var data in datas)
             {
+                if (data == null)
+                {
+                    continue;
+                }
                 if (batchReturn)
                 {
                     data.CloseLazyMemberLoad();

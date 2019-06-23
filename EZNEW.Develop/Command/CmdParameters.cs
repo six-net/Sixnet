@@ -1,4 +1,6 @@
-﻿using System;
+﻿using EZNEW.Develop.Command.Modify;
+using EZNEW.Framework.Extension;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -15,7 +17,7 @@ namespace EZNEW.Develop.Command
         /// <summary>
         /// parameters
         /// </summary>
-        public Dictionary<string, ParameterItem> Parameters { get; } = new Dictionary<string, ParameterItem>();
+        public Dictionary<string, ParameterItem> Parameters { get; private set; } = new Dictionary<string, ParameterItem>();
 
         /// <summary>
         /// add parameter
@@ -29,7 +31,7 @@ namespace EZNEW.Develop.Command
         /// <param name="scale">scale</param>
         public void Add(string name, object value = null, DbType? dbType = null, ParameterDirection? direction = null, int? size = null, byte? precision = null, byte? scale = null)
         {
-            Parameters[name] = new ParameterItem()
+            var item = new ParameterItem()
             {
                 Name = name,
                 Value = value,
@@ -39,6 +41,146 @@ namespace EZNEW.Develop.Command
                 Precision = precision,
                 Scale = scale
             };
+            Add(item);
+        }
+
+        /// <summary>
+        /// add parameter
+        /// </summary>
+        /// <param name="parameter"></param>
+        public void Add(ParameterItem parameter)
+        {
+            if (parameter == null)
+            {
+                return;
+            }
+            if (Parameters.ContainsKey(parameter.Name))
+            {
+                Parameters[parameter.Name] = parameter;
+            }
+            else
+            {
+                Parameters.Add(parameter.Name, parameter);
+            }
+        }
+
+        /// <summary>
+        /// add parameters
+        /// </summary>
+        /// <param name="parameters">parameters</param>
+        public void Add(IEnumerable<KeyValuePair<string, object>> parameters)
+        {
+            if (parameters == null)
+            {
+                return;
+            }
+            foreach (var parameter in parameters)
+            {
+                Add(parameter.Key, parameter.Value);
+            }
+        }
+
+        /// <summary>
+        /// add parameters
+        /// </summary>
+        /// <param name="parameters">parameters</param>
+        public void Add(IEnumerable<KeyValuePair<string, string>> parameters)
+        {
+            if (parameters == null)
+            {
+                return;
+            }
+            foreach (var parameter in parameters)
+            {
+                Add(parameter.Key, parameter.Value);
+            }
+        }
+
+        /// <summary>
+        /// add parameters
+        /// </summary>
+        /// <param name="parameters">parameters</param>
+        public void Add(IEnumerable<KeyValuePair<string, IModifyValue>> parameters)
+        {
+            if (parameters == null)
+            {
+                return;
+            }
+            foreach (var parameter in parameters)
+            {
+                Add(parameter.Key, parameter.Value);
+            }
+        }
+
+        /// <summary>
+        /// union parameters
+        /// </summary>
+        /// <param name="parameters"></param>
+        public CmdParameters Union(params CmdParameters[] parameters)
+        {
+            if (parameters.IsNullOrEmpty())
+            {
+                return this;
+            }
+            foreach (var cmdParameter in parameters)
+            {
+                if (cmdParameter.Parameters.IsNullOrEmpty())
+                {
+                    continue;
+                }
+                foreach (var para in cmdParameter.Parameters)
+                {
+                    Add(para.Value);
+                }
+            }
+            return this;
+        }
+
+        /// <summary>
+        /// get parameter value
+        /// </summary>
+        /// <param name="parameterName">parameter name</param>
+        /// <returns></returns>
+        public object GetParameterValue(string parameterName)
+        {
+            if (string.IsNullOrWhiteSpace(parameterName))
+            {
+                return null;
+            }
+            Parameters.TryGetValue(parameterName, out var item);
+            return item?.Value;
+        }
+
+        /// <summary>
+        /// parameter rename
+        /// </summary>
+        /// <param name="originParameterName">origin name</param>
+        /// <param name="newParameterName">new name</param>
+        public void Rename(string originParameterName, string newParameterName)
+        {
+            if (string.IsNullOrWhiteSpace(originParameterName) || string.IsNullOrWhiteSpace(newParameterName))
+            {
+                return;
+            }
+            if (Parameters.TryGetValue(originParameterName, out var parameter) && parameter != null)
+            {
+                Parameters.Remove(originParameterName);
+                parameter.Name = newParameterName;
+                Parameters.Add(newParameterName, parameter);
+            }
+        }
+
+        /// <summary>
+        /// modify value
+        /// </summary>
+        /// <param name="parameterName">parameter name</param>
+        /// <param name="newValue">new value</param>
+        public void ModifyValue(string parameterName, object newValue)
+        {
+            if (Parameters.TryGetValue(parameterName, out var item) && item != null)
+            {
+                item.Value = newValue;
+            }
         }
     }
 

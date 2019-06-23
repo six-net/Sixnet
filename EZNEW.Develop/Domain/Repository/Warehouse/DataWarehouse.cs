@@ -67,7 +67,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
             {
                 throw IdentityValueIsNullOrEmptyException();
             }
-            if (Datas?.ContainsKey(identityValue) ?? false)
+            if (Datas.ContainsKey(identityValue))
             {
                 return null;
             }
@@ -132,7 +132,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
             {
                 throw IdentityValueIsNullOrEmptyException();
             }
-            if (Datas?.ContainsKey(identityValue) ?? false)
+            if (Datas.ContainsKey(identityValue))
             {
                 return null;
             }

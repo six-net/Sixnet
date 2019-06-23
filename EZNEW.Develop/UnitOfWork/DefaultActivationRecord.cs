@@ -94,6 +94,14 @@ namespace EZNEW.Develop.UnitOfWork
         /// </summary>
         public bool IsObsolete { get; private set; }
 
+        /// <summary>
+        /// record identity
+        /// </summary>
+        public string RecordIdentity
+        {
+            get; private set;
+        }
+
         private DefaultActivationRecord()
         { }
 
@@ -104,13 +112,24 @@ namespace EZNEW.Develop.UnitOfWork
         /// <returns></returns>
         public static DefaultActivationRecord<ET, DAI> CreateRecord(ActivationOperation operation, string identityValue)
         {
-            return new DefaultActivationRecord<ET, DAI>()
+            var record = new DefaultActivationRecord<ET, DAI>()
             {
                 Operation = operation,
                 IdentityValue = identityValue,
                 DataAccessService = typeof(DAI),
                 EntityType = typeof(ET)
             };
+            switch (operation)
+            {
+                case ActivationOperation.SaveObject:
+                case ActivationOperation.RemoveByObject:
+                    record.RecordIdentity =string.Format("{0}_{1}",typeof(ET).GUID,identityValue);
+                    break;
+                default:
+                    record.RecordIdentity = Guid.NewGuid().ToString();
+                    break;
+            }
+            return record;
         }
 
         /// <summary>
@@ -222,41 +241,25 @@ namespace EZNEW.Develop.UnitOfWork
         /// get execute commands
         /// </summary>
         /// <returns></returns>
-        public List<ICommand> GetExecuteCommands()
+        public ICommand GetExecuteCommand()
         {
-            List<ICommand> commands = new List<ICommand>();
+            ICommand command = null;
             switch (Operation)
             {
                 case ActivationOperation.SaveObject:
-                    var saveCmd = GetSaveObjectCommand();
-                    if (saveCmd != null)
-                    {
-                        commands.Add(saveCmd);
-                    }
+                    command = GetSaveObjectCommand();
                     break;
                 case ActivationOperation.RemoveByObject:
-                    var delCmd = GetRemoveObjectCommand();
-                    if (delCmd != null)
-                    {
-                        commands.Add(delCmd);
-                    }
+                    command = GetRemoveObjectCommand();
                     break;
                 case ActivationOperation.RemoveByCondition:
-                    var delQueryCmd = GetRemoveConditionCommand();
-                    if (delQueryCmd != null)
-                    {
-                        commands.Add(delQueryCmd);
-                    }
+                    command = GetRemoveConditionCommand();
                     break;
                 case ActivationOperation.ModifyByExpression:
-                    var modifyCmd = GetModifyExpressionCommand();
-                    if (modifyCmd != null)
-                    {
-                        commands.Add(modifyCmd);
-                    }
+                    command = GetModifyExpressionCommand();
                     break;
             }
-            return commands;
+            return command;
         }
 
         /// <summary>

@@ -32,11 +32,11 @@ namespace EZNEW.Develop.UnitOfWork
         /// <summary>
         /// executed success or empty command
         /// </summary>
-        public bool NoneCommandOrSuccess
+        public bool EmptyResultOrSuccess
         {
             get
             {
-                return CommitCommandCount-AllowNoneResultCommandCount <= 0 || ExecutedSuccess;
+                return CommitCommandCount - AllowEmptyResultCommandCount <= 0 || ExecutedSuccess;
             }
         }
 
@@ -55,9 +55,9 @@ namespace EZNEW.Develop.UnitOfWork
         /// allow none result command count
         /// </summary>
         /// <returns></returns>
-        public int AllowNoneResultCommandCount
+        public int AllowEmptyResultCommandCount
         {
-            get;set;
+            get; set;
         }
 
         #endregion

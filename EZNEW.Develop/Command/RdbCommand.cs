@@ -49,11 +49,6 @@ namespace EZNEW.Develop.Command
         public ExecuteCommandResult CommandResultType { get; set; } = ExecuteCommandResult.ExecuteRows;
 
         /// <summary>
-        /// verify result method
-        /// </summary>
-        public Func<int, bool> VerifyResult { get; set; }
-
-        /// <summary>
         /// object name
         /// </summary>
         public string ObjectName { get; set; } = string.Empty;
@@ -139,6 +134,14 @@ namespace EZNEW.Develop.Command
         /// </summary>
         public Type EntityType { get; set; }
 
+        /// <summary>
+        /// must return value on success
+        /// </summary>
+        public bool MustReturnValueOnSuccess
+        {
+            get; set;
+        }
+
         #endregion
 
         #region static methods
@@ -155,7 +158,7 @@ namespace EZNEW.Develop.Command
         {
             return new RdbCommand()
             {
-                Id = WorkFactory.Current?.GetRecordId() ?? DateTime.Now.Ticks,
+                Id = WorkFactory.Current?.GetCommandId() ?? DateTime.Now.Ticks,
                 EntityType = typeof(T),
                 Operate = operate,
                 Parameters = parameters,
@@ -188,17 +191,19 @@ namespace EZNEW.Develop.Command
         {
             if (success)
             {
-                if (SuccessCallbackAsync != null)
+                if (SuccessCallbackAsync == null)
                 {
-                    await SuccessCallbackAsync(CallbackRequest).ConfigureAwait(false);
+                    return;
                 }
+                await SuccessCallbackAsync(CallbackRequest).ConfigureAwait(false);
             }
             else
             {
-                if (FailedCallbackAsync != null)
+                if (FailedCallbackAsync == null)
                 {
-                    await FailedCallbackAsync(CallbackRequest).ConfigureAwait(false);
+                    return;
                 }
+                await FailedCallbackAsync(CallbackRequest).ConfigureAwait(false);
             }
         }
 
@@ -217,11 +222,7 @@ namespace EZNEW.Develop.Command
         /// <returns></returns>
         public async Task<bool> ExecuteBeforeAsync()
         {
-            if (BeforeExecuteAsync != null)
-            {
-                return await BeforeExecuteAsync(BeforeRequest).ConfigureAwait(false);
-            }
-            return true;
+            return BeforeExecuteAsync == null ? true : await BeforeExecuteAsync(BeforeRequest).ConfigureAwait(false);
         }
 
         #endregion

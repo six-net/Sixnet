@@ -11,11 +11,12 @@ namespace EZNEW.Develop.UnitOfWork
     {
         private EmptyActivationRecord()
         { }
-         
+
         public int Id { get; set; }
         public IActivationRecord ParentRecord { get; set; }
         public ActivationOperation Operation { get; set; }
         public string IdentityValue { get; set; }
+        public string RecordIdentity { get { return string.Empty; } }
         public IQuery Query { get; set; }
         public IModify ModifyExpression { get; set; }
         public bool IsObsolete => true;
@@ -24,9 +25,9 @@ namespace EZNEW.Develop.UnitOfWork
         {
         }
 
-        public List<ICommand> GetExecuteCommands()
+        public ICommand GetExecuteCommand()
         {
-            return new List<ICommand>(0);
+            return null;
         }
 
         public List<IActivationRecord> GetFollowRecords()

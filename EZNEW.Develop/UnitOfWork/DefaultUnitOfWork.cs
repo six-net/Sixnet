@@ -16,11 +16,18 @@ namespace EZNEW.Develop.UnitOfWork
     /// </summary>
     public class DefaultUnitOfWork : IUnitOfWork
     {
-        List<ICommand> commandList = new List<ICommand>();//command list
+        //command list
+        List<ICommand> commandList = null;
+        Dictionary<string, Tuple<ICommandEngine, List<ICommand>>> commandGroup = null;
+        int allowEmptyResultCommandCount = 0;
+
+        //records
         List<IActivationRecord> activationRecords = new List<IActivationRecord>();
-        ConcurrentDictionary<Guid, IDataWarehouse> repositoryWarehouses = new ConcurrentDictionary<Guid, IDataWarehouse>();//data warehouse
-        int commandCounter = 0;
-        int recordCounter = 0;
+        Dictionary<int, IActivationRecord> activationRecordValueCollection = new Dictionary<int, IActivationRecord>();
+        Dictionary<string, int> activationRecordCollection = new Dictionary<string, int>();
+        Dictionary<Guid, IDataWarehouse> repositoryWarehouses = new Dictionary<Guid, IDataWarehouse>();//data warehouse
+        int commandCounter = 1;
+        int recordCounter = 1;
 
         /// <summary>
         /// commit success callback event
@@ -84,18 +91,16 @@ namespace EZNEW.Develop.UnitOfWork
         /// resolve activation record
         /// </summary>
         /// <param name="records">records</param>
-        List<IActivationRecord> ResolveActivationRecord()
+        void ResolveActivationRecord()
         {
-            var records = new List<IActivationRecord>();
             foreach (var record in activationRecords)
             {
                 if (record == null)
                 {
                     continue;
                 }
-                ResolveSingleActivationRecord(record, ref records);
+                ResolveSingleActivationRecord(record);
             }
-            return records;
         }
 
         /// <summary>
@@ -103,7 +108,7 @@ namespace EZNEW.Develop.UnitOfWork
         /// </summary>
         /// <param name="record"></param>
         /// <param name="records"></param>
-        void ResolveSingleActivationRecord(IActivationRecord record, ref List<IActivationRecord> records)
+        void ResolveSingleActivationRecord(IActivationRecord record)
         {
             if (record == null)
             {
@@ -117,7 +122,18 @@ namespace EZNEW.Develop.UnitOfWork
                     break;
                 default:
                     record.Id = GetRecordId();
-                    records.Add(record);
+                    if (activationRecordCollection.TryGetValue(record.RecordIdentity, out int maxRecordId))
+                    {
+                        if (record.Id >= maxRecordId)
+                        {
+                            activationRecordCollection[record.RecordIdentity] = record.Id;
+                        }
+                    }
+                    else
+                    {
+                        activationRecordCollection.Add(record.RecordIdentity, record.Id);
+                    }
+                    activationRecordValueCollection[record.Id] = record;
                     break;
             }
             if (followRecords.IsNullOrEmpty())
@@ -126,7 +142,7 @@ namespace EZNEW.Develop.UnitOfWork
             }
             foreach (var followRecord in followRecords)
             {
-                ResolveSingleActivationRecord(followRecord, ref records);
+                ResolveSingleActivationRecord(followRecord);
             }
         }
 
@@ -150,7 +166,7 @@ namespace EZNEW.Develop.UnitOfWork
                 //build commands
                 BuildCommand();
                 //object command
-                if (commandList.Count <= 0)
+                if (commandGroup.IsNullOrEmpty())
                 {
                     return new CommitResult()
                     {
@@ -158,21 +174,20 @@ namespace EZNEW.Develop.UnitOfWork
                         ExecutedDataCount = 0
                     };
                 }
-                var exectCommandList = commandList.Where(c => !c.IsObsolete).ToList();
-                bool beforeExecuteResult = await ExecuteCommandBeforeExecuteAsync(exectCommandList).ConfigureAwait(false);
+                bool beforeExecuteResult = await ExecuteCommandBeforeExecuteAsync().ConfigureAwait(false);
                 if (!beforeExecuteResult)
                 {
                     throw new Exception("any command BeforeExecute event return fail");
                 }
-                var result = await CommandExecuteManager.ExecuteAsync(exectCommandList).ConfigureAwait(false);
-                await ExecuteCommandCallbackAsync(exectCommandList, result > 0).ConfigureAwait(false);
+                var result = await CommandExecuteManager.ExecuteAsync(commandGroup.Values).ConfigureAwait(false);
                 var commitResult = new CommitResult()
                 {
-                    CommitCommandCount = exectCommandList.Count,
+                    CommitCommandCount = commandList.Count,
                     ExecutedDataCount = result,
-                    AllowNoneResultCommandCount = exectCommandList.Count(c => c.VerifyResult?.Invoke(0) ?? false)
+                    AllowEmptyResultCommandCount = allowEmptyResultCommandCount
                 };
-                if (commitResult.NoneCommandOrSuccess)
+                await ExecuteCommandCallbackAsync(commitResult.EmptyResultOrSuccess).ConfigureAwait(false);
+                if (commitResult.EmptyResultOrSuccess)
                 {
                     CommitSuccessCallbackEvent?.Invoke();
                     WorkFactory.InvokeCommitSuccessEvent();
@@ -194,21 +209,45 @@ namespace EZNEW.Develop.UnitOfWork
         /// </summary>
         void BuildCommand()
         {
-            var records = ResolveActivationRecord().OrderBy(r => r.Id);
-            foreach (var record in records)
+            ResolveActivationRecord();//resolve records
+            var recordIds = activationRecordCollection.Values.OrderBy(c => c);
+            commandGroup = new Dictionary<string, Tuple<ICommandEngine, List<ICommand>>>(activationRecordCollection.Count);
+            commandList = new List<ICommand>(activationRecordCollection.Count);
+            allowEmptyResultCommandCount = 0;
+            foreach (var recordId in recordIds)
             {
-                switch (record.Operation)
+                if (activationRecordValueCollection.TryGetValue(recordId, out var record) && record != null)
                 {
-                    case ActivationOperation.SaveObject:
-                    case ActivationOperation.RemoveByObject:
-                        if (activationRecords.Any(c => c.Id > record.Id && c.IdentityValue == record.IdentityValue))
+                    var command = record.GetExecuteCommand();
+                    if (command?.IsObsolete ?? true)
+                    {
+                        continue;
+                    }
+                    commandList.Add(command);
+                    if (command.MustReturnValueOnSuccess)
+                    {
+                        allowEmptyResultCommandCount += 1;
+                    }
+                    var commandEngines = CommandExecuteManager.GetCommandEngines(command);
+                    if (commandEngines.IsNullOrEmpty())
+                    {
+                        continue;
+                    }
+                    foreach (var engine in commandEngines)
+                    {
+                        if (engine == null)
                         {
                             continue;
                         }
-                        break;
+                        var engineKey = engine.IdentityKey;
+                        if (!commandGroup.TryGetValue(engineKey, out Tuple<ICommandEngine, List<ICommand>> engineValues))
+                        {
+                            engineValues = new Tuple<ICommandEngine, List<ICommand>>(engine, new List<ICommand>(activationRecordValueCollection.Count));
+                        }
+                        engineValues.Item2.Add(command);
+                        commandGroup[engineKey] = engineValues;
+                    }
                 }
-                var commands = record.GetExecuteCommands();
-                AddCommand(commands.ToArray());
             }
         }
 
@@ -237,25 +276,12 @@ namespace EZNEW.Develop.UnitOfWork
         public DataWarehouse<ET> GetWarehouse<ET>() where ET : BaseEntity<ET>
         {
             var entityTypeId = typeof(ET).GUID;
-            var warehouse = repositoryWarehouses.GetOrAdd(entityTypeId, new DataWarehouse<ET>());
-            return warehouse as DataWarehouse<ET>;
-        }
-
-        /// <summary>
-        /// save warehouse
-        /// </summary>
-        /// <param name="warehouse">warehouse</param>
-        public void SaveWarehouse<ET>(DataWarehouse<ET> warehouse) where ET : BaseEntity<ET>
-        {
-            if (warehouse == null)
+            if (!repositoryWarehouses.TryGetValue(entityTypeId, out var warehouse))
             {
-                return;
+                warehouse = new DataWarehouse<ET>();
+                repositoryWarehouses.Add(entityTypeId, warehouse);
             }
-            var entityTypeId = typeof(ET).GUID;
-            repositoryWarehouses.AddOrUpdate(entityTypeId, warehouse, (eid, ow) =>
-            {
-                return warehouse;
-            });
+            return warehouse as DataWarehouse<ET>;
         }
 
         /// <summary>
@@ -265,8 +291,10 @@ namespace EZNEW.Develop.UnitOfWork
         {
             commandCounter = 0;
             recordCounter = 0;
-            commandList.Clear();
-            activationRecords.Clear();
+            allowEmptyResultCommandCount = 0;
+            commandList?.Clear();
+            commandGroup?.Clear();
+            activationRecords?.Clear();
         }
 
         /// <summary>
@@ -275,21 +303,21 @@ namespace EZNEW.Develop.UnitOfWork
         public void Dispose()
         {
             CommitCompleted();
-            repositoryWarehouses.Clear();
+            repositoryWarehouses?.Clear();
         }
 
         /// <summary>
         /// Execute Command Before Execute
         /// </summary>
         /// <param name="cmds">command</param>
-        static async Task<bool> ExecuteCommandBeforeExecuteAsync(IEnumerable<ICommand> cmds)
+        async Task<bool> ExecuteCommandBeforeExecuteAsync()
         {
-            if (cmds == null)
+            if (commandList.IsNullOrEmpty())
             {
                 return false;
             }
             bool result = true;
-            foreach (var cmd in cmds)
+            foreach (var cmd in commandList)
             {
                 result = result && await cmd.ExecuteBeforeAsync().ConfigureAwait(false);
             }
@@ -300,13 +328,16 @@ namespace EZNEW.Develop.UnitOfWork
         /// Execute Command Callback
         /// </summary>
         /// <param name="cmds">commands</param>
-        static async Task ExecuteCommandCallbackAsync(IEnumerable<ICommand> cmds, bool success)
+        async Task ExecuteCommandCallbackAsync(bool success)
         {
-            foreach (var cmd in cmds)
+            if (commandList.IsNullOrEmpty())
+            {
+                return;
+            }
+            foreach (var cmd in commandList)
             {
                 await cmd.ExecuteCompleteAsync(success).ConfigureAwait(false);
             }
         }
-
     }
 }

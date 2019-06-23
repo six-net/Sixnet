@@ -206,7 +206,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// <returns></returns>
         List<string> GetNewQueryFields(IQuery newQuery)
         {
-            var newQueryFields = newQuery?.GetActuallyQueryFields(WarehouseData.GetType()) ?? new List<string>(0);
+            var newQueryFields = newQuery?.GetActuallyQueryFields(WarehouseData.GetType())?.Select(c => c.PropertyName) ?? new List<string>(0);
             var exceptFields = newQueryFields.Except(QueryFields).ToList();
             return exceptFields;
         }
@@ -346,7 +346,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
                 LifeSource = DataLifeSource.DataSource,
                 Operate = WarehouseDataOperate.None
             };
-            dataPackage.AddQueryFields(query?.GetActuallyQueryFields(data.GetType()));
+            dataPackage.AddQueryFields(query?.GetActuallyQueryFields(data.GetType())?.Select(c => c.PropertyName));
             return dataPackage;
         }
     }

@@ -71,12 +71,5 @@ namespace EZNEW.Develop.UnitOfWork
         /// </summary>
         /// <returns></returns>
         DataWarehouse<ET> GetWarehouse<ET>() where ET : BaseEntity<ET>;
-
-        /// <summary>
-        /// save warehouse
-        /// </summary>
-        /// <param name="entityType">entity type</param>
-        /// <param name="warehouse">warehouse</param>
-        void SaveWarehouse<ET>(DataWarehouse<ET> warehouse) where ET : BaseEntity<ET>;
     }
 }

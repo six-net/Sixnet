@@ -23,6 +23,11 @@ namespace EZNEW.Develop.UnitOfWork
         int Id { get; set; }
 
         /// <summary>
+        /// identity value
+        /// </summary>
+        string RecordIdentity { get; }
+
+        /// <summary>
         /// parent record
         /// </summary>
         IActivationRecord ParentRecord { get; set; }
@@ -70,7 +75,7 @@ namespace EZNEW.Develop.UnitOfWork
         /// get execute commands
         /// </summary>
         /// <returns></returns>
-        List<ICommand> GetExecuteCommands();
+        ICommand GetExecuteCommand();
 
         /// <summary>
         /// obsolete

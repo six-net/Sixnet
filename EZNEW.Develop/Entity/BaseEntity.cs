@@ -19,6 +19,9 @@ namespace EZNEW.Develop.Entity
     public abstract class BaseEntity<T> where T : BaseEntity<T>
     {
         protected Dictionary<string, dynamic> valueDict = new Dictionary<string, dynamic>();//field values
+        string identityValue = string.Empty;
+        bool loadedIdentityValue = false;
+        protected static Type entityType = typeof(T);
 
         static BaseEntity()
         {
@@ -111,12 +114,14 @@ namespace EZNEW.Develop.Entity
         /// <returns></returns>
         public virtual string GetIdentityValue()
         {
-            var primaryValues = GetPrimaryKeyValues();
-            if ((primaryValues?.Count ?? 0) < 1)
+            if (loadedIdentityValue)
             {
-                return Guid.NewGuid().ToString();
+                return identityValue;
             }
-            return string.Join("_", primaryValues.Values.OrderBy(c => c.ToString()).ToArray());
+            var primaryValues = GetPrimaryKeyValues();
+            identityValue = primaryValues.IsNullOrEmpty() ? Guid.NewGuid().ToString() : string.Join("_", primaryValues.Values.OrderBy(c => c?.ToString()??string.Empty).ToArray());
+            loadedIdentityValue = true;
+            return identityValue;
         }
 
         public override int GetHashCode()
@@ -283,6 +288,10 @@ namespace EZNEW.Develop.Entity
         public void SetPropertyValue(string propertyName, dynamic value)
         {
             IEnumerableExtension.SetValue(valueDict, propertyName, value);
+            if (loadedIdentityValue && EntityManager.IsPrimaryKey(entityType, propertyName))
+            {
+                loadedIdentityValue = false;
+            }
         }
 
         /// <summary>

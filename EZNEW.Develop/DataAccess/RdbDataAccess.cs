@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using EZNEW.Develop.Command;
 using EZNEW.Develop.Command.Modify;
 using EZNEW.Framework.Extension;
+using EZNEW.Develop.UnitOfWork;
 
 namespace EZNEW.Develop.DataAccess
 {
@@ -41,8 +42,7 @@ namespace EZNEW.Develop.DataAccess
             InitRefreshDateFieldValue(obj);//init refresh date value
             var cmd = RdbCommand.CreateNewCommand<T>(OperateType.Insert, obj);
             SetCommand(cmd, obj.GetAllPropertyValues());
-            cmd.VerifyResult = a => a > 0;
-            cmd.Fields = GetEditFields();
+            cmd.MustReturnValueOnSuccess = true;
             return await Task.FromResult(cmd).ConfigureAwait(false);
         }
 
@@ -127,7 +127,6 @@ namespace EZNEW.Develop.DataAccess
             {
                 return null;
             }
-
             var entityType = typeof(T);
 
             #region control version
@@ -234,11 +233,7 @@ namespace EZNEW.Develop.DataAccess
             cmd.Parameters = parameters;
             if (query.VerifyResult != null)
             {
-                cmd.VerifyResult = query.VerifyResult;
-            }
-            else
-            {
-                cmd.VerifyResult = r => r > 0;
+                cmd.MustReturnValueOnSuccess = query.VerifyResult(0);
             }
             cmd.Query = query;
             return await Task.FromResult(cmd);
@@ -289,11 +284,7 @@ namespace EZNEW.Develop.DataAccess
             SetCommand(cmd, null);
             if (query.VerifyResult != null)
             {
-                cmd.VerifyResult = query.VerifyResult;
-            }
-            else
-            {
-                cmd.VerifyResult = r => r >= 0;
+                cmd.MustReturnValueOnSuccess = query.VerifyResult(0);
             }
             cmd.Query = query;
             return await Task.FromResult(cmd).ConfigureAwait(false);
@@ -323,8 +314,8 @@ namespace EZNEW.Develop.DataAccess
             ICommand cmd = RdbCommand.CreateNewCommand<T>(OperateType.Query);
             SetCommand(cmd, null);
             cmd.Query = query;
-            cmd.Fields = GetQueryObjectFields(query);
-            T obj = await UnitOfWork.WorkFactory.QuerySingleAsync<T>(cmd).ConfigureAwait(false);
+            //cmd.Fields = GetQueryObjectFields(query);
+            T obj = await WorkFactory.QuerySingleAsync<T>(cmd).ConfigureAwait(false);
             return obj;
         }
 
@@ -346,11 +337,7 @@ namespace EZNEW.Develop.DataAccess
         public async Task<List<T>> GetListAsync(IQuery query)
         {
             List<T> objList = await QueryListAsync(query).ConfigureAwait(false);
-            if (objList == null || objList.Count <= 0)
-            {
-                return new List<T>(0);
-            }
-            return objList;
+            return objList ?? new List<T>(0);
         }
 
         /// <summary>
@@ -363,8 +350,8 @@ namespace EZNEW.Develop.DataAccess
             ICommand cmd = RdbCommand.CreateNewCommand<T>(OperateType.Query);
             SetCommand(cmd, null);
             cmd.Query = query;
-            cmd.Fields = GetQueryObjectFields(query);
-            var objList = (await UnitOfWork.WorkFactory.QueryAsync<T>(cmd).ConfigureAwait(false)).ToList();
+            //cmd.Fields = GetQueryObjectFields(query);
+            var objList = (await WorkFactory.QueryAsync<T>(cmd).ConfigureAwait(false)).ToList();
             return objList;
         }
 
@@ -388,8 +375,8 @@ namespace EZNEW.Develop.DataAccess
             ICommand cmd = RdbCommand.CreateNewCommand<T>(OperateType.Query);
             SetCommand(cmd, null);
             cmd.Query = query;
-            cmd.Fields = GetQueryObjectFields(query);
-            var objPaging = await UnitOfWork.WorkFactory.QueryPagingAsync<T>(cmd).ConfigureAwait(false);
+            //cmd.Fields = GetQueryObjectFields(query);
+            var objPaging = await WorkFactory.QueryPagingAsync<T>(cmd).ConfigureAwait(false);
             return objPaging;
         }
 
@@ -412,11 +399,11 @@ namespace EZNEW.Develop.DataAccess
         {
             var cmd = RdbCommand.CreateNewCommand<T>(OperateType.Exist);
             SetCommand(cmd, null);
-            cmd.VerifyResult = r => r > 0;
+            cmd.MustReturnValueOnSuccess = true;
             cmd.Query = query;
-            cmd.Fields = GetQueryFields();
+            //cmd.Fields = GetQueryFields();
             cmd.CommandResultType = ExecuteCommandResult.ExecuteScalar;
-            return await UnitOfWork.WorkFactory.QueryAsync(cmd).ConfigureAwait(false);
+            return await WorkFactory.QueryAsync(cmd).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -538,53 +525,8 @@ namespace EZNEW.Develop.DataAccess
             ICommand cmd = RdbCommand.CreateNewCommand<T>(funcType);
             SetCommand(cmd, null);
             cmd.Query = query;
-            cmd.Fields = GetQueryObjectFields(query, false, false);
-            DT obj = await UnitOfWork.WorkFactory.QuerySingleAsync<DT>(cmd).ConfigureAwait(false);
+            DT obj = await WorkFactory.QuerySingleAsync<DT>(cmd).ConfigureAwait(false);
             return obj;
-        }
-
-        #endregion
-
-        #region get edit fields
-
-        /// <summary>
-        /// get edit fields
-        /// </summary>
-        /// <returns></returns>
-        protected virtual List<string> GetEditFields()
-        {
-            return BaseEntity<T>.GetEditFields().Select<EntityField, string>(c => c).ToList();
-        }
-
-        #endregion
-
-        #region get query fields
-
-        /// <summary>
-        /// get query fields
-        /// </summary>
-        /// <returns></returns>
-        protected virtual List<string> GetQueryFields()
-        {
-            return BaseEntity<T>.GetQueryFields().Select<EntityField, string>(c => c).ToList();
-        }
-
-        #endregion
-
-        #region get fields by query object
-
-        /// <summary>
-        /// get fields by query object
-        /// </summary>
-        /// <param name="query">query object</param>
-        /// <returns></returns>
-        protected List<string> GetQueryObjectFields(IQuery query, bool forcePrimaryKey = true, bool forceVersion = true)
-        {
-            if (query == null)
-            {
-                return GetQueryFields();
-            }
-            return query.GetActuallyQueryFields<T>(forcePrimaryKey, forceVersion);
         }
 
         #endregion
@@ -602,19 +544,32 @@ namespace EZNEW.Develop.DataAccess
             {
                 return;
             }
-            Type type = typeof(T);
+            var type = typeof(T);
+
+            //set object name
             cmd.ObjectName = EntityManager.GetEntityObjectName(type);
 
-            #region primary keys
+            #region set primary key and values
 
-            var primaryKeys = EntityManager.GetPrimaryKeys(type);
-            if (!primaryKeys.IsNullOrEmpty() && !values.IsNullOrEmpty())
+            var primaryFields = EntityManager.GetPrimaryKeys(type);
+            if (primaryFields.IsNullOrEmpty())
             {
-                var pkNames = primaryKeys.Select<EntityField, string>(c => c);
-                cmd.ObjectKeys = pkNames.ToList();
-                Dictionary<string, dynamic> primaryValues = values.Where(c => pkNames.Contains(c.Key)).ToDictionary(c => c.Key, c => c.Value);
-                cmd.ObjectKeyValues = primaryValues;
+                return;
             }
+            List<string> primaryKeys = new List<string>(primaryFields.Count);
+            Dictionary<string, dynamic> primaryValues = new Dictionary<string, dynamic>(primaryFields.Count);
+            foreach (var field in primaryFields)
+            {
+                string primaryKey = field.PropertyName;
+                primaryKeys.Add(primaryKey);
+                dynamic value = null;
+                if (values?.TryGetValue(primaryKey, out value) ?? false)
+                {
+                    primaryValues.Add(primaryKey, value);
+                }
+            }
+            cmd.ObjectKeys = primaryKeys;
+            cmd.ObjectKeyValues = primaryValues;
 
             #endregion
         }

@@ -73,11 +73,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// <param name="data">objects</param>
         protected override async Task<IActivationRecord> ExecuteSaveAsync(DT data)
         {
-            if (data == null)
-            {
-                return null;
-            }
-            var entity = data.MapTo<ET>();
+            var entity = data?.MapTo<ET>();
             return await SaveEntityAsync(entity).ConfigureAwait(false);
         }
 
@@ -266,7 +262,7 @@ namespace EZNEW.Develop.Domain.Repository
             {
                 WorkFactory.RegisterActivationRecord(record);
             }
-        } 
+        }
 
         #endregion
     }

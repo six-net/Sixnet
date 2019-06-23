@@ -19,6 +19,14 @@ namespace EZNEW.Develop.CQuery.Translator
             get;
         }
 
+        /// <summary>
+        /// parameter sequence
+        /// </summary>
+        int ParameterSequence
+        {
+            get;set;
+        }
+
         #endregion
 
         #region Functions

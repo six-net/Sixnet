@@ -131,6 +131,21 @@ namespace EZNEW.Develop.CQuery
         }
 
         /// <summary>
+        /// has recurve criteria
+        /// </summary>
+        bool HasRecurveCriteria { get; }
+
+        /// <summary>
+        /// has join
+        /// </summary>
+        bool HasJoin { get; }
+
+        /// <summary>
+        /// complex query
+        /// </summary>
+        bool IsComplexQuery { get; }
+
+        /// <summary>
         /// Recurve Criteria
         /// </summary>
         RecurveCriteria RecurveCriteria
@@ -851,13 +866,13 @@ namespace EZNEW.Develop.CQuery
         /// get actually query fields
         /// </summary>
         /// <returns></returns>
-        List<string> GetActuallyQueryFields<ET>(bool forcePrimaryKey = true, bool forceVersion = true);
+        List<EntityField> GetActuallyQueryFields<ET>(bool forcePrimaryKey = true, bool forceVersion = true);
 
         /// <summary>
         /// get actually query fields
         /// </summary>
         /// <returns></returns>
-        List<string> GetActuallyQueryFields(Type entityType, bool forcePrimaryKey = true, bool forceVersion = true);
+        List<EntityField> GetActuallyQueryFields(Type entityType, bool forcePrimaryKey = true, bool forceVersion = true);
 
         #endregion
 
