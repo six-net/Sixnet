@@ -928,7 +928,7 @@ namespace EZNEW.Develop.CQuery
         /// </summary>
         /// <param name="keys">keys</param>
         /// <returns></returns>
-        List<Dictionary<string, dynamic>> GetKeysEqualValue(IEnumerable<string> keys);
+        Dictionary<string, List<dynamic>> GetKeysEqualValue(IEnumerable<string> keys);
 
         #endregion
 

@@ -129,112 +129,112 @@ namespace EZNEW.Develop.Entity
             return base.GetHashCode();
         }
 
-        /// <summary>
-        /// get primary keys with cache
-        /// </summary>
-        /// <returns></returns>
-        public string GetPrimaryCacheKey(bool includeObjectName = true)
-        {
-            List<EntityField> primaryKeys = EntityManager.GetPrimaryKeys(typeof(T));
-            return GenerateCacheKey(primaryKeys, includeObjectName);
-        }
+        ///// <summary>
+        ///// get primary keys with cache
+        ///// </summary>
+        ///// <returns></returns>
+        //public string GetPrimaryCacheKey(bool includeObjectName = true)
+        //{
+        //    List<EntityField> primaryKeys = EntityManager.GetPrimaryKeys(typeof(T));
+        //    return GenerateCacheKey(primaryKeys, includeObjectName);
+        //}
 
-        /// <summary>
-        /// get cache keys
-        /// </summary>
-        /// <typeparam name="T">data type</typeparam>
-        /// <param name="includeObjectName">whether include object name</param>
-        /// <param name="propertys"></param>
-        /// <returns></returns>
-        public string GetCacheKey(bool includeObjectName = true, params Expression<Func<T, dynamic>>[] propertys)
-        {
-            if (propertys == null)
-            {
-                return string.Empty;
-            }
-            return GetCacheKey(includeObjectName, propertys.Select(c => ExpressionHelper.GetExpressionPropertyName(c.Body)).ToArray());
-        }
+        ///// <summary>
+        ///// get cache keys
+        ///// </summary>
+        ///// <typeparam name="T">data type</typeparam>
+        ///// <param name="includeObjectName">whether include object name</param>
+        ///// <param name="propertys"></param>
+        ///// <returns></returns>
+        //public string GetCacheKey(bool includeObjectName = true, params Expression<Func<T, dynamic>>[] propertys)
+        //{
+        //    if (propertys == null)
+        //    {
+        //        return string.Empty;
+        //    }
+        //    return GetCacheKey(includeObjectName, propertys.Select(c => ExpressionHelper.GetExpressionPropertyName(c.Body)).ToArray());
+        //}
 
-        /// <summary>
-        /// get chache keys
-        /// </summary>
-        /// <param name="includeObjectName">whether include object name</param>
-        /// <param name="keys">cache keys</param>
-        /// <returns></returns>
-        public string GetCacheKey(bool includeObjectName = true, params string[] keys)
-        {
-            if (keys == null || keys.Length <= 0)
-            {
-                return string.Empty;
-            }
-            SortedSet<string> sortedKeys = new SortedSet<string>();
-            foreach (string key in keys)
-            {
-                sortedKeys.Add(key);
-            }
-            return GenerateCacheKey(keys.Select<string, EntityField>(c => c), includeObjectName);
-        }
+        ///// <summary>
+        ///// get chache keys
+        ///// </summary>
+        ///// <param name="includeObjectName">whether include object name</param>
+        ///// <param name="keys">cache keys</param>
+        ///// <returns></returns>
+        //public string GetCacheKey(bool includeObjectName = true, params string[] keys)
+        //{
+        //    if (keys == null || keys.Length <= 0)
+        //    {
+        //        return string.Empty;
+        //    }
+        //    SortedSet<string> sortedKeys = new SortedSet<string>();
+        //    foreach (string key in keys)
+        //    {
+        //        sortedKeys.Add(key);
+        //    }
+        //    return GenerateCacheKey(keys.Select<string, EntityField>(c => c), includeObjectName);
+        //}
 
-        /// <summary>
-        /// get cache keys
-        /// </summary>
-        /// <param name="keyAndValues">key and values</param>
-        /// <param name="includeObjectName">whether include object name</param>
-        /// <returns></returns>
-        public static string GetCacheKey(IDictionary<string, dynamic> keyAndValues, bool includeObjectName = true)
-        {
-            List<string> keys = new List<string>();
-            if (includeObjectName)
-            {
-                Type type = typeof(T);
-                string objectName = EntityManager.GetEntityObjectName(type);
-                if (!string.IsNullOrWhiteSpace(objectName))
-                {
-                    keys.Add(objectName);
-                }
-            }
-            if (keyAndValues != null && keyAndValues.Count > 0)
-            {
-                SortedDictionary<string, dynamic> sortedValues = new SortedDictionary<string, dynamic>();
-                foreach (var valItem in keyAndValues)
-                {
-                    sortedValues.Add(valItem.Key, valItem.Value);
-                }
-                foreach (var sortValItem in sortedValues)
-                {
-                    keys.Add(string.Format("{0}${1}", sortValItem.Key, sortValItem.Value));
-                }
-            }
-            return string.Join(":", keys);
-        }
+        ///// <summary>
+        ///// get cache keys
+        ///// </summary>
+        ///// <param name="keyAndValues">key and values</param>
+        ///// <param name="includeObjectName">whether include object name</param>
+        ///// <returns></returns>
+        //public static string GetCacheKey(IDictionary<string, dynamic> keyAndValues, bool includeObjectName = true)
+        //{
+        //    List<string> keys = new List<string>();
+        //    if (includeObjectName)
+        //    {
+        //        Type type = typeof(T);
+        //        string objectName = EntityManager.GetEntityObjectName(type);
+        //        if (!string.IsNullOrWhiteSpace(objectName))
+        //        {
+        //            keys.Add(objectName);
+        //        }
+        //    }
+        //    if (keyAndValues != null && keyAndValues.Count > 0)
+        //    {
+        //        SortedDictionary<string, dynamic> sortedValues = new SortedDictionary<string, dynamic>();
+        //        foreach (var valItem in keyAndValues)
+        //        {
+        //            sortedValues.Add(valItem.Key, valItem.Value);
+        //        }
+        //        foreach (var sortValItem in sortedValues)
+        //        {
+        //            keys.Add(string.Format("{0}${1}", sortValItem.Key, sortValItem.Value));
+        //        }
+        //    }
+        //    return string.Join(":", keys);
+        //}
 
-        /// <summary>
-        /// generate cache key
-        /// </summary>
-        /// <param name="keys">keys</param>
-        /// <param name="includeObjectName">whether include object name</param>
-        /// <returns></returns>
-        string GenerateCacheKey(IEnumerable<EntityField> keys, bool includeObjectName = true)
-        {
-            List<string> keyValues = new List<string>();
-            var type = typeof(T);
-            if (includeObjectName)
-            {
-                string objectName = EntityManager.GetEntityObjectName(type);
-                if (!string.IsNullOrWhiteSpace(objectName))
-                {
-                    keyValues.Add(objectName);
-                }
-            }
-            if (keys != null)
-            {
-                foreach (string key in keys)
-                {
-                    keyValues.Add(string.Format("{0}${1}", key, valueDict[key]));
-                }
-            }
-            return string.Join(":", keyValues);
-        }
+        ///// <summary>
+        ///// generate cache key
+        ///// </summary>
+        ///// <param name="keys">keys</param>
+        ///// <param name="includeObjectName">whether include object name</param>
+        ///// <returns></returns>
+        //string GenerateCacheKey(IEnumerable<EntityField> keys, bool includeObjectName = true)
+        //{
+        //    List<string> keyValues = new List<string>();
+        //    var type = typeof(T);
+        //    if (includeObjectName)
+        //    {
+        //        string objectName = EntityManager.GetEntityObjectName(type);
+        //        if (!string.IsNullOrWhiteSpace(objectName))
+        //        {
+        //            keyValues.Add(objectName);
+        //        }
+        //    }
+        //    if (keys != null)
+        //    {
+        //        foreach (string key in keys)
+        //        {
+        //            keyValues.Add(string.Format("{0}${1}", key, valueDict[key]));
+        //        }
+        //    }
+        //    return string.Join(":", keyValues);
+        //}
 
         /// <summary>
         /// get paging count

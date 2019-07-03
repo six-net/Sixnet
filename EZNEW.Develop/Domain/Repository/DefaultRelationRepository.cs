@@ -127,6 +127,9 @@ namespace EZNEW.Develop.Domain.Repository
         /// <param name="query">query</param>
         public sealed override async Task RemoveAsync(IQuery query)
         {
+            //query filter
+            query = GlobalQueryFilter(query);
+            query = RemoveQueryFilter(query);
             var record = await ExecuteRemoveAsync(query).ConfigureAwait(false);
             if (record == null)
             {
@@ -157,6 +160,11 @@ namespace EZNEW.Develop.Domain.Repository
         /// <param name="query">query</param>
         public sealed override void RemoveByFirst(IQuery query)
         {
+            //query filter
+            query = GlobalQueryFilter(query);
+            query = RemoveQueryFilter(query);
+            query = RemoveByFirstQueryFilter(query);
+
             var removeQuery = CreateQueryByFirst(query);
             Remove(removeQuery);
         }
@@ -182,6 +190,11 @@ namespace EZNEW.Develop.Domain.Repository
         /// <param name="query">query</param>
         public sealed override void RemoveBySecond(IQuery query)
         {
+            //query filter
+            query = GlobalQueryFilter(query);
+            query = RemoveQueryFilter(query);
+            query = RemoveBySecondQueryFilter(query);
+
             var removeQuery = CreateQueryBySecond(query);
             Remove(removeQuery);
         }
@@ -207,6 +220,8 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns></returns>
         public sealed override async Task<Tuple<First, Second>> GetAsync(IQuery query)
         {
+            query = GlobalQueryFilter(query);
+            query = GetDataQueryFilter(query);
             return await ExecuteGetAsync(query).ConfigureAwait(false);
         }
 
@@ -227,6 +242,8 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns></returns>
         public sealed override async Task<List<Tuple<First, Second>>> GetListAsync(IQuery query)
         {
+            query = GlobalQueryFilter(query);
+            query = GetDataQueryFilter(query);
             return await ExecuteGetListAsync(query).ConfigureAwait(false);
         }
 
@@ -247,6 +264,8 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns></returns>
         public sealed override async Task<IPaging<Tuple<First, Second>>> GetPagingAsync(IQuery query)
         {
+            query = GlobalQueryFilter(query);
+            query = GetDataQueryFilter(query);
             return await ExecuteGetPagingAsync(query).ConfigureAwait(false);
         }
 
@@ -551,6 +570,72 @@ namespace EZNEW.Develop.Domain.Repository
         /// <param name="entity">entity</param>
         /// <returns></returns>
         public abstract Tuple<First, Second> CreateRelationDataByEntity(ET entity);
+
+        #endregion
+
+        #region query filter
+
+        #region global query filter
+
+        /// <summary>
+        /// global query filter
+        /// </summary>
+        /// <param name="originQuery">origin query</param>
+        /// <returns></returns>
+        public virtual IQuery GlobalQueryFilter(IQuery originQuery)
+        {
+            return originQuery;
+        }
+
+        #endregion
+
+        #region remove query filter
+
+        /// <summary>
+        /// remove query filter
+        /// </summary>
+        /// <param name="originQuery">origin query</param>
+        /// <returns></returns>
+        public virtual IQuery RemoveQueryFilter(IQuery originQuery)
+        {
+            return originQuery;
+        }
+
+        /// <summary>
+        /// remove by first query filter
+        /// </summary>
+        /// <param name="originQuery">origin query</param>
+        /// <returns></returns>
+        public virtual IQuery RemoveByFirstQueryFilter(IQuery originQuery)
+        {
+            return originQuery;
+        }
+
+        /// <summary>
+        /// remove by second query filter
+        /// </summary>
+        /// <param name="originQuery">origin query</param>
+        /// <returns></returns>
+        public virtual IQuery RemoveBySecondQueryFilter(IQuery originQuery)
+        {
+            return originQuery;
+        }
+
+        #endregion
+
+        #region get data query filter
+
+        /// <summary>
+        /// get data query filter
+        /// </summary>
+        /// <param name="originQuery">origin query</param>
+        /// <returns></returns>
+        public virtual IQuery GetDataQueryFilter(IQuery originQuery)
+        {
+            return originQuery;
+        }
+
+        #endregion
 
         #endregion
     }

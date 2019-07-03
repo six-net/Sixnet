@@ -131,6 +131,9 @@ namespace EZNEW.Develop.Domain.Repository
         /// <param name="query">query model</param>
         public sealed override async Task RemoveAsync(IQuery query)
         {
+            //query filter
+            query = GlobalQueryFilter(query);
+            query = RemoveQueryFilter(query);
             var record = await ExecuteRemoveAsync(query).ConfigureAwait(false);
             if (record == null)
             {
@@ -157,6 +160,9 @@ namespace EZNEW.Develop.Domain.Repository
         /// <param name="query">query model</param>
         public sealed override async Task ModifyAsync(IModify expression, IQuery query)
         {
+            //query filter
+            query = GlobalQueryFilter(query);
+            query = ModifyQueryFilter(query);
             var record = await ExecuteModifyAsync(expression, query).ConfigureAwait(false);
             if (record == null)
             {
@@ -183,6 +189,9 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns>Object</returns>
         public sealed override async Task<DT> GetAsync(IQuery query)
         {
+            //query filter
+            query = GlobalQueryFilter(query);
+            query = GetDataQueryFilter(query);
             var data = await GetDataAsync(query).ConfigureAwait(false);
             var dataList = new List<DT>() { data };
             QueryCallback(query, false, dataList);
@@ -214,6 +223,9 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns>object list</returns>
         public sealed override async Task<List<DT>> GetListAsync(IQuery query)
         {
+            //query filter
+            query = GlobalQueryFilter(query);
+            query = GetDataQueryFilter(query);
             var datas = await GetDataListAsync(query).ConfigureAwait(false);
             QueryCallback(query, true, datas);
             RepositoryEventBus.PublishQuery<DT>(GetType(), datas, result =>
@@ -244,6 +256,9 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns>object paging</returns>
         public sealed override async Task<IPaging<DT>> GetPagingAsync(IQuery query)
         {
+            //query filter
+            query = GlobalQueryFilter(query);
+            query = GetDataQueryFilter(query);
             var paging = await GetDataPagingAsync(query).ConfigureAwait(false);
             IEnumerable<DT> datas = paging;
             QueryCallback(query, true, datas);
@@ -275,6 +290,9 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns></returns>
         public sealed override async Task<bool> ExistAsync(IQuery query)
         {
+            //query filter
+            query = GlobalQueryFilter(query);
+            query = ExistQueryFilter(query);
             return await IsExistAsync(query).ConfigureAwait(false);
         }
 
@@ -295,6 +313,9 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns></returns>
         public sealed override async Task<long> CountAsync(IQuery query)
         {
+            //query filter
+            query = GlobalQueryFilter(query);
+            query = CountQueryFilter(query);
             return await CountValueAsync(query).ConfigureAwait(false);
         }
 
@@ -317,6 +338,9 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns>max value</returns>
         public sealed override async Task<VT> MaxAsync<VT>(IQuery query)
         {
+            //query filter
+            query = GlobalQueryFilter(query);
+            query = MaxQueryFilter(query);
             return await MaxValueAsync<VT>(query).ConfigureAwait(false);
         }
 
@@ -339,6 +363,9 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns>min value</returns>
         public sealed override async Task<VT> MinAsync<VT>(IQuery query)
         {
+            //query filter
+            query = GlobalQueryFilter(query);
+            query = MinQueryFilter(query);
             return await MinValueAsync<VT>(query).ConfigureAwait(false);
         }
 
@@ -361,6 +388,9 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns>sum value</returns>
         public sealed override async Task<VT> SumAsync<VT>(IQuery query)
         {
+            //query filter
+            query = GlobalQueryFilter(query);
+            query = SumQueryFilter(query);
             return await SumValueAsync<VT>(query).ConfigureAwait(false);
         }
 
@@ -383,6 +413,9 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns>average value</returns>
         public sealed override async Task<VT> AvgAsync<VT>(IQuery query)
         {
+            //query filter
+            query = GlobalQueryFilter(query);
+            query = AvgQueryFilter(query);
             return await AvgValueAsync<VT>(query).ConfigureAwait(false);
         }
 
@@ -510,6 +543,150 @@ namespace EZNEW.Develop.Domain.Repository
                 }
             }
         }
+
+        #endregion
+
+        #region Query Filter
+
+        #region global query filter
+
+        /// <summary>
+        /// global query filter
+        /// </summary>
+        /// <param name="originQuery">origin query</param>
+        /// <returns></returns>
+        public virtual IQuery GlobalQueryFilter(IQuery originQuery)
+        {
+            return originQuery;
+        }
+
+        #endregion
+
+        #region remove query filter
+
+        /// <summary>
+        /// remove query filter
+        /// </summary>
+        /// <param name="originQuery">origin query</param>
+        /// <returns></returns>
+        public virtual IQuery RemoveQueryFilter(IQuery originQuery)
+        {
+            return originQuery;
+        }
+
+        #endregion
+
+        #region modify query filter
+
+        /// <summary>
+        /// modify query filter
+        /// </summary>
+        /// <param name="originQuery">origin query</param>
+        /// <returns></returns>
+        public virtual IQuery ModifyQueryFilter(IQuery originQuery)
+        {
+            return originQuery;
+        }
+
+        #endregion
+
+        #region get data query filter
+
+        /// <summary>
+        /// get data query filter
+        /// </summary>
+        /// <param name="originQuery">origin query</param>
+        /// <returns></returns>
+        public virtual IQuery GetDataQueryFilter(IQuery originQuery)
+        {
+            return originQuery;
+        }
+
+        #endregion
+
+        #region exist query filter
+
+        /// <summary>
+        /// exist query filter
+        /// </summary>
+        /// <param name="originQuery">origin query</param>
+        /// <returns></returns>
+        public virtual IQuery ExistQueryFilter(IQuery originQuery)
+        {
+            return originQuery;
+        }
+
+        #endregion
+
+        #region count query filter
+
+        /// <summary>
+        /// count query filter
+        /// </summary>
+        /// <param name="originQuery">origin query</param>
+        /// <returns></returns>
+        public virtual IQuery CountQueryFilter(IQuery originQuery)
+        {
+            return originQuery;
+        }
+
+        #endregion
+
+        #region max query filter
+
+        /// <summary>
+        /// count query filter
+        /// </summary>
+        /// <param name="originQuery">origin query</param>
+        /// <returns></returns>
+        public virtual IQuery MaxQueryFilter(IQuery originQuery)
+        {
+            return originQuery;
+        }
+
+        #endregion
+
+        #region min query filter
+
+        /// <summary>
+        /// count query filter
+        /// </summary>
+        /// <param name="originQuery">origin query</param>
+        /// <returns></returns>
+        public virtual IQuery MinQueryFilter(IQuery originQuery)
+        {
+            return originQuery;
+        }
+
+        #endregion
+
+        #region sum query filter
+
+        /// <summary>
+        /// count query filter
+        /// </summary>
+        /// <param name="originQuery">origin query</param>
+        /// <returns></returns>
+        public virtual IQuery SumQueryFilter(IQuery originQuery)
+        {
+            return originQuery;
+        }
+
+        #endregion
+
+        #region avg query filter
+
+        /// <summary>
+        /// count query filter
+        /// </summary>
+        /// <param name="originQuery">origin query</param>
+        /// <returns></returns>
+        public virtual IQuery AvgQueryFilter(IQuery originQuery)
+        {
+            return originQuery;
+        }
+
+        #endregion
 
         #endregion
     }

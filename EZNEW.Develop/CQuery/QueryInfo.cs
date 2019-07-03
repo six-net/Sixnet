@@ -1423,89 +1423,48 @@ namespace EZNEW.Develop.CQuery
         /// </summary>
         /// <param name="keys">keys</param>
         /// <returns></returns>
-        public List<Dictionary<string, dynamic>> GetKeysEqualValue(IEnumerable<string> keys)
+        public Dictionary<string, List<dynamic>> GetKeysEqualValue(IEnumerable<string> keys)
         {
-            if (QueryType == QueryCommandType.Text || keys == null || !keys.Any() || equalCriteriaList == null || equalCriteriaList.Count <= 0)
+            if (QueryType == QueryCommandType.Text || keys.IsNullOrEmpty() || equalCriteriaList.IsNullOrEmpty())
             {
-                return new List<Dictionary<string, dynamic>>(0);
+                return new Dictionary<string, List<dynamic>>();
             }
-            if (HasSubQuery)
+            var equalCriteriaDict = equalCriteriaList.GroupBy(c => c.Name).ToDictionary(c => c.Key, c => c.ToList());
+            var values = new Dictionary<string, List<dynamic>>(equalCriteriaDict.Count);
+            foreach (var key in keys)
             {
-                return new List<Dictionary<string, dynamic>>(0);
-            }
-            List<string> keyList = keys.Distinct().ToList();
-            int index = 0;
-            return GetChildKeyValues(ref index, keyList);
-        }
-
-        List<Dictionary<string, dynamic>> GetChildKeyValues(ref int index, List<string> keys)
-        {
-            List<Dictionary<string, dynamic>> keyValuesDic = new List<Dictionary<string, dynamic>>();
-            for (int i = index; i < keys.Count; index = i++)
-            {
-                string nowKey = keys[i];
-                var nowKeyCriteriaList = equalCriteriaList.Where(c => c.Name == nowKey).ToList();
-                if (nowKeyCriteriaList == null || nowKeyCriteriaList.Count <= 0)
+                equalCriteriaDict.TryGetValue(key, out var keyCriterias);
+                if (keyCriterias.IsNullOrEmpty())
                 {
-                    return keyValuesDic;
+                    continue;
                 }
-                foreach (var criteria in nowKeyCriteriaList)
+                List<dynamic> criteriaValues = new List<dynamic>();
+                foreach (var criteria in keyCriterias)
                 {
+                    var criteriaValue = criteria.GetCriteriaRealValue();
+                    if (criteriaValue == null)
+                    {
+                        continue;
+                    }
                     if (criteria.Operator == CriteriaOperator.In)
                     {
-                        foreach (var val in criteria.Value)
+                        foreach (var cvalue in criteriaValue)
                         {
-                            Dictionary<string, dynamic> criteriaValues = new Dictionary<string, dynamic>();
-                            criteriaValues.Add(criteria.Name, val);
-                            keyValuesDic.Add(criteriaValues);
+                            criteriaValues.Add(cvalue);
                         }
                     }
                     else
                     {
-                        Dictionary<string, dynamic> criteriaValues = new Dictionary<string, dynamic>();
-                        criteriaValues.Add(criteria.Name, criteria.GetCriteriaRealValue());
-                        keyValuesDic.Add(criteriaValues);
+                        criteriaValues.Add(criteriaValue);
                     }
                 }
-                i++;
-                if (i < keys.Count)
+                if (criteriaValues.IsNullOrEmpty())
                 {
-                    List<Dictionary<string, dynamic>> childKeyValueDic = GetChildKeyValues(ref i, keys);
-                    if (childKeyValueDic == null || childKeyValueDic.Count <= 0)
-                    {
-                        return new List<Dictionary<string, dynamic>>(0);
-                    }
-                    var maxKeyValues = keyValuesDic;
-                    var minKeyValues = childKeyValueDic;
-                    if (minKeyValues.Count > maxKeyValues.Count)
-                    {
-                        minKeyValues = maxKeyValues;
-                        keyValuesDic = maxKeyValues = childKeyValueDic;
-                    }
-                    List<Dictionary<string, dynamic>> newKeyValues = new List<Dictionary<string, dynamic>>();
-                    foreach (var nowKeyValue in maxKeyValues)
-                    {
-                        foreach (var childKeyValue in minKeyValues)
-                        {
-                            foreach (var childValue in childKeyValue)
-                            {
-                                if (nowKeyValue.ContainsKey(childValue.Key))
-                                {
-                                    Dictionary<string, dynamic> copyNewValue = nowKeyValue.Where(c => c.Key != childValue.Key).ToDictionary(c => c.Key, c => c.Value);
-                                    copyNewValue.Add(childValue.Key, childValue.Value);
-                                    newKeyValues.Add(copyNewValue);
-                                }
-                                else
-                                {
-                                    nowKeyValue.Add(childValue.Key, childValue.Value);
-                                }
-                            }
-                        }
-                    }
-                    keyValuesDic.AddRange(newKeyValues);
+                    continue;
                 }
+                values[key] = criteriaValues;
             }
-            return keyValuesDic;
+            return values;
         }
 
         #endregion
@@ -3991,10 +3950,7 @@ namespace EZNEW.Develop.CQuery
             query.SetHasSubQuery(query.HasSubQuery || valueQuery.HasSubQuery);
             query.SetHasJoin(query.HasJoin || valueQuery.HasJoin);
             query.SetHasRecurveCriteria(query.HasRecurveCriteria || valueQuery.HasRecurveCriteria);
-            if (!query.HasSubQuery)
-            {
-                query.equalCriteriaList.AddRange(valueQuery.equalCriteriaList);
-            }
+            query.equalCriteriaList.AddRange(valueQuery.equalCriteriaList);
         }
 
         /// <summary>

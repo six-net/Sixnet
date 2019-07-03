@@ -182,13 +182,13 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
                     var realData = data;
                     if (dataPackage == null)
                     {
-                        InitFromDataSource(data, query);
+                        dataPackage = InitFromDataSource(data, query);
                     }
                     else
                     {
                         realData = dataPackage.MergeFromDataSource(data, query);
                     }
-                    if (realData == null)
+                    if (dataPackage.Operate == WarehouseDataOperate.Remove || realData == null)
                     {
                         continue;
                     }
@@ -231,19 +231,22 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
                 var dataPackage = GetDataPackage(data);
                 if (dataPackage == null)
                 {
-                    InitFromDataSource(data, query);
+                    dataPackage = InitFromDataSource(data, query);
                 }
                 else
                 {
                     realData = dataPackage.MergeFromDataSource(data, query);
                 }
-                warehouseDatas.Add(realData);
+                if (dataPackage.Operate != WarehouseDataOperate.Remove && realData != null)
+                {
+                    warehouseDatas.Add(realData);
+                }
             }
 
             //get data
             if (warehouseDatas.IsNullOrEmpty())
             {
-                return data;
+                return default(T);
             }
             else
             {

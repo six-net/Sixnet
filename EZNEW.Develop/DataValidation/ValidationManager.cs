@@ -498,7 +498,7 @@ namespace EZNEW.Develop.DataValidation
         /// <returns></returns>
         public static List<VerifyResult> Validate<T>(T obj)
         {
-            string typeName = typeof(T).FullName;
+            string typeName = obj?.GetType().FullName;
             if (!_typeValidationList.ContainsKey(typeName))
             {
                 return new List<VerifyResult>(0);
