@@ -168,6 +168,11 @@ namespace EZNEW.Develop.CQuery
         /// </summary>
         List<JoinItem> JoinItems { get; }
 
+        /// <summary>
+        /// none condition
+        /// </summary>
+        bool NoneCondition { get; }
+
         #endregion
 
         #region Method

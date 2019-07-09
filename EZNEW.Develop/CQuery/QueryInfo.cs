@@ -224,6 +224,17 @@ namespace EZNEW.Develop.CQuery
         /// </summary>
         public List<JoinItem> JoinItems { get; private set; } = new List<JoinItem>();
 
+        /// <summary>
+        /// none condition
+        /// </summary>
+        public bool NoneCondition
+        {
+            get
+            {
+                return criterias.IsNullOrEmpty() && JoinItems.IsNullOrEmpty();
+            }
+        }
+
         #endregion
 
         #region Functions

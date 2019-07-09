@@ -75,7 +75,11 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         public static ET Merge<ET>(ET data, IQuery query) where ET : BaseEntity<ET>
         {
             var warehouse = GetWarehouse<ET>();
-            return warehouse?.Merge(data, query);
+            if (warehouse == null)
+            {
+                return data;
+            }
+            return warehouse.Merge(data, query);
         }
 
         #endregion

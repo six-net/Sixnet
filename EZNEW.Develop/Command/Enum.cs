@@ -58,6 +58,7 @@ namespace EZNEW.Develop.Command
         Add = 110,
         Update = 120,
         UpdateByQuery = 130,
+        UpdateObjectType = 135,
         RemoveByQuery = 140,
         RemoveObjectType = 150,
         RemoveData = 160
