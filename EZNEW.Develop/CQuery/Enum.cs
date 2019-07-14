@@ -20,8 +20,11 @@ namespace EZNEW.Develop.CQuery
         In,                 //IN()  
         NotIn,              //NOT IN ()  
         Like,
+        NotLike,
         BeginLike,
-        EndLike
+        NotBeginLike,
+        EndLike,
+        NotEndLike
     }
 
     /// <summary>

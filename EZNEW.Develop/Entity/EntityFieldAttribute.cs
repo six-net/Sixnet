@@ -18,7 +18,7 @@ namespace EZNEW.Develop.Entity
         }
 
         /// <summary>
-        /// 描述
+        /// description
         /// </summary>
         public string Description
         {
@@ -26,9 +26,17 @@ namespace EZNEW.Develop.Entity
         }
 
         /// <summary>
-        /// 主键
+        /// primary key
         /// </summary>
         public bool PrimaryKey
+        {
+            get;set;
+        }
+
+        /// <summary>
+        /// cache key
+        /// </summary>
+        public bool CacheKey
         {
             get;set;
         }

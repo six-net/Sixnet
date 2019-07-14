@@ -83,6 +83,7 @@ namespace EZNEW.Develop.Entity
             List<EntityField> queryFields = new List<EntityField>();
             List<EntityField> allFields = new List<EntityField>();
             List<EntityField> primaryKeys = new List<EntityField>();
+            List<EntityField> cacheKeys = new List<EntityField>();
             EntityField versionField = null;
             EntityField refreshDateField = null;
 
@@ -96,6 +97,7 @@ namespace EZNEW.Develop.Entity
                 bool refreshDate = false;
                 bool disableQuery = false;
                 bool primaryKey = false;
+                bool cacheKey = false;
                 string queryFormat = string.Empty;
                 if (entityFieldAttribute != null)
                 {
@@ -109,6 +111,7 @@ namespace EZNEW.Develop.Entity
                     disableQuery = entityFieldAttribute.DisableQuery;
                     queryFormat = entityFieldAttribute.QueryFormat;
                     primaryKey = entityFieldAttribute.PrimaryKey;
+                    cacheKey = entityFieldAttribute.CacheKey;
                 }
                 var propertyField = new EntityField()
                 {
@@ -136,6 +139,10 @@ namespace EZNEW.Develop.Entity
                 if (refreshDate)
                 {
                     refreshDateField = propertyField;
+                }
+                if (cacheKey && !primaryKey)
+                {
+                    cacheKeys.Add(propertyField);
                 }
 
                 //relation config
@@ -193,6 +200,10 @@ namespace EZNEW.Develop.Entity
             if (entityConfig.RefreshDateField == null)
             {
                 entityConfig.RefreshDateField = refreshDateField;
+            }
+            if (entityConfig.CacheKeys.IsNullOrEmpty())
+            {
+                entityConfig.CacheKeys = cacheKeys;
             }
             ConfigEntity(type.GUID, entityConfig);
         }

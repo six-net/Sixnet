@@ -78,7 +78,7 @@ namespace EZNEW.Develop.CQuery
             IQuery query = Create<T>();
             if (criteria != null)
             {
-                query.And<T>(criteria);
+                query.And(criteria);
             }
             return query;
         }
@@ -104,7 +104,10 @@ namespace EZNEW.Develop.CQuery
             {
                 throw new Exception(string.Format("type:{0} isn't set primary keys", entityType.FullName));
             }
-            List<dynamic> keyValueList = new List<dynamic>();
+            var firstData = datas.ElementAt(0).GetPropertyValue(keys.ElementAt(0));
+            var dataType = firstData.GetType();
+            dynamic keyValueList = Activator.CreateInstance(typeof(List<>).MakeGenericType(dataType));
+            //List<dynamic> keyValueList = new List<dynamic>();
             foreach (T entity in datas)
             {
                 if (keys.Count == 1)
@@ -113,7 +116,7 @@ namespace EZNEW.Develop.CQuery
                 }
                 else
                 {
-                    IQuery entityQuery = QueryFactory.Create();
+                    IQuery entityQuery = Create();
                     foreach (var key in keys)
                     {
                         entityQuery.And(key, exclude ? CriteriaOperator.NotEqual : CriteriaOperator.Equal, entity.GetPropertyValue(key));

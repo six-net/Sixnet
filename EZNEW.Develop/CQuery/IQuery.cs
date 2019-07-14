@@ -173,6 +173,16 @@ namespace EZNEW.Develop.CQuery
         /// </summary>
         bool NoneCondition { get; }
 
+        /// <summary>
+        /// atomic condition count
+        /// </summary>
+        int AtomicConditionCount { get; }
+
+        /// <summary>
+        /// all condition field names
+        /// </summary>
+        List<string> AllConditionFieldNames { get; }
+
         #endregion
 
         #region Method

@@ -235,6 +235,16 @@ namespace EZNEW.Develop.CQuery
             }
         }
 
+        /// <summary>
+        /// atomic condition count
+        /// </summary>
+        public int AtomicConditionCount { get; private set; } = 0;
+
+        /// <summary>
+        /// all condition field names
+        /// </summary>
+        public List<string> AllConditionFieldNames { get; private set; } = new List<string>();
+
         #endregion
 
         #region Functions
@@ -1143,6 +1153,36 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
+        #region NotLike
+
+        /// <summary>
+        /// Not Like Condition
+        /// </summary>
+        /// <param name="fieldName">field</param>
+        /// <param name="value">value</param>
+        /// <param name="or">connect with 'and'(true/default) or 'or'(false)</param>
+        /// <returns>return newest instance</returns>
+        public IQuery NotLike(string fieldName, string value, bool or = false, ICriteriaConvert convert = null)
+        {
+            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, fieldName, CriteriaOperator.NotLike, value, convert);
+            return this;
+        }
+
+        /// <summary>
+        /// Not Like Condition
+        /// </summary>
+        /// <param name="field">field</param>
+        /// <param name="value">value</param>
+        /// <param name="or">connect with 'and'(true/default) or 'or'(false)</param>
+        /// <returns>return newest instance</returns>
+        public IQuery NotLike<T>(Expression<Func<T, dynamic>> field, string value, bool or = false, ICriteriaConvert convert = null) where T : QueryModel<T>
+        {
+            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, ExpressionHelper.GetExpressionPropertyName(field.Body), CriteriaOperator.NotLike, value, convert);
+            return this;
+        }
+
+        #endregion
+
         #region BeginLike
 
         /// <summary>
@@ -1173,6 +1213,36 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
+        #region BeginLike
+
+        /// <summary>
+        /// Not Begin Like Condition
+        /// </summary>
+        /// <param name="fieldName">field</param>
+        /// <param name="value">value</param>
+        /// <param name="or">connect with 'and'(true/default) or 'or'(false)</param>
+        /// <returns>return newest instance</returns>
+        public IQuery NotBeginLike(string fieldName, string value, bool or = false, ICriteriaConvert convert = null)
+        {
+            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, fieldName, CriteriaOperator.NotBeginLike, value, convert);
+            return this;
+        }
+
+        /// <summary>
+        /// Not Begin Like Condition
+        /// </summary>
+        /// <param name="field">field</param>
+        /// <param name="value">value</param>
+        /// <param name="or">connect with 'and'(true/default) or 'or'(false)</param>
+        /// <returns>return newest instance</returns>
+        public IQuery NotBeginLike<T>(Expression<Func<T, dynamic>> field, string value, bool or = false, ICriteriaConvert convert = null) where T : QueryModel<T>
+        {
+            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, ExpressionHelper.GetExpressionPropertyName(field.Body), CriteriaOperator.NotBeginLike, value, convert);
+            return this;
+        }
+
+        #endregion
+
         #region EndLike
 
         /// <summary>
@@ -1198,6 +1268,36 @@ namespace EZNEW.Develop.CQuery
         public IQuery EndLike<T>(Expression<Func<T, dynamic>> field, string value, bool or = false, ICriteriaConvert convert = null) where T : QueryModel<T>
         {
             AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, ExpressionHelper.GetExpressionPropertyName(field.Body), CriteriaOperator.EndLike, value, convert);
+            return this;
+        }
+
+        #endregion
+
+        #region EndLike
+
+        /// <summary>
+        /// Not End Like Condition
+        /// </summary>
+        /// <param name="fieldName">field</param>
+        /// <param name="value">value</param>
+        /// <param name="or">connect with 'and'(true/default) or 'or'(false)</param>
+        /// <returns>return newest instance</returns>
+        public IQuery NotEndLike(string fieldName, string value, bool or = false, ICriteriaConvert convert = null)
+        {
+            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, fieldName, CriteriaOperator.NotEndLike, value, convert);
+            return this;
+        }
+
+        /// <summary>
+        /// Not EndLike
+        /// </summary>
+        /// <param name="field">field</param>
+        /// <param name="value">value</param>
+        /// <param name="or">connect with 'and'(true/default) or 'or'(false)</param>
+        /// <returns>return newest instance</returns>
+        public IQuery NotEndLike<T>(Expression<Func<T, dynamic>> field, string value, bool or = false, ICriteriaConvert convert = null) where T : QueryModel<T>
+        {
+            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, ExpressionHelper.GetExpressionPropertyName(field.Body), CriteriaOperator.NotEndLike, value, convert);
             return this;
         }
 
@@ -3948,7 +4048,10 @@ namespace EZNEW.Develop.CQuery
                         query.equalCriteriaList.Add(criteria);
                         break;
                 }
+
             }
+            query.AtomicConditionCount++;
+            query.AllConditionFieldNames.Add(criteria.Name);
         }
 
         /// <summary>
@@ -3962,6 +4065,8 @@ namespace EZNEW.Develop.CQuery
             query.SetHasJoin(query.HasJoin || valueQuery.HasJoin);
             query.SetHasRecurveCriteria(query.HasRecurveCriteria || valueQuery.HasRecurveCriteria);
             query.equalCriteriaList.AddRange(valueQuery.equalCriteriaList);
+            query.AtomicConditionCount += valueQuery.AtomicConditionCount;
+            query.AllConditionFieldNames.AddRange(valueQuery.AllConditionFieldNames);
         }
 
         /// <summary>
@@ -4020,14 +4125,14 @@ namespace EZNEW.Develop.CQuery
             }
             else if (nodeType == ExpressionType.Call)
             {
-                return GetCallExpressionQueryItem(queryOperator, CriteriaOperator.In, expression);
+                return GetCallExpressionQueryItem(queryOperator, expression);
             }
             else if (nodeType == ExpressionType.Not)
             {
                 UnaryExpression unaryExpress = expression as UnaryExpression;
                 if (unaryExpress != null && unaryExpress.Operand is MethodCallExpression)
                 {
-                    return GetCallExpressionQueryItem(queryOperator, CriteriaOperator.NotIn, unaryExpress.Operand);
+                    return GetCallExpressionQueryItem(queryOperator, unaryExpress.Operand, true);
                 }
             }
             return null;
@@ -4039,55 +4144,125 @@ namespace EZNEW.Develop.CQuery
         /// <param name="expressionType">expression node type</param>
         /// <param name="expression">expression</param>
         /// <returns></returns>
-        Tuple<QueryOperator, IQueryItem> GetCallExpressionQueryItem(QueryOperator queryOperator, CriteriaOperator criteriaOperator, Expression expression)
+        Tuple<QueryOperator, IQueryItem> GetCallExpressionQueryItem(QueryOperator queryOperator, Expression expression, bool negation = false)
         {
             MethodCallExpression callExpression = expression as MethodCallExpression;
-            Criteria criteria = null;
-            switch (callExpression.Method.Name)
+            MemberExpression memberArg = null;
+            Expression parameterExpression = null;
+            if (callExpression.Object != null)
             {
-                case "Contains":
-                    MemberExpression memberArg = null;
-                    Expression parameterExpression = null;
-                    string parameterName = string.Empty;
-                    if (callExpression.Object != null)
-                    {
-                        memberArg = callExpression.Object as MemberExpression;
-                        parameterExpression = callExpression.Arguments[0];
-                    }
-                    else if (callExpression.Arguments.Count == 2)
-                    {
-                        memberArg = callExpression.Arguments[0] as MemberExpression;
-                        parameterExpression = callExpression.Arguments[1];
-                    }
-                    if (memberArg == null || parameterExpression == null)
-                    {
-                        return null;
-                    }
-                    IEnumerable values = Expression.Lambda(memberArg)?.Compile().DynamicInvoke() as IEnumerable;
-                    if (values == null)
-                    {
-                        return null;
-                    }
-                    if (parameterExpression is ParameterExpression)
-                    {
-                        parameterName = (parameterExpression as ParameterExpression)?.Name;
-                    }
-                    else if (parameterExpression is MemberExpression)
-                    {
-                        parameterName = ExpressionHelper.GetExpressionPropertyName(parameterExpression as MemberExpression);
-                    }
-                    if (string.IsNullOrWhiteSpace(parameterName))
-                    {
-                        return null;
-                    }
-                    criteria = Criteria.CreateNewCriteria(parameterName, criteriaOperator, values);
-                    break;
+                memberArg = callExpression.Object as MemberExpression;
+                parameterExpression = callExpression.Arguments[0];
+            }
+            else if (callExpression.Arguments.Count == 2)
+            {
+                memberArg = callExpression.Arguments[0] as MemberExpression;
+                parameterExpression = callExpression.Arguments[1];
+            }
+            if (memberArg == null || parameterExpression == null)
+            {
+                return null;
+            }
+            Criteria criteria = null;
+            var dataType = memberArg.Type;
+            if (dataType == typeof(string))
+            {
+                criteria = GetStringCallExpressionQueryItem(callExpression.Method.Name, memberArg, parameterExpression, negation);
+            }
+            else if (typeof(IEnumerable).IsAssignableFrom(memberArg.Type))
+            {
+                criteria = GetIEnumerableCallExpressionQueryItem(callExpression.Method.Name, parameterExpression, memberArg, negation);
             }
             if (criteria != null)
             {
                 return new Tuple<QueryOperator, IQueryItem>(queryOperator, criteria);
             }
             return null;
+        }
+
+        /// <summary>
+        /// get string call expression query item
+        /// </summary>
+        /// <param name="methodName">method name</param>
+        /// <param name="expression">expression</param>
+        /// <param name="negation">negation</param>
+        /// <returns></returns>
+        Criteria GetStringCallExpressionQueryItem(string methodName, Expression memberArg, Expression parameter, bool negation = false)
+        {
+            Criteria criteria = null;
+            CriteriaOperator criteriaOperator = CriteriaOperator.Like;
+            //parameter name
+            string parameterName = string.Empty;
+            if (memberArg is ParameterExpression)
+            {
+                parameterName = (memberArg as ParameterExpression)?.Name;
+            }
+            else if (memberArg is MemberExpression)
+            {
+                parameterName = ExpressionHelper.GetExpressionPropertyName(memberArg as MemberExpression);
+            }
+            if (string.IsNullOrWhiteSpace(parameterName))
+            {
+                return null;
+            }
+            string value = Expression.Lambda(parameter)?.Compile().DynamicInvoke()?.ToString();
+            switch (methodName)
+            {
+                case "EndsWith":
+                    criteriaOperator = negation ? CriteriaOperator.NotEndLike : CriteriaOperator.EndLike;
+                    criteria = Criteria.CreateNewCriteria(parameterName, criteriaOperator, value);
+                    break;
+                case "StartsWith":
+                    criteriaOperator = negation ? CriteriaOperator.NotBeginLike : CriteriaOperator.BeginLike;
+                    criteria = Criteria.CreateNewCriteria(parameterName, criteriaOperator, value);
+                    break;
+                case "Contains":
+                    criteriaOperator = negation ? CriteriaOperator.NotLike : CriteriaOperator.Like;
+                    criteria = Criteria.CreateNewCriteria(parameterName, criteriaOperator, value);
+                    break;
+            }
+            return criteria;
+        }
+
+        /// <summary>
+        /// get ienumerable call expression query item
+        /// </summary>
+        /// <param name="methodName">method name</param>
+        /// <param name="memberArg">memberArg</param>
+        /// <param name="parameter">parameter</param>
+        /// <param name="negation">negation</param>
+        /// <returns></returns>
+        Criteria GetIEnumerableCallExpressionQueryItem(string methodName, Expression memberArg, Expression parameter, bool negation = false)
+        {
+            Criteria criteria = null;
+            CriteriaOperator criteriaOperator = CriteriaOperator.In;
+            IEnumerable values = null;
+            string parameterName = string.Empty;
+            if (memberArg is ParameterExpression)
+            {
+                parameterName = (memberArg as ParameterExpression)?.Name;
+            }
+            else if (memberArg is MemberExpression)
+            {
+                parameterName = ExpressionHelper.GetExpressionPropertyName(memberArg as MemberExpression);
+            }
+            if (string.IsNullOrWhiteSpace(parameterName))
+            {
+                return null;
+            }
+            switch (methodName)
+            {
+                case "Contains":
+                    values = Expression.Lambda(parameter)?.Compile().DynamicInvoke() as IEnumerable;
+                    if (values == null)
+                    {
+                        return null;
+                    }
+                    criteriaOperator = negation ? CriteriaOperator.NotIn : CriteriaOperator.In;
+                    criteria = Criteria.CreateNewCriteria(parameterName, criteriaOperator, values);
+                    break;
+            }
+            return criteria;
         }
 
         /// <summary>
