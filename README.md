@@ -16,8 +16,8 @@ If you have any questions or Suggestions, you can report to us via email, and we
 
 These are some other repos for related projects:
 
-. [EZNEW.Data](https://github.com/eznew-net/EZNEW.Data)-provide data access support for EZNEW.Develop
-. [EZNEW.Data.SqlServer](https://github.com/eznew-net/EZNEW.Data.SqlServer)-provides support for SQLServer database access
-. [EZNEW.Data.MySQL](https://github.com/eznew-net/EZNEW.Data.MySQL)-provides support for MySQL database access
-. [EZNEW.Framework](https://github.com/eznew-net/EZNEW.Framework)-common development tool libraries
-. [Demo](https://github.com/eznew-net/Demo)-demo application
+  . [EZNEW.Data](https://github.com/eznew-net/EZNEW.Data)-provide data access support for EZNEW.Develop
+  . [EZNEW.Data.SqlServer](https://github.com/eznew-net/EZNEW.Data.SqlServer)-provides support for SQLServer database access
+  . [EZNEW.Data.MySQL](https://github.com/eznew-net/EZNEW.Data.MySQL)-provides support for MySQL database access
+  . [EZNEW.Framework](https://github.com/eznew-net/EZNEW.Framework)-common development tool libraries
+  . [Demo](https://github.com/eznew-net/Demo)-demo application
