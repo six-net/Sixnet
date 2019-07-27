@@ -1,4 +1,5 @@
 ﻿using EZNEW.Develop.Command;
+using EZNEW.Develop.Domain.Event;
 using EZNEW.Develop.Domain.Repository.Warehouse;
 using EZNEW.Develop.Entity;
 using EZNEW.Framework.Extension;
@@ -20,14 +21,26 @@ namespace EZNEW.Develop.UnitOfWork
         List<ICommand> commandList = null;
         Dictionary<string, Tuple<ICommandEngine, List<ICommand>>> commandGroup = null;
         int allowEmptyResultCommandCount = 0;
+        int commandCounter = 1;
 
         //records
         List<IActivationRecord> activationRecords = new List<IActivationRecord>();
         Dictionary<int, IActivationRecord> activationRecordValueCollection = new Dictionary<int, IActivationRecord>();
         Dictionary<string, int> activationRecordCollection = new Dictionary<string, int>();
-        Dictionary<Guid, IDataWarehouse> repositoryWarehouses = new Dictionary<Guid, IDataWarehouse>();//data warehouse
-        int commandCounter = 1;
         int recordCounter = 1;
+
+        //data warehouses
+        Dictionary<Guid, IDataWarehouse> repositoryWarehouses = new Dictionary<Guid, IDataWarehouse>();//data warehouse
+
+        /// <summary>
+        /// domain event manager
+        /// </summary>
+        public DomainEventManager DomainEventManager { get; private set; }
+
+        /// <summary>
+        /// domain events
+        /// </summary>
+        public List<IDomainEvent> DomainEvents { get; } = new List<IDomainEvent>();
 
         /// <summary>
         /// commit success callback event
@@ -43,6 +56,7 @@ namespace EZNEW.Develop.UnitOfWork
             WorkFactory.InvokeCreateWorkEvent();
             WorkFactory.Current = this;
             WorkId = Guid.NewGuid().ToString();
+            DomainEventManager = new DomainEventManager();
         }
 
         /// <summary>
@@ -189,8 +203,9 @@ namespace EZNEW.Develop.UnitOfWork
                 await ExecuteCommandCallbackAsync(commitResult.EmptyResultOrSuccess).ConfigureAwait(false);
                 if (commitResult.EmptyResultOrSuccess)
                 {
-                    CommitSuccessCallbackEvent?.Invoke();
-                    WorkFactory.InvokeCommitSuccessEvent();
+                    CommitSuccessCallbackEvent?.Invoke();//local unit work success callback
+                    WorkFactory.InvokeCommitSuccessEvent();//unit work global success callback
+                    await ExecuteWorkCompletedDomainEventAsync().ConfigureAwait(false);//execute domain event
                 }
                 return commitResult;
             }
@@ -224,7 +239,7 @@ namespace EZNEW.Develop.UnitOfWork
                         continue;
                     }
                     commandList.Add(command);
-                    if (command.MustReturnValueOnSuccess)
+                    if (!command.MustReturnValueOnSuccess)
                     {
                         allowEmptyResultCommandCount += 1;
                     }
@@ -304,6 +319,8 @@ namespace EZNEW.Develop.UnitOfWork
         {
             CommitCompleted();
             repositoryWarehouses?.Clear();
+            DomainEventManager = null;
+            DomainEvents?.Clear();
         }
 
         /// <summary>
@@ -338,6 +355,42 @@ namespace EZNEW.Develop.UnitOfWork
             {
                 await cmd.ExecuteCompleteAsync(success).ConfigureAwait(false);
             }
+        }
+
+        /// <summary>
+        /// publish domain event
+        /// </summary>
+        /// <param name="domainEvents">domain event</param>
+        public async Task PublishDomainEventAsync(params IDomainEvent[] domainEvents)
+        {
+            if (domainEvents.IsNullOrEmpty())
+            {
+                return;
+            }
+            DomainEvents.AddRange(domainEvents);
+            await DomainEventManager.PublishAsync(domainEvents).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// publish domain event
+        /// </summary>
+        /// <param name="domainEvents">domain event</param>
+        public void PublishDomainEvent(params IDomainEvent[] domainEvents)
+        {
+            PublishDomainEventAsync(domainEvents).Wait();
+        }
+
+        /// <summary>
+        /// execute work completed domain event
+        /// </summary>
+        async Task ExecuteWorkCompletedDomainEventAsync()
+        {
+            var eventArray = DomainEvents.ToArray();
+            if (DomainEventBus.globalDomainEventManager != null)
+            {
+                await DomainEventBus.globalDomainEventManager.ExecutedTimeDomainEventAsync(EventExecuteTime.WorkCompleted, eventArray).ConfigureAwait(false);//execute global event handler
+            }
+            await DomainEventManager.ExecutedTimeDomainEventAsync(EventExecuteTime.WorkCompleted, eventArray).ConfigureAwait(false);//execute local work event handler
         }
     }
 }

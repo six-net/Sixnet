@@ -1,4 +1,5 @@
 ﻿using EZNEW.Develop.Command;
+using EZNEW.Develop.Domain.Event;
 using EZNEW.Develop.Domain.Repository.Warehouse;
 using EZNEW.Develop.Entity;
 using EZNEW.Framework.Paging;
@@ -71,5 +72,27 @@ namespace EZNEW.Develop.UnitOfWork
         /// </summary>
         /// <returns></returns>
         DataWarehouse<ET> GetWarehouse<ET>() where ET : BaseEntity<ET>;
+
+        /// <summary>
+        /// domain event manager
+        /// </summary>
+        DomainEventManager DomainEventManager { get; }
+
+        /// <summary>
+        /// domain events
+        /// </summary>
+        List<IDomainEvent> DomainEvents { get; }
+
+        /// <summary>
+        /// publish domain event
+        /// </summary>
+        /// <param name="domainEvents">domain event</param>
+        void PublishDomainEvent(params IDomainEvent[] domainEvents);
+
+        /// <summary>
+        /// publish domain event
+        /// </summary>
+        /// <param name="domainEvents">domain event</param>
+        Task PublishDomainEventAsync(params IDomainEvent[] domainEvents);
     }
 }
