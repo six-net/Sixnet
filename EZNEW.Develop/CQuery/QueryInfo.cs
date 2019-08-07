@@ -11,6 +11,7 @@ using EZNEW.Framework.ExpressionUtil;
 using EZNEW.Develop.CQuery.CriteriaConvert;
 using EZNEW.Framework.Extension;
 using EZNEW.Develop.Entity;
+using EZNEW.Framework.Fault;
 
 namespace EZNEW.Develop.CQuery
 {
@@ -35,6 +36,7 @@ namespace EZNEW.Develop.CQuery
         Dictionary<Guid, dynamic> queryExpressionDict = new Dictionary<Guid, dynamic>();
         int joinSort = 0;
         static Dictionary<Guid, Action<QueryInfo, IQueryItem>> addQueryItemHandlers = null;
+        bool alreadySetGlobalCondition = false;
 
         #region Constructor
 
@@ -127,12 +129,20 @@ namespace EZNEW.Develop.CQuery
             }
         }
 
+        ///// <summary>
+        ///// query model type
+        ///// </summary>
+        //public Type QueryModelType
+        //{
+        //    get; private set;
+        //}
+
         /// <summary>
-        /// query model type
+        /// entity type
         /// </summary>
-        public Type QueryModelType
+        public Type EntityType
         {
-            get; set;
+            get; private set;
         }
 
         /// <summary>
@@ -244,6 +254,11 @@ namespace EZNEW.Develop.CQuery
         /// all condition field names
         /// </summary>
         public List<string> AllConditionFieldNames { get; private set; } = new List<string>();
+
+        /// <summary>
+        /// all subqueries
+        /// </summary>
+        public List<IQuery> Subqueries { get; private set; } = new List<IQuery>();
 
         #endregion
 
@@ -1884,7 +1899,7 @@ namespace EZNEW.Develop.CQuery
             newQuery.loadPropertys = new Dictionary<string, bool>(loadPropertys);
             newQuery.equalCriteriaList = new List<Criteria>(equalCriteriaList);
             newQuery.queryExpressionDict = new Dictionary<Guid, dynamic>(queryExpressionDict);
-            newQuery.QueryModelType = QueryModelType;
+            newQuery.EntityType = EntityType;
             newQuery.PagingInfo = PagingInfo;
             newQuery.QueryText = QueryText;
             newQuery.QueryTextParameters = QueryTextParameters;
@@ -1894,6 +1909,7 @@ namespace EZNEW.Develop.CQuery
             newQuery.RecurveCriteria = RecurveCriteria;
             newQuery.VerifyResult = VerifyResult;
             newQuery.JoinItems = JoinItems;
+            newQuery.alreadySetGlobalCondition = alreadySetGlobalCondition;
             return newQuery;
         }
 
@@ -1913,6 +1929,10 @@ namespace EZNEW.Develop.CQuery
         /// <returns></returns>
         public IQuery Join(Dictionary<string, string> joinFields, JoinType joinType, JoinOperator joinOperator, IQuery joinQuery)
         {
+            if (joinQuery.EntityType == null)
+            {
+                throw new EZNEWException("the IQuery object used for the join operation must set the property EntityType");
+            }
             JoinItems.Add(new JoinItem()
             {
                 JoinType = joinType,
@@ -3944,6 +3964,60 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
+        #region EntityType
+
+        /// <summary>
+        /// set entity type
+        /// </summary>
+        /// <param name="entityType">entity type</param>
+        public void SetEntityType(Type entityType)
+        {
+            if (EntityType != null || entityType == null)
+            {
+                return;
+            }
+            EntityType = entityType;
+        }
+
+        #endregion
+
+        #region GlobalCondition
+
+        /// <summary>
+        /// set global condition
+        /// </summary>
+        /// <param name="globalCondition">global condition</param>
+        /// <param name="queryOperator">query operator</param>
+        /// <returns></returns>
+        public IQuery SetGlobalCondition(IQuery globalCondition, QueryOperator queryOperator)
+        {
+            if (alreadySetGlobalCondition || globalCondition == null || globalCondition.NoneCondition)
+            {
+                return this;
+            }
+            if (queryOperator == QueryOperator.OR)
+            {
+                Or(globalCondition);
+            }
+            else
+            {
+                And(globalCondition);
+            }
+            alreadySetGlobalCondition = true;
+            return this;
+        }
+
+        /// <summary>
+        /// allow set global condition
+        /// </summary>
+        /// <returns></returns>
+        public bool AllowSetGlobalCondition()
+        {
+            return !alreadySetGlobalCondition;
+        }
+
+        #endregion
+
         #endregion
 
         #region Util
@@ -4035,6 +4109,11 @@ namespace EZNEW.Develop.CQuery
             var queryValue = criteria.Value as IQuery;
             if (queryValue != null)
             {
+                if (queryValue.EntityType == null)
+                {
+                    throw new EZNEWException("the IQuery object used for the subquery must set the property EntityType");
+                }
+                query.Subqueries.Add(queryValue);
                 query.SetHasSubQuery(true);
                 query.SetHasJoin(query.HasJoin || queryValue.HasJoin);
                 query.SetHasRecurveCriteria(query.HasRecurveCriteria || queryValue.HasRecurveCriteria);

@@ -27,20 +27,17 @@ namespace EZNEW.Develop.CQuery
         #region Property
 
         ///// <summary>
-        ///// Query Object Name(usually,it's the table name)
+        ///// query model type
         ///// </summary>
-        //string ObjectName
+        //Type QueryModelType
         //{
         //    get;
         //}
 
         /// <summary>
-        /// query model type
+        /// entity type
         /// </summary>
-        Type QueryModelType
-        {
-            get; set;
-        }
+        Type EntityType { get; }
 
         /// <summary>
         /// all criterias or other IQuery items
@@ -182,6 +179,11 @@ namespace EZNEW.Develop.CQuery
         /// all condition field names
         /// </summary>
         List<string> AllConditionFieldNames { get; }
+
+        /// <summary>
+        /// all subqueries
+        /// </summary>
+        List<IQuery> Subqueries { get;}
 
         #endregion
 
@@ -2337,6 +2339,34 @@ namespace EZNEW.Develop.CQuery
         IQuery CrossJoin(params IQuery[] joinQuerys);
 
         #endregion
+
+        #endregion
+
+        #region EntityType
+
+        /// <summary>
+        /// set entity type
+        /// </summary>
+        /// <param name="entityType">entity type</param>
+        void SetEntityType(Type entityType);
+
+        #endregion
+
+        #region GlobalCondition
+
+        /// <summary>
+        /// set global condition
+        /// </summary>
+        /// <param name="globalCondition">global condition</param>
+        /// <param name="queryOperator">query operator</param>
+        /// <returns></returns>
+        IQuery SetGlobalCondition(IQuery globalCondition, QueryOperator queryOperator);
+
+        /// <summary>
+        /// allow set global condition
+        /// </summary>
+        /// <returns></returns>
+        bool AllowSetGlobalCondition();
 
         #endregion
 

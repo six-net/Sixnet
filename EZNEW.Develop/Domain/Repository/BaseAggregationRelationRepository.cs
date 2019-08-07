@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace EZNEW.Develop.Domain.Repository
 {
-    public abstract class BaseAggregationRelationRepository<T, First, Second,ET,DAI> : DefaultAggregationRepository<T,ET,DAI> where T : IAggregationRoot<T> where ET : BaseEntity<ET> where DAI : IDataAccess<ET>
+    public abstract class BaseAggregationRelationRepository<T, First, Second, ET, DAI> : DefaultAggregationRepository<T, ET, DAI> where T : IAggregationRoot<T> where ET : BaseEntity<ET> where DAI : IDataAccess<ET>
     {
         #region query
 

@@ -131,9 +131,8 @@ namespace EZNEW.Develop.Domain.Repository
         /// <param name="query">query model</param>
         public sealed override async Task RemoveAsync(IQuery query)
         {
-            //query filter
-            query = GlobalQueryFilter(query);
-            query = RemoveQueryFilter(query);
+            //append condition
+            query = AppendRemoveCondition(query);
             var record = await ExecuteRemoveAsync(query).ConfigureAwait(false);
             if (record == null)
             {
@@ -160,9 +159,8 @@ namespace EZNEW.Develop.Domain.Repository
         /// <param name="query">query model</param>
         public sealed override async Task ModifyAsync(IModify expression, IQuery query)
         {
-            //query filter
-            query = GlobalQueryFilter(query);
-            query = ModifyQueryFilter(query);
+            //append condition
+            query = AppendModifyCondition(query);
             var record = await ExecuteModifyAsync(expression, query).ConfigureAwait(false);
             if (record == null)
             {
@@ -189,13 +187,12 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns>Object</returns>
         public sealed override async Task<DT> GetAsync(IQuery query)
         {
-            //query filter
-            query = GlobalQueryFilter(query);
-            query = GetDataQueryFilter(query);
+            //append condition
+            query = AppendQueryCondition(query);
             var data = await GetDataAsync(query).ConfigureAwait(false);
             var dataList = new List<DT>() { data };
             QueryCallback(query, false, dataList);
-            RepositoryEventBus.PublishQuery<DT>(GetType(), dataList, result =>
+            RepositoryEventBus.PublishQuery(GetType(), dataList, result =>
               {
                   QueryEventResult<DT> queryResult = result as QueryEventResult<DT>;
                   if (queryResult != null)
@@ -223,12 +220,11 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns>object list</returns>
         public sealed override async Task<List<DT>> GetListAsync(IQuery query)
         {
-            //query filter
-            query = GlobalQueryFilter(query);
-            query = GetDataQueryFilter(query);
+            //append condition
+            query = AppendQueryCondition(query);
             var datas = await GetDataListAsync(query).ConfigureAwait(false);
             QueryCallback(query, true, datas);
-            RepositoryEventBus.PublishQuery<DT>(GetType(), datas, result =>
+            RepositoryEventBus.PublishQuery(GetType(), datas, result =>
             {
                 QueryEventResult<DT> queryResult = result as QueryEventResult<DT>;
                 if (queryResult != null)
@@ -256,13 +252,12 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns>object paging</returns>
         public sealed override async Task<IPaging<DT>> GetPagingAsync(IQuery query)
         {
-            //query filter
-            query = GlobalQueryFilter(query);
-            query = GetDataQueryFilter(query);
+            //append condition
+            query = AppendQueryCondition(query);
             var paging = await GetDataPagingAsync(query).ConfigureAwait(false);
             IEnumerable<DT> datas = paging;
             QueryCallback(query, true, datas);
-            RepositoryEventBus.PublishQuery<DT>(GetType(), datas, result =>
+            RepositoryEventBus.PublishQuery(GetType(), datas, result =>
             {
                 QueryEventResult<DT> queryResult = result as QueryEventResult<DT>;
                 if (queryResult != null)
@@ -290,9 +285,8 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns></returns>
         public sealed override async Task<bool> ExistAsync(IQuery query)
         {
-            //query filter
-            query = GlobalQueryFilter(query);
-            query = ExistQueryFilter(query);
+            //append condition
+            query = AppendExistCondition(query);
             return await IsExistAsync(query).ConfigureAwait(false);
         }
 
@@ -313,9 +307,8 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns></returns>
         public sealed override async Task<long> CountAsync(IQuery query)
         {
-            //query filter
-            query = GlobalQueryFilter(query);
-            query = CountQueryFilter(query);
+            //append condition
+            query = AppendCountCondition(query);
             return await CountValueAsync(query).ConfigureAwait(false);
         }
 
@@ -338,9 +331,8 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns>max value</returns>
         public sealed override async Task<VT> MaxAsync<VT>(IQuery query)
         {
-            //query filter
-            query = GlobalQueryFilter(query);
-            query = MaxQueryFilter(query);
+            //append condition
+            query = AppendMaxCondition(query);
             return await MaxValueAsync<VT>(query).ConfigureAwait(false);
         }
 
@@ -363,9 +355,8 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns>min value</returns>
         public sealed override async Task<VT> MinAsync<VT>(IQuery query)
         {
-            //query filter
-            query = GlobalQueryFilter(query);
-            query = MinQueryFilter(query);
+            //append condition
+            query = AppendMinCondition(query);
             return await MinValueAsync<VT>(query).ConfigureAwait(false);
         }
 
@@ -388,9 +379,8 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns>sum value</returns>
         public sealed override async Task<VT> SumAsync<VT>(IQuery query)
         {
-            //query filter
-            query = GlobalQueryFilter(query);
-            query = SumQueryFilter(query);
+            //append condition
+            query = AppendSumCondition(query);
             return await SumValueAsync<VT>(query).ConfigureAwait(false);
         }
 
@@ -413,9 +403,8 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns>average value</returns>
         public sealed override async Task<VT> AvgAsync<VT>(IQuery query)
         {
-            //query filter
-            query = GlobalQueryFilter(query);
-            query = AvgQueryFilter(query);
+            //append condition
+            query = AppendAvgCondition(query);
             return await AvgValueAsync<VT>(query).ConfigureAwait(false);
         }
 
@@ -546,142 +535,128 @@ namespace EZNEW.Develop.Domain.Repository
 
         #endregion
 
-        #region Query Filter
+        #region Global Condition
 
-        #region global query filter
+        #region Append Remove Extra Condition
 
         /// <summary>
-        /// global query filter
+        /// append remove condition
         /// </summary>
         /// <param name="originQuery">origin query</param>
         /// <returns></returns>
-        public virtual IQuery GlobalQueryFilter(IQuery originQuery)
+        protected virtual IQuery AppendRemoveCondition(IQuery originQuery)
         {
             return originQuery;
         }
 
         #endregion
 
-        #region remove query filter
+        #region Append Modify Extra Condition
 
         /// <summary>
-        /// remove query filter
+        /// append modify condition
         /// </summary>
         /// <param name="originQuery">origin query</param>
         /// <returns></returns>
-        public virtual IQuery RemoveQueryFilter(IQuery originQuery)
+        protected virtual IQuery AppendModifyCondition(IQuery originQuery)
         {
             return originQuery;
         }
 
         #endregion
 
-        #region modify query filter
+        #region Append Query Extra Condition
 
         /// <summary>
-        /// modify query filter
+        /// append query condition
         /// </summary>
         /// <param name="originQuery">origin query</param>
         /// <returns></returns>
-        public virtual IQuery ModifyQueryFilter(IQuery originQuery)
+        protected virtual IQuery AppendQueryCondition(IQuery originQuery)
         {
             return originQuery;
         }
 
         #endregion
 
-        #region get data query filter
+        #region Append Exist Extra Condition
 
         /// <summary>
-        /// get data query filter
+        /// append exist condition
         /// </summary>
         /// <param name="originQuery">origin query</param>
         /// <returns></returns>
-        public virtual IQuery GetDataQueryFilter(IQuery originQuery)
+        protected virtual IQuery AppendExistCondition(IQuery originQuery)
         {
             return originQuery;
         }
 
         #endregion
 
-        #region exist query filter
+        #region Append Count Extra Condition
 
         /// <summary>
-        /// exist query filter
+        /// append count condition
         /// </summary>
         /// <param name="originQuery">origin query</param>
         /// <returns></returns>
-        public virtual IQuery ExistQueryFilter(IQuery originQuery)
+        protected virtual IQuery AppendCountCondition(IQuery originQuery)
         {
             return originQuery;
         }
 
         #endregion
 
-        #region count query filter
+        #region Append Max Extra Condition
 
         /// <summary>
-        /// count query filter
+        /// append max condition
         /// </summary>
         /// <param name="originQuery">origin query</param>
         /// <returns></returns>
-        public virtual IQuery CountQueryFilter(IQuery originQuery)
+        protected virtual IQuery AppendMaxCondition(IQuery originQuery)
         {
             return originQuery;
         }
 
         #endregion
 
-        #region max query filter
+        #region Append Min Extra Condition
 
         /// <summary>
-        /// count query filter
+        /// append min condition
         /// </summary>
         /// <param name="originQuery">origin query</param>
         /// <returns></returns>
-        public virtual IQuery MaxQueryFilter(IQuery originQuery)
+        protected virtual IQuery AppendMinCondition(IQuery originQuery)
         {
             return originQuery;
         }
 
         #endregion
 
-        #region min query filter
+        #region Append Sum Extra Condition
 
         /// <summary>
-        /// count query filter
+        /// append sum condition
         /// </summary>
         /// <param name="originQuery">origin query</param>
         /// <returns></returns>
-        public virtual IQuery MinQueryFilter(IQuery originQuery)
+        protected virtual IQuery AppendSumCondition(IQuery originQuery)
         {
             return originQuery;
         }
 
         #endregion
 
-        #region sum query filter
+        #region Append Avg Extra Condition
 
         /// <summary>
-        /// count query filter
+        /// append avg condition
         /// </summary>
         /// <param name="originQuery">origin query</param>
         /// <returns></returns>
-        public virtual IQuery SumQueryFilter(IQuery originQuery)
-        {
-            return originQuery;
-        }
-
-        #endregion
-
-        #region avg query filter
-
-        /// <summary>
-        /// count query filter
-        /// </summary>
-        /// <param name="originQuery">origin query</param>
-        /// <returns></returns>
-        public virtual IQuery AvgQueryFilter(IQuery originQuery)
+        protected virtual IQuery AppendAvgCondition(IQuery originQuery)
         {
             return originQuery;
         }

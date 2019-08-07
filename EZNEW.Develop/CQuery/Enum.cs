@@ -81,4 +81,30 @@ namespace EZNEW.Develop.CQuery
         GreaterThan,        //>  
         GreaterThanOrEqual //>=
     }
+
+    /// <summary>
+    /// condition source type
+    /// </summary>
+    public enum QuerySourceType
+    {
+        Repository = 2,
+        Subuery = 4,
+        JoinQuery = 8
+    }
+
+    /// <summary>
+    /// query usage scene
+    /// </summary>
+    public enum QueryUsageScene
+    {
+        Remove = 2001,
+        Modify = 2005,
+        Query = 2010,
+        Exist = 2015,
+        Count = 2020,
+        Max = 2025,
+        Min = 2030,
+        Sum = 2035,
+        Avg = 2040
+    }
 }

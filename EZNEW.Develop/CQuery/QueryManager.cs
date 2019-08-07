@@ -1,6 +1,7 @@
 ﻿using EZNEW.Develop.Entity;
 using EZNEW.Framework.ExpressionUtil;
 using EZNEW.Framework.Extension;
+using EZNEW.Framework.Fault;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +17,7 @@ namespace EZNEW.Develop.CQuery
     public static class QueryManager
     {
         /// <summary>
-        /// query model entity s
+        /// query model entity
         /// key:query model type guid
         /// </summary>
         static Dictionary<Guid, Type> queryModelEntityRelations = new Dictionary<Guid, Type>();
@@ -25,6 +26,17 @@ namespace EZNEW.Develop.CQuery
         /// alread config query model guids
         /// </summary>
         static HashSet<Guid> alreadConfigQueryEntitys = new HashSet<Guid>();
+
+        #region Propertys
+
+        /// <summary>
+        /// global query filter
+        /// </summary>
+        public static Func<GlobalConditionFilter, GlobalConditionFilterResult> GetGlobalCondition { get; set; }
+
+        #endregion
+
+        #region Methods
 
         #region set query model relation entity
 
@@ -155,6 +167,40 @@ namespace EZNEW.Develop.CQuery
         {
             return GetQueryModelRelationEntityType(typeof(T));
         }
+
+        #endregion
+
+        #region append global condition
+
+        /// <summary>
+        /// global condition filter
+        /// </summary>
+        /// <param name="conditionFilter">condition filter</param>
+        /// <returns>filter result</returns>
+        public static GlobalConditionFilterResult GlobalConditionFilter(GlobalConditionFilter conditionFilter)
+        {
+            if (conditionFilter == null)
+            {
+                throw new EZNEWException("GlobalConditionFilter is null");
+            }
+            if (conditionFilter.EntityType == null)
+            {
+                throw new EZNEWException("GlobalConditionFilter.EntityType is null");
+            }
+            if (conditionFilter.OriginQuery == null)
+            {
+                conditionFilter.OriginQuery = QueryFactory.Create();
+                conditionFilter.OriginQuery.SetEntityType(conditionFilter.EntityType);
+            }
+            GlobalConditionFilterResult globalConditionResult = null;
+            if (GetGlobalCondition != null && conditionFilter.OriginQuery.AllowSetGlobalCondition())
+            {
+                globalConditionResult = GetGlobalCondition(conditionFilter);
+            }
+            return globalConditionResult;
+        }
+
+        #endregion
 
         #endregion
     }

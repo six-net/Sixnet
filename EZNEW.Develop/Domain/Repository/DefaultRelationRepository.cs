@@ -19,6 +19,7 @@ namespace EZNEW.Develop.Domain.Repository
     public abstract class DefaultRelationRepository<First, Second, ET, DAI> : BaseRelationRepository<First, Second> where Second : IAggregationRoot<Second> where First : IAggregationRoot<First> where ET : BaseEntity<ET> where DAI : IDataAccess<ET>
     {
         IRepositoryWarehouse<ET, DAI> repositoryWarehouse = ContainerManager.Resolve<IRepositoryWarehouse<ET, DAI>>();
+        static Type entityType = typeof(ET);
 
         static DefaultRelationRepository()
         {
@@ -50,7 +51,7 @@ namespace EZNEW.Develop.Domain.Repository
             {
                 return;
             }
-            RepositoryEventBus.PublishSave<Tuple<First, Second>>(GetType(), datas);
+            RepositoryEventBus.PublishSave(GetType(), datas);
             WorkFactory.RegisterActivationRecord(records.ToArray());
         }
 
@@ -65,7 +66,7 @@ namespace EZNEW.Develop.Domain.Repository
             {
                 return;
             }
-            RepositoryEventBus.PublishSave<First>(GetType(), datas);
+            RepositoryEventBus.PublishSave(GetType(), datas);
             WorkFactory.RegisterActivationRecord(saveRecords.ToArray());
         }
 
@@ -80,7 +81,7 @@ namespace EZNEW.Develop.Domain.Repository
             {
                 return;
             }
-            RepositoryEventBus.PublishSave<Second>(GetType(), datas);
+            RepositoryEventBus.PublishSave(GetType(), datas);
             WorkFactory.RegisterActivationRecord(saveRecords.ToArray());
         }
 
@@ -108,7 +109,7 @@ namespace EZNEW.Develop.Domain.Repository
             {
                 return;
             }
-            RepositoryEventBus.PublishRemove<Tuple<First, Second>>(GetType(), datas);
+            RepositoryEventBus.PublishRemove(GetType(), datas);
             WorkFactory.RegisterActivationRecord(records.ToArray());
         }
 
@@ -127,9 +128,8 @@ namespace EZNEW.Develop.Domain.Repository
         /// <param name="query">query</param>
         public sealed override async Task RemoveAsync(IQuery query)
         {
-            //query filter
-            query = GlobalQueryFilter(query);
-            query = RemoveQueryFilter(query);
+            //query condition
+            query = AppendRemoveCondition(query);
             var record = await ExecuteRemoveAsync(query).ConfigureAwait(false);
             if (record == null)
             {
@@ -145,13 +145,12 @@ namespace EZNEW.Develop.Domain.Repository
         /// <param name="datas">datas</param>
         public sealed override void RemoveByFirst(IEnumerable<First> datas)
         {
-            var removeRecord = ExecuteRemoveByFirst(datas);
-            if (removeRecord == null)
+            if (datas.IsNullOrEmpty())
             {
                 return;
             }
-            RepositoryEventBus.PublishRemove(GetType(), datas);
-            WorkFactory.RegisterActivationRecord(removeRecord);
+            var query = CreateQueryByFirst(datas);
+            Remove(query);
         }
 
         /// <summary>
@@ -160,11 +159,6 @@ namespace EZNEW.Develop.Domain.Repository
         /// <param name="query">query</param>
         public sealed override void RemoveByFirst(IQuery query)
         {
-            //query filter
-            query = GlobalQueryFilter(query);
-            query = RemoveQueryFilter(query);
-            query = RemoveByFirstQueryFilter(query);
-
             var removeQuery = CreateQueryByFirst(query);
             Remove(removeQuery);
         }
@@ -175,13 +169,12 @@ namespace EZNEW.Develop.Domain.Repository
         /// <param name="datas">datas</param>
         public sealed override void RemoveBySecond(IEnumerable<Second> datas)
         {
-            var removeRecord = ExecuteRemoveBySecond(datas);
-            if (removeRecord == null)
+            if (datas.IsNullOrEmpty())
             {
                 return;
             }
-            RepositoryEventBus.PublishRemove(GetType(), datas);
-            WorkFactory.RegisterActivationRecord(removeRecord);
+            var query = CreateQueryBySecond(datas);
+            Remove(query);
         }
 
         /// <summary>
@@ -190,11 +183,6 @@ namespace EZNEW.Develop.Domain.Repository
         /// <param name="query">query</param>
         public sealed override void RemoveBySecond(IQuery query)
         {
-            //query filter
-            query = GlobalQueryFilter(query);
-            query = RemoveQueryFilter(query);
-            query = RemoveBySecondQueryFilter(query);
-
             var removeQuery = CreateQueryBySecond(query);
             Remove(removeQuery);
         }
@@ -220,8 +208,8 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns></returns>
         public sealed override async Task<Tuple<First, Second>> GetAsync(IQuery query)
         {
-            query = GlobalQueryFilter(query);
-            query = GetDataQueryFilter(query);
+            //append condition
+            query = AppendQueryCondition(query);
             return await ExecuteGetAsync(query).ConfigureAwait(false);
         }
 
@@ -242,8 +230,8 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns></returns>
         public sealed override async Task<List<Tuple<First, Second>>> GetListAsync(IQuery query)
         {
-            query = GlobalQueryFilter(query);
-            query = GetDataQueryFilter(query);
+            //append condition
+            query = AppendQueryCondition(query);
             return await ExecuteGetListAsync(query).ConfigureAwait(false);
         }
 
@@ -264,8 +252,8 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns></returns>
         public sealed override async Task<IPaging<Tuple<First, Second>>> GetPagingAsync(IQuery query)
         {
-            query = GlobalQueryFilter(query);
-            query = GetDataQueryFilter(query);
+            //append condition
+            query = AppendQueryCondition(query);
             return await ExecuteGetPagingAsync(query).ConfigureAwait(false);
         }
 
@@ -286,7 +274,13 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns></returns>
         public sealed override async Task<List<First>> GetFirstListBySecondAsync(IEnumerable<Second> datas)
         {
-            return await ExecuteGetFirstBySecondListAsync(datas).ConfigureAwait(false);
+            if (datas.IsNullOrEmpty())
+            {
+                return new List<First>(0);
+            }
+            var query = CreateQueryBySecond(datas);
+            var relationDatas = await GetListAsync(query).ConfigureAwait(false);
+            return relationDatas?.Select(c => c.Item1).ToList() ?? new List<First>(0);
         }
 
         /// <summary>
@@ -306,7 +300,13 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns></returns>
         public sealed override async Task<List<Second>> GetSecondListByFirstAsync(IEnumerable<First> datas)
         {
-            return await ExecuteGetSecondByFirstListAsync(datas).ConfigureAwait(false);
+            if (datas.IsNullOrEmpty())
+            {
+                return new List<Second>(0);
+            }
+            var query = CreateQueryByFirst(datas);
+            var relationDatas = await GetListAsync(query).ConfigureAwait(false);
+            return relationDatas?.Select(c => c.Item2).ToList() ?? new List<Second>(0);
         }
 
         #endregion
@@ -404,38 +404,6 @@ namespace EZNEW.Develop.Domain.Repository
         }
 
         /// <summary>
-        /// remove by first datas
-        /// </summary>
-        /// <param name="datas">datas</param>
-        /// <returns></returns>
-        public virtual IActivationRecord ExecuteRemoveByFirst(IEnumerable<First> datas)
-        {
-            if (datas.IsNullOrEmpty())
-            {
-                return null;
-            }
-            var query = CreateQueryByFirst(datas);
-            var removeRecord = repositoryWarehouse.RemoveAsync(query).Result;
-            return removeRecord;
-        }
-
-        /// <summary>
-        /// remove by second datas
-        /// </summary>
-        /// <param name="datas">datas</param>
-        /// <returns></returns>
-        public virtual IActivationRecord ExecuteRemoveBySecond(IEnumerable<Second> datas)
-        {
-            if (datas.IsNullOrEmpty())
-            {
-                return null;
-            }
-            var query = CreateQueryBySecond(datas);
-            var removeRecord = repositoryWarehouse.RemoveAsync(query).Result;
-            return removeRecord;
-        }
-
-        /// <summary>
         /// create data by first
         /// </summary>
         /// <param name="data">data</param>
@@ -498,38 +466,6 @@ namespace EZNEW.Develop.Domain.Repository
         }
 
         /// <summary>
-        /// get First by Second
-        /// </summary>
-        /// <param name="datas">datas</param>
-        /// <returns></returns>
-        public virtual async Task<List<First>> ExecuteGetFirstBySecondListAsync(IEnumerable<Second> datas)
-        {
-            if (datas.IsNullOrEmpty())
-            {
-                return new List<First>(0);
-            }
-            var query = CreateQueryBySecond(datas);
-            var entitys = await repositoryWarehouse.GetListAsync(query).ConfigureAwait(false);
-            return entitys.Select(c => CreateRelationDataByEntity(c).Item1).ToList();
-        }
-
-        /// <summary>
-        /// get Second by First
-        /// </summary>
-        /// <param name="datas">datas</param>
-        /// <returns></returns>
-        public virtual async Task<List<Second>> ExecuteGetSecondByFirstListAsync(IEnumerable<First> datas)
-        {
-            if (datas.IsNullOrEmpty())
-            {
-                return new List<Second>(0);
-            }
-            var query = CreateQueryByFirst(datas);
-            var entitys = await repositoryWarehouse.GetListAsync(query).ConfigureAwait(false);
-            return entitys.Select(c => CreateRelationDataByEntity(c).Item2).ToList();
-        }
-
-        /// <summary>
         /// create query by first type datas
         /// </summary>
         /// <param name="datas">datas</param>
@@ -573,66 +509,168 @@ namespace EZNEW.Develop.Domain.Repository
 
         #endregion
 
-        #region query filter
+        #region global condition
 
-        #region global query filter
+        #region Append Repository Condition
 
         /// <summary>
-        /// global query filter
+        /// append repository condition
         /// </summary>
         /// <param name="originQuery">origin query</param>
         /// <returns></returns>
-        public virtual IQuery GlobalQueryFilter(IQuery originQuery)
+        IQuery AppendRepositoryCondition(IQuery originQuery, QueryUsageScene usageScene)
         {
+            if (originQuery == null)
+            {
+                originQuery = QueryFactory.Create();
+                originQuery.SetEntityType(entityType);
+            }
+            else
+            {
+                originQuery.SetEntityType(entityType);
+            }
+
+            //primary query
+            GlobalConditionFilter conditionFilter = new GlobalConditionFilter()
+            {
+                OriginQuery = originQuery,
+                UsageSceneEntityType = entityType,
+                EntityType = entityType,
+                SourceType = QuerySourceType.Repository,
+                UsageScene = usageScene
+            };
+            var conditionFilterResult = QueryManager.GlobalConditionFilter(conditionFilter);
+            if (conditionFilterResult != null)
+            {
+                conditionFilterResult.AppendTo(originQuery);
+            }
+            //subqueries
+            if (!originQuery.Subqueries.IsNullOrEmpty())
+            {
+                foreach (var squery in originQuery.Subqueries)
+                {
+                    AppendSubqueryCondition(squery, conditionFilter);
+                }
+            }
+            //join
+            if (!originQuery.JoinItems.IsNullOrEmpty())
+            {
+                foreach (var jitem in originQuery.JoinItems)
+                {
+                    AppendJoinQueryCondition(jitem.JoinQuery, conditionFilter);
+                }
+            }
             return originQuery;
         }
 
         #endregion
 
-        #region remove query filter
+        #region Append Subqueries Condition
 
         /// <summary>
-        /// remove query filter
+        /// append subqueries condition
         /// </summary>
-        /// <param name="originQuery">origin query</param>
-        /// <returns></returns>
-        public virtual IQuery RemoveQueryFilter(IQuery originQuery)
+        /// <param name="subquery">subquery</param>
+        /// <param name="conditionFilter">condition filter</param>
+        void AppendSubqueryCondition(IQuery subquery, GlobalConditionFilter conditionFilter)
         {
-            return originQuery;
-        }
-
-        /// <summary>
-        /// remove by first query filter
-        /// </summary>
-        /// <param name="originQuery">origin query</param>
-        /// <returns></returns>
-        public virtual IQuery RemoveByFirstQueryFilter(IQuery originQuery)
-        {
-            return originQuery;
-        }
-
-        /// <summary>
-        /// remove by second query filter
-        /// </summary>
-        /// <param name="originQuery">origin query</param>
-        /// <returns></returns>
-        public virtual IQuery RemoveBySecondQueryFilter(IQuery originQuery)
-        {
-            return originQuery;
+            if (subquery == null)
+            {
+                return;
+            }
+            conditionFilter.SourceType = QuerySourceType.Subuery;
+            conditionFilter.EntityType = subquery.EntityType;
+            conditionFilter.OriginQuery = subquery;
+            var conditionFilterResult = QueryManager.GlobalConditionFilter(conditionFilter);
+            if (conditionFilterResult != null)
+            {
+                conditionFilterResult.AppendTo(subquery);
+            }
+            //subqueries
+            if (!subquery.Subqueries.IsNullOrEmpty())
+            {
+                foreach (var squery in subquery.Subqueries)
+                {
+                    AppendSubqueryCondition(squery, conditionFilter);
+                }
+            }
+            //join
+            if (!subquery.JoinItems.IsNullOrEmpty())
+            {
+                foreach (var jitem in subquery.JoinItems)
+                {
+                    AppendJoinQueryCondition(jitem.JoinQuery, conditionFilter);
+                }
+            }
         }
 
         #endregion
 
-        #region get data query filter
+        #region Append Join Condition
 
         /// <summary>
-        /// get data query filter
+        /// append join query condition
+        /// </summary>
+        /// <param name="joinQuery">join query</param>
+        /// <param name="conditionFilter">condition filter</param>
+        void AppendJoinQueryCondition(IQuery joinQuery, GlobalConditionFilter conditionFilter)
+        {
+            if (joinQuery == null)
+            {
+                return;
+            }
+            conditionFilter.SourceType = QuerySourceType.JoinQuery;
+            conditionFilter.EntityType = joinQuery.EntityType;
+            conditionFilter.OriginQuery = joinQuery;
+            var conditionFilterResult = QueryManager.GlobalConditionFilter(conditionFilter);
+            if (conditionFilterResult != null)
+            {
+                conditionFilterResult.AppendTo(joinQuery);
+            }
+            //subqueries
+            if (!joinQuery.Subqueries.IsNullOrEmpty())
+            {
+                foreach (var squery in joinQuery.Subqueries)
+                {
+                    AppendSubqueryCondition(squery, conditionFilter);
+                }
+            }
+            //join query
+            if (!joinQuery.JoinItems.IsNullOrEmpty())
+            {
+                foreach (var jitem in joinQuery.JoinItems)
+                {
+                    AppendJoinQueryCondition(jitem.JoinQuery, conditionFilter);
+                }
+            }
+        }
+
+        #endregion
+
+        #region Append Remove Extra Condition
+
+        /// <summary>
+        /// append remove condition
         /// </summary>
         /// <param name="originQuery">origin query</param>
         /// <returns></returns>
-        public virtual IQuery GetDataQueryFilter(IQuery originQuery)
+        protected virtual IQuery AppendRemoveCondition(IQuery originQuery)
         {
-            return originQuery;
+            return AppendRepositoryCondition(originQuery, QueryUsageScene.Remove);
+        }
+
+        #endregion
+
+        #region Append Query Extra Condition
+
+        /// <summary>
+        /// append query condition
+        /// </summary>
+        /// <param name="originQuery">origin query</param>
+        /// <returns></returns>
+        protected virtual IQuery AppendQueryCondition(IQuery originQuery)
+        {
+            return AppendRepositoryCondition(originQuery, QueryUsageScene.Query);
         }
 
         #endregion

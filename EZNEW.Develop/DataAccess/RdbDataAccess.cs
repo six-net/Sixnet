@@ -10,6 +10,7 @@ using EZNEW.Develop.Command;
 using EZNEW.Develop.Command.Modify;
 using EZNEW.Framework.Extension;
 using EZNEW.Develop.UnitOfWork;
+using EZNEW.Framework.Fault;
 
 namespace EZNEW.Develop.DataAccess
 {
@@ -19,6 +20,8 @@ namespace EZNEW.Develop.DataAccess
     /// <typeparam name="T"></typeparam>
     public abstract class RdbDataAccess<T> : IDataAccess<T> where T : BaseEntity<T>
     {
+        static Type entityType = typeof(T);
+
         #region add data
 
         /// <summary>
@@ -127,7 +130,10 @@ namespace EZNEW.Develop.DataAccess
             {
                 return null;
             }
-            var entityType = typeof(T);
+            if (query == null)
+            {
+                throw new EZNEWException("the data modification condition is null");
+            }
 
             #region control version
 
@@ -141,7 +147,6 @@ namespace EZNEW.Develop.DataAccess
                     newData.SetPropertyValue(versionFieldName, newVersionValue);
                     modifyValues.Add(versionFieldName, newVersionValue);
                 }
-                query = query ?? QueryFactory.Create();
                 query.And(versionFieldName, CriteriaOperator.Equal, nowVersionValue);
             }
 
@@ -314,7 +319,6 @@ namespace EZNEW.Develop.DataAccess
             ICommand cmd = RdbCommand.CreateNewCommand<T>(OperateType.Query);
             SetCommand(cmd, null);
             cmd.Query = query;
-            //cmd.Fields = GetQueryObjectFields(query);
             T obj = await WorkFactory.QuerySingleAsync<T>(cmd).ConfigureAwait(false);
             return obj;
         }
@@ -350,7 +354,6 @@ namespace EZNEW.Develop.DataAccess
             ICommand cmd = RdbCommand.CreateNewCommand<T>(OperateType.Query);
             SetCommand(cmd, null);
             cmd.Query = query;
-            //cmd.Fields = GetQueryObjectFields(query);
             var objList = (await WorkFactory.QueryAsync<T>(cmd).ConfigureAwait(false)).ToList();
             return objList;
         }
@@ -375,7 +378,6 @@ namespace EZNEW.Develop.DataAccess
             ICommand cmd = RdbCommand.CreateNewCommand<T>(OperateType.Query);
             SetCommand(cmd, null);
             cmd.Query = query;
-            //cmd.Fields = GetQueryObjectFields(query);
             var objPaging = await WorkFactory.QueryPagingAsync<T>(cmd).ConfigureAwait(false);
             return objPaging;
         }
@@ -401,7 +403,6 @@ namespace EZNEW.Develop.DataAccess
             SetCommand(cmd, null);
             cmd.MustReturnValueOnSuccess = true;
             cmd.Query = query;
-            //cmd.Fields = GetQueryFields();
             cmd.CommandResultType = ExecuteCommandResult.ExecuteScalar;
             return await WorkFactory.QueryAsync(cmd).ConfigureAwait(false);
         }

@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using EZNEW.Framework.Extension;
 using EZNEW.Develop.Entity;
+using EZNEW.Framework.Fault;
 
 namespace EZNEW.Develop.CQuery
 {
@@ -15,6 +16,8 @@ namespace EZNEW.Develop.CQuery
     /// </summary>
     public static class QueryFactory
     {
+        #region Methods
+
         /// <summary>
         /// Create a new query instance
         /// </summary>
@@ -31,7 +34,7 @@ namespace EZNEW.Develop.CQuery
         /// <returns>IQuery object</returns>
         public static IQuery Create(PagingFilter filter)
         {
-            var query = new QueryInfo();
+            var query = Create();
             if (filter != null)
             {
                 query.PagingInfo = filter;
@@ -48,7 +51,12 @@ namespace EZNEW.Develop.CQuery
         {
             QueryModel<T>.Init();
             var query = Create();
-            query.QueryModelType = typeof(T);
+            var entityType = QueryManager.GetQueryModelRelationEntityType<T>();
+            if (entityType == null)
+            {
+                throw new EZNEWException(string.Format("query model:{0} didn't relate any entity", typeof(T).FullName));
+            }
+            query.SetEntityType(entityType);
             return query;
         }
 
@@ -84,6 +92,18 @@ namespace EZNEW.Develop.CQuery
         }
 
         /// <summary>
+        /// create a new query instance by entity
+        /// </summary>
+        /// <typeparam name="ET"></typeparam>
+        /// <returns></returns>
+        static IQuery CreateByEntity<ET>()
+        {
+            var query = Create();
+            query.SetEntityType(typeof(ET));
+            return query;
+        }
+
+        /// <summary>
         /// Append Entity Identity Condition
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -93,7 +113,7 @@ namespace EZNEW.Develop.CQuery
         /// <returns></returns>
         public static IQuery AppendEntityIdentityCondition<T>(IEnumerable<T> datas, IQuery originalQuery = null, bool exclude = false) where T : BaseEntity<T>
         {
-            originalQuery = originalQuery ?? QueryFactory.Create();
+            originalQuery = originalQuery ?? CreateByEntity<T>();
             if (datas == null || !datas.Any())
             {
                 return originalQuery;
@@ -148,7 +168,7 @@ namespace EZNEW.Develop.CQuery
         /// <returns></returns>
         public static IQuery AppendEntityIdentityCondition<T>(T data, IQuery originalQuery = null, bool exclude = false) where T : BaseEntity<T>
         {
-            originalQuery = originalQuery ?? QueryFactory.Create();
+            originalQuery = originalQuery ?? CreateByEntity<T>();
             if (data == null)
             {
                 return originalQuery;
@@ -165,5 +185,7 @@ namespace EZNEW.Develop.CQuery
             }
             return originalQuery;
         }
+
+        #endregion
     }
 }

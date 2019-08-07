@@ -65,7 +65,6 @@ namespace EZNEW.Develop.Domain.Repository
             return await GetListAsync(query).ConfigureAwait(false);
         }
 
-
         /// <summary>
         /// get list by third
         /// </summary>
@@ -106,7 +105,6 @@ namespace EZNEW.Develop.Domain.Repository
             {
                 return;
             }
-            RepositoryEventBus.PublishRemove<First>(GetType(), datas);
             IQuery query = CreateQueryByFirst(datas);
             Remove(query);
         }
@@ -122,7 +120,6 @@ namespace EZNEW.Develop.Domain.Repository
             {
                 return;
             }
-            RepositoryEventBus.PublishRemove<Second>(GetType(), datas);
             IQuery query = CreateQueryBySecond(datas);
             Remove(query);
         }
@@ -138,7 +135,6 @@ namespace EZNEW.Develop.Domain.Repository
             {
                 return;
             }
-            RepositoryEventBus.PublishRemove<Third>(GetType(), datas);
             IQuery query = CreateQueryByThird(datas);
             Remove(query);
         }
