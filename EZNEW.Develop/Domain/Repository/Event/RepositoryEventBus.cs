@@ -22,7 +22,7 @@ namespace EZNEW.Develop.Domain.Repository.Event
         /// <summary>
         /// key:source repository->operation data->event type
         /// </summary>
-        static ConcurrentDictionary<Guid, ConcurrentDictionary<Guid, ConcurrentDictionary<EventType, List<IRepositoryEventHandler>>>> eventWarehouse = new ConcurrentDictionary<Guid, ConcurrentDictionary<Guid, ConcurrentDictionary<EventType, List<IRepositoryEventHandler>>>>();
+        static Dictionary<Guid, Dictionary<Guid, Dictionary<EventType, List<IRepositoryEventHandler>>>> eventWarehouse = new Dictionary<Guid, Dictionary<Guid, Dictionary<EventType, List<IRepositoryEventHandler>>>>();
 
         #region Subscribe
 
@@ -38,9 +38,21 @@ namespace EZNEW.Develop.Domain.Repository.Event
             }
             var eventSourceId = eventSource.GUID;
             var objectId = repositoryEventHandler.ObjectType.GUID;
-            var sourceEvents = eventWarehouse.GetOrAdd(eventSourceId, new ConcurrentDictionary<Guid, ConcurrentDictionary<EventType, List<IRepositoryEventHandler>>>());
-            var eventDict = sourceEvents.GetOrAdd(objectId, new ConcurrentDictionary<EventType, List<IRepositoryEventHandler>>());
-            var dataEvents = eventDict.GetOrAdd(repositoryEventHandler.EventType, new List<IRepositoryEventHandler>());
+            if (!eventWarehouse.TryGetValue(eventSourceId, out var sourceEvents) || sourceEvents.IsNullOrEmpty())
+            {
+                sourceEvents = new Dictionary<Guid, Dictionary<EventType, List<IRepositoryEventHandler>>>();
+                eventWarehouse[eventSourceId] = sourceEvents;
+            }
+            if (!sourceEvents.TryGetValue(objectId, out var eventDict) || eventDict.IsNullOrEmpty())
+            {
+                eventDict = new Dictionary<EventType, List<IRepositoryEventHandler>>();
+                sourceEvents[objectId] = eventDict;
+            }
+            if (!eventDict.TryGetValue(repositoryEventHandler.EventType, out var dataEvents) || dataEvents.IsNullOrEmpty())
+            {
+                dataEvents = new List<IRepositoryEventHandler>();
+                eventDict[repositoryEventHandler.EventType] = dataEvents;
+            }
             if (!dataEvents.Exists(c => c.HandlerRepositoryType == repositoryEventHandler.HandlerRepositoryType))
             {
                 dataEvents.Add(repositoryEventHandler);
@@ -350,12 +362,12 @@ namespace EZNEW.Develop.Domain.Repository.Event
             {
                 return new List<IRepositoryEventHandler>(0);
             }
-            eventWarehouse.TryGetValue(eventSource.GUID, out ConcurrentDictionary<Guid, ConcurrentDictionary<EventType, List<IRepositoryEventHandler>>> sourceEvents);
+            eventWarehouse.TryGetValue(eventSource.GUID, out Dictionary<Guid, Dictionary<EventType, List<IRepositoryEventHandler>>> sourceEvents);
             if (sourceEvents == null)
             {
                 return new List<IRepositoryEventHandler>(0);
             }
-            sourceEvents.TryGetValue(objectType.GUID, out ConcurrentDictionary<EventType, List<IRepositoryEventHandler>> objectEvents);
+            sourceEvents.TryGetValue(objectType.GUID, out Dictionary<EventType, List<IRepositoryEventHandler>> objectEvents);
             if (objectEvents == null)
             {
                 return new List<IRepositoryEventHandler>(0);
@@ -527,7 +539,6 @@ namespace EZNEW.Develop.Domain.Repository.Event
                 Datas = eventDatas.ToList()
             });
         }
-
 
         #endregion
     }

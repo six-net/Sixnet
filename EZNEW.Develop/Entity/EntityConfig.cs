@@ -20,9 +20,9 @@ namespace EZNEW.Develop.Entity
         }
 
         /// <summary>
-        /// edit fields
+        /// all fields
         /// </summary>
-        public List<EntityField> EditFields
+        public List<EntityField> AllFields
         {
             get; set;
         }
@@ -31,14 +31,6 @@ namespace EZNEW.Develop.Entity
         /// query fields
         /// </summary>
         public List<EntityField> QueryFields
-        {
-            get; set;
-        }
-
-        /// <summary>
-        /// all fields
-        /// </summary>
-        public List<EntityField> AllFields
         {
             get; set;
         }
@@ -57,6 +49,22 @@ namespace EZNEW.Develop.Entity
         public List<EntityField> CacheKeys
         {
             get; set;
+        }
+
+        /// <summary>
+        /// cache prefix keys
+        /// </summary>
+        public List<EntityField> CachePrefixKeys
+        {
+            get;set;
+        }
+
+        /// <summary>
+        /// cache ignore keys
+        /// </summary>
+        public List<EntityField> CacheIgnoreKeys
+        {
+            get;set;
         }
 
         /// <summary>
@@ -80,7 +88,7 @@ namespace EZNEW.Develop.Entity
         /// key:relation type id
         /// value: key->field,value:relation field
         /// </summary>
-        public Dictionary<Guid, Dictionary<string,string>> RelationFields
+        public Dictionary<Guid, Dictionary<string, string>> RelationFields
         {
             get; set;
         }

@@ -17,6 +17,20 @@ namespace EZNEW.Develop.UnitOfWork
     /// </summary>
     public class DefaultUnitOfWork : IUnitOfWork
     {
+        /// <summary>
+        /// instance a defaultunitofwork object
+        /// </summary>
+        internal DefaultUnitOfWork()
+        {
+            WorkFactory.Current?.Dispose();
+            WorkId = Guid.NewGuid().ToString();
+            DomainEventManager = new DomainEventManager();
+            WorkFactory.InvokeCreateWorkEventHandler(this);
+            WorkFactory.Current = this;
+        }
+
+        #region fields
+
         //command list
         List<ICommand> commandList = null;
         Dictionary<string, Tuple<ICommandEngine, List<ICommand>>> commandGroup = null;
@@ -30,7 +44,14 @@ namespace EZNEW.Develop.UnitOfWork
         int recordCounter = 1;
 
         //data warehouses
-        Dictionary<Guid, IDataWarehouse> repositoryWarehouses = new Dictionary<Guid, IDataWarehouse>();//data warehouse
+        Dictionary<Guid, IDataWarehouse> repositoryWarehouses = new Dictionary<Guid, IDataWarehouse>();//data warehouse 
+
+        //event handler
+        static event Action<IUnitOfWork, CommitResult, IEnumerable<ICommand>> commitSuccessEventHandler;
+
+        #endregion
+
+        #region propertys
 
         /// <summary>
         /// domain event manager
@@ -41,23 +62,6 @@ namespace EZNEW.Develop.UnitOfWork
         /// domain events
         /// </summary>
         public List<IDomainEvent> DomainEvents { get; } = new List<IDomainEvent>();
-
-        /// <summary>
-        /// commit success callback event
-        /// </summary>
-        public event Action CommitSuccessCallbackEvent;
-
-        /// <summary>
-        /// instance a defaultunitofwork object
-        /// </summary>
-        internal DefaultUnitOfWork()
-        {
-            WorkFactory.Current?.Dispose();
-            WorkFactory.InvokeCreateWorkEvent();
-            WorkFactory.Current = this;
-            WorkId = Guid.NewGuid().ToString();
-            DomainEventManager = new DomainEventManager();
-        }
 
         /// <summary>
         /// command count
@@ -75,21 +79,16 @@ namespace EZNEW.Develop.UnitOfWork
         /// </summary>
         public string WorkId { get; } = string.Empty;
 
-        /// <summary>
-        /// Add Commands To UnitOfWork
-        /// </summary>
-        /// <param name="cmds">Commands</param>
-        public void AddCommand(params ICommand[] cmds)
-        {
-            if (cmds == null)
-            {
-                return;
-            }
-            commandList.AddRange(cmds);
-        }
+        #endregion
+
+        #region methods
+
+        #region activation record
+
+        #region add work activation
 
         /// <summary>
-        /// add activation operation
+        /// add work activation
         /// </summary>
         /// <param name="records"></param>
         public void AddActivation(params IActivationRecord[] records)
@@ -100,6 +99,10 @@ namespace EZNEW.Develop.UnitOfWork
             }
             activationRecords.AddRange(records);
         }
+
+        #endregion
+
+        #region resolve activation record
 
         /// <summary>
         /// resolve activation record
@@ -160,64 +163,20 @@ namespace EZNEW.Develop.UnitOfWork
             }
         }
 
-        /// <summary>
-        /// Commit Work
-        /// </summary>
-        /// <returns></returns>
-        public CommitResult Commit()
-        {
-            return CommitAsync().Result;
-        }
+        #endregion
 
         /// <summary>
-        /// Commit Work
+        /// get record id
         /// </summary>
         /// <returns></returns>
-        public async Task<CommitResult> CommitAsync()
+        public int GetRecordId()
         {
-            try
-            {
-                //build commands
-                BuildCommand();
-                //object command
-                if (commandGroup.IsNullOrEmpty())
-                {
-                    return new CommitResult()
-                    {
-                        CommitCommandCount = 0,
-                        ExecutedDataCount = 0
-                    };
-                }
-                bool beforeExecuteResult = await ExecuteCommandBeforeExecuteAsync().ConfigureAwait(false);
-                if (!beforeExecuteResult)
-                {
-                    throw new Exception("any command BeforeExecute event return fail");
-                }
-                var result = await CommandExecuteManager.ExecuteAsync(commandGroup.Values).ConfigureAwait(false);
-                var commitResult = new CommitResult()
-                {
-                    CommitCommandCount = commandList.Count,
-                    ExecutedDataCount = result,
-                    AllowEmptyResultCommandCount = allowEmptyResultCommandCount
-                };
-                await ExecuteCommandCallbackAsync(commitResult.EmptyResultOrSuccess).ConfigureAwait(false);
-                if (commitResult.EmptyResultOrSuccess)
-                {
-                    CommitSuccessCallbackEvent?.Invoke();//local unit work success callback
-                    WorkFactory.InvokeCommitSuccessEvent();//unit work global success callback
-                    await ExecuteWorkCompletedDomainEventAsync().ConfigureAwait(false);//execute domain event
-                }
-                return commitResult;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-                CommitCompleted();
-            }
+            return recordCounter++;
         }
+
+        #endregion
+
+        #region command
 
         /// <summary>
         /// parse activation record
@@ -267,15 +226,6 @@ namespace EZNEW.Develop.UnitOfWork
         }
 
         /// <summary>
-        /// get record id
-        /// </summary>
-        /// <returns></returns>
-        public int GetRecordId()
-        {
-            return recordCounter++;
-        }
-
-        /// <summary>
         /// get command id
         /// </summary>
         /// <returns></returns>
@@ -283,6 +233,121 @@ namespace EZNEW.Develop.UnitOfWork
         {
             return commandCounter++;
         }
+
+        /// <summary>
+        /// Execute Command Before Execute
+        /// </summary>
+        /// <param name="cmds">command</param>
+        async Task<bool> ExecuteCommandBeforeExecuteAsync()
+        {
+            if (commandList.IsNullOrEmpty())
+            {
+                return false;
+            }
+            bool result = true;
+            foreach (var cmd in commandList)
+            {
+                result = result && (cmd.ExecuteBeforeExecuteOperation()?.AllowExecuteCommand ?? false);
+            }
+            return await Task.FromResult(result);
+        }
+
+        /// <summary>
+        /// Execute Command Callback
+        /// </summary>
+        /// <param name="cmds">commands</param>
+        async Task ExecuteCommandCallbackAsync(bool success)
+        {
+            if (commandList.IsNullOrEmpty())
+            {
+                return;
+            }
+            foreach (var cmd in commandList)
+            {
+                cmd.ExecuteCallbackOperation(success);
+            }
+            await Task.CompletedTask;
+        }
+
+        #endregion
+
+        #region commit
+
+        /// <summary>
+        /// Commit Work
+        /// </summary>
+        /// <returns></returns>
+        public CommitResult Commit()
+        {
+            return CommitAsync().Result;
+        }
+
+        /// <summary>
+        /// Commit Work
+        /// </summary>
+        /// <returns></returns>
+        public async Task<CommitResult> CommitAsync()
+        {
+            try
+            {
+                //build commands
+                BuildCommand();
+                //object command
+                if (commandGroup.IsNullOrEmpty())
+                {
+                    return new CommitResult()
+                    {
+                        CommitCommandCount = 0,
+                        ExecutedDataCount = 0
+                    };
+                }
+                bool beforeExecuteResult = await ExecuteCommandBeforeExecuteAsync().ConfigureAwait(false);
+                if (!beforeExecuteResult)
+                {
+                    throw new Exception("any command BeforeExecute event return fail");
+                }
+                var result = await CommandExecuteManager.ExecuteAsync(commandGroup.Values).ConfigureAwait(false);
+                var commitResult = new CommitResult()
+                {
+                    CommitCommandCount = commandList.Count,
+                    ExecutedDataCount = result,
+                    AllowEmptyResultCommandCount = allowEmptyResultCommandCount
+                };
+                await ExecuteCommandCallbackAsync(commitResult.EmptyResultOrSuccess).ConfigureAwait(false);
+                if (commitResult.EmptyResultOrSuccess)
+                {
+                    InvokeCommitSuccessEventHandler(commitResult);//local unit work success callback
+                    WorkFactory.InvokeWorkCommitSuccessEventHandler(this, commitResult, commandList);//unit work global success callback
+                    await ExecuteWorkCompletedDomainEventAsync().ConfigureAwait(false);//execute domain event
+                }
+                return commitResult;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                CommitCompleted();
+            }
+        }
+
+        /// <summary>
+        /// commit completed
+        /// </summary>
+        void CommitCompleted()
+        {
+            commandCounter = 0;
+            recordCounter = 0;
+            allowEmptyResultCommandCount = 0;
+            commandList?.Clear();
+            commandGroup?.Clear();
+            activationRecords?.Clear();
+        }
+
+        #endregion
+
+        #region warehouse
 
         /// <summary>
         /// get data warehouse by entity type
@@ -299,63 +364,50 @@ namespace EZNEW.Develop.UnitOfWork
             return warehouse as DataWarehouse<ET>;
         }
 
-        /// <summary>
-        /// commit completed
-        /// </summary>
-        void CommitCompleted()
-        {
-            commandCounter = 0;
-            recordCounter = 0;
-            allowEmptyResultCommandCount = 0;
-            commandList?.Clear();
-            commandGroup?.Clear();
-            activationRecords?.Clear();
-        }
+        #endregion
+
+        #region work event
+
+        #region register commit success event handler
 
         /// <summary>
-        /// Dispose
+        /// register commit success event handler
         /// </summary>
-        public void Dispose()
+        /// <param name="handlers">handlers</param>
+        public void RegisterCommitSuccessEventHandler(params Action<IUnitOfWork, CommitResult, IEnumerable<ICommand>>[] handlers)
         {
-            CommitCompleted();
-            repositoryWarehouses?.Clear();
-            DomainEventManager = null;
-            DomainEvents?.Clear();
-        }
-
-        /// <summary>
-        /// Execute Command Before Execute
-        /// </summary>
-        /// <param name="cmds">command</param>
-        async Task<bool> ExecuteCommandBeforeExecuteAsync()
-        {
-            if (commandList.IsNullOrEmpty())
-            {
-                return false;
-            }
-            bool result = true;
-            foreach (var cmd in commandList)
-            {
-                result = result && await cmd.ExecuteBeforeAsync().ConfigureAwait(false);
-            }
-            return result;
-        }
-
-        /// <summary>
-        /// Execute Command Callback
-        /// </summary>
-        /// <param name="cmds">commands</param>
-        async Task ExecuteCommandCallbackAsync(bool success)
-        {
-            if (commandList.IsNullOrEmpty())
+            if (handlers.IsNullOrEmpty())
             {
                 return;
             }
-            foreach (var cmd in commandList)
+            foreach (var handler in handlers)
             {
-                await cmd.ExecuteCompleteAsync(success).ConfigureAwait(false);
+                commitSuccessEventHandler += handler;
             }
         }
+
+        #endregion
+
+        #region invoke commit success event handler
+
+        /// <summary>
+        /// invoke commit success event handler
+        /// </summary>
+        /// <param name="commitResult"></param>
+        void InvokeCommitSuccessEventHandler(CommitResult commitResult)
+        {
+            commitSuccessEventHandler?.Invoke(this, commitResult, commandList);
+        }
+
+        #endregion
+
+        #region 
+
+        #endregion
+
+        #endregion
+
+        #region domain event
 
         /// <summary>
         /// publish domain event
@@ -388,9 +440,28 @@ namespace EZNEW.Develop.UnitOfWork
             var eventArray = DomainEvents.ToArray();
             if (DomainEventBus.globalDomainEventManager != null)
             {
-                await DomainEventBus.globalDomainEventManager.ExecutedTimeDomainEventAsync(EventExecuteTime.WorkCompleted, eventArray).ConfigureAwait(false);//execute global event handler
+                await DomainEventBus.globalDomainEventManager.ExecutedTimeDomainEventAsync(EventTriggerTime.WorkCompleted, eventArray).ConfigureAwait(false);//execute global event handler
             }
-            await DomainEventManager.ExecutedTimeDomainEventAsync(EventExecuteTime.WorkCompleted, eventArray).ConfigureAwait(false);//execute local work event handler
+            await DomainEventManager.ExecutedTimeDomainEventAsync(EventTriggerTime.WorkCompleted, eventArray).ConfigureAwait(false);//execute local work event handler
         }
+
+        #endregion
+
+        #region dispose
+
+        /// <summary>
+        /// Dispose
+        /// </summary>
+        public void Dispose()
+        {
+            CommitCompleted();
+            repositoryWarehouses?.Clear();
+            DomainEventManager = null;
+            DomainEvents?.Clear();
+        } 
+
+        #endregion
+
+        #endregion
     }
 }

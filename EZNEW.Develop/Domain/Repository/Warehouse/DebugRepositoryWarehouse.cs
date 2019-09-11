@@ -18,13 +18,8 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
     /// <summary>
     /// repository warehouses
     /// </summary>
-    public class DefaultRepositoryWarehouse<ET, DAI> : IRepositoryWarehouse<ET, DAI> where ET : BaseEntity<ET> where DAI : IDataAccess<ET>
+    public class DebugRepositoryWarehouse<ET, DAI> : IRepositoryWarehouse<ET, DAI> where ET : BaseEntity<ET> where DAI : IDataAccess<ET>
     {
-        /// <summary>
-        /// data access
-        /// </summary>
-        DAI dataAccess = ContainerManager.Resolve<DAI>();
-
         #region save
 
         /// <summary>
@@ -117,9 +112,9 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// <returns>data</returns>
         public async Task<ET> GetAsync(IQuery query)
         {
-            var data = await dataAccess.GetAsync(query).ConfigureAwait(false);
+            ET data = null;
             data = WarehouseManager.Merge(data, query);
-            return data;
+            return await Task.FromResult(data);
         }
 
         /// <summary>
@@ -129,9 +124,9 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// <returns>object list</returns>
         public async Task<List<ET>> GetListAsync(IQuery query)
         {
-            var datas = await dataAccess.GetListAsync(query).ConfigureAwait(false);
+            var datas = new List<ET>(0);
             datas = WarehouseManager.Merge<ET>(datas, query);
-            return datas;
+            return await Task.FromResult(datas);
         }
 
         /// <summary>
@@ -141,9 +136,9 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// <returns>object paging</returns>
         public async Task<IPaging<ET>> GetPagingAsync(IQuery query)
         {
-            var paging = await dataAccess.GetPagingAsync(query).ConfigureAwait(false);
+            IPaging<ET> paging = Paging<ET>.EmptyPaging();
             paging = WarehouseManager.MergePaging(paging, query);
-            return paging;
+            return await Task.FromResult(paging);
         }
 
         /// <summary>
@@ -155,10 +150,6 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         {
             var result = await WarehouseManager.ExistAsync<ET>(query).ConfigureAwait(false);
             var isExist = result.IsExist;
-            if (!isExist)
-            {
-                isExist = await dataAccess.ExistAsync(result.CheckQuery).ConfigureAwait(false);
-            }
             return isExist;
         }
 
@@ -169,7 +160,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// <returns></returns>
         public async Task<long> CountAsync(IQuery query)
         {
-            var allCount = await dataAccess.CountAsync(query).ConfigureAwait(false);
+            long allCount = 0;
             var countResult = await WarehouseManager.CountAsync<ET>(query).ConfigureAwait(false);
             allCount = allCount - countResult.PersistentDataCount + countResult.NewDataCount;
             return allCount;
@@ -185,8 +176,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         {
             var maxResult = await WarehouseManager.MaxAsync<ET, DT>(query).ConfigureAwait(false);
             dynamic resultVal = maxResult.Value;
-            dynamic maxValue = await dataAccess.MaxAsync<DT>(maxResult.ComputeQuery).ConfigureAwait(false);
-            return resultVal > maxValue ? resultVal : maxValue;
+            return resultVal;
         }
 
         /// <summary>
@@ -199,8 +189,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         {
             var minResult = await WarehouseManager.MinAsync<ET, DT>(query).ConfigureAwait(false);
             dynamic resultVal = minResult.Value;
-            dynamic minValue = await dataAccess.MinAsync<DT>(minResult.ComputeQuery).ConfigureAwait(false);
-            return resultVal < minValue ? resultVal : minValue;
+            return resultVal;
         }
 
         /// <summary>
@@ -213,8 +202,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         {
             var sumResult = await WarehouseManager.SumAsync<ET, DT>(query).ConfigureAwait(false);
             dynamic resultVal = sumResult.Value;
-            dynamic sumValue = await dataAccess.SumAsync<DT>(sumResult.ComputeQuery).ConfigureAwait(false);
-            return resultVal + sumValue;
+            return resultVal;
         }
 
         /// <summary>
@@ -225,17 +213,9 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// <returns>average value</returns>
         public async Task<DT> AvgAsync<DT>(IQuery query)
         {
-            var countResult = await WarehouseManager.CountAsync<ET>(query).ConfigureAwait(false);
-            if (countResult.TotalDataCount > 0)
-            {
-                dynamic sum = await SumAsync<DT>(query).ConfigureAwait(false);
-                var count = await CountAsync(query).ConfigureAwait(false);
-                return sum / count;
-            }
-            else
-            {
-                return await dataAccess.AvgAsync<DT>(query).ConfigureAwait(false);
-            }
+            dynamic sum = await SumAsync<DT>(query).ConfigureAwait(false);
+            var count = await CountAsync(query).ConfigureAwait(false);
+            return sum / count;
         }
 
         #endregion

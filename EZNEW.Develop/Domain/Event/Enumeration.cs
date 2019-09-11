@@ -5,9 +5,9 @@ using System.Text;
 namespace EZNEW.Develop.Domain.Event
 {
     /// <summary>
-    /// event execute time
+    /// event trigger time
     /// </summary>
-    public enum EventExecuteTime
+    public enum EventTriggerTime
     {
         Immediately = 2,
         WorkCompleted = 4

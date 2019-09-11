@@ -59,7 +59,7 @@ namespace EZNEW.Develop.Domain.Event
         /// <typeparam name="Event">event</typeparam>
         /// <param name="eventHandleOperation">event handle operation</param>
         /// <param name="executeTime">execute time</param>
-        public static void GlobalSubscribe<Event>(Func<Event, DomainEventExecuteResult> eventHandleOperation, EventExecuteTime executeTime = EventExecuteTime.Immediately) where Event : class, IDomainEvent
+        public static void GlobalSubscribe<Event>(Func<Event, DomainEventExecuteResult> eventHandleOperation, EventTriggerTime executeTime = EventTriggerTime.Immediately) where Event : class, IDomainEvent
         {
             globalDomainEventManager?.Subscribe(eventHandleOperation, executeTime);
         }
@@ -70,7 +70,7 @@ namespace EZNEW.Develop.Domain.Event
         /// <typeparam name="Event"></typeparam>
         /// <param name="eventHandleOperationAsync">event handle operation</param>
         /// <param name="executeTime">execute time</param>
-        public static void GlobalSubscribe<Event>(Func<Event, Task<DomainEventExecuteResult>> eventHandleOperationAsync, EventExecuteTime executeTime = EventExecuteTime.Immediately) where Event : class, IDomainEvent
+        public static void GlobalSubscribe<Event>(Func<Event, Task<DomainEventExecuteResult>> eventHandleOperationAsync, EventTriggerTime executeTime = EventTriggerTime.Immediately) where Event : class, IDomainEvent
         {
             globalDomainEventManager?.Subscribe(eventHandleOperationAsync, executeTime);
         }
@@ -94,7 +94,7 @@ namespace EZNEW.Develop.Domain.Event
         /// </summary>
         /// <param name="eventHandleOperation">event handle operation</param>
         /// <param name="executeTime">execute time</param>
-        public static void GlobalSubscribeAll(Func<IDomainEvent, DomainEventExecuteResult> eventHandleOperation, EventExecuteTime executeTime = EventExecuteTime.Immediately)
+        public static void GlobalSubscribeAll(Func<IDomainEvent, DomainEventExecuteResult> eventHandleOperation, EventTriggerTime executeTime = EventTriggerTime.Immediately)
         {
             globalDomainEventManager?.SubscribeAll(eventHandleOperation, executeTime);
         }
@@ -104,7 +104,7 @@ namespace EZNEW.Develop.Domain.Event
         /// </summary>
         /// <param name="eventHandleOperationAsync">event handle operation</param>
         /// <param name="executeTime">execute time</param>
-        public static void GlobalSubscribeAll(Func<IDomainEvent, Task<DomainEventExecuteResult>> eventHandleOperationAsync, EventExecuteTime executeTime = EventExecuteTime.Immediately)
+        public static void GlobalSubscribeAll(Func<IDomainEvent, Task<DomainEventExecuteResult>> eventHandleOperationAsync, EventTriggerTime executeTime = EventTriggerTime.Immediately)
         {
             globalDomainEventManager?.SubscribeAll(eventHandleOperationAsync, executeTime);
         }
@@ -128,9 +128,9 @@ namespace EZNEW.Develop.Domain.Event
         /// <typeparam name="Event">event</typeparam>
         /// <param name="eventHandleOperation">event handle operation</param>
         /// <param name="executeTime">execute time</param>
-        public static void WorkSubscribe<Event>(Func<Event, DomainEventExecuteResult> eventHandleOperation, EventExecuteTime executeTime = EventExecuteTime.Immediately) where Event : class, IDomainEvent
+        public static void WorkSubscribe<Event>(Func<Event, DomainEventExecuteResult> eventHandleOperation, EventTriggerTime executeTime = EventTriggerTime.Immediately) where Event : class, IDomainEvent
         {
-            WorkFactory.Current?.DomainEventManager?.Subscribe<Event>(eventHandleOperation, executeTime);
+            WorkFactory.Current?.DomainEventManager?.Subscribe(eventHandleOperation, executeTime);
         }
 
         /// <summary>
@@ -139,7 +139,7 @@ namespace EZNEW.Develop.Domain.Event
         /// <typeparam name="Event"></typeparam>
         /// <param name="eventHandleOperationAsync">event handle operation</param>
         /// <param name="executeTime">execute time</param>
-        public static void WorkSubscribe<Event>(Func<Event, Task<DomainEventExecuteResult>> eventHandleOperationAsync, EventExecuteTime executeTime = EventExecuteTime.Immediately) where Event : class, IDomainEvent
+        public static void WorkSubscribe<Event>(Func<Event, Task<DomainEventExecuteResult>> eventHandleOperationAsync, EventTriggerTime executeTime = EventTriggerTime.Immediately) where Event : class, IDomainEvent
         {
             WorkFactory.Current?.DomainEventManager?.Subscribe<Event>(eventHandleOperationAsync, executeTime);
         }
@@ -163,7 +163,7 @@ namespace EZNEW.Develop.Domain.Event
         /// </summary>
         /// <param name="eventHandleOperation">event handle operation</param>
         /// <param name="executeTime">execute time</param>
-        public static void WorkSubscribeAll(Func<IDomainEvent, DomainEventExecuteResult> eventHandleOperation, EventExecuteTime executeTime = EventExecuteTime.Immediately)
+        public static void WorkSubscribeAll(Func<IDomainEvent, DomainEventExecuteResult> eventHandleOperation, EventTriggerTime executeTime = EventTriggerTime.Immediately)
         {
             WorkFactory.Current?.DomainEventManager?.SubscribeAll(eventHandleOperation, executeTime);
         }
@@ -173,7 +173,7 @@ namespace EZNEW.Develop.Domain.Event
         /// </summary>
         /// <param name="eventHandleOperationAsync">event handle operation</param>
         /// <param name="executeTime">execute time</param>
-        public static void WorkSubscribeAll(Func<IDomainEvent, Task<DomainEventExecuteResult>> eventHandleOperationAsync, EventExecuteTime executeTime = EventExecuteTime.Immediately)
+        public static void WorkSubscribeAll(Func<IDomainEvent, Task<DomainEventExecuteResult>> eventHandleOperationAsync, EventTriggerTime executeTime = EventTriggerTime.Immediately)
         {
             WorkFactory.Current?.DomainEventManager?.SubscribeAll(eventHandleOperationAsync, executeTime);
         }

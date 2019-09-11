@@ -24,6 +24,47 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
     /// </summary>
     public static class WarehouseManager
     {
+        #region propertys
+
+        /// <summary>
+        /// dev debug
+        /// </summary>
+        static bool devDebug = false;
+
+        #endregion
+
+        #region set debug
+
+        public static void SetDebug()
+        {
+            devDebug = true;
+        }
+
+        #endregion
+
+        #region register default warehouse
+
+        /// <summary>
+        /// register default warehouse
+        /// </summary>
+        internal static void RegisterDefaultWarehouse<ET, DAI>() where ET : BaseEntity<ET> where DAI : IDataAccess<ET>
+        {
+            if (ContainerManager.IsRegister<IRepositoryWarehouse<ET, DAI>>())
+            {
+                return;
+            }
+            if (devDebug)
+            {
+                ContainerManager.Register<IRepositoryWarehouse<ET, DAI>, DebugRepositoryWarehouse<ET, DAI>>();
+            }
+            else
+            {
+                ContainerManager.Register<IRepositoryWarehouse<ET, DAI>, DefaultRepositoryWarehouse<ET, DAI>>();
+            }
+        }
+
+        #endregion
+
         #region merge
 
         /// <summary>
@@ -342,7 +383,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
 
         #endregion
 
-        #region get not init unit work
+        #region get not init unit work exception
 
         static EZNEWException NotInitUnitWork()
         {

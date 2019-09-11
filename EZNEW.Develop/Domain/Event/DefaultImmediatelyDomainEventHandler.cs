@@ -13,6 +13,6 @@ namespace EZNEW.Develop.Domain.Event
         /// <summary>
         /// execute time
         /// </summary>
-        public EventExecuteTime ExecuteTime { get; } = EventExecuteTime.Immediately;
+        public EventTriggerTime ExecuteTime { get; } = EventTriggerTime.Immediately;
     }
 }

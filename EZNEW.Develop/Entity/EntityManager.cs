@@ -6,13 +6,14 @@ using System.Reflection;
 using EZNEW.Framework.Extension;
 using System.Linq.Expressions;
 using EZNEW.Framework.ExpressionUtil;
+using System.Collections.Concurrent;
 
 namespace EZNEW.Develop.Entity
 {
     /// <summary>
     /// entity manager
     /// </summary>
-    public class EntityManager
+    public static class EntityManager
     {
         #region Propertys
 
@@ -20,19 +21,16 @@ namespace EZNEW.Develop.Entity
         /// entity config
         /// key:entity type guid
         /// </summary>
-        public static Dictionary<Guid, EntityConfig> EntityConfigs
+        public static ConcurrentDictionary<Guid, EntityConfig> EntityConfigs
         {
             get; private set;
-        } = new Dictionary<Guid, EntityConfig>();
-
-        /// <summary>
-        /// alread config entitys
-        /// </summary>
-        static HashSet<Guid> AlreadConfigEntitys = new HashSet<Guid>();
+        } = new ConcurrentDictionary<Guid, EntityConfig>();
 
         #endregion
 
         #region Methods
+
+        #region entity config
 
         #region config entity
 
@@ -40,7 +38,7 @@ namespace EZNEW.Develop.Entity
         /// config entity
         /// </summary>
         /// <typeparam name="T">entty type</typeparam>
-        public static void ConfigEntity<T>()
+        internal static void ConfigEntity<T>() where T : BaseEntity<T>
         {
             var type = typeof(T);
             ConfigEntity(type);
@@ -50,18 +48,17 @@ namespace EZNEW.Develop.Entity
         /// config entity
         /// </summary>
         /// <param name="type">entity type</param>
-        public static void ConfigEntity(Type type)
+        internal static void ConfigEntity(Type type)
         {
             if (type == null)
             {
                 return;
             }
             var typeGuid = type.GUID;
-            if (AlreadConfigEntitys.Contains(typeGuid))
+            if (EntityConfigs.ContainsKey(typeGuid))
             {
                 return;
             }
-            AlreadConfigEntitys.Add(typeGuid);
             var entityAttribute = (type.GetCustomAttributes(typeof(EntityAttribute), false)?.FirstOrDefault()) as EntityAttribute;
             if (entityAttribute == null)
             {
@@ -79,11 +76,15 @@ namespace EZNEW.Develop.Entity
                 entityConfig.TableName = objectName;
             }
             //fields
-            List<EntityField> editFields = new List<EntityField>();
-            List<EntityField> queryFields = new List<EntityField>();
             List<EntityField> allFields = new List<EntityField>();
             List<EntityField> primaryKeys = new List<EntityField>();
+
+            //cache keys
             List<EntityField> cacheKeys = new List<EntityField>();
+            List<EntityField> cachePrefixKeys = new List<EntityField>();
+            List<EntityField> cacheIgnoreKeys = new List<EntityField>();
+
+            List<EntityField> queryFields = new List<EntityField>();
             EntityField versionField = null;
             EntityField refreshDateField = null;
 
@@ -97,7 +98,7 @@ namespace EZNEW.Develop.Entity
                 bool refreshDate = false;
                 bool disableQuery = false;
                 bool primaryKey = false;
-                bool cacheKey = false;
+                EntityFieldCacheOption cacheOption = EntityFieldCacheOption.None;
                 string queryFormat = string.Empty;
                 if (entityFieldAttribute != null)
                 {
@@ -111,26 +112,39 @@ namespace EZNEW.Develop.Entity
                     disableQuery = entityFieldAttribute.DisableQuery;
                     queryFormat = entityFieldAttribute.QueryFormat;
                     primaryKey = entityFieldAttribute.PrimaryKey;
-                    cacheKey = entityFieldAttribute.CacheKey;
+                    cacheOption = entityFieldAttribute.CacheOption;
                 }
                 var propertyField = new EntityField()
                 {
                     FieldName = name,
                     PropertyName = propertyName,
-                    QueryFormat = queryFormat
+                    QueryFormat = queryFormat,
+                    CacheOption = cacheOption,
+                    IsDisableEdit = disableEdit,
+                    IsDisableQuery = disableQuery,
+                    IsPrimaryKey = primaryKey,
+                    IsRefreshDate = refreshDate,
+                    IsVersion = isVersion
                 };
                 allFields.Add(propertyField);
                 if (primaryKey)
                 {
                     primaryKeys.Add(propertyField);
                 }
-                if (!disableQuery)
+                else
                 {
-                    queryFields.Add(propertyField);
-                }
-                if (!disableEdit)
-                {
-                    editFields.Add(propertyField);
+                    if ((cacheOption & EntityFieldCacheOption.CacheKey) != 0)
+                    {
+                        cacheKeys.Add(propertyField);
+                    }
+                    if ((cacheOption & EntityFieldCacheOption.CacheKeyPrefix) != 0)
+                    {
+                        cachePrefixKeys.Add(propertyField);
+                    }
+                    if ((cacheOption & EntityFieldCacheOption.Ignore) != 0)
+                    {
+                        cacheIgnoreKeys.Add(propertyField);
+                    }
                 }
                 if (isVersion)
                 {
@@ -140,9 +154,9 @@ namespace EZNEW.Develop.Entity
                 {
                     refreshDateField = propertyField;
                 }
-                if (cacheKey && !primaryKey)
+                if (!disableQuery)
                 {
-                    cacheKeys.Add(propertyField);
+                    queryFields.Add(propertyField);
                 }
 
                 //relation config
@@ -185,14 +199,6 @@ namespace EZNEW.Develop.Entity
             {
                 entityConfig.AllFields = allFields;
             }
-            if (entityConfig.EditFields.IsNullOrEmpty())
-            {
-                entityConfig.EditFields = editFields;
-            }
-            if (entityConfig.QueryFields.IsNullOrEmpty())
-            {
-                entityConfig.QueryFields = queryFields;
-            }
             if (entityConfig.VersionField == null)
             {
                 entityConfig.VersionField = versionField;
@@ -205,6 +211,18 @@ namespace EZNEW.Develop.Entity
             {
                 entityConfig.CacheKeys = cacheKeys;
             }
+            if (entityConfig.CachePrefixKeys.IsNullOrEmpty())
+            {
+                entityConfig.CachePrefixKeys = cachePrefixKeys;
+            }
+            if (entityConfig.CacheIgnoreKeys.IsNullOrEmpty())
+            {
+                entityConfig.CacheIgnoreKeys = cacheIgnoreKeys;
+            }
+            if (entityConfig.QueryFields.IsNullOrEmpty())
+            {
+                entityConfig.QueryFields = queryFields;
+            }
             ConfigEntity(type.GUID, entityConfig);
         }
 
@@ -212,7 +230,7 @@ namespace EZNEW.Develop.Entity
         /// config entity
         /// </summary>
         /// <param name="entityConfig">entity config</param>
-        public static void ConfigEntity(string typeAssemblyQualifiedName)
+        internal static void ConfigEntity(string typeAssemblyQualifiedName)
         {
             var type = Type.GetType(typeAssemblyQualifiedName);
             ConfigEntity(type);
@@ -229,14 +247,7 @@ namespace EZNEW.Develop.Entity
             {
                 return;
             }
-            if (EntityConfigs.ContainsKey(typeGuid))
-            {
-                EntityConfigs[typeGuid] = entityConfig;
-            }
-            else
-            {
-                EntityConfigs.Add(typeGuid, entityConfig);
-            }
+            EntityConfigs[typeGuid] = entityConfig;
         }
 
         #endregion
@@ -255,8 +266,8 @@ namespace EZNEW.Develop.Entity
                 return null;
             }
             var typeGuid = type.GUID;
-            EntityConfigs.TryGetValue(typeGuid, out EntityConfig entityConfig);
-            if (entityConfig == null && !AlreadConfigEntitys.Contains(typeGuid))
+            EntityConfigs.TryGetValue(typeGuid, out var entityConfig);
+            if (entityConfig == null)
             {
                 ConfigEntity(type);
                 EntityConfigs.TryGetValue(typeGuid, out entityConfig);
@@ -288,7 +299,11 @@ namespace EZNEW.Develop.Entity
             return GetEntityConfig(Type.GetType(typeAssemblyQualifiedName));
         }
 
+        #endregion 
+
         #endregion
+
+        #region object name
 
         #region config object name
 
@@ -318,7 +333,11 @@ namespace EZNEW.Develop.Entity
             {
                 return;
             }
-            ConfigObjectName(type.GUID, objectName);
+            var entityConfig = GetEntityConfig(type);
+            if (entityConfig != null)
+            {
+                entityConfig.TableName = objectName;
+            }
         }
 
         /// <summary>
@@ -330,25 +349,6 @@ namespace EZNEW.Develop.Entity
         {
             var type = Type.GetType(typeAssemblyQualifiedName);
             ConfigObjectName(type, objectName);
-        }
-
-        /// <summary>
-        /// config entity object name
-        /// </summary>
-        /// <param name="typeGuid">type guid</param>
-        /// <param name="objectName">object name</param>
-        static void ConfigObjectName(Guid typeGuid, string objectName)
-        {
-            if (objectName.IsNullOrEmpty())
-            {
-                return;
-            }
-            if (EntityConfigs.TryGetValue(typeGuid, out EntityConfig entityConfig))
-            {
-                entityConfig = new EntityConfig();
-            }
-            entityConfig.TableName = objectName;
-            ConfigEntity(typeGuid, entityConfig);
         }
 
         #endregion
@@ -397,166 +397,52 @@ namespace EZNEW.Develop.Entity
 
         #endregion
 
-        #region config edit fields
-
-        /// <summary>
-        /// config edit fields
-        /// </summary>
-        /// <typeparam name="T">entity type</typeparam>
-        /// <param name="fields">edit fields</param>
-        public static void ConfigEntityEditFields<T>(IEnumerable<EntityField> fields)
-        {
-            ConfigEntityEditFields(typeof(T), fields);
-        }
-
-        /// <summary>
-        /// config edit fields
-        /// </summary>
-        /// <param name="type">entity type</param>
-        /// <param name="fields">edit fields</param>
-        public static void ConfigEntityEditFields(Type type, IEnumerable<EntityField> fields)
-        {
-            if (type == null)
-            {
-                return;
-            }
-            ConfigEntityEditFields(type.GUID, fields);
-        }
-
-        /// <summary>
-        /// config edit fields
-        /// </summary>
-        /// <param name="typeAssemblyQualifiedName">type full name</param>
-        /// <param name="fields">edit fields</param>
-        public static void ConfigEntityEditFields(string typeAssemblyQualifiedName, IEnumerable<EntityField> fields)
-        {
-            var type = Type.GetType(typeAssemblyQualifiedName);
-            ConfigEntityEditFields(type, fields);
-        }
-
-        /// <summary>
-        /// config entity edit fields
-        /// </summary>
-        /// <param name="typeGuid">type guid</param>
-        /// <param name="fields">fields</param>
-        static void ConfigEntityEditFields(Guid typeGuid, IEnumerable<EntityField> fields)
-        {
-            if (fields.IsNullOrEmpty())
-            {
-                return;
-            }
-            if (EntityConfigs.TryGetValue(typeGuid, out EntityConfig entityConfig))
-            {
-                entityConfig = new EntityConfig();
-            }
-            entityConfig.EditFields = fields.ToList();
-            ConfigEntity(typeGuid, entityConfig);
-        }
-
         #endregion
 
-        #region get edit fields
+        #region fields
+
+        #region set fields
 
         /// <summary>
-        /// get entity edit fields
+        /// set fields
         /// </summary>
-        /// <param name="typeAssemblyQualifiedName">entity type full name</param>
-        /// <returns></returns>
-        public static List<EntityField> GetEntityEditFields(string typeAssemblyQualifiedName)
-        {
-            if (typeAssemblyQualifiedName.IsNullOrEmpty())
-            {
-                return new List<EntityField>(0);
-            }
-            var type = Type.GetType(typeAssemblyQualifiedName);
-            return GetEntityEditFields(type);
-        }
-
-        /// <summary>
-        /// get entity edit fields
-        /// </summary>
-        /// <param name="type">entity type</param>
-        /// <returns></returns>
-        public static List<EntityField> GetEntityEditFields(Type type)
+        /// <param name="type">type</param>
+        /// <param name="fields">fields</param>
+        public static void SetFields(Type type, IEnumerable<EntityField> fields)
         {
             if (type == null)
             {
-                return new List<EntityField>(0);
+                return;
             }
             var entityConfig = GetEntityConfig(type);
-            return entityConfig.EditFields ?? new List<EntityField>(0);
-        }
-
-        /// <summary>
-        /// get entity edit fields
-        /// </summary>
-        /// <typeparam name="T">entity type</typeparam>
-        /// <returns></returns>
-        public static List<EntityField> GetEntityEditFields<T>()
-        {
-            return GetEntityEditFields(typeof(T));
+            if (entityConfig == null)
+            {
+                return;
+            }
+            var otherFields = entityConfig.AllFields?.Except(fields);
+            if (otherFields.IsNullOrEmpty())
+            {
+                entityConfig.AllFields = fields.ToList();
+            }
+            else
+            {
+                entityConfig.AllFields = otherFields.Union(fields).ToList();
+            }
         }
 
         #endregion
 
-        #region config query fields
+        #region get fields
 
         /// <summary>
-        /// config query fields
-        /// </summary>
-        /// <typeparam name="T">entity type</typeparam>
-        /// <param name="fields">query fields</param>
-        public static void ConfigEntityQueryFields<T>(IEnumerable<EntityField> fields)
-        {
-            ConfigEntityQueryFields(typeof(T), fields);
-        }
-
-        /// <summary>
-        /// config query fields
+        /// get fields
         /// </summary>
         /// <param name="type">entity type</param>
-        /// <param name="fields">query fields</param>
-        public static void ConfigEntityQueryFields(Type type, IEnumerable<EntityField> fields)
+        /// <returns></returns>
+        public static List<EntityField> GetFields(Type type)
         {
-            if (type == null)
-            {
-                return;
-            }
-            ConfigEntityQueryFields(type.GUID, fields);
-        }
-
-        /// <summary>
-        /// config query fields
-        /// </summary>
-        /// <param name="typeAssemblyQualifiedName">type full name</param>
-        /// <param name="fields">query fields</param>
-        public static void ConfigEntityQueryFields(string typeAssemblyQualifiedName, IEnumerable<EntityField> fields)
-        {
-            if (typeAssemblyQualifiedName.IsNullOrEmpty())
-            {
-                return;
-            }
-            var type = Type.GetType(typeAssemblyQualifiedName);
-            ConfigEntityQueryFields(type, fields);
-        }
-
-        /// <summary>
-        /// config entity query fields
-        /// </summary>
-        /// <param name="typeGuid">type guid</param>
-        /// <param name="fields">fields</param>
-        static void ConfigEntityQueryFields(Guid typeGuid, IEnumerable<EntityField> fields)
-        {
-            if (fields.IsNullOrEmpty())
-            {
-                return;
-            }
-            if (EntityConfigs.TryGetValue(typeGuid, out EntityConfig entityConfig))
-            {
-                entityConfig = new EntityConfig();
-            }
-            entityConfig.QueryFields = fields.ToList();
-            ConfigEntity(typeGuid, entityConfig);
+            var entityConfig = GetEntityConfig(type);
+            return entityConfig?.AllFields ?? new List<EntityField>(0);
         }
 
         #endregion
@@ -591,29 +477,20 @@ namespace EZNEW.Develop.Entity
             {
                 return new List<EntityField>(0);
             }
-            if (!queryPropertyNames.IsNullOrEmpty())
+            if (queryPropertyNames.IsNullOrEmpty())
             {
-                if (forcePrimaryKey)
-                {
-                    var primaryKeys = GetPrimaryKeys(type)?.Select(c => c.PropertyName);
-                    if (!primaryKeys.IsNullOrEmpty())
-                    {
-                        queryPropertyNames = queryPropertyNames.Union(primaryKeys);
-                    }
-                }
-                if (forceVersionKey)
-                {
-                    var versionKey = GetVersionField(type);
-                    if (!string.IsNullOrWhiteSpace(versionKey))
-                    {
-                        queryPropertyNames = queryPropertyNames.Union(new List<string>(1) { versionKey });
-                    }
-                }
+                return allQueryFields;
             }
-            if (!queryPropertyNames.IsNullOrEmpty())
+            // special query fields
+            if (forcePrimaryKey && !entityConfig.PrimaryKeys.IsNullOrEmpty())
             {
-                allQueryFields = allQueryFields.Intersect(queryPropertyNames.Select<string, EntityField>(c => c)).ToList();
+                queryPropertyNames = queryPropertyNames.Union(entityConfig.PrimaryKeys.Select(c => c.PropertyName));
             }
+            if (forceVersionKey && entityConfig.VersionField != null)
+            {
+                queryPropertyNames = queryPropertyNames.Union(new List<string>(1) { entityConfig.VersionField.PropertyName });
+            }
+            allQueryFields = allQueryFields.Intersect(queryPropertyNames.Select<string, EntityField>(c => c)).ToList();
             return allQueryFields;
         }
 
@@ -629,6 +506,10 @@ namespace EZNEW.Develop.Entity
 
         #endregion
 
+        #endregion
+
+        #region primary key
+
         #region set primary keys 
 
         /// <summary>
@@ -642,7 +523,20 @@ namespace EZNEW.Develop.Entity
             {
                 return;
             }
-            SetPrimaryKey(type.GUID, keyNames);
+            var entityConfig = GetEntityConfig(type);
+            if (entityConfig == null)
+            {
+                return;
+            }
+            var keyFields = keyNames.Select<string, EntityField>(c => c);
+            if (entityConfig.PrimaryKeys == null)
+            {
+                entityConfig.PrimaryKeys = keyFields.ToList();
+            }
+            else
+            {
+                entityConfig.PrimaryKeys = entityConfig.PrimaryKeys.Union(keyFields).ToList();
+            }
         }
 
         /// <summary>
@@ -674,35 +568,9 @@ namespace EZNEW.Develop.Entity
             SetPrimaryKey(typeof(T), fields.Select(c => ExpressionHelper.GetExpressionPropertyName(c.Body)).ToArray());
         }
 
-        /// <summary>
-        /// set primary keys
-        /// </summary>
-        /// <param name="typeGuid">type guid</param>
-        /// <param name="keyNames">primary key names</param>
-        static void SetPrimaryKey(Guid typeGuid, params string[] keyNames)
-        {
-            if (keyNames.IsNullOrEmpty())
-            {
-                return;
-            }
-            if (EntityConfigs.TryGetValue(typeGuid, out EntityConfig entityConfig))
-            {
-                entityConfig = new EntityConfig();
-            }
-            if (entityConfig.PrimaryKeys == null)
-            {
-                entityConfig.PrimaryKeys = new List<EntityField>(keyNames.Select<string, EntityField>(c => c));
-            }
-            foreach (string key in keyNames)
-            {
-                entityConfig.PrimaryKeys.Add(key);
-            }
-            ConfigEntity(typeGuid, entityConfig);
-        }
-
         #endregion
 
-        #region Get Primary Keys
+        #region get primary keys
 
         /// <summary>
         /// Get Primary Key
@@ -772,7 +640,11 @@ namespace EZNEW.Develop.Entity
 
         #endregion
 
-        #region Set Version Field
+        #endregion
+
+        #region version field
+
+        #region set version field
 
         /// <summary>
         /// Set Version Field
@@ -796,7 +668,11 @@ namespace EZNEW.Develop.Entity
             {
                 return;
             }
-            SetVersionField(type.GUID, fieldName);
+            var entityConfig = GetEntityConfig(type);
+            if (entityConfig != null)
+            {
+                entityConfig.VersionField = fieldName;
+            }
         }
 
         /// <summary>
@@ -813,24 +689,9 @@ namespace EZNEW.Develop.Entity
             SetVersionField(typeof(T), ExpressionHelper.GetExpressionPropertyName(field.Body));
         }
 
-        /// <summary>
-        /// Set Version Field
-        /// </summary>
-        /// <param name="typeGuid">type guid</param>
-        /// <param name="fieldName">field name</param>
-        static void SetVersionField(Guid typeGuid, string fieldName)
-        {
-            if (!EntityConfigs.TryGetValue(typeGuid, out EntityConfig entityConfig))
-            {
-                entityConfig = new EntityConfig();
-            }
-            entityConfig.VersionField = fieldName;
-            ConfigEntity(typeGuid, entityConfig);
-        }
-
         #endregion
 
-        #region Get Version Field
+        #region get version field
 
         /// <summary>
         /// Get Version Field
@@ -864,7 +725,11 @@ namespace EZNEW.Develop.Entity
 
         #endregion
 
-        #region Set RefreshDate Field
+        #endregion
+
+        #region refreshdate field
+
+        #region set refreshdate field
 
         /// <summary>
         /// Set RefreshDate Field
@@ -888,7 +753,11 @@ namespace EZNEW.Develop.Entity
             {
                 return;
             }
-            SetRefreshDateField(type.GUID, fieldName);
+            var entityConfig = GetEntityConfig(type);
+            if (entityConfig != null)
+            {
+                entityConfig.RefreshDateField = fieldName;
+            }
         }
 
         /// <summary>
@@ -905,24 +774,9 @@ namespace EZNEW.Develop.Entity
             SetRefreshDateField(typeof(T), ExpressionHelper.GetExpressionPropertyName(field.Body));
         }
 
-        /// <summary>
-        /// Set RefreshDate Field
-        /// </summary>
-        /// <param name="typeGuid">type guid</param>
-        /// <param name="fieldName">field name</param>
-        static void SetRefreshDateField(Guid typeGuid, string fieldName)
-        {
-            if (!EntityConfigs.TryGetValue(typeGuid, out EntityConfig entityConfig))
-            {
-                entityConfig = new EntityConfig();
-            }
-            entityConfig.RefreshDateField = fieldName;
-            ConfigEntity(typeGuid, entityConfig);
-        }
-
         #endregion
 
-        #region Get RefreshDate Field
+        #region get refreshdate field
 
         /// <summary>
         /// Get RefreshDate Field
@@ -954,55 +808,7 @@ namespace EZNEW.Develop.Entity
             return entityConfig?.RefreshDateField;
         }
 
-        #endregion
-
-        #region get field
-
-        /// <summary>
-        /// get field
-        /// </summary>
-        /// <param name="entityType">entity type</param>
-        /// <param name="propertyName">property name</param>
-        /// <returns></returns>
-        public static EntityField GetField(Type entityType, string propertyName)
-        {
-            if (entityType == null || propertyName.IsNullOrEmpty())
-            {
-                return string.Empty;
-            }
-            var entityConfig = GetEntityConfig(entityType);
-            var allFields = entityConfig?.AllFields;
-            if (allFields.IsNullOrEmpty())
-            {
-                return propertyName;
-            }
-            return allFields.FirstOrDefault(c => c.PropertyName == propertyName) ?? propertyName;
-        }
-
-        #endregion
-
-        #region fields
-
-        /// <summary>
-        /// fields
-        /// </summary>
-        /// <param name="entityType">entity type</param>
-        /// <param name="propertyNames">property names</param>
-        /// <returns></returns>
-        public static List<EntityField> GetFields(Type entityType, IEnumerable<string> propertyNames)
-        {
-            if (entityType == null || propertyNames.IsNullOrEmpty())
-            {
-                return new List<EntityField>(0);
-            }
-            var entityConfig = GetEntityConfig(entityType);
-            var allFields = entityConfig?.AllFields;
-            if (allFields.IsNullOrEmpty())
-            {
-                return new List<EntityField>(0);
-            }
-            return allFields.Intersect(propertyNames.Select<string, EntityField>(c => c)).ToList();
-        }
+        #endregion 
 
         #endregion
 

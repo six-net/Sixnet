@@ -76,31 +76,6 @@ namespace EZNEW.Develop.Command
         List<string> Fields { get; set; }
 
         /// <summary>
-        /// Success Callback
-        /// </summary>
-        event ExecuteCommandCallback SuccessCallbackAsync;
-
-        /// <summary>
-        /// Failed Callback
-        /// </summary>
-        event ExecuteCommandCallback FailedCallbackAsync;
-
-        /// <summary>
-        /// Before Execute
-        /// </summary>
-        event BeforeExecute BeforeExecuteAsync;
-
-        /// <summary>
-        /// Before Execute Request
-        /// </summary>
-        BeforeExecuteRequest BeforeRequest { get; set; }
-
-        /// <summary>
-        /// callback request
-        /// </summary>
-        CommandCallbackRequest CallbackRequest { get; set; }
-
-        /// <summary>
         /// direct return if command is obsolete
         /// </summary>
         bool IsObsolete { get; }
@@ -119,29 +94,58 @@ namespace EZNEW.Develop.Command
 
         #region Methods
 
-        /// <summary>
-        /// execute complete
-        /// </summary>
-        /// <param name="success">success</param>
-        void ExecuteComplete(bool success);
+        #region command execute before operation
+
+        #region register before execute sync operation
 
         /// <summary>
-        /// execute complete
+        /// register before execute sync operation
         /// </summary>
-        /// <param name="success">success</param>
-        Task ExecuteCompleteAsync(bool success);
+        /// <param name="operation">operation</param>
+        /// <param name="beforeExecuteParameter">parameter</param>
+        /// <param name="async">execute by async</param>
+        void RegisterBeforeExecuteOperation(CommandBeforeExecuteOperation operation, CommandBeforeExecuteParameter beforeExecuteParameter, bool async = false);
+
+        #endregion
+
+        #region execute before operation
 
         /// <summary>
-        /// execute before
+        /// execute before execute operation
         /// </summary>
         /// <returns></returns>
-        bool ExecuteBefore();
+        CommandBeforeExecuteResult ExecuteBeforeExecuteOperation();
+
+        #endregion
+
+        #endregion
+
+        #region command callback operation
+
+        #region register command callback operation
 
         /// <summary>
-        /// execute before
+        /// register command callback operation
         /// </summary>
+        /// <param name="operation">operation</param>
+        /// <param name="parameter">parameter</param>
+        /// <param name="async">execute callback by async</param>
+        void RegisterCallbackOperation(CommandCallbackOperation operation, CommandCallbackParameter parameter, bool async = true);
+
+        #endregion
+
+        #region execute callback operation
+
+        /// <summary>
+        /// execute callback operation
+        /// </summary>
+        /// <param name="success">command execute success</param>
         /// <returns></returns>
-        Task<bool> ExecuteBeforeAsync();
+        CommandCallbackResult ExecuteCallbackOperation(bool success);
+
+        #endregion
+
+        #endregion
 
         #endregion
     }

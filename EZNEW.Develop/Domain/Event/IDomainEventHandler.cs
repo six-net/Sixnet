@@ -15,7 +15,7 @@ namespace EZNEW.Develop.Domain.Event
         /// <summary>
         /// execute time
         /// </summary>
-        EventExecuteTime ExecuteTime { get; }
+        EventTriggerTime ExecuteTime { get; }
 
         #endregion
 

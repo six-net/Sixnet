@@ -38,6 +38,54 @@ namespace EZNEW.Develop.Entity
         }
 
         /// <summary>
+        /// is primary key
+        /// </summary>
+        public bool IsPrimaryKey
+        {
+            get; set;
+        }
+
+        /// <summary>
+        /// cache option
+        /// </summary>
+        public EntityFieldCacheOption CacheOption
+        {
+            get; set;
+        }
+
+        /// <summary>
+        /// is disable query
+        /// </summary>
+        public bool IsDisableQuery
+        {
+            get; set;
+        }
+
+        /// <summary>
+        /// is disable edit
+        /// </summary>
+        public bool IsDisableEdit
+        {
+            get; set;
+        }
+
+        /// <summary>
+        /// is version field
+        /// </summary>
+        public bool IsVersion
+        {
+            get; set;
+        }
+
+        /// <summary>
+        /// is refresh date
+        /// </summary>
+        public bool IsRefreshDate
+        {
+            get; set;
+        }
+
+        /// <summary>
         /// query format fields
         /// </summary>
         ConcurrentDictionary<string, string> queryFormatFields = new ConcurrentDictionary<string, string>();

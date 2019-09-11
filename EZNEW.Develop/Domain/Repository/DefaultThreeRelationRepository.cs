@@ -31,10 +31,7 @@ namespace EZNEW.Develop.Domain.Repository
 
         static DefaultThreeRelationRepository()
         {
-            if (!ContainerManager.IsRegister<IRepositoryWarehouse<ET, DAI>>())
-            {
-                ContainerManager.Register<IRepositoryWarehouse<ET, DAI>, DefaultRepositoryWarehouse<ET, DAI>>();
-            }
+            WarehouseManager.RegisterDefaultWarehouse<ET, DAI>();
         }
 
         #region save

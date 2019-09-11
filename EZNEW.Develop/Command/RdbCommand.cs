@@ -1,6 +1,8 @@
 ﻿using EZNEW.Develop.CQuery;
 using EZNEW.Develop.Entity;
 using EZNEW.Develop.UnitOfWork;
+using EZNEW.Framework.Extension;
+using EZNEW.Framework.Internal.MQ;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -94,31 +96,6 @@ namespace EZNEW.Develop.Command
         public List<string> Fields { get; set; } = null;
 
         /// <summary>
-        /// success callback
-        /// </summary>
-        public event ExecuteCommandCallback SuccessCallbackAsync;
-
-        /// <summary>
-        /// failed callback
-        /// </summary>
-        public event ExecuteCommandCallback FailedCallbackAsync;
-
-        /// <summary>
-        /// before execute
-        /// </summary>
-        public event BeforeExecute BeforeExecuteAsync;
-
-        /// <summary>
-        /// callback request
-        /// </summary>
-        public CommandCallbackRequest CallbackRequest { get; set; }
-
-        /// <summary>
-        /// before request
-        /// </summary>
-        public BeforeExecuteRequest BeforeRequest { get; set; }
-
-        /// <summary>
         /// direct return if command is obsolete
         /// </summary>
         public bool IsObsolete
@@ -141,6 +118,26 @@ namespace EZNEW.Develop.Command
         {
             get; set;
         }
+
+        /// <summary>
+        /// sync before operations
+        /// </summary>
+        List<Tuple<CommandBeforeExecuteOperation, CommandBeforeExecuteParameter>> SyncBeforeOperations = new List<Tuple<CommandBeforeExecuteOperation, CommandBeforeExecuteParameter>>();
+
+        /// <summary>
+        /// async before operations
+        /// </summary>
+        List<Tuple<CommandBeforeExecuteOperation, CommandBeforeExecuteParameter>> AsyncBeforeOperations = new List<Tuple<CommandBeforeExecuteOperation, CommandBeforeExecuteParameter>>();
+
+        /// <summary>
+        /// sync callback
+        /// </summary>
+        List<Tuple<CommandCallbackOperation, CommandCallbackParameter>> SyncCallbackOperations = new List<Tuple<CommandCallbackOperation, CommandCallbackParameter>>();
+
+        /// <summary>
+        /// async callback
+        /// </summary>
+        List<Tuple<CommandCallbackOperation, CommandCallbackParameter>> AsyncCallbackOperations = new List<Tuple<CommandCallbackOperation, CommandCallbackParameter>>();
 
         #endregion
 
@@ -174,56 +171,141 @@ namespace EZNEW.Develop.Command
 
         #region methods
 
-        /// <summary>
-        /// execute commplete
-        /// </summary>
-        /// <param name="success">success</param>
-        public void ExecuteComplete(bool success)
-        {
-            ExecuteCompleteAsync(success).Wait();
-        }
+        #region command execute before operation
+
+        #region register before execute sync operation
 
         /// <summary>
-        /// execute commplete
+        /// register before execute sync operation
         /// </summary>
-        /// <param name="success">success</param>
-        public async Task ExecuteCompleteAsync(bool success)
+        /// <param name="operation">operation</param>
+        /// <param name="beforeExecuteParameter">parameter</param>
+        /// <param name="async">execute by async</param>
+        public void RegisterBeforeExecuteOperation(CommandBeforeExecuteOperation operation, CommandBeforeExecuteParameter beforeExecuteParameter, bool async = false)
         {
-            if (success)
+            if (operation == null)
             {
-                if (SuccessCallbackAsync == null)
-                {
-                    return;
-                }
-                await SuccessCallbackAsync(CallbackRequest).ConfigureAwait(false);
+                return;
+            }
+            if (async)
+            {
+                AsyncBeforeOperations.Add(new Tuple<CommandBeforeExecuteOperation, CommandBeforeExecuteParameter>(operation, beforeExecuteParameter));
             }
             else
             {
-                if (FailedCallbackAsync == null)
-                {
-                    return;
-                }
-                await FailedCallbackAsync(CallbackRequest).ConfigureAwait(false);
+                SyncBeforeOperations.Add(new Tuple<CommandBeforeExecuteOperation, CommandBeforeExecuteParameter>(operation, beforeExecuteParameter));
             }
         }
 
-        /// <summary>
-        /// execute before
-        /// </summary>
-        /// <returns></returns>
-        public bool ExecuteBefore()
-        {
-            return ExecuteBeforeAsync().Result;
-        }
+        #endregion
+
+        #region execute before operation
 
         /// <summary>
-        /// execute before
+        /// execute before execute operation
         /// </summary>
         /// <returns></returns>
-        public async Task<bool> ExecuteBeforeAsync()
+        public CommandBeforeExecuteResult ExecuteBeforeExecuteOperation()
         {
-            return BeforeExecuteAsync == null ? true : await BeforeExecuteAsync(BeforeRequest).ConfigureAwait(false);
+            #region execute async operation
+
+            if (!AsyncBeforeOperations.IsNullOrEmpty())
+            {
+                var internalMsgItem = new CommandBeforeOperationInternalMessageItem(AsyncBeforeOperations);
+                InternalMessageQueue.Enqueue(internalMsgItem);
+            }
+
+            #endregion
+
+            #region execut sync operation
+
+            if (SyncBeforeOperations.IsNullOrEmpty())
+            {
+                return CommandBeforeExecuteResult.DefaultSuccess; ;
+            }
+            CommandBeforeExecuteResult result = new CommandBeforeExecuteResult();
+            SyncBeforeOperations.ForEach(op =>
+                        {
+                            var opResult = op.Item1(op.Item2);
+                            result.AllowExecuteCommand = result.AllowExecuteCommand && opResult.AllowExecuteCommand;
+                        });
+            return result;
+
+            #endregion
         }
+
+        #endregion
+
+        #endregion
+
+        #region command callback operation
+
+        #region register command callback operation
+
+        /// <summary>
+        /// register command callback operation
+        /// </summary>
+        /// <param name="operation">operation</param>
+        /// <param name="parameter">parameter</param>
+        /// <param name="async">execute callback by async</param>
+        public void RegisterCallbackOperation(CommandCallbackOperation operation, CommandCallbackParameter parameter, bool async = true)
+        {
+            if (operation == null)
+            {
+                return;
+            }
+            if (async)
+            {
+                AsyncCallbackOperations.Add(new Tuple<CommandCallbackOperation, CommandCallbackParameter>(operation, parameter));
+            }
+            else
+            {
+                SyncCallbackOperations.Add(new Tuple<CommandCallbackOperation, CommandCallbackParameter>(operation, parameter));
+            }
+        }
+
+        #endregion
+
+        #region execute callback operation
+
+        /// <summary>
+        /// execute callback operation
+        /// </summary>
+        /// <param name="success">command execute success</param>
+        /// <returns></returns>
+        public CommandCallbackResult ExecuteCallbackOperation(bool success)
+        {
+            #region execute async operation
+
+            if (!AsyncCallbackOperations.IsNullOrEmpty())
+            {
+                var internalMsgItem = new CommandCallbackInternalMessageItem(AsyncCallbackOperations);
+                InternalMessageQueue.Enqueue(internalMsgItem);
+            }
+
+            #endregion
+
+            #region execute sync operation
+
+            if (!SyncCallbackOperations.IsNullOrEmpty())
+            {
+                SyncCallbackOperations.ForEach(op =>
+                {
+                    if (op.Item2 != null)
+                    {
+                        op.Item2.ExecuteSuccess = success;
+                    }
+                    op.Item1(op.Item2);
+                });
+            }
+            return CommandCallbackResult.Default;
+
+            #endregion
+        }
+
+        #endregion
+
+        #endregion
 
         #endregion
     }

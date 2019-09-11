@@ -14,12 +14,12 @@ namespace EZNEW.Develop.Domain.Event
         /// <summary>
         /// global event handlers
         /// </summary>
-        Dictionary<Guid, Dictionary<EventExecuteTime, List<IDomainEventHandler>>> eventHandlerCollection = new Dictionary<Guid, Dictionary<EventExecuteTime, List<IDomainEventHandler>>>();
+        Dictionary<Guid, Dictionary<EventTriggerTime, List<IDomainEventHandler>>> eventHandlerCollection = new Dictionary<Guid, Dictionary<EventTriggerTime, List<IDomainEventHandler>>>();
 
         /// <summary>
         /// overall event handler collection
         /// </summary>
-        Dictionary<EventExecuteTime, List<IDomainEventHandler>> overallEventHandlerCollection = new Dictionary<EventExecuteTime, List<IDomainEventHandler>>();
+        Dictionary<EventTriggerTime, List<IDomainEventHandler>> overallEventHandlerCollection = new Dictionary<EventTriggerTime, List<IDomainEventHandler>>();
 
         #region publish
 
@@ -38,7 +38,7 @@ namespace EZNEW.Develop.Domain.Event
         /// <param name="domainEvents">domain event</param>
         public async Task PublishAsync(params IDomainEvent[] domainEvents)
         {
-            await ExecutedTimeDomainEventAsync(EventExecuteTime.Immediately, domainEvents).ConfigureAwait(false);
+            await ExecutedTimeDomainEventAsync(EventTriggerTime.Immediately, domainEvents).ConfigureAwait(false);
         }
 
         #endregion
@@ -50,7 +50,7 @@ namespace EZNEW.Develop.Domain.Event
         /// </summary>
         /// <param name="eventExecuteTime">event time</param>
         /// <param name="domainEvents">domain events</param>
-        internal void ExecutedTimeDomainEvent(EventExecuteTime eventExecuteTime, params IDomainEvent[] domainEvents)
+        internal void ExecutedTimeDomainEvent(EventTriggerTime eventExecuteTime, params IDomainEvent[] domainEvents)
         {
             ExecutedTimeDomainEventAsync(eventExecuteTime, domainEvents).Wait();
         }
@@ -60,7 +60,7 @@ namespace EZNEW.Develop.Domain.Event
         /// </summary>
         /// <param name="eventExecuteTime">event time</param>
         /// <param name="domainEvents">domain events</param>
-        internal async Task ExecutedTimeDomainEventAsync(EventExecuteTime eventExecuteTime, params IDomainEvent[] domainEvents)
+        internal async Task ExecutedTimeDomainEventAsync(EventTriggerTime eventExecuteTime, params IDomainEvent[] domainEvents)
         {
             if (domainEvents.IsNullOrEmpty())
             {
@@ -108,7 +108,7 @@ namespace EZNEW.Develop.Domain.Event
         /// <typeparam name="Event">event</typeparam>
         /// <param name="eventHandleOperation">event handle operation</param>
         /// <param name="executeTime">execute time</param>
-        public void Subscribe<Event>(Func<Event, DomainEventExecuteResult> eventHandleOperation, EventExecuteTime executeTime = EventExecuteTime.Immediately) where Event : class, IDomainEvent
+        public void Subscribe<Event>(Func<Event, DomainEventExecuteResult> eventHandleOperation, EventTriggerTime executeTime = EventTriggerTime.Immediately) where Event : class, IDomainEvent
         {
             if (eventHandleOperation == null)
             {
@@ -124,18 +124,18 @@ namespace EZNEW.Develop.Domain.Event
         /// <typeparam name="Event"></typeparam>
         /// <param name="eventHandleOperationAsync">event handle operation</param>
         /// <param name="executeTime">execute time</param>
-        public void Subscribe<Event>(Func<Event, Task<DomainEventExecuteResult>> eventHandleOperationAsync, EventExecuteTime executeTime = EventExecuteTime.Immediately) where Event : class, IDomainEvent
+        public void Subscribe<Event>(Func<Event, Task<DomainEventExecuteResult>> eventHandleOperationAsync, EventTriggerTime executeTime = EventTriggerTime.Immediately) where Event : class, IDomainEvent
         {
             IDomainEventHandler domainEventHandler = null;
             switch (executeTime)
             {
-                case EventExecuteTime.Immediately:
+                case EventTriggerTime.Immediately:
                     domainEventHandler = new DefaultImmediatelyDomainEventHandler<Event>()
                     {
                         ExecuteEventOperation = eventHandleOperationAsync
                     };
                     break;
-                case EventExecuteTime.WorkCompleted:
+                case EventTriggerTime.WorkCompleted:
                     domainEventHandler = new DefaultWorkCompletedDomainEventHandler<Event>()
                     {
                         ExecuteEventOperation = eventHandleOperationAsync
@@ -157,9 +157,9 @@ namespace EZNEW.Develop.Domain.Event
                 return;
             }
             var eventType = typeof(Event);
-            if (!eventHandlerCollection.TryGetValue(eventType.GUID, out Dictionary<EventExecuteTime, List<IDomainEventHandler>> executeTimeHandlers) || executeTimeHandlers == null)
+            if (!eventHandlerCollection.TryGetValue(eventType.GUID, out Dictionary<EventTriggerTime, List<IDomainEventHandler>> executeTimeHandlers) || executeTimeHandlers == null)
             {
-                executeTimeHandlers = new Dictionary<EventExecuteTime, List<IDomainEventHandler>>()
+                executeTimeHandlers = new Dictionary<EventTriggerTime, List<IDomainEventHandler>>()
                 {
                     { handler.ExecuteTime,new List<IDomainEventHandler>(){ handler } }
                 };
@@ -188,7 +188,7 @@ namespace EZNEW.Develop.Domain.Event
         /// <typeparam name="Event">event</typeparam>
         /// <param name="eventHandleOperation">event handle operation</param>
         /// <param name="executeTime">execute time</param>
-        public void SubscribeAll(Func<IDomainEvent, DomainEventExecuteResult> eventHandleOperation, EventExecuteTime executeTime = EventExecuteTime.Immediately)
+        public void SubscribeAll(Func<IDomainEvent, DomainEventExecuteResult> eventHandleOperation, EventTriggerTime executeTime = EventTriggerTime.Immediately)
         {
             if (eventHandleOperation == null)
             {
@@ -204,18 +204,18 @@ namespace EZNEW.Develop.Domain.Event
         /// <typeparam name="Event"></typeparam>
         /// <param name="eventHandleOperationAsync">event handle operation</param>
         /// <param name="executeTime">execute time</param>
-        public void SubscribeAll(Func<IDomainEvent, Task<DomainEventExecuteResult>> eventHandleOperationAsync, EventExecuteTime executeTime = EventExecuteTime.Immediately)
+        public void SubscribeAll(Func<IDomainEvent, Task<DomainEventExecuteResult>> eventHandleOperationAsync, EventTriggerTime executeTime = EventTriggerTime.Immediately)
         {
             IDomainEventHandler domainEventHandler = null;
             switch (executeTime)
             {
-                case EventExecuteTime.Immediately:
+                case EventTriggerTime.Immediately:
                     domainEventHandler = new DefaultImmediatelyDomainEventHandler<IDomainEvent>()
                     {
                         ExecuteEventOperation = eventHandleOperationAsync
                     };
                     break;
-                case EventExecuteTime.WorkCompleted:
+                case EventTriggerTime.WorkCompleted:
                     domainEventHandler = new DefaultWorkCompletedDomainEventHandler<IDomainEvent>()
                     {
                         ExecuteEventOperation = eventHandleOperationAsync

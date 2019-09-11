@@ -10,6 +10,6 @@ namespace EZNEW.Develop.Domain.Event
         /// <summary>
         /// execute time
         /// </summary>
-        public EventExecuteTime ExecuteTime { get; } = EventExecuteTime.WorkCompleted;
+        public EventTriggerTime ExecuteTime { get; } = EventTriggerTime.WorkCompleted;
     }
 }

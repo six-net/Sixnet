@@ -3,6 +3,7 @@ using EZNEW.Framework.ExpressionUtil;
 using EZNEW.Framework.Extension;
 using EZNEW.Framework.Fault;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -20,12 +21,7 @@ namespace EZNEW.Develop.CQuery
         /// query model entity
         /// key:query model type guid
         /// </summary>
-        static Dictionary<Guid, Type> queryModelEntityRelations = new Dictionary<Guid, Type>();
-
-        /// <summary>
-        /// alread config query model guids
-        /// </summary>
-        static HashSet<Guid> alreadConfigQueryEntitys = new HashSet<Guid>();
+        static ConcurrentDictionary<Guid, Type> queryModelEntityRelations = new ConcurrentDictionary<Guid, Type>();
 
         #region Propertys
 
@@ -97,12 +93,10 @@ namespace EZNEW.Develop.CQuery
             {
                 return;
             }
-            var typeGuid = queryModelType.GUID;
-            if (queryModelEntityRelations.ContainsKey(typeGuid) || alreadConfigQueryEntitys.Contains(typeGuid))
+            if (queryModelEntityRelations.ContainsKey(queryModelType.GUID))
             {
                 return;
             }
-            alreadConfigQueryEntitys.Add(typeGuid);
             var attributes = queryModelType.GetCustomAttributes(typeof(QueryEntityAttribute), true);
             if (attributes.IsNullOrEmpty())
             {
@@ -148,12 +142,11 @@ namespace EZNEW.Develop.CQuery
             {
                 return null;
             }
-            var typeGuid = queryModelType.GUID;
-            queryModelEntityRelations.TryGetValue(typeGuid, out Type entityType);
-            if (entityType == null && !alreadConfigQueryEntitys.Contains(typeGuid))
+            queryModelEntityRelations.TryGetValue(queryModelType.GUID, out Type entityType);
+            if (entityType == null)
             {
                 ConfigQueryModelRelationEntity(queryModelType);
-                queryModelEntityRelations.TryGetValue(typeGuid, out entityType);
+                queryModelEntityRelations.TryGetValue(queryModelType.GUID, out entityType);
             }
             return entityType;
         }

@@ -5,7 +5,7 @@ using System.Text;
 namespace EZNEW.Develop.Entity
 {
     [AttributeUsage(AttributeTargets.Property)]
-    public class EntityFieldAttribute:Attribute
+    public class EntityFieldAttribute : Attribute
     {
         #region Propertys
 
@@ -14,7 +14,7 @@ namespace EZNEW.Develop.Entity
         /// </summary>
         public string Name
         {
-            get;set;
+            get; set;
         }
 
         /// <summary>
@@ -22,7 +22,7 @@ namespace EZNEW.Develop.Entity
         /// </summary>
         public string Description
         {
-            get;set;
+            get; set;
         }
 
         /// <summary>
@@ -30,23 +30,23 @@ namespace EZNEW.Develop.Entity
         /// </summary>
         public bool PrimaryKey
         {
-            get;set;
+            get; set;
         }
 
         /// <summary>
-        /// cache key
+        /// cache option
         /// </summary>
-        public bool CacheKey
+        public EntityFieldCacheOption CacheOption
         {
-            get;set;
-        }
+            get; set;
+        } = EntityFieldCacheOption.None;
 
         /// <summary>
         /// disable query
         /// </summary>
         public bool DisableQuery
         {
-            get;set;
+            get; set;
         }
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace EZNEW.Develop.Entity
         /// </summary>
         public bool DisableEdit
         {
-            get;set;
+            get; set;
         }
 
         /// <summary>
@@ -62,7 +62,7 @@ namespace EZNEW.Develop.Entity
         /// </summary>
         public bool IsVersion
         {
-            get;set;
+            get; set;
         }
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace EZNEW.Develop.Entity
         /// </summary>
         public bool RefreshDate
         {
-            get;set;
+            get; set;
         }
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace EZNEW.Develop.Entity
         /// </summary>
         public string QueryFormat
         {
-            get;set;
+            get; set;
         }
 
         #endregion

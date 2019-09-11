@@ -16,10 +16,33 @@ namespace EZNEW.Develop.UnitOfWork
     /// </summary>
     public interface IUnitOfWork : IDisposable
     {
+        #region propertys
+
         /// <summary>
-        /// commit success callback event
+        /// command count
         /// </summary>
-        event Action CommitSuccessCallbackEvent;
+        int CommandCount { get; }
+
+        /// <summary>
+        /// work id
+        /// </summary>
+        string WorkId { get; }
+
+        /// <summary>
+        /// domain event manager
+        /// </summary>
+        DomainEventManager DomainEventManager { get; }
+
+        /// <summary>
+        /// domain events
+        /// </summary>
+        List<IDomainEvent> DomainEvents { get; }
+
+        #endregion
+
+        #region methods
+
+        #region commit
 
         /// <summary>
         /// Commit Command
@@ -33,11 +56,9 @@ namespace EZNEW.Develop.UnitOfWork
         /// <returns></returns>
         Task<CommitResult> CommitAsync();
 
-        /// <summary>
-        /// add command
-        /// </summary>
-        /// <param name="cmds">commands</param>
-        void AddCommand(params ICommand[] cmds);
+        #endregion
+
+        #region activation record
 
         /// <summary>
         /// add activation operation
@@ -46,20 +67,14 @@ namespace EZNEW.Develop.UnitOfWork
         void AddActivation(params IActivationRecord[] records);
 
         /// <summary>
-        /// command count
-        /// </summary>
-        int CommandCount { get; }
-
-        /// <summary>
-        /// work id
-        /// </summary>
-        string WorkId { get; }
-
-        /// <summary>
         /// get new record id
         /// </summary>
         /// <returns></returns>
         int GetRecordId();
+
+        #endregion
+
+        #region command
 
         /// <summary>
         /// get command id
@@ -67,21 +82,19 @@ namespace EZNEW.Develop.UnitOfWork
         /// <returns></returns>
         int GetCommandId();
 
+        #endregion
+
+        #region warehouse
+
         /// <summary>
         /// get data warehouse by entity type
         /// </summary>
         /// <returns></returns>
         DataWarehouse<ET> GetWarehouse<ET>() where ET : BaseEntity<ET>;
 
-        /// <summary>
-        /// domain event manager
-        /// </summary>
-        DomainEventManager DomainEventManager { get; }
+        #endregion
 
-        /// <summary>
-        /// domain events
-        /// </summary>
-        List<IDomainEvent> DomainEvents { get; }
+        #region domain event
 
         /// <summary>
         /// publish domain event
@@ -94,5 +107,23 @@ namespace EZNEW.Develop.UnitOfWork
         /// </summary>
         /// <param name="domainEvents">domain event</param>
         Task PublishDomainEventAsync(params IDomainEvent[] domainEvents);
+
+        #endregion
+
+        #region work event
+
+        #region register commit success event handler
+
+        /// <summary>
+        /// register commit success event handler
+        /// </summary>
+        /// <param name="handlers">handlers</param>
+        void RegisterCommitSuccessEventHandler(params Action<IUnitOfWork, CommitResult, IEnumerable<ICommand>>[] handlers);
+
+        #endregion
+
+        #endregion
+
+        #endregion
     }
 }

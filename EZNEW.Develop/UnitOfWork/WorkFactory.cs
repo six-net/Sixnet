@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using EZNEW.Develop.Entity;
 using EZNEW.Develop.Command;
+using EZNEW.Framework.Extension;
 
 namespace EZNEW.Develop.UnitOfWork
 {
@@ -16,17 +17,26 @@ namespace EZNEW.Develop.UnitOfWork
     /// </summary>
     public class WorkFactory
     {
-        private static AsyncLocal<IUnitOfWork> current = new AsyncLocal<IUnitOfWork>();
+        #region fields
 
         /// <summary>
-        /// create unit work event
+        /// current unitofwork
         /// </summary>
-        public static event Action CreateWorkEvent;
+        static AsyncLocal<IUnitOfWork> current = new AsyncLocal<IUnitOfWork>();
 
         /// <summary>
-        /// commit success event
+        /// create work event handler
         /// </summary>
-        public static event Action CommitSuccessCallbackEvent;
+        static event Action<IUnitOfWork> createWorkEventHandler;
+
+        /// <summary>
+        /// commit success event handler
+        /// </summary>
+        static event Action<IUnitOfWork, CommitResult, IEnumerable<ICommand>> workCommitSuccessEventHandler;
+
+        #endregion
+
+        #region propertys
 
         /// <summary>
         /// current IUnitOfWork Object
@@ -43,14 +53,71 @@ namespace EZNEW.Develop.UnitOfWork
             }
         }
 
+        #endregion
+
+        #region methods
+
+        #region event handler
+
+        #region register event handler
+
         /// <summary>
-        /// Register Command To UnityWork
+        /// register create work event handler
         /// </summary>
-        /// <param name="cmds">Commands</param>
-        public static void RegisterCommand(params ICommand[] cmds)
+        /// <param name="handlers">handlers</param>
+        public static void RegisterCreateWorkEventHandler(params Action<IUnitOfWork>[] handlers)
         {
-            Current?.AddCommand(cmds);
+            if (handlers.IsNullOrEmpty())
+            {
+                return;
+            }
+            foreach (var handler in handlers)
+            {
+                createWorkEventHandler += handler;
+            }
         }
+
+        /// <summary>
+        /// register work commit success event handler
+        /// </summary>
+        /// <param name="handlers">handlers</param>
+        public static void RegisterWorkCommitSuccessEventHandler(params Action<IUnitOfWork, CommitResult, IEnumerable<ICommand>>[] handlers)
+        {
+            if (handlers.IsNullOrEmpty())
+            {
+                return;
+            }
+            foreach (var handler in handlers)
+            {
+                workCommitSuccessEventHandler += handler;
+            }
+        }
+
+        #endregion
+
+        #region invoke event handler
+
+        /// <summary>
+        /// invoke create work eventhandler
+        /// </summary>
+        internal static void InvokeCreateWorkEventHandler(IUnitOfWork unitOfWork)
+        {
+            createWorkEventHandler?.Invoke(unitOfWork);
+        }
+
+        /// <summary>
+        /// invoke commit success event
+        /// </summary>
+        internal static void InvokeWorkCommitSuccessEventHandler(IUnitOfWork unitOfWork, CommitResult commitResult, IEnumerable<ICommand> commands)
+        {
+            workCommitSuccessEventHandler?.Invoke(unitOfWork, commitResult, commands);
+        }
+
+        #endregion
+
+        #endregion
+
+        #region register activation record
 
         /// <summary>
         /// register activation record
@@ -60,6 +127,10 @@ namespace EZNEW.Develop.UnitOfWork
         {
             Current?.AddActivation(records);
         }
+
+        #endregion
+
+        #region query data
 
         /// <summary>
         /// query
@@ -163,6 +234,10 @@ namespace EZNEW.Develop.UnitOfWork
             return await CommandExecuteManager.QuerySingleAsync<T>(cmd).ConfigureAwait(false);
         }
 
+        #endregion
+
+        #region create unitofwork
+
         /// <summary>
         /// create a new IUnitOrWork
         /// </summary>
@@ -172,20 +247,8 @@ namespace EZNEW.Develop.UnitOfWork
             return new DefaultUnitOfWork();
         }
 
-        /// <summary>
-        /// invoke create work event
-        /// </summary>
-        internal static void InvokeCreateWorkEvent()
-        {
-            CreateWorkEvent?.Invoke();
-        }
+        #endregion
 
-        /// <summary>
-        /// invoke commit success event
-        /// </summary>
-        internal static void InvokeCommitSuccessEvent()
-        {
-            CommitSuccessCallbackEvent?.Invoke();
-        }
+        #endregion
     }
 }
