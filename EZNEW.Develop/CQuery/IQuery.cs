@@ -183,7 +183,7 @@ namespace EZNEW.Develop.CQuery
         /// <summary>
         /// all subqueries
         /// </summary>
-        List<IQuery> Subqueries { get;}
+        List<IQuery> Subqueries { get; }
 
         #endregion
 
@@ -798,6 +798,46 @@ namespace EZNEW.Develop.CQuery
         /// <param name="convert">criterial convert</param>
         /// <returns>return newest instance</returns>
         IQuery EndLike<T>(Expression<Func<T, dynamic>> field, string value, bool or = false, ICriteriaConvert convert = null) where T : QueryModel<T>;
+
+        #endregion
+
+        #region IsNull
+
+        /// <summary>
+        /// Field Is Null
+        /// </summary>
+        /// <param name="fieldName">field</param>
+        /// <param name="or">connect with 'and'(true/default) or 'or'(false)</param>
+        /// <returns>return newest instance</returns>
+        IQuery IsNull(string fieldName, bool or = false);
+
+        /// <summary>
+        /// Field Is Null
+        /// </summary>
+        /// <param name="field">field</param>
+        /// <param name="or">connect with 'and'(true/default) or 'or'(false)</param>
+        /// <returns>return newest instance</returns>
+        IQuery IsNull<T>(Expression<Func<T, dynamic>> field, bool or = false) where T : QueryModel<T>;
+
+        #endregion
+
+        #region NotNull
+
+        /// <summary>
+        /// Field Is Not Null
+        /// </summary>
+        /// <param name="fieldName">field</param>
+        /// <param name="or">connect with 'and'(true/default) or 'or'(false)</param>
+        /// <returns>return newest instance</returns>
+        IQuery NotNull(string fieldName, bool or = false);
+
+        /// <summary>
+        /// Field Is Not Null
+        /// </summary>
+        /// <param name="field">field</param>
+        /// <param name="or">connect with 'and'(true/default) or 'or'(false)</param>
+        /// <returns>return newest instance</returns>
+        IQuery NotNull<T>(Expression<Func<T, dynamic>> field, bool or = false) where T : QueryModel<T>;
 
         #endregion
 

@@ -24,7 +24,9 @@ namespace EZNEW.Develop.CQuery
         BeginLike,
         NotBeginLike,
         EndLike,
-        NotEndLike
+        NotEndLike,
+        IsNull,
+        NotNull
     }
 
     /// <summary>

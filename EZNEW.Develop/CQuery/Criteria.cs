@@ -71,6 +71,10 @@ namespace EZNEW.Develop.CQuery
             {
                 return _operator;
             }
+            internal set
+            {
+                _operator = value;
+            }
         }
 
         /// <summary>
@@ -89,7 +93,7 @@ namespace EZNEW.Develop.CQuery
         /// </summary>
         public ICriteriaConvert Convert
         {
-            get;set;
+            get; set;
         }
 
         #endregion

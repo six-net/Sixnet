@@ -1318,6 +1318,62 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
+        #region IsNull
+
+        /// <summary>
+        /// Field Is Null
+        /// </summary>
+        /// <param name="fieldName">field</param>
+        /// <param name="or">connect with 'and'(true/default) or 'or'(false)</param>
+        /// <returns>return newest instance</returns>
+        public IQuery IsNull(string fieldName, bool or = false)
+        {
+            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, fieldName, CriteriaOperator.IsNull, null);
+            return this;
+        }
+
+        /// <summary>
+        /// Field Is Null
+        /// </summary>
+        /// <param name="field">field</param>
+        /// <param name="or">connect with 'and'(true/default) or 'or'(false)</param>
+        /// <returns>return newest instance</returns>
+        public IQuery IsNull<T>(Expression<Func<T, dynamic>> field, bool or = false) where T : QueryModel<T>
+        {
+            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, ExpressionHelper.GetExpressionPropertyName(field.Body), CriteriaOperator.IsNull, null);
+            return this;
+        }
+
+        #endregion
+
+        #region NotNull
+
+        /// <summary>
+        /// Field Is Not Null
+        /// </summary>
+        /// <param name="fieldName">field</param>
+        /// <param name="or">connect with 'and'(true/default) or 'or'(false)</param>
+        /// <returns>return newest instance</returns>
+        public IQuery NotNull(string fieldName, bool or = false)
+        {
+            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, fieldName, CriteriaOperator.NotNull, null);
+            return this;
+        }
+
+        /// <summary>
+        /// Field Is Not Null
+        /// </summary>
+        /// <param name="field">field</param>
+        /// <param name="or">connect with 'and'(true/default) or 'or'(false)</param>
+        /// <returns>return newest instance</returns>
+        public IQuery NotNull<T>(Expression<Func<T, dynamic>> field, bool or = false) where T : QueryModel<T>
+        {
+            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, ExpressionHelper.GetExpressionPropertyName(field.Body), CriteriaOperator.NotNull, null);
+            return this;
+        }
+
+        #endregion
+
         #region ASC
 
         /// <summary>
@@ -1699,16 +1755,32 @@ namespace EZNEW.Develop.CQuery
 
         Expression GenerateSingleExpression(Expression parameter, Criteria criteria)
         {
-            Expression property = Expression.PropertyOrField(parameter, criteria.Name);
             object criteriaValue = criteria.GetCriteriaRealValue();
             Expression valueExpression = Expression.Constant(criteriaValue, criteriaValue?.GetType() ?? typeof(object));
+            Expression property = Expression.PropertyOrField(parameter, criteria.Name);
             switch (criteria.Operator)
             {
                 case CriteriaOperator.Equal:
-                    property = Expression.Equal(property, valueExpression);
+                case CriteriaOperator.IsNull:
+                    if (criteriaValue == null && !property.Type.AllowNull())
+                    {
+                        property = Expression.Constant(false, typeof(bool));
+                    }
+                    else
+                    {
+                        property = Expression.Equal(property, valueExpression);
+                    }
                     break;
                 case CriteriaOperator.NotEqual:
-                    property = Expression.NotEqual(property, valueExpression);
+                case CriteriaOperator.NotNull:
+                    if (criteriaValue == null && !property.Type.AllowNull())
+                    {
+                        property = Expression.Constant(true, typeof(bool));
+                    }
+                    else
+                    {
+                        property = Expression.NotEqual(property, valueExpression);
+                    }
                     break;
                 case CriteriaOperator.GreaterThan:
                     property = Expression.GreaterThan(property, valueExpression);
@@ -4031,7 +4103,7 @@ namespace EZNEW.Develop.CQuery
         /// <param name="value">value</param>
         void AddCriteria(QueryOperator queryOperator, string fieldName, CriteriaOperator criteriaOperator, dynamic value, ICriteriaConvert convert = null)
         {
-            if (string.IsNullOrWhiteSpace(fieldName) || value == null)
+            if (string.IsNullOrWhiteSpace(fieldName))
             {
                 return;
             }
@@ -4120,14 +4192,32 @@ namespace EZNEW.Develop.CQuery
             }
             else
             {
+                bool equalCriterial = false;
+                bool verifyValueNull = false;
+                CriteriaOperator verifyValueNullOperator = CriteriaOperator.IsNull;
                 switch (criteria.Operator)
                 {
                     case CriteriaOperator.Equal:
+                        equalCriterial = true;
+                        verifyValueNull = true;
+                        break;
+                    case CriteriaOperator.NotEqual:
+                        verifyValueNull = true;
+                        verifyValueNullOperator = CriteriaOperator.NotNull;
+                        break;
                     case CriteriaOperator.In:
-                        query.equalCriteriaList.Add(criteria);
+                        equalCriterial = true;
                         break;
                 }
-
+                if (criteria.GetCriteriaRealValue() == null && verifyValueNull)
+                {
+                    equalCriterial = false;
+                    criteria.Operator = verifyValueNullOperator;
+                }
+                if (equalCriterial)
+                {
+                    query.equalCriteriaList.Add(criteria);
+                }
             }
             query.AtomicConditionCount++;
             query.AllConditionFieldNames.Add(criteria.Name);
