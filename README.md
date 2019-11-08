@@ -10,7 +10,7 @@ Also check out the [EZNEW.NET Homepage](http://www.eznew.net) for released versi
 
 # Reporting issues and bugs
 
-If you have any questions or Suggestions, you can report to us via email,to the lidingbin@live.com, and we will reply to you as soon as possible, or you can contact [Ice Lee](https://github.com/lidingbin) via GitHub
+If you have any questions or Suggestions, you can report to us via email,to the lidingbin@live.com, and we will reply to you as soon as possible, or you can contact [DingBin Li](https://github.com/lidingbin) via GitHub
 
 # Related projects
 
