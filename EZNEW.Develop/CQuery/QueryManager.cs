@@ -39,7 +39,7 @@ namespace EZNEW.Develop.CQuery
         /// <summary>
         /// set query model relation entity type
         /// </summary>
-        /// <param name="typeGuid">query model </param>
+        /// <param name="typeGuid">query model type guid</param>
         /// <param name="entityType">relation type</param>
         public static void SetQueryModelRelatioEntity(Guid typeGuid, Type entityType)
         {
@@ -75,19 +75,19 @@ namespace EZNEW.Develop.CQuery
         }
 
         /// <summary>
-        /// set query model relation entity type
+        /// config query model relation entity type
         /// </summary>
-        /// <typeparam name="QT">query model</typeparam>
+        /// <typeparam name="QT">query model type</typeparam>
         internal static void ConfigQueryModelRelationEntity<QT>()
         {
-            ConfigQueryModelRelationEntity(typeof(QT));
+            SetQueryModelRelationEntity(typeof(QT));
         }
 
         /// <summary>
-        /// set query model relation entity type
+        /// config query model relation entity type
         /// </summary>
         /// <param name="queryModelType">query model type</param>
-        public static void ConfigQueryModelRelationEntity(Type queryModelType)
+        public static void SetQueryModelRelationEntity(Type queryModelType)
         {
             if (queryModelType == null)
             {
@@ -145,7 +145,7 @@ namespace EZNEW.Develop.CQuery
             queryModelEntityRelations.TryGetValue(queryModelType.GUID, out Type entityType);
             if (entityType == null)
             {
-                ConfigQueryModelRelationEntity(queryModelType);
+                SetQueryModelRelationEntity(queryModelType);
                 queryModelEntityRelations.TryGetValue(queryModelType.GUID, out entityType);
             }
             return entityType;

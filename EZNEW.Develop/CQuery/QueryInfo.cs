@@ -1228,7 +1228,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region BeginLike
+        #region NotBeginLike
 
         /// <summary>
         /// Not Begin Like Condition
@@ -1288,7 +1288,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region EndLike
+        #region NotEndLike
 
         /// <summary>
         /// Not End Like Condition
@@ -2071,6 +2071,25 @@ namespace EZNEW.Develop.CQuery
         /// <summary>
         /// inner join
         /// </summary>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuerys">join querys</param>
+        /// <returns>return newest query object instance</returns>
+        public IQuery InnerJoin(JoinOperator joinOperator, params IQuery[] joinQuerys)
+        {
+            if (joinQuerys.IsNullOrEmpty())
+            {
+                return this;
+            }
+            foreach (var joinQuery in joinQuerys)
+            {
+                InnerJoin(string.Empty, string.Empty, joinOperator, joinQuery);
+            }
+            return this;
+        }
+
+        /// <summary>
+        /// inner join
+        /// </summary>
         /// <param name="sourceField">source field</param>
         /// <param name="targetField">target field</param>
         /// <param name="joinOperator">join operator</param>
@@ -2554,6 +2573,25 @@ namespace EZNEW.Develop.CQuery
         #region Left Join
 
         #region Left Join helper
+
+        /// <summary>
+        /// left join
+        /// </summary>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuerys">join querys</param>
+        /// <returns>return newest query object instance</returns>
+        public IQuery LeftJoin(JoinOperator joinOperator, params IQuery[] joinQuerys)
+        {
+            if (joinQuerys.IsNullOrEmpty())
+            {
+                return this;
+            }
+            foreach (var joinQuery in joinQuerys)
+            {
+                LeftJoin(string.Empty, string.Empty, joinOperator, joinQuery);
+            }
+            return this;
+        }
 
         /// <summary>
         /// left join
@@ -3045,6 +3083,25 @@ namespace EZNEW.Develop.CQuery
         /// <summary>
         /// right join
         /// </summary>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuerys">join querys</param>
+        /// <returns>return newest query object instance</returns>
+        public IQuery RightJoin(JoinOperator joinOperator, params IQuery[] joinQuerys)
+        {
+            if (joinQuerys.IsNullOrEmpty())
+            {
+                return this;
+            }
+            foreach (var joinQuery in joinQuerys)
+            {
+                RightJoin(string.Empty, string.Empty, joinOperator, joinQuery);
+            }
+            return this;
+        }
+
+        /// <summary>
+        /// right join
+        /// </summary>
         /// <param name="sourceField">source field</param>
         /// <param name="targetField">target field</param>
         /// <param name="joinOperator">join operator</param>
@@ -3528,6 +3585,25 @@ namespace EZNEW.Develop.CQuery
         #region Full Join
 
         #region Full Join helper
+
+        /// <summary>
+        /// full join
+        /// </summary>
+        /// <param name="joinOperator">join operator</param>
+        /// <param name="joinQuerys">join querys</param>
+        /// <returns>return newest query object instance</returns>
+        public IQuery FullJoin(JoinOperator joinOperator, params IQuery[] joinQuerys)
+        {
+            if (joinQuerys.IsNullOrEmpty())
+            {
+                return this;
+            }
+            foreach (var joinQuery in joinQuerys)
+            {
+                FullJoin(string.Empty, string.Empty, joinOperator, joinQuery);
+            }
+            return this;
+        }
 
         /// <summary>
         /// full join

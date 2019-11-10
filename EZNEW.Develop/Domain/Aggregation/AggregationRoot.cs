@@ -16,6 +16,7 @@ using EZNEW.Framework.ExpressionUtil;
 using EZNEW.Framework.Serialize;
 using EZNEW.Develop.Entity;
 using EZNEW.Develop.Domain.Repository.Warehouse;
+using EZNEW.Develop.Domain.Event;
 
 namespace EZNEW.Develop.Domain.Aggregation
 {
@@ -297,6 +298,10 @@ namespace EZNEW.Develop.Domain.Aggregation
         public virtual async Task SaveAsync()
         {
             await repository.SaveAsync((T)this).ConfigureAwait(false);
+            DomainEventBus.Publish(new DefaultAggregationSaveDomainEvent<T>()
+            {
+                Object = this as T
+            });
         }
 
         /// <summary>
@@ -313,6 +318,10 @@ namespace EZNEW.Develop.Domain.Aggregation
         public virtual async Task RemoveAsync()
         {
             await repository.RemoveAsync((T)this).ConfigureAwait(false);
+            DomainEventBus.Publish(new DefaultAggregationRemoveDomainEvent<T>()
+            {
+                Object = this as T
+            });
         }
 
         /// <summary>

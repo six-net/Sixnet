@@ -132,13 +132,13 @@ namespace EZNEW.Develop.Domain.Event
                 case EventTriggerTime.Immediately:
                     domainEventHandler = new DefaultImmediatelyDomainEventHandler<Event>()
                     {
-                        ExecuteEventOperation = eventHandleOperationAsync
+                        ExecuteEventOperationAsync = eventHandleOperationAsync
                     };
                     break;
                 case EventTriggerTime.WorkCompleted:
                     domainEventHandler = new DefaultWorkCompletedDomainEventHandler<Event>()
                     {
-                        ExecuteEventOperation = eventHandleOperationAsync
+                        ExecuteEventOperationAsync = eventHandleOperationAsync
                     };
                     break;
             }
@@ -212,13 +212,13 @@ namespace EZNEW.Develop.Domain.Event
                 case EventTriggerTime.Immediately:
                     domainEventHandler = new DefaultImmediatelyDomainEventHandler<IDomainEvent>()
                     {
-                        ExecuteEventOperation = eventHandleOperationAsync
+                        ExecuteEventOperationAsync = eventHandleOperationAsync
                     };
                     break;
                 case EventTriggerTime.WorkCompleted:
                     domainEventHandler = new DefaultWorkCompletedDomainEventHandler<IDomainEvent>()
                     {
-                        ExecuteEventOperation = eventHandleOperationAsync
+                        ExecuteEventOperationAsync = eventHandleOperationAsync
                     };
                     break;
             }

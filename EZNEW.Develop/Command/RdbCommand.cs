@@ -211,7 +211,7 @@ namespace EZNEW.Develop.Command
 
             if (!AsyncBeforeOperations.IsNullOrEmpty())
             {
-                var internalMsgItem = new CommandBeforeOperationInternalMessageItem(AsyncBeforeOperations);
+                var internalMsgItem = new CommandBeforeOperationInternalMessageCommand(AsyncBeforeOperations);
                 InternalMessageQueue.Enqueue(internalMsgItem);
             }
 
@@ -279,7 +279,7 @@ namespace EZNEW.Develop.Command
 
             if (!AsyncCallbackOperations.IsNullOrEmpty())
             {
-                var internalMsgItem = new CommandCallbackInternalMessageItem(AsyncCallbackOperations);
+                var internalMsgItem = new CommandCallbackInternalMessageCommand(AsyncCallbackOperations);
                 InternalMessageQueue.Enqueue(internalMsgItem);
             }
 

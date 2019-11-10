@@ -10,7 +10,7 @@ namespace EZNEW.Develop.Domain.Event
         /// <summary>
         /// execute event operation
         /// </summary>
-        public Func<Event, Task<DomainEventExecuteResult>> ExecuteEventOperation
+        public Func<Event, Task<DomainEventExecuteResult>> ExecuteEventOperationAsync
         {
             get; set;
         }
@@ -22,7 +22,7 @@ namespace EZNEW.Develop.Domain.Event
 
         public async Task<DomainEventExecuteResult> ExecuteAsync(IDomainEvent domainEvent)
         {
-            if (ExecuteEventOperation == null)
+            if (ExecuteEventOperationAsync == null)
             {
                 return DomainEventExecuteResult.EmptyResult("did't set any event operation");
             }
@@ -31,7 +31,7 @@ namespace EZNEW.Develop.Domain.Event
             {
                 return DomainEventExecuteResult.EmptyResult("event data is null");
             }
-            return await ExecuteEventOperation(eventData);
+            return await ExecuteEventOperationAsync(eventData).ConfigureAwait(false);
         }
     }
 }
