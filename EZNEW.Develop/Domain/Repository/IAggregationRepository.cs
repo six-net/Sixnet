@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using EZNEW.Develop.Command.Modify;
 using EZNEW.Develop.Entity;
 using EZNEW.Develop.Domain.Repository.Warehouse;
+using EZNEW.Develop.UnitOfWork;
 
 namespace EZNEW.Develop.Domain.Repository
 {
@@ -19,97 +20,163 @@ namespace EZNEW.Develop.Domain.Repository
     /// <typeparam name="T">IAggregationRoot</typeparam>
     public interface IAggregationRepository<T> where T : IAggregationRoot<T>
     {
-        /// <summary>
-        /// Save Objects
-        /// </summary>
-        /// <param name="objDatas">objects</param>
-        void Save(params T[] objDatas);
+        #region save data
 
         /// <summary>
-        /// Save Objects
+        /// save data
         /// </summary>
-        /// <param name="objDatas">objects</param>
-        Task SaveAsync(params T[] objDatas);
+        /// <param name="data">data</param>
+        /// <param name="activationOption">activation option</param>
+        void Save(T data, ActivationOption activationOption = null);
 
         /// <summary>
-        /// Remove Objects
+        /// save datas
         /// </summary>
-        /// <param name="objDatas">objects</param>
-        void Remove(params T[] objDatas);
+        /// <param name="datas">datas</param>
+        /// <param name="activationOption">activation option</param>
+        void Save(IEnumerable<T> datas, ActivationOption activationOption = null);
 
         /// <summary>
-        /// Remove Objects
+        /// save data
         /// </summary>
-        /// <param name="objDatas">objects</param>
-        Task RemoveAsync(params T[] objDatas);
+        /// <param name="data">data</param>
+        /// <param name="activationOption">activation option</param>
+        Task SaveAsync(T data, ActivationOption activationOption = null);
 
         /// <summary>
-        /// Remove Object
+        /// save datas
+        /// </summary>
+        /// <param name="datas">datas</param>
+        /// <param name="activationOption">activation option</param>
+        Task SaveAsync(IEnumerable<T> datas, ActivationOption activationOption = null);
+
+        #endregion
+
+        #region remove data
+
+        /// <summary>
+        /// remove data
+        /// </summary>
+        /// <param name="data">data</param>
+        /// <param name="activationOption">activation option</param>
+        void Remove(T data, ActivationOption activationOption = null);
+
+        /// <summary>
+        /// remove datas
+        /// </summary>
+        /// <param name="datas">datas</param>
+        /// <param name="activationOption">activation option</param>
+        void Remove(IEnumerable<T> datas, ActivationOption activationOption = null);
+
+        /// <summary>
+        /// remove data
+        /// </summary>
+        /// <param name="data">data</param>
+        /// <param name="activationOption">activation option</param>
+        Task RemoveAsync(T data, ActivationOption activationOption = null);
+
+        /// <summary>
+        /// remove datas
+        /// </summary>
+        /// <param name="datas">datas</param>
+        /// <param name="activationOption">activation option</param>
+        Task RemoveAsync(IEnumerable<T> datas, ActivationOption activationOption = null);
+
+        #endregion
+
+        #region remove by condition
+
+        /// <summary>
+        /// remove data by condition
         /// </summary>
         /// <param name="query">query model</param>
-        void Remove(IQuery query);
+        /// <param name="activationOption">activation option</param>
+        void Remove(IQuery query, ActivationOption activationOption = null);
 
         /// <summary>
-        /// Remove Object
+        /// remove data by condition
         /// </summary>
         /// <param name="query">query model</param>
-        Task RemoveAsync(IQuery query);
+        /// <param name="activationOption">activation option</param>
+        Task RemoveAsync(IQuery query, ActivationOption activationOption = null);
+
+        #endregion
+
+        #region modify
 
         /// <summary>
-        /// Modify Object
+        /// modify data
         /// </summary>
         /// <param name="expression">modify expression</param>
         /// <param name="query">query model</param>
-        void Modify(IModify expression, IQuery query);
+        /// <param name="activationOption">activation option</param>
+        void Modify(IModify expression, IQuery query, ActivationOption activationOption = null);
 
         /// <summary>
-        /// Modify Object
+        /// modify data
         /// </summary>
         /// <param name="expression">modify expression</param>
         /// <param name="query">query model</param>
-        Task ModifyAsync(IModify expression, IQuery query);
+        /// <param name="activationOption">activation option</param>
+        Task ModifyAsync(IModify expression, IQuery query, ActivationOption activationOption = null);
+
+        #endregion
+
+        #region get data
 
         /// <summary>
-        /// Get Object
+        /// get data
         /// </summary>
         /// <param name="query">query model</param>
-        /// <returns>object</returns>
+        /// <returns>data</returns>
         T Get(IQuery query);
 
         /// <summary>
-        /// Get Object
+        /// get data
         /// </summary>
         /// <param name="query">query model</param>
-        /// <returns>object</returns>
+        /// <returns>data</returns>
         Task<T> GetAsync(IQuery query);
 
+        #endregion
+
+        #region get data list
+
         /// <summary>
-        /// Get Object List
+        /// get data list
         /// </summary>
         /// <param name="query">query model</param>
-        /// <returns>object list</returns>
+        /// <returns>data list</returns>
         List<T> GetList(IQuery query);
 
         /// <summary>
-        /// Get Object List
+        /// get data list
         /// </summary>
         /// <param name="query">query model</param>
-        /// <returns>object list</returns>
+        /// <returns>data list</returns>
         Task<List<T>> GetListAsync(IQuery query);
 
+        #endregion
+
+        #region get data paging
+
         /// <summary>
-        /// Get Object Paging
+        /// get data paging
         /// </summary>
         /// <param name="query">query model</param>
-        /// <returns>object list</returns>
+        /// <returns>data paging</returns>
         IPaging<T> GetPaging(IQuery query);
 
         /// <summary>
-        /// Get Object Paging
+        /// get data paging
         /// </summary>
         /// <param name="query">query model</param>
-        /// <returns>object list</returns>
+        /// <returns>data paging</returns>
         Task<IPaging<T>> GetPagingAsync(IQuery query);
+
+        #endregion
+
+        #region exist
 
         /// <summary>
         /// exist data
@@ -125,22 +192,30 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns></returns>
         Task<bool> ExistAsync(IQuery query);
 
+        #endregion
+
+        #region get data count
+
         /// <summary>
-        /// Get Data Count
+        /// get data count
         /// </summary>
         /// <param name="query">query model</param>
         /// <returns></returns>
         long Count(IQuery query);
 
         /// <summary>
-        /// Get Data Count
+        /// get data count
         /// </summary>
         /// <param name="query">query model</param>
         /// <returns></returns>
         Task<long> CountAsync(IQuery query);
 
+        #endregion
+
+        #region get max value
+
         /// <summary>
-        /// Get Max Value
+        /// get max value
         /// </summary>
         /// <typeparam name="DT">DataType</typeparam>
         /// <param name="query">query model</param>
@@ -148,15 +223,19 @@ namespace EZNEW.Develop.Domain.Repository
         DT Max<DT>(IQuery query);
 
         /// <summary>
-        /// Get Max Value
+        /// get max value
         /// </summary>
         /// <typeparam name="DT">DataType</typeparam>
         /// <param name="query">query model</param>
         /// <returns>max value</returns>
         Task<DT> MaxAsync<DT>(IQuery query);
 
+        #endregion
+
+        #region get min value
+
         /// <summary>
-        /// Get Min Value
+        /// get min value
         /// </summary>
         /// <typeparam name="DT">DataType</typeparam>
         /// <param name="query">query model</param>
@@ -164,15 +243,19 @@ namespace EZNEW.Develop.Domain.Repository
         DT Min<DT>(IQuery query);
 
         /// <summary>
-        /// Get Min Value
+        /// get min value
         /// </summary>
         /// <typeparam name="DT">DataType</typeparam>
         /// <param name="query">query model</param>
         /// <returns>min value</returns>
         Task<DT> MinAsync<DT>(IQuery query);
 
+        #endregion
+
+        #region get sum value
+
         /// <summary>
-        /// Get Sum Value
+        /// get sum value
         /// </summary>
         /// <typeparam name="DT">DataType</typeparam>
         /// <param name="query">query model</param>
@@ -180,15 +263,19 @@ namespace EZNEW.Develop.Domain.Repository
         DT Sum<DT>(IQuery query);
 
         /// <summary>
-        /// Get Sum Value
+        /// get sum value
         /// </summary>
         /// <typeparam name="DT">DataType</typeparam>
         /// <param name="query">query model</param>
         /// <returns>sum value</returns>
         Task<DT> SumAsync<DT>(IQuery query);
 
+        #endregion
+
+        #region get average value
+
         /// <summary>
-        /// Get Average Value
+        /// get average value
         /// </summary>
         /// <typeparam name="DT">DataType</typeparam>
         /// <param name="query">query model</param>
@@ -196,12 +283,16 @@ namespace EZNEW.Develop.Domain.Repository
         DT Avg<DT>(IQuery query);
 
         /// <summary>
-        /// Get Average Value
+        /// get average value
         /// </summary>
         /// <typeparam name="DT">DataType</typeparam>
         /// <param name="query">query model</param>
         /// <returns>average value</returns>
         Task<DT> AvgAsync<DT>(IQuery query);
+
+        #endregion
+
+        #region get life status
 
         /// <summary>
         /// get life status
@@ -210,11 +301,17 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns></returns>
         DataLifeSource GetLifeSource(IAggregationRoot data);
 
+        #endregion
+
+        #region modify life source
+
         /// <summary>
         /// modify life source
         /// </summary>
         /// <param name="data">data</param>
         /// <param name="lifeSource">life source</param>
         void ModifyLifeSource(IAggregationRoot data, DataLifeSource lifeSource);
+
+        #endregion
     }
 }

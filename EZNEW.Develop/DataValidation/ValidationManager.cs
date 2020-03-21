@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace EZNEW.Develop.DataValidation
 {
     /// <summary>
-    /// Validation Manager
+    /// aalidation manager
     /// </summary>
     public static class ValidationManager
     {
@@ -20,12 +20,12 @@ namespace EZNEW.Develop.DataValidation
         static Dictionary<string, DataValidator> _validatorList = new Dictionary<string, DataValidator>();
         static Dictionary<string, string> defaultValidationTipMsg = new Dictionary<string, string>();
 
-        #region Set Validation
+        #region set validation
 
         /// <summary>
-        /// Set Validation
+        /// set validation
         /// </summary>
-        /// <typeparam name="T">DataType</typeparam>
+        /// <typeparam name="T">data type</typeparam>
         /// <param name="validator">validator</param>
         /// <param name="fields">fields</param>
         static void SetValidation<T>(DataValidator validator, params ValidationField<T>[] fields)
@@ -78,9 +78,9 @@ namespace EZNEW.Develop.DataValidation
         }
 
         /// <summary>
-        /// String Length
+        /// string length
         /// </summary>
-        /// <typeparam name="T">DataType</typeparam>
+        /// <typeparam name="T">data type</typeparam>
         /// <param name="maxLength">max length</param>
         /// <param name="minLength">min length</param>
         /// <param name="fields">fields</param>
@@ -101,9 +101,9 @@ namespace EZNEW.Develop.DataValidation
         }
 
         /// <summary>
-        /// Email
+        /// email
         /// </summary>
-        /// <typeparam name="T">DataType</typeparam>
+        /// <typeparam name="T">data type</typeparam>
         /// <param name="fields">fields</param>
         public static void Email<T>(params ValidationField<T>[] fields)
         {
@@ -122,10 +122,10 @@ namespace EZNEW.Develop.DataValidation
         }
 
         /// <summary>
-        /// Set Compare Validation
+        /// set compare validation
         /// </summary>
-        /// <typeparam name="T">DataType</typeparam>
-        /// <param name="compareOperator">compareOperator</param>
+        /// <typeparam name="T">data type</typeparam>
+        /// <param name="compareOperator">compare operator</param>
         /// <param name="value">value</param>
         /// <param name="field">field</param>
         public static void SetCompareValidation<T>(CompareOperator compareOperator, dynamic value, ValidationField<T> field)
@@ -146,9 +146,9 @@ namespace EZNEW.Develop.DataValidation
         }
 
         /// <summary>
-        /// Equal
+        /// equal
         /// </summary>
-        /// <typeparam name="T">DataType</typeparam>
+        /// <typeparam name="T">data type</typeparam>
         /// <param name="value">value</param>
         /// <param name="field">field</param>
         public static void Equal<T>(dynamic value, ValidationField<T> field)
@@ -157,9 +157,9 @@ namespace EZNEW.Develop.DataValidation
         }
 
         /// <summary>
-        /// Equal
+        /// equal
         /// </summary>
-        /// <typeparam name="T">DataType</typeparam>
+        /// <typeparam name="T">data type</typeparam>
         /// <param name="value">value</param>
         /// <param name="field">field</param>
         public static void Equal<T>(Expression<Func<T, dynamic>> value, ValidationField<T> field)
@@ -168,9 +168,9 @@ namespace EZNEW.Develop.DataValidation
         }
 
         /// <summary>
-        /// NotEqual
+        /// not equal
         /// </summary>
-        /// <typeparam name="T">DataType</typeparam>
+        /// <typeparam name="T">data type</typeparam>
         /// <param name="value">value</param>
         /// <param name="field">field</param>
         public static void NotEqual<T>(dynamic value, ValidationField<T> field)
@@ -179,9 +179,9 @@ namespace EZNEW.Develop.DataValidation
         }
 
         /// <summary>
-        /// NotEqual
+        /// not equal
         /// </summary>
-        /// <typeparam name="T">DataType</typeparam>
+        /// <typeparam name="T">data type</typeparam>
         /// <param name="value">value</param>
         /// <param name="field">field</param>
         public static void NotEqual<T>(Expression<Func<T, dynamic>> value, ValidationField<T> field)
@@ -190,9 +190,9 @@ namespace EZNEW.Develop.DataValidation
         }
 
         /// <summary>
-        /// LessThanOrEqual
+        /// less than or equal
         /// </summary>
-        /// <typeparam name="T">DataType</typeparam>
+        /// <typeparam name="T">data type</typeparam>
         /// <param name="value">value</param>
         /// <param name="field">field</param>
         public static void LessThanOrEqual<T>(dynamic value, ValidationField<T> field)
@@ -201,9 +201,9 @@ namespace EZNEW.Develop.DataValidation
         }
 
         /// <summary>
-        /// LessThanOrEqual
+        /// less than or equal
         /// </summary>
-        /// <typeparam name="T">DataType</typeparam>
+        /// <typeparam name="T">data type</typeparam>
         /// <param name="value">value</param>
         /// <param name="field">field</param>
         public static void LessThanOrEqual<T>(Expression<Func<T, dynamic>> value, ValidationField<T> field)
@@ -212,9 +212,9 @@ namespace EZNEW.Develop.DataValidation
         }
 
         /// <summary>
-        /// LessThan
+        /// less than
         /// </summary>
-        /// <typeparam name="T">DataType</typeparam>
+        /// <typeparam name="T">data type</typeparam>
         /// <param name="value">value</param>
         /// <param name="field">field</param>
         public static void LessThan<T>(dynamic value, ValidationField<T> field)
@@ -223,9 +223,9 @@ namespace EZNEW.Develop.DataValidation
         }
 
         /// <summary>
-        /// LessThan
+        /// less than
         /// </summary>
-        /// <typeparam name="T">DataType</typeparam>
+        /// <typeparam name="T">data type</typeparam>
         /// <param name="value">value</param>
         /// <param name="field">field</param>
         public static void LessThan<T>(Expression<Func<T, dynamic>> value, ValidationField<T> field)
@@ -234,9 +234,9 @@ namespace EZNEW.Develop.DataValidation
         }
 
         /// <summary>
-        /// GreaterThan
+        /// greater than
         /// </summary>
-        /// <typeparam name="T">DataType</typeparam>
+        /// <typeparam name="T">data type</typeparam>
         /// <param name="value">value</param>
         /// <param name="field">field</param>
         public static void GreaterThan<T>(dynamic value, ValidationField<T> field)
@@ -245,9 +245,9 @@ namespace EZNEW.Develop.DataValidation
         }
 
         /// <summary>
-        /// GreaterThan
+        /// greater than
         /// </summary>
-        /// <typeparam name="T">DataType</typeparam>
+        /// <typeparam name="T">data type</typeparam>
         /// <param name="value">value</param>
         /// <param name="field">field</param>
         public static void GreaterThan<T>(Expression<Func<T, dynamic>> value, ValidationField<T> field)
@@ -256,9 +256,9 @@ namespace EZNEW.Develop.DataValidation
         }
 
         /// <summary>
-        /// GreaterThanOrEqual
+        /// greater than or equal
         /// </summary>
-        /// <typeparam name="T">DataType</typeparam>
+        /// <typeparam name="T">data type</typeparam>
         /// <param name="value">value</param>
         /// <param name="field">field</param>
         public static void GreaterThanOrEqual<T>(dynamic value, ValidationField<T> field)
@@ -267,9 +267,9 @@ namespace EZNEW.Develop.DataValidation
         }
 
         /// <summary>
-        /// GreaterThanOrEqual
+        /// greater than or equal
         /// </summary>
-        /// <typeparam name="T">DataType</typeparam>
+        /// <typeparam name="T">data type</typeparam>
         /// <param name="value">value</param>
         /// <param name="field">field</param>
         public static void GreaterThanOrEqual<T>(Expression<Func<T, dynamic>> value, ValidationField<T> field)
@@ -278,9 +278,9 @@ namespace EZNEW.Develop.DataValidation
         }
 
         /// <summary>
-        /// In
+        /// in
         /// </summary>
-        /// <typeparam name="T">DataType</typeparam>
+        /// <typeparam name="T">data type</typeparam>
         /// <param name="value">value</param>
         /// <param name="field">field</param>
         public static void In<T>(IEnumerable<dynamic> value, ValidationField<T> field)
@@ -289,9 +289,9 @@ namespace EZNEW.Develop.DataValidation
         }
 
         /// <summary>
-        /// NotIn
+        /// not in
         /// </summary>
-        /// <typeparam name="T">DataType</typeparam>
+        /// <typeparam name="T">data type</typeparam>
         /// <param name="value">value</param>
         /// <param name="field">field</param>
         public static void NotIn<T>(IEnumerable<dynamic> value, ValidationField<T> field)
@@ -300,9 +300,9 @@ namespace EZNEW.Develop.DataValidation
         }
 
         /// <summary>
-        /// EnumType
+        /// enum type
         /// </summary>
-        /// <typeparam name="T">DataType</typeparam>
+        /// <typeparam name="T">data type</typeparam>
         /// <param name="enumType">enum type</param>
         /// <param name="fields">field</param>
         public static void EnumType<T>(Type enumType, params ValidationField<T>[] fields)
@@ -323,9 +323,9 @@ namespace EZNEW.Develop.DataValidation
 
 
         /// <summary>
-        /// Max Length
+        /// max length
         /// </summary>
-        /// <typeparam name="T">DataType</typeparam>
+        /// <typeparam name="T">data type</typeparam>
         /// <param name="length">length</param>
         /// <param name="fields">field</param>
         public static void MaxLength<T>(int length, params ValidationField<T>[] fields)
@@ -345,9 +345,9 @@ namespace EZNEW.Develop.DataValidation
         }
 
         /// <summary>
-        /// MinLength
+        /// min length
         /// </summary>
-        /// <typeparam name="T">DataType</typeparam>
+        /// <typeparam name="T">data type</typeparam>
         /// <param name="length">length</param>
         /// <param name="fields">field</param>
         public static void MinLength<T>(int length, params ValidationField<T>[] fields)
@@ -367,9 +367,9 @@ namespace EZNEW.Develop.DataValidation
         }
 
         /// <summary>
-        /// Phone
+        /// phone
         /// </summary>
-        /// <typeparam name="T">DataType</typeparam>
+        /// <typeparam name="T">data type</typeparam>
         public static void Phone<T>(params ValidationField<T>[] fields)
         {
             string validatorKey = string.Format("{0}", typeof(PhoneValidator).FullName);
@@ -387,9 +387,9 @@ namespace EZNEW.Develop.DataValidation
         }
 
         /// <summary>
-        /// Range
+        /// range
         /// </summary>
-        /// <typeparam name="T">DataType</typeparam>
+        /// <typeparam name="T">data type</typeparam>
         public static void Range<T>(dynamic minimum, dynamic maximum, RangeBoundary lowerBoundary = RangeBoundary.Include, RangeBoundary upperBoundary = RangeBoundary.Include, params ValidationField<T>[] fields)
         {
             string validatorKey = string.Format("{0}/{1}_{2}_{3}_{4}", typeof(RangeValidator).FullName, minimum, maximum, (int)lowerBoundary, (int)upperBoundary);
@@ -407,9 +407,9 @@ namespace EZNEW.Develop.DataValidation
         }
 
         /// <summary>
-        /// RegularExpression
+        /// regular expression
         /// </summary>
-        /// <typeparam name="T">DataType</typeparam>
+        /// <typeparam name="T">data type</typeparam>
         public static void RegularExpression<T>(string pattern, params ValidationField<T>[] fields)
         {
             string validatorKey = string.Format("{0}/{1}", typeof(RegularExpressionValidator).FullName, pattern);
@@ -427,9 +427,9 @@ namespace EZNEW.Develop.DataValidation
         }
 
         /// <summary>
-        /// Required
+        /// required
         /// </summary>
-        /// <typeparam name="T">DataType</typeparam>
+        /// <typeparam name="T">data type</typeparam>
         public static void Required<T>(params ValidationField<T>[] fields)
         {
             string validatorKey = string.Format("{0}", typeof(RequiredValidator).FullName);
@@ -447,9 +447,9 @@ namespace EZNEW.Develop.DataValidation
         }
 
         /// <summary>
-        /// Url
+        /// url
         /// </summary>
-        /// <typeparam name="T">DataType</typeparam>
+        /// <typeparam name="T">data type</typeparam>
         public static void Url<T>(params ValidationField<T>[] fields)
         {
             string validatorKey = string.Format("{0}", typeof(UrlValidator).FullName);
@@ -467,9 +467,9 @@ namespace EZNEW.Develop.DataValidation
         }
 
         /// <summary>
-        /// CreditCard
+        /// credit card
         /// </summary>
-        /// <typeparam name="T">DataType</typeparam>
+        /// <typeparam name="T">data type</typeparam>
         public static void CreditCard<T>(params ValidationField<T>[] fields)
         {
             string validatorKey = string.Format("{0}", typeof(CreditCardValidator).FullName);
@@ -491,9 +491,9 @@ namespace EZNEW.Develop.DataValidation
         #region Validate
 
         /// <summary>
-        /// Validate
+        /// validate
         /// </summary>
-        /// <typeparam name="T">DataType</typeparam>
+        /// <typeparam name="T">data type</typeparam>
         /// <param name="obj">object</param>
         /// <returns></returns>
         public static List<VerifyResult> Validate<T>(T obj)
@@ -517,12 +517,12 @@ namespace EZNEW.Develop.DataValidation
 
         #endregion
 
-        #region Get Validation Rules
+        #region get validation rules
 
         /// <summary>
-        /// Get Validation Rules
+        /// get validation rules
         /// </summary>
-        /// <param name="type">DataType</param>
+        /// <param name="type">data type</param>
         /// <param name="propertyOrFieldName">property or field name</param>
         /// <returns></returns>
         public static List<IValidation> GetValidationRules(Type type, string propertyOrFieldName)
@@ -545,12 +545,12 @@ namespace EZNEW.Develop.DataValidation
 
         #endregion
 
-        #region Get Validation Tip Message
+        #region get validation tip message
 
         /// <summary>
-        /// Get Validation Tip Message
+        /// get validation tip message
         /// </summary>
-        /// <param name="type">DataType</param>
+        /// <param name="type">data type</param>
         /// <param name="propertyName">property name</param>
         /// <returns></returns>
         public static string GetValidationTipMessage(Type type, string propertyName)
@@ -568,9 +568,9 @@ namespace EZNEW.Develop.DataValidation
         }
 
         /// <summary>
-        /// Get Validation Tip Message
+        /// get validation tip message
         /// </summary>
-        /// <typeparam name="T">DataType</typeparam>
+        /// <typeparam name="T">data type</typeparam>
         /// <param name="property">property</param>
         /// <returns></returns>
         public static string GetValidationTipMessage<T, TP>(Expression<Func<T, TP>> property)

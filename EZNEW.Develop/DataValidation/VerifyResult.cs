@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 namespace EZNEW.Develop.DataValidation
 {
     /// <summary>
-    /// Verify Result
+    /// verify result
     /// </summary>
     public class VerifyResult
     {
-        #region Propertys
+        #region propertys
 
         /// <summary>
-        /// Success
+        /// success
         /// </summary>
         public bool Success
         {
@@ -22,7 +22,7 @@ namespace EZNEW.Develop.DataValidation
         }
 
         /// <summary>
-        /// Error Message
+        /// error message
         /// </summary>
         public string ErrorMessage
         {
@@ -30,7 +30,7 @@ namespace EZNEW.Develop.DataValidation
         }
 
         /// <summary>
-        /// Field Name
+        /// field name
         /// </summary>
         public string FieldName
         {
@@ -39,10 +39,10 @@ namespace EZNEW.Develop.DataValidation
 
         #endregion
 
-        #region Method
+        #region method
 
         /// <summary>
-        /// Get Error Result
+        /// get error result
         /// </summary>
         /// <param name="errorMessage">error message</param>
         /// <returns></returns>
@@ -56,7 +56,7 @@ namespace EZNEW.Develop.DataValidation
         }
 
         /// <summary>
-        /// Get Success Result
+        /// get success result
         /// </summary>
         /// <param name="successMessage">success message</param>
         /// <returns></returns>

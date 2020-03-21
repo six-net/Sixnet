@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace EZNEW.Develop.Command
 {
     /// <summary>
-    /// Command Parameters
+    /// command parameters
     /// </summary>
     public class CmdParameters
     {

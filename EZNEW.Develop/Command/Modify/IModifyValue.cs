@@ -7,7 +7,7 @@ namespace EZNEW.Develop.Command.Modify
     public interface IModifyValue
     {
         /// <summary>
-        /// Calculate Value
+        /// calculate value
         /// </summary>
         dynamic Value { get; }
 

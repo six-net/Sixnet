@@ -8,11 +8,12 @@ using EZNEW.Framework.Extension;
 using EZNEW.Framework.Fault;
 using EZNEW.Develop.Entity;
 using EZNEW.Framework.IoC;
+using System.Data;
 
 namespace EZNEW.Develop.Command
 {
     /// <summary>
-    ///  Command Execute Manager
+    ///  command execute manager
     /// </summary>
     public static class CommandExecuteManager
     {
@@ -31,19 +32,10 @@ namespace EZNEW.Develop.Command
         /// <summary>
         /// execute command
         /// </summary>
+        /// <param name="executeOption">execute option</param>
         /// <param name="commands">commands</param>
         /// <returns>return the execute data numbers</returns>
-        internal static int Execute(IEnumerable<ICommand> commands)
-        {
-            return ExecuteAsync(commands).Result;
-        }
-
-        /// <summary>
-        /// execute command
-        /// </summary>
-        /// <param name="commands">commands</param>
-        /// <returns>return the execute data numbers</returns>
-        internal static async Task<int> ExecuteAsync(IEnumerable<ICommand> commands)
+        internal static async Task<int> ExecuteAsync(CommandExecuteOption executeOption, IEnumerable<ICommand> commands)
         {
             if (commands == null || !commands.Any())
             {
@@ -57,7 +49,7 @@ namespace EZNEW.Develop.Command
             int result = 0;
             foreach (var engineGroup in cmdGroupEngines)
             {
-                result += await engineGroup.Value.Item1.ExecuteAsync(engineGroup.Value.Item2.ToArray()).ConfigureAwait(false);
+                result += await engineGroup.Value.Item1.ExecuteAsync(executeOption, engineGroup.Value.Item2.ToArray()).ConfigureAwait(false);
             }
             return result;
         }
@@ -65,9 +57,10 @@ namespace EZNEW.Develop.Command
         /// <summary>
         /// execute command
         /// </summary>
+        /// <param name="executeOption">execute option</param>
         /// <param name="commands">commands</param>
         /// <returns></returns>
-        internal static async Task<int> ExecuteAsync(IEnumerable<Tuple<ICommandEngine, List<ICommand>>> commands)
+        internal static async Task<int> ExecuteAsync(CommandExecuteOption executeOption, IEnumerable<Tuple<ICommandEngine, List<ICommand>>> commands)
         {
             if (commands.IsNullOrEmpty())
             {
@@ -76,7 +69,7 @@ namespace EZNEW.Develop.Command
             int result = 0;
             foreach (var cmdItem in commands)
             {
-                result += await cmdItem.Item1.ExecuteAsync(cmdItem.Item2.ToArray()).ConfigureAwait(false);
+                result += await cmdItem.Item1.ExecuteAsync(executeOption, cmdItem.Item2.ToArray()).ConfigureAwait(false);
             }
             return result;
         }
@@ -84,17 +77,6 @@ namespace EZNEW.Develop.Command
         #endregion
 
         #region query
-
-        /// <summary>
-        /// execute query
-        /// </summary>
-        /// <typeparam name="T">data type</typeparam>
-        /// <param name="cmd">command</param>
-        /// <returns>queried datas</returns>
-        internal static IEnumerable<T> Query<T>(ICommand cmd)
-        {
-            return QueryAsync<T>(cmd).Result;
-        }
 
         /// <summary>
         /// execute query
@@ -152,18 +134,7 @@ namespace EZNEW.Develop.Command
         /// <typeparam name="T">data type</typeparam>
         /// <param name="cmd">command</param>
         /// <returns>queried datas</returns>
-        internal static IPaging<T> QueryPaging<T>(ICommand cmd) where T : BaseEntity<T>
-        {
-            return QueryPagingAsync<T>(cmd).Result;
-        }
-
-        /// <summary>
-        /// query data with paging
-        /// </summary>
-        /// <typeparam name="T">data type</typeparam>
-        /// <param name="cmd">command</param>
-        /// <returns>queried datas</returns>
-        internal static async Task<IPaging<T>> QueryPagingAsync<T>(ICommand cmd) where T : BaseEntity<T>
+        internal static async Task<IPaging<T>> QueryPagingAsync<T>(ICommand cmd) where T : BaseEntity<T>, new()
         {
             var groupEngines = await GroupCommandByEnginesAsync(new List<ICommand>() { cmd }).ConfigureAwait(false);
             if (groupEngines == null || groupEngines.Count <= 0)
@@ -212,16 +183,6 @@ namespace EZNEW.Develop.Command
         /// </summary>
         /// <param name="cmd">command</param>
         /// <returns>data is exist</returns>
-        internal static bool Query(ICommand cmd)
-        {
-            return QueryAsync(cmd).Result;
-        }
-
-        /// <summary>
-        /// determine whether data is exist
-        /// </summary>
-        /// <param name="cmd">command</param>
-        /// <returns>data is exist</returns>
         internal static async Task<bool> QueryAsync(ICommand cmd)
         {
             var groupEngines = await GroupCommandByEnginesAsync(new List<ICommand>() { cmd }).ConfigureAwait(false);
@@ -241,76 +202,12 @@ namespace EZNEW.Develop.Command
         }
 
         /// <summary>
-        /// query single data
+        /// aggregate value
         /// </summary>
         /// <typeparam name="T">data type</typeparam>
         /// <param name="cmd">command</param>
         /// <returns>query data</returns>
-        internal static T QuerySingle<T>(ICommand cmd)
-        {
-            return QuerySingleAsync<T>(cmd).Result;
-        }
-
-        /// <summary>
-        /// query single data
-        /// </summary>
-        /// <typeparam name="T">data type</typeparam>
-        /// <param name="cmd">command</param>
-        /// <returns>query data</returns>
-        internal static async Task<T> QuerySingleAsync<T>(ICommand cmd)
-        {
-            T data;
-            switch (cmd.Operate)
-            {
-                case OperateType.Query:
-                    data = await QuerySingleObjectAsync<T>(cmd).ConfigureAwait(false);
-                    break;
-                case OperateType.Max:
-                case OperateType.Min:
-                case OperateType.Sum:
-                case OperateType.Avg:
-                case OperateType.Count:
-                    data = await QueryAggregateFunctionResultAsync<T>(cmd).ConfigureAwait(false);
-                    break;
-                default:
-                    data = default(T);
-                    break;
-
-            }
-            return data;
-        }
-
-        /// <summary>
-        /// query model
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="cmd">command</param>
-        /// <returns></returns>
-        static async Task<T> QuerySingleObjectAsync<T>(ICommand cmd)
-        {
-            var groupEngines = await GroupCommandByEnginesAsync(new List<ICommand>() { cmd });
-            if (groupEngines == null || groupEngines.Count <= 0)
-            {
-                return default(T);
-            }
-            foreach (var groupEngine in groupEngines)
-            {
-                var data = await groupEngine.Value.Item1.QuerySingleAsync<T>(cmd).ConfigureAwait(false);
-                if (data != null)
-                {
-                    return data;
-                }
-            }
-            return default(T);
-        }
-
-        /// <summary>
-        /// Aggregate Function
-        /// </summary>
-        /// <typeparam name="T">data type</typeparam>
-        /// <param name="cmd">command</param>
-        /// <returns>query data</returns>
-        static async Task<T> QueryAggregateFunctionResultAsync<T>(ICommand cmd)
+        internal static async Task<T> AggregateValueAsync<T>(ICommand cmd)
         {
             var groupEngines = await GroupCommandByEnginesAsync(new List<ICommand>() { cmd }).ConfigureAwait(false);
             if (groupEngines == null || groupEngines.Count <= 0)
@@ -320,7 +217,7 @@ namespace EZNEW.Develop.Command
             List<T> datas = new List<T>(groupEngines.Count);
             foreach (var groupEngine in groupEngines)
             {
-                datas.Add(await groupEngine.Value.Item1.QuerySingleAsync<T>(cmd).ConfigureAwait(false));
+                datas.Add(await groupEngine.Value.Item1.AggregateValueAsync<T>(cmd).ConfigureAwait(false));
             }
             if (datas.Count == 1)
             {
@@ -344,6 +241,41 @@ namespace EZNEW.Develop.Command
                     break;
             }
             return result;
+        }
+
+        /// <summary>
+        /// query data
+        /// </summary>
+        /// <param name="cmd">query command</param>
+        /// <returns>data</returns>
+        internal static async Task<DataSet> QueryMultipleAsync(ICommand cmd)
+        {
+            var groupEngines = await GroupCommandByEnginesAsync(new List<ICommand>() { cmd }).ConfigureAwait(false);
+            if (groupEngines == null || groupEngines.Count <= 0)
+            {
+                return new DataSet();
+            }
+            DataSet ds = null;
+            foreach (var groupEngine in groupEngines)
+            {
+                var result = await groupEngine.Value.Item1.QueryMultipleAsync(cmd).ConfigureAwait(false);
+                if (result?.Tables == null)
+                {
+                    continue;
+                }
+                if (ds == null)
+                {
+                    ds = result;
+                }
+                else
+                {
+                    foreach (DataTable dt in result.Tables)
+                    {
+                        ds.Tables.Add(dt);
+                    }
+                }
+            }
+            return ds;
         }
 
         #endregion
@@ -374,7 +306,7 @@ namespace EZNEW.Develop.Command
                         }
                     };
                 }
-                throw new EZNEWException("GetCommandEnginesMethodAsync didn't set any value");
+                throw new EZNEWException("GetCommandEnginesAsync didn't set any value");
             }
             var cmdEngineDict = new Dictionary<string, Tuple<ICommandEngine, List<ICommand>>>();
             foreach (var command in commands)

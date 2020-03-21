@@ -12,11 +12,12 @@ using EZNEW.Develop.CQuery.CriteriaConvert;
 using EZNEW.Framework.Extension;
 using EZNEW.Develop.Entity;
 using EZNEW.Framework.Fault;
+using EZNEW.Develop.DataAccess;
 
 namespace EZNEW.Develop.CQuery
 {
     /// <summary>
-    /// Condition Implement
+    /// IQuery default implement
     /// </summary>
     internal class QueryInfo : IQuery
     {
@@ -38,10 +39,10 @@ namespace EZNEW.Develop.CQuery
         static Dictionary<Guid, Action<QueryInfo, IQueryItem>> addQueryItemHandlers = null;
         bool alreadySetGlobalCondition = false;
 
-        #region Constructor
+        #region constructor
 
         /// <summary>
-        /// Create a query instance
+        /// create a query instance
         /// </summary>
         /// <param name="objectName">object name</param>
         internal QueryInfo()
@@ -67,7 +68,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region Propertys
+        #region propertys
 
         /// <summary>
         /// all criterias
@@ -260,9 +261,14 @@ namespace EZNEW.Develop.CQuery
         /// </summary>
         public List<IQuery> Subqueries { get; private set; } = new List<IQuery>();
 
+        /// <summary>
+        /// data isolation level
+        /// </summary>
+        public DataIsolationLevel? IsolationLevel { get; set; }
+
         #endregion
 
-        #region Functions
+        #region functions
 
         #region And
 
@@ -1448,11 +1454,18 @@ namespace EZNEW.Develop.CQuery
         /// </summary>
         /// <typeparam name="T">data type</typeparam>
         /// <typeparam name="TProperty">field type</typeparam>
-        /// <param name="fieldExpression">field expression</param>
+        /// <param name="fieldExpressions">field expression</param>
         /// <returns>return newest instance</returns>
-        public IQuery AddQueryFields<T>(Expression<Func<T, dynamic>> fieldExpression) where T : QueryModel<T>
+        public IQuery AddQueryFields<T>(params Expression<Func<T, dynamic>>[] fieldExpressions) where T : QueryModel<T>
         {
-            return AddQueryFields(ExpressionHelper.GetExpressionPropertyName(fieldExpression.Body));
+            if (!fieldExpressions.IsNullOrEmpty())
+            {
+                foreach (var expression in fieldExpressions)
+                {
+                    AddQueryFields(ExpressionHelper.GetExpressionPropertyName(expression.Body));
+                }
+            }
+            return this;
         }
 
         /// <summary>
@@ -1471,11 +1484,18 @@ namespace EZNEW.Develop.CQuery
         /// </summary>
         /// <typeparam name="T">data type</typeparam>
         /// <typeparam name="TProperty">field type</typeparam>
-        /// <param name="fieldExpression">field expression</param>
+        /// <param name="fieldExpressions">field expression</param>
         /// <returns>return newest instance</returns>
-        public IQuery AddNotQueryFields<T>(Expression<Func<T, dynamic>> fieldExpression) where T : QueryModel<T>
+        public IQuery AddNotQueryFields<T>(params Expression<Func<T, dynamic>>[] fieldExpressions) where T : QueryModel<T>
         {
-            return AddNotQueryFields(ExpressionHelper.GetExpressionPropertyName(fieldExpression.Body));
+            if (!fieldExpressions.IsNullOrEmpty())
+            {
+                foreach (var expression in fieldExpressions)
+                {
+                    AddNotQueryFields(ExpressionHelper.GetExpressionPropertyName(expression.Body));
+                }
+            }
+            return this;
         }
 
         /// <summary>
@@ -1493,16 +1513,28 @@ namespace EZNEW.Develop.CQuery
         /// <returns></returns>
         public List<EntityField> GetActuallyQueryFields(Type entityType, bool forcePrimaryKey = true, bool forceVersionKey = true)
         {
-            List<EntityField> fields = null;
-            if (queryFields.IsNullOrEmpty())
+            if (!queryFields.IsNullOrEmpty())
             {
-                fields = EntityManager.GetEntityQueryFields(entityType);
+                return EntityManager.GetEntityQueryFields(entityType, queryFields, forcePrimaryKey, forceVersionKey);
             }
-            else
+            IEnumerable<EntityField> allFields = EntityManager.GetEntityQueryFields(entityType);
+            if (!notQueryFields.IsNullOrEmpty())
             {
-                fields = EntityManager.GetEntityQueryFields(entityType, queryFields, forcePrimaryKey, forceVersionKey);
+                allFields = allFields.Except(notQueryFields.Select<string, EntityField>(c => c));
+                if (forcePrimaryKey)
+                {
+                    allFields = allFields.Union(EntityManager.GetPrimaryKeys(entityType));
+                }
+                if (forceVersionKey)
+                {
+                    var versionField = EntityManager.GetVersionField(entityType);
+                    if (!string.IsNullOrWhiteSpace(versionField))
+                    {
+                        allFields = allFields.Union(new List<EntityField>(1) { versionField });
+                    }
+                }
             }
-            return fields;
+            return allFields.ToList();
         }
 
         #endregion
@@ -4168,7 +4200,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region Util
+        #region util
 
         /// <summary>
         /// set single criteria

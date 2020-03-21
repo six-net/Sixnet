@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace EZNEW.Develop.DataValidation.Validators
 {
     /// <summary>
-    /// Regular Expression Validator
+    /// regular expression validator
     /// </summary>
     public class RegularExpressionValidator : DataValidator
     {
@@ -53,7 +53,7 @@ namespace EZNEW.Develop.DataValidation.Validators
         }
 
         /// <summary>
-        /// Create Validation Attribute
+        /// create validation attribute
         /// </summary>
         /// <returns></returns>
         public override ValidationAttribute CreateValidationAttribute(ValidationAttributeParameter parameter)

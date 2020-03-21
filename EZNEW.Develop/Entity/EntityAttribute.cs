@@ -5,7 +5,7 @@ using System.Text;
 namespace EZNEW.Develop.Entity
 {
     [AttributeUsage(AttributeTargets.Class)]
-    public class EntityAttribute:Attribute
+    public class EntityAttribute : Attribute
     {
         #region Propertys
 
@@ -14,15 +14,15 @@ namespace EZNEW.Develop.Entity
         /// </summary>
         public string ObjectName
         {
-            get;set;
+            get; set;
         }
 
         /// <summary>
-        /// Description
+        /// description
         /// </summary>
         public string Description
         {
-            get;set;
+            get; set;
         }
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace EZNEW.Develop.Entity
         /// </summary>
         public string Group
         {
-            get;set;
+            get; set;
         }
 
         #endregion

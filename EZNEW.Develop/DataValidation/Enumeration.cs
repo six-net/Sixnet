@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace EZNEW.Develop.DataValidation
 {
     /// <summary>
-    /// Compare Operator
+    /// compare operator
     /// </summary>
     public enum CompareOperator
     {
@@ -22,7 +22,7 @@ namespace EZNEW.Develop.DataValidation
     }
 
     /// <summary>
-    /// Range Boundary
+    /// range boundary
     /// </summary>
     public enum RangeBoundary
     {
@@ -31,7 +31,7 @@ namespace EZNEW.Develop.DataValidation
     }
 
     /// <summary>
-    /// Validator Type
+    /// validator type
     /// </summary>
     public enum ValidatorType
     {

@@ -5,7 +5,7 @@ using System.Text;
 namespace EZNEW.Develop.CQuery
 {
     /// <summary>
-    /// Global Condition Filter Result
+    /// global condition filter result
     /// </summary>
     public class GlobalConditionFilterResult
     {

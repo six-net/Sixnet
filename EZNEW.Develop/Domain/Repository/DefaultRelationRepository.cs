@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace EZNEW.Develop.Domain.Repository
 {
-    public abstract class DefaultRelationRepository<First, Second, ET, DAI> : BaseRelationRepository<First, Second> where Second : IAggregationRoot<Second> where First : IAggregationRoot<First> where ET : BaseEntity<ET> where DAI : IDataAccess<ET>
+    public abstract class DefaultRelationRepository<First, Second, ET, DAI> : BaseRelationRepository<First, Second> where Second : IAggregationRoot<Second> where First : IAggregationRoot<First> where ET : BaseEntity<ET>, new() where DAI : IDataAccess<ET>
     {
         IRepositoryWarehouse<ET, DAI> repositoryWarehouse = ContainerManager.Resolve<IRepositoryWarehouse<ET, DAI>>();
         static Type entityType = typeof(ET);
@@ -32,23 +32,25 @@ namespace EZNEW.Develop.Domain.Repository
         /// save
         /// </summary>
         /// <param name="datas">datas</param>
-        public sealed override void Save(IEnumerable<Tuple<First, Second>> datas)
+        /// <param name="activationOption">activation option</param>
+        public sealed override void Save(IEnumerable<Tuple<First, Second>> datas, ActivationOption activationOption = null)
         {
-            SaveAsync(datas).Wait();
+            SaveAsync(datas, activationOption).Wait();
         }
 
         /// <summary>
         /// save async
         /// </summary>
         /// <param name="datas">datas</param>
-        public sealed override async Task SaveAsync(IEnumerable<Tuple<First, Second>> datas)
+        /// <param name="activationOption">activation option</param>
+        public sealed override async Task SaveAsync(IEnumerable<Tuple<First, Second>> datas, ActivationOption activationOption = null)
         {
-            var records = await ExecuteSaveAsync(datas).ConfigureAwait(false);
+            var records = await ExecuteSaveAsync(datas, activationOption).ConfigureAwait(false);
             if (records.IsNullOrEmpty())
             {
                 return;
             }
-            RepositoryEventBus.PublishSave(GetType(), datas);
+            RepositoryEventBus.PublishSave(GetType(), datas, activationOption);
             WorkFactory.RegisterActivationRecord(records.ToArray());
         }
 
@@ -56,14 +58,15 @@ namespace EZNEW.Develop.Domain.Repository
         /// save by first type datas
         /// </summary>
         /// <param name="datas">datas</param>
-        public sealed override void SaveByFirst(IEnumerable<First> datas)
+        /// <param name="activationOption">activation option</param>
+        public sealed override void SaveByFirst(IEnumerable<First> datas, ActivationOption activationOption = null)
         {
-            var saveRecords = ExecuteSaveByFirstAsync(datas).Result;
+            var saveRecords = ExecuteSaveByFirstAsync(datas, activationOption).Result;
             if (saveRecords.IsNullOrEmpty())
             {
                 return;
             }
-            RepositoryEventBus.PublishSave(GetType(), datas);
+            RepositoryEventBus.PublishSave(GetType(), datas, activationOption);
             WorkFactory.RegisterActivationRecord(saveRecords.ToArray());
         }
 
@@ -71,14 +74,15 @@ namespace EZNEW.Develop.Domain.Repository
         /// save by second type datas
         /// </summary>
         /// <param name="datas">datas</param>
-        public sealed override void SaveBySecond(IEnumerable<Second> datas)
+        /// <param name="activationOption">activation option</param>
+        public sealed override void SaveBySecond(IEnumerable<Second> datas, ActivationOption activationOption = null)
         {
-            var saveRecords = ExecuteSaveBySecondAsync(datas).Result;
+            var saveRecords = ExecuteSaveBySecondAsync(datas, activationOption).Result;
             if (saveRecords.IsNullOrEmpty())
             {
                 return;
             }
-            RepositoryEventBus.PublishSave(GetType(), datas);
+            RepositoryEventBus.PublishSave(GetType(), datas, activationOption);
             WorkFactory.RegisterActivationRecord(saveRecords.ToArray());
         }
 
@@ -90,23 +94,25 @@ namespace EZNEW.Develop.Domain.Repository
         /// remove
         /// </summary>
         /// <param name="datas">datas</param>
-        public sealed override void Remove(IEnumerable<Tuple<First, Second>> datas)
+        /// <param name="activationOption">activation option</param>
+        public sealed override void Remove(IEnumerable<Tuple<First, Second>> datas, ActivationOption activationOption = null)
         {
-            RemoveAsync(datas).Wait();
+            RemoveAsync(datas, activationOption).Wait();
         }
 
         /// <summary>
         /// save async
         /// </summary>
         /// <param name="datas">datas</param>
-        public sealed override async Task RemoveAsync(IEnumerable<Tuple<First, Second>> datas)
+        /// <param name="activationOption">activation option</param>
+        public sealed override async Task RemoveAsync(IEnumerable<Tuple<First, Second>> datas, ActivationOption activationOption = null)
         {
-            var records = await ExecuteRemoveAsync(datas).ConfigureAwait(false);
+            var records = await ExecuteRemoveAsync(datas, activationOption).ConfigureAwait(false);
             if (records.IsNullOrEmpty())
             {
                 return;
             }
-            RepositoryEventBus.PublishRemove(GetType(), datas);
+            RepositoryEventBus.PublishRemove(GetType(), datas, activationOption);
             WorkFactory.RegisterActivationRecord(records.ToArray());
         }
 
@@ -114,25 +120,27 @@ namespace EZNEW.Develop.Domain.Repository
         /// remove by condition
         /// </summary>
         /// <param name="query">query</param>
-        public sealed override void Remove(IQuery query)
+        /// <param name="activationOption">activation option</param>
+        public sealed override void Remove(IQuery query, ActivationOption activationOption = null)
         {
-            RemoveAsync(query).Wait();
+            RemoveAsync(query, activationOption).Wait();
         }
 
         /// <summary>
         /// remove by condition
         /// </summary>
         /// <param name="query">query</param>
-        public sealed override async Task RemoveAsync(IQuery query)
+        /// <param name="activationOption">activation option</param>
+        public sealed override async Task RemoveAsync(IQuery query, ActivationOption activationOption = null)
         {
             //query condition
             query = AppendRemoveCondition(query);
-            var record = await ExecuteRemoveAsync(query).ConfigureAwait(false);
+            var record = await ExecuteRemoveAsync(query, activationOption).ConfigureAwait(false);
             if (record == null)
             {
                 return;
             }
-            RepositoryEventBus.PublishRemove<Tuple<First, Second>>(GetType(), query);
+            RepositoryEventBus.PublishRemove<Tuple<First, Second>>(GetType(), query, activationOption);
             WorkFactory.RegisterActivationRecord(record);
         }
 
@@ -140,48 +148,52 @@ namespace EZNEW.Develop.Domain.Repository
         /// remove by first datas
         /// </summary>
         /// <param name="datas">datas</param>
-        public sealed override void RemoveByFirst(IEnumerable<First> datas)
+        /// <param name="activationOption">activation option</param>
+        public sealed override void RemoveByFirst(IEnumerable<First> datas, ActivationOption activationOption = null)
         {
             if (datas.IsNullOrEmpty())
             {
                 return;
             }
             var query = CreateQueryByFirst(datas);
-            Remove(query);
+            Remove(query, activationOption);
         }
 
         /// <summary>
         /// remove by first
         /// </summary>
         /// <param name="query">query</param>
-        public sealed override void RemoveByFirst(IQuery query)
+        /// <param name="activationOption">activation option</param>
+        public sealed override void RemoveByFirst(IQuery query, ActivationOption activationOption = null)
         {
             var removeQuery = CreateQueryByFirst(query);
-            Remove(removeQuery);
+            Remove(removeQuery, activationOption);
         }
 
         /// <summary>
         /// remove by second datas
         /// </summary>
         /// <param name="datas">datas</param>
-        public sealed override void RemoveBySecond(IEnumerable<Second> datas)
+        /// <param name="activationOption">activation option</param>
+        public sealed override void RemoveBySecond(IEnumerable<Second> datas, ActivationOption activationOption = null)
         {
             if (datas.IsNullOrEmpty())
             {
                 return;
             }
             var query = CreateQueryBySecond(datas);
-            Remove(query);
+            Remove(query, activationOption);
         }
 
         /// <summary>
         /// remove by first
         /// </summary>
         /// <param name="query">query</param>
-        public sealed override void RemoveBySecond(IQuery query)
+        /// <param name="activationOption">activation option</param>
+        public sealed override void RemoveBySecond(IQuery query, ActivationOption activationOption = null)
         {
             var removeQuery = CreateQueryBySecond(query);
-            Remove(removeQuery);
+            Remove(removeQuery, activationOption);
         }
 
         #endregion
@@ -314,8 +326,8 @@ namespace EZNEW.Develop.Domain.Repository
         /// execute save
         /// </summary>
         /// <param name="datas">datas</param>
-        /// <returns></returns>
-        public virtual async Task<List<IActivationRecord>> ExecuteSaveAsync(IEnumerable<Tuple<First, Second>> datas)
+        /// <param name="activationOption">activation option</param>
+        public virtual async Task<List<IActivationRecord>> ExecuteSaveAsync(IEnumerable<Tuple<First, Second>> datas, ActivationOption activationOption = null)
         {
             if (datas.IsNullOrEmpty())
             {
@@ -325,7 +337,7 @@ namespace EZNEW.Develop.Domain.Repository
             List<IActivationRecord> records = new List<IActivationRecord>(entitys.Count);
             foreach (var entity in entitys)
             {
-                records.Add(await repositoryWarehouse.SaveAsync(entity).ConfigureAwait(false));
+                records.Add(await repositoryWarehouse.SaveAsync(entity, activationOption).ConfigureAwait(false));
             }
             return records;
         }
@@ -334,8 +346,9 @@ namespace EZNEW.Develop.Domain.Repository
         /// execute save by first datas
         /// </summary>
         /// <param name="datas">datas</param>
+        /// <param name="activationOption">activation option</param>
         /// <returns></returns>
-        public virtual async Task<List<IActivationRecord>> ExecuteSaveByFirstAsync(IEnumerable<First> datas)
+        public virtual async Task<List<IActivationRecord>> ExecuteSaveByFirstAsync(IEnumerable<First> datas, ActivationOption activationOption = null)
         {
             if (datas.IsNullOrEmpty())
             {
@@ -345,7 +358,7 @@ namespace EZNEW.Develop.Domain.Repository
             List<IActivationRecord> records = new List<IActivationRecord>(entitys.Count);
             foreach (var entity in entitys)
             {
-                records.Add(await repositoryWarehouse.SaveAsync(entity).ConfigureAwait(false));
+                records.Add(await repositoryWarehouse.SaveAsync(entity, activationOption).ConfigureAwait(false));
             }
             return records;
         }
@@ -354,8 +367,9 @@ namespace EZNEW.Develop.Domain.Repository
         /// execute save by second datas
         /// </summary>
         /// <param name="datas">datas</param>
+        /// <param name="activationOption">activation option</param>
         /// <returns></returns>
-        public virtual async Task<List<IActivationRecord>> ExecuteSaveBySecondAsync(IEnumerable<Second> datas)
+        public virtual async Task<List<IActivationRecord>> ExecuteSaveBySecondAsync(IEnumerable<Second> datas, ActivationOption activationOption = null)
         {
             if (datas.IsNullOrEmpty())
             {
@@ -365,7 +379,7 @@ namespace EZNEW.Develop.Domain.Repository
             List<IActivationRecord> records = new List<IActivationRecord>(entitys.Count);
             foreach (var entity in entitys)
             {
-                records.Add(await repositoryWarehouse.SaveAsync(entity).ConfigureAwait(false));
+                records.Add(await repositoryWarehouse.SaveAsync(entity, activationOption).ConfigureAwait(false));
             }
             return records;
         }
@@ -374,8 +388,9 @@ namespace EZNEW.Develop.Domain.Repository
         /// execute remove
         /// </summary>
         /// <param name="datas">datas</param>
+        /// <param name="activationOption">activation option</param>
         /// <returns></returns>
-        public virtual async Task<List<IActivationRecord>> ExecuteRemoveAsync(IEnumerable<Tuple<First, Second>> datas)
+        public virtual async Task<List<IActivationRecord>> ExecuteRemoveAsync(IEnumerable<Tuple<First, Second>> datas, ActivationOption activationOption = null)
         {
             if (datas.IsNullOrEmpty())
             {
@@ -385,7 +400,7 @@ namespace EZNEW.Develop.Domain.Repository
             List<IActivationRecord> records = new List<IActivationRecord>(entitys.Count);
             foreach (var entity in entitys)
             {
-                records.Add(await repositoryWarehouse.RemoveAsync(entity).ConfigureAwait(false));
+                records.Add(await repositoryWarehouse.RemoveAsync(entity, activationOption).ConfigureAwait(false));
             }
             return records;
         }
@@ -394,10 +409,11 @@ namespace EZNEW.Develop.Domain.Repository
         /// execute remove
         /// </summary>
         /// <param name="query">query</param>
+        /// <param name="activationOption">activation option</param>
         /// <returns></returns>
-        public virtual async Task<IActivationRecord> ExecuteRemoveAsync(IQuery query)
+        public virtual async Task<IActivationRecord> ExecuteRemoveAsync(IQuery query, ActivationOption activationOption = null)
         {
-            return await repositoryWarehouse.RemoveAsync(query);
+            return await repositoryWarehouse.RemoveAsync(query, activationOption);
         }
 
         /// <summary>
@@ -508,7 +524,7 @@ namespace EZNEW.Develop.Domain.Repository
 
         #region global condition
 
-        #region Append Repository Condition
+        #region append repository condition
 
         /// <summary>
         /// append repository condition
@@ -530,7 +546,7 @@ namespace EZNEW.Develop.Domain.Repository
             //primary query
             GlobalConditionFilter conditionFilter = new GlobalConditionFilter()
             {
-                OriginQuery = originQuery,
+                OriginalQuery = originQuery,
                 UsageSceneEntityType = entityType,
                 EntityType = entityType,
                 SourceType = QuerySourceType.Repository,
@@ -562,7 +578,7 @@ namespace EZNEW.Develop.Domain.Repository
 
         #endregion
 
-        #region Append Subqueries Condition
+        #region append subqueries condition
 
         /// <summary>
         /// append subqueries condition
@@ -577,7 +593,7 @@ namespace EZNEW.Develop.Domain.Repository
             }
             conditionFilter.SourceType = QuerySourceType.Subuery;
             conditionFilter.EntityType = subquery.EntityType;
-            conditionFilter.OriginQuery = subquery;
+            conditionFilter.OriginalQuery = subquery;
             var conditionFilterResult = QueryManager.GlobalConditionFilter(conditionFilter);
             if (conditionFilterResult != null)
             {
@@ -603,7 +619,7 @@ namespace EZNEW.Develop.Domain.Repository
 
         #endregion
 
-        #region Append Join Condition
+        #region append join condition
 
         /// <summary>
         /// append join query condition
@@ -618,7 +634,7 @@ namespace EZNEW.Develop.Domain.Repository
             }
             conditionFilter.SourceType = QuerySourceType.JoinQuery;
             conditionFilter.EntityType = joinQuery.EntityType;
-            conditionFilter.OriginQuery = joinQuery;
+            conditionFilter.OriginalQuery = joinQuery;
             var conditionFilterResult = QueryManager.GlobalConditionFilter(conditionFilter);
             if (conditionFilterResult != null)
             {
@@ -644,7 +660,7 @@ namespace EZNEW.Develop.Domain.Repository
 
         #endregion
 
-        #region Append Remove Extra Condition
+        #region append remove extra condition
 
         /// <summary>
         /// append remove condition
@@ -658,7 +674,7 @@ namespace EZNEW.Develop.Domain.Repository
 
         #endregion
 
-        #region Append Query Extra Condition
+        #region append query extra condition
 
         /// <summary>
         /// append query condition

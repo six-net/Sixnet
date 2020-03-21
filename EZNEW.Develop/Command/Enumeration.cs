@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace EZNEW.Develop.Command
 {
     /// <summary>
-    /// Command Operate Type
+    /// command operate type
     /// </summary>
     public enum OperateType
     {
@@ -24,7 +24,7 @@ namespace EZNEW.Develop.Command
     }
 
     /// <summary>
-    /// Command Execute Mode
+    /// command execute mode
     /// </summary>
     public enum CommandExecuteMode
     {
@@ -33,16 +33,16 @@ namespace EZNEW.Develop.Command
     }
 
     /// <summary>
-    /// RdbCommand Text Type
+    /// command text type
     /// </summary>
-    public enum RdbCommandTextType
+    public enum CommandTextType
     {
         Text = 210,
         Procedure = 220
     }
 
     /// <summary>
-    /// Command Execute Result
+    /// command execute result
     /// </summary>
     public enum ExecuteCommandResult
     {
@@ -51,7 +51,7 @@ namespace EZNEW.Develop.Command
     }
 
     /// <summary>
-    /// Command Behavior
+    /// command behavior
     /// </summary>
     public enum CommandBehavior
     {

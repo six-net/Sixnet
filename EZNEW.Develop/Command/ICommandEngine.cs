@@ -2,6 +2,7 @@
 using EZNEW.Framework.Paging;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -30,16 +31,18 @@ namespace EZNEW.Develop.Command
         /// <summary>
         /// execute command
         /// </summary>
+        /// <param name="executeOption">execute option</param>
         /// <param name="cmds">commands</param>
         /// <returns>date numbers </returns>
-        int Execute(params ICommand[] cmds);
+        int Execute(CommandExecuteOption executeOption, params ICommand[] cmds);
 
         /// <summary>
         /// execute command
         /// </summary>
+        /// <param name="executeOption">execute option</param>
         /// <param name="cmds">commands</param>
         /// <returns>date numbers </returns>
-        Task<int> ExecuteAsync(params ICommand[] cmds);
+        Task<int> ExecuteAsync(CommandExecuteOption executeOption, params ICommand[] cmds);
 
         #endregion
 
@@ -67,7 +70,7 @@ namespace EZNEW.Develop.Command
         /// <typeparam name="T">data type</typeparam>
         /// <param name="cmd">command</param>
         /// <returns></returns>
-        IPaging<T> QueryPaging<T>(ICommand cmd) where T:BaseEntity<T>;
+        IPaging<T> QueryPaging<T>(ICommand cmd) where T : BaseEntity<T>, new();
 
         /// <summary>
         /// query data with paging
@@ -75,7 +78,7 @@ namespace EZNEW.Develop.Command
         /// <typeparam name="T">data type</typeparam>
         /// <param name="cmd">command</param>
         /// <returns></returns>
-        Task<IPaging<T>> QueryPagingAsync<T>(ICommand cmd) where T : BaseEntity<T>;
+        Task<IPaging<T>> QueryPagingAsync<T>(ICommand cmd) where T : BaseEntity<T>, new();
 
         /// <summary>
         /// determine whether data is exist
@@ -92,20 +95,27 @@ namespace EZNEW.Develop.Command
         Task<bool> QueryAsync(ICommand cmd);
 
         /// <summary>
-        /// query a single data
+        /// query aggregate data
         /// </summary>
         /// <typeparam name="T">data type</typeparam>
         /// <param name="cmd">command</param>
         /// <returns>data</returns>
-        T QuerySingle<T>(ICommand cmd);
+        T QueryAggregateValue<T>(ICommand cmd);
 
         /// <summary>
-        /// query a single data
+        /// aggregate value
         /// </summary>
         /// <typeparam name="T">data type</typeparam>
         /// <param name="cmd">command</param>
         /// <returns>data</returns>
-        Task<T> QuerySingleAsync<T>(ICommand cmd);
+        Task<T> AggregateValueAsync<T>(ICommand cmd);
+
+        /// <summary>
+        /// query data
+        /// </summary>
+        /// <param name="cmd">query cmd</param>
+        /// <returns>data</returns>
+        Task<DataSet> QueryMultipleAsync(ICommand cmd);
 
         #endregion
     }

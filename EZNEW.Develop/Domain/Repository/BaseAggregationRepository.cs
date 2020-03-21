@@ -3,6 +3,7 @@ using EZNEW.Develop.CQuery;
 using EZNEW.Develop.Domain.Aggregation;
 using EZNEW.Develop.Domain.Repository.Warehouse;
 using EZNEW.Develop.Entity;
+using EZNEW.Develop.UnitOfWork;
 using EZNEW.Framework.Paging;
 using System;
 using System.Collections.Generic;
@@ -13,200 +14,294 @@ using System.Threading.Tasks;
 namespace EZNEW.Develop.Domain.Repository
 {
     /// <summary>
-    /// Repository Base
+    /// base aggregation repository
     /// </summary>
-    public abstract class BaseAggregationRepository<DT>
+    public abstract class BaseAggregationRepository<T>
     {
-        /// <summary>
-        /// Save Objects
-        /// </summary>
-        /// <param name="objects">objects</param>
-        public abstract void Save(params DT[] objects);
+        #region save data
 
         /// <summary>
-        /// Save Objects
+        /// save data
         /// </summary>
-        /// <param name="objects">objects</param>
-        public abstract Task SaveAsync(params DT[] objects);
+        /// <param name="data">data</param>
+        /// <param name="activationOption">activation option</param>
+        public abstract void Save(T data, ActivationOption activationOption = null);
 
         /// <summary>
-        /// Remove Objects
+        /// save datas
         /// </summary>
-        /// <param name="objects">objects</param>
-        public abstract void Remove(params DT[] objects);
+        /// <param name="datas">datas</param>
+        /// <param name="activationOption">activation option</param>
+        public abstract void Save(IEnumerable<T> datas, ActivationOption activationOption = null);
 
         /// <summary>
-        /// Remove Objects
+        /// save data
         /// </summary>
-        /// <param name="objects">objects</param>
-        public abstract Task RemoveAsync(params DT[] objects);
+        /// <param name="data">data</param>
+        /// <param name="activationOption">activation option</param>
+        public abstract Task SaveAsync(T data, ActivationOption activationOption = null);
 
         /// <summary>
-        /// Remove Object
+        /// save datas
+        /// </summary>
+        /// <param name="datas">datas</param>
+        /// <param name="activationOption">activation option</param>
+        public abstract Task SaveAsync(IEnumerable<T> datas, ActivationOption activationOption = null);
+
+        #endregion
+
+        #region remove data
+
+        /// <summary>
+        /// remove data
+        /// </summary>
+        /// <param name="data">data</param>
+        /// <param name="activationOption">activation option</param>
+        public abstract void Remove(T data, ActivationOption activationOption = null);
+
+        /// <summary>
+        /// remove datas
+        /// </summary>
+        /// <param name="datas">datas</param>
+        /// <param name="activationOption">activation option</param>
+        public abstract void Remove(IEnumerable<T> datas, ActivationOption activationOption = null);
+
+        /// <summary>
+        /// remove data
+        /// </summary>
+        /// <param name="data">data</param>
+        /// <param name="activationOption">activation option</param>
+        public abstract Task RemoveAsync(T data, ActivationOption activationOption = null);
+
+        /// <summary>
+        /// remove datas
+        /// </summary>
+        /// <param name="datas">datas</param>
+        /// <param name="activationOption">activation option</param>
+        public abstract Task RemoveAsync(IEnumerable<T> datas, ActivationOption activationOption = null);
+
+        #endregion
+
+        #region remove by condition
+
+        /// <summary>
+        /// remove data by condition
         /// </summary>
         /// <param name="query">query model</param>
-        public abstract void Remove(IQuery query);
+        /// <param name="activationOption">activation option</param>
+        public abstract void Remove(IQuery query, ActivationOption activationOption = null);
 
         /// <summary>
-        /// Remove Object
+        /// remove data by condition
         /// </summary>
         /// <param name="query">query model</param>
-        public abstract Task RemoveAsync(IQuery query);
+        /// <param name="activationOption">activation option</param>
+        public abstract Task RemoveAsync(IQuery query, ActivationOption activationOption = null);
+
+        #endregion
+
+        #region modify
 
         /// <summary>
-        /// Modify Object
+        /// modify data
         /// </summary>
         /// <param name="expression">modify expression</param>
         /// <param name="query">query model</param>
-        public abstract void Modify(IModify expression, IQuery query);
+        /// <param name="activationOption">activation option</param>
+        public abstract void Modify(IModify expression, IQuery query, ActivationOption activationOption = null);
 
         /// <summary>
-        /// Modify Object
+        /// modify data
         /// </summary>
         /// <param name="expression">modify expression</param>
         /// <param name="query">query model</param>
-        public abstract Task ModifyAsync(IModify expression, IQuery query);
+        /// <param name="activationOption">activation option</param>
+        public abstract Task ModifyAsync(IModify expression, IQuery query, ActivationOption activationOption = null);
+
+        #endregion
+
+        #region get data
 
         /// <summary>
-        /// Get Object
+        /// get data
         /// </summary>
         /// <param name="query">query model</param>
-        /// <returns>object</returns>
-        public abstract DT Get(IQuery query);
+        /// <returns>data</returns>
+        public abstract T Get(IQuery query);
 
         /// <summary>
-        /// Get Object
+        /// get data
         /// </summary>
         /// <param name="query">query model</param>
-        /// <returns>object</returns>
-        public abstract Task<DT> GetAsync(IQuery query);
+        /// <returns>data</returns>
+        public abstract Task<T> GetAsync(IQuery query);
+
+        #endregion
+
+        #region get data list
 
         /// <summary>
-        /// Get Object List
+        /// get data list
         /// </summary>
         /// <param name="query">query model</param>
-        /// <returns>object list</returns>
-        public abstract List<DT> GetList(IQuery query);
+        /// <returns>data list</returns>
+        public abstract List<T> GetList(IQuery query);
 
         /// <summary>
-        /// Get Object List
+        /// get data list
         /// </summary>
         /// <param name="query">query model</param>
-        /// <returns>object list</returns>
-        public abstract Task<List<DT>> GetListAsync(IQuery query);
+        /// <returns>data list</returns>
+        public abstract Task<List<T>> GetListAsync(IQuery query);
+
+        #endregion
+
+        #region get data paging
 
         /// <summary>
-        /// Get Object Paging
+        /// get data paging
         /// </summary>
         /// <param name="query">query model</param>
-        /// <returns>object paging</returns>
-        public abstract IPaging<DT> GetPaging(IQuery query);
+        /// <returns>data paging</returns>
+        public abstract IPaging<T> GetPaging(IQuery query);
 
         /// <summary>
-        /// Get Object Paging
+        /// get data paging
         /// </summary>
         /// <param name="query">query model</param>
-        /// <returns>object paging</returns>
-        public abstract Task<IPaging<DT>> GetPagingAsync(IQuery query);
+        /// <returns>data paging</returns>
+        public abstract Task<IPaging<T>> GetPagingAsync(IQuery query);
+
+        #endregion
+
+        #region exist
 
         /// <summary>
-        /// Wheather Have Any Data
+        /// exist data
         /// </summary>
         /// <param name="query">query model</param>
         /// <returns></returns>
         public abstract bool Exist(IQuery query);
 
         /// <summary>
-        /// Wheather Have Any Data
+        /// exist data
         /// </summary>
         /// <param name="query">query model</param>
         /// <returns></returns>
         public abstract Task<bool> ExistAsync(IQuery query);
 
+        #endregion
+
+        #region get data count
+
         /// <summary>
-        /// Get Data Count
+        /// get data count
         /// </summary>
         /// <param name="query">query model</param>
         /// <returns></returns>
         public abstract long Count(IQuery query);
 
         /// <summary>
-        /// Get Data Count
+        /// get data count
         /// </summary>
         /// <param name="query">query model</param>
         /// <returns></returns>
         public abstract Task<long> CountAsync(IQuery query);
 
+        #endregion
+
+        #region get max value
+
         /// <summary>
-        /// Get Max Value
+        /// get max value
         /// </summary>
         /// <typeparam name="DT">DataType</typeparam>
         /// <param name="query">query model</param>
-        /// <returns>Max Value</returns>
-        public abstract VT Max<VT>(IQuery query);
+        /// <returns>max value</returns>
+        public abstract DT Max<DT>(IQuery query);
 
         /// <summary>
-        /// Get Max Value
+        /// get max value
         /// </summary>
         /// <typeparam name="DT">DataType</typeparam>
         /// <param name="query">query model</param>
-        /// <returns>Max Value</returns>
-        public abstract Task<VT> MaxAsync<VT>(IQuery query);
+        /// <returns>max value</returns>
+        public abstract Task<DT> MaxAsync<DT>(IQuery query);
+
+        #endregion
+
+        #region get min value
 
         /// <summary>
-        /// Get Min Value
+        /// get min value
         /// </summary>
         /// <typeparam name="DT">DataType</typeparam>
         /// <param name="query">query model</param>
-        /// <returns>Min Value</returns>
-        public abstract VT Min<VT>(IQuery query);
+        /// <returns>min value</returns>
+        public abstract DT Min<DT>(IQuery query);
 
         /// <summary>
-        /// Get Min Value
+        /// get min value
         /// </summary>
         /// <typeparam name="DT">DataType</typeparam>
         /// <param name="query">query model</param>
-        /// <returns>Min Value</returns>
-        public abstract Task<VT> MinAsync<VT>(IQuery query);
+        /// <returns>min value</returns>
+        public abstract Task<DT> MinAsync<DT>(IQuery query);
+
+        #endregion
+
+        #region get sum value
 
         /// <summary>
-        /// Get Sum Value
+        /// get sum value
         /// </summary>
         /// <typeparam name="DT">DataType</typeparam>
         /// <param name="query">query model</param>
-        /// <returns>sum</returns>
-        public abstract VT Sum<VT>(IQuery query);
+        /// <returns>sum value</returns>
+        public abstract DT Sum<DT>(IQuery query);
 
         /// <summary>
-        /// Get Sum Value
+        /// get sum value
         /// </summary>
         /// <typeparam name="DT">DataType</typeparam>
         /// <param name="query">query model</param>
-        /// <returns>sum</returns>
-        public abstract Task<VT> SumAsync<VT>(IQuery query);
+        /// <returns>sum value</returns>
+        public abstract Task<DT> SumAsync<DT>(IQuery query);
+
+        #endregion
+
+        #region get average value
 
         /// <summary>
-        /// Get Average Value
+        /// get average value
         /// </summary>
         /// <typeparam name="DT">DataType</typeparam>
         /// <param name="query">query model</param>
-        /// <returns>average model</returns>
-        public abstract VT Avg<VT>(IQuery query);
+        /// <returns>average value</returns>
+        public abstract DT Avg<DT>(IQuery query);
 
         /// <summary>
-        /// Get Average Value
+        /// get average value
         /// </summary>
         /// <typeparam name="DT">DataType</typeparam>
         /// <param name="query">query model</param>
-        /// <returns>average model</returns>
-        public abstract Task<VT> AvgAsync<VT>(IQuery query);
+        /// <returns>average value</returns>
+        public abstract Task<DT> AvgAsync<DT>(IQuery query);
+
+        #endregion
+
+        #region get life status
 
         /// <summary>
-        /// get life source
+        /// get life status
         /// </summary>
         /// <param name="data">data</param>
         /// <returns></returns>
         public abstract DataLifeSource GetLifeSource(IAggregationRoot data);
+
+        #endregion
+
+        #region modify life source
 
         /// <summary>
         /// modify life source
@@ -214,5 +309,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// <param name="data">data</param>
         /// <param name="lifeSource">life source</param>
         public abstract void ModifyLifeSource(IAggregationRoot data, DataLifeSource lifeSource);
+
+        #endregion
     }
 }

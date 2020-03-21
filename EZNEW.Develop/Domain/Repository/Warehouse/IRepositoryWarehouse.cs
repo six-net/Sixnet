@@ -15,38 +15,53 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
     /// <summary>
     /// repository warehouse
     /// </summary>
-    public interface IRepositoryWarehouse<ET, DAI> where ET : BaseEntity<ET> where DAI : IDataAccess<ET>
+    public interface IRepositoryWarehouse<ET, DAI> where ET : BaseEntity<ET>, new() where DAI : IDataAccess<ET>
     {
         #region save
 
         /// <summary>
+        /// save datas
+        /// </summary>
+        /// <param name="datas">datas</param>
+        /// <param name="activationOption">activation option</param>
+        /// <returns></returns>
+        Task<IActivationRecord> SaveAsync(IEnumerable<ET> datas, ActivationOption activationOption = null);
+
+        /// <summary>
         /// save data
         /// </summary>
-        /// <typeparam name="ET">entity</typeparam>
-        /// <typeparam name="DAI">persistent data service</typeparam>
-        /// <param name="datas">datas</param>
+        /// <param name="data">data</param>
+        /// <param name="activationOption">activation option</param>
         /// <returns></returns>
-        Task<IActivationRecord> SaveAsync(params ET[] datas);
+        Task<IActivationRecord> SaveAsync(ET data, ActivationOption activationOption = null);
 
         #endregion
 
         #region remove
 
         /// <summary>
+        /// remove datas
+        /// </summary>
+        /// <param name="datas">datas</param>
+        /// <param name="activationOption">activation option</param>
+        /// <returns></returns>
+        Task<IActivationRecord> RemoveAsync(IEnumerable<ET> datas, ActivationOption activationOption = null);
+
+        /// <summary>
         /// remove data
         /// </summary>
-        /// <typeparam name="ET">entity</typeparam>
-        /// <typeparam name="DAI">persistent data service</typeparam>
-        /// <param name="datas">datas</param>
+        /// <param name="data">data</param>
+        /// <param name="activationOption">activation option</param>
         /// <returns></returns>
-        Task<IActivationRecord> RemoveAsync(params ET[] datas);
+        Task<IActivationRecord> RemoveAsync(ET data, ActivationOption activationOption = null);
 
         /// <summary>
         /// remove by condition
         /// </summary>
         /// <param name="query">query</param>
+        /// <param name="activationOption">activation option</param>
         /// <returns></returns>
-        Task<IActivationRecord> RemoveAsync(IQuery query);
+        Task<IActivationRecord> RemoveAsync(IQuery query, ActivationOption activationOption = null);
 
         #endregion
 
@@ -57,8 +72,9 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// </summary>
         /// <param name="modifyExpression">modify expression</param>
         /// <param name="query">query</param>
+        /// <param name="activationOption">activation option</param>
         /// <returns></returns>
-        Task<IActivationRecord> ModifyAsync(IModify modifyExpression, IQuery query);
+        Task<IActivationRecord> ModifyAsync(IModify modifyExpression, IQuery query, ActivationOption activationOption = null);
 
         #endregion
 

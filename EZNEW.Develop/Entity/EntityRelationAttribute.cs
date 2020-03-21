@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EZNEW.Develop.Entity
 {
-    [AttributeUsage(AttributeTargets.Property)]
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
     public class EntityRelationAttribute : Attribute
     {
         /// <summary>
@@ -12,7 +12,7 @@ namespace EZNEW.Develop.Entity
         /// </summary>
         public Type RelationType
         {
-            get;set;
+            get; set;
         }
 
         /// <summary>
@@ -20,7 +20,7 @@ namespace EZNEW.Develop.Entity
         /// </summary>
         public string RelationField
         {
-            get;set;
+            get; set;
         }
 
         /// <summary>

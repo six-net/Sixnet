@@ -12,14 +12,14 @@ using EZNEW.Framework.Fault;
 namespace EZNEW.Develop.CQuery
 {
     /// <summary>
-    /// Query Factory
+    /// query factory
     /// </summary>
     public static class QueryFactory
     {
-        #region Methods
+        #region methods
 
         /// <summary>
-        /// Create a new query instance
+        /// create a new query instance
         /// </summary>
         /// <returns>IQuery object</returns>
         public static IQuery Create()
@@ -28,7 +28,7 @@ namespace EZNEW.Develop.CQuery
         }
 
         /// <summary>
-        /// Create a new query instance
+        /// create a new query instance
         /// </summary>
         /// <param name="filter">pagingfilter</param>
         /// <returns>IQuery object</returns>
@@ -43,7 +43,7 @@ namespace EZNEW.Develop.CQuery
         }
 
         /// <summary>
-        /// Create a new query instance
+        /// create a new query instance
         /// </summary>
         /// <typeparam name="T">query model</typeparam>
         /// <returns>IQuery object</returns>
@@ -61,7 +61,7 @@ namespace EZNEW.Develop.CQuery
         }
 
         /// <summary>
-        /// Create a new query instance
+        /// create a new query instance
         /// </summary>
         /// <typeparam name="T">query model</typeparam>
         /// <returns>IQuery object</returns>
@@ -76,7 +76,7 @@ namespace EZNEW.Develop.CQuery
         }
 
         /// <summary>
-        /// Create a new query instance
+        /// create a new query instance
         /// </summary>
         /// <typeparam name="T">data type</typeparam>
         /// <param name="criteria">condition expression</param>
@@ -104,14 +104,14 @@ namespace EZNEW.Develop.CQuery
         }
 
         /// <summary>
-        /// Append Entity Identity Condition
+        /// append entity identity condition
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="datas">datas</param>
         /// <param name="originalQuery">original query</param>
         /// <param name="exclude">exclude</param>
         /// <returns></returns>
-        public static IQuery AppendEntityIdentityCondition<T>(IEnumerable<T> datas, IQuery originalQuery = null, bool exclude = false) where T : BaseEntity<T>
+        public static IQuery AppendEntityIdentityCondition<T>(IEnumerable<T> datas, IQuery originalQuery = null, bool exclude = false) where T : BaseEntity<T>, new()
         {
             originalQuery = originalQuery ?? CreateByEntity<T>();
             if (datas == null || !datas.Any())
@@ -159,14 +159,14 @@ namespace EZNEW.Develop.CQuery
         }
 
         /// <summary>
-        /// Append Entity Identity Condition
+        /// append entity identity condition
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="data"></param>
         /// <param name="originalQuery"></param>
         /// <param name="exclude"></param>
         /// <returns></returns>
-        public static IQuery AppendEntityIdentityCondition<T>(T data, IQuery originalQuery = null, bool exclude = false) where T : BaseEntity<T>
+        public static IQuery AppendEntityIdentityCondition<T>(T data, IQuery originalQuery = null, bool exclude = false) where T : BaseEntity<T>, new()
         {
             originalQuery = originalQuery ?? CreateByEntity<T>();
             if (data == null)

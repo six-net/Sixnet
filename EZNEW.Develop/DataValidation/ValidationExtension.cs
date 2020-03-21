@@ -9,7 +9,7 @@ namespace EZNEW.Develop.DataValidation
     public static class ValidationExtension
     {
         /// <summary>
-        /// Get Error Message
+        /// get error message
         /// </summary>
         /// <param name="results">results</param>
         /// <returns></returns>

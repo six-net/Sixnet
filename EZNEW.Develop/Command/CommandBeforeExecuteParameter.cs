@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace EZNEW.Develop.Command
 {
     /// <summary>
-    /// Command Before Execute Request Info
+    /// command before execute request info
     /// </summary>
     public class CommandBeforeExecuteParameter
     {
@@ -22,7 +22,7 @@ namespace EZNEW.Develop.Command
         }
 
         /// <summary>
-        /// Command Behavior
+        /// command behavior
         /// </summary>
         public CommandBehavior CmdBehavior
         {
@@ -30,7 +30,7 @@ namespace EZNEW.Develop.Command
         }
 
         /// <summary>
-        /// Data
+        /// data
         /// </summary>
         public object Data
         {

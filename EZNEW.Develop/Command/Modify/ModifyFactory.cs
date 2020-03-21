@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace EZNEW.Develop.Command.Modify
 {
     /// <summary>
-    /// Modify Object Factory
+    /// modify object factory
     /// </summary>
     public class ModifyFactory
     {

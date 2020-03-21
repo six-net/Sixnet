@@ -9,7 +9,7 @@ using System.Globalization;
 namespace EZNEW.Develop.DataValidation.Validators
 {
     /// <summary>
-    /// EnumType Validator
+    /// enum type validator
     /// </summary>
     public class EnumTypeValidator : DataValidator
     {
@@ -105,7 +105,7 @@ namespace EZNEW.Develop.DataValidation.Validators
         }
 
         /// <summary>
-        /// Create Validation Attribute
+        /// create validation attribute
         /// </summary>
         /// <returns></returns>
         public override ValidationAttribute CreateValidationAttribute(ValidationAttributeParameter parameter)

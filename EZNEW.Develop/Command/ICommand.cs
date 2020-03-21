@@ -13,7 +13,7 @@ namespace EZNEW.Develop.Command
     /// </summary>
     public interface ICommand
     {
-        #region Propertys
+        #region propertys
 
         /// <summary>
         /// command Id
@@ -21,57 +21,57 @@ namespace EZNEW.Develop.Command
         long Id { get; }
 
         /// <summary>
-        /// Command Text
+        /// command text
         /// </summary>
         string CommandText { get; set; }
 
         /// <summary>
-        /// Parameters
+        /// parameters
         /// </summary>
         dynamic Parameters { get; set; }
 
         /// <summary>
-        /// ObjectName
+        /// object name
         /// </summary>
         string ObjectName { get; set; }
 
         /// <summary>
-        /// ObjectKeys
+        /// object keys
         /// </summary>
         List<string> ObjectKeys { get; set; }
 
         /// <summary>
-        /// ObjectKeyValues
+        /// object key values
         /// </summary>
         Dictionary<string, dynamic> ObjectKeyValues { get; set; }
 
         /// <summary>
-        /// ServerKeys
+        /// server keys
         /// </summary>
         List<string> ServerKeys { get; set; }
 
         /// <summary>
-        /// ServerKey Values
+        /// server key values
         /// </summary>
         Dictionary<string, dynamic> ServerKeyValues { get; set; }
 
         /// <summary>
-        /// Execute Mode
+        /// execute mode
         /// </summary>
         CommandExecuteMode ExecuteMode { get; set; }
 
         /// <summary>
-        /// Query
+        /// query
         /// </summary>
         IQuery Query { get; set; }
 
         /// <summary>
-        /// Operate
+        /// operate
         /// </summary>
         OperateType Operate { get; set; }
 
         /// <summary>
-        /// Fields
+        /// fields
         /// </summary>
         List<string> Fields { get; set; }
 
@@ -92,7 +92,7 @@ namespace EZNEW.Develop.Command
 
         #endregion
 
-        #region Methods
+        #region methods
 
         #region command execute before operation
 

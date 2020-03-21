@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 namespace EZNEW.Develop.Command
 {
     /// <summary>
-    /// Command Callback Parameter
+    /// command callback parameter
     /// </summary>
     public class CommandCallbackParameter
     {
         #region Propertys
 
         /// <summary>
-        /// ICommand Object
+        /// ICommand object
         /// </summary>
         public ICommand Command
         {
@@ -22,7 +22,7 @@ namespace EZNEW.Develop.Command
         }
 
         /// <summary>
-        /// Command Behavior
+        /// command behavior
         /// </summary>
         public CommandBehavior CmdBehavior
         {
@@ -30,7 +30,7 @@ namespace EZNEW.Develop.Command
         }
 
         /// <summary>
-        /// Data
+        /// data
         /// </summary>
         public object Data { get; set; }
 

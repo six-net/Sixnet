@@ -10,7 +10,7 @@ namespace EZNEW.Develop.Domain.Event
     /// </summary>
     public class DomainEventExecuteResult
     {
-        #region Propertys
+        #region propertys
 
         /// <summary>
         /// success
@@ -38,7 +38,7 @@ namespace EZNEW.Develop.Domain.Event
 
         #endregion
 
-        #region Methods
+        #region methods
 
         /// <summary>
         /// empty result

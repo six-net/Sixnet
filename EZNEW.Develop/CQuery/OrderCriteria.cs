@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 namespace EZNEW.Develop.CQuery
 {
     /// <summary>
-    /// Order Expression
+    /// order expression
     /// </summary>
     public class OrderCriteria
     {
-        #region Property
+        #region property
 
         /// <summary>
         /// field

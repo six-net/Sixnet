@@ -7,7 +7,7 @@ namespace EZNEW.Develop.Entity
     [AttributeUsage(AttributeTargets.Property)]
     public class EntityFieldAttribute : Attribute
     {
-        #region Propertys
+        #region propertys
 
         /// <summary>
         /// name

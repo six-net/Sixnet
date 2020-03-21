@@ -21,7 +21,7 @@ using EZNEW.Develop.Domain.Event;
 namespace EZNEW.Develop.Domain.Aggregation
 {
     /// <summary>
-    /// AggregationRoot
+    /// aggregation root
     /// </summary>
     [Serializable]
     public abstract class AggregationRoot<T> : IAggregationRoot<T> where T : AggregationRoot<T>
@@ -53,7 +53,7 @@ namespace EZNEW.Develop.Domain.Aggregation
 
         #endregion
 
-        #region Propertys
+        #region propertys
 
         /// <summary>
         /// allow to save
@@ -78,7 +78,7 @@ namespace EZNEW.Develop.Domain.Aggregation
         }
 
         /// <summary>
-        /// Allow Lazy Data Load
+        /// allow lazy data load
         /// </summary>
         protected bool LoadLazyMember
         {
@@ -93,7 +93,7 @@ namespace EZNEW.Develop.Domain.Aggregation
         }
 
         /// <summary>
-        /// Allow Load Data Propertys
+        /// allow load data propertys
         /// </summary>
         protected Dictionary<string, bool> LoadPropertys
         {
@@ -132,10 +132,10 @@ namespace EZNEW.Develop.Domain.Aggregation
 
         #endregion
 
-        #region Methods
+        #region methods
 
         /// <summary>
-        /// Save Validation
+        /// save validation
         /// </summary>
         /// <returns></returns>
         protected virtual bool SaveValidation()
@@ -162,7 +162,7 @@ namespace EZNEW.Develop.Domain.Aggregation
         }
 
         /// <summary>
-        /// Remove Validation
+        /// remove validation
         /// </summary>
         /// <returns></returns>
         protected virtual bool RemoveValidation()
@@ -171,7 +171,7 @@ namespace EZNEW.Develop.Domain.Aggregation
         }
 
         /// <summary>
-        /// Mark Object Is New
+        /// mark object is new
         /// </summary>
         public virtual bool MarkNew()
         {
@@ -184,7 +184,7 @@ namespace EZNEW.Develop.Domain.Aggregation
         }
 
         /// <summary>
-        /// Mark Object Is Stored
+        /// mark object is stored
         /// </summary>
         /// <returns></returns>
         public virtual bool MarkStored()
@@ -198,7 +198,7 @@ namespace EZNEW.Develop.Domain.Aggregation
         }
 
         /// <summary>
-        /// Set Load Propertys
+        /// set load propertys
         /// </summary>
         /// <param name="loadPropertys">propertys</param>
         /// <returns></returns>
@@ -223,7 +223,7 @@ namespace EZNEW.Develop.Domain.Aggregation
         }
 
         /// <summary>
-        /// Set Load Propertys
+        /// set load propertys
         /// </summary>
         /// <param name="property">property</param>
         /// <param name="allowLoad">allow load</param>
@@ -241,7 +241,7 @@ namespace EZNEW.Develop.Domain.Aggregation
         }
 
         /// <summary>
-        /// Close Lazy Data Load
+        /// close lazy data load
         /// </summary>
         public virtual void CloseLazyMemberLoad()
         {
@@ -249,7 +249,7 @@ namespace EZNEW.Develop.Domain.Aggregation
         }
 
         /// <summary>
-        /// Open Lazy Data Load
+        /// open lazy data load
         /// </summary>
         public virtual void OpenLazyMemberLoad()
         {
@@ -257,7 +257,7 @@ namespace EZNEW.Develop.Domain.Aggregation
         }
 
         /// <summary>
-        /// Allow Lazy Load
+        /// allow lazy load
         /// </summary>
         /// <param name="property">property</param>
         /// <returns>wheather allow load property</returns>
@@ -271,7 +271,7 @@ namespace EZNEW.Develop.Domain.Aggregation
         }
 
         /// <summary>
-        /// Allow Lazy Load
+        /// allow lazy load
         /// </summary>
         /// <param name="property">property</param>
         /// <returns>wheather allow load property</returns>
@@ -285,7 +285,7 @@ namespace EZNEW.Develop.Domain.Aggregation
         }
 
         /// <summary>
-        /// Save
+        /// save
         /// </summary>
         public void Save()
         {
@@ -293,7 +293,7 @@ namespace EZNEW.Develop.Domain.Aggregation
         }
 
         /// <summary>
-        /// Save
+        /// save
         /// </summary>
         public virtual async Task SaveAsync()
         {
@@ -305,7 +305,7 @@ namespace EZNEW.Develop.Domain.Aggregation
         }
 
         /// <summary>
-        /// Remove
+        /// remove
         /// </summary>
         public void Remove()
         {
@@ -313,7 +313,7 @@ namespace EZNEW.Develop.Domain.Aggregation
         }
 
         /// <summary>
-        /// Remove
+        /// remove
         /// </summary>
         public virtual async Task RemoveAsync()
         {
@@ -325,9 +325,9 @@ namespace EZNEW.Develop.Domain.Aggregation
         }
 
         /// <summary>
-        /// Init From SimilarObject
+        /// init from similar object
         /// </summary>
-        /// <typeparam name="DT">DataType</typeparam>
+        /// <typeparam name="DT">data type</typeparam>
         /// <param name="similarObject">similar object</param>
         /// <returns></returns>
         public virtual void InitFromSimilarObject<DT>(DT similarObject) where DT : AggregationRoot<T>, T
@@ -340,9 +340,9 @@ namespace EZNEW.Develop.Domain.Aggregation
         }
 
         /// <summary>
-        /// Copy Data From SimilarObject
+        /// copy data from similar object
         /// </summary>
-        /// <typeparam name="DT">DataType</typeparam>
+        /// <typeparam name="DT">data type</typeparam>
         /// <param name="similarObject">similar object</param>
         /// <param name="excludePropertys">not copy propertys</param>
         protected virtual void CopyDataFromSimilarObject<DT>(DT similarObject, IEnumerable<string> excludePropertys = null) where DT : T
@@ -350,13 +350,13 @@ namespace EZNEW.Develop.Domain.Aggregation
         }
 
         /// <summary>
-        /// Init Primary Value
+        /// init primary value
         /// </summary>
         public virtual void InitIdentityValue()
         { }
 
         /// <summary>
-        /// Primary Value Is None
+        /// primary value is none
         /// </summary>
         /// <returns></returns>
         public virtual bool IdentityValueIsNone()

@@ -18,7 +18,7 @@ namespace EZNEW.Develop.UnitOfWork
     /// default activation record
     /// </summary>
     /// <typeparam name="ET"></typeparam>
-    public class DefaultActivationRecord<ET, DAI> : IActivationRecord where ET : BaseEntity<ET> where DAI : IDataAccess<ET>
+    public class DefaultActivationRecord<ET, DAI> : IActivationRecord where ET : BaseEntity<ET>,new() where DAI : IDataAccess<ET>
     {
         /// <summary>
         /// id
@@ -102,6 +102,15 @@ namespace EZNEW.Develop.UnitOfWork
             get; private set;
         }
 
+        /// <summary>
+        /// activation option
+        /// </summary>
+        public ActivationOption ActivationOption
+        {
+            get;
+            private set;
+        }
+
         private DefaultActivationRecord()
         { }
 
@@ -109,8 +118,10 @@ namespace EZNEW.Develop.UnitOfWork
         /// create operation
         /// </summary>
         /// <param name="operation">operation</param>
+        /// <param name="identityValue">object identity value</param>
+        /// <param name="activationOption">activation option</param>
         /// <returns></returns>
-        public static DefaultActivationRecord<ET, DAI> CreateRecord(ActivationOperation operation, string identityValue)
+        public static DefaultActivationRecord<ET, DAI> CreateRecord(ActivationOperation operation, string identityValue, ActivationOption activationOption)
         {
             var record = new DefaultActivationRecord<ET, DAI>()
             {
@@ -119,15 +130,24 @@ namespace EZNEW.Develop.UnitOfWork
                 DataAccessService = typeof(DAI),
                 EntityType = typeof(ET)
             };
-            switch (operation)
+            activationOption = activationOption ?? ActivationOption.Default;
+            record.ActivationOption = activationOption;
+            if (activationOption.ForceExecute)
             {
-                case ActivationOperation.SaveObject:
-                case ActivationOperation.RemoveByObject:
-                    record.RecordIdentity =string.Format("{0}_{1}",typeof(ET).GUID,identityValue);
-                    break;
-                default:
-                    record.RecordIdentity = Guid.NewGuid().ToString();
-                    break;
+                record.RecordIdentity = Guid.NewGuid().ToString();
+            }
+            else
+            {
+                switch (operation)
+                {
+                    case ActivationOperation.SaveObject:
+                    case ActivationOperation.RemoveByObject:
+                        record.RecordIdentity = string.Format("{0}_{1}", typeof(ET).GUID, identityValue);
+                        break;
+                    default:
+                        record.RecordIdentity = Guid.NewGuid().ToString();
+                        break;
+                }
             }
             return record;
         }
@@ -136,40 +156,41 @@ namespace EZNEW.Develop.UnitOfWork
         /// create save operation
         /// </summary>
         /// <param name="identityValue">identity values</param>
+        /// <param name="activationOption">activation option</param>
         /// <returns></returns>
-        public static DefaultActivationRecord<ET, DAI> CreateSaveRecord(string identityValue)
+        public static DefaultActivationRecord<ET, DAI> CreateSaveRecord(string identityValue, ActivationOption activationOption)
         {
             if (identityValue.IsNullOrEmpty())
             {
                 throw new EZNEWException("identityValue is null or empty");
             }
-            return CreateRecord(ActivationOperation.SaveObject, identityValue);
+            return CreateRecord(ActivationOperation.SaveObject, identityValue, activationOption);
         }
 
         /// <summary>
         /// create remove object operation
         /// </summary>
         /// <param name="identityValue"></param>
+        /// <param name="activationOption">activation option</param>
         /// <returns></returns>
-        public static DefaultActivationRecord<ET, DAI> CreateRemoveObjectRecord(string identityValue)
+        public static DefaultActivationRecord<ET, DAI> CreateRemoveObjectRecord(string identityValue, ActivationOption activationOption)
         {
             if (identityValue.IsNullOrEmpty())
             {
                 throw new EZNEWException("identityValue is null or empty");
             }
-            return CreateRecord(ActivationOperation.RemoveByObject, identityValue);
+            return CreateRecord(ActivationOperation.RemoveByObject, identityValue, activationOption);
         }
 
         /// <summary>
         /// create remove by condition record
         /// </summary>
-        /// <typeparam name="ET"></typeparam>
-        /// <typeparam name="DAI"></typeparam>
-        /// <param name="query"></param>
+        /// <param name="query">query object</param>
+        /// <param name="activationOption">activation option</param>
         /// <returns></returns>
-        public static DefaultActivationRecord<ET, DAI> CreateRemoveByConditionRecord(IQuery query)
+        public static DefaultActivationRecord<ET, DAI> CreateRemoveByConditionRecord(IQuery query, ActivationOption activationOption)
         {
-            var record = CreateRecord(ActivationOperation.RemoveByCondition, null);
+            var record = CreateRecord(ActivationOperation.RemoveByCondition, null, activationOption);
             record.Query = query;
             return record;
         }
@@ -177,24 +198,14 @@ namespace EZNEW.Develop.UnitOfWork
         /// <summary>
         /// create modify record
         /// </summary>
-        /// <param name="modify"></param>
+        /// <param name="modify">modify expression</param>
+        /// <param name="query">query object</param>
+        /// <param name="activationOption">activation option</param>
         /// <returns></returns>
-        public static DefaultActivationRecord<ET, DAI> CreateModifyRecord(IModify modify, IQuery query)
+        public static DefaultActivationRecord<ET, DAI> CreateModifyRecord(IModify modify, IQuery query, ActivationOption activationOption)
         {
-            var record = CreateRecord(ActivationOperation.ModifyByExpression, null);
+            var record = CreateRecord(ActivationOperation.ModifyByExpression, null, activationOption);
             record.ModifyExpression = modify;
-            record.Query = query;
-            return record;
-        }
-
-        /// <summary>
-        /// create remove record
-        /// </summary>
-        /// <param name="query"></param>
-        /// <returns></returns>
-        public static DefaultActivationRecord<ET, DAI> CreateRemoveRecord(IQuery query)
-        {
-            var record = CreateRecord(ActivationOperation.ModifyByExpression, null);
             record.Query = query;
             return record;
         }
@@ -205,7 +216,7 @@ namespace EZNEW.Develop.UnitOfWork
         /// <returns></returns>
         public static DefaultActivationRecord<ET, DAI> CreatePackageRecord()
         {
-            return CreateRecord(ActivationOperation.Package, string.Empty);
+            return CreateRecord(ActivationOperation.Package, string.Empty, null);
         }
 
         /// <summary>
@@ -273,19 +284,19 @@ namespace EZNEW.Develop.UnitOfWork
                 return null;
             }
             var dataPackage = WarehouseManager.GetDataPackage<ET>(IdentityValue);
-            if (dataPackage == null || dataPackage.Operate != WarehouseDataOperate.Save)
+            if (dataPackage == null || (!ActivationOption.ForceExecute && dataPackage.Operate != WarehouseDataOperate.Save))
             {
                 return null;
             }
             var dalService = ContainerManager.Resolve<DAI>();
             if (dataPackage.LifeSource == DataLifeSource.New) //new add value
             {
-                return dalService.Add((ET)dataPackage.WarehouseData);
+                return dalService.Add(dataPackage.WarehouseData);
             }
             else if (dataPackage.HasValueChanged) // update value
             {
-                var data = (ET)dataPackage.WarehouseData;
-                return dalService.Modify(data, (ET)dataPackage.PersistentData);
+                var data = dataPackage.WarehouseData;
+                return dalService.Modify(data, dataPackage.PersistentData);
             }
             return null;
         }
@@ -301,12 +312,12 @@ namespace EZNEW.Develop.UnitOfWork
                 return null;
             }
             var dataPackage = WarehouseManager.GetDataPackage<ET>(IdentityValue);
-            if (dataPackage == null || dataPackage.Operate != WarehouseDataOperate.Remove || dataPackage.IsRealRemove)
+            if (dataPackage == null || (!ActivationOption.ForceExecute && (dataPackage.Operate != WarehouseDataOperate.Remove || dataPackage.IsRealRemove)))
             {
                 return null;
             }
             var dalService = ContainerManager.Resolve<DAI>();
-            var data = (ET)dataPackage.WarehouseData;
+            var data = dataPackage.WarehouseData;
             return dalService.Delete(data);
         }
 

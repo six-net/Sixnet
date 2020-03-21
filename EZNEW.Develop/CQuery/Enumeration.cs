@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace EZNEW.Develop.CQuery
 {
     /// <summary>
-    /// Condition Operator
+    /// condition operator
     /// </summary>
     public enum CriteriaOperator
     {
@@ -30,7 +30,7 @@ namespace EZNEW.Develop.CQuery
     }
 
     /// <summary>
-    /// Connect Operator
+    /// connect operator
     /// </summary>
     public enum QueryOperator
     {
@@ -39,7 +39,7 @@ namespace EZNEW.Develop.CQuery
     }
 
     /// <summary>
-    /// Query Command Type
+    /// query command type
     /// </summary>
     public enum QueryCommandType
     {
@@ -49,14 +49,14 @@ namespace EZNEW.Develop.CQuery
 
 
     /// <summary>
-    /// Calculate Operator
+    /// calculate operator
     /// </summary>
     public enum CalculateOperator
     {
         Add,
-        subtract,
-        multiply,
-        divide
+        Subtract,
+        Multiply,
+        Divide
     }
 
     /// <summary>
@@ -72,7 +72,7 @@ namespace EZNEW.Develop.CQuery
     }
 
     /// <summary>
-    /// Join Operator
+    /// join operator
     /// </summary>
     public enum JoinOperator
     {

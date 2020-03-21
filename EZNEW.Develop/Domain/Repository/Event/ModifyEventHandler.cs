@@ -1,6 +1,7 @@
 ﻿using EZNEW.Develop.Command.Modify;
 using EZNEW.Develop.CQuery;
 using EZNEW.Develop.Domain.Aggregation;
+using EZNEW.Develop.UnitOfWork;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -32,14 +33,17 @@ namespace EZNEW.Develop.Domain.Repository.Event
         /// <summary>
         /// execute
         /// </summary>
+        /// <param name="modify">modeify expression</param>
+        /// <param name="query">query object</param>
+        /// <param name="activationOption">activation option</param>
         /// <returns></returns>
-        public IRepositoryEventHandleResult Execute(IModify modify, IQuery query)
+        public IRepositoryEventHandleResult Execute(IModify modify, IQuery query, ActivationOption activationOption = null)
         {
             if (modify == null || Operation == null)
             {
                 return DataOperationEventResult.Empty;
             }
-            Operation(modify, query);
+            Operation(modify, query, activationOption);
             return DataOperationEventResult.Empty;
         }
     }

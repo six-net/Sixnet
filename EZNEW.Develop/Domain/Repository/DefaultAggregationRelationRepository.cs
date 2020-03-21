@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace EZNEW.Develop.Domain.Repository
 {
-    public abstract class DefaultAggregationRelationRepository<DT, First, Second, ET, DAI> : BaseAggregationRelationRepository<DT, First, Second, ET, DAI> where DT : IAggregationRoot<DT> where Second : IAggregationRoot<Second> where First : IAggregationRoot<First> where ET : BaseEntity<ET> where DAI : IDataAccess<ET>
+    public abstract class DefaultAggregationRelationRepository<DT, First, Second, ET, DAI> : BaseAggregationRelationRepository<DT, First, Second, ET, DAI> where DT : IAggregationRoot<DT> where Second : IAggregationRoot<Second> where First : IAggregationRoot<First> where ET : BaseEntity<ET>, new() where DAI : IDataAccess<ET>
     {
         #region query
 
@@ -79,50 +79,52 @@ namespace EZNEW.Develop.Domain.Repository
         /// remove by first datas
         /// </summary>
         /// <param name="datas">datas</param>
-        /// <param name="record">activation record</param>
-        public sealed override void RemoveByFirst(IEnumerable<First> datas)
+        /// <param name="activationOption">activation option</param>
+        public sealed override void RemoveByFirst(IEnumerable<First> datas, ActivationOption activationOption = null)
         {
             if (datas.IsNullOrEmpty())
             {
                 return;
             }
             IQuery query = CreateQueryByFirst(datas);
-            Remove(query);
+            Remove(query, activationOption);
         }
 
         /// <summary>
         /// remove by second datas
         /// </summary>
         /// <param name="datas">datas</param>
-        /// <param name="record">activation record</param>
-        public sealed override void RemoveBySecond(IEnumerable<Second> datas)
+        /// <param name="activationOption">activation option</param>
+        public sealed override void RemoveBySecond(IEnumerable<Second> datas, ActivationOption activationOption = null)
         {
             if (datas.IsNullOrEmpty())
             {
                 return;
             }
             IQuery query = CreateQueryBySecond(datas);
-            Remove(query);
+            Remove(query, activationOption);
         }
 
         /// <summary>
         /// remove by first
         /// </summary>
         /// <param name="query">query</param>
-        public sealed override void RemoveByFirst(IQuery query)
+        /// <param name="activationOption">activation option</param>
+        public sealed override void RemoveByFirst(IQuery query, ActivationOption activationOption = null)
         {
             var removeQuery = CreateQueryByFirst(query);
-            Remove(removeQuery);
+            Remove(removeQuery, activationOption);
         }
 
         /// <summary>
         /// remove by first
         /// </summary>
         /// <param name="query">query</param>
-        public sealed override void RemoveBySecond(IQuery query)
+        /// <param name="activationOption">activation option</param>
+        public sealed override void RemoveBySecond(IQuery query, ActivationOption activationOption = null)
         {
             var removeQuery = CreateQueryBySecond(query);
-            Remove(removeQuery);
+            Remove(removeQuery, activationOption);
         }
 
         #endregion

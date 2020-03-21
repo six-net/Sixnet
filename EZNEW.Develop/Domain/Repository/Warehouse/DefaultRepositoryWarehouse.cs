@@ -18,7 +18,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
     /// <summary>
     /// repository warehouses
     /// </summary>
-    public class DefaultRepositoryWarehouse<ET, DAI> : IRepositoryWarehouse<ET, DAI> where ET : BaseEntity<ET> where DAI : IDataAccess<ET>
+    public class DefaultRepositoryWarehouse<ET, DAI> : IRepositoryWarehouse<ET, DAI> where ET : BaseEntity<ET>, new() where DAI : IDataAccess<ET>
     {
         /// <summary>
         /// data access
@@ -28,26 +28,37 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         #region save
 
         /// <summary>
-        /// save data
+        /// save datas
         /// </summary>
-        /// <typeparam name="ET">entity</typeparam>
-        /// <typeparam name="DAI">persistent data service</typeparam>
         /// <param name="datas">datas</param>
+        /// <param name="activationOption">activation option</param>
         /// <returns></returns>
-        public async Task<IActivationRecord> SaveAsync(params ET[] datas)
+        public async Task<IActivationRecord> SaveAsync(IEnumerable<ET> datas, ActivationOption activationOption = null)
         {
             if (datas.IsNullOrEmpty())
             {
                 return null;
             }
-            await WarehouseManager.SaveAsync(datas);
             var packageRecord = DefaultActivationRecord<ET, DAI>.CreatePackageRecord();
             foreach (var data in datas)
             {
-                var identityValue = data.GetIdentityValue();
-                packageRecord.AddFollowRecords(DefaultActivationRecord<ET, DAI>.CreateSaveRecord(identityValue));
+                var dataRecord = await SaveAsync(data, activationOption).ConfigureAwait(false);
+                packageRecord.AddFollowRecords(packageRecord);
             }
             return packageRecord;
+        }
+
+        /// <summary>
+        /// save data
+        /// </summary>
+        /// <param name="data">data</param>
+        /// <param name="activationOption">activation option</param>
+        /// <returns></returns>
+        public async Task<IActivationRecord> SaveAsync(ET data, ActivationOption activationOption = null)
+        {
+            await WarehouseManager.SaveAsync(data).ConfigureAwait(false);
+            var identityValue = data.GetIdentityValue();
+            return DefaultActivationRecord<ET, DAI>.CreateSaveRecord(identityValue, activationOption);
         }
 
         #endregion
@@ -57,24 +68,35 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// <summary>
         /// remove data
         /// </summary>
-        /// <typeparam name="ET">entity</typeparam>
-        /// <typeparam name="DAI">persistent data service</typeparam>
         /// <param name="datas">datas</param>
+        /// <param name="activationOption">activation option</param>
         /// <returns></returns>
-        public async Task<IActivationRecord> RemoveAsync(params ET[] datas)
+        public async Task<IActivationRecord> RemoveAsync(IEnumerable<ET> datas, ActivationOption activationOption = null)
         {
             if (datas.IsNullOrEmpty())
             {
                 return null;
             }
-            await WarehouseManager.RemoveAsync(datas);
             var packageRecord = DefaultActivationRecord<ET, DAI>.CreatePackageRecord();
             foreach (var data in datas)
             {
-                var identityValue = data.GetIdentityValue();
-                packageRecord.AddFollowRecords(DefaultActivationRecord<ET, DAI>.CreateRemoveObjectRecord(identityValue));
+                var dataRecord = await RemoveAsync(data, activationOption).ConfigureAwait(false);
+                packageRecord.AddFollowRecords(dataRecord);
             }
             return packageRecord;
+        }
+
+        /// <summary>
+        /// remove data
+        /// </summary>
+        /// <param name="data">data</param>
+        /// <param name="activationOption">activation option</param>
+        /// <returns></returns>
+        public async Task<IActivationRecord> RemoveAsync(ET data, ActivationOption activationOption = null)
+        {
+            await WarehouseManager.RemoveAsync(data).ConfigureAwait(false);
+            var identityValue = data.GetIdentityValue();
+            return DefaultActivationRecord<ET, DAI>.CreateRemoveObjectRecord(identityValue, activationOption);
         }
 
         /// <summary>
@@ -82,10 +104,10 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// </summary>
         /// <param name="query"></param>
         /// <returns></returns>
-        public async Task<IActivationRecord> RemoveAsync(IQuery query)
+        public async Task<IActivationRecord> RemoveAsync(IQuery query, ActivationOption activationOption = null)
         {
             await WarehouseManager.RemoveAsync<ET>(query);
-            var record = DefaultActivationRecord<ET, DAI>.CreateRemoveByConditionRecord(query);
+            var record = DefaultActivationRecord<ET, DAI>.CreateRemoveByConditionRecord(query, activationOption);
             return record;
         }
 
@@ -99,10 +121,10 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// <param name="modifyExpression">modify expression</param>
         /// <param name="query">query</param>
         /// <returns></returns>
-        public async Task<IActivationRecord> ModifyAsync(IModify modifyExpression, IQuery query)
+        public async Task<IActivationRecord> ModifyAsync(IModify modifyExpression, IQuery query, ActivationOption activationOption = null)
         {
             await WarehouseManager.ModifyAsync<ET>(modifyExpression, query);
-            var record = DefaultActivationRecord<ET, DAI>.CreateModifyRecord(modifyExpression, query);
+            var record = DefaultActivationRecord<ET, DAI>.CreateModifyRecord(modifyExpression, query, activationOption);
             return record;
         }
 

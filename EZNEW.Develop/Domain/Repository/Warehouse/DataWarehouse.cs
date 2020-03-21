@@ -14,7 +14,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
     /// <summary>
     /// repository warehouse
     /// </summary>
-    public class DataWarehouse<T> : IDataWarehouse where T : BaseEntity<T>
+    public class DataWarehouse<T> : IDataWarehouse where T : BaseEntity<T>, new()
     {
         /// <summary>
         /// datas

@@ -9,87 +9,53 @@ using System.Threading.Tasks;
 namespace EZNEW.Develop.CQuery
 {
     /// <summary>
-    /// Atomic Query Conditions
+    /// atomic query conditions
     /// </summary>
     public class Criteria : IQueryItem
     {
-        #region Constructor
+        #region constructor
 
         /// <summary>
-        /// Initialize a Condition Instance
+        /// initialize a condition instance
         /// </summary>
         /// <param name="name">field name</param>
         /// <param name="operator">conditional operator</param>
         /// <param name="value">value</param>
         private Criteria(string name, CriteriaOperator @operator, dynamic value)
         {
-            _name = name;
-            _operator = @operator;
-            _value = value;
+            Name = name;
+            Operator = @operator;
+            Value = value;
         }
 
         #endregion
 
-        #region Fields
+        #region fields
 
-        /// <summary>
-        /// field name
-        /// </summary>
-        string _name;
-        /// <summary>
-        /// conditional operator
-        /// </summary>
-        CriteriaOperator _operator;
-        /// <summary>
-        /// value
-        /// </summary>
-        dynamic _value;
         dynamic _realValue = null;
         bool _calculateValue = false;//init real value
 
         #endregion
 
-        #region Propertys
+        #region propertys
 
         /// <summary>
-        /// Field Name
+        /// field name
         /// </summary>
-        public string Name
-        {
-            get
-            {
-                return _name;
-            }
-        }
+        public string Name { get; }
 
         /// <summary>
-        /// Condition Operator
+        /// condition operator
         /// </summary>
-        public CriteriaOperator Operator
-        {
-            get
-            {
-                return _operator;
-            }
-            internal set
-            {
-                _operator = value;
-            }
-        }
+        public CriteriaOperator Operator { get; internal set; }
 
         /// <summary>
-        /// Value
+        /// value
         /// </summary>
-        public dynamic Value
-        {
-            get
-            {
-                return _value;
-            }
-        }
+        public dynamic Value { get; }
 
         /// <summary>
-        /// Criteria Convert
+        /// criteria convert
         /// </summary>
         public ICriteriaConvert Convert
         {
@@ -98,10 +64,10 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region Functions
+        #region functions
 
         /// <summary>
-        /// Get the real value
+        /// get the real value
         /// </summary>
         /// <returns></returns>
         public dynamic GetCriteriaRealValue()
@@ -110,14 +76,14 @@ namespace EZNEW.Develop.CQuery
             {
                 return _realValue;
             }
-            Expression valueExpression = _value as Expression;
+            Expression valueExpression = Value as Expression;
             if (valueExpression != null)
             {
                 _realValue = GetExpressionValue(valueExpression);
             }
             else
             {
-                _realValue = _value;
+                _realValue = Value;
             }
             _calculateValue = true;
             return _realValue;
@@ -185,10 +151,10 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region Static Method
+        #region static method
 
         /// <summary>
-        /// Create a Criteria Instance
+        /// create a criteria instance
         /// </summary>
         /// <param name="name">fieldName</param>
         /// <param name="operator">condition operator</param>

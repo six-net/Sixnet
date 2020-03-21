@@ -31,18 +31,18 @@ namespace EZNEW.Develop.DataAccess
         Task<ICommand> AddAsync(T obj);
 
         /// <summary>
-        /// add data list
+        /// add datas
         /// </summary>
-        /// <param name="objList">object list</param>
-        /// <returns>icommand list</returns>
-        List<ICommand> Add(IEnumerable<T> objList);
+        /// <param name="objs">object datas</param>
+        /// <returns>ICommand list</returns>
+        List<ICommand> Add(IEnumerable<T> objs);
 
         /// <summary>
-        /// add data list
+        /// add datas
         /// </summary>
-        /// <param name="objList">object list</param>
-        /// <returns>icommand list</returns>
-        Task<List<ICommand>> AddAsync(IEnumerable<T> objList);
+        /// <param name="objs">object list</param>
+        /// <returns>ICommand list</returns>
+        Task<List<ICommand>> AddAsync(IEnumerable<T> objs);
 
         #endregion
 

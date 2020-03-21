@@ -2,6 +2,7 @@
 using EZNEW.Develop.DataAccess;
 using EZNEW.Develop.Domain.Aggregation;
 using EZNEW.Develop.Entity;
+using EZNEW.Develop.UnitOfWork;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace EZNEW.Develop.Domain.Repository
 {
-    public abstract class BaseAggregationThreeRelationRepository<T, First, Second, Third, ET, DAI> : DefaultAggregationRepository<T, ET, DAI> where T : IAggregationRoot<T> where ET : BaseEntity<ET> where DAI : IDataAccess<ET>
+    public abstract class BaseAggregationThreeRelationRepository<T, First, Second, Third, ET, DAI> : DefaultAggregationRepository<T, ET, DAI> where T : IAggregationRoot<T> where ET : BaseEntity<ET>, new() where DAI : IDataAccess<ET>
     {
         #region query
 
@@ -63,40 +64,43 @@ namespace EZNEW.Develop.Domain.Repository
         /// remove by first datas
         /// </summary>
         /// <param name="datas">datas</param>
-        /// <param name="record">activation record</param>
-        public abstract void RemoveByFirst(IEnumerable<First> datas);
+        /// <param name="activationOption">activation option</param>
+        public abstract void RemoveByFirst(IEnumerable<First> datas, ActivationOption activationOption = null);
 
         /// <summary>
         /// remove by second datas
         /// </summary>
         /// <param name="datas">datas</param>
-        /// <param name="record">activation record</param>
-        public abstract void RemoveBySecond(IEnumerable<Second> datas);
+        /// <<param name="activationOption">activation option</param>
+        public abstract void RemoveBySecond(IEnumerable<Second> datas, ActivationOption activationOption = null);
 
         /// <summary>
         /// remove by third datas
         /// </summary>
         /// <param name="datas">datas</param>
-        /// <param name="record">activation record</param>
-        public abstract void RemoveByThird(IEnumerable<Third> datas);
+        /// <param name="activationOption">activation option</param>
+        public abstract void RemoveByThird(IEnumerable<Third> datas, ActivationOption activationOption = null);
 
         /// <summary>
         /// remove by first
         /// </summary>
         /// <param name="query">query</param>
-        public abstract void RemoveByFirst(IQuery query);
+        /// <param name="activationOption">activation option</param>
+        public abstract void RemoveByFirst(IQuery query, ActivationOption activationOption = null);
 
         /// <summary>
         /// remove by second
         /// </summary>
         /// <param name="query">query</param>
-        public abstract void RemoveBySecond(IQuery query);
+        /// <param name="activationOption">activation option</param>
+        public abstract void RemoveBySecond(IQuery query, ActivationOption activationOption = null);
 
         /// <summary>
         /// remove by third
         /// </summary>
         /// <param name="query">query</param>
-        public abstract void RemoveByThird(IQuery query);
+        /// <param name="activationOption">activation option</param>
+        public abstract void RemoveByThird(IQuery query, ActivationOption activationOption = null);
 
         #endregion
     }

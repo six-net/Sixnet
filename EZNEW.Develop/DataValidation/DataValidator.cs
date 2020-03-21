@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace EZNEW.Develop.DataValidation
 {
     /// <summary>
-    /// Data Validator
+    /// data validator
     /// </summary>
     public abstract class DataValidator
     {
@@ -29,7 +29,7 @@ namespace EZNEW.Develop.DataValidation
 
         #endregion
 
-        #region Propertys
+        #region propertys
 
         /// <summary>
         /// wheather pass validation
@@ -43,7 +43,7 @@ namespace EZNEW.Develop.DataValidation
         }
 
         /// <summary>
-        /// Verify Result
+        /// verify result
         /// </summary>
         public VerifyResult Result
         {
@@ -54,7 +54,7 @@ namespace EZNEW.Develop.DataValidation
         }
 
         /// <summary>
-        /// Default Error Message
+        /// default error message
         /// </summary>
         public string DefaultErrorMessage
         {
@@ -73,7 +73,7 @@ namespace EZNEW.Develop.DataValidation
         /// </summary>
         /// <param name="value">Validate Value</param>
         /// <param name="errorMessage">Error Message</param>
-        public abstract void Validate(dynamic value,string errorMessage);
+        public abstract void Validate(dynamic value, string errorMessage);
 
         /// <summary>
         /// Create Validation Attribute

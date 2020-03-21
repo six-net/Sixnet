@@ -21,7 +21,7 @@ namespace EZNEW.Develop.Domain.Repository
     /// <summary>
     /// Default Repository
     /// </summary>
-    public abstract class DefaultAggregationRepository<DT, ET, DAI> : DefaultAggregationRootRepository<DT> where DT : IAggregationRoot<DT> where ET : BaseEntity<ET> where DAI : IDataAccess<ET>
+    public abstract class DefaultAggregationRepository<DT, ET, DAI> : DefaultAggregationRootRepository<DT> where DT : IAggregationRoot<DT> where ET : BaseEntity<ET>, new() where DAI : IDataAccess<ET>
     {
         protected IRepositoryWarehouse<ET, DAI> repositoryWarehouse = ContainerManager.Resolve<IRepositoryWarehouse<ET, DAI>>();
         static Type entityType = typeof(ET);
@@ -66,42 +66,48 @@ namespace EZNEW.Develop.Domain.Repository
         #region function
 
         /// <summary>
-        /// Execute Save
+        /// execute save
         /// </summary>
-        /// <param name="data">objects</param>
-        protected override async Task<IActivationRecord> ExecuteSaveAsync(DT data)
+        /// <param name="data">data</param>
+        /// <param name="activationOption">activation option</param>
+        /// <returns></returns>
+        protected override async Task<IActivationRecord> ExecuteSaveAsync(DT data, ActivationOption activationOption = null)
         {
             var entity = data?.MapTo<ET>();
-            return await SaveEntityAsync(entity).ConfigureAwait(false);
+            return await SaveEntityAsync(entity, activationOption).ConfigureAwait(false);
         }
 
         /// <summary>
-        /// Execute Remove
+        /// execute remove
         /// </summary>
         /// <param name="data">data</param>
-        protected override async Task<IActivationRecord> ExecuteRemoveAsync(DT data)
+        /// <param name="activationOption">activation option</param>
+        /// <returns></returns>
+        protected override async Task<IActivationRecord> ExecuteRemoveAsync(DT data, ActivationOption activationOption = null)
         {
             if (data == null)
             {
                 return null;
             }
             var entity = data.MapTo<ET>();
-            return await RemoveEntityAsync(entity).ConfigureAwait(false);
+            return await RemoveEntityAsync(entity, activationOption).ConfigureAwait(false);
         }
 
         /// <summary>
-        /// Execute Remove
+        /// execute remove
         /// </summary>
-        /// <param name="query">query model</param>
-        protected override async Task<IActivationRecord> ExecuteRemoveAsync(IQuery query)
+        /// <param name="query">query object</param>
+        /// <param name="activationOption">activation option</param>
+        /// <returns></returns>
+        protected override async Task<IActivationRecord> ExecuteRemoveAsync(IQuery query, ActivationOption activationOption = null)
         {
-            return await repositoryWarehouse.RemoveAsync(query).ConfigureAwait(false);
+            return await repositoryWarehouse.RemoveAsync(query, activationOption).ConfigureAwait(false);
         }
 
         /// <summary>
-        /// Get Data
+        /// get data
         /// </summary>
-        /// <param name="query">query model</param>
+        /// <param name="query">query object</param>
         /// <returns></returns>
         protected override async Task<DT> GetDataAsync(IQuery query)
         {
@@ -115,9 +121,9 @@ namespace EZNEW.Develop.Domain.Repository
         }
 
         /// <summary>
-        /// Get Data List
+        /// get data list
         /// </summary>
-        /// <param name="query">query model</param>
+        /// <param name="query">query object</param>
         /// <returns></returns>
         protected override async Task<List<DT>> GetDataListAsync(IQuery query)
         {
@@ -131,9 +137,9 @@ namespace EZNEW.Develop.Domain.Repository
         }
 
         /// <summary>
-        /// Get Object Paging
+        /// get object paging
         /// </summary>
-        /// <param name="query">query model</param>
+        /// <param name="query">query object</param>
         /// <returns></returns>
         protected override async Task<IPaging<DT>> GetDataPagingAsync(IQuery query)
         {
@@ -143,9 +149,9 @@ namespace EZNEW.Develop.Domain.Repository
         }
 
         /// <summary>
-        /// Check Data
+        /// check data
         /// </summary>
-        /// <param name="query">query model</param>
+        /// <param name="query">query object</param>
         /// <returns></returns>
         protected override async Task<bool> IsExistAsync(IQuery query)
         {
@@ -153,9 +159,9 @@ namespace EZNEW.Develop.Domain.Repository
         }
 
         /// <summary>
-        /// Get Data Count
+        /// get data count
         /// </summary>
-        /// <param name="query">query model</param>
+        /// <param name="query">query object</param>
         /// <returns></returns>
         protected override async Task<long> CountValueAsync(IQuery query)
         {
@@ -163,10 +169,10 @@ namespace EZNEW.Develop.Domain.Repository
         }
 
         /// <summary>
-        /// Get Max Value
+        /// get max value
         /// </summary>
         /// <typeparam name="VT">Data Type</typeparam>
-        /// <param name="query">query model</param>
+        /// <param name="query">query object</param>
         /// <returns></returns>
         protected override async Task<VT> MaxValueAsync<VT>(IQuery query)
         {
@@ -174,10 +180,10 @@ namespace EZNEW.Develop.Domain.Repository
         }
 
         /// <summary>
-        /// get Min Value
+        /// get min value
         /// </summary>
         /// <typeparam name="VT">DataType</typeparam>
-        /// <param name="query">query model</param>
+        /// <param name="query">query object</param>
         /// <returns>min value</returns>
         protected override async Task<VT> MinValueAsync<VT>(IQuery query)
         {
@@ -185,10 +191,10 @@ namespace EZNEW.Develop.Domain.Repository
         }
 
         /// <summary>
-        /// Get Sum Value
+        /// get sum value
         /// </summary>
         /// <typeparam name="VT">DataType</typeparam>
-        /// <param name="query">query model</param>
+        /// <param name="query">query object</param>
         /// <returns></returns>
         protected override async Task<VT> SumValueAsync<VT>(IQuery query)
         {
@@ -196,10 +202,10 @@ namespace EZNEW.Develop.Domain.Repository
         }
 
         /// <summary>
-        /// Get Average Value
+        /// get average value
         /// </summary>
         /// <typeparam name="VT">DataType</typeparam>
-        /// <param name="query">query model</param>
+        /// <param name="query">query object</param>
         /// <returns></returns>
         protected override async Task<VT> AvgValueAsync<VT>(IQuery query)
         {
@@ -207,32 +213,48 @@ namespace EZNEW.Develop.Domain.Repository
         }
 
         /// <summary>
-        /// Execute Modify
+        /// execute modify
         /// </summary>
         /// <param name="expression">modify expression</param>
-        /// <param name="query">query model</param>
-        protected override async Task<IActivationRecord> ExecuteModifyAsync(IModify expression, IQuery query)
+        /// <param name="query">query object</param>
+        /// <param name="activationOption">activation option</param>
+        /// <returns></returns>
+        protected override async Task<IActivationRecord> ExecuteModifyAsync(IModify expression, IQuery query, ActivationOption activationOption = null)
         {
-            return await repositoryWarehouse.ModifyAsync(expression, query).ConfigureAwait(false);
+            return await repositoryWarehouse.ModifyAsync(expression, query, activationOption).ConfigureAwait(false);
         }
 
         /// <summary>
         /// save entity
         /// </summary>
         /// <param name="datas">datas</param>
+        /// <param name="activationOption">activation option</param>
         /// <returns></returns>
-        protected virtual async Task<IActivationRecord> SaveEntityAsync(params ET[] datas)
+        protected virtual async Task<IActivationRecord> SaveEntityAsync(IEnumerable<ET> datas, ActivationOption activationOption = null)
         {
-            return await repositoryWarehouse.SaveAsync(datas).ConfigureAwait(false);
+            return await repositoryWarehouse.SaveAsync(datas, activationOption).ConfigureAwait(false);
         }
 
         /// <summary>
         /// save entity
         /// </summary>
-        /// <param name="datas"></param>
-        protected virtual void SaveEntity(params ET[] datas)
+        /// <param name="data">data</param>
+        /// <param name="activationOption">activation option</param>
+        /// <returns></returns>
+        protected virtual async Task<IActivationRecord> SaveEntityAsync(ET data, ActivationOption activationOption = null)
         {
-            var record = SaveEntityAsync(datas).Result;
+            return await repositoryWarehouse.SaveAsync(data, activationOption).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// save entity
+        /// </summary>
+        /// <param name="datas">datas</param>
+        /// <param name="activationOption">activation option</param>
+        /// <returns></returns>
+        protected virtual void SaveEntity(IEnumerable<ET> datas, ActivationOption activationOption = null)
+        {
+            var record = SaveEntityAsync(datas, activationOption).Result;
             if (record != null)
             {
                 WorkFactory.RegisterActivationRecord(record);
@@ -240,22 +262,36 @@ namespace EZNEW.Develop.Domain.Repository
         }
 
         /// <summary>
-        /// remove entity
+        /// remove entitys
         /// </summary>
         /// <param name="datas">datas</param>
+        /// <param name="activationOption">activation option</param>
         /// <returns></returns>
-        protected virtual async Task<IActivationRecord> RemoveEntityAsync(params ET[] datas)
+        protected virtual async Task<IActivationRecord> RemoveEntityAsync(IEnumerable<ET> datas, ActivationOption activationOption = null)
         {
-            return await repositoryWarehouse.RemoveAsync(datas).ConfigureAwait(false);
+            return await repositoryWarehouse.RemoveAsync(datas, activationOption).ConfigureAwait(false);
         }
 
         /// <summary>
         /// remove entity
         /// </summary>
-        /// <param name="datas"></param>
-        protected virtual void RemoveEntity(params ET[] datas)
+        /// <param name="data">data</param>
+        /// <param name="activationOption">activation option</param>
+        /// <returns></returns>
+        protected virtual async Task<IActivationRecord> RemoveEntityAsync(ET data, ActivationOption activationOption = null)
         {
-            var record = RemoveEntityAsync(datas).Result;
+            return await repositoryWarehouse.RemoveAsync(data, activationOption).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// remove entitys
+        /// </summary>
+        /// <param name="datas">datas</param>
+        /// <param name="activationOption">activation option</param>
+        /// <returns></returns>
+        protected virtual void RemoveEntity(IEnumerable<ET> datas, ActivationOption activationOption = null)
+        {
+            var record = RemoveEntityAsync(datas, activationOption).Result;
             if (record != null)
             {
                 WorkFactory.RegisterActivationRecord(record);
@@ -266,29 +302,29 @@ namespace EZNEW.Develop.Domain.Repository
 
         #region global condition
 
-        #region Append Repository Condition
+        #region append repository condition
 
         /// <summary>
         /// append repository condition
         /// </summary>
-        /// <param name="originQuery">origin query</param>
+        /// <param name="originalQuery">original query</param>
         /// <returns></returns>
-        IQuery AppendRepositoryCondition(IQuery originQuery, QueryUsageScene usageScene)
+        IQuery AppendRepositoryCondition(IQuery originalQuery, QueryUsageScene usageScene)
         {
-            if (originQuery == null)
+            if (originalQuery == null)
             {
-                originQuery = QueryFactory.Create();
-                originQuery.SetEntityType(entityType);
+                originalQuery = QueryFactory.Create();
+                originalQuery.SetEntityType(entityType);
             }
             else
             {
-                originQuery.SetEntityType(entityType);
+                originalQuery.SetEntityType(entityType);
             }
 
             //primary query
             GlobalConditionFilter conditionFilter = new GlobalConditionFilter()
             {
-                OriginQuery = originQuery,
+                OriginalQuery = originalQuery,
                 UsageSceneEntityType = entityType,
                 EntityType = entityType,
                 SourceType = QuerySourceType.Repository,
@@ -297,30 +333,30 @@ namespace EZNEW.Develop.Domain.Repository
             var conditionFilterResult = QueryManager.GlobalConditionFilter(conditionFilter);
             if (conditionFilterResult != null)
             {
-                conditionFilterResult.AppendTo(originQuery);
+                conditionFilterResult.AppendTo(originalQuery);
             }
             //subqueries
-            if (!originQuery.Subqueries.IsNullOrEmpty())
+            if (!originalQuery.Subqueries.IsNullOrEmpty())
             {
-                foreach (var squery in originQuery.Subqueries)
+                foreach (var squery in originalQuery.Subqueries)
                 {
                     AppendSubqueryCondition(squery, conditionFilter);
                 }
             }
             //join
-            if (!originQuery.JoinItems.IsNullOrEmpty())
+            if (!originalQuery.JoinItems.IsNullOrEmpty())
             {
-                foreach (var jitem in originQuery.JoinItems)
+                foreach (var jitem in originalQuery.JoinItems)
                 {
                     AppendJoinQueryCondition(jitem.JoinQuery, conditionFilter);
                 }
             }
-            return originQuery;
+            return originalQuery;
         }
 
         #endregion
 
-        #region Append Subqueries Condition
+        #region append subqueries condition
 
         /// <summary>
         /// append subqueries condition
@@ -335,7 +371,7 @@ namespace EZNEW.Develop.Domain.Repository
             }
             conditionFilter.SourceType = QuerySourceType.Subuery;
             conditionFilter.EntityType = subquery.EntityType;
-            conditionFilter.OriginQuery = subquery;
+            conditionFilter.OriginalQuery = subquery;
             var conditionFilterResult = QueryManager.GlobalConditionFilter(conditionFilter);
             if (conditionFilterResult != null)
             {
@@ -361,7 +397,7 @@ namespace EZNEW.Develop.Domain.Repository
 
         #endregion
 
-        #region Append Join Condition
+        #region append join condition
 
         /// <summary>
         /// append join query condition
@@ -376,7 +412,7 @@ namespace EZNEW.Develop.Domain.Repository
             }
             conditionFilter.SourceType = QuerySourceType.JoinQuery;
             conditionFilter.EntityType = joinQuery.EntityType;
-            conditionFilter.OriginQuery = joinQuery;
+            conditionFilter.OriginalQuery = joinQuery;
             var conditionFilterResult = QueryManager.GlobalConditionFilter(conditionFilter);
             if (conditionFilterResult != null)
             {
@@ -398,132 +434,132 @@ namespace EZNEW.Develop.Domain.Repository
                     AppendJoinQueryCondition(jitem.JoinQuery, conditionFilter);
                 }
             }
-        } 
+        }
 
         #endregion
 
-        #region Append Remove Extra Condition
+        #region append remove extra condition
 
         /// <summary>
         /// append remove condition
         /// </summary>
-        /// <param name="originQuery">origin query</param>
+        /// <param name="originalQuery">original query</param>
         /// <returns></returns>
-        protected override IQuery AppendRemoveCondition(IQuery originQuery)
+        protected override IQuery AppendRemoveCondition(IQuery originalQuery)
         {
-            return AppendRepositoryCondition(originQuery, QueryUsageScene.Remove);
+            return AppendRepositoryCondition(originalQuery, QueryUsageScene.Remove);
         }
 
         #endregion
 
-        #region Append Modify Extra Condition
+        #region append modify extra condition
 
         /// <summary>
         /// append modify condition
         /// </summary>
-        /// <param name="originQuery">origin query</param>
+        /// <param name="originalQuery">original query</param>
         /// <returns></returns>
-        protected override IQuery AppendModifyCondition(IQuery originQuery)
+        protected override IQuery AppendModifyCondition(IQuery originalQuery)
         {
-            return AppendRepositoryCondition(originQuery, QueryUsageScene.Modify);
+            return AppendRepositoryCondition(originalQuery, QueryUsageScene.Modify);
         }
 
         #endregion
 
-        #region Append Query Extra Condition
+        #region append query extra condition
 
         /// <summary>
         /// append query condition
         /// </summary>
-        /// <param name="originQuery">origin query</param>
+        /// <param name="originalQuery">original query</param>
         /// <returns></returns>
-        protected override IQuery AppendQueryCondition(IQuery originQuery)
+        protected override IQuery AppendQueryCondition(IQuery originalQuery)
         {
-            return AppendRepositoryCondition(originQuery, QueryUsageScene.Query);
+            return AppendRepositoryCondition(originalQuery, QueryUsageScene.Query);
         }
 
         #endregion
 
-        #region Append Exist Extra Condition
+        #region append exist extra condition
 
         /// <summary>
         /// append exist condition
         /// </summary>
-        /// <param name="originQuery">origin query</param>
+        /// <param name="originalQuery">original query</param>
         /// <returns></returns>
-        protected override IQuery AppendExistCondition(IQuery originQuery)
+        protected override IQuery AppendExistCondition(IQuery originalQuery)
         {
-            return AppendRepositoryCondition(originQuery, QueryUsageScene.Exist);
+            return AppendRepositoryCondition(originalQuery, QueryUsageScene.Exist);
         }
 
         #endregion
 
-        #region Append Count Extra Condition
+        #region append count extra condition
 
         /// <summary>
         /// append count condition
         /// </summary>
-        /// <param name="originQuery">origin query</param>
+        /// <param name="originalQuery">original query</param>
         /// <returns></returns>
-        protected override IQuery AppendCountCondition(IQuery originQuery)
+        protected override IQuery AppendCountCondition(IQuery originalQuery)
         {
-            return AppendRepositoryCondition(originQuery, QueryUsageScene.Count);
+            return AppendRepositoryCondition(originalQuery, QueryUsageScene.Count);
         }
 
         #endregion
 
-        #region Append Max Extra Condition
+        #region append max extra condition
 
         /// <summary>
         /// append max condition
         /// </summary>
-        /// <param name="originQuery">origin query</param>
+        /// <param name="originalQuery">original query</param>
         /// <returns></returns>
-        protected override IQuery AppendMaxCondition(IQuery originQuery)
+        protected override IQuery AppendMaxCondition(IQuery originalQuery)
         {
-            return AppendRepositoryCondition(originQuery, QueryUsageScene.Max);
+            return AppendRepositoryCondition(originalQuery, QueryUsageScene.Max);
         }
 
         #endregion
 
-        #region Append Min Extra Condition
+        #region append min extra condition
 
         /// <summary>
         /// append min condition
         /// </summary>
-        /// <param name="originQuery">origin query</param>
+        /// <param name="originalQuery">original query</param>
         /// <returns></returns>
-        protected override IQuery AppendMinCondition(IQuery originQuery)
+        protected override IQuery AppendMinCondition(IQuery originalQuery)
         {
-            return AppendRepositoryCondition(originQuery, QueryUsageScene.Min);
+            return AppendRepositoryCondition(originalQuery, QueryUsageScene.Min);
         }
 
         #endregion
 
-        #region Append Sum Extra Condition
+        #region append sum extra condition
 
         /// <summary>
         /// append sum condition
         /// </summary>
-        /// <param name="originQuery">origin query</param>
+        /// <param name="originalQuery">original query</param>
         /// <returns></returns>
-        protected override IQuery AppendSumCondition(IQuery originQuery)
+        protected override IQuery AppendSumCondition(IQuery originalQuery)
         {
-            return AppendRepositoryCondition(originQuery, QueryUsageScene.Sum);
+            return AppendRepositoryCondition(originalQuery, QueryUsageScene.Sum);
         }
 
         #endregion
 
-        #region Append Avg Extra Condition
+        #region append avg extra condition
 
         /// <summary>
         /// append avg condition
         /// </summary>
-        /// <param name="originQuery">origin query</param>
+        /// <param name="originalQuery">original query</param>
         /// <returns></returns>
-        protected override IQuery AppendAvgCondition(IQuery originQuery)
+        protected override IQuery AppendAvgCondition(IQuery originalQuery)
         {
-            return AppendRepositoryCondition(originQuery, QueryUsageScene.Avg);
+            return AppendRepositoryCondition(originalQuery, QueryUsageScene.Avg);
         }
 
         #endregion

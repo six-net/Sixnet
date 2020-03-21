@@ -18,7 +18,7 @@ namespace EZNEW.Develop.DataAccess
     /// imeplements data access for rdb
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public abstract class RdbDataAccess<T> : IDataAccess<T> where T : BaseEntity<T>
+    public abstract class RdbDataAccess<T> : IDataAccess<T> where T : BaseEntity<T>, new()
     {
         static Type entityType = typeof(T);
 
@@ -526,7 +526,7 @@ namespace EZNEW.Develop.DataAccess
             ICommand cmd = RdbCommand.CreateNewCommand<T>(funcType);
             SetCommand(cmd, null);
             cmd.Query = query;
-            DT obj = await WorkFactory.QuerySingleAsync<DT>(cmd).ConfigureAwait(false);
+            DT obj = await WorkFactory.AggregateValueAsync<DT>(cmd).ConfigureAwait(false);
             return obj;
         }
 

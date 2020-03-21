@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace EZNEW.Develop.DataValidation.Validators
 {
     /// <summary>
-    /// String Length Validator
+    /// string length validator
     /// </summary>
     public class StringLengthValidator : DataValidator
     {
@@ -19,26 +19,26 @@ namespace EZNEW.Develop.DataValidation.Validators
             _errorMessage = string.Format("the character length is between {0} and {1}", minLength, maxLength);
         }
 
-        #region 属性
+        #region propertys
 
         /// <summary>
-        /// maxlength
+        /// max length
         /// </summary>
         public int MaximumLength { get; }
         /// <summary>
-        /// minlength
+        /// min length
         /// </summary>
         public int MinimumLength { get; set; }
 
         #endregion
 
-        #region 方法
+        #region methods
 
         /// <summary>
-        /// Validate
+        /// validate
         /// </summary>
-        /// <param name="value">Validate Value</param>
-        /// <param name="errorMessage">Error Message</param>
+        /// <param name="value">validate value</param>
+        /// <param name="errorMessage">error message</param>
         public override void Validate(dynamic value, string errorMessage = "")
         {
             EnsureLegalLengths();
@@ -48,7 +48,7 @@ namespace EZNEW.Develop.DataValidation.Validators
         }
 
         /// <summary>
-        /// EnsureLegalLengths
+        /// ensure legal lengths
         /// </summary>
         private void EnsureLegalLengths()
         {
@@ -64,7 +64,7 @@ namespace EZNEW.Develop.DataValidation.Validators
         }
 
         /// <summary>
-        /// Create Validation Attribute
+        /// create validation attribute
         /// </summary>
         /// <returns></returns>
         public override ValidationAttribute CreateValidationAttribute(ValidationAttributeParameter parameter)

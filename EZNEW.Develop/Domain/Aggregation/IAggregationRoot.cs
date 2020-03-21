@@ -11,7 +11,7 @@ namespace EZNEW.Develop.Domain.Aggregation
 
     public interface IAggregationRoot
     {
-        #region Propertys
+        #region propertys
 
         /// <summary>
         /// allow to save
@@ -38,34 +38,34 @@ namespace EZNEW.Develop.Domain.Aggregation
         #region Methods
 
         /// <summary>
-        /// Mark Object Is New
+        /// mark object is new
         /// </summary>
         bool MarkNew();
 
         /// <summary>
-        /// Mark Object Is Stored
+        /// mark object is stored
         /// </summary>
         /// <returns></returns>
         bool MarkStored();
 
         /// <summary>
-        /// Save Object
+        /// save object
         /// </summary>
         void Save();
 
         /// <summary>
-        /// Save Object
+        /// save object
         /// </summary>
         /// <returns></returns>
         Task SaveAsync();
 
         /// <summary>
-        /// Remove Object
+        /// remove object
         /// </summary>
         void Remove();
 
         /// <summary>
-        /// Remove Object
+        /// remove object
         /// </summary>
         Task RemoveAsync();
 
@@ -73,7 +73,7 @@ namespace EZNEW.Develop.Domain.Aggregation
     }
 
     /// <summary>
-    /// AggregationRoot Interface
+    /// aggregationRoot interface
     /// </summary>
     public interface IAggregationRoot<in T> : IAggregationRoot where T : IAggregationRoot<T>
     {
@@ -85,17 +85,17 @@ namespace EZNEW.Develop.Domain.Aggregation
         bool Equals(T targetObj);
 
         /// <summary>
-        /// Close Lazy Data Load
+        /// close lazy data load
         /// </summary>
         void CloseLazyMemberLoad();
 
         /// <summary>
-        /// Open Lazy Data Load
+        /// open lazy data load
         /// </summary>
         void OpenLazyMemberLoad();
 
         /// <summary>
-        /// Set Load Propertys
+        /// set load propertys
         /// </summary>
         /// <param name="loadPropertys">propertys</param>
         /// <returns></returns>

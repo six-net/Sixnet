@@ -10,14 +10,14 @@ namespace EZNEW.Develop.DataValidation
     public interface IValidation
     {
         /// <summary>
-        /// Validate
+        /// validate
         /// </summary>
         /// <param name="obj">validate object</param>
         /// <returns></returns>
         VerifyResult Validate(dynamic obj);
 
         /// <summary>
-        /// Create Validation Attribute
+        /// create validation attribute
         /// </summary>
         /// <returns></returns>
         ValidationAttribute CreateValidationAttribute();

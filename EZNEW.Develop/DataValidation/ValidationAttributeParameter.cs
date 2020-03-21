@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 namespace EZNEW.Develop.DataValidation
 {
     /// <summary>
-    /// Validation Attribute Parameter
+    /// validation attribute parameter
     /// </summary>
     public class ValidationAttributeParameter
     {
         #region Propertys
 
         /// <summary>
-        /// Error Message
+        /// error message
         /// </summary>
         public string ErrorMessage
         {
@@ -22,7 +22,7 @@ namespace EZNEW.Develop.DataValidation
         }
 
         /// <summary>
-        /// Other Property
+        /// other property
         /// </summary>
         public string OtherProperty
         {

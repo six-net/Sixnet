@@ -14,32 +14,60 @@ using System.Threading.Tasks;
 
 namespace EZNEW.Develop.Domain.Repository
 {
-    public abstract class DefaultAggregationRootRepository<DT> : BaseAggregationRepository<DT> where DT : IAggregationRoot<DT>
+    /// <summary>
+    /// default aggregation root repository
+    /// </summary>
+    /// <typeparam name="T">data type</typeparam>
+    public abstract class DefaultAggregationRootRepository<T> : BaseAggregationRepository<T> where T : IAggregationRoot<T>
     {
-        #region Impl Methods
+        #region impl methods
+
+        #region save data
 
         /// <summary>
-        /// Save Objects
+        /// save data
         /// </summary>
-        /// <param name="objDatas">Objects</param>
-        public sealed override void Save(params DT[] objDatas)
+        /// <param name="data">data</param>
+        /// <param name="activationOption">activation option</param>
+        public sealed override void Save(T data, ActivationOption activationOption = null)
         {
-            SaveAsync(objDatas).Wait();
+            SaveAsync(data, activationOption).Wait();
         }
 
         /// <summary>
-        /// Save Objects
+        /// save data
         /// </summary>
-        /// <param name="objDatas">Objects</param>
-        public sealed override async Task SaveAsync(params DT[] objDatas)
+        /// <param name="data">data</param>
+        /// <param name="activationOption">activation option</param>
+        public sealed override async Task SaveAsync(T data, ActivationOption activationOption = null)
         {
-            #region Verify Parameters
+            await SaveAsync(new T[1] { data }, activationOption).ConfigureAwait(false);
+        }
 
-            if (objDatas.IsNullOrEmpty())
+        /// <summary>
+        /// save datas
+        /// </summary>
+        /// <param name="datas">datas</param>
+        /// <param name="activationOption">activation option</param>
+        public sealed override void Save(IEnumerable<T> datas, ActivationOption activationOption = null)
+        {
+            SaveAsync(datas, activationOption).Wait();
+        }
+
+        /// <summary>
+        /// save datas
+        /// </summary>
+        /// <param name="datas">datas</param>
+        /// <param name="activationOption">activation option</param>
+        public sealed override async Task SaveAsync(IEnumerable<T> datas, ActivationOption activationOption = null)
+        {
+            #region verify parameters
+
+            if (datas.IsNullOrEmpty())
             {
-                throw new Exception("objDatas is null or empty");
+                throw new Exception($"{nameof(datas)} is null or empty");
             }
-            foreach (var obj in objDatas)
+            foreach (var obj in datas)
             {
                 if (obj == null)
                 {
@@ -47,48 +75,74 @@ namespace EZNEW.Develop.Domain.Repository
                 }
                 if (!obj.CanBeSave)
                 {
-                    throw new Exception("object data cann't to be save");
+                    throw new Exception("data cann't to be save");
                 }
             }
 
             #endregion
 
-            var records = new List<IActivationRecord>(objDatas.Length);
-            foreach (var data in objDatas)
+            var records = new List<IActivationRecord>(datas.Count());
+            foreach (var data in datas)
             {
-                var record = await ExecuteSaveAsync(data).ConfigureAwait(false);//Execute Save
+                var record = await ExecuteSaveAsync(data, activationOption).ConfigureAwait(false);//execute save
                 if (record == null)
                 {
                     continue;
                 }
                 records.Add(record);
             }
-            RepositoryEventBus.PublishSave(GetType(), objDatas);
+            RepositoryEventBus.PublishSave(GetType(), datas, activationOption);
             WorkFactory.RegisterActivationRecord(records.ToArray());
         }
 
+        #endregion
+
+        #region remove data
+
         /// <summary>
-        /// Remove Objects
+        /// remove data
         /// </summary>
-        /// <param name="objDatas">objects</param>
-        public sealed override void Remove(params DT[] objDatas)
+        /// <param name="data">data</param>
+        /// <param name="activationOption">activation option</param>
+        public sealed override void Remove(T data, ActivationOption activationOption = null)
         {
-            RemoveAsync(objDatas).Wait();
+            RemoveAsync(data, activationOption).Wait();
         }
 
         /// <summary>
-        /// Remove Objects
+        /// remove data
         /// </summary>
-        /// <param name="objDatas">objects</param>
-        public sealed override async Task RemoveAsync(params DT[] objDatas)
+        /// <param name="data">data</param>
+        /// <param name="activationOption">activation option</param>
+        public sealed override async Task RemoveAsync(T data, ActivationOption activationOption = null)
         {
-            #region Verify Parameters
+            await RemoveAsync(new T[1] { data }, activationOption).ConfigureAwait(false);
+        }
 
-            if (objDatas == null || objDatas.Length <= 0)
+        /// <summary>
+        /// remove datas
+        /// </summary>
+        /// <param name="datas">datas</param>
+        /// <param name="activationOption">activation option</param>
+        public sealed override void Remove(IEnumerable<T> datas, ActivationOption activationOption = null)
+        {
+            RemoveAsync(datas, activationOption).Wait();
+        }
+
+        /// <summary>
+        /// remove datas
+        /// </summary>
+        /// <param name="datas">datas</param>
+        /// <param name="activationOption">activation option</param>
+        public sealed override async Task RemoveAsync(IEnumerable<T> datas, ActivationOption activationOption = null)
+        {
+            #region verify parameters
+
+            if (datas.IsNullOrEmpty())
             {
-                throw new Exception("objDatas is null or empty");
+                throw new Exception("datas is null or empty");
             }
-            foreach (var obj in objDatas)
+            foreach (var obj in datas)
             {
                 if (obj == null)
                 {
@@ -102,123 +156,143 @@ namespace EZNEW.Develop.Domain.Repository
 
             #endregion
 
-            var records = new List<IActivationRecord>(objDatas.Length);
-            foreach (var data in objDatas)
+            var records = new List<IActivationRecord>(datas.Count());
+            foreach (var data in datas)
             {
-                var record = await ExecuteRemoveAsync(data).ConfigureAwait(false);//execute remove
+                var record = await ExecuteRemoveAsync(data, activationOption).ConfigureAwait(false);//execute remove
                 if (record == null)
                 {
                     continue;
                 }
                 records.Add(record);
             }
-            RepositoryEventBus.PublishRemove(GetType(), objDatas);
+            RepositoryEventBus.PublishRemove(GetType(), datas, activationOption);
             WorkFactory.RegisterActivationRecord(records.ToArray());
         }
 
+        #endregion
+
+        #region remove by condition
+
         /// <summary>
-        /// Remove Object
+        /// remove by condition
         /// </summary>
-        /// <param name="query">query model</param>
-        public sealed override void Remove(IQuery query)
+        /// <param name="query">query object</param>
+        /// <param name="activationOption">activation option</param>
+        public sealed override void Remove(IQuery query, ActivationOption activationOption = null)
         {
-            RemoveAsync(query).Wait();
+            RemoveAsync(query, activationOption).Wait();
         }
 
         /// <summary>
-        /// Remove Object
+        /// remove by condition
         /// </summary>
-        /// <param name="query">query model</param>
-        public sealed override async Task RemoveAsync(IQuery query)
+        /// <param name="query">query object</param>
+        /// <param name="activationOption">activation option</param>
+        public sealed override async Task RemoveAsync(IQuery query, ActivationOption activationOption = null)
         {
             //append condition
             query = AppendRemoveCondition(query);
-            var record = await ExecuteRemoveAsync(query).ConfigureAwait(false);
+            var record = await ExecuteRemoveAsync(query, activationOption).ConfigureAwait(false);
             if (record == null)
             {
                 return;
             }
-            RepositoryEventBus.PublishRemove<DT>(GetType(), query);
+            RepositoryEventBus.PublishRemove<T>(GetType(), query, activationOption);
             WorkFactory.RegisterActivationRecord(record);
         }
 
+        #endregion
+
+        #region modify
+
         /// <summary>
-        /// Modify Object
+        /// modify data
         /// </summary>
         /// <param name="expression">modify expression</param>
-        /// <param name="query">query model</param>
-        public sealed override void Modify(IModify expression, IQuery query)
+        /// <param name="query">query object</param>
+        /// <param name="activationOption">activation option</param>
+        public sealed override void Modify(IModify expression, IQuery query, ActivationOption activationOption = null)
         {
-            ModifyAsync(expression, query).Wait();
+            ModifyAsync(expression, query, activationOption).Wait();
         }
 
         /// <summary>
-        /// Modify Object
+        /// modify data
         /// </summary>
         /// <param name="expression">modify expression</param>
-        /// <param name="query">query model</param>
-        public sealed override async Task ModifyAsync(IModify expression, IQuery query)
+        /// <param name="query">query object</param>
+        /// <param name="activationOption">activation option</param>
+        public sealed override async Task ModifyAsync(IModify expression, IQuery query, ActivationOption activationOption = null)
         {
             //append condition
             query = AppendModifyCondition(query);
-            var record = await ExecuteModifyAsync(expression, query).ConfigureAwait(false);
+            var record = await ExecuteModifyAsync(expression, query, activationOption).ConfigureAwait(false);
             if (record == null)
             {
                 return;
             }
-            RepositoryEventBus.PublishModify<DT>(GetType(), expression, query);
+            RepositoryEventBus.PublishModify<T>(GetType(), expression, query, activationOption);
             WorkFactory.RegisterActivationRecord(record);
         }
 
+        #endregion
+
+        #region get data
+
         /// <summary>
-        /// Get Object
+        /// get data
         /// </summary>
-        /// <param name="query">query model</param>
-        /// <returns>Object</returns>
-        public sealed override DT Get(IQuery query)
+        /// <param name="query">query object</param>
+        /// <returns>data</returns>
+        public sealed override T Get(IQuery query)
         {
             return GetAsync(query).Result;
         }
 
         /// <summary>
-        /// Get Object
+        /// get data
         /// </summary>
-        /// <param name="query">query model</param>
-        /// <returns>Object</returns>
-        public sealed override async Task<DT> GetAsync(IQuery query)
+        /// <param name="query">query object</param>
+        /// <returns>data</returns>
+        public sealed override async Task<T> GetAsync(IQuery query)
         {
             //append condition
             query = AppendQueryCondition(query);
             var data = await GetDataAsync(query).ConfigureAwait(false);
-            var dataList = new List<DT>() { data };
+            var dataList = new List<T>() { data };
             QueryCallback(query, false, dataList);
             RepositoryEventBus.PublishQuery(GetType(), dataList, result =>
               {
-                  QueryEventResult<DT> queryResult = result as QueryEventResult<DT>;
+                  QueryEventResult<T> queryResult = result as QueryEventResult<T>;
                   if (queryResult != null)
                   {
                       dataList = queryResult.Datas;
                   }
               });
-            return dataList.IsNullOrEmpty() ? default(DT) : dataList.FirstOrDefault();
+            return dataList.IsNullOrEmpty() ? default(T) : dataList.FirstOrDefault();
         }
 
+        #endregion
+
+        #region get data list
+
         /// <summary>
-        /// Get Object List
+        /// get data list
         /// </summary>
-        /// <param name="query">query model</param>
+        /// <param name="query">query object</param>
         /// <returns>object list</returns>
-        public sealed override List<DT> GetList(IQuery query)
+        public sealed override List<T> GetList(IQuery query)
         {
             return GetListAsync(query).Result;
         }
 
         /// <summary>
-        /// Get Object List
+        /// get data list
         /// </summary>
-        /// <param name="query">query model</param>
+        /// <param name="query">query object</param>
         /// <returns>object list</returns>
-        public sealed override async Task<List<DT>> GetListAsync(IQuery query)
+        public sealed override async Task<List<T>> GetListAsync(IQuery query)
         {
             //append condition
             query = AppendQueryCondition(query);
@@ -226,52 +300,60 @@ namespace EZNEW.Develop.Domain.Repository
             QueryCallback(query, true, datas);
             RepositoryEventBus.PublishQuery(GetType(), datas, result =>
             {
-                QueryEventResult<DT> queryResult = result as QueryEventResult<DT>;
+                QueryEventResult<T> queryResult = result as QueryEventResult<T>;
                 if (queryResult != null)
                 {
                     datas = queryResult.Datas;
                 }
             });
-            return datas ?? new List<DT>(0);
+            return datas ?? new List<T>(0);
         }
 
+        #endregion
+
+        #region get data paging
+
         /// <summary>
-        /// Get Object Paging
+        /// get data paging
         /// </summary>
-        /// <param name="query">query model</param>
-        /// <returns>object paging</returns>
-        public sealed override IPaging<DT> GetPaging(IQuery query)
+        /// <param name="query">query object</param>
+        /// <returns>data paging</returns>
+        public sealed override IPaging<T> GetPaging(IQuery query)
         {
             return GetPagingAsync(query).Result;
         }
 
         /// <summary>
-        /// Get Object Paging
+        /// get data paging
         /// </summary>
-        /// <param name="query">query model</param>
-        /// <returns>object paging</returns>
-        public sealed override async Task<IPaging<DT>> GetPagingAsync(IQuery query)
+        /// <param name="query">query object</param>
+        /// <returns>data paging</returns>
+        public sealed override async Task<IPaging<T>> GetPagingAsync(IQuery query)
         {
             //append condition
             query = AppendQueryCondition(query);
             var paging = await GetDataPagingAsync(query).ConfigureAwait(false);
-            IEnumerable<DT> datas = paging;
+            IEnumerable<T> datas = paging;
             QueryCallback(query, true, datas);
             RepositoryEventBus.PublishQuery(GetType(), datas, result =>
             {
-                QueryEventResult<DT> queryResult = result as QueryEventResult<DT>;
+                QueryEventResult<T> queryResult = result as QueryEventResult<T>;
                 if (queryResult != null)
                 {
                     datas = queryResult.Datas;
                 }
             });
-            return new Paging<DT>(paging.Page, paging.PageSize, paging.TotalCount, datas);
+            return new Paging<T>(paging.Page, paging.PageSize, paging.TotalCount, datas);
         }
 
+        #endregion
+
+        #region exist
+
         /// <summary>
-        /// Wheather Has Any Data
+        /// wheather has any data
         /// </summary>
-        /// <param name="query">query model</param>
+        /// <param name="query">query object</param>
         /// <returns></returns>
         public sealed override bool Exist(IQuery query)
         {
@@ -279,9 +361,9 @@ namespace EZNEW.Develop.Domain.Repository
         }
 
         /// <summary>
-        /// Wheather Has Any Data
+        /// wheather has any data
         /// </summary>
-        /// <param name="query">query model</param>
+        /// <param name="query">query object</param>
         /// <returns></returns>
         public sealed override async Task<bool> ExistAsync(IQuery query)
         {
@@ -290,10 +372,14 @@ namespace EZNEW.Develop.Domain.Repository
             return await IsExistAsync(query).ConfigureAwait(false);
         }
 
+        #endregion
+
+        #region count
+
         /// <summary>
-        /// Get Data Count
+        /// get data count
         /// </summary>
-        /// <param name="query">query model</param>
+        /// <param name="query">query object</param>
         /// <returns></returns>
         public sealed override long Count(IQuery query)
         {
@@ -301,9 +387,9 @@ namespace EZNEW.Develop.Domain.Repository
         }
 
         /// <summary>
-        /// Get Data Count
+        /// get data count
         /// </summary>
-        /// <param name="query">query model</param>
+        /// <param name="query">query object</param>
         /// <returns></returns>
         public sealed override async Task<long> CountAsync(IQuery query)
         {
@@ -312,11 +398,15 @@ namespace EZNEW.Develop.Domain.Repository
             return await CountValueAsync(query).ConfigureAwait(false);
         }
 
+        #endregion
+
+        #region max value
+
         /// <summary>
-        /// Get Max Value
+        /// get max value
         /// </summary>
         /// <typeparam name="DT">DataType</typeparam>
-        /// <param name="query">query model</param>
+        /// <param name="query">query object</param>
         /// <returns>max value</returns>
         public sealed override VT Max<VT>(IQuery query)
         {
@@ -324,10 +414,10 @@ namespace EZNEW.Develop.Domain.Repository
         }
 
         /// <summary>
-        /// Get Max Value
+        /// get max value
         /// </summary>
         /// <typeparam name="DT">DataType</typeparam>
-        /// <param name="query">query model</param>
+        /// <param name="query">query object</param>
         /// <returns>max value</returns>
         public sealed override async Task<VT> MaxAsync<VT>(IQuery query)
         {
@@ -336,11 +426,15 @@ namespace EZNEW.Develop.Domain.Repository
             return await MaxValueAsync<VT>(query).ConfigureAwait(false);
         }
 
+        #endregion
+
+        #region min value
+
         /// <summary>
-        /// Get Min Value
+        /// get min value
         /// </summary>
         /// <typeparam name="DT">DataType</typeparam>
-        /// <param name="query">query model</param>
+        /// <param name="query">query object</param>
         /// <returns>min value</returns>
         public sealed override VT Min<VT>(IQuery query)
         {
@@ -348,10 +442,10 @@ namespace EZNEW.Develop.Domain.Repository
         }
 
         /// <summary>
-        /// Get Min Value
+        /// get min value
         /// </summary>
         /// <typeparam name="DT">DataType</typeparam>
-        /// <param name="query">query model</param>
+        /// <param name="query">query object</param>
         /// <returns>min value</returns>
         public sealed override async Task<VT> MinAsync<VT>(IQuery query)
         {
@@ -360,11 +454,15 @@ namespace EZNEW.Develop.Domain.Repository
             return await MinValueAsync<VT>(query).ConfigureAwait(false);
         }
 
+        #endregion
+
+        #region sum value
+
         /// <summary>
-        /// Get Sum Value
+        /// get sum value
         /// </summary>
         /// <typeparam name="DT">DataType</typeparam>
-        /// <param name="query">query model</param>
+        /// <param name="query">query object</param>
         /// <returns>sum value</returns>
         public sealed override VT Sum<VT>(IQuery query)
         {
@@ -372,10 +470,10 @@ namespace EZNEW.Develop.Domain.Repository
         }
 
         /// <summary>
-        /// Get Sum Value
+        /// get sum value
         /// </summary>
         /// <typeparam name="DT">DataType</typeparam>
-        /// <param name="query">query model</param>
+        /// <param name="query">query object</param>
         /// <returns>sum value</returns>
         public sealed override async Task<VT> SumAsync<VT>(IQuery query)
         {
@@ -384,11 +482,15 @@ namespace EZNEW.Develop.Domain.Repository
             return await SumValueAsync<VT>(query).ConfigureAwait(false);
         }
 
+        #endregion
+
+        #region average value
+
         /// <summary>
-        /// Get Average Value
+        /// get average value
         /// </summary>
         /// <typeparam name="DT">DataType</typeparam>
-        /// <param name="query">query model</param>
+        /// <param name="query">query object</param>
         /// <returns>average value</returns>
         public sealed override VT Avg<VT>(IQuery query)
         {
@@ -396,10 +498,10 @@ namespace EZNEW.Develop.Domain.Repository
         }
 
         /// <summary>
-        /// Get Average Value
+        /// get average value
         /// </summary>
         /// <typeparam name="DT">DataType</typeparam>
-        /// <param name="query">query model</param>
+        /// <param name="query">query object</param>
         /// <returns>average value</returns>
         public sealed override async Task<VT> AvgAsync<VT>(IQuery query)
         {
@@ -410,66 +512,74 @@ namespace EZNEW.Develop.Domain.Repository
 
         #endregion
 
-        #region Functions
+        #endregion
+
+        #region functions
 
         /// <summary>
-        /// Execute Save
-        /// </summary>
-        /// <param name="data">objects</param>
-        protected abstract Task<IActivationRecord> ExecuteSaveAsync(DT data);
-
-        /// <summary>
-        /// Execute Remove
+        /// execute save
         /// </summary>
         /// <param name="data">data</param>
-        protected abstract Task<IActivationRecord> ExecuteRemoveAsync(DT data);
-
-        /// <summary>
-        /// Execute Remove
-        /// </summary>
-        /// <param name="query">query model</param>
-        protected abstract Task<IActivationRecord> ExecuteRemoveAsync(IQuery query);
-
-        /// <summary>
-        /// Get Data
-        /// </summary>
-        /// <param name="query">query model</param>
+        /// <param name="activationOption">activation option</param>
         /// <returns></returns>
-        protected abstract Task<DT> GetDataAsync(IQuery query);
+        protected abstract Task<IActivationRecord> ExecuteSaveAsync(T data, ActivationOption activationOption = null);
 
         /// <summary>
-        /// Get Data List
+        /// execute remove
         /// </summary>
-        /// <param name="query">query model</param>
+        /// <param name="data">data</param>
+        /// <param name="activationOption">activation option</param>
         /// <returns></returns>
-        protected abstract Task<List<DT>> GetDataListAsync(IQuery query);
+        protected abstract Task<IActivationRecord> ExecuteRemoveAsync(T data, ActivationOption activationOption = null);
 
         /// <summary>
-        /// Get Object Paging
+        /// execute remove by condition
         /// </summary>
-        /// <param name="query">query model</param>
+        /// <param name="query">query object</param>
+        /// <param name="activationOption">activation option</param>
         /// <returns></returns>
-        protected abstract Task<IPaging<DT>> GetDataPagingAsync(IQuery query);
+        protected abstract Task<IActivationRecord> ExecuteRemoveAsync(IQuery query, ActivationOption activationOption = null);
 
         /// <summary>
-        /// Check Data
+        /// get data
         /// </summary>
-        /// <param name="query">query model</param>
+        /// <param name="query">query object</param>
+        /// <returns></returns>
+        protected abstract Task<T> GetDataAsync(IQuery query);
+
+        /// <summary>
+        /// get data List
+        /// </summary>
+        /// <param name="query">query object</param>
+        /// <returns></returns>
+        protected abstract Task<List<T>> GetDataListAsync(IQuery query);
+
+        /// <summary>
+        /// get data paging
+        /// </summary>
+        /// <param name="query">query object</param>
+        /// <returns></returns>
+        protected abstract Task<IPaging<T>> GetDataPagingAsync(IQuery query);
+
+        /// <summary>
+        /// check data
+        /// </summary>
+        /// <param name="query">query object</param>
         /// <returns></returns>
         protected abstract Task<bool> IsExistAsync(IQuery query);
 
         /// <summary>
-        /// Get Data Count
+        /// get data count
         /// </summary>
-        /// <param name="query">query model</param>
+        /// <param name="query">query object</param>
         /// <returns></returns>
         protected abstract Task<long> CountValueAsync(IQuery query);
 
         /// <summary>
-        /// Get Max Value
+        /// get max value
         /// </summary>
         /// <typeparam name="VT">Data Type</typeparam>
-        /// <param name="query">query model</param>
+        /// <param name="query">query object</param>
         /// <returns></returns>
         protected abstract Task<VT> MaxValueAsync<VT>(IQuery query);
 
@@ -477,32 +587,34 @@ namespace EZNEW.Develop.Domain.Repository
         /// get Min Value
         /// </summary>
         /// <typeparam name="VT">DataType</typeparam>
-        /// <param name="query">query model</param>
+        /// <param name="query">query object</param>
         /// <returns>min value</returns>
         protected abstract Task<VT> MinValueAsync<VT>(IQuery query);
 
         /// <summary>
-        /// Get Sum Value
+        /// get sum value
         /// </summary>
         /// <typeparam name="VT">DataType</typeparam>
-        /// <param name="query">query model</param>
+        /// <param name="query">query object</param>
         /// <returns></returns>
         protected abstract Task<VT> SumValueAsync<VT>(IQuery query);
 
         /// <summary>
-        /// Get Average Value
+        /// get average value
         /// </summary>
         /// <typeparam name="VT">DataType</typeparam>
-        /// <param name="query">query model</param>
+        /// <param name="query">query object</param>
         /// <returns></returns>
         protected abstract Task<VT> AvgValueAsync<VT>(IQuery query);
 
         /// <summary>
-        /// Execute Modify
+        /// execute modify
         /// </summary>
         /// <param name="expression">modify expression</param>
-        /// <param name="query">query model</param>
-        protected abstract Task<IActivationRecord> ExecuteModifyAsync(IModify expression, IQuery query);
+        /// <param name="query">query object</param>
+        /// <param name="activationOption">activation option</param>
+        /// <returns></returns>
+        protected abstract Task<IActivationRecord> ExecuteModifyAsync(IModify expression, IQuery query, ActivationOption activationOption = null);
 
         /// <summary>
         /// query callback
@@ -510,7 +622,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// <param name="query">query</param>
         /// <param name="batchReturn">batch return</param>
         /// <param name="datas">datas</param>
-        protected virtual void QueryCallback(IQuery query, bool batchReturn, IEnumerable<DT> datas)
+        protected virtual void QueryCallback(IQuery query, bool batchReturn, IEnumerable<T> datas)
         {
             if (datas.IsNullOrEmpty())
             {
@@ -535,130 +647,130 @@ namespace EZNEW.Develop.Domain.Repository
 
         #endregion
 
-        #region Global Condition
+        #region global condition
 
-        #region Append Remove Extra Condition
+        #region append remove extra condition
 
         /// <summary>
         /// append remove condition
         /// </summary>
-        /// <param name="originQuery">origin query</param>
+        /// <param name="originalQuery">original query</param>
         /// <returns></returns>
-        protected virtual IQuery AppendRemoveCondition(IQuery originQuery)
+        protected virtual IQuery AppendRemoveCondition(IQuery originalQuery)
         {
-            return originQuery;
+            return originalQuery;
         }
 
         #endregion
 
-        #region Append Modify Extra Condition
+        #region append modify extra condition
 
         /// <summary>
         /// append modify condition
         /// </summary>
-        /// <param name="originQuery">origin query</param>
+        /// <param name="originalQuery">original query</param>
         /// <returns></returns>
-        protected virtual IQuery AppendModifyCondition(IQuery originQuery)
+        protected virtual IQuery AppendModifyCondition(IQuery originalQuery)
         {
-            return originQuery;
+            return originalQuery;
         }
 
         #endregion
 
-        #region Append Query Extra Condition
+        #region append query extra condition
 
         /// <summary>
         /// append query condition
         /// </summary>
-        /// <param name="originQuery">origin query</param>
+        /// <param name="originalQuery">original query</param>
         /// <returns></returns>
-        protected virtual IQuery AppendQueryCondition(IQuery originQuery)
+        protected virtual IQuery AppendQueryCondition(IQuery originalQuery)
         {
-            return originQuery;
+            return originalQuery;
         }
 
         #endregion
 
-        #region Append Exist Extra Condition
+        #region append exist extra condition
 
         /// <summary>
         /// append exist condition
         /// </summary>
-        /// <param name="originQuery">origin query</param>
+        /// <param name="originalQuery">original query</param>
         /// <returns></returns>
-        protected virtual IQuery AppendExistCondition(IQuery originQuery)
+        protected virtual IQuery AppendExistCondition(IQuery originalQuery)
         {
-            return originQuery;
+            return originalQuery;
         }
 
         #endregion
 
-        #region Append Count Extra Condition
+        #region append count extra condition
 
         /// <summary>
         /// append count condition
         /// </summary>
-        /// <param name="originQuery">origin query</param>
+        /// <param name="originalQuery">original query</param>
         /// <returns></returns>
-        protected virtual IQuery AppendCountCondition(IQuery originQuery)
+        protected virtual IQuery AppendCountCondition(IQuery originalQuery)
         {
-            return originQuery;
+            return originalQuery;
         }
 
         #endregion
 
-        #region Append Max Extra Condition
+        #region append max extra condition
 
         /// <summary>
         /// append max condition
         /// </summary>
-        /// <param name="originQuery">origin query</param>
+        /// <param name="originalQuery">original query</param>
         /// <returns></returns>
-        protected virtual IQuery AppendMaxCondition(IQuery originQuery)
+        protected virtual IQuery AppendMaxCondition(IQuery originalQuery)
         {
-            return originQuery;
+            return originalQuery;
         }
 
         #endregion
 
-        #region Append Min Extra Condition
+        #region append min extra condition
 
         /// <summary>
         /// append min condition
         /// </summary>
-        /// <param name="originQuery">origin query</param>
+        /// <param name="originalQuery">original query</param>
         /// <returns></returns>
-        protected virtual IQuery AppendMinCondition(IQuery originQuery)
+        protected virtual IQuery AppendMinCondition(IQuery originalQuery)
         {
-            return originQuery;
+            return originalQuery;
         }
 
         #endregion
 
-        #region Append Sum Extra Condition
+        #region append sum extra condition
 
         /// <summary>
         /// append sum condition
         /// </summary>
-        /// <param name="originQuery">origin query</param>
+        /// <param name="originalQuery">original query</param>
         /// <returns></returns>
-        protected virtual IQuery AppendSumCondition(IQuery originQuery)
+        protected virtual IQuery AppendSumCondition(IQuery originalQuery)
         {
-            return originQuery;
+            return originalQuery;
         }
 
         #endregion
 
-        #region Append Avg Extra Condition
+        #region append avg extra condition
 
         /// <summary>
         /// append avg condition
         /// </summary>
-        /// <param name="originQuery">origin query</param>
+        /// <param name="originalQuery">original query</param>
         /// <returns></returns>
-        protected virtual IQuery AppendAvgCondition(IQuery originQuery)
+        protected virtual IQuery AppendAvgCondition(IQuery originalQuery)
         {
-            return originQuery;
+            return originalQuery;
         }
 
         #endregion

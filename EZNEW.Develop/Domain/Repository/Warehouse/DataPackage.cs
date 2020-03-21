@@ -14,7 +14,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
     /// <summary>
     /// data package
     /// </summary>
-    public class DataPackage<T> where T : BaseEntity<T>
+    public class DataPackage<T> where T : BaseEntity<T>,new()
     {
         internal DataPackage()
         {
@@ -183,7 +183,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
                 case DataLifeSource.DataSource:
                     if (PersistentData == null)
                     {
-                        PersistentData = WarehouseData.CopyNewByIdentity();
+                        PersistentData = WarehouseData.CopyOnlyWithIdentity();
                         ComparisonData();
                     }
                     break;
@@ -319,7 +319,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
             }
             var dataPackage = new DataPackage<T>()
             {
-                WarehouseData = data.DeepClone(),
+                WarehouseData = data.Copy(),
                 LifeSource = DataLifeSource.New,
                 Operate = WarehouseDataOperate.Save
             };
@@ -338,7 +338,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
             {
                 throw new ArgumentNullException(nameof(data));
             }
-            var copyData = data.DeepClone();
+            var copyData = data.Copy();
             var dataPackage = new DataPackage<T>()
             {
                 WarehouseData = copyData,

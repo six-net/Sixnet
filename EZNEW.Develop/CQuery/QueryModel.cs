@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace EZNEW.Develop.CQuery
 {
     /// <summary>
-    /// QueryModel
+    /// query model
     /// </summary>
     public abstract class QueryModel<T> where T : QueryModel<T>
     {

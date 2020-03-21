@@ -15,7 +15,7 @@ namespace EZNEW.Develop.Entity
     /// </summary>
     public static class EntityManager
     {
-        #region Propertys
+        #region propertys
 
         /// <summary>
         /// entity config
@@ -28,7 +28,7 @@ namespace EZNEW.Develop.Entity
 
         #endregion
 
-        #region Methods
+        #region methods
 
         #region entity config
 
@@ -38,7 +38,7 @@ namespace EZNEW.Develop.Entity
         /// config entity
         /// </summary>
         /// <typeparam name="T">entty type</typeparam>
-        internal static void ConfigEntity<T>() where T : BaseEntity<T>
+        internal static void ConfigEntity<T>() where T : BaseEntity<T>, new()
         {
             var type = typeof(T);
             ConfigEntity(type);

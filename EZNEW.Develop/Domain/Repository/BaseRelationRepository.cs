@@ -19,79 +19,89 @@ namespace EZNEW.Develop.Domain.Repository
         /// save
         /// </summary>
         /// <param name="datas">datas</param>
-        public abstract void Save(IEnumerable<Tuple<First, Second>> datas);
+        /// <param name="activationOption">activation option</param>
+        public abstract void Save(IEnumerable<Tuple<First, Second>> datas, ActivationOption activationOption = null);
 
         /// <summary>
         /// save async
         /// </summary>
         /// <param name="datas">datas</param>
-        public abstract Task SaveAsync(IEnumerable<Tuple<First, Second>> datas);
+        /// <param name="activationOption">activation option</param>
+        public abstract Task SaveAsync(IEnumerable<Tuple<First, Second>> datas, ActivationOption activationOption = null);
 
         /// <summary>
         /// save by first type datas
         /// </summary>
         /// <param name="datas">datas</param>
-        public abstract void SaveByFirst(IEnumerable<First> datas);
+        /// <param name="activationOption">activation option</param>
+        public abstract void SaveByFirst(IEnumerable<First> datas, ActivationOption activationOption = null);
 
         /// <summary>
         /// save by second type datas
         /// </summary>
         /// <param name="datas">datas</param>
-        public abstract void SaveBySecond(IEnumerable<Second> datas);
+        /// <param name="activationOption">activation option</param>
+        public abstract void SaveBySecond(IEnumerable<Second> datas, ActivationOption activationOption = null);
 
         #endregion
 
         #region remove
 
         /// <summary>
-        /// remove
+        /// remove datas
         /// </summary>
         /// <param name="datas">datas</param>
-        public abstract void Remove(IEnumerable<Tuple<First, Second>> datas);
+        /// <param name="activationOption">activation option</param>
+        public abstract void Remove(IEnumerable<Tuple<First, Second>> datas, ActivationOption activationOption = null);
 
         /// <summary>
-        /// save async
+        /// remove datas
         /// </summary>
         /// <param name="datas">datas</param>
-        public abstract Task RemoveAsync(IEnumerable<Tuple<First, Second>> datas);
+        /// <param name="activationOption">activation option</param>
+        public abstract Task RemoveAsync(IEnumerable<Tuple<First, Second>> datas, ActivationOption activationOption = null);
 
         /// <summary>
         /// remove by condition
         /// </summary>
         /// <param name="query">query</param>
-        public abstract void Remove(IQuery query);
+        /// <param name="activationOption">activation option</param>
+        public abstract void Remove(IQuery query, ActivationOption activationOption = null);
 
         /// <summary>
         /// remove by condition
         /// </summary>
         /// <param name="query">query</param>
-        public abstract Task RemoveAsync(IQuery query);
+        /// <param name="activationOption">activation option</param>
+        public abstract Task RemoveAsync(IQuery query, ActivationOption activationOption = null);
 
         /// <summary>
         /// remove by first datas
         /// </summary>
         /// <param name="datas">datas</param>
-        /// <param name="record">activation record</param>
-        public abstract void RemoveByFirst(IEnumerable<First> datas);
+        /// <param name="activationOption">activation option</param>
+        public abstract void RemoveByFirst(IEnumerable<First> datas, ActivationOption activationOption = null);
 
         /// <summary>
         /// remove by first
         /// </summary>
         /// <param name="query">query</param>
-        public abstract void RemoveByFirst(IQuery query);
+        /// <param name="activationOption">activation option</param>
+        public abstract void RemoveByFirst(IQuery query, ActivationOption activationOption = null);
 
         /// <summary>
         /// remove by second datas
         /// </summary>
         /// <param name="datas">datas</param>
-        /// <param name="record">activation record</param>
-        public abstract void RemoveBySecond(IEnumerable<Second> datas);
+        /// <param name="activationOption">activation option</param>
+        public abstract void RemoveBySecond(IEnumerable<Second> datas, ActivationOption activationOption = null);
 
         /// <summary>
         /// remove by second
         /// </summary>
         /// <param name="query">query</param>
-        public abstract void RemoveBySecond(IQuery query);
+        /// <param name="activationOption">activation option</param>
+        public abstract void RemoveBySecond(IQuery query, ActivationOption activationOption = null);
 
         #endregion
 

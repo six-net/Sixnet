@@ -9,21 +9,21 @@ using System.ComponentModel.DataAnnotations;
 namespace EZNEW.Develop.DataValidation.Validators
 {
     /// <summary>
-    /// Email Validator
+    /// email validator
     /// </summary>
     public class EmailValidator : DataValidator
     {
         private static Regex _regex = CreateRegEx();
         public EmailValidator()
         {
-            _errorMessage = "Incorrect email format";
+            _errorMessage = "incorrect email format";
         }
 
         /// <summary>
-        /// Validate
+        /// validate
         /// </summary>
-        /// <param name="value">Validate Value</param>
-        /// <param name="errorMessage">Error Message</param>
+        /// <param name="value">validate value</param>
+        /// <param name="errorMessage">error message</param>
         public override void Validate(dynamic value, string errorMessage = "")
         {
             if (value == null)
@@ -52,7 +52,7 @@ namespace EZNEW.Develop.DataValidation.Validators
         }
 
         /// <summary>
-        /// Create Validation Attribute
+        /// create validation attribute
         /// </summary>
         /// <returns></returns>
         public override ValidationAttribute CreateValidationAttribute(ValidationAttributeParameter parameter)
@@ -64,7 +64,7 @@ namespace EZNEW.Develop.DataValidation.Validators
         }
 
         /// <summary>
-        /// Create RegEx
+        /// create regex
         /// </summary>
         /// <returns></returns>
         private static Regex CreateRegEx()

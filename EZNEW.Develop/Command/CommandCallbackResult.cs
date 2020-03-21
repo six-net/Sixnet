@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace EZNEW.Develop.Command
 {
     /// <summary>
-    /// Command Callback Result
+    /// command callback result
     /// </summary>
     public class CommandCallbackResult
     {

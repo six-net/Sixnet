@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 namespace EZNEW.Develop.Command
 {
     /// <summary>
-    /// Command Callback Operation
+    /// command callback operation
     /// </summary>
     /// <param name="parameter">parameter</param>
     /// <returns>response</returns>
     public delegate CommandCallbackResult CommandCallbackOperation(CommandCallbackParameter parameter);
 
     /// <summary>
-    /// Command Before Execute Operation
+    /// command before execute operation
     /// </summary>
     /// <param name="parameter">parameter</param>
     public delegate CommandBeforeExecuteResult CommandBeforeExecuteOperation(CommandBeforeExecuteParameter parameter);

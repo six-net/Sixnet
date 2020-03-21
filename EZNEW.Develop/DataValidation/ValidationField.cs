@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 namespace EZNEW.Develop.DataValidation
 {
     /// <summary>
-    /// Validation Field
+    /// validation field
     /// </summary>
     public class ValidationField<T>
     {
         /// <summary>
-        /// Field Expression
+        /// field expression
         /// </summary>
         public Expression<Func<T, dynamic>> FieldExpression
         {
@@ -21,7 +21,7 @@ namespace EZNEW.Develop.DataValidation
         }
 
         /// <summary>
-        /// Error Message
+        /// error message
         /// </summary>
         public string ErrorMessage
         {
@@ -29,7 +29,7 @@ namespace EZNEW.Develop.DataValidation
         }
 
         /// <summary>
-        /// Compare Value
+        /// compare value
         /// </summary>
         internal dynamic CompareValue
         {
@@ -37,7 +37,7 @@ namespace EZNEW.Develop.DataValidation
         }
 
         /// <summary>
-        /// Tip Message
+        /// tip message
         /// </summary>
         public bool TipMessage
         {

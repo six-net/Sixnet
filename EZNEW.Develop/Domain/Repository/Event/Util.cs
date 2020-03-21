@@ -17,7 +17,7 @@ namespace EZNEW.Develop.Domain.Repository.Event
     }
 
     /// <summary>
-    /// Event Callback
+    /// event callback
     /// </summary>
     /// <param name="result">result</param>
     public delegate void RepositoryEventCallback(IRepositoryEventHandleResult result);

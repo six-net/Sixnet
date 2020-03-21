@@ -1,4 +1,5 @@
 ﻿using EZNEW.Develop.Command;
+using EZNEW.Develop.DataAccess;
 using EZNEW.Develop.Domain.Event;
 using EZNEW.Develop.Domain.Repository.Warehouse;
 using EZNEW.Develop.Entity;
@@ -78,6 +79,11 @@ namespace EZNEW.Develop.UnitOfWork
         /// work id
         /// </summary>
         public string WorkId { get; } = string.Empty;
+
+        /// <summary>
+        /// data isolation level
+        /// </summary>
+        public DataIsolationLevel? IsolationLevel { get; set; }
 
         #endregion
 
@@ -306,7 +312,8 @@ namespace EZNEW.Develop.UnitOfWork
                 {
                     throw new Exception("any command BeforeExecute event return fail");
                 }
-                var result = await CommandExecuteManager.ExecuteAsync(commandGroup.Values).ConfigureAwait(false);
+                var executeOption = GetCommandExecuteOption();
+                var result = await CommandExecuteManager.ExecuteAsync(executeOption, commandGroup.Values).ConfigureAwait(false);
                 var commitResult = new CommitResult()
                 {
                     CommitCommandCount = commandList.Count,
@@ -333,6 +340,22 @@ namespace EZNEW.Develop.UnitOfWork
         }
 
         /// <summary>
+        /// get command execute option
+        /// </summary>
+        /// <returns></returns>
+        CommandExecuteOption GetCommandExecuteOption()
+        {
+            if (!IsolationLevel.HasValue)
+            {
+                return CommandExecuteOption.Default;
+            }
+            return new CommandExecuteOption()
+            {
+                IsolationLevel = IsolationLevel
+            };
+        }
+
+        /// <summary>
         /// commit completed
         /// </summary>
         void CommitCompleted()
@@ -353,7 +376,7 @@ namespace EZNEW.Develop.UnitOfWork
         /// get data warehouse by entity type
         /// </summary>
         /// <returns></returns>
-        public DataWarehouse<ET> GetWarehouse<ET>() where ET : BaseEntity<ET>
+        public DataWarehouse<ET> GetWarehouse<ET>() where ET : BaseEntity<ET>, new()
         {
             var entityTypeId = typeof(ET).GUID;
             if (!repositoryWarehouses.TryGetValue(entityTypeId, out var warehouse))
@@ -458,7 +481,7 @@ namespace EZNEW.Develop.UnitOfWork
             repositoryWarehouses?.Clear();
             DomainEventManager = null;
             DomainEvents?.Clear();
-        } 
+        }
 
         #endregion
 

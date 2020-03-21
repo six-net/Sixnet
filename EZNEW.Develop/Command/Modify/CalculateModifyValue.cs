@@ -8,17 +8,17 @@ using System.Threading.Tasks;
 namespace EZNEW.Develop.Command.Modify
 {
     /// <summary>
-    /// CalculateModify
+    /// calculate modify value
     /// </summary>
     public class CalculateModifyValue : IModifyValue
     {
         bool isCalculated = false;
         dynamic calculatedValue;
 
-        #region Propertys
+        #region propertys
 
         /// <summary>
-        /// Calculate Operator
+        /// calculate operator
         /// </summary>
         public CalculateOperator Operator
         {
@@ -26,7 +26,7 @@ namespace EZNEW.Develop.Command.Modify
         }
 
         /// <summary>
-        /// Calculate Value
+        /// calculate value
         /// </summary>
         public dynamic Value
         {
@@ -57,13 +57,13 @@ namespace EZNEW.Develop.Command.Modify
                 case CalculateOperator.Add:
                     calculatedValue = originalValue + Value;
                     break;
-                case CalculateOperator.subtract:
+                case CalculateOperator.Subtract:
                     calculatedValue = originalValue - Value;
                     break;
-                case CalculateOperator.multiply:
+                case CalculateOperator.Multiply:
                     calculatedValue = originalValue * Value;
                     break;
-                case CalculateOperator.divide:
+                case CalculateOperator.Divide:
                     calculatedValue = originalValue / Value;
                     break;
                 default:

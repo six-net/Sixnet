@@ -14,9 +14,9 @@ using System.Threading.Tasks;
 namespace EZNEW.Develop.Entity
 {
     /// <summary>
-    /// Command Entity
+    /// base entity
     /// </summary>
-    public abstract class BaseEntity<T> where T : BaseEntity<T>
+    public abstract class BaseEntity<T> where T : BaseEntity<T>,new()
     {
         protected Dictionary<string, dynamic> valueDict = new Dictionary<string, dynamic>();//field values
         string identityValue = string.Empty;
@@ -31,9 +31,9 @@ namespace EZNEW.Develop.Entity
         #region Propertys
 
         /// <summary>
-        /// Page Count
+        /// page count
         /// </summary>
-        protected int PagingTotalCount
+        protected int QueryDataTotalCount
         {
             get; set;
         }
@@ -137,9 +137,9 @@ namespace EZNEW.Develop.Entity
         /// get paging count
         /// </summary>
         /// <returns></returns>
-        public int GetPagingTotalCount()
+        public int GetTotalCount()
         {
-            return PagingTotalCount;
+            return QueryDataTotalCount;
         }
 
         /// <summary>
@@ -194,10 +194,9 @@ namespace EZNEW.Develop.Entity
         /// copy new by identity
         /// </summary>
         /// <returns></returns>
-        public T CopyNewByIdentity()
+        public T CopyOnlyWithIdentity()
         {
-            var newData = (T)this.DeepClone();
-            newData.valueDict.Clear();
+            var newData = new T();
             var primaryKeys = EntityManager.GetPrimaryKeys<T>();
             if (primaryKeys.IsNullOrEmpty())
             {
@@ -208,6 +207,20 @@ namespace EZNEW.Develop.Entity
                 var value = GetPropertyValue(pk.PropertyName);
                 newData.SetPropertyValue(pk.PropertyName, value);
             }
+            return newData;
+        }
+
+        /// <summary>
+        /// copy a new object
+        /// </summary>
+        /// <returns></returns>
+        public T Copy()
+        {
+            var newData = new T();
+            newData.valueDict = valueDict.Select(c => c).ToDictionary(c => c.Key, c => c.Value);
+            newData.QueryDataTotalCount = QueryDataTotalCount;
+            newData.loadedIdentityValue = loadedIdentityValue;
+            newData.identityValue = identityValue;
             return newData;
         }
 

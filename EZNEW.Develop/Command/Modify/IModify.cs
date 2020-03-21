@@ -13,7 +13,7 @@ namespace EZNEW.Develop.Command.Modify
     /// </summary>
     public interface IModify
     {
-        #region Functions
+        #region methods
 
         /// <summary>
         /// set modify expression

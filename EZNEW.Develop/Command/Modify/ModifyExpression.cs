@@ -133,7 +133,7 @@ namespace EZNEW.Develop.Command.Modify
         /// <returns>IModify object</returns>
         public IModify Subtract(string name, dynamic value)
         {
-            return Calculate(name, CalculateOperator.subtract, value);
+            return Calculate(name, CalculateOperator.Subtract, value);
         }
 
         /// <summary>
@@ -155,7 +155,7 @@ namespace EZNEW.Develop.Command.Modify
         /// <returns>IModify object</returns>
         public IModify Multiply(string name, dynamic value)
         {
-            return Calculate(name, CalculateOperator.multiply, value);
+            return Calculate(name, CalculateOperator.Multiply, value);
         }
 
         /// <summary>
@@ -177,7 +177,7 @@ namespace EZNEW.Develop.Command.Modify
         /// <returns>IModify object</returns>
         public IModify Divide(string name, dynamic value)
         {
-            return Calculate(name, CalculateOperator.divide, value);
+            return Calculate(name, CalculateOperator.Divide, value);
         }
 
         /// <summary>

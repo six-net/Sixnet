@@ -5,12 +5,12 @@ using System.Text;
 namespace EZNEW.Develop.CQuery
 {
     /// <summary>
-    /// Recurve Criteria
+    /// recurve criteria
     /// </summary>
     public class RecurveCriteria
     {
         /// <summary>
-        /// Key
+        /// key
         /// </summary>
         public string Key
         {
@@ -18,7 +18,7 @@ namespace EZNEW.Develop.CQuery
         }
 
         /// <summary>
-        /// Relation Key
+        /// relation key
         /// </summary>
         public string RelationKey
         {
@@ -26,7 +26,7 @@ namespace EZNEW.Develop.CQuery
         }
 
         /// <summary>
-        /// Recurve Direction
+        /// recurve direction
         /// </summary>
         public RecurveDirection Direction
         {

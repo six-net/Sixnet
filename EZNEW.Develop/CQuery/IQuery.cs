@@ -8,6 +8,7 @@ using System.Collections;
 using EZNEW.Framework.Paging;
 using EZNEW.Develop.CQuery.CriteriaConvert;
 using EZNEW.Develop.Entity;
+using EZNEW.Develop.DataAccess;
 
 namespace EZNEW.Develop.CQuery
 {
@@ -24,15 +25,7 @@ namespace EZNEW.Develop.CQuery
     /// </summary>
     public interface IQuery : IQueryItem
     {
-        #region Property
-
-        ///// <summary>
-        ///// query model type
-        ///// </summary>
-        //Type QueryModelType
-        //{
-        //    get;
-        //}
+        #region property
 
         /// <summary>
         /// entity type
@@ -112,7 +105,7 @@ namespace EZNEW.Develop.CQuery
         }
 
         /// <summary>
-        /// Allow Load Propertys
+        /// allow load propertys
         /// </summary>
         Dictionary<string, bool> LoadPropertys
         {
@@ -120,7 +113,7 @@ namespace EZNEW.Develop.CQuery
         }
 
         /// <summary>
-        /// Has Sub Query
+        /// has sub query
         /// </summary>
         bool HasSubQuery
         {
@@ -143,7 +136,7 @@ namespace EZNEW.Develop.CQuery
         bool IsComplexQuery { get; }
 
         /// <summary>
-        /// Recurve Criteria
+        /// recurve criteria
         /// </summary>
         RecurveCriteria RecurveCriteria
         {
@@ -151,7 +144,7 @@ namespace EZNEW.Develop.CQuery
         }
 
         /// <summary>
-        /// Verify Result Method
+        /// verify result method
         /// </summary>
         Func<int, bool> VerifyResult { get; set; }
 
@@ -185,11 +178,16 @@ namespace EZNEW.Develop.CQuery
         /// </summary>
         List<IQuery> Subqueries { get; }
 
+        /// <summary>
+        /// data isolation level
+        /// </summary>
+        DataIsolationLevel? IsolationLevel { get; set; }
+
         #endregion
 
-        #region Method
+        #region method
 
-        #region And
+        #region and
 
         /// <summary>
         /// connect condition by 'and'
@@ -253,7 +251,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region OR
+        #region or
 
         /// <summary>
         /// connect condition by 'or'
@@ -317,7 +315,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region Equal
+        #region equal
 
         /// <summary>
         /// equal condition
@@ -369,7 +367,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region Not Equal
+        #region not equal
 
         /// <summary>
         /// not equal condition
@@ -421,7 +419,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region LessThan
+        #region less than
 
         /// <summary>
         /// less than condition
@@ -473,7 +471,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region LessThanOrEqual
+        #region less than or equal
 
         /// <summary>
         /// less than or equal condition
@@ -525,7 +523,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region GreaterThan
+        #region greater than
 
         /// <summary>
         /// greater than condition
@@ -577,7 +575,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region GreaterThanOrEqual
+        #region greater than or equal
 
         /// <summary>
         /// greater than or equal condition
@@ -629,7 +627,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region IN
+        #region in
 
         /// <summary>
         /// include value condition
@@ -679,7 +677,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region Not In
+        #region not in
 
         /// <summary>
         /// not include condition
@@ -729,7 +727,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region Like
+        #region like
 
         /// <summary>
         /// like condition
@@ -753,7 +751,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region NotLike
+        #region not like
 
         /// <summary>
         /// not like condition
@@ -775,7 +773,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region BeginLike
+        #region begin like
 
         /// <summary>
         /// begin like condition
@@ -799,7 +797,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region NotBeginLike
+        #region not begin like
 
         /// <summary>
         /// not begin like condition
@@ -821,7 +819,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region EndLike
+        #region end like
 
         /// <summary>
         /// end like condition
@@ -845,7 +843,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region NotEndLike
+        #region not end like
 
         /// <summary>
         /// not end like condition
@@ -867,7 +865,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region IsNull
+        #region is null
 
         /// <summary>
         /// field is null
@@ -887,7 +885,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region NotNull
+        #region not null
 
         /// <summary>
         /// field is not null
@@ -907,10 +905,10 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region ASC
+        #region asc
 
         /// <summary>
-        /// order by ASC
+        /// order by asc
         /// </summary>
         /// <typeparam name="T">data type</typeparam>
         /// <typeparam name="TProperty">field type</typeparam>
@@ -920,7 +918,7 @@ namespace EZNEW.Develop.CQuery
         IQuery Asc<T>(Expression<Func<T, dynamic>> field, ICriteriaConvert convert = null) where T : QueryModel<T>;
 
         /// <summary>
-        /// order by ASC
+        /// order by asc
         /// </summary>
         /// <param name="fieldName">field</param>
         /// <param name="convert">criterial convert</param>
@@ -929,10 +927,10 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region DESC
+        #region desc
 
         /// <summary>
-        /// order by DESC
+        /// order by desc
         /// </summary>
         /// <typeparam name="T">data type</typeparam>
         /// <typeparam name="TProperty">field type</typeparam>
@@ -942,7 +940,7 @@ namespace EZNEW.Develop.CQuery
         IQuery Desc<T>(Expression<Func<T, dynamic>> field, ICriteriaConvert convert = null) where T : QueryModel<T>;
 
         /// <summary>
-        /// order by DESC
+        /// order by desc
         /// </summary>
         /// <param name="fieldName">field</param>
         /// <param name="convert">criterial convert</param>
@@ -951,7 +949,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region Fields
+        #region fields
 
         /// <summary>
         /// add special fields need to query
@@ -965,9 +963,9 @@ namespace EZNEW.Develop.CQuery
         /// </summary>
         /// <typeparam name="T">data type</typeparam>
         /// <typeparam name="TProperty">field type</typeparam>
-        /// <param name="fieldExpression">field expression</param>
+        /// <param name="fieldExpressions">field expression</param>
         /// <returns>return newest query object</returns>
-        IQuery AddQueryFields<T>(Expression<Func<T, dynamic>> fieldExpression) where T : QueryModel<T>;
+        IQuery AddQueryFields<T>(params Expression<Func<T, dynamic>>[] fieldExpressions) where T : QueryModel<T>;
 
         /// <summary>
         /// add special fields that don't query
@@ -981,9 +979,9 @@ namespace EZNEW.Develop.CQuery
         /// </summary>
         /// <typeparam name="T">data type</typeparam>
         /// <typeparam name="TProperty">field type</typeparam>
-        /// <param name="fieldExpression">field expression</param>
+        /// <param name="fieldExpressions">field expression</param>
         /// <returns>return newest query object</returns>
-        IQuery AddNotQueryFields<T>(Expression<Func<T, dynamic>> fieldExpression) where T : QueryModel<T>;
+        IQuery AddNotQueryFields<T>(params Expression<Func<T, dynamic>>[] fieldExpressions) where T : QueryModel<T>;
 
         /// <summary>
         /// get actually query fields
@@ -999,7 +997,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region QueryText
+        #region query text
 
         /// <summary>
         /// set query text
@@ -1011,7 +1009,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region Load Propertys
+        #region load propertys
 
         /// <summary>
         /// set load propertys
@@ -1055,7 +1053,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region Get Expression
+        #region get expression
 
         /// <summary>
         /// get query expression
@@ -1066,7 +1064,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region Order Datas
+        #region order datas
 
         /// <summary>
         /// order datas
@@ -1078,7 +1076,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region Recurve
+        #region recurve
 
         /// <summary>
         /// set recurve criteria
@@ -1100,7 +1098,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region Obsolete
+        #region obsolete
 
         /// <summary>
         /// obsolete query
@@ -1171,9 +1169,9 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region Inner Join
+        #region inner join
 
-        #region InnerJoin helper
+        #region inner join helper
 
         /// <summary>
         /// inner join
@@ -1223,7 +1221,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region Equal InnerJoin
+        #region equal inner join
 
         /// <summary>
         /// inner join
@@ -1268,7 +1266,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region NotEqual InnerJoin
+        #region not equal inner join
 
         /// <summary>
         /// inner join
@@ -1313,7 +1311,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region LessThanOrEqual InnerJoin
+        #region less than or equal inner join
 
         /// <summary>
         /// inner join
@@ -1358,7 +1356,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region LessThan InnerJoin
+        #region less than inner join
 
         /// <summary>
         /// inner join
@@ -1403,7 +1401,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region GreaterThan InnerJoin
+        #region greater than inner join
 
         /// <summary>
         /// inner join
@@ -1448,7 +1446,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region GreaterThanOrEqual InnerJoin
+        #region greater than or equal inner join
 
         /// <summary>
         /// inner join
@@ -1495,9 +1493,9 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region Left Join
+        #region left join
 
-        #region Left Join Helper
+        #region left join helper
 
         /// <summary>
         /// left join
@@ -1547,7 +1545,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region Equal LeftJoin
+        #region equal left join
 
         /// <summary>
         /// left join
@@ -1592,7 +1590,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region NotEqual LeftJoin
+        #region not equal left join
 
         /// <summary>
         /// left join
@@ -1637,7 +1635,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region LessThanOrEqual LeftJoin
+        #region less than or equal left join
 
         /// <summary>
         /// left join
@@ -1682,7 +1680,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region LessThan LeftJoin
+        #region less than left join
 
         /// <summary>
         /// left join
@@ -1727,7 +1725,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region GreaterThan LeftJoin
+        #region greater than left join
 
         /// <summary>
         /// left join
@@ -1772,7 +1770,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region GreaterThanOrEqual LeftJoin
+        #region greater than or equal left join
 
         /// <summary>
         /// left join
@@ -1819,9 +1817,9 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region Right Join
+        #region right join
 
-        #region Right Join Helper
+        #region right join helper
 
         /// <summary>
         /// right join
@@ -1871,7 +1869,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region Equal RightJoin
+        #region equal right join
 
         /// <summary>
         /// right join
@@ -1916,7 +1914,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region NotEqual RightJoin
+        #region not equal right join
 
         /// <summary>
         /// right join
@@ -1961,7 +1959,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region LessThanOrEqual RightJoin
+        #region less than or equal right join
 
         /// <summary>
         /// right join
@@ -2006,7 +2004,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region LessThan RightJoin
+        #region less than right join
 
         /// <summary>
         /// right join
@@ -2051,7 +2049,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region GreaterThan RightJoin
+        #region greater than right join
 
         /// <summary>
         /// right join
@@ -2096,7 +2094,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region GreaterThanOrEqual RightJoin
+        #region greater than or equal right join
 
         /// <summary>
         /// right join
@@ -2143,9 +2141,9 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region Full Join
+        #region full join
 
-        #region Full Join Helper
+        #region full join helper
 
         /// <summary>
         /// full join
@@ -2195,7 +2193,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region Equal FullJoin
+        #region equal full join
 
         /// <summary>
         /// full join
@@ -2240,7 +2238,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region NotEqual FullJoin
+        #region not equal full join
 
         /// <summary>
         /// full join
@@ -2285,7 +2283,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region LessThanOrEqual FullJoin
+        #region less than or equal full join
 
         /// <summary>
         /// full join
@@ -2330,7 +2328,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region LessThan FullJoin
+        #region less than full join
 
         /// <summary>
         /// full join
@@ -2375,7 +2373,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region GreaterThan FullJoin
+        #region greater than full join
 
         /// <summary>
         /// full join
@@ -2420,7 +2418,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region GreaterThanOrEqual FullJoin
+        #region greater than or equal full join
 
         /// <summary>
         /// full join
@@ -2467,7 +2465,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region CrossJoin
+        #region cross join
 
         /// <summary>
         /// join query
@@ -2480,7 +2478,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region EntityType
+        #region entity type
 
         /// <summary>
         /// set entity type
@@ -2490,7 +2488,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region GlobalCondition
+        #region global condition
 
         /// <summary>
         /// set global condition

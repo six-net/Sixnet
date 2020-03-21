@@ -9,11 +9,14 @@ using System.Threading.Tasks;
 using EZNEW.Develop.Entity;
 using EZNEW.Develop.Command;
 using EZNEW.Framework.Extension;
+using System.Data;
+using EZNEW.Develop.CQuery;
+using EZNEW.Develop.DataAccess;
 
 namespace EZNEW.Develop.UnitOfWork
 {
     /// <summary>
-    /// UnitOfWork Manager
+    /// UnitOfWork manager
     /// </summary>
     public class WorkFactory
     {
@@ -164,7 +167,7 @@ namespace EZNEW.Develop.UnitOfWork
         /// <typeparam name="T">data type</typeparam>
         /// <param name="cmd">command</param>
         /// <returns>datas</returns>
-        public static IPaging<T> QueryPaging<T>(ICommand cmd) where T : BaseEntity<T>
+        public static IPaging<T> QueryPaging<T>(ICommand cmd) where T : BaseEntity<T>, new()
         {
             return QueryPagingAsync<T>(cmd).Result;
         }
@@ -175,7 +178,7 @@ namespace EZNEW.Develop.UnitOfWork
         /// <typeparam name="T">data type</typeparam>
         /// <param name="cmd">command</param>
         /// <returns>datas</returns>
-        public static async Task<IPaging<T>> QueryPagingAsync<T>(ICommand cmd) where T : BaseEntity<T>
+        public static async Task<IPaging<T>> QueryPagingAsync<T>(ICommand cmd) where T : BaseEntity<T>, new()
         {
             if (cmd?.IsObsolete ?? true)
             {
@@ -229,9 +232,168 @@ namespace EZNEW.Develop.UnitOfWork
         {
             if (cmd?.IsObsolete ?? true)
             {
-                return default(T);
+                return default;
             }
-            return await CommandExecuteManager.QuerySingleAsync<T>(cmd).ConfigureAwait(false);
+            if (cmd.Query == null)
+            {
+                cmd.Query = QueryFactory.Create();
+            }
+            cmd.Query.QuerySize = 1;
+            var datas = await CommandExecuteManager.QueryAsync<T>(cmd).ConfigureAwait(false);
+            if (datas.IsNullOrEmpty())
+            {
+                return default;
+            }
+            return datas.FirstOrDefault();
+        }
+
+        /// <summary>
+        /// query aggregate data
+        /// </summary>
+        /// <typeparam name="T">data type</typeparam>
+        /// <param name="cmd">command</param>
+        /// <returns>data</returns>
+        public static T AggregateValue<T>(ICommand cmd)
+        {
+            return AggregateValueAsync<T>(cmd).Result;
+        }
+
+        /// <summary>
+        /// query aggregate data
+        /// </summary>
+        /// <typeparam name="T">data type</typeparam>
+        /// <param name="cmd">command</param>
+        /// <returns>data</returns>
+        public static async Task<T> AggregateValueAsync<T>(ICommand cmd)
+        {
+            return await CommandExecuteManager.AggregateValueAsync<T>(cmd).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// query data
+        /// </summary>
+        /// <param name="cmd">execute command</param>
+        /// <returns>data</returns>
+        public static async Task<DataSet> QueryMultipleAsync(ICommand cmd)
+        {
+            return await CommandExecuteManager.QueryMultipleAsync(cmd).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// query data
+        /// </summary>
+        /// <param name="commandText">command text</param>
+        /// <param name="parameters">parameters</param>
+        /// <param name="commandTextType">command text type</param>
+        /// <returns></returns>
+        public static async Task<DataSet> QueryMultipleAsync(string commandText, object parameters = null, CommandTextType commandTextType = CommandTextType.Text)
+        {
+            var rdbCmd = RdbCommand.CreateNewCommand(OperateType.Query, parameters);
+            rdbCmd.CommandType = commandTextType;
+            rdbCmd.CommandText = commandText;
+            return await QueryMultipleAsync(rdbCmd).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// query data
+        /// </summary>
+        /// <param name="cmd">execute command</param>
+        /// <returns>data</returns>
+        public static DataSet QueryMultiple(ICommand cmd)
+        {
+            return QueryMultipleAsync(cmd).Result;
+        }
+
+        /// <summary>
+        /// query data
+        /// </summary>
+        /// <param name="commandText">command text</param>
+        /// <param name="parameters">parameters</param>
+        /// <param name="commandTextType">command text type</param>
+        /// <returns></returns>
+        public static DataSet QueryMultiple(string commandText, object parameters = null, CommandTextType commandTextType = CommandTextType.Text)
+        {
+            return QueryMultipleAsync(commandText, parameters, commandTextType).Result;
+        }
+
+        #endregion
+
+        #region execute command
+
+        /// <summary>
+        /// execute command
+        /// </summary>
+        /// <param name="cmds">commands</param>
+        /// <returns>execute result</returns>
+        public static async Task<int> ExecuteAsync(params ICommand[] cmds)
+        {
+            return await ExecuteAsync(CommandExecuteOption.Default, cmds).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// execute command
+        /// </summary>
+        /// <param name="executeOption">execute option</param>
+        /// <param name="cmds">commands</param>
+        /// <returns></returns>
+        public static async Task<int> ExecuteAsync(CommandExecuteOption executeOption, params ICommand[] cmds)
+        {
+            if (cmds.IsNullOrEmpty())
+            {
+                return await Task.FromResult(0).ConfigureAwait(false);
+            }
+            return await CommandExecuteManager.ExecuteAsync(executeOption ?? CommandExecuteOption.Default, cmds).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// execute command text
+        /// </summary>
+        /// <param name="commandText">command text</param>
+        /// <param name="parameters">parameters</param>
+        /// <param name="commandTextType">command text type</param>
+        /// <param name="executeOption">execute option</param>
+        /// <returns></returns>
+        public static async Task<int> ExecuteAsync(string commandText, object parameters = null, CommandTextType commandTextType = CommandTextType.Text, CommandExecuteOption executeOption = null)
+        {
+            var rdbCmd = RdbCommand.CreateNewCommand(OperateType.Query, parameters);
+            rdbCmd.CommandType = commandTextType;
+            rdbCmd.CommandText = commandText;
+            rdbCmd.ExecuteMode = CommandExecuteMode.CommandText;
+            return await ExecuteAsync(executeOption, rdbCmd).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// execute command
+        /// </summary>
+        /// <param name="cmds">commands</param>
+        /// <returns>execute result</returns>
+        public static int Execute(params ICommand[] cmds)
+        {
+            return ExecuteAsync(cmds).Result;
+        }
+
+        /// <summary>
+        /// execute command
+        /// </summary>
+        /// <param name="executeOption">execute option</param>
+        /// <param name="cmds">commands</param>
+        /// <returns></returns>
+        public static int Execute(CommandExecuteOption executeOption, params ICommand[] cmds)
+        {
+            return ExecuteAsync(executeOption, cmds).Result;
+        }
+
+        /// <summary>
+        /// execute command text
+        /// </summary>
+        /// <param name="commandText">command text</param>
+        /// <param name="parameters">parameters</param>
+        /// <param name="commandTextType">command text type</param>
+        /// <param name="executeOption">execute option</param>
+        /// <returns></returns>
+        public static int Execute(string commandText, object parameters = null, CommandTextType commandTextType = CommandTextType.Text, CommandExecuteOption executeOption = null)
+        {
+            return ExecuteAsync(commandText, parameters, commandTextType, executeOption).Result;
         }
 
         #endregion
@@ -241,10 +403,14 @@ namespace EZNEW.Develop.UnitOfWork
         /// <summary>
         /// create a new IUnitOrWork
         /// </summary>
+        /// <param name="isolationLevel">data isolation level</param>
         /// <returns></returns>
-        public static IUnitOfWork Create()
+        public static IUnitOfWork Create(DataIsolationLevel? isolationLevel = null)
         {
-            return new DefaultUnitOfWork();
+            return new DefaultUnitOfWork()
+            {
+                IsolationLevel = isolationLevel
+            };
         }
 
         #endregion

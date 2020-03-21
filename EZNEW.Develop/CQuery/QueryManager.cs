@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace EZNEW.Develop.CQuery
 {
     /// <summary>
-    /// Query Config
+    /// query config
     /// </summary>
     public static class QueryManager
     {
@@ -23,7 +23,7 @@ namespace EZNEW.Develop.CQuery
         /// </summary>
         static ConcurrentDictionary<Guid, Type> queryModelEntityRelations = new ConcurrentDictionary<Guid, Type>();
 
-        #region Propertys
+        #region propertys
 
         /// <summary>
         /// global query filter
@@ -32,7 +32,7 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region Methods
+        #region methods
 
         #region set query model relation entity
 
@@ -180,13 +180,13 @@ namespace EZNEW.Develop.CQuery
             {
                 throw new EZNEWException("GlobalConditionFilter.EntityType is null");
             }
-            if (conditionFilter.OriginQuery == null)
+            if (conditionFilter.OriginalQuery == null)
             {
-                conditionFilter.OriginQuery = QueryFactory.Create();
-                conditionFilter.OriginQuery.SetEntityType(conditionFilter.EntityType);
+                conditionFilter.OriginalQuery = QueryFactory.Create();
+                conditionFilter.OriginalQuery.SetEntityType(conditionFilter.EntityType);
             }
             GlobalConditionFilterResult globalConditionResult = null;
-            if (GetGlobalCondition != null && conditionFilter.OriginQuery.AllowSetGlobalCondition())
+            if (GetGlobalCondition != null && conditionFilter.OriginalQuery.AllowSetGlobalCondition())
             {
                 globalConditionResult = GetGlobalCondition(conditionFilter);
             }

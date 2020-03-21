@@ -5,14 +5,14 @@ using System.Text;
 namespace EZNEW.Develop.CQuery.Translator
 {
     /// <summary>
-    /// Translate Result
+    /// translate result
     /// </summary>
     public class TranslateResult
     {
-        #region Propertys
+        #region propertys
 
         /// <summary>
-        /// Order String
+        /// order string
         /// </summary>
         public string OrderString
         {
@@ -20,7 +20,7 @@ namespace EZNEW.Develop.CQuery.Translator
         }
 
         /// <summary>
-        /// Condition String
+        /// condition string
         /// </summary>
         public string ConditionString
         {
@@ -36,7 +36,7 @@ namespace EZNEW.Develop.CQuery.Translator
         }
 
         /// <summary>
-        /// Pre Script
+        /// pre script
         /// </summary>
         public string PreScript
         {
@@ -88,10 +88,10 @@ namespace EZNEW.Develop.CQuery.Translator
         private TranslateResult()
         { }
 
-        #region Static Functions
+        #region static functions
 
         /// <summary>
-        /// Create a new TranslateResult Instance
+        /// create a new translate result
         /// </summary>
         /// <param name="condition">condition</param>
         /// <param name="order">order</param>
@@ -107,7 +107,7 @@ namespace EZNEW.Develop.CQuery.Translator
         }
 
         /// <summary>
-        /// return a empty TranslateResult Object
+        /// return a empty translate result
         /// </summary>
         public static TranslateResult Empty
         {

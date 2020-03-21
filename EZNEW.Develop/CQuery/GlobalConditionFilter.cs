@@ -26,9 +26,9 @@ namespace EZNEW.Develop.CQuery
         }
 
         /// <summary>
-        /// origin query
+        /// original query
         /// </summary>
-        public IQuery OriginQuery
+        public IQuery OriginalQuery
         {
             get; set;
         }

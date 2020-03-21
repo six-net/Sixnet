@@ -18,7 +18,7 @@ namespace EZNEW.Develop.CQuery
         }
 
         /// <summary>
-        /// 关联类型全名
+        /// relevance type
         /// </summary>
         public Type RelevanceType
         {

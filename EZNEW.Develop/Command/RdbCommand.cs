@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace EZNEW.Develop.Command
 {
     /// <summary>
-    /// command for RDB
+    /// command for rdb
     /// </summary>
     public class RdbCommand : ICommand
     {
@@ -38,7 +38,7 @@ namespace EZNEW.Develop.Command
         /// <summary>
         /// command type
         /// </summary>
-        public RdbCommandTextType CommandType { get; set; } = RdbCommandTextType.Text;
+        public CommandTextType CommandType { get; set; } = CommandTextType.Text;
 
         /// <summary>
         /// transaction command
@@ -157,6 +157,29 @@ namespace EZNEW.Develop.Command
             {
                 Id = WorkFactory.Current?.GetCommandId() ?? DateTime.Now.Ticks,
                 EntityType = typeof(T),
+                Operate = operate,
+                Parameters = parameters,
+                ObjectName = objectName,
+                ObjectKeyValues = objectKeyValues,
+                ServerKeyValues = serverKeyValues,
+                ObjectKeys = objectKeys,
+                ServerKeys = serverKeys
+            };
+        }
+
+        /// <summary>
+        /// get a new rdbcommand object
+        /// </summary>
+        /// <param name="operate">operate</param>
+        /// <param name="parameters">parameters</param>
+        /// <param name="objectName">objectName</param>
+        /// <param name="objectKey">objectKey</param>
+        /// <returns></returns>
+        public static RdbCommand CreateNewCommand(OperateType operate, object parameters = null, string objectName = "", List<string> objectKeys = null, Dictionary<string, dynamic> objectKeyValues = null, List<string> serverKeys = null, Dictionary<string, dynamic> serverKeyValues = null)
+        {
+            return new RdbCommand()
+            {
+                Id = WorkFactory.Current?.GetCommandId() ?? DateTime.Now.Ticks,
                 Operate = operate,
                 Parameters = parameters,
                 ObjectName = objectName,

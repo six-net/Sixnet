@@ -1,4 +1,5 @@
 ﻿using EZNEW.Develop.Command;
+using EZNEW.Develop.DataAccess;
 using EZNEW.Develop.Domain.Event;
 using EZNEW.Develop.Domain.Repository.Warehouse;
 using EZNEW.Develop.Entity;
@@ -37,6 +38,11 @@ namespace EZNEW.Develop.UnitOfWork
         /// domain events
         /// </summary>
         List<IDomainEvent> DomainEvents { get; }
+
+        /// <summary>
+        /// data isolation level
+        /// </summary>
+        DataIsolationLevel? IsolationLevel { get; set; }
 
         #endregion
 
@@ -90,7 +96,7 @@ namespace EZNEW.Develop.UnitOfWork
         /// get data warehouse by entity type
         /// </summary>
         /// <returns></returns>
-        DataWarehouse<ET> GetWarehouse<ET>() where ET : BaseEntity<ET>;
+        DataWarehouse<ET> GetWarehouse<ET>() where ET : BaseEntity<ET>,new();
 
         #endregion
 

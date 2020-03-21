@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 namespace EZNEW.Develop.DataValidation.Validators
 {
     /// <summary>
-    /// Compare Operator Value
+    /// compare operator value
     /// </summary>
     public class CompareOperatorValue
     {
-        #region Propertys
+        #region propertys
 
         /// <summary>
-        /// Source Value
+        /// source value
         /// </summary>
         public dynamic SourceValue
         {
@@ -22,7 +22,7 @@ namespace EZNEW.Develop.DataValidation.Validators
         }
 
         /// <summary>
-        /// Compare Value
+        /// compare value
         /// </summary>
         public dynamic CompareValue
         {

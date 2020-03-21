@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace EZNEW.Develop.DataValidation
 {
     /// <summary>
-    /// Validation Item
+    /// validation item
     /// </summary>
     public class ValidationItem<T> : IValidation
     {
@@ -47,10 +47,10 @@ namespace EZNEW.Develop.DataValidation
 
         #endregion
 
-        #region Methods
+        #region methods
 
         /// <summary>
-        /// Validate
+        /// validate
         /// </summary>
         /// <returns></returns>
         public VerifyResult Validate(dynamic obj)
@@ -85,7 +85,7 @@ namespace EZNEW.Develop.DataValidation
         }
 
         /// <summary>
-        /// Create Validation Attribute
+        /// create validation attribute
         /// </summary>
         /// <returns></returns>
         public ValidationAttribute CreateValidationAttribute()

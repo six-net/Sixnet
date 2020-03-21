@@ -5,14 +5,14 @@ using System.Text;
 namespace EZNEW.Develop.CQuery.Translator
 {
     /// <summary>
-    /// Query Translator Interace
+    /// query translator interace
     /// </summary>
     public interface IQueryTranslator
     {
         #region Propertys
 
         /// <summary>
-        /// Query Object Pet Name
+        /// query object pet name
         /// </summary>
         string ObjectPetName
         {
@@ -29,10 +29,10 @@ namespace EZNEW.Develop.CQuery.Translator
 
         #endregion
 
-        #region Functions
+        #region functions
 
         /// <summary>
-        /// Translate Query
+        /// translate query
         /// </summary>
         /// <param name="query">query object</param>
         /// <returns>return translate result</returns>

@@ -1,6 +1,7 @@
 ﻿using EZNEW.Develop.Command.Modify;
 using EZNEW.Develop.CQuery;
 using EZNEW.Develop.Domain.Aggregation;
+using EZNEW.Develop.UnitOfWork;
 using EZNEW.Framework.ExpressionUtil;
 using EZNEW.Framework.Extension;
 using EZNEW.Framework.IoC;
@@ -29,6 +30,7 @@ namespace EZNEW.Develop.Domain.Repository.Event
         /// <summary>
         /// subscribe event
         /// </summary>
+        /// <param name="eventSource">event source</param>
         /// <param name="repositoryEventHandler">event handler</param>
         public static void Subscribe(Type eventSource, IRepositoryEventHandler repositoryEventHandler)
         {
@@ -64,11 +66,11 @@ namespace EZNEW.Develop.Domain.Repository.Event
         /// <summary>
         /// subscribe data operation
         /// </summary>
-        /// <param name="eventType"></param>
-        /// <param name="eventSourceType"></param>
-        /// <param name="objectType"></param>
-        /// <param name="eventHandlerType"></param>
-        /// <param name="actionName"></param>
+        /// <param name="eventType">event type</param>
+        /// <param name="eventSourceType">event source type</param>
+        /// <param name="objectType">data object type</param>
+        /// <param name="eventHandlerType">event handler type</param>
+        /// <param name="actionName">action name</param>
         public static void SubscribeDataOperation(EventType eventType, Type eventSourceType, Type objectType, Type eventHandlerType, string actionName)
         {
             if (eventSourceType == null || eventHandlerType == null || objectType == null || actionName.IsNullOrEmpty())
@@ -82,7 +84,8 @@ namespace EZNEW.Develop.Domain.Repository.Event
                 return;
             }
             var parameterType = typeof(IEnumerable<>).MakeGenericType(objectType);
-            var actionMember = eventHandler.GetType().GetMethod(actionName, new Type[] { parameterType });
+            var activationOptionType = typeof(ActivationOption);
+            var actionMember = eventHandler.GetType().GetMethod(actionName, new Type[] { parameterType, activationOptionType });
             if (actionMember == null)
             {
                 return;
@@ -180,7 +183,7 @@ namespace EZNEW.Develop.Domain.Repository.Event
             {
                 return;
             }
-            var actionMember = eventHandler.GetType().GetMethod(actionName, new Type[] { typeof(IQuery) });
+            var actionMember = eventHandler.GetType().GetMethod(actionName, new Type[] { typeof(IQuery), typeof(ActivationOption) });
             if (actionMember == null)
             {
                 return;
@@ -383,8 +386,9 @@ namespace EZNEW.Develop.Domain.Repository.Event
         /// <param name="eventSource">event source</param>
         /// <param name="eventType">event type</param>
         /// <param name="datas">datas</param>
+        /// <param name="activationOption">activation option</param>
         /// <param name="callback">callback</param>
-        public static void PublishDataOperation<T>(Type eventSource, EventType eventType, IEnumerable<T> datas, RepositoryEventCallback callback = null)
+        public static void PublishDataOperation<T>(Type eventSource, EventType eventType, IEnumerable<T> datas, ActivationOption activationOption, RepositoryEventCallback callback = null)
         {
             if (datas.IsNullOrEmpty())
             {
@@ -403,7 +407,7 @@ namespace EZNEW.Develop.Domain.Repository.Event
                 {
                     continue;
                 }
-                eventHandler.Execute(datas);
+                eventHandler.Execute(datas, activationOption);
             }
             callback?.Invoke(DataOperationEventResult.Empty);
         }
@@ -414,10 +418,11 @@ namespace EZNEW.Develop.Domain.Repository.Event
         /// <typeparam name="T"></typeparam>
         /// <param name="eventSource">event source</param>
         /// <param name="datas">datas</param>
+        /// <param name="activationOption">activation option</param>
         /// <param name="callback">callback</param>
-        public static void PublishSave<T>(Type eventSource, IEnumerable<T> datas, RepositoryEventCallback callback = null)
+        public static void PublishSave<T>(Type eventSource, IEnumerable<T> datas, ActivationOption activationOption = null, RepositoryEventCallback callback = null)
         {
-            PublishDataOperation(eventSource, EventType.SaveObject, datas, callback);
+            PublishDataOperation(eventSource, EventType.SaveObject, datas, activationOption, callback);
         }
 
         /// <summary>
@@ -426,10 +431,11 @@ namespace EZNEW.Develop.Domain.Repository.Event
         /// <typeparam name="T"></typeparam>
         /// <param name="eventSource">event source</param>
         /// <param name="datas">datas</param>
+        /// <param name="activationOption">activation option</param>
         /// <param name="callback">callback</param>
-        public static void PublishRemove<T>(Type eventSource, IEnumerable<T> datas, RepositoryEventCallback callback = null)
+        public static void PublishRemove<T>(Type eventSource, IEnumerable<T> datas, ActivationOption activationOption = null, RepositoryEventCallback callback = null)
         {
-            PublishDataOperation(eventSource, EventType.RemoveObject, datas, callback);
+            PublishDataOperation(eventSource, EventType.RemoveObject, datas, activationOption, callback);
         }
 
         /// <summary>
@@ -438,8 +444,9 @@ namespace EZNEW.Develop.Domain.Repository.Event
         /// <param name="eventSource">event source</param>
         /// <param name="eventType">event type</param>
         /// <param name="query">query</param>
+        /// <param name="activationOption">activation option</param>
         /// <param name="callback">callback</param>
-        public static void PublishCondition<T>(Type eventSource, EventType eventType, IQuery query, RepositoryEventCallback callback = null)
+        public static void PublishCondition<T>(Type eventSource, EventType eventType, IQuery query, ActivationOption activationOption = null, RepositoryEventCallback callback = null)
         {
             var eventHandlers = GetEventHandlers(eventSource, eventType, typeof(T));
             if (eventHandlers.IsNullOrEmpty())
@@ -454,7 +461,7 @@ namespace EZNEW.Develop.Domain.Repository.Event
                 {
                     continue;
                 }
-                eventHandler.Execute(query);
+                eventHandler.Execute(query, activationOption);
             }
             callback?.Invoke(DataOperationEventResult.Empty);
         }
@@ -465,10 +472,11 @@ namespace EZNEW.Develop.Domain.Repository.Event
         /// <typeparam name="T"></typeparam>
         /// <param name="eventSource">event source</param>
         /// <param name="query">query</param>
+        /// <param name="activationOption">activation option</param>
         /// <param name="callback">callback</param>
-        public static void PublishRemove<T>(Type eventSource, IQuery query, RepositoryEventCallback callback = null)
+        public static void PublishRemove<T>(Type eventSource, IQuery query, ActivationOption activationOption = null, RepositoryEventCallback callback = null)
         {
-            PublishCondition<T>(eventSource, EventType.RemoveByCondition, query, callback);
+            PublishCondition<T>(eventSource, EventType.RemoveByCondition, query, activationOption, callback);
         }
 
         /// <summary>
@@ -477,8 +485,9 @@ namespace EZNEW.Develop.Domain.Repository.Event
         /// <param name="eventSource">event source</param>
         /// <param name="eventType">event type</param>
         /// <param name="query">query</param>
+        /// <param name="activationOption">activation option</param>
         /// <param name="callback">callback</param>
-        public static void PublishModify<T>(Type eventSource, IModify modify, IQuery query, RepositoryEventCallback callback = null)
+        public static void PublishModify<T>(Type eventSource, IModify modify, IQuery query, ActivationOption activationOption = null, RepositoryEventCallback callback = null)
         {
             if (modify == null)
             {
@@ -497,7 +506,7 @@ namespace EZNEW.Develop.Domain.Repository.Event
                 {
                     continue;
                 }
-                eventHandler.Execute(modify, query);
+                eventHandler.Execute(modify, query, activationOption);
             }
             callback?.Invoke(DataOperationEventResult.Empty);
         }

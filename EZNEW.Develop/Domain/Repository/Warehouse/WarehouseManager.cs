@@ -47,7 +47,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// <summary>
         /// register default warehouse
         /// </summary>
-        internal static void RegisterDefaultWarehouse<ET, DAI>() where ET : BaseEntity<ET> where DAI : IDataAccess<ET>
+        internal static void RegisterDefaultWarehouse<ET, DAI>() where ET : BaseEntity<ET>, new() where DAI : IDataAccess<ET>
         {
             if (ContainerManager.IsRegister<IRepositoryWarehouse<ET, DAI>>())
             {
@@ -74,7 +74,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// <param name="datas">now datas</param>
         /// <param name="query">query model</param>
         /// <returns></returns>
-        public static List<ET> Merge<ET>(IEnumerable<ET> datas, IQuery query = null, bool sort = false) where ET : BaseEntity<ET>
+        public static List<ET> Merge<ET>(IEnumerable<ET> datas, IQuery query = null, bool sort = false) where ET : BaseEntity<ET>, new()
         {
             var warehouse = GetWarehouse<ET>();
             return warehouse?.Merge(datas, query, sort) ?? datas?.ToList() ?? new List<ET>(0);
@@ -87,7 +87,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// <param name="originPaging">origin paging</param>
         /// <param name="query">query</param>
         /// <returns></returns>
-        public static IPaging<ET> MergePaging<ET>(IPaging<ET> originPaging, IQuery query) where ET : BaseEntity<ET>
+        public static IPaging<ET> MergePaging<ET>(IPaging<ET> originPaging, IQuery query) where ET : BaseEntity<ET>, new()
         {
             if (originPaging == null)
             {
@@ -113,7 +113,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// <param name="repositoryType">repository type</param>
         /// <param name="data"></param>
         /// <returns></returns>
-        public static ET Merge<ET>(ET data, IQuery query) where ET : BaseEntity<ET>
+        public static ET Merge<ET>(ET data, IQuery query) where ET : BaseEntity<ET>, new()
         {
             var warehouse = GetWarehouse<ET>();
             if (warehouse == null)
@@ -133,7 +133,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// <param name="repositoryType">repository type</param>
         /// <param name="query">query model</param>
         /// <returns></returns>
-        public static async Task<CheckExistResult> ExistAsync<ET>(IQuery query) where ET : BaseEntity<ET>
+        public static async Task<CheckExistResult> ExistAsync<ET>(IQuery query) where ET : BaseEntity<ET>, new()
         {
             var warehouse = GetWarehouse<ET>();
             var result = warehouse?.Exist(query) ?? new CheckExistResult() { IsExist = false, CheckQuery = query };
@@ -150,7 +150,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// <typeparam name="ET"></typeparam>
         /// <param name="datas"></param>
         /// <returns></returns>
-        public static async Task SaveAsync<ET>(params ET[] datas) where ET : BaseEntity<ET>
+        public static async Task SaveAsync<ET>(params ET[] datas) where ET : BaseEntity<ET>, new()
         {
             if (datas.IsNullOrEmpty())
             {
@@ -178,7 +178,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// <typeparam name="ET"></typeparam>
         /// <param name="datas"></param>
         /// <returns></returns>
-        public static async Task RemoveAsync<ET>(params ET[] datas) where ET : BaseEntity<ET>
+        public static async Task RemoveAsync<ET>(params ET[] datas) where ET : BaseEntity<ET>, new()
         {
             if (datas == null)
             {
@@ -202,7 +202,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// <typeparam name="ET"></typeparam>
         /// <param name="query">query</param>
         /// <returns></returns>
-        public static async Task RemoveAsync<ET>(IQuery query) where ET : BaseEntity<ET>
+        public static async Task RemoveAsync<ET>(IQuery query) where ET : BaseEntity<ET>, new()
         {
             var warehouse = GetWarehouse<ET>();
             if (warehouse == null)
@@ -224,7 +224,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// <param name="modifyExpression">modify expression</param>
         /// <param name="query">query</param>
         /// <returns></returns>
-        public static async Task ModifyAsync<ET>(IModify modifyExpression, IQuery query) where ET : BaseEntity<ET>
+        public static async Task ModifyAsync<ET>(IModify modifyExpression, IQuery query) where ET : BaseEntity<ET>, new()
         {
             var warehouse = GetWarehouse<ET>();
             if (warehouse == null)
@@ -244,7 +244,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// </summary>
         /// <param name="query">query</param>
         /// <returns></returns>
-        public static async Task<CountResult> CountAsync<ET>(IQuery query) where ET : BaseEntity<ET>
+        public static async Task<CountResult> CountAsync<ET>(IQuery query) where ET : BaseEntity<ET>, new()
         {
             var warehouse = GetWarehouse<ET>();
             var result = warehouse?.Count(query) ?? new CountResult();
@@ -262,7 +262,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// <typeparam name="VT">value type</typeparam>
         /// <param name="query">query</param>
         /// <returns></returns>
-        public static async Task<ComputeResult<VT>> MaxAsync<ET, VT>(IQuery query) where ET : BaseEntity<ET>
+        public static async Task<ComputeResult<VT>> MaxAsync<ET, VT>(IQuery query) where ET : BaseEntity<ET>, new()
         {
             var warehouse = GetWarehouse<ET>();
             var result = warehouse?.Max<VT>(query) ?? new ComputeResult<VT>() { Value = default(VT), ComputeQuery = query };
@@ -280,7 +280,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// <typeparam name="VT">value type</typeparam>
         /// <param name="query">query</param>
         /// <returns></returns>
-        public static async Task<ComputeResult<VT>> MinAsync<ET, VT>(IQuery query) where ET : BaseEntity<ET>
+        public static async Task<ComputeResult<VT>> MinAsync<ET, VT>(IQuery query) where ET : BaseEntity<ET>, new()
         {
             var warehouse = GetWarehouse<ET>();
             var result = warehouse?.Min<VT>(query) ?? new ComputeResult<VT>() { Value = default(VT), ComputeQuery = query };
@@ -298,7 +298,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// <typeparam name="VT">value type</typeparam>
         /// <param name="query">query</param>
         /// <returns></returns>
-        public static async Task<ComputeResult<VT>> SumAsync<ET, VT>(IQuery query) where ET : BaseEntity<ET>
+        public static async Task<ComputeResult<VT>> SumAsync<ET, VT>(IQuery query) where ET : BaseEntity<ET>, new()
         {
             var warehouse = GetWarehouse<ET>();
             var result = warehouse?.Sum<VT>(query) ?? new ComputeResult<VT>() { Value = default(VT), ComputeQuery = query };
@@ -314,7 +314,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// </summary>
         /// <param name="data">data</param>
         /// <returns></returns>
-        public static DataLifeSource GetLifeSource<ET>(ET data) where ET : BaseEntity<ET>
+        public static DataLifeSource GetLifeSource<ET>(ET data) where ET : BaseEntity<ET>, new()
         {
             var warehouse = GetWarehouse<ET>();
             return warehouse?.GetLifeSource(data) ?? DataLifeSource.New;
@@ -325,7 +325,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// </summary>
         /// <param name="data">data</param>
         /// <param name="life source">life source</param>
-        public static void ModifyLifeSource<ET>(ET data, DataLifeSource lifeSource) where ET : BaseEntity<ET>
+        public static void ModifyLifeSource<ET>(ET data, DataLifeSource lifeSource) where ET : BaseEntity<ET>, new()
         {
             var warehouse = GetWarehouse<ET>();
             warehouse?.ModifyLifeSource(data, lifeSource);
@@ -340,7 +340,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// </summary>
         /// <typeparam name="RT"></typeparam>
         /// <returns></returns>
-        public static DataWarehouse<ET> GetWarehouse<ET>() where ET : BaseEntity<ET>
+        public static DataWarehouse<ET> GetWarehouse<ET>() where ET : BaseEntity<ET>, new()
         {
             return WorkFactory.Current?.GetWarehouse<ET>();
         }
@@ -355,7 +355,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// <typeparam name="ET"></typeparam>
         /// <param name="identityValue"></param>
         /// <returns></returns>
-        public static DataPackage<ET> GetDataPackage<ET>(string identityValue) where ET : BaseEntity<ET>
+        public static DataPackage<ET> GetDataPackage<ET>(string identityValue) where ET : BaseEntity<ET>, new()
         {
             if (identityValue.IsNullOrEmpty())
             {
@@ -371,7 +371,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// <typeparam name="ET"></typeparam>
         /// <param name="identityValues"></param>
         /// <returns></returns>
-        public static List<DataPackage<ET>> GetDataPackages<ET>(IEnumerable<string> identityValues) where ET : BaseEntity<ET>
+        public static List<DataPackage<ET>> GetDataPackages<ET>(IEnumerable<string> identityValues) where ET : BaseEntity<ET>, new()
         {
             if (identityValues.IsNullOrEmpty())
             {
