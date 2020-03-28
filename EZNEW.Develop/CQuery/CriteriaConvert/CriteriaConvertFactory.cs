@@ -7,20 +7,16 @@ namespace EZNEW.Develop.CQuery.CriteriaConvert
     public static class CriteriaConvertFactory
     {
         /// <summary>
-        /// create criterial convert type
+        /// create criterial convert
         /// </summary>
-        /// <param name="type">convert type</param>
+        /// <param name="convertConfigName">convert config name</param>
         /// <returns></returns>
-        public static ICriteriaConvert Create(CriteriaConvertType type)
+        public static ICriteriaConvert Create(string convertConfigName)
         {
-            ICriteriaConvert convert = null;
-            switch (type)
+            return new DefaultCriteriaConvert()
             {
-                case CriteriaConvertType.StringLength:
-                    convert = new StringLengthCriteriaConvert();
-                    break;
-            }
-            return convert;
+                Name = convertConfigName
+            };
         }
     }
 }

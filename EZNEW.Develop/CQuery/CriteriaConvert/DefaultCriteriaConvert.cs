@@ -4,16 +4,19 @@ using System.Text;
 
 namespace EZNEW.Develop.CQuery.CriteriaConvert
 {
-    public interface ICriteriaConvert
+    /// <summary>
+    /// default criteria convert
+    /// </summary>
+    public class DefaultCriteriaConvert : ICriteriaConvert
     {
         /// <summary>
         /// convert name
         /// </summary>
-        string Name { get; set; }
+        public string Name { get; set; }
 
         /// <summary>
         /// data
         /// </summary>
-        object Data { get; set; }
+        public object Data { get; set; }
     }
 }
