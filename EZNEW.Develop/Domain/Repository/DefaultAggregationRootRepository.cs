@@ -5,6 +5,7 @@ using EZNEW.Develop.Domain.Repository.Event;
 using EZNEW.Develop.Domain.Repository.Warehouse;
 using EZNEW.Develop.UnitOfWork;
 using EZNEW.Framework.Extension;
+using EZNEW.Framework.Fault;
 using EZNEW.Framework.Paging;
 using System;
 using System.Collections.Generic;
@@ -65,7 +66,7 @@ namespace EZNEW.Develop.Domain.Repository
 
             if (datas.IsNullOrEmpty())
             {
-                throw new Exception($"{nameof(datas)} is null or empty");
+                throw new EZNEWException($"{nameof(datas)} is null or empty");
             }
             foreach (var obj in datas)
             {
@@ -75,7 +76,7 @@ namespace EZNEW.Develop.Domain.Repository
                 }
                 if (!obj.CanBeSave)
                 {
-                    throw new Exception("data cann't to be save");
+                    throw new EZNEWException("data cann't to be save");
                 }
             }
 
@@ -140,17 +141,17 @@ namespace EZNEW.Develop.Domain.Repository
 
             if (datas.IsNullOrEmpty())
             {
-                throw new Exception("datas is null or empty");
+                throw new EZNEWException("datas is null or empty");
             }
             foreach (var obj in datas)
             {
                 if (obj == null)
                 {
-                    throw new Exception("remove object data is null");
+                    throw new EZNEWException("remove object data is null");
                 }
                 if (!obj.CanBeRemove)
                 {
-                    throw new Exception("object data cann't to be remove");
+                    throw new EZNEWException("object data cann't to be remove");
                 }
             }
 
@@ -191,15 +192,15 @@ namespace EZNEW.Develop.Domain.Repository
         /// <param name="activationOption">activation option</param>
         public sealed override async Task RemoveAsync(IQuery query, ActivationOption activationOption = null)
         {
-            //append condition
-            query = AppendRemoveCondition(query);
-            var record = await ExecuteRemoveAsync(query, activationOption).ConfigureAwait(false);
+            var newQuery = RepositoryManager.HandleQueryObjectBeforeExecute(query, QueryUsageScene.Remove, AppendRemoveCondition);
+            var record = await ExecuteRemoveAsync(newQuery, activationOption).ConfigureAwait(false);
             if (record == null)
             {
                 return;
             }
-            RepositoryEventBus.PublishRemove<T>(GetType(), query, activationOption);
+            RepositoryEventBus.PublishRemove<T>(GetType(), newQuery, activationOption);
             WorkFactory.RegisterActivationRecord(record);
+            RepositoryManager.HandleQueryObjectAfterExecute(query, newQuery, QueryUsageScene.Remove);
         }
 
         #endregion
@@ -225,15 +226,15 @@ namespace EZNEW.Develop.Domain.Repository
         /// <param name="activationOption">activation option</param>
         public sealed override async Task ModifyAsync(IModify expression, IQuery query, ActivationOption activationOption = null)
         {
-            //append condition
-            query = AppendModifyCondition(query);
-            var record = await ExecuteModifyAsync(expression, query, activationOption).ConfigureAwait(false);
+            var newQuery = RepositoryManager.HandleQueryObjectBeforeExecute(query, QueryUsageScene.Modify, AppendModifyCondition);
+            var record = await ExecuteModifyAsync(expression, newQuery, activationOption).ConfigureAwait(false);
             if (record == null)
             {
                 return;
             }
-            RepositoryEventBus.PublishModify<T>(GetType(), expression, query, activationOption);
+            RepositoryEventBus.PublishModify<T>(GetType(), expression, newQuery, activationOption);
             WorkFactory.RegisterActivationRecord(record);
+            RepositoryManager.HandleQueryObjectAfterExecute(query, newQuery, QueryUsageScene.Modify);
         }
 
         #endregion
@@ -257,20 +258,20 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns>data</returns>
         public sealed override async Task<T> GetAsync(IQuery query)
         {
-            //append condition
-            query = AppendQueryCondition(query);
-            var data = await GetDataAsync(query).ConfigureAwait(false);
-            var dataList = new List<T>() { data };
-            QueryCallback(query, false, dataList);
-            RepositoryEventBus.PublishQuery(GetType(), dataList, result =>
-              {
-                  QueryEventResult<T> queryResult = result as QueryEventResult<T>;
-                  if (queryResult != null)
-                  {
-                      dataList = queryResult.Datas;
-                  }
-              });
-            return dataList.IsNullOrEmpty() ? default(T) : dataList.FirstOrDefault();
+            var newQuery = RepositoryManager.HandleQueryObjectBeforeExecute(query, QueryUsageScene.Query, AppendQueryCondition);
+            var data = await GetDataAsync(newQuery).ConfigureAwait(false);
+            var dataList = new List<T>(1) { data };
+            QueryCallback(newQuery, false, dataList);
+            RepositoryEventBus.PublishQuery(GetType(), dataList, newQuery, result =>
+               {
+                   QueryEventResult<T> queryResult = result as QueryEventResult<T>;
+                   if (queryResult != null)
+                   {
+                       dataList = queryResult.Datas;
+                   }
+               });
+            RepositoryManager.HandleQueryObjectAfterExecute(query, newQuery, QueryUsageScene.Query);
+            return dataList.IsNullOrEmpty() ? default : dataList.FirstOrDefault();
         }
 
         #endregion
@@ -294,18 +295,18 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns>object list</returns>
         public sealed override async Task<List<T>> GetListAsync(IQuery query)
         {
-            //append condition
-            query = AppendQueryCondition(query);
-            var datas = await GetDataListAsync(query).ConfigureAwait(false);
-            QueryCallback(query, true, datas);
-            RepositoryEventBus.PublishQuery(GetType(), datas, result =>
-            {
-                QueryEventResult<T> queryResult = result as QueryEventResult<T>;
-                if (queryResult != null)
-                {
-                    datas = queryResult.Datas;
-                }
-            });
+            var newQuery = RepositoryManager.HandleQueryObjectBeforeExecute(query, QueryUsageScene.Query, AppendQueryCondition);
+            var datas = await GetDataListAsync(newQuery).ConfigureAwait(false);
+            QueryCallback(newQuery, true, datas);
+            RepositoryEventBus.PublishQuery(GetType(), datas, newQuery, result =>
+             {
+                 QueryEventResult<T> queryResult = result as QueryEventResult<T>;
+                 if (queryResult != null)
+                 {
+                     datas = queryResult.Datas;
+                 }
+             });
+            RepositoryManager.HandleQueryObjectAfterExecute(query, newQuery, QueryUsageScene.Query);
             return datas ?? new List<T>(0);
         }
 
@@ -330,19 +331,19 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns>data paging</returns>
         public sealed override async Task<IPaging<T>> GetPagingAsync(IQuery query)
         {
-            //append condition
-            query = AppendQueryCondition(query);
-            var paging = await GetDataPagingAsync(query).ConfigureAwait(false);
+            var newQuery = RepositoryManager.HandleQueryObjectBeforeExecute(query, QueryUsageScene.Query, AppendQueryCondition);
+            var paging = await GetDataPagingAsync(newQuery).ConfigureAwait(false);
             IEnumerable<T> datas = paging;
-            QueryCallback(query, true, datas);
-            RepositoryEventBus.PublishQuery(GetType(), datas, result =>
-            {
-                QueryEventResult<T> queryResult = result as QueryEventResult<T>;
-                if (queryResult != null)
-                {
-                    datas = queryResult.Datas;
-                }
-            });
+            QueryCallback(newQuery, true, datas);
+            RepositoryEventBus.PublishQuery(GetType(), datas, newQuery, result =>
+             {
+                 QueryEventResult<T> queryResult = result as QueryEventResult<T>;
+                 if (queryResult != null)
+                 {
+                     datas = queryResult.Datas;
+                 }
+             });
+            RepositoryManager.HandleQueryObjectAfterExecute(query, newQuery, QueryUsageScene.Query);
             return new Paging<T>(paging.Page, paging.PageSize, paging.TotalCount, datas);
         }
 
@@ -367,9 +368,10 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns></returns>
         public sealed override async Task<bool> ExistAsync(IQuery query)
         {
-            //append condition
-            query = AppendExistCondition(query);
-            return await IsExistAsync(query).ConfigureAwait(false);
+            var newQuery = RepositoryManager.HandleQueryObjectBeforeExecute(query, QueryUsageScene.Exist, AppendExistCondition);
+            var existValue = await IsExistAsync(newQuery).ConfigureAwait(false);
+            RepositoryManager.HandleQueryObjectAfterExecute(query, newQuery, QueryUsageScene.Exist);
+            return existValue;
         }
 
         #endregion
@@ -393,9 +395,10 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns></returns>
         public sealed override async Task<long> CountAsync(IQuery query)
         {
-            //append condition
-            query = AppendCountCondition(query);
-            return await CountValueAsync(query).ConfigureAwait(false);
+            var newQuery = RepositoryManager.HandleQueryObjectBeforeExecute(query, QueryUsageScene.Count, AppendCountCondition);
+            var countValue = await CountValueAsync(newQuery).ConfigureAwait(false);
+            RepositoryManager.HandleQueryObjectAfterExecute(query, newQuery, QueryUsageScene.Count);
+            return countValue;
         }
 
         #endregion
@@ -421,9 +424,10 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns>max value</returns>
         public sealed override async Task<VT> MaxAsync<VT>(IQuery query)
         {
-            //append condition
-            query = AppendMaxCondition(query);
-            return await MaxValueAsync<VT>(query).ConfigureAwait(false);
+            var newQuery = RepositoryManager.HandleQueryObjectBeforeExecute(query, QueryUsageScene.Max, AppendMaxCondition);
+            var maxValue = await MaxValueAsync<VT>(newQuery).ConfigureAwait(false);
+            RepositoryManager.HandleQueryObjectAfterExecute(query, newQuery, QueryUsageScene.Max);
+            return maxValue;
         }
 
         #endregion
@@ -449,9 +453,10 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns>min value</returns>
         public sealed override async Task<VT> MinAsync<VT>(IQuery query)
         {
-            //append condition
-            query = AppendMinCondition(query);
-            return await MinValueAsync<VT>(query).ConfigureAwait(false);
+            var newQuery = RepositoryManager.HandleQueryObjectBeforeExecute(query, QueryUsageScene.Min, AppendMinCondition);
+            var minValue = await MinValueAsync<VT>(newQuery).ConfigureAwait(false);
+            RepositoryManager.HandleQueryObjectAfterExecute(query, newQuery, QueryUsageScene.Min);
+            return minValue;
         }
 
         #endregion
@@ -477,9 +482,10 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns>sum value</returns>
         public sealed override async Task<VT> SumAsync<VT>(IQuery query)
         {
-            //append condition
-            query = AppendSumCondition(query);
-            return await SumValueAsync<VT>(query).ConfigureAwait(false);
+            var newQuery = RepositoryManager.HandleQueryObjectBeforeExecute(query, QueryUsageScene.Sum, AppendSumCondition);
+            var sumValue = await SumValueAsync<VT>(newQuery).ConfigureAwait(false);
+            RepositoryManager.HandleQueryObjectAfterExecute(query, newQuery, QueryUsageScene.Sum);
+            return sumValue;
         }
 
         #endregion
@@ -505,9 +511,10 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns>average value</returns>
         public sealed override async Task<VT> AvgAsync<VT>(IQuery query)
         {
-            //append condition
-            query = AppendAvgCondition(query);
-            return await AvgValueAsync<VT>(query).ConfigureAwait(false);
+            var newQuery = RepositoryManager.HandleQueryObjectBeforeExecute(query, QueryUsageScene.Avg, AppendAvgCondition);
+            var avgValue = await AvgValueAsync<VT>(newQuery).ConfigureAwait(false);
+            RepositoryManager.HandleQueryObjectAfterExecute(query, newQuery, QueryUsageScene.Avg);
+            return avgValue;
         }
 
         #endregion

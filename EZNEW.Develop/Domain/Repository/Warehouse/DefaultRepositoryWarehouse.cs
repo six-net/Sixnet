@@ -193,7 +193,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         {
             var allCount = await dataAccess.CountAsync(query).ConfigureAwait(false);
             var countResult = await WarehouseManager.CountAsync<ET>(query).ConfigureAwait(false);
-            allCount = allCount - countResult.PersistentDataCount + countResult.NewDataCount;
+            allCount = allCount - countResult.PersistentDataRemoveCount + countResult.NewDataCount;
             return allCount;
         }
 
@@ -208,7 +208,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
             var maxResult = await WarehouseManager.MaxAsync<ET, DT>(query).ConfigureAwait(false);
             dynamic resultVal = maxResult.Value;
             dynamic maxValue = await dataAccess.MaxAsync<DT>(maxResult.ComputeQuery).ConfigureAwait(false);
-            return resultVal > maxValue ? resultVal : maxValue;
+            return maxResult.ValidValue ? (resultVal > maxValue ? resultVal : maxValue) : maxValue;
         }
 
         /// <summary>
@@ -222,7 +222,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
             var minResult = await WarehouseManager.MinAsync<ET, DT>(query).ConfigureAwait(false);
             dynamic resultVal = minResult.Value;
             dynamic minValue = await dataAccess.MinAsync<DT>(minResult.ComputeQuery).ConfigureAwait(false);
-            return resultVal < minValue ? resultVal : minValue;
+            return minResult.ValidValue ? (resultVal < minValue ? resultVal : minValue) : minValue;
         }
 
         /// <summary>
@@ -236,7 +236,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
             var sumResult = await WarehouseManager.SumAsync<ET, DT>(query).ConfigureAwait(false);
             dynamic resultVal = sumResult.Value;
             dynamic sumValue = await dataAccess.SumAsync<DT>(sumResult.ComputeQuery).ConfigureAwait(false);
-            return resultVal + sumValue;
+            return sumResult.ValidValue ? resultVal + sumValue : sumValue;
         }
 
         /// <summary>

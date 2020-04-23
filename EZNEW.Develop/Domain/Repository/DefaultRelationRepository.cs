@@ -133,15 +133,15 @@ namespace EZNEW.Develop.Domain.Repository
         /// <param name="activationOption">activation option</param>
         public sealed override async Task RemoveAsync(IQuery query, ActivationOption activationOption = null)
         {
-            //query condition
-            query = AppendRemoveCondition(query);
-            var record = await ExecuteRemoveAsync(query, activationOption).ConfigureAwait(false);
+            var newQuery = RepositoryManager.HandleQueryObjectBeforeExecute(query, QueryUsageScene.Remove, AppendRemoveCondition);
+            var record = await ExecuteRemoveAsync(newQuery, activationOption).ConfigureAwait(false);
             if (record == null)
             {
                 return;
             }
-            RepositoryEventBus.PublishRemove<Tuple<First, Second>>(GetType(), query, activationOption);
+            RepositoryEventBus.PublishRemove<Tuple<First, Second>>(GetType(), newQuery, activationOption);
             WorkFactory.RegisterActivationRecord(record);
+            RepositoryManager.HandleQueryObjectAfterExecute(query, newQuery, QueryUsageScene.Remove);
         }
 
         /// <summary>
@@ -217,9 +217,10 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns></returns>
         public sealed override async Task<Tuple<First, Second>> GetAsync(IQuery query)
         {
-            //append condition
-            query = AppendQueryCondition(query);
-            return await ExecuteGetAsync(query).ConfigureAwait(false);
+            var newQuery = RepositoryManager.HandleQueryObjectBeforeExecute(query, QueryUsageScene.Query, AppendQueryCondition);
+            var data = await ExecuteGetAsync(newQuery).ConfigureAwait(false);
+            RepositoryManager.HandleQueryObjectAfterExecute(query, newQuery, QueryUsageScene.Query);
+            return data;
         }
 
         /// <summary>
@@ -239,9 +240,10 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns></returns>
         public sealed override async Task<List<Tuple<First, Second>>> GetListAsync(IQuery query)
         {
-            //append condition
-            query = AppendQueryCondition(query);
-            return await ExecuteGetListAsync(query).ConfigureAwait(false);
+            var newQuery = RepositoryManager.HandleQueryObjectBeforeExecute(query, QueryUsageScene.Query, AppendQueryCondition);
+            var dataList = await ExecuteGetListAsync(newQuery).ConfigureAwait(false);
+            RepositoryManager.HandleQueryObjectAfterExecute(query, newQuery, QueryUsageScene.Query);
+            return dataList;
         }
 
         /// <summary>
@@ -261,9 +263,10 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns></returns>
         public sealed override async Task<IPaging<Tuple<First, Second>>> GetPagingAsync(IQuery query)
         {
-            //append condition
-            query = AppendQueryCondition(query);
-            return await ExecuteGetPagingAsync(query).ConfigureAwait(false);
+            var newQuery = RepositoryManager.HandleQueryObjectBeforeExecute(query, QueryUsageScene.Query, AppendQueryCondition);
+            var paging = await ExecuteGetPagingAsync(newQuery).ConfigureAwait(false);
+            RepositoryManager.HandleQueryObjectAfterExecute(query, newQuery, QueryUsageScene.Query);
+            return paging;
         }
 
         /// <summary>
@@ -552,7 +555,7 @@ namespace EZNEW.Develop.Domain.Repository
                 SourceType = QuerySourceType.Repository,
                 UsageScene = usageScene
             };
-            var conditionFilterResult = QueryManager.GlobalConditionFilter(conditionFilter);
+            var conditionFilterResult = QueryFactory.GlobalConditionFilter(conditionFilter);
             if (conditionFilterResult != null)
             {
                 conditionFilterResult.AppendTo(originQuery);
@@ -592,9 +595,9 @@ namespace EZNEW.Develop.Domain.Repository
                 return;
             }
             conditionFilter.SourceType = QuerySourceType.Subuery;
-            conditionFilter.EntityType = subquery.EntityType;
+            conditionFilter.EntityType = subquery.GetEntityType();
             conditionFilter.OriginalQuery = subquery;
-            var conditionFilterResult = QueryManager.GlobalConditionFilter(conditionFilter);
+            var conditionFilterResult = QueryFactory.GlobalConditionFilter(conditionFilter);
             if (conditionFilterResult != null)
             {
                 conditionFilterResult.AppendTo(subquery);
@@ -633,9 +636,9 @@ namespace EZNEW.Develop.Domain.Repository
                 return;
             }
             conditionFilter.SourceType = QuerySourceType.JoinQuery;
-            conditionFilter.EntityType = joinQuery.EntityType;
+            conditionFilter.EntityType = joinQuery.GetEntityType();
             conditionFilter.OriginalQuery = joinQuery;
-            var conditionFilterResult = QueryManager.GlobalConditionFilter(conditionFilter);
+            var conditionFilterResult = QueryFactory.GlobalConditionFilter(conditionFilter);
             if (conditionFilterResult != null)
             {
                 conditionFilterResult.AppendTo(joinQuery);

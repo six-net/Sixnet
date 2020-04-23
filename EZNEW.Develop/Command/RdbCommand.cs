@@ -155,7 +155,7 @@ namespace EZNEW.Develop.Command
         {
             return new RdbCommand()
             {
-                Id = WorkFactory.Current?.GetCommandId() ?? DateTime.Now.Ticks,
+                Id = WorkFactory.Current?.GetCommandId() ?? DateTimeOffset.Now.Ticks,
                 EntityType = typeof(T),
                 Operate = operate,
                 Parameters = parameters,
@@ -179,7 +179,7 @@ namespace EZNEW.Develop.Command
         {
             return new RdbCommand()
             {
-                Id = WorkFactory.Current?.GetCommandId() ?? DateTime.Now.Ticks,
+                Id = WorkFactory.Current?.GetCommandId() ?? DateTimeOffset.Now.Ticks,
                 Operate = operate,
                 Parameters = parameters,
                 ObjectName = objectName,

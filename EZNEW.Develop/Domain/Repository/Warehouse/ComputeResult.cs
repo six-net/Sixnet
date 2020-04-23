@@ -25,5 +25,10 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         {
             get;set;
         }
+        
+        /// <summary>
+        /// valid compute value
+        /// </summary>
+        public bool ValidValue { get; set; }
     }
 }

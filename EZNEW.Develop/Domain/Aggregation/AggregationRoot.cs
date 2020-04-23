@@ -211,14 +211,7 @@ namespace EZNEW.Develop.Domain.Aggregation
             allowLoadPropertys = allowLoadPropertys ?? new Dictionary<string, bool>();
             foreach (var property in loadPropertys)
             {
-                if (allowLoadPropertys.ContainsKey(property.Key))
-                {
-                    allowLoadPropertys[property.Key] = property.Value;
-                }
-                else
-                {
-                    allowLoadPropertys.Add(property.Key, property.Value);
-                }
+                allowLoadPropertys[property.Key] = property.Value;
             }
         }
 

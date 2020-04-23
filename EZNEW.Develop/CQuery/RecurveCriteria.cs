@@ -7,6 +7,7 @@ namespace EZNEW.Develop.CQuery
     /// <summary>
     /// recurve criteria
     /// </summary>
+    [Serializable]
     public class RecurveCriteria
     {
         /// <summary>
@@ -37,6 +38,7 @@ namespace EZNEW.Develop.CQuery
     /// <summary>
     /// recurve direction
     /// </summary>
+    [Serializable]
     public enum RecurveDirection
     {
         Up = 210,

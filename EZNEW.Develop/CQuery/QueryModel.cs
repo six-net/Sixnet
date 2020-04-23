@@ -14,7 +14,7 @@ namespace EZNEW.Develop.CQuery
     {
         static QueryModel()
         {
-            QueryManager.ConfigQueryModelRelationEntity<T>();
+            QueryFactory.ConfigQueryModelRelationEntity<T>();
         }
 
         internal static void Init()

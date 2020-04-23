@@ -1,4 +1,6 @@
-﻿using EZNEW.Develop.CQuery;
+﻿using Dapper;
+using EZNEW.Develop.Command;
+using EZNEW.Develop.CQuery;
 using EZNEW.Develop.Entity;
 using EZNEW.Framework.ExpressionUtil;
 using EZNEW.Framework.Extension;
@@ -10,13 +12,14 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using static Dapper.SqlMapper;
 
 namespace EZNEW.Develop.Entity
 {
     /// <summary>
     /// base entity
     /// </summary>
-    public abstract class BaseEntity<T> where T : BaseEntity<T>,new()
+    public abstract class BaseEntity<T> where T : BaseEntity<T>, new()
     {
         protected Dictionary<string, dynamic> valueDict = new Dictionary<string, dynamic>();//field values
         string identityValue = string.Empty;
@@ -119,7 +122,7 @@ namespace EZNEW.Develop.Entity
                 return identityValue;
             }
             var primaryValues = GetPrimaryKeyValues();
-            identityValue = primaryValues.IsNullOrEmpty() ? Guid.NewGuid().ToString() : string.Join("_", primaryValues.Values.OrderBy(c => c?.ToString()??string.Empty).ToArray());
+            identityValue = primaryValues.IsNullOrEmpty() ? Guid.NewGuid().ToString() : string.Join("_", primaryValues.Values.OrderBy(c => c?.ToString() ?? string.Empty).ToArray());
             loadedIdentityValue = true;
             return identityValue;
         }
@@ -188,6 +191,23 @@ namespace EZNEW.Develop.Entity
         public Dictionary<string, dynamic> GetAllPropertyValues()
         {
             return valueDict;
+        }
+
+        /// <summary>
+        /// get cmd parameters
+        /// </summary>
+        /// <returns></returns>
+        public CmdParameters GetCmdParameters()
+        {
+            var parameters = new CmdParameters();
+            var propertys = EntityManager.GetFields(entityType);
+            foreach (var property in propertys)
+            {
+                var value = GetPropertyValue(property.PropertyName);
+                var dbType = SqlMapper.LookupDbType(property.DataType, property.PropertyName, false, out ITypeHandler handler);
+                parameters.Add(property.PropertyName, value, dbType: dbType);
+            }
+            return parameters;
         }
 
         /// <summary>

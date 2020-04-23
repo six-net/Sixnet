@@ -449,19 +449,17 @@ namespace EZNEW.Develop.Domain.Repository.Event
         public static void PublishCondition<T>(Type eventSource, EventType eventType, IQuery query, ActivationOption activationOption = null, RepositoryEventCallback callback = null)
         {
             var eventHandlers = GetEventHandlers(eventSource, eventType, typeof(T));
-            if (eventHandlers.IsNullOrEmpty())
+            if (!eventHandlers.IsNullOrEmpty())
             {
-                callback?.Invoke(DataOperationEventResult.Empty);
-                return;
-            }
-            foreach (var handler in eventHandlers)
-            {
-                ConditionEventHandler eventHandler = handler as ConditionEventHandler;
-                if (eventHandler == null)
+                foreach (var handler in eventHandlers)
                 {
-                    continue;
+                    ConditionEventHandler eventHandler = handler as ConditionEventHandler;
+                    if (eventHandler == null)
+                    {
+                        continue;
+                    }
+                    eventHandler.Execute(query, activationOption);
                 }
-                eventHandler.Execute(query, activationOption);
             }
             callback?.Invoke(DataOperationEventResult.Empty);
         }
@@ -489,24 +487,18 @@ namespace EZNEW.Develop.Domain.Repository.Event
         /// <param name="callback">callback</param>
         public static void PublishModify<T>(Type eventSource, IModify modify, IQuery query, ActivationOption activationOption = null, RepositoryEventCallback callback = null)
         {
-            if (modify == null)
-            {
-                return;
-            }
             var eventHandlers = GetEventHandlers(eventSource, EventType.ModifyExpression, typeof(T));
-            if (eventHandlers.IsNullOrEmpty())
+            if (!eventHandlers.IsNullOrEmpty())
             {
-                callback?.Invoke(DataOperationEventResult.Empty);
-                return;
-            }
-            foreach (var handler in eventHandlers)
-            {
-                ModifyEventHandler eventHandler = handler as ModifyEventHandler;
-                if (eventHandler == null)
+                foreach (var handler in eventHandlers)
                 {
-                    continue;
+                    ModifyEventHandler eventHandler = handler as ModifyEventHandler;
+                    if (eventHandler == null)
+                    {
+                        continue;
+                    }
+                    eventHandler.Execute(modify, query, activationOption);
                 }
-                eventHandler.Execute(modify, query, activationOption);
             }
             callback?.Invoke(DataOperationEventResult.Empty);
         }
@@ -517,38 +509,48 @@ namespace EZNEW.Develop.Domain.Repository.Event
         /// <typeparam name="T"></typeparam>
         /// <param name="eventSource">event source</param>
         /// <param name="datas">datas</param>
+        /// <param name="query">query</param>
         /// <param name="callback">callback</param>
-        public static void PublishQuery<T>(Type eventSource, IEnumerable<T> datas, RepositoryEventCallback callback = null)
+        public static void PublishQuery<T>(Type eventSource, IEnumerable<T> datas, IQuery query, RepositoryEventCallback callback = null)
         {
-            if (datas.IsNullOrEmpty())
-            {
-                return;
-            }
             var eventHandlers = GetEventHandlers(eventSource, EventType.QueryData, typeof(T));
-            if (eventHandlers.IsNullOrEmpty())
-            {
-                callback?.Invoke(new QueryEventResult<T>()
-                {
-                    Datas = datas.ToList()
-                });
-                return;
-            }
             var eventDatas = datas;
-            foreach (var handler in eventHandlers)
+            if (!eventHandlers.IsNullOrEmpty())
             {
-                QueryEventHandler<T> eventHandler = handler as QueryEventHandler<T>;
-                if (eventHandler == null)
+                foreach (var handler in eventHandlers)
                 {
-                    continue;
+                    QueryEventHandler<T> eventHandler = handler as QueryEventHandler<T>;
+                    if (eventHandler == null)
+                    {
+                        continue;
+                    }
+                    eventDatas = eventHandler.Execute(eventDatas);
                 }
-                eventDatas = eventHandler.Execute(eventDatas);
             }
             callback?.Invoke(new QueryEventResult<T>()
             {
-                Datas = eventDatas.ToList()
+                Datas = eventDatas?.ToList() ?? new List<T>(0)
             });
         }
 
         #endregion
     }
+
+    /// <summary>
+    /// event type
+    /// </summary>
+    public enum EventType
+    {
+        SaveObject = 2,
+        RemoveObject = 4,
+        RemoveByCondition = 8,
+        QueryData = 16,
+        ModifyExpression = 32
+    }
+
+    /// <summary>
+    /// event callback
+    /// </summary>
+    /// <param name="result">result</param>
+    public delegate void RepositoryEventCallback(IRepositoryEventHandleResult result);
 }

@@ -56,7 +56,7 @@ namespace EZNEW.Develop.Entity
         /// </summary>
         public List<EntityField> CachePrefixKeys
         {
-            get;set;
+            get; set;
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace EZNEW.Develop.Entity
         /// </summary>
         public List<EntityField> CacheIgnoreKeys
         {
-            get;set;
+            get; set;
         }
 
         /// <summary>
@@ -89,6 +89,14 @@ namespace EZNEW.Develop.Entity
         /// value: key->field,value:relation field
         /// </summary>
         public Dictionary<Guid, Dictionary<string, string>> RelationFields
+        {
+            get; set;
+        }
+
+        /// <summary>
+        /// predicate type
+        /// </summary>
+        public Type PredicateType
         {
             get; set;
         }

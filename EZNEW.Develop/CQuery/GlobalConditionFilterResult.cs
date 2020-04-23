@@ -23,7 +23,7 @@ namespace EZNEW.Develop.CQuery
         public QueryOperator AppendMethod
         {
             get; set;
-        }
+        } = QueryOperator.AND;
 
         /// <summary>
         /// append origin query

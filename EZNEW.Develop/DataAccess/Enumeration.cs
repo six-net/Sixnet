@@ -7,6 +7,7 @@ namespace EZNEW.Develop.DataAccess
     /// <summary>
     /// data isolation level
     /// </summary>
+    [Serializable]
     public enum DataIsolationLevel
     {
         /// <summary>

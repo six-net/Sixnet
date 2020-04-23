@@ -9,6 +9,7 @@ namespace EZNEW.Develop.CQuery
     /// <summary>
     /// condition operator
     /// </summary>
+    [Serializable]
     public enum CriteriaOperator
     {
         Equal,              //=  
@@ -32,6 +33,7 @@ namespace EZNEW.Develop.CQuery
     /// <summary>
     /// connect operator
     /// </summary>
+    [Serializable]
     public enum QueryOperator
     {
         AND,
@@ -41,6 +43,7 @@ namespace EZNEW.Develop.CQuery
     /// <summary>
     /// query command type
     /// </summary>
+    [Serializable]
     public enum QueryCommandType
     {
         QueryObject,
@@ -51,6 +54,7 @@ namespace EZNEW.Develop.CQuery
     /// <summary>
     /// calculate operator
     /// </summary>
+    [Serializable]
     public enum CalculateOperator
     {
         Add,
@@ -62,6 +66,7 @@ namespace EZNEW.Develop.CQuery
     /// <summary>
     /// join type
     /// </summary>
+    [Serializable]
     public enum JoinType
     {
         InnerJoin = 2,
@@ -74,6 +79,7 @@ namespace EZNEW.Develop.CQuery
     /// <summary>
     /// join operator
     /// </summary>
+    [Serializable]
     public enum JoinOperator
     {
         Equal,              //=  
@@ -87,6 +93,7 @@ namespace EZNEW.Develop.CQuery
     /// <summary>
     /// condition source type
     /// </summary>
+    [Serializable]
     public enum QuerySourceType
     {
         Repository = 2,
@@ -97,6 +104,7 @@ namespace EZNEW.Develop.CQuery
     /// <summary>
     /// query usage scene
     /// </summary>
+    [Serializable]
     public enum QueryUsageScene
     {
         Remove = 2001,

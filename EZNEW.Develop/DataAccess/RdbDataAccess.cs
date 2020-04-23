@@ -43,7 +43,7 @@ namespace EZNEW.Develop.DataAccess
         {
             InitVersionFieldValue(obj);//init version field value
             InitRefreshDateFieldValue(obj);//init refresh date value
-            var cmd = RdbCommand.CreateNewCommand<T>(OperateType.Insert, obj);
+            var cmd = RdbCommand.CreateNewCommand<T>(OperateType.Insert, obj.GetCmdParameters());
             SetCommand(cmd, obj.GetAllPropertyValues());
             cmd.MustReturnValueOnSuccess = true;
             return await Task.FromResult(cmd).ConfigureAwait(false);
@@ -126,7 +126,7 @@ namespace EZNEW.Develop.DataAccess
         public virtual async Task<ICommand> ModifyAsync(T newData, T oldData, IQuery query)
         {
             Dictionary<string, dynamic> modifyValues = newData.GetModifyValues(oldData);
-            if (modifyValues == null || modifyValues.Count <= 0)
+            if (modifyValues == null || modifyValues.Count < 1)
             {
                 return null;
             }
@@ -159,7 +159,7 @@ namespace EZNEW.Develop.DataAccess
             {
                 if (!modifyValues.ContainsKey(refreshFieldName))
                 {
-                    var nowDate = DateTime.Now;
+                    var nowDate = DateTimeOffset.Now;
                     newData.SetPropertyValue(refreshFieldName, nowDate);
                     modifyValues.Add(refreshFieldName, nowDate);
                 }
@@ -215,7 +215,7 @@ namespace EZNEW.Develop.DataAccess
             {
                 if (!fieldAndValues.ContainsKey(refreshFieldName))
                 {
-                    fieldAndValues.Add(refreshFieldName, new FixedModifyValue(DateTime.Now));
+                    fieldAndValues.Add(refreshFieldName, new FixedModifyValue(DateTimeOffset.Now));
                 }
             }
 
@@ -612,7 +612,7 @@ namespace EZNEW.Develop.DataAccess
             {
                 return;
             }
-            obj.SetPropertyValue(refreshDateField, DateTime.Now);
+            obj.SetPropertyValue(refreshDateField, DateTimeOffset.Now);
         }
 
         #endregion

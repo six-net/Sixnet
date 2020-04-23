@@ -11,6 +11,7 @@ namespace EZNEW.Develop.CQuery
     /// <summary>
     /// atomic query conditions
     /// </summary>
+    [Serializable]
     public class Criteria : IQueryItem
     {
         #region constructor
@@ -76,17 +77,24 @@ namespace EZNEW.Develop.CQuery
             {
                 return _realValue;
             }
-            Expression valueExpression = Value as Expression;
-            if (valueExpression != null)
-            {
-                _realValue = GetExpressionValue(valueExpression);
-            }
-            else
-            {
-                _realValue = Value;
-            }
+            _realValue = ComputeCriteriaValue(Value);
             _calculateValue = true;
             return _realValue;
+        }
+
+        /// <summary>
+        /// compute criteria value
+        /// </summary>
+        /// <param name="originalValue">original value</param>
+        /// <returns></returns>
+        public static dynamic ComputeCriteriaValue(dynamic originalValue)
+        {
+            Expression valueExpression = originalValue as Expression;
+            if (valueExpression != null)
+            {
+                return GetExpressionValue(valueExpression);
+            }
+            return originalValue;
         }
 
         /// <summary>
@@ -94,7 +102,7 @@ namespace EZNEW.Develop.CQuery
         /// </summary>
         /// <param name="valueExpression">value expression</param>
         /// <returns></returns>
-        dynamic GetExpressionValue(Expression valueExpression)
+        public static dynamic GetExpressionValue(Expression valueExpression)
         {
             if (valueExpression == null)
             {
@@ -162,7 +170,7 @@ namespace EZNEW.Develop.CQuery
         /// <returns>creteria</returns>
         public static Criteria CreateNewCriteria(string name, CriteriaOperator @operator, dynamic value)
         {
-            return new Criteria(name, @operator, value);
+            return new Criteria(name, @operator, ComputeCriteriaValue(value));
         }
 
         #endregion

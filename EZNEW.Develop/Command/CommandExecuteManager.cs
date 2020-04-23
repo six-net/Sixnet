@@ -20,7 +20,7 @@ namespace EZNEW.Develop.Command
         /// <summary>
         /// get command execute command engines
         /// </summary>
-        public static Func<ICommand, Task<List<ICommandEngine>>> GetCommandEnginesAsync { get; set; }
+        public static Func<ICommand, List<ICommandEngine>> ResolveCommandEngines { get; set; }
 
         /// <summary>
         /// allow none command engine
@@ -41,7 +41,7 @@ namespace EZNEW.Develop.Command
             {
                 return 0;
             }
-            var cmdGroupEngines = await GroupCommandByEnginesAsync(commands).ConfigureAwait(false);
+            var cmdGroupEngines = GroupCommandByEngines(commands);
             if (cmdGroupEngines == null || cmdGroupEngines.Count <= 0)
             {
                 return 0;
@@ -86,7 +86,7 @@ namespace EZNEW.Develop.Command
         /// <returns>queried datas</returns>
         internal static async Task<IEnumerable<T>> QueryAsync<T>(ICommand cmd)
         {
-            var groupEngines = await GroupCommandByEnginesAsync(new List<ICommand>() { cmd }).ConfigureAwait(false);
+            var groupEngines = GroupCommandByEngines(new List<ICommand>(1) { cmd });
             if (groupEngines == null || groupEngines.Count <= 0)
             {
                 return new List<T>(0);
@@ -136,7 +136,7 @@ namespace EZNEW.Develop.Command
         /// <returns>queried datas</returns>
         internal static async Task<IPaging<T>> QueryPagingAsync<T>(ICommand cmd) where T : BaseEntity<T>, new()
         {
-            var groupEngines = await GroupCommandByEnginesAsync(new List<ICommand>() { cmd }).ConfigureAwait(false);
+            var groupEngines = GroupCommandByEngines(new List<ICommand>(1) { cmd });
             if (groupEngines == null || groupEngines.Count <= 0)
             {
                 return Paging<T>.EmptyPaging();
@@ -185,7 +185,7 @@ namespace EZNEW.Develop.Command
         /// <returns>data is exist</returns>
         internal static async Task<bool> QueryAsync(ICommand cmd)
         {
-            var groupEngines = await GroupCommandByEnginesAsync(new List<ICommand>() { cmd }).ConfigureAwait(false);
+            var groupEngines = GroupCommandByEngines(new List<ICommand>(1) { cmd });
             if (groupEngines == null || groupEngines.Count <= 0)
             {
                 return false;
@@ -209,7 +209,7 @@ namespace EZNEW.Develop.Command
         /// <returns>query data</returns>
         internal static async Task<T> AggregateValueAsync<T>(ICommand cmd)
         {
-            var groupEngines = await GroupCommandByEnginesAsync(new List<ICommand>() { cmd }).ConfigureAwait(false);
+            var groupEngines = GroupCommandByEngines(new List<ICommand>(1) { cmd });
             if (groupEngines == null || groupEngines.Count <= 0)
             {
                 return default(T);
@@ -250,7 +250,7 @@ namespace EZNEW.Develop.Command
         /// <returns>data</returns>
         internal static async Task<DataSet> QueryMultipleAsync(ICommand cmd)
         {
-            var groupEngines = await GroupCommandByEnginesAsync(new List<ICommand>() { cmd }).ConfigureAwait(false);
+            var groupEngines = GroupCommandByEngines(new List<ICommand>(1) { cmd });
             if (groupEngines == null || groupEngines.Count <= 0)
             {
                 return new DataSet();
@@ -287,13 +287,13 @@ namespace EZNEW.Develop.Command
         /// </summary>
         /// <param name="commands">command</param>
         /// <returns></returns>
-        static async Task<Dictionary<string, Tuple<ICommandEngine, List<ICommand>>>> GroupCommandByEnginesAsync(IEnumerable<ICommand> commands)
+        static Dictionary<string, Tuple<ICommandEngine, List<ICommand>>> GroupCommandByEngines(IEnumerable<ICommand> commands)
         {
             if (commands.IsNullOrEmpty())
             {
                 return new Dictionary<string, Tuple<ICommandEngine, List<ICommand>>>(0);
             }
-            if (GetCommandEnginesAsync == null)
+            if (ResolveCommandEngines == null)
             {
                 var defaultCmdEngine = ContainerManager.Resolve<ICommandEngine>();
                 if (defaultCmdEngine != null)
@@ -306,7 +306,7 @@ namespace EZNEW.Develop.Command
                         }
                     };
                 }
-                throw new EZNEWException("GetCommandEnginesAsync didn't set any value");
+                throw new EZNEWException($"{nameof(ResolveCommandEngines)} didn't set any value");
             }
             var cmdEngineDict = new Dictionary<string, Tuple<ICommandEngine, List<ICommand>>>();
             foreach (var command in commands)
@@ -315,7 +315,7 @@ namespace EZNEW.Develop.Command
                 {
                     continue;
                 }
-                var cmdEngines = await GetCommandEnginesAsync(command).ConfigureAwait(false);
+                var cmdEngines = ResolveCommandEngines(command);
                 if (cmdEngines.IsNullOrEmpty())
                 {
                     continue;
@@ -351,7 +351,7 @@ namespace EZNEW.Develop.Command
                 return new List<ICommandEngine>(0);
             }
             List<ICommandEngine> commandEngines = null;
-            if (GetCommandEnginesAsync == null)
+            if (ResolveCommandEngines == null)
             {
                 var defaultCmdEngine = ContainerManager.Resolve<ICommandEngine>();
                 if (defaultCmdEngine != null)
@@ -361,7 +361,7 @@ namespace EZNEW.Develop.Command
             }
             else
             {
-                commandEngines = GetCommandEnginesAsync(command).Result;
+                commandEngines = ResolveCommandEngines(command);
             }
             if (!AllowNoneCommandEngine && commandEngines.IsNullOrEmpty())
             {

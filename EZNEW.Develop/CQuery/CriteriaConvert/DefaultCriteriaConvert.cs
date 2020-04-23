@@ -7,6 +7,7 @@ namespace EZNEW.Develop.CQuery.CriteriaConvert
     /// <summary>
     /// default criteria convert
     /// </summary>
+   [Serializable]
     public class DefaultCriteriaConvert : ICriteriaConvert
     {
         /// <summary>

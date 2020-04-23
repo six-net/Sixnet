@@ -15,6 +15,8 @@ namespace EZNEW.Develop.Entity
     /// </summary>
     public static class EntityManager
     {
+        static Type booleanType = typeof(bool);
+
         #region propertys
 
         /// <summary>
@@ -124,7 +126,8 @@ namespace EZNEW.Develop.Entity
                     IsDisableQuery = disableQuery,
                     IsPrimaryKey = primaryKey,
                     IsRefreshDate = refreshDate,
-                    IsVersion = isVersion
+                    IsVersion = isVersion,
+                    DataType = property.PropertyType
                 };
                 allFields.Add(propertyField);
                 if (primaryKey)
@@ -223,6 +226,7 @@ namespace EZNEW.Develop.Entity
             {
                 entityConfig.QueryFields = queryFields;
             }
+            entityConfig.PredicateType = typeof(Func<,>).MakeGenericType(type, booleanType);
             ConfigEntity(type.GUID, entityConfig);
         }
 

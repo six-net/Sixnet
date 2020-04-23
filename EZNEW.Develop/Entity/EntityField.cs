@@ -86,6 +86,14 @@ namespace EZNEW.Develop.Entity
         }
 
         /// <summary>
+        /// data type
+        /// </summary>
+        public Type DataType 
+        {
+            get;set;
+        }
+
+        /// <summary>
         /// query format fields
         /// </summary>
         ConcurrentDictionary<string, string> queryFormatFields = new ConcurrentDictionary<string, string>();

@@ -10,6 +10,7 @@ namespace EZNEW.Develop.CQuery
     /// <summary>
     /// order expression
     /// </summary>
+    [Serializable]
     public class OrderCriteria
     {
         #region property

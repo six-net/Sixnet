@@ -4,6 +4,7 @@ using System.Text;
 
 namespace EZNEW.Develop.CQuery
 {
+    [Serializable]
     public class JoinItem
     {
         /// <summary>

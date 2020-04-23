@@ -19,7 +19,7 @@ namespace EZNEW.Develop.Domain.Event
         /// <summary>
         /// created date
         /// </summary>
-        public DateTime CreatedDate { get; set; } = DateTime.Now;
+        public DateTimeOffset CreatedDate { get; set; } = DateTimeOffset.Now;
 
         #endregion
     }

@@ -9,6 +9,7 @@ using EZNEW.Framework.Paging;
 using EZNEW.Develop.CQuery.CriteriaConvert;
 using EZNEW.Develop.Entity;
 using EZNEW.Develop.DataAccess;
+using System.Threading;
 
 namespace EZNEW.Develop.CQuery
 {
@@ -26,11 +27,6 @@ namespace EZNEW.Develop.CQuery
     public interface IQuery : IQueryItem
     {
         #region property
-
-        /// <summary>
-        /// entity type
-        /// </summary>
-        Type EntityType { get; }
 
         /// <summary>
         /// all criterias or other IQuery items
@@ -69,7 +65,7 @@ namespace EZNEW.Develop.CQuery
         /// </summary>
         PagingFilter PagingInfo
         {
-            get; set;
+            get;
         }
 
         /// <summary>
@@ -1118,7 +1114,19 @@ namespace EZNEW.Develop.CQuery
         /// clone
         /// </summary>
         /// <returns></returns>
-        IQuery Clone();
+        IQuery Copy();
+
+        /// <summary>
+        /// deep clone
+        /// </summary>
+        /// <returns></returns>
+        IQuery DeepCopy();
+
+        /// <summary>
+        /// clone by this object without conditions
+        /// </summary>
+        /// <returns></returns>
+        IQuery CopyWithoutConditions();
 
         #endregion
 
@@ -2478,16 +2486,6 @@ namespace EZNEW.Develop.CQuery
 
         #endregion
 
-        #region entity type
-
-        /// <summary>
-        /// set entity type
-        /// </summary>
-        /// <param name="entityType">entity type</param>
-        void SetEntityType(Type entityType);
-
-        #endregion
-
         #region global condition
 
         /// <summary>
@@ -2503,6 +2501,57 @@ namespace EZNEW.Develop.CQuery
         /// </summary>
         /// <returns></returns>
         bool AllowSetGlobalCondition();
+
+        #endregion
+
+        #region reset
+
+        /// <summary>
+        /// reset
+        /// </summary>
+        void Reset();
+
+        #endregion
+
+        #region cancellationtoken
+
+        /// <summary>
+        /// set cancellation token
+        /// </summary>
+        /// <param name="cancellationToken">CancellationToken</param>
+        void SetCancellationToken(CancellationToken? cancellationToken);
+
+        /// <summary>
+        /// get cancellation token
+        /// </summary>
+        /// <returns>CancellationToken</returns>
+        CancellationToken? GetCancellationToken();
+
+        #endregion
+
+        #region entity type
+
+        /// <summary>
+        /// get entity type
+        /// </summary>
+        /// <returns></returns>
+        Type GetEntityType();
+
+        /// <summary>
+        /// set entity type
+        /// </summary>
+        /// <param name="entityType">entity type</param>
+        void SetEntityType(Type entityType);
+
+        #endregion
+
+        #region paging
+
+        /// <summary>
+        /// set paging
+        /// </summary>
+        /// <param name="pagingFilter">paging filter</param>
+        void SetPaging(PagingFilter pagingFilter);
 
         #endregion
 

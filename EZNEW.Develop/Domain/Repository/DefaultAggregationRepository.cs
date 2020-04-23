@@ -112,7 +112,7 @@ namespace EZNEW.Develop.Domain.Repository
         protected override async Task<DT> GetDataAsync(IQuery query)
         {
             var entityData = await repositoryWarehouse.GetAsync(query).ConfigureAwait(false);
-            DT data = default(DT);
+            DT data = default;
             if (entityData != null)
             {
                 data = entityData.MapTo<DT>();
@@ -330,7 +330,7 @@ namespace EZNEW.Develop.Domain.Repository
                 SourceType = QuerySourceType.Repository,
                 UsageScene = usageScene
             };
-            var conditionFilterResult = QueryManager.GlobalConditionFilter(conditionFilter);
+            var conditionFilterResult = QueryFactory.GlobalConditionFilter(conditionFilter);
             if (conditionFilterResult != null)
             {
                 conditionFilterResult.AppendTo(originalQuery);
@@ -370,9 +370,9 @@ namespace EZNEW.Develop.Domain.Repository
                 return;
             }
             conditionFilter.SourceType = QuerySourceType.Subuery;
-            conditionFilter.EntityType = subquery.EntityType;
+            conditionFilter.EntityType = subquery.GetEntityType();
             conditionFilter.OriginalQuery = subquery;
-            var conditionFilterResult = QueryManager.GlobalConditionFilter(conditionFilter);
+            var conditionFilterResult = QueryFactory.GlobalConditionFilter(conditionFilter);
             if (conditionFilterResult != null)
             {
                 conditionFilterResult.AppendTo(subquery);
@@ -411,9 +411,9 @@ namespace EZNEW.Develop.Domain.Repository
                 return;
             }
             conditionFilter.SourceType = QuerySourceType.JoinQuery;
-            conditionFilter.EntityType = joinQuery.EntityType;
+            conditionFilter.EntityType = joinQuery.GetEntityType();
             conditionFilter.OriginalQuery = joinQuery;
-            var conditionFilterResult = QueryManager.GlobalConditionFilter(conditionFilter);
+            var conditionFilterResult = QueryFactory.GlobalConditionFilter(conditionFilter);
             if (conditionFilterResult != null)
             {
                 conditionFilterResult.AppendTo(joinQuery);

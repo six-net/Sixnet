@@ -402,7 +402,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
                 var sourceDatas = dataPackages.Where(c => c.LifeSource == DataLifeSource.DataSource);
                 if (!sourceDatas.IsNullOrEmpty())
                 {
-                    QueryFactory.AppendEntityIdentityCondition(sourceDatas.Select(c => c.PersistentData), query, true);
+                    query = QueryFactory.AppendEntityIdentityCondition(sourceDatas.Select(c => c.PersistentData), query, true);
                 }
                 result.CheckQuery = query;
             }
@@ -471,16 +471,18 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
             var dataPackages = GetDataPackages(query);
             string propertyName = query.QueryFields.ElementAt(0);
             var nowDataPackages = dataPackages.Where(c => c.Operate != WarehouseDataOperate.Remove);
-            VT value;
-            if (nowDataPackages.IsNullOrEmpty())
-            {
-                value = default(VT);
-            }
-            else
+            VT value = default;
+            bool validValue = false;
+            if (!nowDataPackages.IsNullOrEmpty())
             {
                 value = nowDataPackages.Max(c => c.WarehouseData.GetPropertyValue<VT>(propertyName));
+                validValue = true;
             }
-            var result = new ComputeResult<VT>() { Value = value };
+            var result = new ComputeResult<VT>()
+            {
+                Value = value,
+                ValidValue = validValue
+            };
             var sourceDatas = dataPackages.Where(c => c.LifeSource == DataLifeSource.DataSource);
             if (!sourceDatas.IsNullOrEmpty())
             {
@@ -513,16 +515,18 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
             var dataPackages = GetDataPackages(query);
             string propertyName = query.QueryFields.ElementAt(0);
             var nowDataPackages = dataPackages.Where(c => c.Operate != WarehouseDataOperate.Remove);
-            VT value;
-            if (nowDataPackages.IsNullOrEmpty())
-            {
-                value = default(VT);
-            }
-            else
+            VT value = default;
+            bool validValue = false;
+            if (!nowDataPackages.IsNullOrEmpty())
             {
                 value = nowDataPackages.Min(c => c.WarehouseData.GetPropertyValue<VT>(propertyName));
+                validValue = true;
             }
-            var result = new ComputeResult<VT>() { Value = value };
+            var result = new ComputeResult<VT>()
+            {
+                Value = value,
+                ValidValue = validValue
+            };
             var sourceDatas = dataPackages.Where(c => c.LifeSource == DataLifeSource.DataSource);
             if (!sourceDatas.IsNullOrEmpty())
             {
@@ -548,23 +552,28 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
             {
                 return new ComputeResult<VT>()
                 {
-                    Value = default(VT),
+                    Value = default,
                     ComputeQuery = query
                 };
             }
             var dataPackages = GetDataPackages(query);
             string propertyName = query.QueryFields.ElementAt(0);
-            var nowDataPackages = dataPackages.Where(c => c.Operate != WarehouseDataOperate.Remove);
-            dynamic value;
-            if (nowDataPackages.IsNullOrEmpty())
+            var nowDataPackages = dataPackages.Where(c => c.Operate != WarehouseDataOperate.Remove).ToList();
+            dynamic value = default(VT);
+            bool validValue = false;
+            if (!nowDataPackages.IsNullOrEmpty())
             {
-                value = default(VT);
+                nowDataPackages.ForEach(c =>
+                {
+                    value += c.WarehouseData.GetPropertyValue<VT>(propertyName);
+                });
+                validValue = true;
             }
-            else
+            var result = new ComputeResult<VT>()
             {
-                value = nowDataPackages.Sum(c => (dynamic)c.WarehouseData.GetPropertyValue<VT>(propertyName));
-            }
-            var result = new ComputeResult<VT>() { Value = value };
+                Value = value,
+                ValidValue = validValue
+            };
             var sourceDatas = dataPackages.Where(c => c.LifeSource == DataLifeSource.DataSource);
             if (!sourceDatas.IsNullOrEmpty())
             {
