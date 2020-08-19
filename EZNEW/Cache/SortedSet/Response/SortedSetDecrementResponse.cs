@@ -8,9 +8,6 @@
         /// <summary>
         /// Gets or sets the new score value
         /// </summary>
-        public double NewScore
-        {
-            get; set;
-        }
+        public double NewScore { get; set; }
     }
 }

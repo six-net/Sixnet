@@ -3,33 +3,27 @@ using System.Collections.Generic;
 using System.Linq;
 using static EZNEW.Dapper.SqlMapper;
 using EZNEW.Develop.Command;
+using EZNEW.Develop.CQuery;
+using EZNEW.Fault;
 
 namespace EZNEW.Develop.Entity
 {
     /// <summary>
     /// Base entity
     /// </summary>
-    public abstract class BaseEntity<T> where T : BaseEntity<T>, new()
+    public abstract class BaseEntity<T> : IQueryModel<T> where T : BaseEntity<T>, new()
     {
         protected Dictionary<string, dynamic> valueDict = new Dictionary<string, dynamic>();//field values
         string identityValue = string.Empty;
         bool loadedIdentityValue = false;
         protected static Type entityType = typeof(T);
 
-        static BaseEntity()
-        {
-            EntityManager.ConfigureEntity<T>();
-        }
-
         #region Properties
 
         /// <summary>
         /// Gets or sets the query data total count
         /// </summary>
-        protected int QueryDataTotalCount
-        {
-            get; set;
-        }
+        protected int QueryDataTotalCount { get; set; }
 
         #endregion
 
@@ -69,11 +63,12 @@ namespace EZNEW.Develop.Entity
         internal Dictionary<string, dynamic> GetPrimaryKeyValues()
         {
             var primaryKeys = EntityManager.GetPrimaryKeys(typeof(T));
-            if (primaryKeys == null || primaryKeys.Count <= 0)
+            var keysCount = primaryKeys.GetCount();
+            if (primaryKeys == null || keysCount <= 0)
             {
                 return new Dictionary<string, dynamic>(0);
             }
-            Dictionary<string, dynamic> values = new Dictionary<string, dynamic>(primaryKeys.Count);
+            Dictionary<string, dynamic> values = new Dictionary<string, dynamic>(keysCount);
             foreach (var key in primaryKeys)
             {
                 if (valueDict.ContainsKey(key))
@@ -142,11 +137,8 @@ namespace EZNEW.Develop.Entity
         /// <returns>Return property value</returns>
         public dynamic GetPropertyValue(string propertyName)
         {
-            if (valueDict.ContainsKey(propertyName))
-            {
-                return valueDict[propertyName];
-            }
-            throw new Exception("error property");
+            valueDict.TryGetValue(propertyName, out var value);
+            return value;
         }
 
         /// <summary>
@@ -190,12 +182,16 @@ namespace EZNEW.Develop.Entity
         public CommandParameters GetCommandParameters()
         {
             var parameters = new CommandParameters();
-            var propertys = EntityManager.GetFields(entityType);
-            foreach (var property in propertys)
+            var entityConfig = EntityManager.GetEntityConfiguration(entityType);
+            if (entityConfig == null)
             {
-                var value = GetPropertyValue(property.PropertyName);
-                var dbType = LookupDbType(property.DataType, property.PropertyName, false, out ITypeHandler handler);
-                parameters.Add(property.PropertyName, value, dbType: dbType);
+                return parameters;
+            }
+            foreach (var fieldItem in entityConfig.AllFields)
+            {
+                var value = GetPropertyValue(fieldItem.Key);
+                var dbType = LookupDbType(fieldItem.Value.DataType, fieldItem.Key, false, out ITypeHandler handler);
+                parameters.Add(fieldItem.Key, value, dbType: dbType);
             }
             return parameters;
         }
@@ -212,10 +208,10 @@ namespace EZNEW.Develop.Entity
             {
                 return newData;
             }
-            foreach (var pk in primaryKeys)
+            foreach (var key in primaryKeys)
             {
-                var value = GetPropertyValue(pk.PropertyName);
-                newData.SetPropertyValue(pk.PropertyName, value);
+                var value = GetPropertyValue(key);
+                newData.SetPropertyValue(key, value);
             }
             return newData;
         }

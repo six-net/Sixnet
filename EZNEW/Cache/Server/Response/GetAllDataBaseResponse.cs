@@ -10,9 +10,6 @@ namespace EZNEW.Cache.Server.Response
         /// <summary>
         /// Gets or sets the databases
         /// </summary>
-        public List<CacheDatabase> Databases
-        {
-            get; set;
-        }
+        public List<CacheDatabase> Databases { get; set; }
     }
 }

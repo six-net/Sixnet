@@ -8,9 +8,6 @@
         /// <summary>
         /// Gets or sets the cache keys
         /// </summary>
-        public CachePaging<CacheKey> Keys
-        {
-            get; set;
-        }
+        public CachePaging<CacheKey> Keys { get; set; }
     }
 }

@@ -11,18 +11,12 @@ namespace EZNEW.Cache.Keys.Request
         /// <summary>
         /// Gets or sets the cache key
         /// </summary>
-        public CacheKey Key
-        {
-            get; set;
-        }
+        public CacheKey Key { get; set; }
 
         /// <summary>
-        /// Gets or sets the expire
+        /// Gets or sets the expiration time
         /// </summary>
-        public CacheExpiration Expire
-        {
-            get; set;
-        }
+        public CacheExpiration Expiration { get; set; }
 
         /// <summary>
         /// Execute cache operation

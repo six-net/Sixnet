@@ -16,10 +16,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// <summary>
         /// Gets the datas
         /// </summary>
-        public Dictionary<string, DataPackage<TEntity>> DataDictionary
-        {
-            get; private set;
-        } = new Dictionary<string, DataPackage<TEntity>>();
+        public Dictionary<string, DataPackage<TEntity>> EntityDataCollection { get; private set; } = new Dictionary<string, DataPackage<TEntity>>();
 
         /// <summary>
         /// Remove querys
@@ -65,7 +62,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
             {
                 throw IdentityValueIsNullOrEmptyException();
             }
-            if (DataDictionary.ContainsKey(identityValue))
+            if (EntityDataCollection.ContainsKey(identityValue))
             {
                 return null;
             }
@@ -130,7 +127,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
             {
                 throw IdentityValueIsNullOrEmptyException();
             }
-            if (DataDictionary.ContainsKey(identityValue))
+            if (EntityDataCollection.ContainsKey(identityValue))
             {
                 return null;
             }
@@ -169,7 +166,8 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
             var warehouseDatas = GetWarehouseDatas(query);
             if (!datas.IsNullOrEmpty())
             {
-                warehouseDatas = warehouseDatas.Except(datas).ToList();
+                warehouseDatas = warehouseDatas.Except(datas);
+                List<TEntity> validateDatas = new List<TEntity>();
                 foreach (var data in datas)
                 {
                     if (data == null)
@@ -190,7 +188,11 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
                     {
                         continue;
                     }
-                    warehouseDatas.Add(realData);
+                    validateDatas.Add(realData);
+                }
+                if (validateDatas.Count > 0)
+                {
+                    warehouseDatas = warehouseDatas.Union(validateDatas);
                 }
             }
             if (warehouseDatas.IsNullOrEmpty())
@@ -199,18 +201,18 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
             }
             if (!(query?.Orders.IsNullOrEmpty() ?? true))
             {
-                warehouseDatas = query.Sort(warehouseDatas).ToList();
+                warehouseDatas = query.Sort(warehouseDatas);
             }
             var querySize = 0;
             if (query != null)
             {
                 querySize = query.PagingInfo == null ? query.QuerySize : query.PagingInfo.PageSize;
             }
-            if (querySize > 0 && warehouseDatas.Count > querySize)
+            if (querySize > 0 && warehouseDatas.GetCount() > querySize)
             {
-                warehouseDatas = warehouseDatas.Take(querySize).ToList();
+                warehouseDatas = warehouseDatas.Take(querySize);
             }
-            return warehouseDatas;
+            return warehouseDatas.ToList();
         }
 
         /// <summary>
@@ -220,7 +222,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// <returns>Return warehouse entity data</returns>
         public TEntity Merge(TEntity data, IQuery query = null)
         {
-            var warehouseDatas = GetWarehouseDatas(query);
+            var warehouseDatas = GetWarehouseDatas(query).ToList();
             //merge data to warehouse
             if (data != null)
             {
@@ -344,7 +346,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
                 return;
             }
             removeQueryCollection.Add(query);
-            foreach (var dataPackage in DataDictionary.Values)
+            foreach (var dataPackage in EntityDataCollection.Values)
             {
                 if (func(dataPackage.WarehouseData))
                 {
@@ -370,7 +372,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
             }
             modifyExpressionCollection.Add(new Tuple<IModify, IQuery>(modifyExpression, query));
             var queryFunc = query?.GetQueryExpression<TEntity>();
-            foreach (var item in DataDictionary)
+            foreach (var item in EntityDataCollection)
             {
                 if (queryFunc?.Invoke(item.Value.WarehouseData) ?? true)
                 {
@@ -397,12 +399,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
             };
             if (!result.IsExist)
             {
-                var sourceDatas = dataPackages.Where(c => c.LifeSource == DataLifeSource.DataSource);
-                if (!sourceDatas.IsNullOrEmpty())
-                {
-                    query = QueryManager.AppendEntityIdentityCondition(sourceDatas.Select(c => c.PersistentData), query, true);
-                }
-                result.CheckQuery = query;
+                result.CheckQuery = AppendExcludeDataCondition(query, dataPackages);
             }
             return result;
         }
@@ -419,30 +416,20 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         public CountResult Count(IQuery query)
         {
             var dataPackages = GetDataPackages(query);
-            long newDataCount = 0;
-            long removePersistentDataCount = 0;
-            long allPersistentDataCount = 0;
-            dataPackages.ForEach(c =>
+            long dataCount = 0;
+            foreach (var dataPackage in dataPackages)
             {
-                if (c.LifeSource == DataLifeSource.New)
+                if (dataPackage.Operate == WarehouseDataOperate.Remove)
                 {
-                    newDataCount += 1;
+                    continue;
                 }
-                else
-                {
-                    allPersistentDataCount += 1;
-                    if (c.Operate == WarehouseDataOperate.Remove)
-                    {
-                        removePersistentDataCount += 1;
-                    }
-                }
-            });
+                dataCount++;
+            }
+            query = AppendExcludeDataCondition(query, dataPackages);
             return new CountResult()
             {
-                NewDataCount = newDataCount,
-                PersistentDataRemoveCount = removePersistentDataCount,
-                PersistentDataCount = allPersistentDataCount,
-                TotalDataCount = dataPackages.Count
+                Count = dataCount,
+                ComputeQuery = query
             };
         }
 
@@ -481,12 +468,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
                 Value = value,
                 ValidValue = validValue
             };
-            var sourceDatas = dataPackages.Where(c => c.LifeSource == DataLifeSource.DataSource);
-            if (!sourceDatas.IsNullOrEmpty())
-            {
-                QueryManager.AppendEntityIdentityCondition(sourceDatas.Select(c => c.PersistentData), query, true);
-            }
-            result.ComputeQuery = query;
+            result.ComputeQuery = AppendExcludeDataCondition(query, dataPackages);
             return result;
         }
 
@@ -506,7 +488,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
             {
                 return new ComputeResult<TValue>()
                 {
-                    Value = default(TValue),
+                    Value = default,
                     ComputeQuery = query
                 };
             }
@@ -525,12 +507,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
                 Value = value,
                 ValidValue = validValue
             };
-            var sourceDatas = dataPackages.Where(c => c.LifeSource == DataLifeSource.DataSource);
-            if (!sourceDatas.IsNullOrEmpty())
-            {
-                QueryManager.AppendEntityIdentityCondition(sourceDatas.Select(c => c.PersistentData), query, true);
-            }
-            result.ComputeQuery = query;
+            result.ComputeQuery = AppendExcludeDataCondition(query, dataPackages);
             return result;
         }
 
@@ -572,12 +549,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
                 Value = value,
                 ValidValue = validValue
             };
-            var sourceDatas = dataPackages.Where(c => c.LifeSource == DataLifeSource.DataSource);
-            if (!sourceDatas.IsNullOrEmpty())
-            {
-                QueryManager.AppendEntityIdentityCondition(sourceDatas.Select(c => c.PersistentData), query, true);
-            }
-            result.ComputeQuery = query;
+            result.ComputeQuery = AppendExcludeDataCondition(query, dataPackages);
             return result;
         }
 
@@ -611,7 +583,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
             {
                 return null;
             }
-            DataDictionary.TryGetValue(identityValue, out DataPackage<TEntity> dataPackage);
+            EntityDataCollection.TryGetValue(identityValue, out DataPackage<TEntity> dataPackage);
             return dataPackage;
         }
 
@@ -626,7 +598,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
             {
                 return new List<DataPackage<TEntity>>(0);
             }
-            return DataDictionary.Where(c => identityValues.Contains(c.Key)).Select(c => c.Value).ToList();
+            return EntityDataCollection.Where(c => identityValues.Contains(c.Key)).Select(c => c.Value).ToList();
         }
 
         #endregion
@@ -682,24 +654,16 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
             {
                 return;
             }
-            if (DataDictionary.ContainsKey(identityValue))
-            {
-                DataDictionary[identityValue] = dataPackage;
-            }
-            else
-            {
-                DataDictionary.Add(identityValue, dataPackage);
-            }
+            EntityDataCollection[identityValue] = dataPackage;
         }
 
         /// <summary>
         /// Get stored datas
         /// </summary>
         /// <returns></returns>
-        List<TEntity> GetWarehouseDatas()
+        IEnumerable<TEntity> GetWarehouseDatas()
         {
-            var storedDatas = DataDictionary?.Where(c => c.Value.Operate != WarehouseDataOperate.Remove).Select(c => c.Value.WarehouseData);
-            return storedDatas.ToList();
+            return EntityDataCollection?.Where(c => c.Value.Operate != WarehouseDataOperate.Remove).Select(c => c.Value.WarehouseData);
         }
 
         /// <summary>
@@ -707,7 +671,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// </summary>
         /// <param name="query">Query object</param>
         /// <returns>Return entity data list</returns>
-        List<TEntity> GetWarehouseDatas(IQuery query)
+        IEnumerable<TEntity> GetWarehouseDatas(IQuery query)
         {
             var storedDatas = GetWarehouseDatas();
             if (query != null)
@@ -715,7 +679,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
                 var func = query.GetQueryExpression<TEntity>();
                 if (func != null)
                 {
-                    storedDatas = storedDatas.Where(func).ToList();
+                    storedDatas = storedDatas.Where(func);
                 }
             }
             return storedDatas;
@@ -732,8 +696,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
             {
                 return null;
             }
-            string identityValue = data.GetIdentityValue();
-            return GetDataPackage(identityValue);
+            return GetDataPackage(data.GetIdentityValue());
         }
 
         /// <summary>
@@ -741,17 +704,17 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// </summary>
         /// <param name="query">Query</param>
         /// <returns>Return the entity data packages</returns>
-        List<DataPackage<TEntity>> GetDataPackages(IQuery query)
+        IEnumerable<DataPackage<TEntity>> GetDataPackages(IQuery query)
         {
-            var dataPackages = DataDictionary?.Values.ToList();
+            IEnumerable<DataPackage<TEntity>> dataPackages = EntityDataCollection?.Values;
             if (dataPackages.IsNullOrEmpty())
             {
-                return new List<DataPackage<TEntity>>(0);
+                return Array.Empty<DataPackage<TEntity>>();
             }
             if (query != null)
             {
                 var func = query.GetQueryExpression<TEntity>();
-                dataPackages = dataPackages.Where(c => func(c.WarehouseData)).ToList();
+                dataPackages = dataPackages.Where(c => func(c.WarehouseData));
             }
             return dataPackages;
         }
@@ -763,6 +726,29 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         EZNEWException IdentityValueIsNullOrEmptyException()
         {
             return new EZNEWException(string.Format("{0} identity value is null or empty", typeof(TEntity)));
+        }
+
+        /// <summary>
+        /// Append exclude data condition
+        /// </summary>
+        /// <param name="originalQuery">Original query</param>
+        /// <param name="dataPackages">Data packages</param>
+        /// <returns>Return the newest IQuery object</returns>
+        IQuery AppendExcludeDataCondition(IQuery originalQuery, IEnumerable<DataPackage<TEntity>> dataPackages)
+        {
+            var sourceDatas = dataPackages.Where(c => c.LifeSource == DataLifeSource.DataSource);
+            if (!sourceDatas.IsNullOrEmpty())
+            {
+                originalQuery = QueryManager.AppendEntityIdentityCondition(sourceDatas.Select(c => c.PersistentData), originalQuery, true);
+            }
+            if (!removeQueryCollection.IsNullOrEmpty())
+            {
+                foreach (var removeQuery in removeQueryCollection)
+                {
+                    originalQuery = originalQuery.Except(removeQuery);
+                }
+            }
+            return originalQuery;
         }
 
         #endregion

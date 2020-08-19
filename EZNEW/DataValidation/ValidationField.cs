@@ -11,33 +11,21 @@ namespace EZNEW.DataValidation
         /// <summary>
         /// Gets or sets the field
         /// </summary>
-        public Expression<Func<T, dynamic>> Field
-        {
-            get; set;
-        }
+        public Expression<Func<T, dynamic>> Field { get; set; }
 
         /// <summary>
         /// Gets or sets the error message
         /// </summary>
-        public string ErrorMessage
-        {
-            get; set;
-        }
+        public string ErrorMessage { get; set; }
 
         /// <summary>
         /// Gets or sets the compare value
         /// </summary>
-        internal dynamic CompareValue
-        {
-            get; set;
-        }
+        internal dynamic CompareValue { get; set; }
 
         /// <summary>
         /// Gets or sets the tip message
         /// </summary>
-        public bool TipMessage
-        {
-            get; set;
-        }
+        public bool TipMessage { get; set; }
     }
 }

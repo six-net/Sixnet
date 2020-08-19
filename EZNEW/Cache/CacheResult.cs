@@ -10,10 +10,7 @@ namespace EZNEW.Cache.Command.Result
         /// <summary>
         /// Gets or sets the responses
         /// </summary>
-        public List<TResponse> Responses
-        {
-            get; set;
-        }
+        public List<TResponse> Responses { get; set; }
 
         /// <summary>
         /// Add response

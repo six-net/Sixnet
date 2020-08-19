@@ -10,17 +10,11 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// <summary>
         /// Gets or sets whether has data
         /// </summary>
-        public bool IsExist
-        {
-            get; set;
-        }
+        public bool IsExist { get; set; }
 
         /// <summary>
         /// Gets or sets the check query
         /// </summary>
-        public IQuery CheckQuery
-        {
-            get; set;
-        }
+        public IQuery CheckQuery { get; set; }
     }
 }

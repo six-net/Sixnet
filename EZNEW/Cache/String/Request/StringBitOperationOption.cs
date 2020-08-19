@@ -12,26 +12,23 @@ namespace EZNEW.Cache.String.Request
         /// <summary>
         /// Gets or sets the bit wise
         /// </summary>
-        public CacheBitwise Bitwise
-        {
-            get; set;
-        }
+        public CacheBitwise Bitwise { get; set; }
 
         /// <summary>
         /// Gets or sets the destination key for store
         /// </summary>
-        public CacheKey DestinationKey
-        {
-            get; set;
-        }
+        public CacheKey DestinationKey { get; set; }
 
         /// <summary>
         /// Gets or sets the cache keys
         /// </summary>
-        public List<CacheKey> Keys
-        {
-            get; set;
-        }
+        public List<CacheKey> Keys { get; set; }
+
+        /// <summary>
+        /// Gets or sets the cache entry expiration
+        /// When the specified cache item is not found, the cache item is created with the change expiration information 
+        /// </summary>
+        public CacheExpiration Expiration { get; set; }
 
         /// <summary>
         /// Execute cache operation

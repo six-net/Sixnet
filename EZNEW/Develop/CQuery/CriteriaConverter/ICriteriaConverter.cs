@@ -14,5 +14,11 @@
         /// Gets or sets the data
         /// </summary>
         object Data { get; set; }
+
+        /// <summary>
+        /// Clone a new converter
+        /// </summary>
+        /// <returns></returns>
+        ICriteriaConverter Clone();
     }
 }

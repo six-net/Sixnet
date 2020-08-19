@@ -8,18 +8,12 @@
         /// <summary>
         /// Gets or sets the group statements count
         /// </summary>
-        public int GroupStatementsCount
-        {
-            get; set;
-        } = 1000;
+        public int GroupStatementsCount { get; set; } = 1000;
 
         /// <summary>
         /// Gets or sets the group parameters count
         /// </summary>
-        public int GroupParametersCount
-        {
-            get; set;
-        } = 2000;
+        public int GroupParametersCount { get; set; } = 2000;
 
         /// <summary>
         /// Gets the default batch execute configuration

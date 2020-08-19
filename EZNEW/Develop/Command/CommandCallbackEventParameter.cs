@@ -11,18 +11,12 @@ namespace EZNEW.Develop.Command
         /// <summary>
         /// Gets or sets the command
         /// </summary>
-        public ICommand Command
-        {
-            get; set;
-        }
+        public ICommand Command { get; set; }
 
         /// <summary>
         /// Gets or sets the command behavior
         /// </summary>
-        public CommandBehavior CommandBehavior
-        {
-            get; set;
-        }
+        public CommandBehavior CommandBehavior { get; set; }
 
         /// <summary>
         /// Gets or sets the event data
@@ -32,9 +26,6 @@ namespace EZNEW.Develop.Command
         /// <summary>
         /// Gets or sets whether the command execute successful
         /// </summary>
-        public bool IsExecuteSuccess
-        {
-            get; set;
-        }
+        public bool IsExecuteSuccess { get; set; }
     }
 }

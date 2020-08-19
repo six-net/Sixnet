@@ -11,41 +11,26 @@ namespace EZNEW.Application
         /// <summary>
         /// Gets or sets application code
         /// </summary>
-        public string Code
-        {
-            get; set;
-        }
+        public string Code { get; set; }
 
         /// <summary>
         /// Gets or sets application secret
         /// </summary>
-        public string Secret
-        {
-            get; set;
-        }
+        public string Secret { get; set; }
 
         /// <summary>
         /// Gets or sets application name
         /// </summary>
-        public string Name
-        {
-            get; set;
-        }
+        public string Name { get; set; }
 
         /// <summary>
         /// Gets or sets application type
         /// </summary>
-        public ApplicationType Type
-        {
-            get; set;
-        }
+        public ApplicationType Type { get; set; }
 
         /// <summary>
         /// Gets or sets application status
         /// </summary>
-        public ApplicationStatus Status
-        {
-            get; set;
-        }
+        public ApplicationStatus Status { get; set; }
     }
 }

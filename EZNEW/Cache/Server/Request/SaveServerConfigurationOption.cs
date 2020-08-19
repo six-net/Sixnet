@@ -12,10 +12,7 @@ namespace EZNEW.Cache.Server.Request
         /// <summary>
         /// Gets or sets the configuration
         /// </summary>
-        public CacheServerConfiguration ServerConfiguration
-        {
-            get; set;
-        }
+        public CacheServerConfiguration ServerConfiguration { get; set; }
 
         /// <summary>
         /// Execute cache operation

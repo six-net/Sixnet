@@ -8,9 +8,6 @@
         /// <summary>
         /// Gets or sets the string value length
         /// </summary>
-        public long StringLength
-        {
-            get; set;
-        }
+        public long Length { get; set; }
     }
 }

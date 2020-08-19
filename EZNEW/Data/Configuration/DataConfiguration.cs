@@ -10,9 +10,6 @@ namespace EZNEW.Data.Configuration
         /// <summary>
         /// Gets or sets the server type configuration
         /// </summary>
-        public Dictionary<DatabaseServerType, DatabaseServerConfiguration> Servers
-        {
-            get; set;
-        }
+        public Dictionary<DatabaseServerType, DatabaseServerConfiguration> Servers { get; set; }
     }
 }

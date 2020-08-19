@@ -10,9 +10,6 @@ namespace EZNEW.Cache.SortedSet.Response
         /// <summary>
         /// Gets or sets the members
         /// </summary>
-        public List<SortedSetMember> Members
-        {
-            get; set;
-        }
+        public List<SortedSetMember> Members { get; set; }
     }
 }

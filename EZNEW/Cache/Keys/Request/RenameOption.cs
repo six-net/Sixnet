@@ -11,26 +11,17 @@ namespace EZNEW.Cache.Keys.Request
         /// <summary>
         /// Gets or sets the cache key
         /// </summary>
-        public CacheKey Key
-        {
-            get; set;
-        }
+        public CacheKey Key { get; set; }
 
         /// <summary>
         /// Gets or sets the new key
         /// </summary>
-        public CacheKey NewKey
-        {
-            get; set;
-        }
+        public CacheKey NewKey { get; set; }
 
         /// <summary>
-        /// Gets or sets the time condition
+        /// Gets or sets whether only set new key when not exists
         /// </summary>
-        public CacheSetWhen When
-        {
-            get; set;
-        } = CacheSetWhen.Always;
+        public bool WhenNewKeyNotExists { get; set; }
 
         /// <summary>
         /// Execute cache operation

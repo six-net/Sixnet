@@ -10,9 +10,6 @@ namespace EZNEW.Cache.Hash.Response
         /// <summary>
         /// Gets or sets the hash keys
         /// </summary>
-        public List<string> HashKeys
-        {
-            get; set;
-        }
+        public List<string> HashKeys { get; set; }
     }
 }

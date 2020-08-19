@@ -16,10 +16,7 @@ namespace EZNEW.Develop.Command
         /// <summary>
         /// Gets the command engine identity key
         /// </summary>
-        string IdentityKey
-        {
-            get;
-        }
+        string IdentityKey { get; }
 
         #endregion
 

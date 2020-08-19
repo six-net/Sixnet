@@ -10,18 +10,12 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// <summary>
         /// Gets or sets the value
         /// </summary>
-        public TValue Value
-        {
-            get; set;
-        }
+        public TValue Value { get; set; }
 
         /// <summary>
         /// Gets or sets the compute query
         /// </summary>
-        public IQuery ComputeQuery
-        {
-            get; set;
-        }
+        public IQuery ComputeQuery { get; set; }
 
         /// <summary>
         /// Gets or sets whether valid compute value

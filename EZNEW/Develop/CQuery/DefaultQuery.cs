@@ -1,15 +1,15 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Linq.Expressions;
+using EZNEW.ExpressionUtil;
+using EZNEW.Reflection;
 using EZNEW.Develop.CQuery.CriteriaConverter;
-using EZNEW.Develop.Entity;
 using EZNEW.Fault;
 using EZNEW.Develop.DataAccess;
 using EZNEW.Paging;
-using System.Linq.Expressions;
-using EZNEW.ExpressionUtil;
+using EZNEW.Develop.Entity;
 
 namespace EZNEW.Develop.CQuery
 {
@@ -44,7 +44,7 @@ namespace EZNEW.Develop.CQuery
         /// <summary>
         /// Load data property
         /// </summary>
-        internal Dictionary<string, bool> loadPropertyDictionary = new Dictionary<string, bool>();
+        internal Dictionary<string, bool> loadProperties = new Dictionary<string, bool>();
 
         /// <summary>
         /// Equal criterias
@@ -55,6 +55,11 @@ namespace EZNEW.Develop.CQuery
         /// Join items
         /// </summary>
         internal List<JoinItem> joinItemCollection = new List<JoinItem>();
+
+        /// <summary>
+        /// Combine items
+        /// </summary>
+        internal List<CombineItem> combineItemCollection = new List<CombineItem>();
 
         /// <summary>
         /// Subqueries
@@ -87,6 +92,16 @@ namespace EZNEW.Develop.CQuery
         internal bool hasRecurveCriteria = false;
 
         /// <summary>
+        /// Has combine
+        /// </summary>
+        internal bool hasCombine = false;
+
+        /// <summary>
+        /// Has converter
+        /// </summary>
+        internal bool hasConverter = false;
+
+        /// <summary>
         /// Atomic condition count
         /// </summary>
         internal int atomicConditionCount = 0;
@@ -97,11 +112,16 @@ namespace EZNEW.Develop.CQuery
         internal List<string> allConditionFieldNameCollection = new List<string>();
 
         /// <summary>
+        /// Actually query fields
+        /// </summary>
+        Tuple<bool, IEnumerable<string>> actuallyQueryFields = null;
+
+        /// <summary>
         /// Entity type assembly qualified name
         /// </summary>
         internal string entityTypeAssemblyQualifiedName = string.Empty;
         [NonSerialized]
-        internal Dictionary<Guid, dynamic> queryExpressionDictionary = new Dictionary<Guid, dynamic>();
+        internal Dictionary<Guid, dynamic> queryExpressionCaches = new Dictionary<Guid, dynamic>();
         [NonSerialized]
         internal CancellationToken? cancellationToken = default;
         [NonSerialized]
@@ -111,9 +131,7 @@ namespace EZNEW.Develop.CQuery
 
         #region Constructor
 
-        internal DefaultQuery()
-        {
-        }
+        internal DefaultQuery() { }
 
         #endregion
 
@@ -152,7 +170,7 @@ namespace EZNEW.Develop.CQuery
         /// <summary>
         /// Gets the query text parameter
         /// </summary>
-        public dynamic QueryTextParameters { get; internal set; } = null;
+        public IEnumerable<KeyValuePair<string, object>> QueryTextParameters { get; internal set; } = null;
 
         /// <summary>
         /// Gets the query command type
@@ -167,7 +185,7 @@ namespace EZNEW.Develop.CQuery
         /// <summary>
         /// Gets all of data properties allow to lazy load
         /// </summary>
-        public IEnumerable<KeyValuePair<string, bool>> LoadPropertys => loadPropertyDictionary;
+        public IEnumerable<KeyValuePair<string, bool>> LoadPropertys => loadProperties;
 
         /// <summary>
         /// Gets whether has subquery
@@ -183,6 +201,16 @@ namespace EZNEW.Develop.CQuery
         /// Gets whether has join item
         /// </summary>
         public bool HasJoin => hasJoin;
+
+        /// <summary>
+        /// Gets whether has combine items
+        /// </summary>
+        public bool HasCombine => hasCombine;
+
+        /// <summary>
+        /// Gets whether has criteria converter
+        /// </summary>
+        public bool HasConverter => hasConverter;
 
         /// <summary>
         /// Gets whether is a complex query
@@ -211,9 +239,14 @@ namespace EZNEW.Develop.CQuery
         public IEnumerable<JoinItem> JoinItems => joinItemCollection;
 
         /// <summary>
+        /// Gets the combine items
+        /// </summary>
+        public IEnumerable<CombineItem> CombineItems => combineItemCollection;
+
+        /// <summary>
         /// Gets whether is a none condition object
         /// </summary>
-        public bool NoneCondition => criteriaCollection.IsNullOrEmpty() && JoinItems.IsNullOrEmpty();
+        public bool NoneCondition => criteriaCollection.IsNullOrEmpty() && JoinItems.IsNullOrEmpty() && combineItemCollection.IsNullOrEmpty();
 
         /// <summary>
         /// Gets the atomic condition count
@@ -239,1241 +272,60 @@ namespace EZNEW.Develop.CQuery
 
         #region Functions
 
-        #region And
+        #region Condition
 
         /// <summary>
-        /// Add a condition with 'and'
+        /// Add a criteria
         /// </summary>
+        /// <param name="queryOperator">Connect operator</param>
         /// <param name="fieldName">Field name</param>
-        /// <param name="operator">Condition operator</param>
+        /// <param name="criteriaOperator">Condition operator</param>
         /// <param name="value">Value</param>
-        /// <param name="converter">Criteria converter</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery And(string fieldName, CriteriaOperator @operator, dynamic value, ICriteriaConverter converter = null)
+        /// <param name="converter">Converter</param>
+        /// <param name="queryOption">query parameter option</param>
+        public IQuery AddCriteria(QueryOperator queryOperator, string fieldName, CriteriaOperator criteriaOperator, dynamic value, ICriteriaConverter converter = null, QueryParameterOption queryOption = null)
         {
-            AddCriteria(QueryOperator.AND, fieldName, @operator, value, converter);
-            return this;
-        }
-
-        /// <summary>
-        /// Add a condition with 'and'
-        /// </summary>
-        /// <param name="eachFieldConnectOperator">each field codition connect operator</param>
-        /// <param name="operator">Condition operator</param>
-        /// <param name="value">Value</param>
-        /// <param name="converter">Criteria converter</param>
-        /// <param name="fieldNames">Field names</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery And(QueryOperator eachFieldConnectOperator, CriteriaOperator @operator, dynamic value, ICriteriaConverter converter = null, params string[] fieldNames)
-        {
-            if (fieldNames.IsNullOrEmpty())
+            if (string.IsNullOrWhiteSpace(fieldName))
             {
                 return this;
             }
-            IQuery groupQuery = QueryManager.Create();
-            foreach (string field in fieldNames)
+            Criteria newCriteria = Criteria.CreateNewCriteria(fieldName, criteriaOperator, value);
+            newCriteria.Converter = converter;
+            return AddQueryItem(queryOperator, newCriteria, queryOption);
+        }
+
+        /// <summary>
+        /// Add a IQueryItem
+        /// </summary>
+        /// <param name="queryOperator">Connect operator</param>
+        /// <param name="queryItem">query item</param>
+        /// <param name="queryOption">query parameter option</param>
+        public IQuery AddQueryItem(QueryOperator queryOperator, IQueryItem queryItem, QueryParameterOption queryOption = null)
+        {
+            #region invoke handler
+
+            var queryItemTypeId = queryItem?.GetType().GUID ?? Guid.Empty;
+            Func<DefaultQuery, IQueryItem, QueryParameterOption, IQueryItem> handler = null;
+            QueryManager.AddQueryItemHandlers?.TryGetValue(queryItemTypeId, out handler);
+            if (handler != null)
             {
-                switch (eachFieldConnectOperator)
-                {
-                    case QueryOperator.AND:
-                    default:
-                        groupQuery.And(field, @operator, value, converter);
-                        break;
-                    case QueryOperator.OR:
-                        groupQuery.Or(field, @operator, value, converter);
-                        break;
-                }
+                queryItem = handler(this, queryItem, queryOption);
             }
-            AddQueryItem(QueryOperator.AND, groupQuery);
-            return this;
-        }
 
-        /// <summary>
-        /// Add a condition with 'and'
-        /// </summary>
-        /// <typeparam name="TQueryModel">Query model</typeparam>
-        /// <param name="criteria">Criteria</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery And<TQueryModel>(Expression<Func<TQueryModel, bool>> criteria) where TQueryModel : QueryModel<TQueryModel>
-        {
-            var expressQuery = GetExpressionQuery(QueryOperator.AND, criteria.Body);
-            if (expressQuery != null)
+            #endregion
+
+            if (queryItem != null)
             {
-                AddQueryItem(expressQuery.Item1, expressQuery.Item2);
+                //clear data
+                queryExpressionCaches?.Clear();
+                criteriaCollection.Add(new Tuple<QueryOperator, IQueryItem>(queryOperator, queryItem));
             }
-            return this;
-        }
-
-        /// <summary>
-        /// Add a condition with 'and'
-        /// </summary>
-        /// <typeparam name="TQueryModel">Query model</typeparam>
-        /// <param name="field">Field</param>
-        /// <param name="operator">Condition operator</param>
-        /// <param name="value">Value</param>
-        /// <param name="converter">Criteria converter</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery And<TQueryModel>(Expression<Func<TQueryModel, dynamic>> field, CriteriaOperator @operator, dynamic value, ICriteriaConverter converter = null) where TQueryModel : QueryModel<TQueryModel>
-        {
-            return And(ExpressionHelper.GetExpressionPropertyName(field.Body), @operator, value, converter);
-        }
-
-        /// <summary>
-        /// Add a condition with 'and'
-        /// </summary>
-        /// <typeparam name="TQueryModel">Query model</typeparam>
-        /// <param name="eachFieldConnectOperator">Each field connect operator</param>
-        /// <param name="operator">Condition operator</param>
-        /// <param name="value">Value</param>
-        /// <param name="converter">Criteria converter</param>
-        /// <param name="fields">Fields</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery And<TQueryModel>(QueryOperator eachFieldConnectOperator, CriteriaOperator @operator, dynamic value, ICriteriaConverter converter = null, params Expression<Func<TQueryModel, dynamic>>[] fields) where TQueryModel : QueryModel<TQueryModel>
-        {
-            if (fields.IsNullOrEmpty())
-            {
-                return this;
-            }
-            IEnumerable<string> fieldNames = fields.Select(c => ExpressionHelper.GetExpressionPropertyName(c.Body));
-            return And(eachFieldConnectOperator, @operator, value, converter, fieldNames.ToArray());
-        }
-
-        /// <summary>
-        /// Add a condition with 'and'
-        /// </summary>
-        /// <param name="groupQuery">Group query condition</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery And(IQuery groupQuery)
-        {
-            AddQueryItem(QueryOperator.AND, groupQuery);
             return this;
         }
 
         #endregion
 
-        #region OR
-
-        /// <summary>
-        /// Add a condition with 'or'
-        /// </summary>
-        /// <param name="fieldName">Field name</param>
-        /// <param name="operator">Condition operator</param>
-        /// <param name="value">Value</param>
-        /// <param name="converter">Criteria converter</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery Or(string fieldName, CriteriaOperator @operator, dynamic value, ICriteriaConverter converter = null)
-        {
-            AddCriteria(QueryOperator.OR, fieldName, @operator, value, converter);
-            return this;
-        }
-
-        /// <summary>
-        /// Add a condition with 'or'
-        /// </summary>
-        /// <param name="eachFieldConnectOperator">Each field connect operator</param>
-        /// <param name="operator">Condition operator</param>
-        /// <param name="value">Value</param>
-        /// <param name="converter">Criteria converter</param>
-        /// <param name="fieldNames">Fields</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery Or(QueryOperator eachFieldConnectOperator, CriteriaOperator @operator, dynamic value, ICriteriaConverter converter = null, params string[] fieldNames)
-        {
-            if (fieldNames.IsNullOrEmpty())
-            {
-                return this;
-            }
-            IQuery groupQuery = QueryManager.Create();
-            foreach (string field in fieldNames)
-            {
-                switch (eachFieldConnectOperator)
-                {
-                    case QueryOperator.AND:
-                    default:
-                        groupQuery.And(field, @operator, value, converter);
-                        break;
-                    case QueryOperator.OR:
-                        groupQuery.Or(field, @operator, value, converter);
-                        break;
-                }
-            }
-            AddQueryItem(QueryOperator.OR, groupQuery);
-            return this;
-        }
-
-        /// <summary>
-        /// Add a condition with 'or'
-        /// </summary>
-        /// <typeparam name="TQueryModel">Query model</typeparam>
-        /// <param name="criteria">Criteria</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery Or<TQueryModel>(Expression<Func<TQueryModel, bool>> criteria) where TQueryModel : QueryModel<TQueryModel>
-        {
-            var expressQuery = GetExpressionQuery(QueryOperator.OR, criteria.Body);
-            if (expressQuery != null)
-            {
-                AddQueryItem(expressQuery.Item1, expressQuery.Item2);
-            }
-            return this;
-        }
-
-        /// <summary>
-        /// Add a condition with 'or'
-        /// </summary>
-        /// <typeparam name="TQueryModel">Query model</typeparam>
-        /// <param name="field">Field</param>
-        /// <param name="operator">Condition operator</param>
-        /// <param name="value">Value</param>
-        /// <param name="converter">Criteria converter</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery Or<TQueryModel>(Expression<Func<TQueryModel, dynamic>> field, CriteriaOperator @operator, dynamic value, ICriteriaConverter converter = null) where TQueryModel : QueryModel<TQueryModel>
-        {
-            return Or(ExpressionHelper.GetExpressionPropertyName(field.Body), @operator, value, converter);
-        }
-
-        /// <summary>
-        /// Add a condition with 'or'
-        /// </summary>
-        /// <typeparam name="TQueryModel">Query model</typeparam>
-        /// <param name="eachFieldConnectOperator">Each field connect operator</param>
-        /// <param name="operator">Condition operator</param>
-        /// <param name="value">Value</param>
-        /// <param name="converter">Criteria converter</param>
-        /// <param name="fields">Fields</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery Or<TQueryModel>(QueryOperator eachFieldConnectOperator, CriteriaOperator @operator, dynamic value, ICriteriaConverter converter = null, params Expression<Func<TQueryModel, dynamic>>[] fields) where TQueryModel : QueryModel<TQueryModel>
-        {
-            if (fields.IsNullOrEmpty())
-            {
-                return this;
-            }
-            IEnumerable<string> fieldNames = fields.Select(c => ExpressionHelper.GetExpressionPropertyName(c.Body));
-            return Or(eachFieldConnectOperator, @operator, value, converter, fieldNames.ToArray());
-        }
-
-        /// <summary>
-        /// Add a condition with 'or'
-        /// </summary>
-        /// <param name="groupQuery">Group query condition</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery Or(IQuery groupQuery)
-        {
-            AddQueryItem(QueryOperator.OR, groupQuery);
-            return this;
-        }
-
-        #endregion
-
-        #region Equal
-
-        /// <summary>
-        /// Equal Condition
-        /// </summary>
-        /// <param name="fieldName">Field name</param>
-        /// <param name="value">Value</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <param name="converter">Criteria converter</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery Equal(string fieldName, dynamic value, bool or = false, ICriteriaConverter converter = null)
-        {
-            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, fieldName, CriteriaOperator.Equal, value, converter);
-            return this;
-        }
-
-        /// <summary>
-        /// Equal Condition
-        /// </summary>
-        /// <param name="fieldName">Field name</param>
-        /// <param name="subquery">Subquery</param>
-        /// <param name="subqueryFieldName">Subquery field</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery Equal(string fieldName, IQuery subquery, string subqueryFieldName = "", bool or = false)
-        {
-            if (subquery != null)
-            {
-                AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, fieldName, CriteriaOperator.Equal, subquery, null, new QueryParameterOption()
-                {
-                    QueryFieldName = subqueryFieldName
-                });
-            }
-            return this;
-        }
-
-        /// <summary>
-        /// Equal Condition
-        /// </summary>
-        /// <typeparam name="TQueryModel">Query model</typeparam>
-        /// <param name="field">Field</param>
-        /// <param name="value">Value</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <param name="converter">Criteria converter</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery Equal<TQueryModel>(Expression<Func<TQueryModel, dynamic>> field, dynamic value, bool or = false, ICriteriaConverter converter = null) where TQueryModel : QueryModel<TQueryModel>
-        {
-            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, ExpressionHelper.GetExpressionPropertyName(field.Body), CriteriaOperator.Equal, value, converter);
-            return this;
-        }
-
-        /// <summary>
-        /// Equal Condition
-        /// </summary>
-        /// <typeparam name="TQueryModel">Query model</typeparam>
-        /// <param name="field">Field</param>
-        /// <param name="subquery">Subquery</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery Equal<TQueryModel>(Expression<Func<TQueryModel, dynamic>> field, IQuery subquery, bool or = false) where TQueryModel : QueryModel<TQueryModel>
-        {
-            return or ? Or(field, CriteriaOperator.Equal, subquery) : And(field, CriteriaOperator.Equal, subquery);
-        }
-
-        /// <summary>
-        /// Equal Condition
-        /// </summary>
-        /// <typeparam name="TSourceQueryModel">Source query model</typeparam>
-        /// <typeparam name="TSubqueryQueryModel">Subquery query model</typeparam>
-        /// <param name="field">Field</param>
-        /// <param name="subquery">Subquery</param>
-        /// <param name="subqueryField">Subquery field</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery Equal<TSourceQueryModel, TSubqueryQueryModel>(Expression<Func<TSourceQueryModel, dynamic>> field, IQuery subquery, Expression<Func<TSubqueryQueryModel, dynamic>> subqueryField, bool or = false) where TSourceQueryModel : QueryModel<TSourceQueryModel> where TSubqueryQueryModel : QueryModel<TSubqueryQueryModel>
-        {
-            if (field == null || subquery == null || subqueryField == null)
-            {
-                return this;
-            }
-            var fieldName = ExpressionHelper.GetExpressionPropertyName(field);
-            var subFieldName = ExpressionHelper.GetExpressionPropertyName(subqueryField);
-            return Equal(fieldName, subquery, subFieldName, or);
-        }
-
-        #endregion
-
-        #region Not Equal
-
-        /// <summary>
-        /// Not Equal Condition
-        /// </summary>
-        /// <param name="fieldName">Field name</param>
-        /// <param name="value">Value</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <param name="converter">Criteria converter</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery NotEqual(string fieldName, dynamic value, bool or = false, ICriteriaConverter converter = null)
-        {
-            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, fieldName, CriteriaOperator.NotEqual, value, converter);
-            return this;
-        }
-
-        /// <summary>
-        /// Not Equal Condition
-        /// </summary>
-        /// <param name="fieldName">Field name</param>
-        /// <param name="subquery">Subquery</param>
-        /// <param name="subqueryFieldName">Subquery field</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery NotEqual(string fieldName, IQuery subquery, string subqueryFieldName = "", bool or = false)
-        {
-            if (subquery != null)
-            {
-                AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, fieldName, CriteriaOperator.NotEqual, subquery, null, new QueryParameterOption()
-                {
-                    QueryFieldName = subqueryFieldName
-                });
-            }
-            return this;
-        }
-
-        /// <summary>
-        /// Not Equal Condition
-        /// </summary>
-        /// <typeparam name="TQueryModel">Query model</typeparam>
-        /// <param name="field">Field</param>
-        /// <param name="value">Value</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <param name="converter">Criteria converter</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery NotEqual<TQueryModel>(Expression<Func<TQueryModel, dynamic>> field, dynamic value, bool or = false, ICriteriaConverter converter = null) where TQueryModel : QueryModel<TQueryModel>
-        {
-            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, ExpressionHelper.GetExpressionPropertyName(field.Body), CriteriaOperator.NotEqual, value, converter);
-            return this;
-        }
-
-        /// <summary>
-        /// Not Equal Condition
-        /// </summary>
-        /// <typeparam name="TQueryModel">Query model</typeparam>
-        /// <param name="field">Field</param>
-        /// <param name="subquery">Subquery</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery NotEqual<TQueryModel>(Expression<Func<TQueryModel, dynamic>> field, IQuery subquery, bool or = false) where TQueryModel : QueryModel<TQueryModel>
-        {
-            return or ? Or(field, CriteriaOperator.NotEqual, subquery) : And(field, CriteriaOperator.NotEqual, subquery);
-        }
-
-        /// <summary>
-        /// Not Equal Condition
-        /// </summary>
-        /// <typeparam name="TSourceQueryModel">Source query model</typeparam>
-        /// <typeparam name="TSubqueryQueryModel">Subquery query model</typeparam>
-        /// <param name="field">Field</param>
-        /// <param name="subquery">Subquery</param>
-        /// <param name="subqueryField">Subquery field</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery NotEqual<TSourceQueryModel, TSubqueryQueryModel>(Expression<Func<TSourceQueryModel, dynamic>> field, IQuery subquery, Expression<Func<TSubqueryQueryModel, dynamic>> subqueryField, bool or = false) where TSourceQueryModel : QueryModel<TSourceQueryModel> where TSubqueryQueryModel : QueryModel<TSubqueryQueryModel>
-        {
-            if (field == null || subquery == null || subqueryField == null)
-            {
-                return this;
-            }
-            var fieldName = ExpressionHelper.GetExpressionPropertyName(field);
-            var subFieldName = ExpressionHelper.GetExpressionPropertyName(subqueryField);
-            return NotEqual(fieldName, subquery, subFieldName, or);
-        }
-
-        #endregion
-
-        #region LessThan
-
-        /// <summary>
-        /// Less Than Condition
-        /// </summary>
-        /// <param name="fieldName">Field name</param>
-        /// <param name="value">Value</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <param name="converter">Criteria converter</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThan(string fieldName, dynamic value, bool or = false, ICriteriaConverter converter = null)
-        {
-            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, fieldName, CriteriaOperator.LessThan, value, converter);
-            return this;
-        }
-
-        /// <summary>
-        /// Less Than Condition
-        /// </summary>
-        /// <param name="fieldName">Field name</param>
-        /// <param name="subquery">Subquery</param>
-        /// <param name="subqueryFieldName">Subquery field</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThan(string fieldName, IQuery subquery, string subqueryFieldName = "", bool or = false)
-        {
-            if (subquery != null)
-            {
-                AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, fieldName, CriteriaOperator.LessThan, subquery, null, new QueryParameterOption()
-                {
-                    QueryFieldName = subqueryFieldName
-                });
-            }
-            return this;
-        }
-
-        /// <summary>
-        /// Less Than Condition
-        /// </summary>
-        /// <typeparam name="TQueryModel">Query model</typeparam>
-        /// <param name="field">Field</param>
-        /// <param name="value">Value</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <param name="converter">Criteria converter</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThan<TQueryModel>(Expression<Func<TQueryModel, dynamic>> field, dynamic value, bool or = false, ICriteriaConverter converter = null) where TQueryModel : QueryModel<TQueryModel>
-        {
-            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, ExpressionHelper.GetExpressionPropertyName(field.Body), CriteriaOperator.LessThan, value, converter);
-            return this;
-        }
-
-        /// <summary>
-        /// Less Than Condition
-        /// </summary>
-        /// <typeparam name="TQueryModel">Query model</typeparam>
-        /// <param name="field">Field</param>
-        /// <param name="subquery">Subquery</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThan<TQueryModel>(Expression<Func<TQueryModel, dynamic>> field, IQuery subquery, bool or = false) where TQueryModel : QueryModel<TQueryModel>
-        {
-            return or ? Or(field, CriteriaOperator.LessThan, subquery) : And(field, CriteriaOperator.LessThan, subquery);
-        }
-
-        /// <summary>
-        /// Less Than Condition
-        /// </summary>
-        /// <typeparam name="TSourceQueryModel">Source query model</typeparam>
-        /// <typeparam name="TSubqueryQueryModel">Subquery query model</typeparam>
-        /// <param name="field">Field</param>
-        /// <param name="subquery">Subquery</param>
-        /// <param name="subqueryField">Subquery field</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThan<TSourceQueryModel, TSubqueryQueryModel>(Expression<Func<TSourceQueryModel, dynamic>> field, IQuery subquery, Expression<Func<TSubqueryQueryModel, dynamic>> subqueryField, bool or = false) where TSourceQueryModel : QueryModel<TSourceQueryModel> where TSubqueryQueryModel : QueryModel<TSubqueryQueryModel>
-        {
-            if (field == null || subquery == null || subqueryField == null)
-            {
-                return this;
-            }
-            var fieldName = ExpressionHelper.GetExpressionPropertyName(field);
-            var subFieldName = ExpressionHelper.GetExpressionPropertyName(subqueryField);
-            return LessThan(fieldName, subquery, subFieldName, or);
-        }
-
-        #endregion
-
-        #region LessThanOrEqual
-
-        /// <summary>
-        /// Less Than Or Equal Condition
-        /// </summary>
-        /// <param name="fieldName">Field name</param>
-        /// <param name="value">Value</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <param name="converter">Criteria converter</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanOrEqual(string fieldName, dynamic value, bool or = false, ICriteriaConverter converter = null)
-        {
-            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, fieldName, CriteriaOperator.LessThanOrEqual, value, converter);
-            return this;
-        }
-
-        /// <summary>
-        /// Less Than Or Equal Condition
-        /// </summary>
-        /// <param name="fieldName">Field name</param>
-        /// <param name="subquery">Subquery</param>
-        /// <param name="subqueryFieldName">Subquery field</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanOrEqual(string fieldName, IQuery subquery, string subqueryFieldName = "", bool or = false)
-        {
-            if (subquery != null)
-            {
-                AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, fieldName, CriteriaOperator.LessThanOrEqual, subquery, null, new QueryParameterOption()
-                {
-                    QueryFieldName = subqueryFieldName
-                });
-            }
-            return this;
-        }
-
-        /// <summary>
-        /// Less Than Or Equal Condition
-        /// </summary>
-        /// <typeparam name="TQueryModel">Query model</typeparam>
-        /// <param name="field">Field</param>
-        /// <param name="value">Value</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <param name="converter">Criteria converter</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanOrEqual<TQueryModel>(Expression<Func<TQueryModel, dynamic>> field, dynamic value, bool or = false, ICriteriaConverter converter = null) where TQueryModel : QueryModel<TQueryModel>
-        {
-            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, ExpressionHelper.GetExpressionPropertyName(field.Body), CriteriaOperator.LessThanOrEqual, value, converter);
-            return this;
-        }
-
-        /// <summary>
-        /// Less Than Or Equal Condition
-        /// </summary>
-        /// <typeparam name="TQueryModel">Query model</typeparam>
-        /// <param name="field">Field</param>
-        /// <param name="subquery">Subquery</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanOrEqual<TQueryModel>(Expression<Func<TQueryModel, dynamic>> field, IQuery subquery, bool or = false) where TQueryModel : QueryModel<TQueryModel>
-        {
-            return or ? Or(field, CriteriaOperator.LessThanOrEqual, subquery) : And(field, CriteriaOperator.LessThanOrEqual, subquery);
-        }
-
-        /// <summary>
-        /// Less Than Or Equal Condition
-        /// </summary>
-        /// <typeparam name="TSourceQueryModel">Source query model</typeparam>
-        /// <typeparam name="TSubqueryQueryModel">Subquery query model</typeparam>
-        /// <param name="field">Field</param>
-        /// <param name="subquery">Subquery</param>
-        /// <param name="subqueryField">Subquery field</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanOrEqual<TSourceQueryModel, TSubqueryQueryModel>(Expression<Func<TSourceQueryModel, dynamic>> field, IQuery subquery, Expression<Func<TSubqueryQueryModel, dynamic>> subqueryField, bool or = false) where TSourceQueryModel : QueryModel<TSourceQueryModel> where TSubqueryQueryModel : QueryModel<TSubqueryQueryModel>
-        {
-            if (field == null || subquery == null || subqueryField == null)
-            {
-                return this;
-            }
-            var fieldName = ExpressionHelper.GetExpressionPropertyName(field);
-            var subFieldName = ExpressionHelper.GetExpressionPropertyName(subqueryField);
-            return LessThanOrEqual(fieldName, subquery, subFieldName, or);
-        }
-
-        #endregion
-
-        #region GreaterThan
-
-        /// <summary>
-        /// Greater Than Condition
-        /// </summary>
-        /// <param name="fieldName">Field name</param>
-        /// <param name="value">Value</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <param name="converter">Criteria converter</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThan(string fieldName, dynamic value, bool or = false, ICriteriaConverter converter = null)
-        {
-            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, fieldName, CriteriaOperator.GreaterThan, value, converter);
-            return this;
-        }
-
-        /// <summary>
-        /// Greater Than Condition
-        /// </summary>
-        /// <param name="fieldName">Field name</param>
-        /// <param name="subquery">Subquery</param>
-        /// <param name="subqueryFieldName">Subquery field</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThan(string fieldName, IQuery subquery, string subqueryFieldName = "", bool or = false)
-        {
-            if (subquery != null)
-            {
-                AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, fieldName, CriteriaOperator.GreaterThan, subquery, null, new QueryParameterOption()
-                {
-                    QueryFieldName = subqueryFieldName
-                });
-            }
-            return this;
-        }
-
-        /// <summary>
-        /// Greater Than Condition
-        /// </summary>
-        /// <typeparam name="TQueryModel">Query model</typeparam>
-        /// <param name="field">Field</param>
-        /// <param name="value">Value</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <param name="converter">Criteria converter</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThan<TQueryModel>(Expression<Func<TQueryModel, dynamic>> field, dynamic value, bool or = false, ICriteriaConverter converter = null) where TQueryModel : QueryModel<TQueryModel>
-        {
-            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, ExpressionHelper.GetExpressionPropertyName(field.Body), CriteriaOperator.GreaterThan, value, converter);
-            return this;
-        }
-
-        /// <summary>
-        /// Greater Than Condition
-        /// </summary>
-        /// <typeparam name="TQueryModel">Query model</typeparam>
-        /// <param name="field">Field</param>
-        /// <param name="subquery">Subquery</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThan<TQueryModel>(Expression<Func<TQueryModel, dynamic>> field, IQuery subquery, bool or = false) where TQueryModel : QueryModel<TQueryModel>
-        {
-            return or ? Or(field, CriteriaOperator.GreaterThan, subquery) : And(field, CriteriaOperator.GreaterThan, subquery);
-        }
-
-        /// <summary>
-        /// Greater Than Condition
-        /// </summary>
-        /// <typeparam name="TSourceQueryModel">Source query model</typeparam>
-        /// <typeparam name="TSubqueryQueryModel">Subquery query model</typeparam>
-        /// <param name="field">Field</param>
-        /// <param name="subquery">Subquery</param>
-        /// <param name="subqueryField">Subquery field</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThan<TSourceQueryModel, TSubqueryQueryModel>(Expression<Func<TSourceQueryModel, dynamic>> field, IQuery subquery, Expression<Func<TSubqueryQueryModel, dynamic>> subqueryField, bool or = false) where TSourceQueryModel : QueryModel<TSourceQueryModel> where TSubqueryQueryModel : QueryModel<TSubqueryQueryModel>
-        {
-            if (field == null || subquery == null || subqueryField == null)
-            {
-                return this;
-            }
-            var fieldName = ExpressionHelper.GetExpressionPropertyName(field);
-            var subFieldName = ExpressionHelper.GetExpressionPropertyName(subqueryField);
-            return GreaterThan(fieldName, subquery, subFieldName, or);
-        }
-
-        #endregion
-
-        #region GreaterThanOrEqual
-
-        /// <summary>
-        /// Greater Than Or Equal Condition
-        /// </summary>
-        /// <param name="fieldName">Field name</param>
-        /// <param name="subquery">Subquery</param>
-        /// <param name="subqueryFieldName">Subquery field</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanOrEqual(string fieldName, IQuery subquery, string subqueryFieldName = "", bool or = false)
-        {
-            if (subquery != null)
-            {
-                AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, fieldName, CriteriaOperator.GreaterThanOrEqual, subquery, null, new QueryParameterOption()
-                {
-                    QueryFieldName = subqueryFieldName
-                });
-            }
-            return this;
-        }
-
-        /// <summary>
-        /// Greater Than Or Equal Condition
-        /// </summary>
-        /// <param name="fieldName">Field name</param>
-        /// <param name="value">Value</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <param name="converter">Criteria converter</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanOrEqual(string fieldName, dynamic value, bool or = false, ICriteriaConverter converter = null)
-        {
-            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, fieldName, CriteriaOperator.GreaterThanOrEqual, value, converter);
-            return this;
-        }
-
-        /// <summary>
-        /// Greater Than Or Equal Condition
-        /// </summary>
-        /// <typeparam name="TQueryModel">Query model</typeparam>
-        /// <param name="field">Field</param>
-        /// <param name="value">Value</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <param name="converter">Criteria converter</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanOrEqual<TQueryModel>(Expression<Func<TQueryModel, dynamic>> field, dynamic value, bool or = false, ICriteriaConverter converter = null) where TQueryModel : QueryModel<TQueryModel>
-        {
-            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, ExpressionHelper.GetExpressionPropertyName(field.Body), CriteriaOperator.GreaterThanOrEqual, value, converter);
-            return this;
-        }
-
-        /// <summary>
-        /// Greater Than Or Equal Condition
-        /// </summary>
-        /// <typeparam name="TQueryModel">Query model</typeparam>
-        /// <param name="field">Field</param>
-        /// <param name="subquery">Subquery</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanOrEqual<TQueryModel>(Expression<Func<TQueryModel, dynamic>> field, IQuery subquery, bool or = false) where TQueryModel : QueryModel<TQueryModel>
-        {
-            return or ? Or(field, CriteriaOperator.GreaterThanOrEqual, subquery) : And(field, CriteriaOperator.GreaterThanOrEqual, subquery);
-        }
-
-        /// <summary>
-        /// Greater Than Or Equal Condition
-        /// </summary>
-        /// <typeparam name="TSourceQueryModel">Source query model</typeparam>
-        /// <typeparam name="TSubqueryQueryModel">Subquery query model</typeparam>
-        /// <param name="field">Field</param>
-        /// <param name="subquery">Subquery</param>
-        /// <param name="subqueryField">Subquery field</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanOrEqual<TSourceQueryModel, TSubqueryQueryModel>(Expression<Func<TSourceQueryModel, dynamic>> field, IQuery subquery, Expression<Func<TSubqueryQueryModel, dynamic>> subqueryField, bool or = false) where TSourceQueryModel : QueryModel<TSourceQueryModel> where TSubqueryQueryModel : QueryModel<TSubqueryQueryModel>
-        {
-            if (field == null || subquery == null || subqueryField == null)
-            {
-                return this;
-            }
-            var fieldName = ExpressionHelper.GetExpressionPropertyName(field);
-            var subFieldName = ExpressionHelper.GetExpressionPropertyName(subqueryField);
-            return GreaterThanOrEqual(fieldName, subquery, subFieldName, or);
-        }
-
-        #endregion
-
-        #region In
-
-        /// <summary>
-        /// Include Condition
-        /// </summary>
-        /// <param name="fieldName">Field name</param>
-        /// <param name="value">Value</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <param name="converter">Criteria converter</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery In(string fieldName, IEnumerable value, bool or = false, ICriteriaConverter converter = null)
-        {
-            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, fieldName, CriteriaOperator.In, value, converter);
-            return this;
-        }
-
-        /// <summary>
-        /// Include Condition
-        /// </summary>
-        /// <param name="fieldName">Field name</param>
-        /// <param name="subquery">Subquery</param>
-        /// <param name="subqueryFieldName">Subquery field</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery In(string fieldName, IQuery subquery, string subqueryFieldName = "", bool or = false)
-        {
-            if (subquery != null)
-            {
-                AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, fieldName, CriteriaOperator.In, subquery, null, new QueryParameterOption()
-                {
-                    QueryFieldName = subqueryFieldName
-                });
-            }
-            return this;
-        }
-
-        /// <summary>
-        /// Include Condition
-        /// </summary>
-        /// <typeparam name="TQueryModel">Query model</typeparam> 
-        /// <param name="field">Field</param>
-        /// <param name="value">Value</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <param name="converter">Criteria converter</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery In<TQueryModel>(Expression<Func<TQueryModel, dynamic>> field, IEnumerable value, bool or = false, ICriteriaConverter converter = null) where TQueryModel : QueryModel<TQueryModel>
-        {
-            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, ExpressionHelper.GetExpressionPropertyName(field.Body), CriteriaOperator.In, value, converter);
-            return this;
-        }
-
-        /// <summary>
-        /// Include Condition
-        /// </summary>
-        /// <typeparam name="TQueryModel">Query model</typeparam>
-        /// <param name="field">Field</param>
-        /// <param name="subquery">Subquery</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery In<TQueryModel>(Expression<Func<TQueryModel, dynamic>> field, IQuery subquery, bool or = false) where TQueryModel : QueryModel<TQueryModel>
-        {
-            return or ? Or(field, CriteriaOperator.In, subquery) : And(field, CriteriaOperator.In, subquery);
-        }
-
-        /// <summary>
-        /// Include Condition
-        /// </summary>
-        /// <typeparam name="TSourceQueryModel">Source query model</typeparam>
-        /// <typeparam name="TSubqueryQueryModel">Subquery query model</typeparam>
-        /// <param name="field">Field</param>
-        /// <param name="subquery">Subquery</param>
-        /// <param name="subqueryField">Subquery field</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery In<TSourceQueryModel, TSubqueryQueryModel>(Expression<Func<TSourceQueryModel, dynamic>> field, IQuery subquery, Expression<Func<TSubqueryQueryModel, dynamic>> subqueryField, bool or = false) where TSourceQueryModel : QueryModel<TSourceQueryModel> where TSubqueryQueryModel : QueryModel<TSubqueryQueryModel>
-        {
-            if (field == null || subquery == null || subqueryField == null)
-            {
-                return this;
-            }
-            var fieldName = ExpressionHelper.GetExpressionPropertyName(field);
-            var subFieldName = ExpressionHelper.GetExpressionPropertyName(subqueryField);
-            return In(fieldName, subquery, subFieldName, or);
-        }
-
-        #endregion
-
-        #region Not In
-
-        /// <summary>
-        /// Not Include
-        /// </summary>
-        /// <param name="fieldName">Field name</param>
-        /// <param name="value">Value</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <param name="converter">Criteria converter</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery NotIn(string fieldName, IEnumerable value, bool or = false, ICriteriaConverter converter = null)
-        {
-            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, fieldName, CriteriaOperator.NotIn, value, converter);
-            return this;
-        }
-
-        /// <summary>
-        /// Not Include
-        /// </summary>
-        /// <param name="fieldName">Field name</param>
-        /// <param name="subquery">Subquery</param>
-        /// <param name="subqueryFieldName">Subquery field</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery NotIn(string fieldName, IQuery subquery, string subqueryFieldName = "", bool or = false)
-        {
-            if (subquery != null)
-            {
-                AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, fieldName, CriteriaOperator.NotIn, subquery, null, new QueryParameterOption()
-                {
-                    QueryFieldName = subqueryFieldName
-                });
-            }
-            return this;
-        }
-
-        /// <summary>
-        /// Not Include
-        /// </summary>
-        /// <typeparam name="TQueryModel">Query model</typeparam>
-        /// <param name="field">Field</param>
-        /// <param name="value">Value</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <param name="converter">Criteria converter</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery NotIn<TQueryModel>(Expression<Func<TQueryModel, dynamic>> field, IEnumerable value, bool or = false, ICriteriaConverter converter = null) where TQueryModel : QueryModel<TQueryModel>
-        {
-            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, ExpressionHelper.GetExpressionPropertyName(field.Body), CriteriaOperator.NotIn, value, converter);
-            return this;
-        }
-
-        /// <summary>
-        /// Not Include
-        /// </summary>
-        /// <typeparam name="TQueryModel">Query model</typeparam>
-        /// <param name="field">Field</param>
-        /// <param name="subquery">Subquery</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery NotIn<TQueryModel>(Expression<Func<TQueryModel, dynamic>> field, IQuery subquery, bool or = false) where TQueryModel : QueryModel<TQueryModel>
-        {
-            return or ? Or(field, CriteriaOperator.NotIn, subquery) : And<TQueryModel>(field, CriteriaOperator.NotIn, subquery);
-        }
-
-        /// <summary>
-        /// Not Include
-        /// </summary>
-        /// <typeparam name="TSourceQueryModel">Source query model</typeparam>
-        /// <typeparam name="TSubqueryQueryModel">Subquery query model</typeparam>
-        /// <param name="field">Field</param>
-        /// <param name="subquery">Subquery</param>
-        /// <param name="subqueryField">Subquery field</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery NotIn<TSourceQueryModel, TSubqueryQueryModel>(Expression<Func<TSourceQueryModel, dynamic>> field, IQuery subquery, Expression<Func<TSubqueryQueryModel, dynamic>> subqueryField, bool or = false) where TSourceQueryModel : QueryModel<TSourceQueryModel> where TSubqueryQueryModel : QueryModel<TSubqueryQueryModel>
-        {
-            if (field == null || subquery == null || subqueryField == null)
-            {
-                return this;
-            }
-            var fieldName = ExpressionHelper.GetExpressionPropertyName(field);
-            var subFieldName = ExpressionHelper.GetExpressionPropertyName(subqueryField);
-            return NotIn(fieldName, subquery, subFieldName, or);
-        }
-
-        #endregion
-
-        #region Like
-
-        /// <summary>
-        /// Like Condition
-        /// </summary>
-        /// <param name="fieldName">Field name</param>
-        /// <param name="value">Value</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <param name="converter">Criteria converter</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery Like(string fieldName, string value, bool or = false, ICriteriaConverter converter = null)
-        {
-            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, fieldName, CriteriaOperator.Like, value, converter);
-            return this;
-        }
-
-        /// <summary>
-        /// Like Condition
-        /// </summary>
-        /// <typeparam name="TQueryModel">Query model</typeparam>
-        /// <param name="field">Field</param>
-        /// <param name="value">Value</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <param name="converter">Criteria converter</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery Like<TQueryModel>(Expression<Func<TQueryModel, dynamic>> field, string value, bool or = false, ICriteriaConverter converter = null) where TQueryModel : QueryModel<TQueryModel>
-        {
-            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, ExpressionHelper.GetExpressionPropertyName(field.Body), CriteriaOperator.Like, value, converter);
-            return this;
-        }
-
-        #endregion
-
-        #region NotLike
-
-        /// <summary>
-        /// Not Like Condition
-        /// </summary>
-        /// <param name="fieldName">Field name</param>
-        /// <param name="value">Value</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <param name="converter">Criteria converter</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery NotLike(string fieldName, string value, bool or = false, ICriteriaConverter converter = null)
-        {
-            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, fieldName, CriteriaOperator.NotLike, value, converter);
-            return this;
-        }
-
-        /// <summary>
-        /// Not Like Condition
-        /// </summary>
-        /// <typeparam name="TQueryModel">Query model</typeparam>
-        /// <param name="field">Field</param>
-        /// <param name="value">Value</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <param name="converter">Criteria converter</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery NotLike<TQueryModel>(Expression<Func<TQueryModel, dynamic>> field, string value, bool or = false, ICriteriaConverter converter = null) where TQueryModel : QueryModel<TQueryModel>
-        {
-            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, ExpressionHelper.GetExpressionPropertyName(field.Body), CriteriaOperator.NotLike, value, converter);
-            return this;
-        }
-
-        #endregion
-
-        #region BeginLike
-
-        /// <summary>
-        /// Begin Like Condition
-        /// </summary>
-        /// <param name="fieldName">Field name</param>
-        /// <param name="value">Value</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <param name="converter">Criteria converter</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery BeginLike(string fieldName, string value, bool or = false, ICriteriaConverter converter = null)
-        {
-            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, fieldName, CriteriaOperator.BeginLike, value, converter);
-            return this;
-        }
-
-        /// <summary>
-        /// Begin Like Condition
-        /// </summary>
-        /// <typeparam name="TQueryModel">Query model</typeparam>
-        /// <param name="field">Field</param>
-        /// <param name="value">Value</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <param name="converter">Criteria converter</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery BeginLike<TQueryModel>(Expression<Func<TQueryModel, dynamic>> field, string value, bool or = false, ICriteriaConverter converter = null) where TQueryModel : QueryModel<TQueryModel>
-        {
-            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, ExpressionHelper.GetExpressionPropertyName(field.Body), CriteriaOperator.BeginLike, value, converter);
-            return this;
-        }
-
-        #endregion
-
-        #region NotBeginLike
-
-        /// <summary>
-        /// Not Begin Like Condition
-        /// </summary>
-        /// <param name="fieldName">Field name</param>
-        /// <param name="value">Value</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <param name="converter">Criteria converter</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery NotBeginLike(string fieldName, string value, bool or = false, ICriteriaConverter converter = null)
-        {
-            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, fieldName, CriteriaOperator.NotBeginLike, value, converter);
-            return this;
-        }
-
-        /// <summary>
-        /// Not Begin Like Condition
-        /// </summary>
-        /// <typeparam name="TQueryModel">Query model</typeparam>
-        /// <param name="field">Field</param>
-        /// <param name="value">Value</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <param name="converter">Criteria converter</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery NotBeginLike<TQueryModel>(Expression<Func<TQueryModel, dynamic>> field, string value, bool or = false, ICriteriaConverter converter = null) where TQueryModel : QueryModel<TQueryModel>
-        {
-            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, ExpressionHelper.GetExpressionPropertyName(field.Body), CriteriaOperator.NotBeginLike, value, converter);
-            return this;
-        }
-
-        #endregion
-
-        #region EndLike
-
-        /// <summary>
-        /// End Like Condition
-        /// </summary>
-        /// <param name="fieldName">Field name</param>
-        /// <param name="value">Value</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <param name="converter">Criteria converter</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery EndLike(string fieldName, string value, bool or = false, ICriteriaConverter converter = null)
-        {
-            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, fieldName, CriteriaOperator.EndLike, value, converter);
-            return this;
-        }
-
-        /// <summary>
-        /// End Like Condition
-        /// </summary>
-        /// <typeparam name="TQueryModel">Query model</typeparam>
-        /// <param name="field">Field</param>
-        /// <param name="value">Value</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <param name="converter">Criteria converter</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery EndLike<TQueryModel>(Expression<Func<TQueryModel, dynamic>> field, string value, bool or = false, ICriteriaConverter converter = null) where TQueryModel : QueryModel<TQueryModel>
-        {
-            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, ExpressionHelper.GetExpressionPropertyName(field.Body), CriteriaOperator.EndLike, value, converter);
-            return this;
-        }
-
-        #endregion
-
-        #region NotEndLike
-
-        /// <summary>
-        /// Not End Like Condition
-        /// </summary>
-        /// <param name="fieldName">Field name</param>
-        /// <param name="value">Value</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <param name="converter">Criteria converter</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery NotEndLike(string fieldName, string value, bool or = false, ICriteriaConverter converter = null)
-        {
-            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, fieldName, CriteriaOperator.NotEndLike, value, converter);
-            return this;
-        }
-
-        /// <summary>
-        /// Not End Like Condition
-        /// </summary>
-        /// <typeparam name="TQueryModel">Query model</typeparam>
-        /// <param name="field">Field</param>
-        /// <param name="value">Value</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <param name="converter">Criteria converter</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery NotEndLike<TQueryModel>(Expression<Func<TQueryModel, dynamic>> field, string value, bool or = false, ICriteriaConverter converter = null) where TQueryModel : QueryModel<TQueryModel>
-        {
-            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, ExpressionHelper.GetExpressionPropertyName(field.Body), CriteriaOperator.NotEndLike, value, converter);
-            return this;
-        }
-
-        #endregion
-
-        #region IsNull
-
-        /// <summary>
-        /// Field is null
-        /// </summary>
-        /// <param name="fieldName">Field name</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery IsNull(string fieldName, bool or = false)
-        {
-            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, fieldName, CriteriaOperator.IsNull, null);
-            return this;
-        }
-
-        /// <summary>
-        /// Field is null
-        /// </summary>
-        /// <typeparam name="TQueryModel">Query model</typeparam>
-        /// <param name="field">Field</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery IsNull<TQueryModel>(Expression<Func<TQueryModel, dynamic>> field, bool or = false) where TQueryModel : QueryModel<TQueryModel>
-        {
-            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, ExpressionHelper.GetExpressionPropertyName(field.Body), CriteriaOperator.IsNull, null);
-            return this;
-        }
-
-        #endregion
-
-        #region NotNull
-
-        /// <summary>
-        /// Field is not null
-        /// </summary>
-        /// <param name="fieldName">Field name</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery NotNull(string fieldName, bool or = false)
-        {
-            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, fieldName, CriteriaOperator.NotNull, null);
-            return this;
-        }
-
-        /// <summary>
-        /// Field is not null
-        /// </summary>
-        /// <typeparam name="TQueryModel">Query model</typeparam>
-        /// <param name="field">Field</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery NotNull<TQueryModel>(Expression<Func<TQueryModel, dynamic>> field, bool or = false) where TQueryModel : QueryModel<TQueryModel>
-        {
-            AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, ExpressionHelper.GetExpressionPropertyName(field.Body), CriteriaOperator.NotNull, null);
-            return this;
-        }
-
-        #endregion
-
-        #region Sort Condition
-
-        #region ASC
-
-        /// <summary>
-        /// Order by asc
-        /// </summary>
-        /// <param name="field">Field</param>
-        /// <param name="converter">Field converter</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery Asc(string field, ICriteriaConverter converter = null)
-        {
-            AddOrderItem(field, false, converter);
-            return this;
-        }
-
-        /// <summary>
-        /// Order by asc
-        /// </summary>
-        /// <typeparam name="TQueryModel">Query model</typeparam>
-        /// <param name="fieldName">Field name</param>
-        /// <param name="converter">Field converter</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery Asc<TQueryModel>(Expression<Func<TQueryModel, dynamic>> field, ICriteriaConverter converter = null) where TQueryModel : QueryModel<TQueryModel>
-        {
-            AddOrderItem(ExpressionHelper.GetExpressionPropertyName(field.Body), false, converter);
-            return this;
-        }
-
-        #endregion
-
-        #region DESC
-
-        /// <summary>
-        /// Order by desc
-        /// </summary>
-        /// <param name="field">Field</param>
-        /// <param name="converter">Field converter</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery Desc(string field, ICriteriaConverter converter = null)
-        {
-            AddOrderItem(field, true, converter);
-            return this;
-        }
-
-        /// <summary>
-        /// Order by desc
-        /// </summary>
-        /// <typeparam name="TQueryModel">Query model</typeparam>
-        /// <param name="field">Field</param>
-        /// <param name="converter">Field converter</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery Desc<TQueryModel>(Expression<Func<TQueryModel, dynamic>> field, ICriteriaConverter converter = null) where TQueryModel : QueryModel<TQueryModel>
-        {
-            AddOrderItem(ExpressionHelper.GetExpressionPropertyName(field.Body), true, converter);
-            return this;
-        }
-
-        #endregion 
+        #region Sort
 
         #region Clear sort
 
@@ -1484,6 +336,30 @@ namespace EZNEW.Develop.CQuery
         public IQuery ClearOrder()
         {
             sortCollection.Clear();
+            return this;
+        }
+
+        #endregion
+
+        #region Add order
+
+        /// <summary>
+        /// Add order
+        /// </summary>
+        /// <param name="fieldName">Field name</param>
+        /// <param name="desc">Sort by desc</param>
+        /// <param name="converter">Field converter</param>
+        public IQuery AddOrder(string fieldName, bool desc = false, ICriteriaConverter converter = null)
+        {
+            if (!string.IsNullOrWhiteSpace(fieldName))
+            {
+                sortCollection.Add(new SortCriteria()
+                {
+                    Name = fieldName,
+                    Desc = desc,
+                    Converter = converter
+                });
+            }
             return this;
         }
 
@@ -1500,7 +376,11 @@ namespace EZNEW.Develop.CQuery
         /// <returns>Return the newest IQuery object</returns>
         public IQuery AddQueryFields(params string[] fields)
         {
-            queryFieldCollection.AddRange(fields);
+            if (fields?.Length > 0)
+            {
+                queryFieldCollection.AddRange(fields);
+                ClearFieldsCache();
+            }
             return this;
         }
 
@@ -1510,7 +390,7 @@ namespace EZNEW.Develop.CQuery
         /// <typeparam name="TQueryModel">Query model</typeparam>
         /// <param name="fieldExpressions">Fields</param>
         /// <returns>Return the newest IQuery object</returns>
-        public IQuery AddQueryFields<TQueryModel>(params Expression<Func<TQueryModel, dynamic>>[] fieldExpressions) where TQueryModel : QueryModel<TQueryModel>
+        public IQuery AddQueryFields<TQueryModel>(params Expression<Func<TQueryModel, dynamic>>[] fieldExpressions) where TQueryModel : IQueryModel<TQueryModel>
         {
             if (!fieldExpressions.IsNullOrEmpty())
             {
@@ -1518,6 +398,7 @@ namespace EZNEW.Develop.CQuery
                 {
                     AddQueryFields(ExpressionHelper.GetExpressionPropertyName(expression.Body));
                 }
+                ClearFieldsCache();
             }
             return this;
         }
@@ -1529,6 +410,7 @@ namespace EZNEW.Develop.CQuery
         public IQuery ClearQueryFields()
         {
             queryFieldCollection?.Clear();
+            ClearFieldsCache();
             return this;
         }
 
@@ -1539,7 +421,11 @@ namespace EZNEW.Develop.CQuery
         /// <returns>Return the newest IQuery object</returns>
         public IQuery AddNotQueryFields(params string[] fields)
         {
-            notQueryFieldCollection.AddRange(fields);
+            if (fields?.Length > 0)
+            {
+                notQueryFieldCollection.AddRange(fields);
+                ClearFieldsCache();
+            }
             return this;
         }
 
@@ -1549,7 +435,7 @@ namespace EZNEW.Develop.CQuery
         /// <typeparam name="TQueryModel">Query model</typeparam>
         /// <param name="fieldExpressions">Fields</param>
         /// <returns>Return the newest IQuery object</returns>
-        public IQuery AddNotQueryFields<TQueryModel>(params Expression<Func<TQueryModel, dynamic>>[] fieldExpressions) where TQueryModel : QueryModel<TQueryModel>
+        public IQuery AddNotQueryFields<TQueryModel>(params Expression<Func<TQueryModel, dynamic>>[] fieldExpressions) where TQueryModel : IQueryModel<TQueryModel>
         {
             if (!fieldExpressions.IsNullOrEmpty())
             {
@@ -1557,6 +443,7 @@ namespace EZNEW.Develop.CQuery
                 {
                     AddNotQueryFields(ExpressionHelper.GetExpressionPropertyName(expression.Body));
                 }
+                ClearFieldsCache();
             }
             return this;
         }
@@ -1568,6 +455,7 @@ namespace EZNEW.Develop.CQuery
         public IQuery ClearNotQueryFields()
         {
             notQueryFieldCollection?.Clear();
+            ClearFieldsCache();
             return this;
         }
 
@@ -1575,45 +463,70 @@ namespace EZNEW.Develop.CQuery
         /// Get actually query fields
         /// </summary>
         /// <typeparam name="TEntity">Entity type</typeparam>
-        /// <param name="forcePrimaryKey">Whether force return primary key</param>
-        /// <param name="forceVersionKey">Whether fore return version key</param>
+        /// <param name="forceMustFields">Whether return the must query fields</param>
         /// <returns>Return the newest IQuery object</returns>
-        public IEnumerable<EntityField> GetActuallyQueryFields<TEntity>(bool forcePrimaryKey = true, bool forceVersionKey = true)
+        public IEnumerable<string> GetActuallyQueryFields<TEntity>(bool forceMustFields)
         {
-            return GetActuallyQueryFields(typeof(TEntity), forcePrimaryKey, forceVersionKey);
+            return GetActuallyQueryFields(typeof(TEntity), forceMustFields);
         }
 
         /// <summary>
         /// Get actually query fields
         /// </summary>
         /// <param name="entityType">Entity type</param>
-        /// <param name="forcePrimaryKey">Whether force return primary key</param>
-        /// <param name="forceVersionKey">Whether fore return version key</param>
+        /// <param name="forceMustFields">Whether return the must query fields</param>
         /// <returns>Return the newest IQuery object</returns>
-        public IEnumerable<EntityField> GetActuallyQueryFields(Type entityType, bool forcePrimaryKey = true, bool forceVersionKey = true)
+        public IEnumerable<string> GetActuallyQueryFields(Type entityType, bool forceMustFields)
         {
-            if (!queryFieldCollection.IsNullOrEmpty())
+            return GetActuallyQueryFieldsWithSign(entityType, forceMustFields).Item2;
+        }
+
+        /// <summary>
+        /// Get actually query fields
+        /// Item1: whether return entity full query fields
+        /// </summary>
+        /// <param name="entityType">Entity type</param>
+        /// <param name="forceMustFields">Whether return the must query fields</param>
+        /// <returns>Return actually query fields</returns>
+        public Tuple<bool, IEnumerable<string>> GetActuallyQueryFieldsWithSign(Type entityType, bool forceMustFields)
+        {
+            if (actuallyQueryFields == null)
             {
-                return EntityManager.GetQueryFields(entityType, queryFieldCollection, forcePrimaryKey, forceVersionKey);
-            }
-            IEnumerable<EntityField> allFields = EntityManager.GetQueryFields(entityType);
-            if (!notQueryFieldCollection.IsNullOrEmpty())
-            {
-                allFields = allFields.Except(notQueryFieldCollection.Select<string, EntityField>(c => c));
-                if (forcePrimaryKey)
+                bool fullQuery = true;
+                var allowQueryFields = QueryFields;
+                if (!allowQueryFields.IsNullOrEmpty())
                 {
-                    allFields = allFields.Union(EntityManager.GetPrimaryKeys(entityType));
-                }
-                if (forceVersionKey)
-                {
-                    var versionField = EntityManager.GetVersionField(entityType);
-                    if (!string.IsNullOrWhiteSpace(versionField))
+                    fullQuery = false;
+                    var mustQueryFields = EntityManager.GetMustQueryFields(entityType);
+                    if (forceMustFields && !mustQueryFields.IsNullOrEmpty())
                     {
-                        allFields = allFields.Union(new List<EntityField>(1) { versionField });
+                        allowQueryFields = mustQueryFields.Union(allowQueryFields);
+                    }
+                    return actuallyQueryFields = new Tuple<bool, IEnumerable<string>>(fullQuery, allowQueryFields);
+                }
+                IEnumerable<string> allFields = EntityManager.GetQueryFields(entityType);
+                var notQueryFields = NotQueryFields;
+                if (!notQueryFields.IsNullOrEmpty())
+                {
+                    fullQuery = false;
+                    allFields = allFields.Except(notQueryFields);
+                    var mustQueryFields = EntityManager.GetMustQueryFields(entityType);
+                    if (forceMustFields && !mustQueryFields.IsNullOrEmpty())
+                    {
+                        allFields = mustQueryFields.Union(allFields);
                     }
                 }
+                return actuallyQueryFields = new Tuple<bool, IEnumerable<string>>(fullQuery, allFields);
             }
-            return allFields;
+            return actuallyQueryFields;
+        }
+
+        /// <summary>
+        /// Clear fields cache
+        /// </summary>
+        void ClearFieldsCache()
+        {
+            actuallyQueryFields = null;
         }
 
         #endregion
@@ -1629,11 +542,7 @@ namespace EZNEW.Develop.CQuery
         public IQuery SetQueryText(string queryText, object parameters = null)
         {
             QueryText = queryText;
-            if (parameters != null && !parameters.GetType().IsSerializable)
-            {
-                parameters = parameters.ObjectToDcitionary();
-            }
-            QueryTextParameters = parameters;
+            QueryTextParameters = parameters?.ObjectToDcitionary();
             QueryType = QueryCommandType.Text;
             return this;
         }
@@ -1654,7 +563,7 @@ namespace EZNEW.Develop.CQuery
             }
             foreach (var property in properties)
             {
-                loadPropertyDictionary[property.Key] = property.Value;
+                loadProperties[property.Key] = property.Value;
             }
         }
 
@@ -1663,19 +572,19 @@ namespace EZNEW.Develop.CQuery
         /// </summary>
         /// <typeparam name="T">Data Type</typeparam>
         /// <param name="allowLoad">allow load</param>
-        /// <param name="propertys">propertys</param>
-        public void SetLoadPropertys<T>(bool allowLoad, params Expression<Func<T, dynamic>>[] propertys)
+        /// <param name="properties">properties</param>
+        public void SetLoadPropertys<T>(bool allowLoad, params Expression<Func<T, dynamic>>[] properties)
         {
-            if (propertys == null)
+            if (properties == null)
             {
                 return;
             }
-            Dictionary<string, bool> propertyDic = new Dictionary<string, bool>(propertys.Length);
-            foreach (var property in propertys)
+            Dictionary<string, bool> loadPropertyValues = new Dictionary<string, bool>(properties.Length);
+            foreach (var property in properties)
             {
-                propertyDic.Add(ExpressionHelper.GetExpressionPropertyName(property.Body), allowLoad);
+                loadPropertyValues.Add(ExpressionHelper.GetExpressionPropertyName(property.Body), allowLoad);
             }
-            SetLoadPropertys(propertyDic);
+            SetLoadPropertys(loadPropertyValues);
         }
 
         /// <summary>
@@ -1685,7 +594,7 @@ namespace EZNEW.Develop.CQuery
         /// <returns>allow load data</returns>
         public bool AllowLoad(string propertyName)
         {
-            return !string.IsNullOrWhiteSpace(propertyName) && loadPropertyDictionary != null && loadPropertyDictionary.ContainsKey(propertyName) && loadPropertyDictionary[propertyName];
+            return !string.IsNullOrWhiteSpace(propertyName) && loadProperties != null && loadProperties.ContainsKey(propertyName) && loadProperties[propertyName];
         }
 
         /// <summary>
@@ -1769,21 +678,21 @@ namespace EZNEW.Develop.CQuery
         public Func<T, bool> GetQueryExpression<T>()
         {
             Type modelType = typeof(T);
-            queryExpressionDictionary ??= new Dictionary<Guid, dynamic>();
-            if (queryExpressionDictionary.ContainsKey(modelType.GUID))
+            queryExpressionCaches ??= new Dictionary<Guid, dynamic>();
+            if (queryExpressionCaches.ContainsKey(modelType.GUID))
             {
-                return queryExpressionDictionary[modelType.GUID];
+                return queryExpressionCaches[modelType.GUID];
             }
             if (IsComplexQuery)
             {
                 Func<T, bool> falseFunc = (data) => false;
-                queryExpressionDictionary.Add(modelType.GUID, falseFunc);
+                queryExpressionCaches.Add(modelType.GUID, falseFunc);
                 return falseFunc;
             }
             if (criteriaCollection.IsNullOrEmpty())
             {
                 Func<T, bool> trueFunc = (data) => true;
-                queryExpressionDictionary.Add(modelType.GUID, trueFunc);
+                queryExpressionCaches.Add(modelType.GUID, trueFunc);
                 return trueFunc;
             }
             Type funcType = QueryManager.GetEntityPredicateType(modelType);//typeof(Func<,>).MakeGenericType(modelType, typeof(bool));
@@ -1816,13 +725,13 @@ namespace EZNEW.Develop.CQuery
             {
                 return null;
             }
-            var genericLambdaMethod = QueryManager.LambdaMethod.MakeGenericMethod(funcType);
+            var genericLambdaMethod = ReflectionManager.Expression.LambdaMethod.MakeGenericMethod(funcType);
             var lambdaExpression = genericLambdaMethod.Invoke(null, new object[]
             {
                 conditionExpression,parameterArray
             });
             Func<T, bool> func = ((Expression<Func<T, bool>>)lambdaExpression).Compile();
-            queryExpressionDictionary.Add(modelType.GUID, func);
+            queryExpressionCaches.Add(modelType.GUID, func);
             return func;
         }
 
@@ -1839,7 +748,6 @@ namespace EZNEW.Develop.CQuery
                 return GenerateSingleExpression(parameter, queryItem as Criteria);
             }
             IQuery query = queryItem as IQuery;
-            //if (query.Criterias == null || query.Criterias.Count <= 0)
             if (query?.Criterias.IsNullOrEmpty() ?? true)
             {
                 return null;
@@ -1919,15 +827,15 @@ namespace EZNEW.Develop.CQuery
                     property = Expression.LessThanOrEqual(property, valueExpression);
                     break;
                 case CriteriaOperator.BeginLike:
-                    Expression beginLikeExpression = Expression.Call(property, QueryManager.StringIndexOfMethod, valueExpression);
+                    Expression beginLikeExpression = Expression.Call(property, ReflectionManager.String.StringIndexOfMethod, valueExpression);
                     property = Expression.Equal(beginLikeExpression, Expression.Constant(0));
                     break;
                 case CriteriaOperator.Like:
-                    Expression likeExpression = Expression.Call(property, QueryManager.StringIndexOfMethod, valueExpression);
+                    Expression likeExpression = Expression.Call(property, ReflectionManager.String.StringIndexOfMethod, valueExpression);
                     property = Expression.GreaterThanOrEqual(likeExpression, Expression.Constant(0));
                     break;
                 case CriteriaOperator.EndLike:
-                    property = Expression.Call(property, QueryManager.EndWithMethod, valueExpression);
+                    property = Expression.Call(property, ReflectionManager.String.EndWithMethod, valueExpression);
                     break;
                 case CriteriaOperator.In:
                     Type valueType = criteriaValue.GetType();
@@ -1951,20 +859,20 @@ namespace EZNEW.Develop.CQuery
                     {
                         valueType = typeof(object);
                     }
-                    var inMethod = QueryManager.CollectionContainsMethod.MakeGenericMethod(valueType);
+                    var inMethod = ReflectionManager.Collections.GetCollectionContainsMethod(valueType);
                     property = Expression.Call(inMethod, valueExpression, property);
                     break;
                 case CriteriaOperator.NotIn:
-                    Type notInType = criteriaValue.GetType();
-                    if (notInType != null && notInType.GenericTypeArguments != null)
+                    Type notInValueType = criteriaValue.GetType();
+                    if (notInValueType != null && notInValueType.GenericTypeArguments != null)
                     {
-                        notInType = notInType.GenericTypeArguments[0];
+                        notInValueType = notInValueType.GenericTypeArguments[0];
                     }
                     else
                     {
-                        notInType = typeof(object);
+                        notInValueType = typeof(object);
                     }
-                    var notInMethod = QueryManager.CollectionContainsMethod.MakeGenericMethod(notInType);
+                    var notInMethod = ReflectionManager.Collections.GetCollectionContainsMethod(notInValueType);
                     property = Expression.Not(Expression.Call(notInMethod, valueExpression, property));
                     break;
                 default:
@@ -2053,7 +961,7 @@ namespace EZNEW.Develop.CQuery
         /// <param name="relationKey">Relation key</param>
         /// <param name="direction">Recurve direction</param>
         /// <returns>Return the newest IQuery object</returns>
-        public IQuery SetRecurve<TQueryModel>(Expression<Func<TQueryModel, dynamic>> key, Expression<Func<TQueryModel, dynamic>> relationKey, RecurveDirection direction = RecurveDirection.Down) where TQueryModel : QueryModel<TQueryModel>
+        public IQuery SetRecurve<TQueryModel>(Expression<Func<TQueryModel, dynamic>> key, Expression<Func<TQueryModel, dynamic>> relationKey, RecurveDirection direction = RecurveDirection.Down) where TQueryModel : IQueryModel<TQueryModel>
         {
             return SetRecurve(ExpressionHelper.GetExpressionPropertyName(key), ExpressionHelper.GetExpressionPropertyName(relationKey), direction);
         }
@@ -2083,62 +991,79 @@ namespace EZNEW.Develop.CQuery
         #region Clone
 
         /// <summary>
-        /// Copy a IQuery object
+        /// Light clone a IQuery object
         /// </summary>
         /// <returns>Return the replicated Query object</returns>
-        public IQuery Copy()
+        public IQuery LightClone()
         {
-            var newQuery = CopyWithoutConditions() as DefaultQuery;
+            var newQuery = CloneValueMember();
             newQuery.criteriaCollection = new List<Tuple<QueryOperator, IQueryItem>>(criteriaCollection);
+            newQuery.sortCollection = new List<SortCriteria>(sortCollection);
+            newQuery.queryFieldCollection = new List<string>(queryFieldCollection);
+            newQuery.notQueryFieldCollection = new List<string>(notQueryFieldCollection);
+            newQuery.loadProperties = new Dictionary<string, bool>(loadProperties);
             newQuery.equalCriteriaCollection = new List<Criteria>(equalCriteriaCollection);
-            newQuery.subqueryCollection = new List<IQuery>(Subqueries);
-            newQuery.hasSubquery = hasSubquery;
-            newQuery.RecurveCriteria = RecurveCriteria;
-            newQuery.hasRecurveCriteria = hasRecurveCriteria;
-            newQuery.joinItemCollection = new List<JoinItem>(JoinItems);
-            newQuery.hasJoin = hasJoin;
-            newQuery.atomicConditionCount = atomicConditionCount;
+            newQuery.joinItemCollection = new List<JoinItem>(joinItemCollection);
+            newQuery.combineItemCollection = new List<CombineItem>(combineItemCollection);
+            newQuery.subqueryCollection = new List<IQuery>(subqueryCollection);
             newQuery.allConditionFieldNameCollection = new List<string>(allConditionFieldNameCollection);
-            newQuery.alreadySetGlobalCondition = alreadySetGlobalCondition;
-            newQuery.IsObsolete = IsObsolete;
+            newQuery.actuallyQueryFields = actuallyQueryFields == null ? null : new Tuple<bool, IEnumerable<string>>(actuallyQueryFields.Item1, actuallyQueryFields.Item2);
+            newQuery.PagingInfo = PagingInfo == null ? null : new PagingFilter() { Page = PagingInfo.Page, PageSize = PagingInfo.PageSize, QuerySize = PagingInfo.QuerySize };
+            newQuery.queryExpressionCaches = new Dictionary<Guid, dynamic>(queryExpressionCaches);
+            newQuery.QueryTextParameters = QueryTextParameters?.ToDictionary(c => c.Key, c => c.Value);
             return newQuery;
         }
 
         /// <summary>
-        /// Deep copy a IQuery object
+        /// Clone a IQuery object
         /// </summary>
         /// <returns>Return the replicated Query object</returns>
-        public IQuery DeepCopy()
+        public IQuery Clone()
         {
-            var newQuery = this.DeepClone(ObjectCloneMethod.Binary);
-            newQuery.entityType = entityType;
-            newQuery.cancellationToken = cancellationToken;
+            var newQuery = CloneValueMember();
+            newQuery.criteriaCollection = criteriaCollection.Select(c => new Tuple<QueryOperator, IQueryItem>(c.Item1, QueryManager.Clone(c.Item2))).ToList();
+            newQuery.sortCollection = sortCollection.Select(c => c?.Clone()).ToList();
+            newQuery.queryFieldCollection = new List<string>(queryFieldCollection);
+            newQuery.notQueryFieldCollection = new List<string>(notQueryFieldCollection);
+            newQuery.loadProperties = new Dictionary<string, bool>(loadProperties);
+            newQuery.equalCriteriaCollection = equalCriteriaCollection.Select(c => c.Clone()).ToList();
+            newQuery.joinItemCollection = joinItemCollection.Select(c => c.Clone()).ToList();
+            newQuery.combineItemCollection = combineItemCollection.Select(c => c.Clone()).ToList();
+            newQuery.subqueryCollection = subqueryCollection.Select(c => c.Clone()).ToList();
+            newQuery.allConditionFieldNameCollection = new List<string>(allConditionFieldNameCollection);
+            newQuery.actuallyQueryFields = actuallyQueryFields == null ? null : new Tuple<bool, IEnumerable<string>>(actuallyQueryFields.Item1, actuallyQueryFields.Item2?.Select(c => c));
+            newQuery.PagingInfo = PagingInfo == null ? null : new PagingFilter() { Page = PagingInfo.Page, PageSize = PagingInfo.PageSize, QuerySize = PagingInfo.QuerySize };
+            newQuery.queryExpressionCaches = new Dictionary<Guid, dynamic>(queryExpressionCaches);
+            newQuery.QueryTextParameters = QueryTextParameters?.ToDictionary(c => c.Key, c => c.Value);
             return newQuery;
         }
 
         /// <summary>
-        /// Copy a IQuery object without conditions
+        /// Clone value member
         /// </summary>
-        /// <returns>Return the replicated Query object</returns>
-        public IQuery CopyWithoutConditions()
+        /// <returns></returns>
+        DefaultQuery CloneValueMember()
         {
             var newQuery = new DefaultQuery
             {
-                sortCollection = new List<SortCriteria>(sortCollection),
-                queryFieldCollection = new List<string>(queryFieldCollection),
-                notQueryFieldCollection = new List<string>(notQueryFieldCollection),
-                loadPropertyDictionary = new Dictionary<string, bool>(loadPropertyDictionary),
-                queryExpressionDictionary = new Dictionary<Guid, dynamic>(queryExpressionDictionary),
-                entityType = entityType,
+                joinSort = joinSort,
+                alreadySetGlobalCondition = alreadySetGlobalCondition,
+                hasSubquery = hasSubquery,
+                hasJoin = hasJoin,
+                hasRecurveCriteria = hasRecurveCriteria,
+                hasCombine = hasCombine,
+                hasConverter = hasConverter,
+                atomicConditionCount = atomicConditionCount,
                 entityTypeAssemblyQualifiedName = entityTypeAssemblyQualifiedName,
-                PagingInfo = PagingInfo,
+                cancellationToken = cancellationToken,
+                entityType = entityType,
                 QueryText = QueryText,
-                QueryTextParameters = QueryTextParameters,
                 QueryType = QueryType,
                 QuerySize = QuerySize,
+                RecurveCriteria = RecurveCriteria,
                 MustReturnValueOnSuccess = MustReturnValueOnSuccess,
-                IsolationLevel = IsolationLevel,
-                cancellationToken = cancellationToken
+                IsObsolete = IsObsolete,
+                IsolationLevel = IsolationLevel
             };
             return newQuery;
         }
@@ -2146,8 +1071,6 @@ namespace EZNEW.Develop.CQuery
         #endregion
 
         #region Join
-
-        #region Join Util
 
         /// <summary>
         /// Add a join query
@@ -2163,8 +1086,7 @@ namespace EZNEW.Develop.CQuery
             {
                 throw new EZNEWException("the IQuery object used for the join operation must set the property EntityType");
             }
-            joinQuery = QueryManager.HandleParameterQueryBeforeUse(joinQuery, null);
-            joinItemCollection.Add(new JoinItem()
+            return Join(new JoinItem()
             {
                 JoinType = joinType,
                 Operator = joinOperator,
@@ -2172,2188 +1094,50 @@ namespace EZNEW.Develop.CQuery
                 JoinQuery = joinQuery,
                 Sort = joinSort++
             });
+        }
+
+        /// <summary>
+        /// Add a join item
+        /// </summary>
+        /// <param name="joinItem">Join item</param>
+        /// <returns>Return the newest IQuery object</returns>
+        public IQuery Join(JoinItem joinItem)
+        {
+            if (joinItem?.JoinQuery == null)
+            {
+                return this;
+            }
+            joinItem.JoinQuery = QueryManager.HandleParameterQueryBeforeUse(joinItem.JoinQuery, null);
+            if (joinItem.ExtraQuery != null)
+            {
+                joinItem.ExtraQuery = QueryManager.HandleParameterQueryBeforeUse(joinItem.ExtraQuery, null);
+            }
+            joinItemCollection.Add(joinItem);
             hasJoin = true;
+            hasConverter |= joinItem.JoinQuery.HasConverter;
             return this;
-        }
-
-        /// <summary>
-        /// Add a join query
-        /// </summary>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinType">Join type</param>
-        /// <param name="joinOperator">Join operator</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery Join(string sourceField, string targetField, JoinType joinType, JoinOperator joinOperator, IQuery joinQuery)
-        {
-            return Join(new Dictionary<string, string>(1)
-                {
-                    { sourceField,targetField }
-                }, joinType, joinOperator, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a join query
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <typeparam name="TTarget">Join target type</typeparam>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinType">Join type</param>
-        /// <param name="joinOperator">Join operator</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery Join<TSource, TTarget>(Expression<Func<TSource, dynamic>> sourceField, Expression<Func<TTarget, dynamic>> targetField, JoinType joinType, JoinOperator joinOperator, IQuery joinQuery)
-        {
-            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
-            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
-            return Join(sourceFieldName, targetFieldName, joinType, joinOperator, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a join query
-        /// </summary>
-        /// <param name="joinType">Join type</param>
-        /// <param name="joinOperator">Join operator</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery Join(JoinType joinType, JoinOperator joinOperator, IQuery joinQuery)
-        {
-            return Join(string.Empty, string.Empty, joinType, joinOperator, joinQuery);
         }
 
         #endregion
 
-        #region Inner Join
-
-        #region InnerJoin helper
+        #region Combine
 
         /// <summary>
-        /// Add a inner join query
+        /// Add a combine item
         /// </summary>
-        /// <param name="joinOperator">Join operator</param>
-        /// <param name="joinQuerys">Join querys</param>
+        /// <param name="combineItem">Combine item</param>
         /// <returns>Return the newest IQuery object</returns>
-        public IQuery InnerJoin(JoinOperator joinOperator, params IQuery[] joinQuerys)
+        public IQuery Combine(CombineItem combineItem)
         {
-            if (joinQuerys.IsNullOrEmpty())
+            if (combineItem == null)
             {
                 return this;
             }
-            foreach (var joinQuery in joinQuerys)
-            {
-                InnerJoin(string.Empty, string.Empty, joinOperator, joinQuery);
-            }
+            combineItem.CombineQuery = QueryManager.HandleParameterQueryBeforeUse(combineItem.CombineQuery, null);
+            combineItemCollection.Add(combineItem);
+            hasCombine = true;
             return this;
         }
-
-        /// <summary>
-        /// Add a inner join query
-        /// </summary>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinOperator">Join operator</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery InnerJoin(string sourceField, string targetField, JoinOperator joinOperator, IQuery joinQuery)
-        {
-            return Join(sourceField, targetField, JoinType.InnerJoin, joinOperator, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a inner join query
-        /// </summary>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinOperator">Join operator</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery InnerJoin(string joinField, JoinOperator joinOperator, IQuery joinQuery)
-        {
-            return InnerJoin(joinField, joinField, joinOperator, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a inner join query
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <typeparam name="TTarget">Join target type</typeparam>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinOperator">Join operator</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery InnerJoin<TSource, TTarget>(Expression<Func<TSource, dynamic>> sourceField, Expression<Func<TTarget, dynamic>> targetField, JoinOperator joinOperator, IQuery joinQuery)
-        {
-            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
-            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
-            return InnerJoin(sourceFieldName, targetFieldName, joinOperator, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a inner join query
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinOperator">Join operator</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery InnerJoin<TSource>(Expression<Func<TSource, dynamic>> joinField, JoinOperator joinOperator, IQuery joinQuery)
-        {
-            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
-            return InnerJoin(joinFieldName, joinFieldName, joinOperator, joinQuery);
-        }
-
-        #endregion
-
-        #region Equal InnerJoin
-
-        /// <summary>
-        /// Add a inner join by using the Equal operation
-        /// </summary>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery EqualInnerJoin(string sourceField, string targetField, IQuery joinQuery)
-        {
-            return InnerJoin(sourceField, targetField, JoinOperator.Equal, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a inner join by using the Equal operation
-        /// </summary>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery EqualInnerJoin(string joinField, IQuery joinQuery)
-        {
-            return EqualInnerJoin(joinField, joinField, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a inner join by using the Equal operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <typeparam name="TTarget">Join target type</typeparam>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery EqualInnerJoin<TSource, TTarget>(Expression<Func<TSource, dynamic>> sourceField, Expression<Func<TTarget, dynamic>> targetField, IQuery joinQuery)
-        {
-            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
-            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
-            return EqualInnerJoin(sourceFieldName, targetFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a inner join by using the Equal operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery EqualInnerJoin<TSource>(Expression<Func<TSource, dynamic>> joinField, IQuery joinQuery)
-        {
-            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
-            return EqualInnerJoin(joinFieldName, joinFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a inner join by using the Equal operation
-        /// </summary>
-        /// <param name="joinQuerys">Join querys</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery EqualInnerJoin(params IQuery[] joinQuerys)
-        {
-            if (joinQuerys.IsNullOrEmpty())
-            {
-                return this;
-            }
-            foreach (var query in joinQuerys)
-            {
-                EqualInnerJoin(string.Empty, string.Empty, query);
-            }
-            return this;
-        }
-
-        #endregion
-
-        #region NotEqual InnerJoin
-
-        /// <summary>
-        /// Add a inner join by using the NotEqual operation
-        /// </summary>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery NotEqualInnerJoin(string sourceField, string targetField, IQuery joinQuery)
-        {
-            return InnerJoin(sourceField, targetField, JoinOperator.NotEqual, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a inner join by using the NotEqual operation
-        /// </summary>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery NotEqualInnerJoin(string joinField, IQuery joinQuery)
-        {
-            return NotEqualInnerJoin(joinField, joinField, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a inner join by using the NotEqual operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <typeparam name="TTarget">Join target type</typeparam>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery NotEqualInnerJoin<TSource, TTarget>(Expression<Func<TSource, dynamic>> sourceField, Expression<Func<TTarget, dynamic>> targetField, IQuery joinQuery)
-        {
-            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
-            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
-            return NotEqualInnerJoin(sourceFieldName, targetFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a inner join by using the NotEqual operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery NotEqualInnerJoin<TSource>(Expression<Func<TSource, dynamic>> joinField, IQuery joinQuery)
-        {
-            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
-            return NotEqualInnerJoin(joinFieldName, joinFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a inner join by using the NotEqual operation
-        /// </summary>
-        /// <param name="joinQuerys">Join querys</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery NotEqualInnerJoin(params IQuery[] joinQuerys)
-        {
-            if (joinQuerys.IsNullOrEmpty())
-            {
-                return this;
-            }
-            foreach (var query in joinQuerys)
-            {
-                NotEqualInnerJoin(string.Empty, string.Empty, query);
-            }
-            return this;
-        }
-
-        #endregion
-
-        #region LessThanOrEqual InnerJoin
-
-        /// <summary>
-        /// Add a inner join by using the LessThanOrEqual operation
-        /// </summary>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanOrEqualInnerJoin(string sourceField, string targetField, IQuery joinQuery)
-        {
-            return InnerJoin(sourceField, targetField, JoinOperator.LessThanOrEqual, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a inner join by using the LessThanOrEqual operation
-        /// </summary>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanOrEqualInnerJoin(string joinField, IQuery joinQuery)
-        {
-            return LessThanOrEqualInnerJoin(joinField, joinField, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a inner join by using the LessThanOrEqual operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <typeparam name="TTarget">Join target type</typeparam>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanOrEqualInnerJoin<TSource, TTarget>(Expression<Func<TSource, dynamic>> sourceField, Expression<Func<TTarget, dynamic>> targetField, IQuery joinQuery)
-        {
-            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
-            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
-            return LessThanOrEqualInnerJoin(sourceFieldName, targetFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a inner join by using the LessThanOrEqual operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanOrEqualInnerJoin<TSource>(Expression<Func<TSource, dynamic>> joinField, IQuery joinQuery)
-        {
-            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
-            return LessThanOrEqualInnerJoin(joinFieldName, joinFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a inner join by using the LessThanOrEqual operation
-        /// </summary>
-        /// <param name="joinQuerys">Join querys</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanOrEqualInnerJoin(params IQuery[] joinQuerys)
-        {
-            if (joinQuerys.IsNullOrEmpty())
-            {
-                return this;
-            }
-            foreach (var query in joinQuerys)
-            {
-                LessThanOrEqualInnerJoin(string.Empty, string.Empty, query);
-            }
-            return this;
-        }
-
-        #endregion
-
-        #region LessThan InnerJoin
-
-        /// <summary>
-        /// Add a inner join by using the LessThan operation
-        /// </summary>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanInnerJoin(string sourceField, string targetField, IQuery joinQuery)
-        {
-            return InnerJoin(sourceField, targetField, JoinOperator.LessThan, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a inner join by using the LessThan operation
-        /// </summary>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanInnerJoin(string joinField, IQuery joinQuery)
-        {
-            return LessThanInnerJoin(joinField, joinField, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a inner join by using the LessThan operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <typeparam name="TTarget">Join target type</typeparam>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanInnerJoin<TSource, TTarget>(Expression<Func<TSource, dynamic>> sourceField, Expression<Func<TTarget, dynamic>> targetField, IQuery joinQuery)
-        {
-            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
-            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
-            return LessThanInnerJoin(sourceFieldName, targetFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a inner join by using the LessThan operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanInnerJoin<TSource>(Expression<Func<TSource, dynamic>> joinField, IQuery joinQuery)
-        {
-            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
-            return LessThanInnerJoin(joinFieldName, joinFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a inner join by using the LessThan operation
-        /// </summary>
-        /// <param name="joinQuerys">Join querys</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanInnerJoin(params IQuery[] joinQuerys)
-        {
-            if (joinQuerys.IsNullOrEmpty())
-            {
-                return this;
-            }
-            foreach (var query in joinQuerys)
-            {
-                LessThanInnerJoin(string.Empty, string.Empty, query);
-            }
-            return this;
-        }
-
-        #endregion
-
-        #region GreaterThan InnerJoin
-
-        /// <summary>
-        /// Add a inner join by using the GreaterThan operation
-        /// </summary>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanInnerJoin(string sourceField, string targetField, IQuery joinQuery)
-        {
-            return InnerJoin(sourceField, targetField, JoinOperator.GreaterThan, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a inner join by using the GreaterThan operation
-        /// </summary>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanInnerJoin(string joinField, IQuery joinQuery)
-        {
-            return GreaterThanInnerJoin(joinField, joinField, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a inner join by using the GreaterThan operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <typeparam name="TTarget">Join target type</typeparam>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanInnerJoin<TSource, TTarget>(Expression<Func<TSource, dynamic>> sourceField, Expression<Func<TTarget, dynamic>> targetField, IQuery joinQuery)
-        {
-            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
-            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
-            return GreaterThanInnerJoin(sourceFieldName, targetFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a inner join by using the GreaterThan operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanInnerJoin<TSource>(Expression<Func<TSource, dynamic>> joinField, IQuery joinQuery)
-        {
-            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
-            return GreaterThanInnerJoin(joinFieldName, joinFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a inner join by using the GreaterThan operation
-        /// </summary>
-        /// <param name="joinQuerys">Join querys</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanInnerJoin(params IQuery[] joinQuerys)
-        {
-            if (joinQuerys.IsNullOrEmpty())
-            {
-                return this;
-            }
-            foreach (var query in joinQuerys)
-            {
-                GreaterThanInnerJoin(string.Empty, string.Empty, query);
-            }
-            return this;
-        }
-
-        #endregion
-
-        #region GreaterThanOrEqual InnerJoin
-
-        /// <summary>
-        /// Add a inner join by using the GreaterThanOrEqual operation
-        /// </summary>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanOrEqualInnerJoin(string sourceField, string targetField, IQuery joinQuery)
-        {
-            return InnerJoin(sourceField, targetField, JoinOperator.GreaterThanOrEqual, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a inner join by using the GreaterThanOrEqual operation
-        /// </summary>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanOrEqualInnerJoin(string joinField, IQuery joinQuery)
-        {
-            return GreaterThanOrEqualInnerJoin(joinField, joinField, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a inner join by using the GreaterThanOrEqual operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <typeparam name="TTarget">Join target type</typeparam>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanOrEqualInnerJoin<TSource, TTarget>(Expression<Func<TSource, dynamic>> sourceField, Expression<Func<TTarget, dynamic>> targetField, IQuery joinQuery)
-        {
-            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
-            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
-            return GreaterThanOrEqualInnerJoin(sourceFieldName, targetFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a inner join by using the GreaterThanOrEqual operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanOrEqualInnerJoin<TSource>(Expression<Func<TSource, dynamic>> joinField, IQuery joinQuery)
-        {
-            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
-            return GreaterThanOrEqualInnerJoin(joinFieldName, joinFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a inner join by using the GreaterThanOrEqual operation
-        /// </summary>
-        /// <param name="joinQuerys">Join querys</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanOrEqualInnerJoin(params IQuery[] joinQuerys)
-        {
-            if (joinQuerys.IsNullOrEmpty())
-            {
-                return this;
-            }
-            foreach (var query in joinQuerys)
-            {
-                GreaterThanOrEqualInnerJoin(string.Empty, string.Empty, query);
-            }
-            return this;
-        }
-
-        #endregion
-
-        #endregion
-
-        #region Left Join
-
-        #region Left Join helper
-
-        /// <summary>
-        /// Add a left join query
-        /// </summary>
-        /// <param name="joinOperator">Join operator</param>
-        /// <param name="joinQuerys">Join querys</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LeftJoin(JoinOperator joinOperator, params IQuery[] joinQuerys)
-        {
-            if (joinQuerys.IsNullOrEmpty())
-            {
-                return this;
-            }
-            foreach (var joinQuery in joinQuerys)
-            {
-                LeftJoin(string.Empty, string.Empty, joinOperator, joinQuery);
-            }
-            return this;
-        }
-
-        /// <summary>
-        /// Add a left join query
-        /// </summary>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinOperator">Join operator</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LeftJoin(string sourceField, string targetField, JoinOperator joinOperator, IQuery joinQuery)
-        {
-            return Join(sourceField, targetField, JoinType.LeftJoin, joinOperator, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a left join query
-        /// </summary>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinOperator">Join operator</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LeftJoin(string joinField, JoinOperator joinOperator, IQuery joinQuery)
-        {
-            return LeftJoin(joinField, joinField, joinOperator, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a left join query
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <typeparam name="TTarget">Join target type</typeparam>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinOperator">Join operator</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LeftJoin<TSource, TTarget>(Expression<Func<TSource, dynamic>> sourceField, Expression<Func<TTarget, dynamic>> targetField, JoinOperator joinOperator, IQuery joinQuery)
-        {
-            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
-            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
-            return LeftJoin(sourceFieldName, targetFieldName, joinOperator, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a left join query
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinOperator">Join operator</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LeftJoin<TSource>(Expression<Func<TSource, dynamic>> joinField, JoinOperator joinOperator, IQuery joinQuery)
-        {
-            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
-            return LeftJoin(joinFieldName, joinFieldName, joinOperator, joinQuery);
-        }
-
-        #endregion
-
-        #region Equal LeftJoin
-
-        /// <summary>
-        /// Add a left join by using the Equal operation
-        /// </summary>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery EqualLeftJoin(string sourceField, string targetField, IQuery joinQuery)
-        {
-            return LeftJoin(sourceField, targetField, JoinOperator.Equal, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a left join by using the Equal operation
-        /// </summary>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery EqualLeftJoin(string joinField, IQuery joinQuery)
-        {
-            return EqualLeftJoin(joinField, joinField, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a left join by using the Equal operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <typeparam name="TTarget">Join target type</typeparam>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery EqualLeftJoin<TSource, TTarget>(Expression<Func<TSource, dynamic>> sourceField, Expression<Func<TTarget, dynamic>> targetField, IQuery joinQuery)
-        {
-            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
-            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
-            return EqualLeftJoin(sourceFieldName, targetFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a left join by using the Equal operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery EqualLeftJoin<TSource>(Expression<Func<TSource, dynamic>> joinField, IQuery joinQuery)
-        {
-            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
-            return EqualLeftJoin(joinFieldName, joinFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a left join by using the Equal operation
-        /// </summary>
-        /// <param name="joinQuerys">Join querys</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery EqualLeftJoin(params IQuery[] joinQuerys)
-        {
-            if (joinQuerys.IsNullOrEmpty())
-            {
-                return this;
-            }
-            foreach (var query in joinQuerys)
-            {
-                EqualLeftJoin(string.Empty, string.Empty, query);
-            }
-            return this;
-        }
-
-        #endregion
-
-        #region NotEqual LeftJoin
-
-        /// <summary>
-        /// Add a left join by using the NotEqual operation
-        /// </summary>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery NotEqualLeftJoin(string sourceField, string targetField, IQuery joinQuery)
-        {
-            return LeftJoin(sourceField, targetField, JoinOperator.NotEqual, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a left join by using the NotEqual operation
-        /// </summary>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery NotEqualLeftJoin(string joinField, IQuery joinQuery)
-        {
-            return NotEqualLeftJoin(joinField, joinField, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a left join by using the NotEqual operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <typeparam name="TTarget">Join target type</typeparam>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery NotEqualLeftJoin<TSource, TTarget>(Expression<Func<TSource, dynamic>> sourceField, Expression<Func<TTarget, dynamic>> targetField, IQuery joinQuery)
-        {
-            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
-            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
-            return NotEqualLeftJoin(sourceFieldName, targetFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a left join by using the NotEqual operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery NotEqualLeftJoin<TSource>(Expression<Func<TSource, dynamic>> joinField, IQuery joinQuery)
-        {
-            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
-            return NotEqualLeftJoin(joinFieldName, joinFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a left join by using the NotEqual operation
-        /// </summary>
-        /// <param name="joinQuerys">Join querys</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery NotEqualLeftJoin(params IQuery[] joinQuerys)
-        {
-            if (joinQuerys.IsNullOrEmpty())
-            {
-                return this;
-            }
-            foreach (var query in joinQuerys)
-            {
-                NotEqualLeftJoin(string.Empty, string.Empty, query);
-            }
-            return this;
-        }
-
-        #endregion
-
-        #region LessThanOrEqual LeftJoin
-
-        /// <summary>
-        /// Add a left join by using the LessThanOrEqual operation
-        /// </summary>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanOrEqualLeftJoin(string sourceField, string targetField, IQuery joinQuery)
-        {
-            return LeftJoin(sourceField, targetField, JoinOperator.LessThanOrEqual, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a left join by using the LessThanOrEqual operation
-        /// </summary>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanOrEqualLeftJoin(string joinField, IQuery joinQuery)
-        {
-            return LessThanOrEqualLeftJoin(joinField, joinField, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a left join by using the LessThanOrEqual operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <typeparam name="TTarget">Join target type</typeparam>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanOrEqualLeftJoin<TSource, TTarget>(Expression<Func<TSource, dynamic>> sourceField, Expression<Func<TTarget, dynamic>> targetField, IQuery joinQuery)
-        {
-            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
-            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
-            return LessThanOrEqualLeftJoin(sourceFieldName, targetFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a left join by using the LessThanOrEqual operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanOrEqualLeftJoin<TSource>(Expression<Func<TSource, dynamic>> joinField, IQuery joinQuery)
-        {
-            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
-            return LessThanOrEqualLeftJoin(joinFieldName, joinFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a left join by using the LessThanOrEqual operation
-        /// </summary>
-        /// <param name="joinQuerys">Join querys</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanOrEqualLeftJoin(params IQuery[] joinQuerys)
-        {
-            if (joinQuerys.IsNullOrEmpty())
-            {
-                return this;
-            }
-            foreach (var query in joinQuerys)
-            {
-                LessThanOrEqualLeftJoin(string.Empty, string.Empty, query);
-            }
-            return this;
-        }
-
-        #endregion
-
-        #region LessThan LeftJoin
-
-        /// <summary>
-        /// Add a left join by using the LessThan operation
-        /// </summary>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanLeftJoin(string sourceField, string targetField, IQuery joinQuery)
-        {
-            return LeftJoin(sourceField, targetField, JoinOperator.LessThan, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a left join by using the LessThan operation
-        /// </summary>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanLeftJoin(string joinField, IQuery joinQuery)
-        {
-            return LessThanLeftJoin(joinField, joinField, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a left join by using the LessThan operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <typeparam name="TTarget">Join target type</typeparam>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanLeftJoin<TSource, TTarget>(Expression<Func<TSource, dynamic>> sourceField, Expression<Func<TTarget, dynamic>> targetField, IQuery joinQuery)
-        {
-            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
-            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
-            return LessThanLeftJoin(sourceFieldName, targetFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a left join by using the LessThan operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanLeftJoin<TSource>(Expression<Func<TSource, dynamic>> joinField, IQuery joinQuery)
-        {
-            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
-            return LessThanLeftJoin(joinFieldName, joinFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a left join by using the LessThan operation
-        /// </summary>
-        /// <param name="joinQuerys">Join querys</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanLeftJoin(params IQuery[] joinQuerys)
-        {
-            if (joinQuerys.IsNullOrEmpty())
-            {
-                return this;
-            }
-            foreach (var query in joinQuerys)
-            {
-                LessThanLeftJoin(string.Empty, string.Empty, query);
-            }
-            return this;
-        }
-
-        #endregion
-
-        #region GreaterThan LeftJoin
-
-        /// <summary>
-        /// Add a left join by using the GreaterThan operation
-        /// </summary>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanLeftJoin(string sourceField, string targetField, IQuery joinQuery)
-        {
-            return LeftJoin(sourceField, targetField, JoinOperator.GreaterThan, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a left join by using the GreaterThan operation
-        /// </summary>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanLeftJoin(string joinField, IQuery joinQuery)
-        {
-            return GreaterThanLeftJoin(joinField, joinField, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a left join by using the GreaterThan operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <typeparam name="TTarget">Join target type</typeparam>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanLeftJoin<TSource, TTarget>(Expression<Func<TSource, dynamic>> sourceField, Expression<Func<TTarget, dynamic>> targetField, IQuery joinQuery)
-        {
-            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
-            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
-            return GreaterThanLeftJoin(sourceFieldName, targetFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a left join by using the GreaterThan operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanLeftJoin<TSource>(Expression<Func<TSource, dynamic>> joinField, IQuery joinQuery)
-        {
-            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
-            return GreaterThanLeftJoin(joinFieldName, joinFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a left join by using the GreaterThan operation
-        /// </summary>
-        /// <param name="joinQuerys">join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanLeftJoin(params IQuery[] joinQuerys)
-        {
-            if (joinQuerys.IsNullOrEmpty())
-            {
-                return this;
-            }
-            foreach (var query in joinQuerys)
-            {
-                GreaterThanLeftJoin(string.Empty, string.Empty, query);
-            }
-            return this;
-        }
-
-        #endregion
-
-        #region GreaterThanOrEqual LeftJoin
-
-        /// <summary>
-        /// Add a left join by using the GreaterThanOrEqual operation
-        /// </summary>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanOrEqualLeftJoin(string sourceField, string targetField, IQuery joinQuery)
-        {
-            return LeftJoin(sourceField, targetField, JoinOperator.GreaterThanOrEqual, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a left join by using the GreaterThanOrEqual operation
-        /// </summary>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanOrEqualLeftJoin(string joinField, IQuery joinQuery)
-        {
-            return GreaterThanOrEqualLeftJoin(joinField, joinField, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a left join by using the GreaterThanOrEqual operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <typeparam name="TTarget">Join target type</typeparam>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanOrEqualLeftJoin<TSource, TTarget>(Expression<Func<TSource, dynamic>> sourceField, Expression<Func<TTarget, dynamic>> targetField, IQuery joinQuery)
-        {
-            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
-            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
-            return GreaterThanOrEqualLeftJoin(sourceFieldName, targetFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a left join by using the GreaterThanOrEqual operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanOrEqualLeftJoin<TSource>(Expression<Func<TSource, dynamic>> joinField, IQuery joinQuery)
-        {
-            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
-            return GreaterThanOrEqualLeftJoin(joinFieldName, joinFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a left join by using the GreaterThanOrEqual operation
-        /// </summary>
-        /// <param name="joinQuerys">Join querys</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanOrEqualLeftJoin(params IQuery[] joinQuerys)
-        {
-            if (joinQuerys.IsNullOrEmpty())
-            {
-                return this;
-            }
-            foreach (var query in joinQuerys)
-            {
-                GreaterThanOrEqualLeftJoin(string.Empty, string.Empty, query);
-            }
-            return this;
-        }
-
-        #endregion
-
-        #endregion
-
-        #region Right Join
-
-        #region Right Join helper
-
-        /// <summary>
-        /// Add a right join
-        /// </summary>
-        /// <param name="joinOperator">Join operator</param>
-        /// <param name="joinQuerys">Join querys</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery RightJoin(JoinOperator joinOperator, params IQuery[] joinQuerys)
-        {
-            if (joinQuerys.IsNullOrEmpty())
-            {
-                return this;
-            }
-            foreach (var joinQuery in joinQuerys)
-            {
-                RightJoin(string.Empty, string.Empty, joinOperator, joinQuery);
-            }
-            return this;
-        }
-
-        /// <summary>
-        /// Add a right join
-        /// </summary>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinOperator">Join operator</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery RightJoin(string sourceField, string targetField, JoinOperator joinOperator, IQuery joinQuery)
-        {
-            return Join(sourceField, targetField, JoinType.RightJoin, joinOperator, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a right join
-        /// </summary>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinOperator">Join operator</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery RightJoin(string joinField, JoinOperator joinOperator, IQuery joinQuery)
-        {
-            return RightJoin(joinField, joinField, joinOperator, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a right join
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <typeparam name="TTarget">Join target type</typeparam>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinOperator">Join operator</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery RightJoin<TSource, TTarget>(Expression<Func<TSource, dynamic>> sourceField, Expression<Func<TTarget, dynamic>> targetField, JoinOperator joinOperator, IQuery joinQuery)
-        {
-            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
-            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
-            return RightJoin(sourceFieldName, targetFieldName, joinOperator, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a right join
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinOperator">Join operator</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery RightJoin<TSource>(Expression<Func<TSource, dynamic>> joinField, JoinOperator joinOperator, IQuery joinQuery)
-        {
-            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
-            return RightJoin(joinFieldName, joinFieldName, joinOperator, joinQuery);
-        }
-
-        #endregion
-
-        #region Equal RightJoin
-
-        /// <summary>
-        /// Add a right join by using the Equal operation
-        /// </summary>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery EqualRightJoin(string sourceField, string targetField, IQuery joinQuery)
-        {
-            return RightJoin(sourceField, targetField, JoinOperator.Equal, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a right join by using the Equal operation
-        /// </summary>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery EqualRightJoin(string joinField, IQuery joinQuery)
-        {
-            return EqualRightJoin(joinField, joinField, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a right join by using the Equal operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <typeparam name="TTarget">Join target type</typeparam>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery EqualRightJoin<TSource, TTarget>(Expression<Func<TSource, dynamic>> sourceField, Expression<Func<TTarget, dynamic>> targetField, IQuery joinQuery)
-        {
-            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
-            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
-            return EqualRightJoin(sourceFieldName, targetFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a right join by using the Equal operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery EqualRightJoin<TSource>(Expression<Func<TSource, dynamic>> joinField, IQuery joinQuery)
-        {
-            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
-            return EqualRightJoin(joinFieldName, joinFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a right join by using the Equal operation
-        /// </summary>
-        /// <param name="joinQuerys">Join querys</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery EqualRightJoin(params IQuery[] joinQuerys)
-        {
-            if (joinQuerys.IsNullOrEmpty())
-            {
-                return this;
-            }
-            foreach (var query in joinQuerys)
-            {
-                EqualRightJoin(string.Empty, string.Empty, query);
-            }
-            return this;
-        }
-
-        #endregion
-
-        #region NotEqual RightJoin
-
-        /// <summary>
-        /// Add a right join by using the NotEqual operation
-        /// </summary>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery NotEqualRightJoin(string sourceField, string targetField, IQuery joinQuery)
-        {
-            return RightJoin(sourceField, targetField, JoinOperator.NotEqual, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a right join by using the NotEqual operation
-        /// </summary>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery NotEqualRightJoin(string joinField, IQuery joinQuery)
-        {
-            return NotEqualRightJoin(joinField, joinField, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a right join by using the NotEqual operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <typeparam name="TTarget">Join target type</typeparam>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery NotEqualRightJoin<TSource, TTarget>(Expression<Func<TSource, dynamic>> sourceField, Expression<Func<TTarget, dynamic>> targetField, IQuery joinQuery)
-        {
-            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
-            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
-            return NotEqualRightJoin(sourceFieldName, targetFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a right join by using the NotEqual operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery NotEqualRightJoin<TSource>(Expression<Func<TSource, dynamic>> joinField, IQuery joinQuery)
-        {
-            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
-            return NotEqualRightJoin(joinFieldName, joinFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a right join by using the NotEqual operation
-        /// </summary>
-        /// <param name="joinQuerys">Join querys</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery NotEqualRightJoin(params IQuery[] joinQuerys)
-        {
-            if (joinQuerys.IsNullOrEmpty())
-            {
-                return this;
-            }
-            foreach (var query in joinQuerys)
-            {
-                NotEqualRightJoin(string.Empty, string.Empty, query);
-            }
-            return this;
-        }
-
-        #endregion
-
-        #region LessThanOrEqual RightJoin
-
-        /// <summary>
-        /// Add a right join by using the LessThanOrEqual operation
-        /// </summary>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanOrEqualRightJoin(string sourceField, string targetField, IQuery joinQuery)
-        {
-            return RightJoin(sourceField, targetField, JoinOperator.LessThanOrEqual, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a right join by using the LessThanOrEqual operation
-        /// </summary>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanOrEqualRightJoin(string joinField, IQuery joinQuery)
-        {
-            return LessThanOrEqualRightJoin(joinField, joinField, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a right join by using the LessThanOrEqual operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <typeparam name="TTarget">Join target type</typeparam>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanOrEqualRightJoin<TSource, TTarget>(Expression<Func<TSource, dynamic>> sourceField, Expression<Func<TTarget, dynamic>> targetField, IQuery joinQuery)
-        {
-            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
-            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
-            return LessThanOrEqualRightJoin(sourceFieldName, targetFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a right join by using the LessThanOrEqual operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanOrEqualRightJoin<TSource>(Expression<Func<TSource, dynamic>> joinField, IQuery joinQuery)
-        {
-            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
-            return LessThanOrEqualRightJoin(joinFieldName, joinFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a right join by using the LessThanOrEqual operation
-        /// </summary>
-        /// <param name="joinQuerys">Join querys</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanOrEqualRightJoin(params IQuery[] joinQuerys)
-        {
-            if (joinQuerys.IsNullOrEmpty())
-            {
-                return this;
-            }
-            foreach (var query in joinQuerys)
-            {
-                LessThanOrEqualRightJoin(string.Empty, string.Empty, query);
-            }
-            return this;
-        }
-
-        #endregion
-
-        #region LessThan RightJoin
-
-        /// <summary>
-        /// Add a right join by using the LessThan operation
-        /// </summary>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanRightJoin(string sourceField, string targetField, IQuery joinQuery)
-        {
-            return RightJoin(sourceField, targetField, JoinOperator.LessThan, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a right join by using the LessThan operation
-        /// </summary>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanRightJoin(string joinField, IQuery joinQuery)
-        {
-            return LessThanRightJoin(joinField, joinField, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a right join by using the LessThan operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <typeparam name="TTarget">Join target type</typeparam>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanRightJoin<TSource, TTarget>(Expression<Func<TSource, dynamic>> sourceField, Expression<Func<TTarget, dynamic>> targetField, IQuery joinQuery)
-        {
-            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
-            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
-            return LessThanRightJoin(sourceFieldName, targetFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a right join by using the LessThan operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanRightJoin<TSource>(Expression<Func<TSource, dynamic>> joinField, IQuery joinQuery)
-        {
-            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
-            return LessThanRightJoin(joinFieldName, joinFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a right join by using the LessThan operation
-        /// </summary>
-        /// <param name="joinQuerys">Join querys</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanRightJoin(params IQuery[] joinQuerys)
-        {
-            if (joinQuerys.IsNullOrEmpty())
-            {
-                return this;
-            }
-            foreach (var query in joinQuerys)
-            {
-                LessThanRightJoin(string.Empty, string.Empty, query);
-            }
-            return this;
-        }
-
-        #endregion
-
-        #region GreaterThan RightJoin
-
-        /// <summary>
-        /// Add a right join by using the GreaterThan operation
-        /// </summary>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanRightJoin(string sourceField, string targetField, IQuery joinQuery)
-        {
-            return RightJoin(sourceField, targetField, JoinOperator.GreaterThan, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a right join by using the GreaterThan operation
-        /// </summary>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanRightJoin(string joinField, IQuery joinQuery)
-        {
-            return GreaterThanRightJoin(joinField, joinField, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a right join by using the GreaterThan operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <typeparam name="TTarget">Join target type</typeparam>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanRightJoin<TSource, TTarget>(Expression<Func<TSource, dynamic>> sourceField, Expression<Func<TTarget, dynamic>> targetField, IQuery joinQuery)
-        {
-            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
-            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
-            return GreaterThanRightJoin(sourceFieldName, targetFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a right join by using the GreaterThan operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanRightJoin<TSource>(Expression<Func<TSource, dynamic>> joinField, IQuery joinQuery)
-        {
-            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
-            return GreaterThanRightJoin(joinFieldName, joinFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a right join by using the GreaterThan operation
-        /// </summary>
-        /// <param name="joinQuerys">Join querys</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanRightJoin(params IQuery[] joinQuerys)
-        {
-            if (joinQuerys.IsNullOrEmpty())
-            {
-                return this;
-            }
-            foreach (var query in joinQuerys)
-            {
-                GreaterThanRightJoin(string.Empty, string.Empty, query);
-            }
-            return this;
-        }
-
-        #endregion
-
-        #region GreaterThanOrEqual RightJoin
-
-        /// <summary>
-        /// Add a right join by using the GreaterThanOrEqual operation
-        /// </summary>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanOrEqualRightJoin(string sourceField, string targetField, IQuery joinQuery)
-        {
-            return RightJoin(sourceField, targetField, JoinOperator.GreaterThanOrEqual, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a right join by using the GreaterThanOrEqual operation
-        /// </summary>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanOrEqualRightJoin(string joinField, IQuery joinQuery)
-        {
-            return GreaterThanOrEqualRightJoin(joinField, joinField, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a right join by using the GreaterThanOrEqual operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <typeparam name="TTarget">Join target type</typeparam>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanOrEqualRightJoin<TSource, TTarget>(Expression<Func<TSource, dynamic>> sourceField, Expression<Func<TTarget, dynamic>> targetField, IQuery joinQuery)
-        {
-            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
-            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
-            return GreaterThanOrEqualRightJoin(sourceFieldName, targetFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a right join by using the GreaterThanOrEqual operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanOrEqualRightJoin<TSource>(Expression<Func<TSource, dynamic>> joinField, IQuery joinQuery)
-        {
-            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
-            return GreaterThanOrEqualRightJoin(joinFieldName, joinFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a right join by using the GreaterThanOrEqual operation
-        /// </summary>
-        /// <param name="joinQuerys">Join querys</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanOrEqualRightJoin(params IQuery[] joinQuerys)
-        {
-            if (joinQuerys.IsNullOrEmpty())
-            {
-                return this;
-            }
-            foreach (var query in joinQuerys)
-            {
-                GreaterThanOrEqualRightJoin(string.Empty, string.Empty, query);
-            }
-            return this;
-        }
-
-        #endregion
-
-        #endregion
-
-        #region Full Join
-
-        #region Full Join helper
-
-        /// <summary>
-        /// Add a full join
-        /// </summary>
-        /// <param name="joinOperator">Join operator</param>
-        /// <param name="joinQuerys">Join querys</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery FullJoin(JoinOperator joinOperator, params IQuery[] joinQuerys)
-        {
-            if (joinQuerys.IsNullOrEmpty())
-            {
-                return this;
-            }
-            foreach (var joinQuery in joinQuerys)
-            {
-                FullJoin(string.Empty, string.Empty, joinOperator, joinQuery);
-            }
-            return this;
-        }
-
-        /// <summary>
-        /// Add a full join
-        /// </summary>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinOperator">Join operator</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery FullJoin(string sourceField, string targetField, JoinOperator joinOperator, IQuery joinQuery)
-        {
-            return Join(sourceField, targetField, JoinType.FullJoin, joinOperator, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a full join
-        /// </summary>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinOperator">Join operator</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery FullJoin(string joinField, JoinOperator joinOperator, IQuery joinQuery)
-        {
-            return FullJoin(joinField, joinField, joinOperator, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a full join
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <typeparam name="TTarget">Join target type</typeparam>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinOperator">Join operator</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery FullJoin<TSource, TTarget>(Expression<Func<TSource, dynamic>> sourceField, Expression<Func<TTarget, dynamic>> targetField, JoinOperator joinOperator, IQuery joinQuery)
-        {
-            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
-            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
-            return FullJoin(sourceFieldName, targetFieldName, joinOperator, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a full join
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinOperator">Join operator</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery FullJoin<TSource>(Expression<Func<TSource, dynamic>> joinField, JoinOperator joinOperator, IQuery joinQuery)
-        {
-            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
-            return FullJoin(joinFieldName, joinFieldName, joinOperator, joinQuery);
-        }
-
-        #endregion
-
-        #region Equal FullJoin
-
-        /// <summary>
-        /// Add a full join by using the Equal operation
-        /// </summary>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery EqualFullJoin(string sourceField, string targetField, IQuery joinQuery)
-        {
-            return FullJoin(sourceField, targetField, JoinOperator.Equal, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a full join by using the Equal operation
-        /// </summary>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery EqualFullJoin(string joinField, IQuery joinQuery)
-        {
-            return EqualFullJoin(joinField, joinField, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a full join by using the Equal operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <typeparam name="TTarget">Join target type</typeparam>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery EqualFullJoin<TSource, TTarget>(Expression<Func<TSource, dynamic>> sourceField, Expression<Func<TTarget, dynamic>> targetField, IQuery joinQuery)
-        {
-            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
-            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
-            return EqualFullJoin(sourceFieldName, targetFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a full join by using the Equal operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery EqualFullJoin<TSource>(Expression<Func<TSource, dynamic>> joinField, IQuery joinQuery)
-        {
-            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
-            return EqualFullJoin(joinFieldName, joinFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a full join by using the Equal operation
-        /// </summary>
-        /// <param name="joinQuerys">Join querys</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery EqualFullJoin(params IQuery[] joinQuerys)
-        {
-            if (joinQuerys.IsNullOrEmpty())
-            {
-                return this;
-            }
-            foreach (var query in joinQuerys)
-            {
-                EqualFullJoin(string.Empty, string.Empty, query);
-            }
-            return this;
-        }
-
-        #endregion
-
-        #region NotEqual FullJoin
-
-        /// <summary>
-        /// Add a full join by using the NotEqual operation
-        /// </summary>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery NotEqualFullJoin(string sourceField, string targetField, IQuery joinQuery)
-        {
-            return FullJoin(sourceField, targetField, JoinOperator.NotEqual, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a full join by using the NotEqual operation
-        /// </summary>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery NotEqualFullJoin(string joinField, IQuery joinQuery)
-        {
-            return NotEqualFullJoin(joinField, joinField, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a full join by using the NotEqual operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <typeparam name="TTarget">Join target type</typeparam>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery NotEqualFullJoin<TSource, TTarget>(Expression<Func<TSource, dynamic>> sourceField, Expression<Func<TTarget, dynamic>> targetField, IQuery joinQuery)
-        {
-            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
-            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
-            return NotEqualFullJoin(sourceFieldName, targetFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a full join by using the NotEqual operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery NotEqualFullJoin<TSource>(Expression<Func<TSource, dynamic>> joinField, IQuery joinQuery)
-        {
-            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
-            return NotEqualFullJoin(joinFieldName, joinFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a full join by using the NotEqual operation
-        /// </summary>
-        /// <param name="joinQuerys">Join querys</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery NotEqualFullJoin(params IQuery[] joinQuerys)
-        {
-            if (joinQuerys.IsNullOrEmpty())
-            {
-                return this;
-            }
-            foreach (var query in joinQuerys)
-            {
-                NotEqualFullJoin(string.Empty, string.Empty, query);
-            }
-            return this;
-        }
-
-        #endregion
-
-        #region LessThanOrEqual FullJoin
-
-        /// <summary>
-        /// Add a full join by using the LessThanOrEqual operation
-        /// </summary>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanOrEqualFullJoin(string sourceField, string targetField, IQuery joinQuery)
-        {
-            return FullJoin(sourceField, targetField, JoinOperator.LessThanOrEqual, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a full join by using the LessThanOrEqual operation
-        /// </summary>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanOrEqualFullJoin(string joinField, IQuery joinQuery)
-        {
-            return LessThanOrEqualFullJoin(joinField, joinField, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a full join by using the LessThanOrEqual operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <typeparam name="TTarget">Join target type</typeparam>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanOrEqualFullJoin<TSource, TTarget>(Expression<Func<TSource, dynamic>> sourceField, Expression<Func<TTarget, dynamic>> targetField, IQuery joinQuery)
-        {
-            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
-            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
-            return LessThanOrEqualFullJoin(sourceFieldName, targetFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a full join by using the LessThanOrEqual operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanOrEqualFullJoin<TSource>(Expression<Func<TSource, dynamic>> joinField, IQuery joinQuery)
-        {
-            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
-            return LessThanOrEqualFullJoin(joinFieldName, joinFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a full join by using the LessThanOrEqual operation
-        /// </summary>
-        /// <param name="joinQuerys">Join querys</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanOrEqualFullJoin(params IQuery[] joinQuerys)
-        {
-            if (joinQuerys.IsNullOrEmpty())
-            {
-                return this;
-            }
-            foreach (var query in joinQuerys)
-            {
-                LessThanOrEqualFullJoin(string.Empty, string.Empty, query);
-            }
-            return this;
-        }
-
-        #endregion
-
-        #region LessThan FullJoin
-
-        /// <summary>
-        /// Add a full join by using the LessThan operation
-        /// </summary>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanFullJoin(string sourceField, string targetField, IQuery joinQuery)
-        {
-            return FullJoin(sourceField, targetField, JoinOperator.LessThan, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a full join by using the LessThan operation
-        /// </summary>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanFullJoin(string joinField, IQuery joinQuery)
-        {
-            return LessThanFullJoin(joinField, joinField, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a full join by using the LessThan operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <typeparam name="TTarget">Join target type</typeparam>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanFullJoin<TSource, TTarget>(Expression<Func<TSource, dynamic>> sourceField, Expression<Func<TTarget, dynamic>> targetField, IQuery joinQuery)
-        {
-            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
-            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
-            return LessThanFullJoin(sourceFieldName, targetFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a full join by using the LessThan operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanFullJoin<TSource>(Expression<Func<TSource, dynamic>> joinField, IQuery joinQuery)
-        {
-            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
-            return LessThanFullJoin(joinFieldName, joinFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a full join by using the LessThan operation
-        /// </summary>
-        /// <param name="joinQuerys">Join querys</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery LessThanFullJoin(params IQuery[] joinQuerys)
-        {
-            if (joinQuerys.IsNullOrEmpty())
-            {
-                return this;
-            }
-            foreach (var query in joinQuerys)
-            {
-                LessThanFullJoin(string.Empty, string.Empty, query);
-            }
-            return this;
-        }
-
-        #endregion
-
-        #region GreaterThan FullJoin
-
-        /// <summary>
-        /// Add a full join by using the GreaterThan operation
-        /// </summary>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanFullJoin(string sourceField, string targetField, IQuery joinQuery)
-        {
-            return FullJoin(sourceField, targetField, JoinOperator.GreaterThan, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a full join by using the GreaterThan operation
-        /// </summary>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanFullJoin(string joinField, IQuery joinQuery)
-        {
-            return GreaterThanFullJoin(joinField, joinField, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a full join by using the GreaterThan operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <typeparam name="TTarget">Join target type</typeparam>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanFullJoin<TSource, TTarget>(Expression<Func<TSource, dynamic>> sourceField, Expression<Func<TTarget, dynamic>> targetField, IQuery joinQuery)
-        {
-            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
-            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
-            return GreaterThanFullJoin(sourceFieldName, targetFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a full join by using the GreaterThan operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanFullJoin<TSource>(Expression<Func<TSource, dynamic>> joinField, IQuery joinQuery)
-        {
-            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
-            return GreaterThanFullJoin(joinFieldName, joinFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a full join by using the GreaterThan operation
-        /// </summary>
-        /// <param name="joinQuerys">Join querys</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanFullJoin(params IQuery[] joinQuerys)
-        {
-            if (joinQuerys.IsNullOrEmpty())
-            {
-                return this;
-            }
-            foreach (var query in joinQuerys)
-            {
-                GreaterThanFullJoin(string.Empty, string.Empty, query);
-            }
-            return this;
-        }
-
-        #endregion
-
-        #region GreaterThanOrEqual FullJoin
-
-        /// <summary>
-        /// Add a full join by using the GreaterThanOrEqual operation
-        /// </summary>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanOrEqualFullJoin(string sourceField, string targetField, IQuery joinQuery)
-        {
-            return FullJoin(sourceField, targetField, JoinOperator.GreaterThanOrEqual, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a full join by using the GreaterThanOrEqual operation
-        /// </summary>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanOrEqualFullJoin(string joinField, IQuery joinQuery)
-        {
-            return GreaterThanOrEqualFullJoin(joinField, joinField, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a full join by using the GreaterThanOrEqual operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <typeparam name="TTarget">Join target type</typeparam>
-        /// <param name="sourceField">Source field</param>
-        /// <param name="targetField">Target field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanOrEqualFullJoin<TSource, TTarget>(Expression<Func<TSource, dynamic>> sourceField, Expression<Func<TTarget, dynamic>> targetField, IQuery joinQuery)
-        {
-            var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
-            var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
-            return GreaterThanOrEqualFullJoin(sourceFieldName, targetFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a full join by using the GreaterThanOrEqual operation
-        /// </summary>
-        /// <typeparam name="TSource">Join source type</typeparam>
-        /// <param name="joinField">Join field</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanOrEqualFullJoin<TSource>(Expression<Func<TSource, dynamic>> joinField, IQuery joinQuery)
-        {
-            var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
-            return GreaterThanOrEqualFullJoin(joinFieldName, joinFieldName, joinQuery);
-        }
-
-        /// <summary>
-        /// Add a full join by using the GreaterThanOrEqual operation
-        /// </summary>
-        /// <param name="joinQuerys">Join querys</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery GreaterThanOrEqualFullJoin(params IQuery[] joinQuerys)
-        {
-            if (joinQuerys.IsNullOrEmpty())
-            {
-                return this;
-            }
-            foreach (var query in joinQuerys)
-            {
-                GreaterThanOrEqualFullJoin(string.Empty, string.Empty, query);
-            }
-            return this;
-        }
-
-        #endregion
-
-        #endregion
-
-        #region CrossJoin
-
-        /// <summary>
-        /// Add a cross join
-        /// </summary>
-        /// <param name="joinQuerys">Join querys</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery CrossJoin(params IQuery[] joinQuerys)
-        {
-            if (joinQuerys.IsNullOrEmpty())
-            {
-                return this;
-            }
-            foreach (var query in joinQuerys)
-            {
-                Join(string.Empty, string.Empty, JoinType.CrossJoin, JoinOperator.Equal, query);
-            }
-            return this;
-        }
-
-        #endregion
 
         #endregion
 
@@ -4372,15 +1156,7 @@ namespace EZNEW.Develop.CQuery
                 return this;
             }
             alreadySetGlobalCondition = true;
-            if (queryOperator == QueryOperator.OR)
-            {
-                Or(globalCondition);
-            }
-            else
-            {
-                And(globalCondition);
-            }
-            return this;
+            return AddQueryItem(queryOperator, globalCondition);
         }
 
         /// <summary>
@@ -4425,7 +1201,7 @@ namespace EZNEW.Develop.CQuery
         /// <returns>Cancellation token</returns>
         public CancellationToken? GetCancellationToken()
         {
-            return this.cancellationToken;
+            return cancellationToken;
         }
 
         #endregion
@@ -4490,56 +1266,6 @@ namespace EZNEW.Develop.CQuery
         #region Util
 
         /// <summary>
-        /// Add a criteria
-        /// </summary>
-        /// <param name="queryOperator">Connect operator</param>
-        /// <param name="fieldName">Field name</param>
-        /// <param name="criteriaOperator">Condition operator</param>
-        /// <param name="value">Value</param>
-        /// <param name="converter">Converter</param>
-        /// <param name="queryOption">query parameter option</param>
-        void AddCriteria(QueryOperator queryOperator, string fieldName, CriteriaOperator criteriaOperator, dynamic value, ICriteriaConverter converter = null, QueryParameterOption queryOption = null)
-        {
-            if (string.IsNullOrWhiteSpace(fieldName))
-            {
-                return;
-            }
-            Criteria newCriteria = Criteria.CreateNewCriteria(fieldName, criteriaOperator, value);
-            newCriteria.Converter = converter;
-            AddQueryItem(queryOperator, newCriteria, queryOption);
-        }
-
-        /// <summary>
-        /// Add a IQueryItem
-        /// </summary>
-        /// <param name="queryOperator">Connect operator</param>
-        /// <param name="queryItem">query item</param>
-        /// <param name="queryOption">query parameter option</param>
-        void AddQueryItem(QueryOperator queryOperator, IQueryItem queryItem, QueryParameterOption queryOption = null)
-        {
-            #region invoke handler
-
-            var queryItemTypeId = queryItem?.GetType().GUID ?? Guid.Empty;
-            Func<DefaultQuery, IQueryItem, QueryParameterOption, IQueryItem> handler = null;
-            QueryManager.AddQueryItemHandlers?.TryGetValue(queryItemTypeId, out handler);
-            if (handler != null)
-            {
-                queryItem = handler(this, queryItem, queryOption);
-            }
-
-            #endregion
-
-            if (queryItem == null)
-            {
-                return;
-            }
-
-            //clear data
-            queryExpressionDictionary?.Clear();
-            criteriaCollection.Add(new Tuple<QueryOperator, IQueryItem>(queryOperator, queryItem));
-        }
-
-        /// <summary>
         /// Set has subquery
         /// </summary>
         /// <param name="hasSubquery">Has subquery</param>
@@ -4567,338 +1293,30 @@ namespace EZNEW.Develop.CQuery
         }
 
         /// <summary>
+        /// Set has combine items
+        /// </summary>
+        /// <param name="hasCombine">Has combine</param>
+        internal void SetHasCombine(bool hasCombine)
+        {
+            this.hasCombine = hasCombine;
+        }
+
+        /// <summary>
+        /// Set has converter
+        /// </summary>
+        /// <param name="hasConverter">Has converter</param>
+        internal void SetHasConverter(bool hasConverter)
+        {
+            this.hasConverter = hasConverter;
+        }
+
+        /// <summary>
         /// Gets whether IQuery is complex query object
         /// </summary>
         /// <returns>Return whether query object is a complex query object</returns>
         bool GetIsComplexQuery()
         {
-            return HasSubquery || HasRecurveCriteria || HasJoin;
-        }
-
-        /// <summary>
-        /// Add order item
-        /// </summary>
-        /// <param name="fieldName">Field name</param>
-        /// <param name="desc">Sort by desc</param>
-        /// <param name="converter">Field converter</param>
-        void AddOrderItem(string fieldName, bool desc = false, ICriteriaConverter converter = null)
-        {
-            if (string.IsNullOrWhiteSpace(fieldName))
-            {
-                return;
-            }
-            sortCollection.Add(new SortCriteria()
-            {
-                Name = fieldName,
-                Desc = desc,
-                Converter = converter
-            });
-        }
-
-        /// <summary>
-        /// Get a query item by expression
-        /// </summary>
-        /// <param name="queryOperator">Connect operator</param>
-        /// <param name="expression">Condition expression</param>
-        /// <returns>IQueryItem object</returns>
-        Tuple<QueryOperator, IQueryItem> GetExpressionQuery(QueryOperator queryOperator, Expression expression)
-        {
-            var nodeType = expression.NodeType;
-            ExpressionType queryNodeType = queryOperator == QueryOperator.OR ? ExpressionType.OrElse : ExpressionType.AndAlso;
-            if (ExpressionHelper.IsCompareNodeType(nodeType))
-            {
-                return GetSingleExpressionQueryItem(queryNodeType, expression);
-            }
-            else if (ExpressionHelper.IsBoolNodeType(nodeType))
-            {
-                BinaryExpression binExpression = expression as BinaryExpression;
-                if (binExpression == null)
-                {
-                    throw new EZNEWException("expression is error");
-                }
-                DefaultQuery query = new DefaultQuery();
-                var leftQuery = GetExpressionQuery(queryOperator, binExpression.Left);
-                if (leftQuery != null)
-                {
-                    query.AddQueryItem(leftQuery.Item1, leftQuery.Item2);
-                }
-                QueryOperator rightQueryOperator = nodeType == ExpressionType.OrElse ? QueryOperator.OR : QueryOperator.AND;
-                var rightQuery = GetExpressionQuery(rightQueryOperator, binExpression.Right);
-                if (rightQuery != null)
-                {
-                    query.AddQueryItem(rightQuery.Item1, rightQuery.Item2);
-                }
-                return new Tuple<QueryOperator, IQueryItem>(queryOperator, query);
-            }
-            else if (nodeType == ExpressionType.Call)
-            {
-                return GetCallExpressionQueryItem(queryOperator, expression);
-            }
-            else if (nodeType == ExpressionType.Not)
-            {
-                UnaryExpression unaryExpress = expression as UnaryExpression;
-                if (unaryExpress != null && unaryExpress.Operand is MethodCallExpression)
-                {
-                    return GetCallExpressionQueryItem(queryOperator, unaryExpress.Operand, true);
-                }
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// Get a query item by method call expression
-        /// </summary>
-        /// <param name="expressionType">Expression node type</param>
-        /// <param name="expression">Expression</param>
-        /// <param name="negation">Whether is negation</param>
-        /// <returns></returns>
-        Tuple<QueryOperator, IQueryItem> GetCallExpressionQueryItem(QueryOperator queryOperator, Expression expression, bool negation = false)
-        {
-            MethodCallExpression callExpression = expression as MethodCallExpression;
-            MemberExpression memberArg = null;
-            Expression parameterExpression = null;
-            if (callExpression.Object != null)
-            {
-                memberArg = callExpression.Object as MemberExpression;
-                parameterExpression = callExpression.Arguments[0];
-            }
-            else if (callExpression.Arguments.Count == 2)
-            {
-                memberArg = callExpression.Arguments[0] as MemberExpression;
-                parameterExpression = callExpression.Arguments[1];
-            }
-            if (memberArg == null || parameterExpression == null)
-            {
-                return null;
-            }
-            Criteria criteria = null;
-            var dataType = memberArg.Type;
-            if (dataType == typeof(string))
-            {
-                criteria = GetStringCallExpressionQueryItem(callExpression.Method.Name, memberArg, parameterExpression, negation);
-            }
-            else if (typeof(IEnumerable).IsAssignableFrom(memberArg.Type))
-            {
-                criteria = GetIEnumerableCallExpressionQueryItem(callExpression.Method.Name, parameterExpression, memberArg, negation);
-            }
-            if (criteria != null)
-            {
-                return new Tuple<QueryOperator, IQueryItem>(queryOperator, criteria);
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// Get a query item by method call expression with string type
-        /// </summary>
-        /// <param name="methodName">Method name</param>
-        /// <param name="memberArg">Expression</param>
-        /// <param name="negation">Whether is negation</param>
-        /// <returns>criteria</returns>
-        Criteria GetStringCallExpressionQueryItem(string methodName, Expression memberArg, Expression parameter, bool negation = false)
-        {
-            Criteria criteria = null;
-            CriteriaOperator criteriaOperator = CriteriaOperator.Like;
-            //parameter name
-            string parameterName = string.Empty;
-            if (memberArg is ParameterExpression)
-            {
-                parameterName = (memberArg as ParameterExpression)?.Name;
-            }
-            else if (memberArg is MemberExpression)
-            {
-                parameterName = ExpressionHelper.GetExpressionPropertyName(memberArg as MemberExpression);
-            }
-            if (string.IsNullOrWhiteSpace(parameterName))
-            {
-                return null;
-            }
-            string value = Expression.Lambda(parameter)?.Compile().DynamicInvoke()?.ToString();
-            switch (methodName)
-            {
-                case "EndsWith":
-                    criteriaOperator = negation ? CriteriaOperator.NotEndLike : CriteriaOperator.EndLike;
-                    criteria = Criteria.CreateNewCriteria(parameterName, criteriaOperator, value);
-                    break;
-                case "StartsWith":
-                    criteriaOperator = negation ? CriteriaOperator.NotBeginLike : CriteriaOperator.BeginLike;
-                    criteria = Criteria.CreateNewCriteria(parameterName, criteriaOperator, value);
-                    break;
-                case "Contains":
-                    criteriaOperator = negation ? CriteriaOperator.NotLike : CriteriaOperator.Like;
-                    criteria = Criteria.CreateNewCriteria(parameterName, criteriaOperator, value);
-                    break;
-            }
-            return criteria;
-        }
-
-        /// <summary>
-        /// Get a query item by method call expression with IEnumerable
-        /// </summary>
-        /// <param name="methodName">Method name</param>
-        /// <param name="memberArg">MemberArg</param>
-        /// <param name="parameter">Parameter</param>
-        /// <param name="negation">Whether is negation</param>
-        /// <returns>Return a criteria</returns>
-        Criteria GetIEnumerableCallExpressionQueryItem(string methodName, Expression memberArg, Expression parameter, bool negation = false)
-        {
-            Criteria criteria = null;
-            CriteriaOperator criteriaOperator = CriteriaOperator.In;
-            IEnumerable values = null;
-            string parameterName = string.Empty;
-            if (memberArg is ParameterExpression)
-            {
-                parameterName = (memberArg as ParameterExpression)?.Name;
-            }
-            else if (memberArg is MemberExpression)
-            {
-                parameterName = ExpressionHelper.GetExpressionPropertyName(memberArg as MemberExpression);
-            }
-            if (string.IsNullOrWhiteSpace(parameterName))
-            {
-                throw new EZNEWException($"conditional expression is not well-formed");
-            }
-            switch (methodName)
-            {
-                case "Contains":
-                    values = Expression.Lambda(parameter)?.Compile().DynamicInvoke() as IEnumerable;
-                    if (values == null)
-                    {
-                        throw new EZNEWException($"the value of the collection type is null or empty");
-                    }
-                    var type = values.GetType();
-                    if (!type.IsSerializable && type.IsGenericType)
-                    {
-                        var argLength = type.GenericTypeArguments.Length;
-                        var toListMethod = QueryManager.CollectionToListMethod.MakeGenericMethod(type.GenericTypeArguments[argLength - 1]);
-                        values = toListMethod.Invoke(null, new object[1] { values }) as IEnumerable;
-                    }
-                    criteriaOperator = negation ? CriteriaOperator.NotIn : CriteriaOperator.In;
-                    criteria = Criteria.CreateNewCriteria(parameterName, criteriaOperator, values);
-                    break;
-            }
-            return criteria;
-        }
-
-        /// <summary>
-        /// Get a query item
-        /// </summary>
-        /// <param name="expressionType">Expression node type</param>
-        /// <param name="expression">Expression</param>
-        /// <returns>IQueryItem object</returns>
-        Tuple<QueryOperator, IQueryItem> GetSingleExpressionQueryItem(ExpressionType expressionType, Expression expression)
-        {
-            if (expression == null)
-            {
-                throw new EZNEWException("expression is null");
-            }
-            BinaryExpression binaryExpression = expression as BinaryExpression;
-            if (binaryExpression == null)
-            {
-                throw new EZNEWException("expression is error");
-            }
-            QueryOperator qOperator = expressionType == ExpressionType.OrElse ? QueryOperator.OR : QueryOperator.AND;
-            Tuple<Expression, Expression> nameAndValue = GetNameAndValueExpression(binaryExpression.Left, binaryExpression.Right);
-            if (nameAndValue == null)
-            {
-                return null;
-            }
-            string name = ExpressionHelper.GetExpressionPropertyName(nameAndValue.Item1);
-            object value = nameAndValue.Item2;
-            if (string.IsNullOrEmpty(name) || value == null)
-            {
-                return null;
-            }
-            CriteriaOperator cOperator = GetCriteriaOperator(binaryExpression.NodeType);
-            return new Tuple<QueryOperator, IQueryItem>(qOperator, Criteria.CreateNewCriteria(name, cOperator, value));
-        }
-
-        /// <summary>
-        /// Get field and value expression
-        /// </summary>
-        /// <param name="firstExpression">First expression</param>
-        /// <param name="secondExpression">Eecond expression</param>
-        /// <returns>Return field and value expression</returns>
-        Tuple<Expression, Expression> GetNameAndValueExpression(Expression firstExpression, Expression secondExpression)
-        {
-            Tuple<Expression, Expression> result = null;
-            bool firstIsNameExp = IsNameExpression(firstExpression);
-            bool secondIsNameExp = IsNameExpression(secondExpression);
-            if (!firstIsNameExp && !secondIsNameExp)
-            {
-                return result;
-            }
-            if (firstIsNameExp && secondIsNameExp)
-            {
-                Expression firstChildExp = ExpressionHelper.GetLastChildExpression(firstExpression);
-                Expression secondChildExp = ExpressionHelper.GetLastChildExpression(secondExpression);
-                result = firstChildExp.NodeType >= secondChildExp.NodeType ? new Tuple<Expression, Expression>(firstExpression, secondExpression) : new Tuple<Expression, Expression>(secondExpression, firstExpression);
-                return result;
-            }
-            result = firstIsNameExp ? new Tuple<Expression, Expression>(firstExpression, secondExpression) : new Tuple<Expression, Expression>(secondExpression, firstExpression);
-            return result;
-        }
-
-        /// <summary>
-        /// Is field name expression
-        /// </summary>
-        /// <param name="expression">expression</param>
-        /// <returns></returns>
-        bool IsNameExpression(Expression expression)
-        {
-            if (expression == null)
-            {
-                return false;
-            }
-            bool result = false;
-            switch (expression.NodeType)
-            {
-                case ExpressionType.MemberAccess:
-                    result = true;
-                    break;
-                case ExpressionType.Convert:
-                case ExpressionType.ConvertChecked:
-                    UnaryExpression unaryExp = expression as UnaryExpression;
-                    if (unaryExp.Operand.NodeType == ExpressionType.MemberAccess)
-                    {
-                        result = true;
-                    }
-                    break;
-            }
-            return result;
-        }
-
-        /// <summary>
-        /// Get condition operator by expression type
-        /// </summary>
-        /// <param name="expressType">Expression type</param>
-        /// <returns>Return criteria operator</returns>
-        CriteriaOperator GetCriteriaOperator(ExpressionType expressType)
-        {
-            CriteriaOperator cOperator = CriteriaOperator.Equal;
-            switch (expressType)
-            {
-                case ExpressionType.Equal:
-                default:
-                    cOperator = CriteriaOperator.Equal;
-                    break;
-                case ExpressionType.NotEqual:
-                    cOperator = CriteriaOperator.NotEqual;
-                    break;
-                case ExpressionType.LessThanOrEqual:
-                    cOperator = CriteriaOperator.LessThanOrEqual;
-                    break;
-                case ExpressionType.LessThan:
-                    cOperator = CriteriaOperator.LessThan;
-                    break;
-                case ExpressionType.GreaterThan:
-                    cOperator = CriteriaOperator.GreaterThan;
-                    break;
-                case ExpressionType.GreaterThanOrEqual:
-                    cOperator = CriteriaOperator.GreaterThanOrEqual;
-                    break;
-            }
-            return cOperator;
+            return hasSubquery || hasRecurveCriteria || hasJoin || hasCombine || hasConverter;
         }
 
         #endregion

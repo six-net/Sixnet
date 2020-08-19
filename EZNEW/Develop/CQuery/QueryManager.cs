@@ -7,6 +7,8 @@ using System.Collections.Concurrent;
 using EZNEW.Develop.Entity;
 using EZNEW.Fault;
 using EZNEW.Paging;
+using EZNEW.Configuration;
+using EZNEW.ExpressionUtil;
 
 namespace EZNEW.Develop.CQuery
 {
@@ -16,31 +18,6 @@ namespace EZNEW.Develop.CQuery
     public static class QueryManager
     {
         #region Fields
-
-        /// <summary>
-        /// Lambda method info
-        /// </summary>
-        internal static MethodInfo LambdaMethod = null;
-
-        /// <summary>
-        /// String index method info
-        /// </summary>
-        internal static MethodInfo StringIndexOfMethod = null;
-
-        /// <summary>
-        /// String end with method info
-        /// </summary>
-        internal static MethodInfo EndWithMethod = null;
-
-        /// <summary>
-        /// Collection contains method info
-        /// </summary>
-        internal static MethodInfo CollectionContainsMethod = null;
-
-        /// <summary>
-        /// Collection to list method info
-        /// </summary>
-        internal static MethodInfo CollectionToListMethod = null;
 
         /// <summary>
         /// Add query item handlers
@@ -57,12 +34,6 @@ namespace EZNEW.Develop.CQuery
         /// </summary>
         static readonly Type FuncType = typeof(Func<>);
 
-        /// <summary>
-        /// Query model entity
-        /// key:query model type guid
-        /// </summary>
-        static readonly ConcurrentDictionary<Guid, Type> QueryModelEntityRelationDictionary = new ConcurrentDictionary<Guid, Type>();
-
         #endregion
 
         #region Properties
@@ -70,7 +41,7 @@ namespace EZNEW.Develop.CQuery
         /// <summary>
         /// Gets or sets a method to generate global condition
         /// </summary>
-        static Func<GlobalConditionFilter, GlobalCondition> GetGlobalConditionProxy { get; set; }
+        private static readonly List<Func<GlobalConditionFilter, GlobalCondition>> GetGlobalConditionProxys = new List<Func<GlobalConditionFilter, GlobalCondition>>();
 
         /// <summary>
         /// Gets or sets a value to determine whether copy parameter IQuery object,default is true
@@ -84,12 +55,6 @@ namespace EZNEW.Develop.CQuery
 
         static QueryManager()
         {
-            var baseExpressMethods = typeof(Expression).GetMethods(BindingFlags.Public | BindingFlags.Static);
-            LambdaMethod = baseExpressMethods.FirstOrDefault(c => c.Name == "Lambda" && c.IsGenericMethod && c.GetParameters()[1].ParameterType.FullName == typeof(ParameterExpression[]).FullName);
-            StringIndexOfMethod = typeof(string).GetMethods().FirstOrDefault(c => c.Name == "IndexOf" && c.GetParameters().Length == 1 && c.GetParameters()[0].ParameterType.FullName == typeof(string).FullName);
-            EndWithMethod = typeof(string).GetMethods().FirstOrDefault(c => c.Name == "EndsWith" && c.GetParameters().Length == 1 && c.GetParameters()[0].ParameterType.FullName == typeof(string).FullName);
-            CollectionContainsMethod = typeof(Enumerable).GetMethods().FirstOrDefault(c => c.Name == "Contains" && c.GetParameters().Length == 2);
-            CollectionToListMethod = typeof(Enumerable).GetMethods().FirstOrDefault(c => c.Name == "ToList" && c.GetParameters().Length == 1);
             AddQueryItemHandlers = new Dictionary<Guid, Func<DefaultQuery, IQueryItem, QueryParameterOption, IQueryItem>>(2)
             {
                 { typeof(Criteria).GUID,AddCriteriaQueryItemHandler},
@@ -129,9 +94,8 @@ namespace EZNEW.Develop.CQuery
         /// </summary>
         /// <typeparam name="T">Query model</typeparam>
         /// <returns>Return query object</returns>
-        public static IQuery Create<T>() where T : QueryModel<T>
+        public static IQuery Create<T>() where T : IQueryModel<T>
         {
-            QueryModel<T>.Init();
             var query = Create();
             var entityType = GetQueryModelRelationEntityType<T>();
             if (entityType == null)
@@ -147,10 +111,14 @@ namespace EZNEW.Develop.CQuery
         /// </summary>
         /// <typeparam name="T">Query model</typeparam>
         /// <returns>Return query object</returns>
-        public static IQuery Create<T>(PagingFilter filter) where T : QueryModel<T>
+        public static IQuery Create<T>(PagingFilter filter) where T : IQueryModel<T>
         {
             var query = Create<T>();
             query.SetPaging(filter);
+            if (filter != null)
+            {
+                query.QuerySize = filter.QuerySize;
+            }
             return query;
         }
 
@@ -160,7 +128,7 @@ namespace EZNEW.Develop.CQuery
         /// <typeparam name="T">Query model</typeparam>
         /// <param name="criteria">Condition expression</param>
         /// <returns>Return query object</returns>
-        public static IQuery Create<T>(Expression<Func<T, bool>> criteria) where T : QueryModel<T>
+        public static IQuery Create<T>(Expression<Func<T, bool>> criteria) where T : IQueryModel<T>
         {
             IQuery query = Create<T>();
             if (criteria != null)
@@ -206,14 +174,15 @@ namespace EZNEW.Develop.CQuery
             var keys = EntityManager.GetPrimaryKeys(entityType);
             if (keys.IsNullOrEmpty())
             {
-                throw new EZNEWException(string.Format("type:{0} isn't set primary keys", entityType.FullName));
+                throw new EZNEWException(string.Format("Type:{0} isn't set primary keys", entityType.FullName));
             }
             var firstData = datas.ElementAt(0).GetPropertyValue(keys.ElementAt(0));
             var dataType = firstData.GetType();
             dynamic keyValueList = Activator.CreateInstance(typeof(List<>).MakeGenericType(dataType));
+            var keyCount = keys.GetCount();
             foreach (T entity in datas)
             {
-                if (keys.Count == 1)
+                if (keyCount == 1)
                 {
                     keyValueList.Add(entity.GetPropertyValue(keys.ElementAt(0)));
                 }
@@ -222,20 +191,20 @@ namespace EZNEW.Develop.CQuery
                     IQuery entityQuery = Create();
                     foreach (var key in keys)
                     {
-                        entityQuery.And(key, exclude ? CriteriaOperator.NotEqual : CriteriaOperator.Equal, entity.GetPropertyValue(key));
+                        entityQuery = AndExtensions.And(entityQuery, key, exclude ? CriteriaOperator.NotEqual : CriteriaOperator.Equal, entity.GetPropertyValue(key));
                     }
                     originalQuery.Or(entityQuery);
                 }
             }
-            if (keys.Count == 1)
+            if (keyCount == 1)
             {
                 if (exclude)
                 {
-                    originalQuery.NotIn(keys.ElementAt(0), keyValueList);
+                    originalQuery = NotInExtensions.NotIn(originalQuery, keys.ElementAt(0), keyValueList);
                 }
                 else
                 {
-                    originalQuery.In(keys.ElementAt(0), keyValueList);
+                    originalQuery = InExtensions.In(originalQuery, keys.ElementAt(0), keyValueList);
                 }
             }
             return originalQuery;
@@ -256,16 +225,17 @@ namespace EZNEW.Develop.CQuery
             {
                 return originalQuery;
             }
-            originalQuery = originalQuery ?? CreateByEntity<T>();
+            originalQuery ??= CreateByEntity<T>();
             Type entityType = typeof(T);
             var keys = EntityManager.GetPrimaryKeys(entityType);
             if (keys.IsNullOrEmpty())
             {
-                throw new EZNEWException(string.Format("type:{0} is not set primary keys", entityType.FullName));
+                throw new EZNEWException(string.Format("Type:{0} is not set primary keys", entityType.FullName));
             }
             foreach (var key in keys)
             {
-                originalQuery.And(key, exclude ? CriteriaOperator.NotEqual : CriteriaOperator.Equal, data.GetPropertyValue(key));
+                var criteriaOperator = exclude ? CriteriaOperator.NotEqual : CriteriaOperator.Equal;
+                originalQuery = AndExtensions.And(originalQuery, key, criteriaOperator, data.GetPropertyValue(key), null);
             }
             return originalQuery;
         }
@@ -288,6 +258,7 @@ namespace EZNEW.Develop.CQuery
             }
             Criteria criteria = queryItem as Criteria;
             var queryValue = criteria.Value as IQuery;
+            originalQuery.SetHasConverter(originalQuery.HasConverter || criteria.Converter != null);
             if (queryValue != null)
             {
                 if (queryValue.GetEntityType() == null)
@@ -300,6 +271,7 @@ namespace EZNEW.Develop.CQuery
                 originalQuery.SetHasSubQuery(true);
                 originalQuery.SetHasJoin(originalQuery.HasJoin || queryValue.HasJoin);
                 originalQuery.SetHasRecurveCriteria(originalQuery.HasRecurveCriteria || queryValue.HasRecurveCriteria);
+                originalQuery.SetHasConverter(originalQuery.HasConverter || queryValue.HasConverter);
             }
             else
             {
@@ -357,6 +329,7 @@ namespace EZNEW.Develop.CQuery
             originalQuery.atomicConditionCount += valueQuery.AtomicConditionCount;
             originalQuery.allConditionFieldNameCollection.AddRange(valueQuery.AllConditionFieldNames);
             originalQuery.alreadySetGlobalCondition |= valueQuery.alreadySetGlobalCondition;
+            originalQuery.SetHasConverter(originalQuery.HasConverter || valueQuery.HasConverter);
             return valueQuery;
         }
 
@@ -370,7 +343,10 @@ namespace EZNEW.Develop.CQuery
         /// <param name="getGlobalConditionOperation">Get global condition operation</param>
         public static void ConfigureGlobalCondition(Func<GlobalConditionFilter, GlobalCondition> getGlobalConditionOperation)
         {
-            GetGlobalConditionProxy = getGlobalConditionOperation;
+            if (getGlobalConditionOperation != null)
+            {
+                GetGlobalConditionProxys.Add(getGlobalConditionOperation);
+            }
         }
 
         /// <summary>
@@ -394,9 +370,24 @@ namespace EZNEW.Develop.CQuery
                 conditionFilter.OriginalQuery.SetEntityType(conditionFilter.EntityType);
             }
             GlobalCondition globalCondition = null;
-            if (GetGlobalConditionProxy != null && conditionFilter.OriginalQuery.AllowSetGlobalCondition())
+            if (!GetGlobalConditionProxys.IsNullOrEmpty() && conditionFilter.OriginalQuery.AllowSetGlobalCondition())
             {
-                globalCondition = GetGlobalConditionProxy(conditionFilter);
+                foreach (var globalConditionProxy in GetGlobalConditionProxys)
+                {
+                    var nowGlobalCondition = globalConditionProxy(conditionFilter);
+                    if (nowGlobalCondition?.Value == null)
+                    {
+                        continue;
+                    }
+                    if (globalCondition == null)
+                    {
+                        globalCondition = nowGlobalCondition;
+                    }
+                    else
+                    {
+                        globalCondition.Value = globalCondition.Value.AddQueryItem(nowGlobalCondition.AppendMethod, nowGlobalCondition.Value);
+                    }
+                }
             }
             return globalCondition;
         }
@@ -425,79 +416,37 @@ namespace EZNEW.Develop.CQuery
         #region Query model relation entity
 
         /// <summary>
-        /// Set query model relation entity type
+        /// Configure query model relation entity type
         /// </summary>
-        /// <param name="typeGuid">Query model type guid</param>
+        /// <param name="queryModelTypeGuid">Query model type guid</param>
         /// <param name="entityType">Relation entity type</param>
-        public static void SetQueryModelRelatioEntity(Guid typeGuid, Type entityType)
+        public static void ConfigureQueryModelRelationEntity(Guid queryModelTypeGuid, Type entityType)
         {
-            if (entityType == null)
-            {
-                return;
-            }
-            QueryModelEntityRelationDictionary[typeGuid] = entityType;
+            ConfigurationManager.QueryModel.ConfigureQueryModelRelationEntity(queryModelTypeGuid, entityType);
         }
 
         /// <summary>
-        /// Set query model relation entity type
+        /// Configure query model relation entity type
         /// </summary>
         /// <param name="queryModelType">Query model type</param>
         /// <param name="entityType">Relation entity type</param>
-        public static void SetQueryModelRelatioEntity(Type queryModelType, Type entityType)
+        public static void ConfigureQueryModelRelationEntity(Type queryModelType, Type entityType)
         {
             if (queryModelType == null || entityType == null)
             {
                 return;
             }
-            SetQueryModelRelatioEntity(queryModelType.GUID, entityType);
+            ConfigureQueryModelRelationEntity(queryModelType.GUID, entityType);
         }
 
         /// <summary>
-        /// Set query model relation entity type
+        /// Configure query model relation entity type
         /// </summary>
         /// <typeparam name="TQueryModel">Query model type</typeparam>
         /// <typeparam name="TEntity">Entity type</typeparam>
-        public static void SetQueryModelRelatioEntity<TQueryModel, TEntity>() where TQueryModel : QueryModel<TQueryModel>
+        public static void ConfigureQueryModelRelationEntity<TQueryModel, TEntity>() where TQueryModel : IQueryModel<TQueryModel>
         {
-            SetQueryModelRelatioEntity(typeof(TQueryModel), typeof(TEntity));
-        }
-
-        /// <summary>
-        /// Config query model relation entity type
-        /// </summary>
-        /// <typeparam name="TQueryModel">Query model type</typeparam>
-        internal static void ConfigureQueryModelRelationEntity<TQueryModel>() where TQueryModel : QueryModel<TQueryModel>
-        {
-            SetQueryModelRelationEntity(typeof(TQueryModel));
-        }
-
-        /// <summary>
-        /// Config query model relation entity type
-        /// </summary>
-        /// <param name="queryModelType">Query model type</param>
-        public static void SetQueryModelRelationEntity(Type queryModelType)
-        {
-            if (queryModelType == null)
-            {
-                return;
-            }
-            if (QueryModelEntityRelationDictionary.ContainsKey(queryModelType.GUID))
-            {
-                return;
-            }
-            var attributes = queryModelType.GetCustomAttributes(typeof(QueryEntityAttribute), true);
-            if (attributes.IsNullOrEmpty())
-            {
-                return;
-            }
-            var configAttribute = attributes[0] as QueryEntityAttribute;
-            if (configAttribute == null)
-            {
-                return;
-            }
-            var relevanceType = configAttribute.RelevanceType;
-            SetQueryModelRelatioEntity(queryModelType, relevanceType);
-            EntityManager.ConfigureEntity(relevanceType);
+            ConfigureQueryModelRelationEntity(typeof(TQueryModel), typeof(TEntity));
         }
 
         /// <summary>
@@ -522,17 +471,7 @@ namespace EZNEW.Develop.CQuery
         /// <returns>Return entity type</returns>
         public static Type GetQueryModelRelationEntityType(Type queryModelType)
         {
-            if (queryModelType == null)
-            {
-                return null;
-            }
-            QueryModelEntityRelationDictionary.TryGetValue(queryModelType.GUID, out Type entityType);
-            if (entityType == null)
-            {
-                SetQueryModelRelationEntity(queryModelType);
-                QueryModelEntityRelationDictionary.TryGetValue(queryModelType.GUID, out entityType);
-            }
-            return entityType;
+            return ConfigurationManager.QueryModel.GetQueryModelRelationEntityType(queryModelType);
         }
 
         /// <summary>
@@ -540,7 +479,7 @@ namespace EZNEW.Develop.CQuery
         /// </summary>
         /// <typeparam name="TQueryModel">Query model type</typeparam>
         /// <returns>Return entity type</returns>
-        public static Type GetQueryModelRelationEntityType<TQueryModel>() where TQueryModel : QueryModel<TQueryModel>
+        public static Type GetQueryModelRelationEntityType<TQueryModel>() where TQueryModel : IQueryModel<TQueryModel>
         {
             return GetQueryModelRelationEntityType(typeof(TQueryModel));
         }
@@ -563,7 +502,7 @@ namespace EZNEW.Develop.CQuery
             }
             if (EnableCopyParameterQueryObject)
             {
-                parameterQuery = (TQuery)parameterQuery.DeepCopy();
+                parameterQuery = (TQuery)parameterQuery.Clone();
             }
             if (parameterQueryOption != null)
             {
@@ -574,6 +513,28 @@ namespace EZNEW.Develop.CQuery
                 }
             }
             return parameterQuery;
+        }
+
+        #endregion
+
+        #region Clone
+
+        /// <summary>
+        /// Clone a IQueryItem
+        /// </summary>
+        /// <param name="originalQueryItem">Originnal query item</param>
+        /// <returns></returns>
+        public static IQueryItem Clone(IQueryItem originalQueryItem)
+        {
+            if (originalQueryItem is Criteria criteria)
+            {
+                return criteria.Clone();
+            }
+            if (originalQueryItem is IQuery query)
+            {
+                return query.Clone();
+            }
+            return null;
         }
 
         #endregion

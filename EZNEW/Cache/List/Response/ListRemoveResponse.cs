@@ -8,9 +8,6 @@
         /// <summary>
         /// Gets or sets the number of removed elements.
         /// </summary>
-        public long RemoveCount
-        {
-            get; set;
-        }
+        public long RemoveCount { get; set; }
     }
 }

@@ -10,9 +10,6 @@ namespace EZNEW.Cache.Set.Response
         /// <summary>
         /// Gets or sets the combine values
         /// </summary>
-        public List<string> CombineValues
-        {
-            get; set;
-        }
+        public List<string> CombineValues { get; set; }
     }
 }

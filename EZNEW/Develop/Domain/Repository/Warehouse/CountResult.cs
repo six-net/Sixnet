@@ -1,40 +1,18 @@
-﻿namespace EZNEW.Develop.Domain.Repository.Warehouse
+﻿using EZNEW.Develop.CQuery;
+
+namespace EZNEW.Develop.Domain.Repository.Warehouse
 {
     /// <summary>
     /// Count result
     /// </summary>
     public class CountResult
     {
-        /// <summary>
-        /// Gets or sets the new data count
-        /// </summary>
-        public long NewDataCount
-        {
-            get; set;
-        }
+        public long Count { get; set; }
+
 
         /// <summary>
-        /// Gets or sets the persistent data remove count
+        /// Gets or sets the compute query
         /// </summary>
-        public long PersistentDataRemoveCount
-        {
-            get; set;
-        }
-
-        /// <summary>
-        /// Gets or sets the persistent data count
-        /// </summary>
-        public long PersistentDataCount
-        {
-            get; set;
-        }
-
-        /// <summary>
-        /// Gets or sets the total data count
-        /// </summary>
-        public long TotalDataCount
-        {
-            get; set;
-        }
+        public IQuery ComputeQuery { get; set; }
     }
 }

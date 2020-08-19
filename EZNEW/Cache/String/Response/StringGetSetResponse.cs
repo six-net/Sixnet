@@ -8,9 +8,6 @@
         /// <summary>
         /// Gets or sets the old value
         /// </summary>
-        public string OldValue
-        {
-            get; set;
-        }
+        public string OldValue { get; set; }
     }
 }

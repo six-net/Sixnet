@@ -17,18 +17,12 @@ namespace EZNEW.Develop.Command.Modify
         /// <summary>
         /// Gets the calculate operator
         /// </summary>
-        public CalculateOperator Operator
-        {
-            get; private set;
-        }
+        public CalculateOperator Operator { get; private set; }
 
         /// <summary>
         /// Gets the calculate value
         /// </summary>
-        public dynamic Value
-        {
-            get; private set;
-        }
+        public dynamic Value { get; private set; }
 
         #endregion
 

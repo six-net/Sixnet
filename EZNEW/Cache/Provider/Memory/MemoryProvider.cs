@@ -24,6 +24,8 @@ using EZNEW.Cache.String.Response;
 using EZNEW.Code;
 using EZNEW.Selection;
 using EZNEW.Cache.Provider.Memory.Abstractions;
+using System.Collections;
+using System.IO;
 
 namespace EZNEW.Cache.Provider.Memory
 {
@@ -77,14 +79,7 @@ namespace EZNEW.Cache.Provider.Memory
             }
             else if (currentLength > minLength)
             {
-                if (currentLength <= minLength + option.Value.Length)
-                {
-                    cacheValue = cacheValue.Substring(0, option.Offset) + option.Value;
-                }
-                else
-                {
-                    cacheValue = cacheValue.Substring(0, option.Offset) + option.Value + cacheValue.Substring(minLength + option.Value.Length);
-                }
+                cacheValue = cacheValue.Insert(minLength, option.Value);
             }
             else
             {
@@ -136,7 +131,7 @@ namespace EZNEW.Cache.Provider.Memory
             var oldBitValue = false;
             var cacheValue = found ? cacheEntry?.Value?.ToString() ?? string.Empty : string.Empty;
 
-            string binaryValue = cacheValue.ToBinaryString();
+            string binaryValue = cacheValue.ToBinaryString(GetEncoding());
             var binaryArray = binaryValue.ToCharArray();
             if (binaryArray.Length > option.Offset)
             {
@@ -155,7 +150,7 @@ namespace EZNEW.Cache.Provider.Memory
                 binaryArray = binaryArray.Concat(diffArray).ToArray();
             }
             cacheValue = new string(binaryArray);
-            cacheValue = cacheValue.ToOriginalString();
+            cacheValue = cacheValue.ToOriginalString(GetEncoding());
 
             if (found)
             {
@@ -210,7 +205,7 @@ namespace EZNEW.Cache.Provider.Memory
                 using (var entry = MemoryCache.CreateEntry(cacheKey))
                 {
                     entry.Value = data.Value?.ToString() ?? string.Empty;
-                    SetExpiration(entry, data.Expiration ?? option.Expiration);
+                    SetExpiration(entry, data.Expiration);
                 }
                 results.Add(new StringEntrySetResult()
                 {
@@ -243,7 +238,7 @@ namespace EZNEW.Cache.Provider.Memory
             var response = CacheResponse.SuccessResponse<StringLengthResponse>();
             if (MemoryCache.TryGetValue<string>(cacheKey, out var value))
             {
-                response.StringLength = value?.Length ?? 0;
+                response.Length = value?.Length ?? 0;
             }
             return await Task.FromResult(response).ConfigureAwait(false);
         }
@@ -269,10 +264,10 @@ namespace EZNEW.Cache.Provider.Memory
             {
                 return CacheResponse.FailResponse<StringIncrementResponse>(CacheCodes.KeyIsNullOrEmpty);
             }
-            decimal nowValue = 0M;
+            long nowValue = 0;
             if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
             {
-                if (decimal.TryParse(entry.Value?.ToString(), out nowValue))
+                if (long.TryParse(entry.Value?.ToString(), out nowValue))
                 {
                     nowValue += option.Value;
                     entry.SetValue(nowValue);
@@ -434,7 +429,7 @@ namespace EZNEW.Cache.Provider.Memory
             char bit = '0';
             if (MemoryCache.TryGetValue<string>(cacheKey, out var value) && !string.IsNullOrWhiteSpace(value))
             {
-                var binaryArray = value.ToBinaryString().ToCharArray();
+                var binaryArray = value.ToBinaryString(GetEncoding()).ToCharArray();
                 var offset = option.Offset;
                 if (offset < 0)
                 {
@@ -517,10 +512,10 @@ namespace EZNEW.Cache.Provider.Memory
             {
                 return CacheResponse.FailResponse<StringDecrementResponse>(CacheCodes.KeyIsNullOrEmpty);
             }
-            decimal nowValue = 0M;
+            long nowValue = 0;
             if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
             {
-                if (decimal.TryParse(entry.Value?.ToString(), out nowValue))
+                if (long.TryParse(entry.Value?.ToString(), out nowValue))
                 {
                     nowValue -= option.Value;
                     entry.SetValue(nowValue);
@@ -567,7 +562,7 @@ namespace EZNEW.Cache.Provider.Memory
             {
                 return CacheResponse.FailResponse<StringBitPositionResponse>(CacheCodes.KeyIsNullOrEmpty);
             }
-            if ((option.Start >= 0 && option.End < option.Start) || (option.Start < 0 && option.End < option.Start))
+            if ((option.Start >= 0 && option.End < option.Start) || (option.Start < 0 && option.End > option.Start))
             {
                 return CacheResponse.FailResponse<StringBitPositionResponse>(CacheCodes.OffsetError);
             }
@@ -575,7 +570,7 @@ namespace EZNEW.Cache.Provider.Memory
             long position = 0;
             if (MemoryCache.TryGetValue<string>(cacheKey, out var value) && !string.IsNullOrWhiteSpace(value))
             {
-                var valueArray = value.ToCharArray();
+                char[] valueArray = value.ToBinaryString(GetEncoding()).ToCharArray();
                 var matchBit = option.Bit ? '1' : '0';
                 var length = valueArray.LongLength;
                 var start = option.Start;
@@ -588,7 +583,10 @@ namespace EZNEW.Cache.Provider.Memory
                 {
                     return await Task.FromResult(CacheResponse.FailResponse<StringBitPositionResponse>(CacheCodes.OffsetError)).ConfigureAwait(false);
                 }
-                end = length - Math.Abs(end);
+                if (end < 0)
+                {
+                    end = length - Math.Abs(end);
+                }
                 if (end < 0 || end >= length)
                 {
                     return await Task.FromResult(CacheResponse.FailResponse<StringBitPositionResponse>(CacheCodes.OffsetError)).ConfigureAwait(false);
@@ -627,8 +625,66 @@ namespace EZNEW.Cache.Provider.Memory
         /// <returns>Return string bit operation response</returns>
         public async Task<StringBitOperationResponse> StringBitOperationAsync(CacheServer server, StringBitOperationOption option)
         {
-            var response = CacheResponse.FailResponse<StringBitOperationResponse>(CacheCodes.OperationIsNotSupported);
-            return await Task.FromResult(response).ConfigureAwait(false);
+            if (option.Keys.IsNullOrEmpty() || string.IsNullOrWhiteSpace(option.DestinationKey))
+            {
+                return CacheResponse.FailResponse<StringBitOperationResponse>(CacheCodes.KeyIsNullOrEmpty);
+            }
+            if (option.Keys.Count > 1 && option.Bitwise == CacheBitwise.Not)
+            {
+                throw new NotSupportedException($" CacheBitwise.Not can only operate on one key");
+            }
+            BitArray bitArray = null;
+            foreach (var key in option.Keys)
+            {
+                if (MemoryCache.TryGetEntry(key, out ICacheEntry cacheEntry))
+                {
+                    var binaryString = (cacheEntry?.Value?.ToString() ?? string.Empty).ToBinaryString(GetEncoding());
+                    var binaryArray = new BitArray(binaryString.Select(c => (int)c).ToArray());
+                    if (bitArray == null)
+                    {
+                        bitArray = binaryArray;
+                    }
+                    else
+                    {
+                        bitArray = option.Bitwise switch
+                        {
+                            CacheBitwise.And => bitArray.And(binaryArray),
+                            CacheBitwise.Or => bitArray.Or(binaryArray),
+                            CacheBitwise.Xor => bitArray.Xor(binaryArray),
+                            CacheBitwise.Not => binaryArray.Not(),
+                            _ => throw new NotSupportedException()
+                        };
+                    }
+                }
+            }
+            if (bitArray == null)
+            {
+                return CacheResponse.FailResponse<StringBitOperationResponse>(CacheCodes.ValuesIsNullOrEmpty);
+            }
+            var bitString = string.Join("", bitArray.Cast<bool>().Select(c => c ? 1 : 0));
+            var originalString = bitString.ToOriginalString(GetEncoding());
+            var desResult = await StringSetAsync(server, new StringSetOption()
+            {
+                Items = new List<CacheEntry>()
+                {
+                    new CacheEntry()
+                    {
+                        Key=option.DestinationKey,
+                        Type=CacheKeyType.String,
+                        Value=originalString,
+                        Expiration=option.Expiration
+                    }
+                }
+            });
+            if (desResult.Success)
+            {
+                return new StringBitOperationResponse()
+                {
+                    Success = true,
+                    DestinationValueLength = originalString.Length
+                };
+            }
+            return CacheResponse.FailResponse<StringBitOperationResponse>("");
         }
 
         #endregion
@@ -648,8 +704,22 @@ namespace EZNEW.Cache.Provider.Memory
         /// <returns>Return string bit count response</returns>
         public async Task<StringBitCountResponse> StringBitCountAsync(CacheServer server, StringBitCountOption option)
         {
-            var response = CacheResponse.FailResponse<StringBitCountResponse>(CacheCodes.OperationIsNotSupported);
-            return await Task.FromResult(response).ConfigureAwait(false);
+            if (string.IsNullOrWhiteSpace(option?.Key))
+            {
+                throw new ArgumentNullException($"{nameof(StringBitCountOption)}.{nameof(StringBitCountOption.Key)}");
+            }
+            var cacheKey = option.Key.GetActualKey();
+            long bitCount = 0;
+            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            {
+                var value = entry.Value?.ToString() ?? string.Empty;
+                bitCount = value.ToBinaryString(GetEncoding()).Count(c => c == '1');
+            }
+            return await Task.FromResult(new StringBitCountResponse()
+            {
+                Success = true,
+                BitNum = bitCount
+            }).ConfigureAwait(false);
         }
 
         #endregion
@@ -1144,7 +1214,7 @@ namespace EZNEW.Cache.Provider.Memory
             ListLeftPushResponse response = null;
             if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
             {
-                var list = entry.Value as List<string>;
+                List<string> list = entry.Value as List<string>;
                 if (list == null)
                 {
                     return await Task.FromResult(CacheResponse.FailResponse<ListLeftPushResponse>(CacheCodes.ValueIsNotList)).ConfigureAwait(false);
@@ -1247,10 +1317,11 @@ namespace EZNEW.Cache.Provider.Memory
                 }
                 newLength = list.Count;
             }
-            var response = CacheResponse.SuccessResponse<ListInsertBeforeResponse>();
-            response.NewListLength = newLength;
-            response.HasInsert = hasInsertValue;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(new ListInsertBeforeResponse()
+            {
+                Success = hasInsertValue,
+                NewListLength = newLength
+            }).ConfigureAwait(false);
         }
 
         #endregion
@@ -1290,10 +1361,11 @@ namespace EZNEW.Cache.Provider.Memory
                 }
                 newLength = list.Count;
             }
-            var response = CacheResponse.SuccessResponse<ListInsertAfterResponse>();
-            response.NewListLength = newLength;
-            response.HasInsert = hasInsertValue;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(new ListInsertAfterResponse()
+            {
+                NewListLength = newLength,
+                Success = hasInsertValue
+            }).ConfigureAwait(false);
         }
 
         #endregion
@@ -1402,7 +1474,7 @@ namespace EZNEW.Cache.Provider.Memory
                 {
                     return await Task.FromResult(CacheResponse.FailResponse<HashSetResponse>(CacheCodes.ValueIsNotDict)).ConfigureAwait(false);
                 }
-                foreach (var item in option.HashValues)
+                foreach (var item in option.Items)
                 {
                     dict[item.Key] = item.Value;
                 }
@@ -1411,7 +1483,7 @@ namespace EZNEW.Cache.Provider.Memory
             {
                 using (entry = MemoryCache.CreateEntry(cacheKey))
                 {
-                    var value = new ConcurrentDictionary<string, dynamic>(option.HashValues);
+                    var value = new ConcurrentDictionary<string, dynamic>(option.Items);
                     entry.SetValue(value);
                     SetExpiration(entry, option.Expiration);
                 }
@@ -1596,7 +1668,7 @@ namespace EZNEW.Cache.Provider.Memory
                 {
                     return await Task.FromResult(CacheResponse.FailResponse<HashGetAllResponse>(CacheCodes.ValueIsNotDict)).ConfigureAwait(false);
                 }
-                values = dict.DeepClone();
+                values = new ConcurrentDictionary<string, dynamic>(dict);
             }
             var response = CacheResponse.SuccessResponse<HashGetAllResponse>();
             response.HashValues = values?.ToDictionary(c => c.Key, c => c.Value) ?? new Dictionary<string, dynamic>(0);
@@ -1605,7 +1677,7 @@ namespace EZNEW.Cache.Provider.Memory
 
         #endregion
 
-        #region HashExists
+        #region HashExist
 
         /// <summary>
         /// Returns if field is an existing field in the hash stored at key.
@@ -1613,7 +1685,7 @@ namespace EZNEW.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="option">Option</param>
         /// <returns>Return hash exists response</returns>
-        public async Task<HashExistsResponse> HashExistsAsync(CacheServer server, HashExistsOption option)
+        public async Task<HashExistsResponse> HashExistAsync(CacheServer server, HashExistsOption option)
         {
             string cacheKey = option?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
@@ -1661,11 +1733,15 @@ namespace EZNEW.Cache.Provider.Memory
                 {
                     return await Task.FromResult(CacheResponse.FailResponse<HashDeleteResponse>(CacheCodes.ValueIsNotDict)).ConfigureAwait(false);
                 }
-                remove = dict.TryRemove(option.HashField, out var value);
+                foreach (var field in option.HashFields)
+                {
+                    remove |= dict.TryRemove(field, out var value);
+                }
             }
-            var response = CacheResponse.SuccessResponse<HashDeleteResponse>();
-            response.DeleteSuccess = remove;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(new HashDeleteResponse()
+            {
+                Success = remove
+            }).ConfigureAwait(false);
         }
 
         #endregion
@@ -1801,14 +1877,14 @@ namespace EZNEW.Cache.Provider.Memory
                 return await Task.FromResult(CacheResponse.FailResponse<SetRemoveResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
             }
             int removeCount = 0;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null && !option.RemoveValues.IsNullOrEmpty())
+            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null && !option.RemoveMembers.IsNullOrEmpty())
             {
                 var dict = entry.Value as ConcurrentDictionary<string, byte>;
                 if (dict == null)
                 {
                     return await Task.FromResult(CacheResponse.FailResponse<SetRemoveResponse>(CacheCodes.ValueIsNotSet)).ConfigureAwait(false);
                 }
-                foreach (var member in option.RemoveValues)
+                foreach (var member in option.RemoveMembers)
                 {
                     if (dict.TryRemove(member, out var value))
                     {
@@ -1991,28 +2067,29 @@ namespace EZNEW.Cache.Provider.Memory
                         return await Task.FromResult(CacheResponse.FailResponse<SetMoveResponse>(CacheCodes.ValueIsNotSet)).ConfigureAwait(false);
                     }
                 }
-                if (dict.TryRemove(option.MoveValue, out var value))
+                if (dict.TryRemove(option.MoveMember, out var value))
                 {
                     isRemove = true;
                     if (desDict != null)
                     {
-                        desDict[option.MoveValue] = 0;
+                        desDict[option.MoveMember] = 0;
                     }
                     else
                     {
                         using (desEntry = MemoryCache.CreateEntry(desKey))
                         {
                             desDict = new ConcurrentDictionary<string, byte>();
-                            desDict.TryAdd(option.MoveValue, 0);
+                            desDict.TryAdd(option.MoveMember, 0);
                             desEntry.SetValue(desDict);
                             SetExpiration(desEntry, option.Expiration);
                         }
                     }
                 }
             }
-            var response = CacheResponse.SuccessResponse<SetMoveResponse>();
-            response.MoveSuccess = isRemove;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(new SetMoveResponse()
+            {
+                Success = isRemove
+            }).ConfigureAwait(false);
         }
 
         #endregion
@@ -2106,7 +2183,7 @@ namespace EZNEW.Cache.Provider.Memory
                 {
                     return await Task.FromResult(CacheResponse.FailResponse<SetContainsResponse>(CacheCodes.ValueIsNotSet)).ConfigureAwait(false);
                 }
-                existMember = dict.ContainsKey(option.Value);
+                existMember = dict.ContainsKey(option.Member);
             }
             var response = CacheResponse.SuccessResponse<SetContainsResponse>();
             response.ContainsValue = existMember;
@@ -2156,15 +2233,15 @@ namespace EZNEW.Cache.Provider.Memory
                     }
                     else
                     {
-                        switch (option.SetOperationType)
+                        switch (option.CombineOperation)
                         {
-                            case SetOperationType.Union:
+                            case CombineOperation.Union:
                                 members = members.Union(nowDict.Keys).ToList();
                                 break;
-                            case SetOperationType.Intersect:
+                            case CombineOperation.Intersect:
                                 members = members.Intersect(nowDict.Keys).ToList();
                                 break;
-                            case SetOperationType.Difference:
+                            case CombineOperation.Difference:
                                 members = members.Except(nowDict.Keys).ToList();
                                 break;
                         }
@@ -2221,15 +2298,15 @@ namespace EZNEW.Cache.Provider.Memory
                     }
                     else
                     {
-                        switch (option.SetOperationType)
+                        switch (option.CombineOperation)
                         {
-                            case SetOperationType.Union:
+                            case CombineOperation.Union:
                                 members = members.Union(nowDict.Keys).ToList();
                                 break;
-                            case SetOperationType.Intersect:
+                            case CombineOperation.Intersect:
                                 members = members.Intersect(nowDict.Keys).ToList();
                                 break;
-                            case SetOperationType.Difference:
+                            case CombineOperation.Difference:
                                 members = members.Except(nowDict.Keys).ToList();
                                 break;
                         }
@@ -2295,7 +2372,10 @@ namespace EZNEW.Cache.Provider.Memory
                 {
                     return await Task.FromResult(CacheResponse.FailResponse<SetAddResponse>(CacheCodes.ValueIsNotSet)).ConfigureAwait(false);
                 }
-                dict[option.Value] = 0;
+                foreach (var member in option.Members)
+                {
+                    dict[member] = 0;
+                }
             }
             else
             {
@@ -2303,14 +2383,18 @@ namespace EZNEW.Cache.Provider.Memory
                 {
                     ConcurrentDictionary<string, byte> desDict
                         = new ConcurrentDictionary<string, byte>();
-                    desDict[option.Value] = 0;
+                    foreach (var member in option.Members)
+                    {
+                        desDict[member] = 0;
+                    }
                     entry.SetValue(desDict);
                     SetExpiration(entry, option.Expiration);
                 }
             }
-            var response = CacheResponse.SuccessResponse<SetAddResponse>();
-            response.AddSuccess = true;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(new SetAddResponse()
+            {
+                Success = true
+            }).ConfigureAwait(false);
         }
 
         #endregion
@@ -2382,34 +2466,32 @@ namespace EZNEW.Cache.Provider.Memory
                 }
                 var min = option.MinValue;
                 var max = option.MaxValue;
-                if (min > max)
+                if (string.Compare(min, max) > 0)
                 {
                     min = max;
                     max = option.MinValue;
                 }
-                switch (option.Exclude)
-                {
-                    case SortedSetExclude.Start:
-                        min += 0.01M;
-                        break;
-                    case SortedSetExclude.Stop:
-                        max -= 0.01M;
-                        break;
-                    case SortedSetExclude.Both:
-                        min += 0.01M;
-                        max -= 0.01M;
-                        break;
-                }
                 var removeValues = dict.Where(c =>
                 {
-                    if (!decimal.TryParse(c.Key, out var keyVal))
-                    {
-                        return false;
-                    }
-                    return keyVal >= min && keyVal <= max;
+                    return string.Compare(c.Key, min) >= 0 && string.Compare(c.Key, max) <= 0;
                 });
                 foreach (var removeItem in removeValues)
                 {
+                    switch (option.Exclude)
+                    {
+                        case BoundaryExclude.Both:
+                            if (removeItem.Key == min || removeItem.Key == max)
+                                continue;
+                            break;
+                        case BoundaryExclude.Start:
+                            if (removeItem.Key == min)
+                                continue;
+                            break;
+                        case BoundaryExclude.Stop:
+                            if (removeItem.Key == max)
+                                continue;
+                            break;
+                    }
                     if (dict.TryRemove(removeItem.Key, out var value))
                     {
                         removeCount++;
@@ -2454,22 +2536,24 @@ namespace EZNEW.Cache.Provider.Memory
                     min = max;
                     max = option.Start;
                 }
-                switch (option.Exclude)
-                {
-                    case SortedSetExclude.Start:
-                        min += 0.01;
-                        break;
-                    case SortedSetExclude.Stop:
-                        max -= 0.01;
-                        break;
-                    case SortedSetExclude.Both:
-                        min += 0.01;
-                        max -= 0.01;
-                        break;
-                }
                 var removeValues = dict.Where(c => c.Value >= min && c.Value <= max);
                 foreach (var removeItem in removeValues)
                 {
+                    switch (option.Exclude)
+                    {
+                        case BoundaryExclude.Both:
+                            if (removeItem.Value == min || removeItem.Value == max)
+                                continue;
+                            break;
+                        case BoundaryExclude.Start:
+                            if (removeItem.Value == min)
+                                continue;
+                            break;
+                        case BoundaryExclude.Stop:
+                            if (removeItem.Value == max)
+                                continue;
+                            break;
+                    }
                     if (dict.TryRemove(removeItem.Key, out var value))
                     {
                         removeCount++;
@@ -2531,19 +2615,6 @@ namespace EZNEW.Cache.Provider.Memory
                 {
                     int skipCount = min;
                     int takeCount = max - min + 1;
-                    switch (option.Exclude)
-                    {
-                        case SortedSetExclude.Start:
-                            skipCount += 1;
-                            break;
-                        case SortedSetExclude.Stop:
-                            takeCount -= 1;
-                            break;
-                        case SortedSetExclude.Both:
-                            skipCount += 1;
-                            takeCount -= 1;
-                            break;
-                    }
                     var removeItems = dict.OrderBy(c => c.Value).Skip(skipCount).Take(takeCount);
                     foreach (var rmi in removeItems)
                     {
@@ -2629,7 +2700,7 @@ namespace EZNEW.Cache.Provider.Memory
                 {
                     rank = -1;
                     IOrderedEnumerable<KeyValuePair<string, double>> ranks = null;
-                    if (option.Order == SortedOrder.Ascending)
+                    if (option.Order == CacheOrder.Ascending)
                     {
                         ranks = dict.OrderBy(c => c.Value);
                     }
@@ -2681,39 +2752,36 @@ namespace EZNEW.Cache.Provider.Memory
                 }
                 var min = option.MinValue;
                 var max = option.MaxValue;
-                if (min > max)
+                if (string.Compare(min, max) > 0)
                 {
                     min = max;
                     max = option.MinValue;
                 }
-                switch (option.Exclude)
-                {
-                    case SortedSetExclude.Start:
-                        min += 0.01M;
-                        break;
-                    case SortedSetExclude.Stop:
-                        max -= 0.01M;
-                        break;
-                    case SortedSetExclude.Both:
-                        min += 0.01M;
-                        max -= 0.01M;
-                        break;
-                }
                 var values = dict.Where(c =>
                 {
-                    if (!decimal.TryParse(c.Key, out var keyVal))
+                    return option.Exclude switch
                     {
-                        return false;
-                    }
-                    return keyVal >= min && keyVal <= max;
+                        BoundaryExclude.Both => string.Compare(c.Key, min) > 0 && string.Compare(c.Key, max) < 0,
+                        BoundaryExclude.Start => string.Compare(c.Key, min) > 0 && string.Compare(c.Key, max) <= 0,
+                        BoundaryExclude.Stop => string.Compare(c.Key, min) >= 0 && string.Compare(c.Key, max) < 0,
+                        _ => string.Compare(c.Key, min) >= 0 && string.Compare(c.Key, max) <= 0
+                    };
                 });
-                if (option.Skip > 0)
+                if (option.Order == CacheOrder.Descending)
                 {
-                    values = values.Skip(option.Skip);
+                    values = values.OrderByDescending(c => c.Key);
                 }
-                if (option.Take >= 0)
+                else
                 {
-                    values = values.Take(option.Take);
+                    values = values.OrderBy(c => c.Key);
+                }
+                if (option.Offset > 0)
+                {
+                    values = values.Skip(option.Offset);
+                }
+                if (option.Count >= 0)
+                {
+                    values = values.Take(option.Count);
                 }
                 members = values.Select(c => c.Key).ToList();
             }
@@ -2758,27 +2826,31 @@ namespace EZNEW.Cache.Provider.Memory
                     min = max;
                     max = option.Start;
                 }
-                switch (option.Exclude)
+                var values = dict.Where(c =>
                 {
-                    case SortedSetExclude.Start:
-                        min += 0.01;
-                        break;
-                    case SortedSetExclude.Stop:
-                        max -= 0.01;
-                        break;
-                    case SortedSetExclude.Both:
-                        min += 0.01;
-                        max -= 0.01;
-                        break;
+                    return option.Exclude switch
+                    {
+                        BoundaryExclude.Both => c.Value > min && c.Value < max,
+                        BoundaryExclude.Start => c.Value > min && c.Value <= max,
+                        BoundaryExclude.Stop => c.Value >= min && c.Value < max,
+                        _ => c.Value >= min && c.Value <= max,
+                    };
+                });
+                if (option.Order == CacheOrder.Descending)
+                {
+                    values = values.OrderByDescending(c => c.Value);
                 }
-                var values = dict.Where(c => c.Value >= min && c.Value <= max);
-                if (option.Skip > 0)
+                else
                 {
-                    values = values.Skip(option.Skip);
+                    values = values.OrderBy(c => c.Value);
                 }
-                if (option.Take >= 0)
+                if (option.Offset > 0)
                 {
-                    values = values.Take(option.Take);
+                    values = values.Skip(option.Offset);
+                }
+                if (option.Count >= 0)
+                {
+                    values = values.Take(option.Count);
                 }
                 members = values.Select(c => new SortedSetMember()
                 {
@@ -2812,11 +2884,10 @@ namespace EZNEW.Cache.Provider.Memory
                 CacheObject = option.CacheObject,
                 CommandFlags = option.CommandFlags,
                 Exclude = option.Exclude,
-                Expiration = option.Expiration,
                 Key = option.Key,
                 Order = option.Order,
-                Skip = option.Skip,
-                Take = option.Take,
+                Offset = option.Offset,
+                Count = option.Count,
                 Start = option.Start,
                 Stop = option.Stop
             }).ConfigureAwait(false);
@@ -2880,20 +2951,16 @@ namespace EZNEW.Cache.Provider.Memory
                 {
                     int skipCount = min;
                     int takeCount = max - min + 1;
-                    switch (option.Exclude)
+                    IEnumerable<KeyValuePair<string, double>> valueDict = dict;
+                    if (option.Order == CacheOrder.Descending)
                     {
-                        case SortedSetExclude.Start:
-                            skipCount += 1;
-                            break;
-                        case SortedSetExclude.Stop:
-                            takeCount -= 1;
-                            break;
-                        case SortedSetExclude.Both:
-                            skipCount += 1;
-                            takeCount -= 1;
-                            break;
+                        valueDict = dict.OrderByDescending(c => c.Value);
                     }
-                    var items = dict.OrderBy(c => c.Value).Skip(skipCount).Take(takeCount < 0 ? int.MaxValue : takeCount);
+                    else
+                    {
+                        valueDict = dict.OrderBy(c => c.Value);
+                    }
+                    var items = valueDict.Skip(skipCount).Take(takeCount < 0 ? int.MaxValue : takeCount);
                     members = items.Select(c => new SortedSetMember()
                     {
                         Score = c.Value,
@@ -2928,8 +2995,6 @@ namespace EZNEW.Cache.Provider.Memory
             {
                 CacheObject = option.CacheObject,
                 CommandFlags = option.CommandFlags,
-                Exclude = option.Exclude,
-                Expiration = option.Expiration,
                 Key = option.Key,
                 Order = option.Order,
                 Start = option.Start,
@@ -2962,13 +3027,11 @@ namespace EZNEW.Cache.Provider.Memory
             {
                 CacheObject = option.CacheObject,
                 CommandFlags = option.CommandFlags,
-                Exclude = option.Exclude,
-                Expiration = option.Expiration,
                 Key = option.Key,
                 MinValue = option.MinValue,
                 MaxValue = option.MaxValue,
-                Skip = 0,
-                Take = -1
+                Offset = 0,
+                Count = -1
             }).ConfigureAwait(false);
             if (result == null || !result.Success)
             {
@@ -2996,13 +3059,9 @@ namespace EZNEW.Cache.Provider.Memory
             {
                 CacheObject = option.CacheObject,
                 CommandFlags = option.CommandFlags,
-                Exclude = option.Exclude,
-                Expiration = option.Expiration,
                 Key = option.Key,
-                Skip = 0,
-                Take = -1,
-                Start = option.Minimum,
-                Stop = option.Maximum
+                Offset = 0,
+                Count = -1,
             }).ConfigureAwait(false);
             if (result == null || !result.Success)
             {
@@ -3108,10 +3167,11 @@ namespace EZNEW.Cache.Provider.Memory
             {
                 return await Task.FromResult(CacheResponse.FailResponse<SortedSetCombineAndStoreResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
             }
-            List<string> members = null;
+            HashSet<string> members = null;
             Dictionary<string, List<double>> allMembers = new Dictionary<string, List<double>>();
-            foreach (var key in option.SourceKeys)
+            for (int i = 0; i < option.SourceKeys.Count; i++)
             {
+                var key = option.SourceKeys[i];
                 var cacheKey = key?.GetActualKey() ?? string.Empty;
                 if (string.IsNullOrWhiteSpace(cacheKey))
                 {
@@ -3128,88 +3188,78 @@ namespace EZNEW.Cache.Provider.Memory
                     {
                         continue;
                     }
-                    bool first = members.IsNullOrEmpty();
+                    if (members.IsNullOrEmpty())
+                    {
+                        members = new HashSet<string>(nowDict.Keys);
+                    }
+                    else
+                    {
+                        switch (option.CombineOperation)
+                        {
+                            case CombineOperation.Union:
+                                members.UnionWith(nowDict.Keys);
+                                break;
+                            case CombineOperation.Intersect:
+                                members.IntersectWith(nowDict.Keys);
+                                break;
+                            case CombineOperation.Difference:
+                                members.ExceptWith(nowDict.Keys);
+                                break;
+                        }
+                    }
+                    double weight = 1;
+                    if (option?.Weights?.Length >= i + 1)
+                    {
+                        weight = option.Weights[i];
+                    }
                     foreach (var item in nowDict)
                     {
-                        if (first)
+                        if (allMembers.TryGetValue(item.Key, out var scores) && !scores.IsNullOrEmpty())
                         {
-                            members.Add(item.Key);
+                            scores.Add(item.Value * weight);
                         }
                         else
                         {
-                            switch (option.SetOperationType)
-                            {
-                                case SetOperationType.Union:
-                                    members = members.Union(nowDict.Keys).ToList();
-                                    break;
-                                case SetOperationType.Intersect:
-                                    members = members.Intersect(nowDict.Keys).ToList();
-                                    break;
-                                case SetOperationType.Difference:
-                                    members = members.Except(nowDict.Keys).ToList();
-                                    break;
-                            }
+                            allMembers[item.Key] = new List<double>() { item.Value * weight };
                         }
-                        allMembers[item.Key] = new List<double>() { item.Value };
                     }
                 }
             }
-            members = members ?? new List<string>(0);
-            MemoryCache.TryGetEntry(desCacheKey, out var desEntry);
-            if (desEntry != null)
+            Dictionary<string, double> resultItems = new Dictionary<string, double>();
+            foreach (var member in members)
+            {
+                double memberScore = 0;
+                if (allMembers.TryGetValue(member, out var scores) && !scores.IsNullOrEmpty())
+                {
+                    memberScore = option.Aggregate switch
+                    {
+                        SetAggregate.Max => scores.Max(),
+                        SetAggregate.Min => scores.Min(),
+                        SetAggregate.Sum => scores.Sum(),
+                        _ => 0
+                    };
+                }
+                resultItems.Add(member, memberScore);
+            }
+            if (MemoryCache.TryGetEntry(desCacheKey, out var desEntry) && desEntry != null)
             {
                 var desDict = desEntry.Value as ConcurrentDictionary<string, double>;
                 if (desDict == null)
                 {
                     return await Task.FromResult(CacheResponse.FailResponse<SortedSetCombineAndStoreResponse>(CacheCodes.ValueIsNotSet)).ConfigureAwait(false);
                 }
-                foreach (var mem in members)
-                {
-                    double aggreScore = 0;
-                    switch (option.Aggregate)
-                    {
-                        case SetAggregate.Max:
-                            aggreScore = allMembers[mem].Max();
-                            break;
-                        case SetAggregate.Min:
-                            aggreScore = allMembers[mem].Min();
-                            break;
-                        case SetAggregate.Sum:
-                            aggreScore = allMembers[mem].Sum();
-                            break;
-                    }
-                    desDict[mem] = aggreScore;
-                }
+                desEntry.Value = resultItems;
             }
             else
             {
                 using (desEntry = MemoryCache.CreateEntry(desCacheKey))
                 {
-                    ConcurrentDictionary<string, double> desDict
-                        = new ConcurrentDictionary<string, double>();
-                    members.ForEach(m =>
-                    {
-                        double aggreScore = 0;
-                        switch (option.Aggregate)
-                        {
-                            case SetAggregate.Max:
-                                aggreScore = allMembers[m].Max();
-                                break;
-                            case SetAggregate.Min:
-                                aggreScore = allMembers[m].Min();
-                                break;
-                            case SetAggregate.Sum:
-                                aggreScore = allMembers[m].Sum();
-                                break;
-                        }
-                        desDict.TryAdd(m, aggreScore);
-                    });
-                    desEntry.SetValue(desDict);
+                    desEntry.SetValue(resultItems);
                     SetExpiration(desEntry, option.Expiration);
                 }
             }
             var response = CacheResponse.SuccessResponse<SortedSetCombineAndStoreResponse>();
-            response.NewSetLength = members?.Count ?? 0;
+            response.NewSetLength = resultItems.Count;
             return await Task.FromResult(response).ConfigureAwait(false);
         }
 
@@ -3233,6 +3283,10 @@ namespace EZNEW.Cache.Provider.Memory
             {
                 return await Task.FromResult(CacheResponse.FailResponse<SortedSetAddResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
             }
+            if (option.Members.IsNullOrEmpty())
+            {
+                return await Task.FromResult(CacheResponse.FailResponse<SortedSetAddResponse>(CacheCodes.ValuesIsNullOrEmpty)).ConfigureAwait(false);
+            }
             long length = 0;
             if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
             {
@@ -3241,12 +3295,9 @@ namespace EZNEW.Cache.Provider.Memory
                 {
                     return await Task.FromResult(CacheResponse.FailResponse<SortedSetAddResponse>(CacheCodes.ValueIsNotSortedSet)).ConfigureAwait(false);
                 }
-                if (!option.Members.IsNullOrEmpty())
+                foreach (var mem in option.Members)
                 {
-                    foreach (var mem in option.Members)
-                    {
-                        dict[mem.Value] = mem.Score;
-                    }
+                    dict[mem.Value] = mem.Score;
                 }
                 length = dict.Count;
             }
@@ -3255,13 +3306,10 @@ namespace EZNEW.Cache.Provider.Memory
                 using (entry = MemoryCache.CreateEntry(cacheKey))
                 {
                     ConcurrentDictionary<string, double> newDict = new ConcurrentDictionary<string, double>();
-                    if (!option.Members.IsNullOrEmpty())
+                    option.Members.ForEach(c =>
                     {
-                        option.Members.ForEach(c =>
-                        {
-                            newDict.TryAdd(c.Value, c.Score);
-                        });
-                    }
+                        newDict.TryAdd(c.Value, c.Score);
+                    });
                     length = newDict.Count;
                     entry.SetValue(newDict);
                     SetExpiration(entry, option.Expiration);
@@ -3295,6 +3343,104 @@ namespace EZNEW.Cache.Provider.Memory
         /// <returns>Return sort response</returns>
         public async Task<SortResponse> SortAsync(CacheServer server, SortOption option)
         {
+            var keyTypeResult = await KeyTypeAsync(server, new TypeOption()
+            {
+                CacheObject = option.CacheObject,
+                CommandFlags = option.CommandFlags,
+                Key = option.Key
+            }).ConfigureAwait(false);
+            if (keyTypeResult.Success)
+            {
+                Func<IEnumerable<string>, IEnumerable<string>> filterValueFuc = (originalValues) =>
+                {
+                    if (originalValues.IsNullOrEmpty() || originalValues.Count() <= option.Offset)
+                    {
+                        return Array.Empty<string>();
+                    }
+                    if (option.Order == CacheOrder.Descending)
+                    {
+                        originalValues = originalValues.OrderByDescending(c => c);
+                    }
+                    else
+                    {
+                        originalValues = originalValues.OrderBy(c => c);
+                    }
+                    if (option.Offset > 0)
+                    {
+                        originalValues = originalValues.Skip(option.Offset);
+                    }
+                    if (option.Count > 0)
+                    {
+                        originalValues = originalValues.Take(option.Count);
+                    }
+                    return originalValues;
+                };
+
+                IEnumerable<string> values = null;
+                bool support = true;
+                switch (keyTypeResult.KeyType)
+                {
+                    case CacheKeyType.List:
+                        IEnumerable<string> listValues = (await ListRangeAsync(server, new ListRangeOption()
+                        {
+                            CacheObject = option.CacheObject,
+                            CommandFlags = option.CommandFlags,
+                            Key = option.Key,
+                            Start = 0,
+                            Stop = -1
+                        }).ConfigureAwait(false))?.Values ?? new List<string>(0);
+                        values = filterValueFuc(listValues);
+                        break;
+                    case CacheKeyType.Set:
+                        IEnumerable<string> setMembers = (await SetMembersAsync(server, new SetMembersOption()
+                        {
+                            CacheObject = option.CacheObject,
+                            CommandFlags = option.CommandFlags,
+                            Key = option.Key
+                        }).ConfigureAwait(false))?.Members ?? new List<string>(0);
+                        values = filterValueFuc(setMembers);
+                        break;
+                    case CacheKeyType.SortedSet:
+                        IEnumerable<SortedSetMember> sortedSetMembers = (await SortedSetRangeByRankWithScoresAsync(server, new SortedSetRangeByRankWithScoresOption()
+                        {
+                            CacheObject = option.CacheObject,
+                            CommandFlags = option.CommandFlags,
+                            Key = option.Key,
+                            Order = option.Order,
+                            Start = 0,
+                            Stop = -1
+                        }).ConfigureAwait(false))?.Members ?? new List<SortedSetMember>(0);
+                        if (sortedSetMembers.Count() <= option.Offset)
+                        {
+                            values = Array.Empty<string>();
+                        }
+                        else
+                        {
+                            if (option.Offset > 0)
+                            {
+                                sortedSetMembers = sortedSetMembers.Skip(option.Offset);
+                            }
+                            if (option.Count > 0)
+                            {
+                                sortedSetMembers = sortedSetMembers.Take(option.Count);
+                            }
+                            values = sortedSetMembers.Select(c => c.Value).ToList();
+                        }
+                        break;
+                    default:
+                        support = false;
+                        break;
+                }
+                if (!support)
+                {
+                    return await Task.FromResult(CacheResponse.FailResponse<SortResponse>(CacheCodes.OperationIsNotSupported)).ConfigureAwait(false);
+                }
+                return await Task.FromResult(new SortResponse()
+                {
+                    Success = true,
+                    Values = values?.ToList() ?? new List<string>(0)
+                }).ConfigureAwait(false);
+            }
             return await Task.FromResult(CacheResponse.FailResponse<SortResponse>(CacheCodes.OperationIsNotSupported)).ConfigureAwait(false);
         }
 
@@ -3317,7 +3463,41 @@ namespace EZNEW.Cache.Provider.Memory
         /// <returns>Return sort and store response</returns>
         public async Task<SortAndStoreResponse> SortAndStoreAsync(CacheServer server, SortAndStoreOption option)
         {
-            return await Task.FromResult(CacheResponse.FailResponse<SortAndStoreResponse>(CacheCodes.OperationIsNotSupported)).ConfigureAwait(false);
+            if (string.IsNullOrWhiteSpace(option?.SourceKey))
+            {
+                throw new ArgumentNullException($"{nameof(SortAndStoreOption)}.{nameof(SortAndStoreOption.SourceKey)}");
+            }
+            if (string.IsNullOrWhiteSpace(option?.DestinationKey))
+            {
+                throw new ArgumentNullException($"{nameof(SortAndStoreOption)}.{nameof(SortAndStoreOption.DestinationKey)}");
+            }
+            var sortResult = await SortAsync(server, new SortOption()
+            {
+                CacheObject = option.CacheObject,
+                CommandFlags = option.CommandFlags,
+                SortType = option.SortType,
+                Count = option.Count,
+                By = option.By,
+                Gets = option.Gets,
+                Key = option.SourceKey,
+                Offset = option.Offset,
+                Order = option.Order
+            }).ConfigureAwait(false);
+
+            if (sortResult?.Success ?? false)
+            {
+                var values = sortResult.Values;
+                await ListLeftPushAsync(server, new ListLeftPushOption()
+                {
+                    CacheObject = option.CacheObject,
+                    CommandFlags = option.CommandFlags,
+                    Expiration = option.Expiration,
+                    Key = option.DestinationKey,
+                    Values = values
+                }).ConfigureAwait(false);
+                return CacheResponse.SuccessResponse<SortAndStoreResponse>();
+            }
+            return CacheResponse.FailResponse<SortAndStoreResponse>(CacheCodes.OperationIsNotSupported);
         }
 
         #endregion
@@ -3396,7 +3576,7 @@ namespace EZNEW.Cache.Provider.Memory
             {
                 response = CacheResponse.SuccessResponse<TimeToLiveResponse>();
                 var expiration = GetExpiration(entry);
-                response.TimeToLive = expiration;
+                response.TimeToLiveSeconds = (long)(expiration?.TotalSeconds ?? 0);
             }
             else
             {
@@ -3426,7 +3606,7 @@ namespace EZNEW.Cache.Provider.Memory
             }
             using (var entry = MemoryCache.CreateEntry(cacheKey))
             {
-                entry.SetValue(Encoding.UTF8.GetString(option.Value));
+                entry.SetValue(GetEncoding().GetString(option.Value));
                 SetExpiration(entry, option.Expiration);
             }
             var response = CacheResponse.SuccessResponse<RestoreResponse>();
@@ -3466,7 +3646,6 @@ namespace EZNEW.Cache.Provider.Memory
                 }
                 MemoryCache.Remove(cacheKey);
                 response = CacheResponse.SuccessResponse<RenameResponse>();
-                response.RenameSuccess = true;
             }
             else
             {
@@ -3518,7 +3697,6 @@ namespace EZNEW.Cache.Provider.Memory
                     newEntry.SetValue(entry.Value);
                 }
                 response = CacheResponse.SuccessResponse<PersistResponse>();
-                response.PersistSuccess = true;
             }
             else
             {
@@ -3586,7 +3764,6 @@ namespace EZNEW.Cache.Provider.Memory
             {
                 SetExpiration(entry, option.Expiration);
                 response = CacheResponse.SuccessResponse<ExpireResponse>();
-                response.OperationResult = true;
             }
             else
             {
@@ -3618,7 +3795,7 @@ namespace EZNEW.Cache.Provider.Memory
             if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
             {
                 response = CacheResponse.SuccessResponse<DumpResponse>();
-                response.ByteValues = Encoding.UTF8.GetBytes(entry.Value?.ToString() ?? string.Empty);
+                response.ByteValues = GetEncoding().GetBytes(entry.Value?.ToString() ?? string.Empty);
             }
             else
             {
@@ -3668,11 +3845,11 @@ namespace EZNEW.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="option">Option</param>
         /// <returns>Return exists response</returns>
-        public async Task<ExistsResponse> KeyExistsAsync(CacheServer server, ExistsOption option)
+        public async Task<ExistResponse> KeyExistAsync(CacheServer server, ExistOption option)
         {
             if (option.Keys?.IsNullOrEmpty() ?? true)
             {
-                return await Task.FromResult(CacheResponse.FailResponse<ExistsResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return await Task.FromResult(CacheResponse.FailResponse<ExistResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
             }
             long count = 0;
             foreach (var key in option.Keys)
@@ -3683,7 +3860,7 @@ namespace EZNEW.Cache.Provider.Memory
                     count++;
                 }
             }
-            var response = CacheResponse.SuccessResponse<ExistsResponse>();
+            var response = CacheResponse.SuccessResponse<ExistResponse>();
             response.KeyCount = count;
             return await Task.FromResult(response).ConfigureAwait(false);
         }
@@ -3713,7 +3890,7 @@ namespace EZNEW.Cache.Provider.Memory
                     Name="MemoryCache"
                 }
             };
-            return await Task.FromResult<GetAllDataBaseResponse>(null).ConfigureAwait(false);
+            return await Task.FromResult<GetAllDataBaseResponse>(response).ConfigureAwait(false);
         }
 
         #endregion
@@ -3920,6 +4097,15 @@ namespace EZNEW.Cache.Provider.Memory
                 return cacheEntry.AbsoluteExpiration.Value - nowDate;
             }
             return null;
+        }
+
+        /// <summary>
+        /// Get encoding
+        /// </summary>
+        /// <returns></returns>
+        static Encoding GetEncoding()
+        {
+            return CacheManager.Configuration.DefaultEncoding ?? Encoding.UTF8;
         }
 
         #endregion

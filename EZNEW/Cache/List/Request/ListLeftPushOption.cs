@@ -12,18 +12,18 @@ namespace EZNEW.Cache.List.Request
         /// <summary>
         /// Gets or sets the cache key
         /// </summary>
-        public CacheKey Key
-        {
-            get; set;
-        }
+        public CacheKey Key { get; set; }
 
         /// <summary>
         /// Gets or sets the values
         /// </summary>
-        public List<string> Values
-        {
-            get; set;
-        }
+        public List<string> Values { get; set; }
+
+        /// <summary>
+        /// Gets or sets the cache entry expiration
+        /// When the specified cache item is not found, the cache item is created with the change expiration information 
+        /// </summary>
+        public CacheExpiration Expiration { get; set; }
 
         /// <summary>
         /// Execute cache operation

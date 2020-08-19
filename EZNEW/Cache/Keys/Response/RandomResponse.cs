@@ -8,9 +8,6 @@
         /// <summary>
         /// Gets or sets the key value
         /// </summary>
-        public string Key
-        {
-            get; set;
-        }
+        public string Key { get; set; }
     }
 }

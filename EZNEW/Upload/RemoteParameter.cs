@@ -12,10 +12,7 @@ namespace EZNEW.Upload
         /// <summary>
         /// Gets or sets upload files
         /// </summary>
-        public List<UploadFile> Files
-        {
-            get; set;
-        }
+        public List<UploadFile> Files { get; set; }
 
         /// <summary>
         /// Gets or sets upload file parameter name

@@ -17,10 +17,7 @@ namespace EZNEW.Develop.Command.Modify
         /// <summary>
         /// Gets the modify expression
         /// </summary>
-        public Expression Expression
-        {
-            get; private set;
-        }
+        public Expression Expression { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the EZNEW.Develop.Command.Modify.ExpressionModifyItem

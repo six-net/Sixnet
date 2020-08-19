@@ -11,34 +11,27 @@ namespace EZNEW.Cache.Hash.Request
         /// <summary>
         /// Gets or sets the cache key
         /// </summary>
-        public CacheKey Key
-        {
-            get; set;
-        }
+        public CacheKey Key { get; set; }
 
         /// <summary>
         /// Gets or sets the pattern
         /// </summary>
-        public string Pattern
-        {
-            get; set;
-        }
+        public string Pattern { get; set; }
 
         /// <summary>
         /// Gets or sets the pattern type
         /// </summary>
-        public PatternType PatternType
-        {
-            get; set;
-        }
+        public PatternType PatternType { get; set; }
 
         /// <summary>
         /// Gets or sets the page size
         /// </summary>
-        public int PageSize
-        {
-            get; set;
-        } = int.MaxValue;
+        public int PageSize { get; set; } = int.MaxValue;
+
+        /// <summary>
+        /// Gets or sets the cursor
+        /// </summary>
+        public long Cursor { get; set; }
 
         /// <summary>
         /// Execute cache operation

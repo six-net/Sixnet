@@ -116,7 +116,7 @@ namespace EZNEW.Data
             {
                 var databaseServer = serverInfos[cmdGroup.Key];
                 var engine = DataManager.GetDatabaseEngine(databaseServer.ServerType);
-                executeTasks[groupIndex] = engine.ExecuteAsync(databaseServer, executeOption, cmdGroup.Value);
+                executeTasks[groupIndex] = engine.ExecuteAsync(databaseServer, executeOption, cmdGroup.Value.Select(c => c.Clone()));
                 groupIndex++;
             }
             return (await Task.WhenAll(executeTasks).ConfigureAwait(false)).Sum();

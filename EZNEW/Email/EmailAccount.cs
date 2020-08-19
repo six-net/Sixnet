@@ -13,64 +13,37 @@ namespace EZNEW.Email
         /// <summary>
         /// Gets or sets the send person name
         /// </summary>
-        public string SendPersonName
-        {
-            get;
-            set;
-        }
+        public string SendPersonName { get; set; }
 
         /// <summary>
         /// Gets or sets the send email address
         /// </summary>
-        public string SendEmailAddress
-        {
-            get;
-            set;
-        }
+        public string SendEmailAddress { get; set; }
 
         /// <summary>
         /// Gets or sets the user name
         /// </summary>
-        public string UserName
-        {
-            get; set;
-        }
+        public string UserName { get; set; }
 
         /// <summary>
         /// Gets or sets the smtp address
         /// </summary>
-        public string SmtpAddress
-        {
-            get;
-            set;
-        }
+        public string SmtpAddress { get; set; }
 
         /// <summary>
         /// Gets or sets the password
         /// </summary>
-        public string Password
-        {
-            get;
-            set;
-        }
+        public string Password { get; set; }
 
         /// <summary>
         /// Gets or set the port
         /// </summary>
-        public string Port
-        {
-            get;
-            set;
-        }
+        public string Port { get; set; }
 
         /// <summary>
         /// Gets or sets whether enable ssl
         /// </summary>
-        public bool EnableSsl
-        {
-            get;
-            set;
-        }
+        public bool EnableSsl { get; set; }
 
         /// <summary>
         /// Gets the email account identity key

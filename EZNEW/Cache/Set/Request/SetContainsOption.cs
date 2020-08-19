@@ -11,18 +11,12 @@ namespace EZNEW.Cache.Set.Request
         /// <summary>
         /// Gets or sets the cache key
         /// </summary>
-        public CacheKey Key
-        {
-            get; set;
-        }
+        public CacheKey Key { get; set; }
 
         /// <summary>
-        /// Gets or sets the value
+        /// Gets or sets the member value
         /// </summary>
-        public string Value
-        {
-            get; set;
-        }
+        public string Member { get; set; }
 
         /// <summary>
         /// Execute cache operation

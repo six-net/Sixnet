@@ -8,9 +8,6 @@
         /// <summary>
         /// Gets or sets the delete count
         /// </summary>
-        public long DeleteCount
-        {
-            get; set;
-        }
+        public long DeleteCount { get; set; }
     }
 }

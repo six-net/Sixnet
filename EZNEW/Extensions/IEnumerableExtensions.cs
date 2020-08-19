@@ -121,5 +121,23 @@ namespace System.Collections.Generic
         #endregion
 
         #endregion
+
+        #region Get count
+
+        /// <summary>
+        /// Get count
+        /// </summary>
+        /// <param name="values">Values</param>
+        /// <returns>Return count value</returns>
+        public static int GetCount<T>(this IEnumerable<T> values)
+        {
+            if (values is ICollection collection)
+            {
+                return collection.Count;
+            }
+            return values?.Count() ?? 0;
+        }
+
+        #endregion
     }
 }

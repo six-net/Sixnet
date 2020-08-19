@@ -11,34 +11,22 @@ namespace EZNEW.Cache.SortedSet.Request
         /// <summary>
         /// Gets or sets the cache key
         /// </summary>
-        public CacheKey Key
-        {
-            get; set;
-        }
+        public CacheKey Key { get; set; }
 
         /// <summary>
         /// Gets or sets the min value
         /// </summary>
-        public decimal MinValue
-        {
-            get; set;
-        }
+        public string MinValue { get; set; }
 
         /// <summary>
         /// Gets or sets the max value
         /// </summary>
-        public decimal MaxValue
-        {
-            get; set;
-        }
+        public string MaxValue { get; set; }
 
         /// <summary>
         /// Gets or sets the exclude type
         /// </summary>
-        public SortedSetExclude Exclude
-        {
-            get; set;
-        } = SortedSetExclude.None;
+        public BoundaryExclude Exclude { get; set; } = BoundaryExclude.None;
 
         /// <summary>
         /// Execute cache operation

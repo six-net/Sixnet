@@ -13,9 +13,6 @@
         /// <summary>
         /// Gets or sets whether force execute the activation record
         /// </summary>
-        public bool ForceExecute
-        {
-            get; set;
-        }
+        public bool ForceExecute { get; set; }
     }
 }

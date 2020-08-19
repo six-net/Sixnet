@@ -49,34 +49,22 @@ namespace EZNEW.Cache
         /// <summary>
         /// Gets or sets the page size
         /// </summary>
-        public long PageSize
-        {
-            get; set;
-        }
+        public long PageSize { get; set; }
 
         /// <summary>
         /// Gets or sets the page
         /// </summary>
-        public long Page
-        {
-            get; set;
-        }
+        public long Page { get; set; }
 
         /// <summary>
         /// Gets or sets the total count
         /// </summary>
-        public long TotalCount
-        {
-            get; set;
-        }
+        public long TotalCount { get; set; }
 
         /// <summary>
         /// Gets or sets the page count
         /// </summary>
-        public long PageCount
-        {
-            get; set;
-        }
+        public long PageCount { get; set; }
 
         #endregion
 

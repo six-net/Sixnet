@@ -13,33 +13,22 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
     /// </summary>
     public class DataPackage<TEntity> where TEntity : BaseEntity<TEntity>, new()
     {
-        internal DataPackage()
-        {
-        }
+        internal DataPackage() { }
 
         /// <summary>
         /// Gets or sets the warehouse data
         /// </summary>
-        public TEntity WarehouseData
-        {
-            get; set;
-        }
+        public TEntity WarehouseData { get; set; }
 
         /// <summary>
         /// Gets or sets the stored data
         /// </summary>
-        public TEntity PersistentData
-        {
-            get; set;
-        }
+        public TEntity PersistentData { get; set; }
 
         /// <summary>
         /// Gets or sets the operate
         /// </summary>
-        public WarehouseDataOperate Operate
-        {
-            get; set;
-        } = WarehouseDataOperate.None;
+        public WarehouseDataOperate Operate { get; set; } = WarehouseDataOperate.None;
 
         /// <summary>
         /// Gets or sets whether is remove by condition
@@ -49,10 +38,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// <summary>
         /// Gets or sets the stored from
         /// </summary>
-        public DataLifeSource LifeSource
-        {
-            get; private set;
-        } = DataLifeSource.DataSource;
+        public DataLifeSource LifeSource { get; private set; } = DataLifeSource.DataSource;
 
         /// <summary>
         /// Gets or sets the query fields
@@ -90,7 +76,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
             MergeData(data, newQuery);
             if (Operate == WarehouseDataOperate.Remove)
             {
-                return default(TEntity);
+                return default;
             }
             return WarehouseData;
         }
@@ -107,8 +93,9 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
             }
             Operate = WarehouseDataOperate.Save;
             WarehouseData = data;
-            if (IsRealRemove) //add value
+            if (IsRealRemove)
             {
+                //add value
                 LifeSource = DataLifeSource.New;
                 IsRealRemove = false;
             }
@@ -153,7 +140,8 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
             {
                 ModifyData(WarehouseData, modify);
             }
-            if (LifeSource == DataLifeSource.DataSource) // modify data source value
+            // modify data source value
+            if (LifeSource == DataLifeSource.DataSource) 
             {
                 if (PersistentData != null)
                 {
@@ -202,7 +190,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// <returns>Return query fields</returns>
         List<string> GetNewQueryFields(IQuery newQuery)
         {
-            var newQueryFields = newQuery?.GetActuallyQueryFields(WarehouseData.GetType())?.Select(c => c.PropertyName) ?? new List<string>(0);
+            var newQueryFields = newQuery?.GetActuallyQueryFields(WarehouseData.GetType(), true) ?? new List<string>(0);
             var exceptFields = newQueryFields.Except(QueryFields).ToList();
             return exceptFields;
         }
@@ -224,12 +212,11 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
                 return;
             }
             //over new value
-            var modifyPropertyNames = modifyValues?.Keys.ToList() ?? new List<string>(0);
             foreach (var field in newQueryFields)
             {
                 var newPropertyVal = newData.GetPropertyValue(field);
                 PersistentData.SetPropertyValue(field, newPropertyVal);
-                if (!modifyPropertyNames.Contains(field))
+                if (!modifyValues.ContainsKey(field))
                 {
                     WarehouseData.SetPropertyValue(field, newPropertyVal);
                 }
@@ -319,7 +306,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
                 LifeSource = DataLifeSource.New,
                 Operate = WarehouseDataOperate.Save
             };
-            dataPackage.AddQueryFields(EntityManager.GetPrimaryKeys(typeof(TEntity)).Select(c => c.PropertyName));
+            dataPackage.AddQueryFields(EntityManager.GetPrimaryKeys(typeof(TEntity)));
             return dataPackage;
         }
 
@@ -343,7 +330,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
                 LifeSource = DataLifeSource.DataSource,
                 Operate = WarehouseDataOperate.None
             };
-            dataPackage.AddQueryFields(query?.GetActuallyQueryFields(data.GetType())?.Select(c => c.PropertyName));
+            dataPackage.AddQueryFields(query?.GetActuallyQueryFields(data.GetType(), true) ?? Array.Empty<string>());
             return dataPackage;
         }
     }

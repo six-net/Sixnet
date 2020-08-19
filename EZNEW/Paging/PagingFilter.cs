@@ -1,4 +1,5 @@
 ﻿using System;
+using EZNEW.Develop.CQuery;
 
 namespace EZNEW.Paging
 {
@@ -6,7 +7,7 @@ namespace EZNEW.Paging
     /// Paging query condition
     /// </summary>
     [Serializable]
-    public class PagingFilter
+    public class PagingFilter : QueryFilter
     {
         #region Fields
 
@@ -63,5 +64,14 @@ namespace EZNEW.Paging
         }
 
         #endregion
+
+        /// <summary>
+        /// Generate a IQuery instance 
+        /// </summary>
+        /// <returns>Return a IQuery instance</returns>
+        public override IQuery CreateQuery()
+        {
+            return null;
+        }
     }
 }

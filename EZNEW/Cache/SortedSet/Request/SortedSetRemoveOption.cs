@@ -12,18 +12,12 @@ namespace EZNEW.Cache.SortedSet.Request
         /// <summary>
         /// Gets or sets the cache key
         /// </summary>
-        public CacheKey Key
-        {
-            get; set;
-        }
+        public CacheKey Key { get; set; }
 
         /// <summary>
         /// Gets or sets the remove members
         /// </summary>
-        public List<string> RemoveMembers
-        {
-            get; set;
-        }
+        public List<string> RemoveMembers { get; set; }
 
         /// <summary>
         /// Execute cache operation

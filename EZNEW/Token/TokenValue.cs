@@ -8,10 +8,7 @@
         /// <summary>
         /// Gets or sets the the token string value
         /// </summary>
-        public string StringValue
-        {
-            get;set;
-        }
+        public string StringValue { get; set; }
 
         /// <summary>
         /// Gets a empty token value

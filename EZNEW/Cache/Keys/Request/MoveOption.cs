@@ -11,18 +11,12 @@ namespace EZNEW.Cache.Keys.Request
         /// <summary>
         /// Gets or sets the cache key
         /// </summary>
-        public CacheKey Key
-        {
-            get; set;
-        }
+        public CacheKey Key { get; set; }
 
         /// <summary>
         /// Gets or sets the database
         /// </summary>
-        public int DataBase
-        {
-            get; set;
-        }
+        public int Database { get; set; }
 
         /// <summary>
         /// Execute cache operation

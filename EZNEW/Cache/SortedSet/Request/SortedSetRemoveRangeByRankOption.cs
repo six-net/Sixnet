@@ -11,34 +11,17 @@ namespace EZNEW.Cache.SortedSet.Request
         /// <summary>
         /// Gets or sets the cache key
         /// </summary>
-        public CacheKey Key
-        {
-            get; set;
-        }
+        public CacheKey Key { get; set; }
 
         /// <summary>
         /// Gets or sets the start rank value
         /// </summary>
-        public int Start
-        {
-            get; set;
-        }
+        public int Start { get; set; }
 
         /// <summary>
         /// Gets or sets the stop rank value
         /// </summary>
-        public int Stop
-        {
-            get; set;
-        }
-
-        /// <summary>
-        /// Gets or sets the exclude type
-        /// </summary>
-        public SortedSetExclude Exclude
-        {
-            get; set;
-        } = SortedSetExclude.None;
+        public int Stop { get; set; }
 
         /// <summary>
         /// Execute cache operation

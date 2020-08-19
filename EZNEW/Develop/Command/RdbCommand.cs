@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using EZNEW.Develop.Command.Modify;
 using EZNEW.Develop.CQuery;
 using EZNEW.Develop.UnitOfWork;
 using EZNEW.Internal.MessageQueue;
@@ -90,7 +92,7 @@ namespace EZNEW.Develop.Command
         /// <summary>
         /// Gets or sets the fields
         /// </summary>
-        public List<string> Fields { get; set; } = null;
+        public IEnumerable<string> Fields { get; set; } = null;
 
         /// <summary>
         /// Gets if the command is obsolete
@@ -305,6 +307,81 @@ namespace EZNEW.Develop.Command
         }
 
         #endregion
+
+        #endregion
+
+        #region Clone
+
+        /// <summary>
+        /// Clone a ICommand object
+        /// </summary>
+        /// <returns></returns>
+        public ICommand Clone()
+        {
+            var rdbCommand = new RdbCommand()
+            {
+                Id = Id,
+                CommandText = CommandText,
+                CommandType = CommandType,
+                TransactionCommand = TransactionCommand,
+                CommandResultType = CommandResultType,
+                ObjectName = ObjectName,
+                ObjectKeys = ObjectKeys?.Select(c => c).ToList(),
+                ObjectKeyValues = ObjectKeyValues?.ToDictionary(c => c.Key, c => c.Value),
+                ServerKeys = ServerKeys?.Select(c => c).ToList(),
+                ServerKeyValues = ServerKeyValues?.ToDictionary(c => c.Key, c => c.Value),
+                ExecuteMode = ExecuteMode,
+                Query = Query?.Clone(),
+                OperateType = OperateType,
+                Fields = Fields?.Select(c => c).ToList(),
+                EntityType = EntityType,
+                MustReturnValueOnSuccess = MustReturnValueOnSuccess,
+                Parameters = CloneParameters()
+            };
+            rdbCommand.SyncExecutingEventHandlers.AddRange(SyncExecutingEventHandlers);
+            rdbCommand.AsyncExecutingEventHandlers.AddRange(AsyncExecutingEventHandlers);
+            rdbCommand.ExecutedEventHandlers.AddRange(ExecutedEventHandlers);
+            return rdbCommand;
+        }
+
+        /// <summary>
+        /// Clone parameters
+        /// </summary>
+        /// <returns></returns>
+        object CloneParameters()
+        {
+            if (Parameters == null)
+            {
+                return null;
+            }
+            if (Parameters is CommandParameters commandParameters)
+            {
+                return commandParameters.Clone();
+            }
+            CommandParameters newParameters = new CommandParameters();
+            if (Parameters is IEnumerable<KeyValuePair<string, string>> stringDictParameters)
+            {
+                newParameters.Add(stringDictParameters);
+            }
+            else if (Parameters is IEnumerable<KeyValuePair<string, dynamic>> dynamicDictParameters)
+            {
+                newParameters.Add(dynamicDictParameters);
+            }
+            else if (Parameters is IEnumerable<KeyValuePair<string, object>> objectDictParameters)
+            {
+                newParameters.Add(objectDictParameters);
+            }
+            else if (Parameters is IEnumerable<KeyValuePair<string, IModifyValue>> modifyValueParameters)
+            {
+                newParameters.Add(modifyValueParameters);
+            }
+            else
+            {
+                var objectParametersDict = Parameters.ObjectToDcitionary();
+                newParameters.Add(objectParametersDict);
+            }
+            return newParameters;
+        }
 
         #endregion
 

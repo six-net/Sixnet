@@ -13,18 +13,12 @@ namespace EZNEW.Data.Configuration
         /// <summary>
         /// Gets or sets the table name
         /// </summary>
-        public string TableName
-        {
-            get; set;
-        }
+        public string TableName { get; set; }
 
         /// <summary>
         /// Gets or sets the fields
         /// </summary>
-        public List<EntityField> Fields
-        {
-            get; set;
-        }
+        public List<EntityField> Fields { get; set; }
 
         #endregion
     }

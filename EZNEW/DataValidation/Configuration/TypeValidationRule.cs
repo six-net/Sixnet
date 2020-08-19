@@ -12,18 +12,12 @@ namespace EZNEW.DataValidation.Configuration
         /// Gets or sets the type full name
         /// </summary>
         [JsonProperty(PropertyName = "typeName")]
-        public string TypeFullName
-        {
-            get; set;
-        }
+        public string TypeFullName { get; set; }
 
         /// <summary>
         /// Gets or set the property rules
         /// </summary>
         [JsonProperty(PropertyName = "properties")]
-        public List<PropertyRule> Properties
-        {
-            get; set;
-        }
+        public List<PropertyRule> Properties { get; set; }
     }
 }

@@ -12,10 +12,7 @@ namespace EZNEW.Cache.String.Request
         /// <summary>
         /// Gets or sets the cache keys
         /// </summary>
-        public List<CacheKey> Keys
-        {
-            get; set;
-        }
+        public IEnumerable<CacheKey> Keys { get; set; }
 
         /// <summary>
         /// Execute cache operation

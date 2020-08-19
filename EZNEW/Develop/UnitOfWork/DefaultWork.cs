@@ -10,6 +10,7 @@ using EZNEW.Develop.Domain.Event;
 using EZNEW.Develop.Domain.Repository.Warehouse;
 using EZNEW.Develop.Entity;
 using EZNEW.Logging;
+using EZNEW.Serialize;
 
 namespace EZNEW.Develop.UnitOfWork
 {
@@ -19,11 +20,17 @@ namespace EZNEW.Develop.UnitOfWork
     internal class DefaultWork : IWork
     {
         /// <summary>
+        /// Determine whether allow output trace log
+        /// </summary>
+        readonly bool allowTraceLog = false;
+
+        /// <summary>
         /// Initialize default work
         /// </summary>
         internal DefaultWork()
         {
             WorkId = Guid.NewGuid().ToString();
+            allowTraceLog = TraceLogSwitchManager.ShouldTraceFramework();
             DomainEventManager = new DomainEventManager();
             WorkManager.TriggerCreateWorkEvent(this);
             WorkManager.Current = this;
@@ -252,7 +259,6 @@ namespace EZNEW.Develop.UnitOfWork
         {
             //resolve records
             ResolveActivationRecord();
-            bool allowTraceLog = TraceLogSwitchManager.ShouldTraceFramework();
             var recordIds = activationMaxRecordIds.Values.OrderBy(c => c);
             commandEngineGroups = new Dictionary<string, Tuple<ICommandEngine, List<ICommand>>>(activationMaxRecordIds.Count);
             commandCollection = new List<ICommand>(activationMaxRecordIds.Count);
@@ -362,14 +368,25 @@ namespace EZNEW.Develop.UnitOfWork
         {
             try
             {
+                if (allowTraceLog)
+                {
+                    LogManager.LogInformation<DefaultWork>($"===== Work：{WorkId} commit begin =====");
+                }
+
                 //build commands
                 BuildCommand();
-
                 if (commandEngineGroups.IsNullOrEmpty())
                 {
                     return WorkCommitResult.Empty();
                 }
                 var executeOption = GetCommandExecuteOption();
+
+                if (allowTraceLog)
+                {
+                    LogManager.LogInformation<DefaultWork>($"Work：{WorkId},Command execute option：{JsonSerializeHelper.ObjectToJson(executeOption)}");
+                    LogManager.LogInformation<DefaultWork>($"Work：{WorkId},Command engine keys：{string.Join(",", commandEngineGroups.Keys)},Command count：{commandCollection.Count}");
+                }
+
                 var result = await CommandExecuteManager.ExecuteAsync(executeOption, commandEngineGroups.Values).ConfigureAwait(false);
                 var commitResult = new WorkCommitResult()
                 {
@@ -396,12 +413,29 @@ namespace EZNEW.Develop.UnitOfWork
                     //Trigger work global commit fail event
                     WorkManager.TriggerWorkCommitFailEvent(this, commitResult, commandCollection);
                 }
+
+                if (allowTraceLog)
+                {
+                    LogManager.LogInformation<DefaultWork>($"Work：{WorkId},Commit command count：{commitResult.CommitCommandCount},Execute data count：{result},Allow empty result command result：{allowEmptyResultCommandCount}");
+                }
+
                 return commitResult;
             }
             catch (Exception ex)
             {
                 Reset();
+                if (allowTraceLog)
+                {
+                    LogManager.LogInformation<DefaultWork>($"Work：{WorkId},Exception message ： {ex.Message}");
+                }
                 throw ex;
+            }
+            finally
+            {
+                if (allowTraceLog)
+                {
+                    LogManager.LogInformation<DefaultWork>($"===== Work：{WorkId} commit end =====");
+                }
             }
         }
 

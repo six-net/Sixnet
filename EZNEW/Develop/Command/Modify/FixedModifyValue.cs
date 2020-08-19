@@ -11,10 +11,7 @@ namespace EZNEW.Develop.Command.Modify
         /// <summary>
         /// Gets or sets the value
         /// </summary>
-        public dynamic Value
-        {
-            get; set;
-        }
+        public dynamic Value { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the EZNEW.Develop.Command.Modify.FixedModifyValue

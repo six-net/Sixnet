@@ -99,7 +99,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
             {
                 datas = datas.Take(originalPaging.PageSize).ToList();
             }
-            return Pager.Create<TEntity>(originalPaging.Page, originalPaging.PageSize, totalCount, datas);
+            return Pager.Create(originalPaging.Page, originalPaging.PageSize, totalCount, datas);
         }
 
         /// <summary>
@@ -255,7 +255,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         public static ComputeResult<TValue> Max<TEntity, TValue>(IQuery query) where TEntity : BaseEntity<TEntity>, new()
         {
             var warehouse = GetWarehouse<TEntity>();
-            return warehouse?.Max<TValue>(query) ?? new ComputeResult<TValue>() { Value = default(TValue), ComputeQuery = query };
+            return warehouse?.Max<TValue>(query) ?? new ComputeResult<TValue>() { Value = default, ComputeQuery = query };
         }
 
         #endregion

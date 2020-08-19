@@ -11,10 +11,7 @@ namespace EZNEW.Develop.Command
         /// <summary>
         /// Gets or sets whether allow to execute command
         /// </summary>
-        public bool AllowExecuteCommand
-        {
-            get; set;
-        }
+        public bool AllowExecuteCommand { get; set; }
 
         /// <summary>
         /// Gets the default success result

@@ -39,7 +39,7 @@ namespace EZNEW.Develop.Domain.Aggregation
             {
                 VirtualAggregations[modelType.GUID] = true;
             }
-            allTypes = allTypes ?? modelType.Assembly.GetTypes();
+            allTypes ??= modelType.Assembly.GetTypes();
             var subTypes = allTypes.Where(t => t.BaseType == modelType);
             if (subTypes.IsNullOrEmpty())
             {

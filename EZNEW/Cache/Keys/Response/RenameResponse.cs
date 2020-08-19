@@ -5,12 +5,5 @@
     /// </summary>
     public class RenameResponse : CacheResponse
     {
-        /// <summary>
-        /// Gets or sets whether rename successful
-        /// </summary>
-        public bool RenameSuccess
-        {
-            get; set;
-        }
     }
 }

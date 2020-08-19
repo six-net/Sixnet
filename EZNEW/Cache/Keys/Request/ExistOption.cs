@@ -8,15 +8,12 @@ namespace EZNEW.Cache.Keys.Request
     /// <summary>
     /// Exists key option
     /// </summary>
-    public class ExistsOption : CacheRequestOption<ExistsResponse>
+    public class ExistOption : CacheRequestOption<ExistResponse>
     {
         /// <summary>
         /// Gets or sets the cache keys
         /// </summary>
-        public List<CacheKey> Keys
-        {
-            get; set;
-        }
+        public List<CacheKey> Keys { get; set; }
 
         /// <summary>
         /// Execute cache operation
@@ -24,9 +21,9 @@ namespace EZNEW.Cache.Keys.Request
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return exists key response</returns>
-        protected override Task<ExistsResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<ExistResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
         {
-            throw new NotImplementedException();
+            return await cacheProvider.KeyExistAsync(server, this).ConfigureAwait(false);
         }
     }
 }

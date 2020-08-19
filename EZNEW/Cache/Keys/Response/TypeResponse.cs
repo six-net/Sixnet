@@ -8,9 +8,6 @@
         /// <summary>
         /// Gets or sets the cache key type
         /// </summary>
-        public CacheKeyType KeyType
-        {
-            get; set;
-        }
+        public CacheKeyType KeyType { get; set; }
     }
 }

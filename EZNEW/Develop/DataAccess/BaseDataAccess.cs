@@ -89,7 +89,7 @@ namespace EZNEW.Develop.DataAccess
             }
             if (query == null)
             {
-                throw new EZNEWException("the data modification condition is null");
+                throw new EZNEWException("The data modification condition is null");
             }
 
             #region control version
@@ -104,7 +104,7 @@ namespace EZNEW.Develop.DataAccess
                     newData.SetPropertyValue(versionFieldName, newVersionValue);
                     modifyValues.Add(versionFieldName, newVersionValue);
                 }
-                query.And(versionFieldName, CriteriaOperator.Equal, nowVersionValue);
+                query = AndExtensions.And(query, versionFieldName, CriteriaOperator.Equal, nowVersionValue);
             }
 
             #endregion

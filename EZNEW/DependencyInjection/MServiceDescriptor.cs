@@ -13,10 +13,7 @@ namespace EZNEW.DependencyInjection
         /// <summary>
         /// Service behaviors
         /// </summary>
-        public IEnumerable<Type> Behaviors
-        {
-            get; set;
-        }
+        public IEnumerable<Type> Behaviors { get; set; }
 
         public MServiceDescriptor(Type serviceType, object instance) : base(serviceType, instance)
         {

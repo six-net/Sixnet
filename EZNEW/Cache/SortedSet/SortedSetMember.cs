@@ -8,17 +8,11 @@
         /// <summary>
         /// Gets or sets the value
         /// </summary>
-        public string Value
-        {
-            get; set;
-        }
+        public string Value { get; set; }
 
         /// <summary>
         /// Gets or sets the score
         /// </summary>
-        public double Score
-        {
-            get; set;
-        }
+        public double Score { get; set; }
     }
 }

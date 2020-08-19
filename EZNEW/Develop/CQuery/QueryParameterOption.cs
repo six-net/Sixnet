@@ -3,7 +3,7 @@
     /// <summary>
     /// Parameter query option
     /// </summary>
-    internal class QueryParameterOption
+    public class QueryParameterOption
     {
         /// <summary>
         /// Gets or sets the query field name

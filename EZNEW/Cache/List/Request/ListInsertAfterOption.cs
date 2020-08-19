@@ -11,26 +11,17 @@ namespace EZNEW.Cache.List.Request
         /// <summary>
         /// Gets or sets the cache key
         /// </summary>
-        public CacheKey Key
-        {
-            get; set;
-        }
+        public CacheKey Key { get; set; }
 
         /// <summary>
         /// Gets or sets the pivot value
         /// </summary>
-        public string PivotValue
-        {
-            get; set;
-        }
+        public string PivotValue { get; set; }
 
         /// <summary>
         /// Gets or sets the insert value
         /// </summary>
-        public string InsertValue
-        {
-            get; set;
-        }
+        public string InsertValue { get; set; }
 
         /// <summary>
         /// Execute cache operation

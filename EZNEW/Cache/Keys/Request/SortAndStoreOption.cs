@@ -12,66 +12,48 @@ namespace EZNEW.Cache.Keys.Request
         /// <summary>
         /// Gets or sets the destination key
         /// </summary>
-        public CacheKey DestinationKey
-        {
-            get; set;
-        }
+        public CacheKey DestinationKey { get; set; }
 
         /// <summary>
         /// Gets or sets the source key
         /// </summary>
-        public CacheKey SourceKey
-        {
-            get; set;
-        }
+        public CacheKey SourceKey { get; set; }
 
         /// <summary>
-        /// Gets or sets skip count
+        /// Gets or sets the data offset
         /// </summary>
-        public long Skip
-        {
-            get; set;
-        } = 0;
+        public int Offset { get; set; } = 0;
 
         /// <summary>
         /// Gets or sets take count
         /// </summary>
-        public long Take
-        {
-            get; set;
-        } = -1;
+        public int Count { get; set; } = -1;
 
         /// <summary>
         /// Gets or sets order type
         /// </summary>
-        public SortedOrder Order
-        {
-            get; set;
-        } = SortedOrder.Ascending;
+        public CacheOrder Order { get; set; } = CacheOrder.Ascending;
 
         /// <summary>
         /// Gets or sets sort type
         /// </summary>
-        public CacheSortType SortType
-        {
-            get; set;
-        } = CacheSortType.Numeric;
+        public CacheSortType SortType { get; set; } = CacheSortType.Numeric;
 
         /// <summary>
         /// Gets or sets sort by value
         /// </summary>
-        public string By
-        {
-            get; set;
-        }
+        public string By { get; set; }
 
         /// <summary>
         /// Gets or sets the get values
         /// </summary>
-        public List<string> Gets
-        {
-            get; set;
-        }
+        public List<string> Gets { get; set; }
+
+        /// <summary>
+        /// Gets or sets the cache entry expiration
+        /// When the specified cache item is not found, the cache item is created with the change expiration information 
+        /// </summary>
+        public CacheExpiration Expiration { get; set; }
 
         /// <summary>
         /// Execute cache operation

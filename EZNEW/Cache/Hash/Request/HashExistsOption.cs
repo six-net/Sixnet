@@ -11,18 +11,12 @@ namespace EZNEW.Cache.Hash.Request
         /// <summary>
         /// Gets or sets the cache key
         /// </summary>
-        public CacheKey Key
-        {
-            get; set;
-        }
+        public CacheKey Key { get; set; }
 
         /// <summary>
         /// Gets or sets the hash field
         /// </summary>
-        public string HashField
-        {
-            get; set;
-        }
+        public string HashField { get; set; }
 
         /// <summary>
         /// Execute cache operation
@@ -32,7 +26,7 @@ namespace EZNEW.Cache.Hash.Request
         /// <returns>Return hash exists response</returns>
         protected override async Task<HashExistsResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
         {
-            return await cacheProvider.HashExistsAsync(server, this).ConfigureAwait(false);
+            return await cacheProvider.HashExistAsync(server, this).ConfigureAwait(false);
         }
     }
 }

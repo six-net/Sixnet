@@ -11,25 +11,16 @@ namespace EZNEW.Develop.CQuery
         /// <summary>
         /// Gets or sets the data key
         /// </summary>
-        public string Key
-        {
-            get; set;
-        }
+        public string Key { get; set; }
 
         /// <summary>
         /// Gets or sets the relation key
         /// </summary>
-        public string RelationKey
-        {
-            get; set;
-        }
+        public string RelationKey { get; set; }
 
         /// <summary>
         /// Gets or sets the recurve direction
         /// </summary>
-        public RecurveDirection Direction
-        {
-            get; set;
-        }
+        public RecurveDirection Direction { get; set; }
     }
 }

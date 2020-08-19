@@ -8,9 +8,6 @@
         /// <summary>
         /// Gets or sets the new value
         /// </summary>
-        public decimal NewValue
-        {
-            get; set;
-        }
+        public long NewValue { get; set; }
     }
 }

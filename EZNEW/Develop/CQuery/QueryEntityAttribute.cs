@@ -11,16 +11,12 @@ namespace EZNEW.Develop.CQuery
     {
         public QueryEntityAttribute(Type relevanceType)
         {
-            EntityManager.ConfigureEntity(relevanceType);
             RelevanceType = relevanceType;
         }
 
         /// <summary>
         /// Gets or sets the relevance type
         /// </summary>
-        public Type RelevanceType
-        {
-            get; set;
-        }
+        public Type RelevanceType { get; set; }
     }
 }

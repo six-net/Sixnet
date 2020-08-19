@@ -12,18 +12,12 @@ namespace EZNEW.Cache.Set.Request
         /// <summary>
         /// Gets or sets the cache keys
         /// </summary>
-        public List<CacheKey> Keys
-        {
-            get; set;
-        }
+        public List<CacheKey> Keys { get; set; }
 
         /// <summary>
-        /// Gets or sets the set operation
+        /// Gets or sets the combine operation
         /// </summary>
-        public SetOperationType SetOperationType
-        {
-            get; set;
-        } = SetOperationType.Union;
+        public CombineOperation CombineOperation { get; set; } = CombineOperation.Union;
 
         /// <summary>
         /// Execute cache operation

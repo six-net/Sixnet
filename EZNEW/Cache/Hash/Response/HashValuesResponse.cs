@@ -10,9 +10,6 @@ namespace EZNEW.Cache.Hash.Response
         /// <summary>
         /// Gets or sets the values
         /// </summary>
-        public List<dynamic> Values
-        {
-            get; set;
-        }
+        public List<dynamic> Values { get; set; }
     }
 }

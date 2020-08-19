@@ -12,7 +12,7 @@ namespace EZNEW.Code
         /// <summary>
         /// Random object
         /// </summary>
-        private static Random random;
+        private static readonly Random random;
 
         #region Static constructor
 

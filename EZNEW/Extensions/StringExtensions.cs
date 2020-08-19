@@ -30,8 +30,9 @@ namespace System
         /// </summary>
         /// <param name="stringValue">String value</param>
         /// <param name="splitString">Split string</param>
+        /// <param name="removeEmpty">Whether remove empty string</param>
         /// <returns>Return the string array</returns>
-        public static string[] LSplit(this string stringValue, string splitString)
+        public static string[] LSplit(this string stringValue, string splitString, bool removeEmpty = true)
         {
             if (string.IsNullOrWhiteSpace(stringValue))
             {
@@ -41,7 +42,7 @@ namespace System
             {
                 return new string[] { stringValue };
             }
-            return stringValue.Split(new string[] { splitString }, StringSplitOptions.RemoveEmptyEntries);
+            return stringValue.Split(new string[] { splitString }, removeEmpty ? StringSplitOptions.RemoveEmptyEntries : StringSplitOptions.None);
         }
 
         #endregion
@@ -259,14 +260,16 @@ namespace System
         /// Convert string value to binary string
         /// </summary>
         /// <param name="value">Original value</param>
+        /// <param name="encoding">Encoding</param>
         /// <returns>Return the binary string</returns>
-        public static string ToBinaryString(this string value)
+        public static string ToBinaryString(this string value, Encoding encoding = null)
         {
             if (value == null)
             {
                 return null;
             }
-            byte[] data = Encoding.Unicode.GetBytes(value);
+            encoding = encoding ?? Encoding.Default;
+            byte[] data = encoding.GetBytes(value);
             StringBuilder result = new StringBuilder(data.Length * 8);
             foreach (byte b in data)
             {
@@ -283,20 +286,22 @@ namespace System
         /// Convert binary string to original string
         /// </summary>
         /// <param name="binaryString">Binary string value</param>
+        /// <param name="encoding">Encoding</param>
         /// <returns>Return original string</returns>
-        public static string ToOriginalString(this string binaryString)
+        public static string ToOriginalString(this string binaryString, Encoding encoding = null)
         {
             if (string.IsNullOrWhiteSpace(binaryString))
             {
                 return string.Empty;
             }
+            encoding = encoding ?? Encoding.Default;
             CaptureCollection captures = Regex.Match(binaryString, @"([01]{8})+").Groups[1].Captures;
             byte[] data = new byte[captures.Count];
             for (int i = 0; i < captures.Count; i++)
             {
                 data[i] = Convert.ToByte(captures[i].Value, 2);
             }
-            return Encoding.Unicode.GetString(data, 0, data.Length);
+            return encoding.GetString(data, 0, data.Length);
         }
 
         #endregion

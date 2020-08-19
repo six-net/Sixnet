@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using EZNEW.Develop.Command.Modify;
 
 namespace EZNEW.Develop.Command
@@ -179,62 +180,95 @@ namespace EZNEW.Develop.Command
                 item.Value = newValue;
             }
         }
+
+        /// <summary>
+        /// Clone a command parameters
+        /// </summary>
+        /// <returns></returns>
+        public CommandParameters Clone()
+        {
+            return new CommandParameters()
+            {
+                Parameters = Parameters.ToDictionary(c => c.Key, c => c.Value.Clone())
+            };
+        }
     }
+}
+
+/// <summary>
+/// Parameter item
+/// </summary>
+[Serializable]
+public class ParameterItem
+{
+    /// <summary>
+    /// Gets or sets the parameter name
+    /// </summary>
+    public string Name { get; set; }
 
     /// <summary>
-    /// Parameter item
+    /// Gets or sets the parameter value
     /// </summary>
-    [Serializable]
-    public class ParameterItem
+    public object Value { get; set; }
+
+    /// <summary>
+    /// Gets or sets the parameter direction
+    /// </summary>
+    public ParameterDirection ParameterDirection { get; set; }
+
+    /// <summary>
+    /// Gets or sets the parameter database type
+    /// </summary>
+    public DbType? DbType { get; set; }
+
+    /// <summary>
+    /// Gets or sets the parameter size
+    /// </summary>
+    public int? Size { get; set; }
+
+    /// <summary>
+    /// Gets or sets the parameter attached parameter
+    /// </summary>
+    public IDbDataParameter AttachedParam { get; set; }
+
+    /// <summary>
+    /// Gets or sets the parameter output target
+    /// </summary>
+    internal object OutputTarget { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether the parameter is came from template
+    /// </summary>
+    internal bool CameFromTemplate { get; set; }
+
+    /// <summary>
+    /// Gets or sets the parameter precision
+    /// </summary>
+    public byte? Precision { get; set; }
+
+    /// <summary>
+    /// Gets or sets the parameter scale
+    /// </summary>
+    public byte? Scale { get; set; }
+
+    /// <summary>
+    /// Clone a parameter item
+    /// </summary>
+    /// <returns></returns>
+    public ParameterItem Clone()
     {
-        /// <summary>
-        /// Gets or sets the parameter name
-        /// </summary>
-        public string Name { get; set; }
-
-        /// <summary>
-        /// Gets or sets the parameter value
-        /// </summary>
-        public object Value { get; set; }
-
-        /// <summary>
-        /// Gets or sets the parameter direction
-        /// </summary>
-        public ParameterDirection ParameterDirection { get; set; }
-
-        /// <summary>
-        /// Gets or sets the parameter database type
-        /// </summary>
-        public DbType? DbType { get; set; }
-
-        /// <summary>
-        /// Gets or sets the parameter size
-        /// </summary>
-        public int? Size { get; set; }
-
-        /// <summary>
-        /// Gets or sets the parameter attached parameter
-        /// </summary>
-        public IDbDataParameter AttachedParam { get; set; }
-
-        /// <summary>
-        /// Gets or sets the parameter output target
-        /// </summary>
-        internal object OutputTarget { get; set; }
-
-        /// <summary>
-        /// Gets or sets whether the parameter is came from template
-        /// </summary>
-        internal bool CameFromTemplate { get; set; }
-
-        /// <summary>
-        /// Gets or sets the parameter precision
-        /// </summary>
-        public byte? Precision { get; set; }
-
-        /// <summary>
-        /// Gets or sets the parameter scale
-        /// </summary>
-        public byte? Scale { get; set; }
+        return new ParameterItem()
+        {
+            Name = Name,
+            Value = Value,
+            ParameterDirection = ParameterDirection,
+            DbType = DbType,
+            Size = Size,
+            AttachedParam = AttachedParam,
+            OutputTarget = OutputTarget,
+            CameFromTemplate = CameFromTemplate,
+            Precision = Precision,
+            Scale = Scale
+        };
     }
 }

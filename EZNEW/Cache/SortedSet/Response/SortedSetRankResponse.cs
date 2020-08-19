@@ -8,9 +8,6 @@
         /// <summary>
         /// Gets or sets the rank
         /// </summary>
-        public long? Rank
-        {
-            get; set;
-        }
+        public long? Rank { get; set; }
     }
 }

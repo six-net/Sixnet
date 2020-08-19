@@ -537,7 +537,7 @@ namespace EZNEW.Cache
         /// <param name="server">Cache server</param>
         /// <param name="option">Option</param>
         /// <returns>Return hash exists response</returns>
-        Task<HashExistsResponse> HashExistsAsync(CacheServer server, HashExistsOption option);
+        Task<HashExistsResponse> HashExistAsync(CacheServer server, HashExistsOption option);
 
         #endregion
 
@@ -1184,7 +1184,7 @@ namespace EZNEW.Cache
         /// <param name="server">server</param>
         /// <param name="option">Option</param>
         /// <returns>Return exists key response</returns>
-        Task<ExistsResponse> KeyExistsAsync(CacheServer server, ExistsOption option);
+        Task<ExistResponse> KeyExistAsync(CacheServer server, ExistOption option);
 
         #endregion
 

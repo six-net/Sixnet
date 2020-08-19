@@ -28,7 +28,7 @@ namespace EZNEW.Mapper
         {
             if (Current == null)
             {
-                throw new EZNEWException($"{nameof(Current)} is not initialized");
+                throw new EZNEWException($"{nameof(Current)} mapper is not initialized");
             }
             return Current.MapTo<TTarget>(sourceObject);
         }

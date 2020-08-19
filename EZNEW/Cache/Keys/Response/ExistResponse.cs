@@ -3,15 +3,12 @@
     /// <summary>
     /// Key exists response
     /// </summary>
-    public class ExistsResponse : CacheResponse
+    public class ExistResponse : CacheResponse
     {
         /// <summary>
         /// Gets or sets the key count
         /// </summary>
-        public long KeyCount
-        {
-            get; set;
-        }
+        public long KeyCount { get; set; }
 
         /// <summary>
         /// Gets whether has key

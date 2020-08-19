@@ -10,9 +10,6 @@ namespace EZNEW.Cache.String.Response
         /// <summary>
         /// Gets or sets the set results
         /// </summary>
-        public List<StringEntrySetResult> Results
-        {
-            get; set;
-        }
+        public List<StringEntrySetResult> Results { get; set; }
     }
 }

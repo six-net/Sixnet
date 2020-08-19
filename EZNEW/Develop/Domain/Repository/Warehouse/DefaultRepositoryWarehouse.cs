@@ -102,8 +102,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         public IActivationRecord Remove(IQuery query, ActivationOption activationOption = null)
         {
             WarehouseManager.Remove<TEntity>(query);
-            var record = DefaultActivationRecord<TEntity, TDataAccess>.CreateRemoveByConditionRecord(query, activationOption);
-            return record;
+            return DefaultActivationRecord<TEntity, TDataAccess>.CreateRemoveByConditionRecord(query, activationOption);
         }
 
         #endregion
@@ -119,8 +118,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         public IActivationRecord Modify(IModify modifyExpression, IQuery query, ActivationOption activationOption = null)
         {
             WarehouseManager.Modify<TEntity>(modifyExpression, query);
-            var record = DefaultActivationRecord<TEntity, TDataAccess>.CreateModifyRecord(modifyExpression, query, activationOption);
-            return record;
+            return DefaultActivationRecord<TEntity, TDataAccess>.CreateModifyRecord(modifyExpression, query, activationOption);
         }
 
         #endregion
@@ -135,8 +133,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         public async Task<TEntity> GetAsync(IQuery query)
         {
             var data = await dataAccess.GetAsync(query).ConfigureAwait(false);
-            data = WarehouseManager.Merge(data, query);
-            return data;
+            return WarehouseManager.Merge(data, query);
         }
 
         /// <summary>
@@ -147,8 +144,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         public async Task<List<TEntity>> GetListAsync(IQuery query)
         {
             var datas = await dataAccess.GetListAsync(query).ConfigureAwait(false);
-            datas = WarehouseManager.Merge<TEntity>(datas, query);
-            return datas;
+            return WarehouseManager.Merge(datas, query);
         }
 
         /// <summary>
@@ -159,8 +155,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         public async Task<IPaging<TEntity>> GetPagingAsync(IQuery query)
         {
             var paging = await dataAccess.GetPagingAsync(query).ConfigureAwait(false);
-            paging = WarehouseManager.MergePaging(paging, query);
-            return paging;
+            return WarehouseManager.MergePaging(paging, query);
         }
 
         /// <summary>
@@ -171,12 +166,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         public async Task<bool> ExistAsync(IQuery query)
         {
             var result = WarehouseManager.Exist<TEntity>(query);
-            var isExist = result.IsExist;
-            if (!isExist)
-            {
-                isExist = await dataAccess.ExistAsync(result.CheckQuery).ConfigureAwait(false);
-            }
-            return isExist;
+            return result.IsExist || await dataAccess.ExistAsync(result.CheckQuery).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -186,10 +176,9 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// <returns>Return data count</returns>
         public async Task<long> CountAsync(IQuery query)
         {
-            var allCount = await dataAccess.CountAsync(query).ConfigureAwait(false);
             var countResult = WarehouseManager.Count<TEntity>(query);
-            allCount = allCount - countResult.PersistentDataRemoveCount + countResult.NewDataCount;
-            return allCount;
+            countResult.Count += await dataAccess.CountAsync(countResult.ComputeQuery).ConfigureAwait(false);
+            return countResult.Count;
         }
 
         /// <summary>
@@ -243,7 +232,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         public async Task<TValue> AvgAsync<TValue>(IQuery query)
         {
             var countResult = WarehouseManager.Count<TEntity>(query);
-            if (countResult.TotalDataCount > 0)
+            if (countResult.Count > 0)
             {
                 dynamic sum = await SumAsync<TValue>(query).ConfigureAwait(false);
                 var count = await CountAsync(query).ConfigureAwait(false);

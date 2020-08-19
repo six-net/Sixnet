@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -13,8 +14,35 @@ namespace EZNEW.Cache
         /// Create cache key
         /// </summary>
         /// <param name="previousKeys">Previous keys</param>
-        public CacheKey(params CacheKey[] previousKeys)
+        public CacheKey(params CacheKey[] previousKeys) : this(null, previousKeys)
         {
+        }
+
+        /// <summary>
+        /// Create cache key
+        /// </summary>
+        /// <param name="cacheObject">Cache object</param>
+        /// <param name="previousKeys">Previous keys</param>
+        public CacheKey(CacheObject cacheObject, params CacheKey[] previousKeys) : this(cacheObject, (IEnumerable<CacheKey>)previousKeys)
+        {
+        }
+
+        /// <summary>
+        /// Create cache key
+        /// </summary>
+        /// <param name="previousKeys"></param>
+        public CacheKey(IEnumerable<CacheKey> previousKeys) : this(null, previousKeys)
+        {
+        }
+
+        /// <summary>
+        /// Create cache keys
+        /// </summary>
+        /// <param name="cacheObject">Cache object</param>
+        /// <param name="previousKeys">Previous keys</param>
+        public CacheKey(CacheObject cacheObject, IEnumerable<CacheKey> previousKeys)
+        {
+            this.cacheObject = cacheObject;
             if (!previousKeys.IsNullOrEmpty())
             {
                 foreach (var prevKey in previousKeys)
@@ -32,8 +60,19 @@ namespace EZNEW.Cache
         /// </summary>
         /// <param name="name">name</param>
         /// <param name="value">value</param>
-        public CacheKey(string name, string value = "")
+        public CacheKey(string name, string value = "") : this(null, name, value)
         {
+        }
+
+        /// <summary>
+        /// Create cache key
+        /// </summary>
+        /// <param name="cacheObject">Cache object</param>
+        /// <param name="name">Name</param>
+        /// <param name="value">Value</param>
+        public CacheKey(CacheObject cacheObject, string name, string value = "")
+        {
+            this.cacheObject = cacheObject;
             AddName(name, value);
         }
 
@@ -53,6 +92,11 @@ namespace EZNEW.Cache
         /// Whether is generated actual key
         /// </summary>
         protected bool generatedActualKey = false;
+
+        /// <summary>
+        /// Cache object
+        /// </summary>
+        protected CacheObject cacheObject = null;
 
         #endregion
 
@@ -98,7 +142,7 @@ namespace EZNEW.Cache
         /// Get actual key
         /// </summary>
         /// <returns>Return the actual cache key</returns>
-        public string GetActualKey(CacheObject cacheObject = null)
+        public string GetActualKey()
         {
             if (generatedActualKey)
             {

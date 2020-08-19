@@ -14,26 +14,17 @@ namespace EZNEW.Develop.DataAccess.Event
         /// <summary>
         /// Gets or sets whether event execute successful
         /// </summary>
-        public bool Success
-        {
-            get; set;
-        }
+        public bool Success { get; set; }
 
         /// <summary>
         /// Gets or sets the status code
         /// </summary>
-        public string Code
-        {
-            get; set;
-        }
+        public string Code { get; set; }
 
         /// <summary>
         /// Gets or sets the message
         /// </summary>
-        public string Message
-        {
-            get; set;
-        }
+        public string Message { get; set; }
 
         #endregion
 

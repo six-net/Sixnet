@@ -178,7 +178,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         {
             long allCount = 0;
             var countResult = WarehouseManager.Count<TEntity>(query);
-            allCount = allCount - countResult.PersistentDataCount + countResult.NewDataCount;
+            allCount += countResult.Count;
             return await Task.FromResult(allCount).ConfigureAwait(false);
         }
 

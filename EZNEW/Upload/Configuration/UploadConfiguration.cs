@@ -12,25 +12,16 @@ namespace EZNEW.Upload.Configuration
         /// <summary>
         /// Gets or sets the default upload option
         /// </summary>
-        public UploadOption Default
-        {
-            get; set;
-        }
+        public UploadOption Default { get; set; }
 
         /// <summary>
         /// Gets or sets the upload configuration for the specified upload object
         /// </summary>
-        public List<UploadObject> UploadObjects
-        {
-            get; set;
-        } = new List<UploadObject>();
+        public List<UploadObject> UploadObjects { get; set; } = new List<UploadObject>();
 
         /// <summary>
         /// Gets or sets the upload configuration name
         /// </summary>
-        public static string UploadConfigurationName
-        {
-            get; set;
-        } = nameof(UploadConfiguration);
+        public static string UploadConfigurationName { get; set; } = nameof(UploadConfiguration);
     }
 }

@@ -23,8 +23,9 @@ namespace EZNEW.Develop.Domain.Repository
     /// <typeparam name="TDataAccess">Data access</typeparam>
     public abstract class DefaultRelationRepository<TFirstModel, TSecondModel, TEntity, TDataAccess> : BaseRelationRepository<TFirstModel, TSecondModel> where TSecondModel : IAggregationRoot<TSecondModel> where TFirstModel : IAggregationRoot<TFirstModel> where TEntity : BaseEntity<TEntity>, new() where TDataAccess : IDataAccess<TEntity>
     {
-        IRepositoryWarehouse<TEntity, TDataAccess> repositoryWarehouse = ContainerManager.Resolve<IRepositoryWarehouse<TEntity, TDataAccess>>();
-        static Type entityType = typeof(TEntity);
+        readonly IRepositoryWarehouse<TEntity, TDataAccess> repositoryWarehouse = ContainerManager.Resolve<IRepositoryWarehouse<TEntity, TDataAccess>>();
+
+        static readonly Type entityType = typeof(TEntity);
 
         static DefaultRelationRepository()
         {

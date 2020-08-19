@@ -10,9 +10,6 @@ namespace EZNEW.Cache.Set.Response
         /// <summary>
         /// Gets or sets the members
         /// </summary>
-        public List<string> Members
-        {
-            get; set;
-        }
+        public List<string> Members { get; set; }
     }
 }

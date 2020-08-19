@@ -8,80 +8,69 @@ namespace EZNEW.Develop.Entity
     [AttributeUsage(AttributeTargets.Property)]
     public class EntityFieldAttribute : Attribute
     {
-        #region Properties
-
         /// <summary>
         /// Gets or sets the field name
         /// </summary>
-        public string Name
-        {
-            get; set;
-        }
+        public string Name { get; set; }
 
         /// <summary>
         /// Gets or sets the field description
         /// </summary>
-        public string Description
-        {
-            get; set;
-        }
+        public string Description { get; set; }
 
         /// <summary>
         /// Gets or sets whether the field is primary key
         /// </summary>
-        public bool PrimaryKey
-        {
-            get; set;
-        }
+        public bool PrimaryKey { get; set; }
 
         /// <summary>
         /// Gets or sets the cache option
         /// </summary>
-        public EntityFieldCacheOption CacheOption
-        {
-            get; set;
-        } = EntityFieldCacheOption.None;
+        public EntityFieldCacheOption CacheOption { get; set; } = EntityFieldCacheOption.None;
 
         /// <summary>
         /// Gets or sets whether disable the field in query
         /// </summary>
-        public bool DisableQuery
-        {
-            get; set;
-        }
+        public bool DisableQuery { get; set; }
 
         /// <summary>
         /// Gets or sets whether disable the field in edit
         /// </summary>
-        public bool DisableEdit
-        {
-            get; set;
-        }
+        public bool DisableEdit { get; set; }
 
         /// <summary>
         /// Gets or sets whether the field is version field
         /// </summary>
-        public bool IsVersion
-        {
-            get; set;
-        }
+        public bool IsVersion { get; set; }
 
         /// <summary>
         /// Gets or sets whether the field is refresh date field
         /// </summary>
-        public bool RefreshDate
-        {
-            get; set;
-        }
+        public bool RefreshDate { get; set; }
+
+        /// <summary>
+        /// Gets or sets the database type name
+        /// </summary>
+        public string DbTypeName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the max length
+        /// </summary>
+        public int MaxLength { get; set; } = -1;
+
+        /// <summary>
+        /// Whether is fixed length
+        /// </summary>
+        public bool IsFixedLength { get; set; }
+
+        /// <summary>
+        /// Whether is required
+        /// </summary>
+        public bool IsRequired { get; set; }
 
         /// <summary>
         /// Gets or sets the query format
         /// </summary>
-        public string QueryFormat
-        {
-            get; set;
-        }
-
-        #endregion
+        public string QueryFormat { get; set; }
     }
 }

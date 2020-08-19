@@ -14,36 +14,22 @@ namespace EZNEW.Upload
         /// <summary>
         /// Gets or sets whether the upload was successful
         /// </summary>
-        public bool Success
-        {
-            get;
-            set;
-        }
+        public bool Success { get; set; }
 
         /// <summary>
         /// Gets or sets error message
         /// </summary>
-        public string ErrorMessage
-        {
-            get;
-            set;
-        }
+        public string ErrorMessage { get; set; }
 
         /// <summary>
         /// Gets or sets response code
         /// </summary>
-        public string Code
-        {
-            get; set;
-        }
+        public string Code { get; set; }
 
         /// <summary>
         /// Gets or sets file results
         /// </summary>
-        public List<UploadFileResult> Files
-        {
-            get; set;
-        }
+        public List<UploadFileResult> Files { get; set; }
 
         /// <summary>
         /// Gets a default empty upload result

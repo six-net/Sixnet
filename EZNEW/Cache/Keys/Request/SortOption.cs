@@ -12,58 +12,37 @@ namespace EZNEW.Cache.Keys.Request
         /// <summary>
         /// Gets or sets the cache key
         /// </summary>
-        public CacheKey Key
-        {
-            get; set;
-        }
+        public CacheKey Key { get; set; }
 
         /// <summary>
-        /// Gets or sets the skip count
+        /// Gets or sets the data offset
         /// </summary>
-        public long Skip
-        {
-            get; set;
-        } = 0;
+        public int Offset { get; set; } = 0;
 
         /// <summary>
-        /// Gets or sets the take count
+        /// Gets or sets the data count
         /// </summary>
-        public long Take
-        {
-            get; set;
-        } = -1;
+        public int Count { get; set; } = -1;
 
         /// <summary>
         /// Gets or sets order
         /// </summary>
-        public SortedOrder Order
-        {
-            get; set;
-        } = SortedOrder.Ascending;
+        public CacheOrder Order { get; set; } = CacheOrder.Ascending;
 
         /// <summary>
         /// Gets or sets the sort type
         /// </summary>
-        public CacheSortType SortType
-        {
-            get; set;
-        } = CacheSortType.Numeric;
+        public CacheSortType SortType { get; set; } = CacheSortType.Numeric;
 
         /// <summary>
         /// Gets or sets the sort by value
         /// </summary>
-        public string By
-        {
-            get; set;
-        }
+        public string By { get; set; }
 
         /// <summary>
         /// Gets or sets the get values
         /// </summary>
-        public List<string> Gets
-        {
-            get; set;
-        }
+        public List<string> Gets { get; set; }
 
         /// <summary>
         /// Execute cache operation

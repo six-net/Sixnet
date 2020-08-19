@@ -8,9 +8,6 @@
         /// <summary>
         /// Gets or sets the score value
         /// </summary>
-        public double? Score
-        {
-            get; set;
-        }
+        public double? Score { get; set; }
     }
 }

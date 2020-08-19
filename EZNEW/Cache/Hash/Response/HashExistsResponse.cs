@@ -8,9 +8,6 @@
         /// <summary>
         /// Gets or sets whether has field
         /// </summary>
-        public bool HasField
-        {
-            get; set;
-        }
+        public bool HasField { get; set; }
     }
 }

@@ -11,26 +11,23 @@ namespace EZNEW.Cache.String.Request
         /// <summary>
         /// Gets or sets the cache key
         /// </summary>
-        public CacheKey Key
-        {
-            get; set;
-        }
+        public CacheKey Key { get; set; }
 
         /// <summary>
         /// Gets or sets the offset
         /// </summary>
-        public long Offset
-        {
-            get; set;
-        }
+        public long Offset { get; set; }
 
         /// <summary>
         /// Gets or sets whether set bit value
         /// </summary>
-        public bool Bit
-        {
-            get; set;
-        }
+        public bool Bit { get; set; }
+
+        /// <summary>
+        /// Gets or sets the cache entry expiration
+        /// When the specified cache item is not found, the cache item is created with the change expiration information 
+        /// </summary>
+        public CacheExpiration Expiration { get; set; }
 
         /// <summary>
         /// Execute cache operation

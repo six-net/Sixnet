@@ -5,12 +5,5 @@
     /// </summary>
     public class SetMoveResponse : CacheResponse
     {
-        /// <summary>
-        /// Gets or sets whether move successful
-        /// </summary>
-        public bool MoveSuccess
-        {
-            get; set;
-        }
     }
 }

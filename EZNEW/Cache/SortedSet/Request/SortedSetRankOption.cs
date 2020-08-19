@@ -11,26 +11,17 @@ namespace EZNEW.Cache.SortedSet.Request
         /// <summary>
         /// Gets or sets the cache key
         /// </summary>
-        public CacheKey Key
-        {
-            get; set;
-        }
+        public CacheKey Key { get; set; }
 
         /// <summary>
         /// Gets or sets the member
         /// </summary>
-        public string Member
-        {
-            get; set;
-        }
+        public string Member { get; set; }
 
         /// <summary>
         /// Gets or sets the order type
         /// </summary>
-        public SortedOrder Order
-        {
-            get; set;
-        } = SortedOrder.Ascending;
+        public CacheOrder Order { get; set; } = CacheOrder.Ascending;
 
         /// <summary>
         /// Execute cache operation

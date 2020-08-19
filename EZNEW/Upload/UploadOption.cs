@@ -23,36 +23,24 @@ namespace EZNEW.Upload
         /// <summary>
         /// Gets or sets whether to use remote upload
         /// </summary>
-        public bool Remote
-        {
-            get; set;
-        }
+        public bool Remote { get; set; }
 
         /// <summary>
         /// Gets or sets file save path
         /// </summary>
-        public string SavePath
-        {
-            get; set;
-        }
+        public string SavePath { get; set; }
 
         /// <summary>
         /// Gets or sets whether save to content root folder
         /// default is true
         /// </summary>
-        public bool SaveToContentRoot
-        {
-            get; set;
-        } = true;
+        public bool SaveToContentRoot { get; set; } = true;
 
         /// <summary>
         /// Gets or sets upload content root folder path
         /// default value is 'wwwroot'
         /// </summary>
-        public string ContentRootPath
-        {
-            get; set;
-        } = UploadManager.DefaultContentFolder;
+        public string ContentRootPath { get; set; } = UploadManager.DefaultContentFolder;
 
         /// <summary>
         /// Gets or sets remote configs
@@ -74,10 +62,7 @@ namespace EZNEW.Upload
         /// Gets or sets upload server choice pattern
         /// default value is 'Random' pattern
         /// </summary>
-        public SelectMatchMode RemoteServerChoicePattern
-        {
-            get; set;
-        } = SelectMatchMode.EquiprobableRandom;
+        public SelectMatchMode RemoteServerChoicePattern { get; set; } = SelectMatchMode.EquiprobableRandom;
 
         /// <summary>
         /// Gets remote option

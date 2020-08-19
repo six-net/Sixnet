@@ -8,9 +8,6 @@
         /// <summary>
         /// Gets or sets the length of the list after the push operation.
         /// </summary>
-        public long NewListLength
-        {
-            get; set;
-        }
+        public long NewListLength { get; set; }
     }
 }

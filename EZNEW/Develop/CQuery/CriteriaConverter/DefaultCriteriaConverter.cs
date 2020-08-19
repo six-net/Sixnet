@@ -17,5 +17,14 @@ namespace EZNEW.Develop.CQuery.CriteriaConverter
         /// Gets or sets the data
         /// </summary>
         public object Data { get; set; }
+
+        /// <summary>
+        /// Clone a new converter
+        /// </summary>
+        /// <returns></returns>
+        public ICriteriaConverter Clone()
+        {
+            return MemberwiseClone() as ICriteriaConverter;
+        }
     }
 }

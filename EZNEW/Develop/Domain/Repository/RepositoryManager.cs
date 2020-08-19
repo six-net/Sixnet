@@ -17,7 +17,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns>Return the real query object to use</returns>
         internal static IQuery HandleQueryObjectBeforeExecute(IQuery query, QueryUsageScene usageScene, Func<IQuery, IQuery> queryHandler = null)
         {
-            var newQuery = query?.DeepCopy();
+            var newQuery = query?.Clone();
             if (queryHandler != null)
             {
                 newQuery = queryHandler(newQuery);

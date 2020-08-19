@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
+using System.Net.Http.Headers;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using EZNEW.DependencyInjection;
 using EZNEW.Mapper;
@@ -25,6 +28,14 @@ namespace System
             if (value == null)
             {
                 return new Dictionary<string, object>(0);
+            }
+            if (value is Dictionary<string, object> valueDict)
+            {
+                return valueDict;
+            }
+            if (value is IEnumerable<KeyValuePair<string, object>> keyValuePairs)
+            {
+                return keyValuePairs.ToDictionary(c => c.Key, c => c.Value);
             }
             PropertyDescriptorCollection nowPropertyCollection = TypeDescriptor.GetProperties(value);
             Dictionary<string, object> valueDictionary = new Dictionary<string, object>(nowPropertyCollection.Count);

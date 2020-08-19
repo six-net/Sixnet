@@ -71,6 +71,20 @@ namespace EZNEW.Develop.CQuery
         #region Functions
 
         /// <summary>
+        /// Copy a new IQueryItem
+        /// </summary>
+        /// <returns></returns>
+        public Criteria Clone()
+        {
+            return new Criteria(Name, Operator, Value)
+            {
+                Converter = Converter?.Clone(),
+                _calculateValue = _calculateValue,
+                _realValue = _realValue
+            };
+        }
+
+        /// <summary>
         /// Gets the real value
         /// </summary>
         /// <returns>Return the criteria real value</returns>

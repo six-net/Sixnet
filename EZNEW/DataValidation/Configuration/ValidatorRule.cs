@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System;
 
 namespace EZNEW.DataValidation.Configuration
 {
@@ -11,105 +12,73 @@ namespace EZNEW.DataValidation.Configuration
         /// Gets or sets the validate type
         /// </summary>
         [JsonProperty(PropertyName = "vtype")]
-        public ValidatorType ValidatorType
-        {
-            get; set;
-        }
+        public ValidatorType ValidatorType { get; set; }
 
         /// <summary>
         /// Gets or sets the operator
         /// </summary>
         [JsonProperty(PropertyName = "operator")]
-        public CompareOperator Operator
-        {
-            get; set;
-        }
+        public CompareOperator Operator { get; set; }
 
         /// <summary>
         /// Gets or sets the value
         /// </summary>
         [JsonProperty(PropertyName = "value")]
-        public dynamic Value
-        {
-            get; set;
-        }
+        public dynamic Value { get; set; }
 
         /// <summary>
         /// Gets or sets the enum type
         /// </summary>
         [JsonProperty(PropertyName = "enumType")]
-        public string EnumType
-        {
-            get; set;
-        }
+        public string EnumType { get; set; }
 
         /// <summary>
         /// Gets or sets the max value
         /// </summary>
         [JsonProperty(PropertyName = "maxValue")]
-        public dynamic MaxValue
-        {
-            get; set;
-        }
+        public dynamic MaxValue { get; set; }
 
         /// <summary>
         /// Gets or sets the min value
         /// </summary>
         [JsonProperty(PropertyName = "minValue")]
-        public dynamic MinValue
-        {
-            get; set;
-        }
+        public dynamic MinValue { get; set; }
 
         /// <summary>
         /// Gets or sets the lower boundary
         /// </summary>
         [JsonProperty(PropertyName = "lowerBoundary")]
-        public RangeBoundary LowerBoundary
-        {
-            get; set;
-        }
+        public RangeBoundary LowerBoundary { get; set; }
 
         /// <summary>
         /// Gets or sets the upper boundary
         /// </summary>
         [JsonProperty(PropertyName = "upperBoundary")]
-        public RangeBoundary UpperBoundary
-        {
-            get; set;
-        }
+        public RangeBoundary UpperBoundary { get; set; }
 
         /// <summary>
         /// Gets or sets the error message
         /// </summary>
         [JsonProperty(PropertyName = "errorMsg")]
-        public string ErrorMessage
-        {
-            get; set;
-        }
+        public string ErrorMessage { get; set; }
 
         /// <summary>
         /// Gets or sets the tip message
         /// </summary>
         [JsonProperty(PropertyName = "tipMsg")]
-        public bool TipMessage
-        {
-            get; set;
-        }
+        public bool TipMessage { get; set; }
 
         /// <summary>
         /// Gets or sets the compare type
         /// </summary>
         [JsonProperty(PropertyName = "compareType")]
-        public CompareObject CompareType
-        {
-            get; set;
-        }
+        public CompareObject CompareType { get; set; }
     }
 
     /// <summary>
     /// Defines compare object
     /// </summary>
+    [Serializable]
     public enum CompareObject
     {
         Field,

@@ -69,7 +69,7 @@ namespace EZNEW.Develop.Command
         /// <summary>
         /// Gets or sets the fields
         /// </summary>
-        List<string> Fields { get; set; }
+        IEnumerable<string> Fields { get; set; }
 
         /// <summary>
         /// Whether the command is obsolete
@@ -139,6 +139,16 @@ namespace EZNEW.Develop.Command
         void TriggerCallbackEvent(bool success);
 
         #endregion
+
+        #endregion
+
+        #region Clone
+
+        /// <summary>
+        /// Clone a ICommand object
+        /// </summary>
+        /// <returns></returns>
+        ICommand Clone();
 
         #endregion
 

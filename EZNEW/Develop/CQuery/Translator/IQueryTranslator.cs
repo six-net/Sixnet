@@ -1,7 +1,7 @@
 ﻿namespace EZNEW.Develop.CQuery.Translator
 {
     /// <summary>
-    /// query translator interace
+    /// Query translator contract
     /// </summary>
     public interface IQueryTranslator
     {
@@ -10,18 +10,12 @@
         /// <summary>
         /// Gets the object pet name
         /// </summary>
-        string ObjectPetName
-        {
-            get;
-        }
+        string ObjectPetName { get; }
 
         /// <summary>
         /// Gets or sets the parameter sequence
         /// </summary>
-        int ParameterSequence
-        {
-            get; set;
-        }
+        int ParameterSequence { get; set; }
 
         #endregion
 

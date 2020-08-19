@@ -12,10 +12,7 @@ namespace EZNEW.Cache.Server.Request
         /// <summary>
         /// Gets or sets the clear data databases
         /// </summary>
-        public List<CacheDatabase> Databases
-        {
-            get; set;
-        }
+        public List<CacheDatabase> Databases { get; set; }
 
         /// <summary>
         /// Execute cache operation

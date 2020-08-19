@@ -13,27 +13,12 @@ namespace EZNEW.Cache
         /// <summary>
         /// Gets or sets the cache object
         /// </summary>
-        public CacheObject CacheObject
-        {
-            get; set;
-        }
+        public CacheObject CacheObject { get; set; }
 
         /// <summary>
         /// Gets or sets the command flags
         /// </summary>
-        public CacheCommandFlags CommandFlags
-        {
-            get; set;
-        } = CacheCommandFlags.None;
-
-        /// <summary>
-        /// Gets or sets the cache entry expiration
-        /// When the specified cache item is not found, the cache item is created with the change expiration information 
-        /// </summary>
-        public CacheExpiration Expiration
-        {
-            get; set;
-        }
+        public CacheCommandFlags CommandFlags { get; set; } = CacheCommandFlags.None;
 
         /// <summary>
         /// Execute cache operation

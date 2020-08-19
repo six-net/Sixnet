@@ -8,9 +8,6 @@
         /// <summary>
         /// Gets or sets the bit value
         /// </summary>
-        public bool Bit
-        {
-            get; set;
-        }
+        public bool Bit { get; set; }
     }
 }

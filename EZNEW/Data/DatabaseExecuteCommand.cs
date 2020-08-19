@@ -11,42 +11,27 @@ namespace EZNEW.Data
         /// <summary>
         /// Gets or sets the command text
         /// </summary>
-        public string CommandText
-        {
-            get; set;
-        }
+        public string CommandText { get; set; }
 
         /// <summary>
         /// Gets or sets the commandType
         /// </summary>
-        public CommandType CommandType
-        {
-            get; set;
-        }
+        public CommandType CommandType { get; set; }
 
         /// <summary>
         /// Gets or sets the parameters
         /// </summary>
-        public CommandParameters Parameters
-        {
-            get; set;
-        }
+        public CommandParameters Parameters { get; set; }
 
         /// <summary>
         /// Gets or sets whether force return value
         /// </summary>
-        public bool ForceReturnValue
-        {
-            get; set;
-        }
+        public bool ForceReturnValue { get; set; }
 
         /// <summary>
         /// Gets or sets whether has pre script
         /// </summary>
-        public bool HasPreScript
-        {
-            get; set;
-        }
+        public bool HasPreScript { get; set; }
 
         /// <summary>
         /// Gets or sets whether perform alone

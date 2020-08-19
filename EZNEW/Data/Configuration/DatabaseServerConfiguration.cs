@@ -11,26 +11,17 @@ namespace EZNEW.Data.Configuration
         /// <summary>
         /// Gets or sets the database engine type full name
         /// </summary>
-        public string EngineFullTypeName
-        {
-            get; set;
-        }
+        public string EngineFullTypeName { get; set; }
 
         /// <summary>
         /// Gets or sets the entity configuration
         /// Key:entity type
         /// </summary>
-        public Dictionary<Type, DataEntityConfiguration> EntityConfigurations
-        {
-            get; set;
-        }
+        public Dictionary<Type, DataEntityConfiguration> EntityConfigurations { get; set; }
 
         /// <summary>
         /// Gets or sets the batch execute configuration
         /// </summary>
-        public BatchExecuteConfiguration BatchExecuteConfiguration
-        {
-            get; set;
-        }
+        public BatchExecuteConfiguration BatchExecuteConfiguration { get; set; }
     }
 }

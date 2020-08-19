@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using EZNEW.Cache.Command.Result;
 using EZNEW.Cache.Hash.Request;
@@ -282,7 +283,8 @@ namespace EZNEW.Cache
                             When=when,
                             Expiration = new CacheExpiration ()
                             {
-                                AbsoluteExpiration=absoluteExpiration
+                                AbsoluteExpiration=absoluteExpiration,
+                                SlidingExpiration=false
                             }
                         }
                     }
@@ -1348,14 +1350,14 @@ namespace EZNEW.Cache
 
             #endregion
 
-            #region Exists
+            #region Exist
 
             /// <summary>
             /// Check if the given field exists in the hash of the hash table
             /// </summary>
             /// <param name="hashExistsOption">Hash exists option</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<HashExistsResponse>> ExistsAsync(HashExistsOption hashExistsOption)
+            public static async Task<CacheResult<HashExistsResponse>> ExistAsync(HashExistsOption hashExistsOption)
             {
                 return await ExecuteCommandAsync(hashExistsOption).ConfigureAwait(false);
             }
@@ -1365,9 +1367,9 @@ namespace EZNEW.Cache
             /// </summary>
             /// <param name="hashExistsOption">Hash exists option</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<HashExistsResponse> Exists(HashExistsOption hashExistsOption)
+            public static CacheResult<HashExistsResponse> Exist(HashExistsOption hashExistsOption)
             {
-                return ExistsAsync(hashExistsOption).Result;
+                return ExistAsync(hashExistsOption).Result;
             }
 
             #endregion
@@ -2493,6 +2495,30 @@ namespace EZNEW.Cache
             }
 
             #endregion
+
+            #region Exist
+
+            /// <summary>
+            /// Check whether key exist
+            /// </summary>
+            /// <param name="existOption">Exist option</param>
+            /// <returns>Return cache result</returns>
+            public static async Task<CacheResult<ExistResponse>> ExistAsync(ExistOption existOption)
+            {
+                return await ExecuteCommandAsync(existOption).ConfigureAwait(false);
+            }
+
+            /// <summary>
+            /// Check whether key exist
+            /// </summary>
+            /// <param name="existOption">Exist option</param>
+            /// <returns>Return cache result</returns>
+            public static CacheResult<ExistResponse> Exist(ExistOption existOption)
+            {
+                return ExistAsync(existOption).Result;
+            }
+
+            #endregion
         }
 
         #endregion
@@ -2653,7 +2679,7 @@ namespace EZNEW.Cache
             /// <param name="server"> server information </param>
             /// <param name="saveServerConfigurationOption"> Save server configuration option </param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<SaveServerConfigurationResponse> SaveServerConfig(CacheServer server, SaveServerConfigurationOption saveServerConfigOption)
+            public static CacheResult<SaveServerConfigurationResponse> SaveServerConfiguration(CacheServer server, SaveServerConfigurationOption saveServerConfigOption)
             {
                 return SaveServerConfigurationAsync(server, saveServerConfigOption).Result;
             }
@@ -2709,6 +2735,11 @@ namespace EZNEW.Cache
             /// Gets or sets the name&value split word
             /// </summary>
             public static string NameValueSplitWord = "$";
+
+            /// <summary>
+            /// Gets or sets the cache default encoding
+            /// </summary>
+            public static Encoding DefaultEncoding = Encoding.UTF8;
 
             #endregion
 

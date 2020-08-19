@@ -21,75 +21,47 @@ namespace EZNEW.Develop.UnitOfWork
         /// <summary>
         /// Gets or sets the record id
         /// </summary>
-        public int Id
-        {
-            get; set;
-        }
+        public int Id { get; set; }
 
         /// <summary>
         /// Gets or sets the parent record
         /// </summary>
-        public IActivationRecord ParentRecord
-        {
-            get;
-            set;
-        }
+        public IActivationRecord ParentRecord { get; set; }
 
         /// <summary>
         /// Gets or sets the activation operation
         /// </summary>
-        public ActivationOperation Operation
-        {
-            get; set;
-        }
+        public ActivationOperation Operation { get; set; }
 
         /// <summary>
         /// Gets or sets the identity value
         /// </summary>
-        public string IdentityValue
-        {
-            get; set;
-        }
+        public string IdentityValue { get; set; }
 
         /// <summary>
         /// Gets or sets the query object
         /// </summary>
-        public IQuery Query
-        {
-            get; set;
-        }
+        public IQuery Query { get; set; }
 
         /// <summary>
         /// Gets or sets the modify expression
         /// </summary>
-        public IModify ModifyExpression
-        {
-            get; set;
-        }
+        public IModify ModifyExpression { get; set; }
 
         /// <summary>
         /// Gets or sets follow records
         /// </summary>
-        private List<IActivationRecord> FollowRecords
-        {
-            get; set;
-        }
+        private List<IActivationRecord> FollowRecords { get; set; }
 
         /// <summary>
         /// Gets or sets the data access service
         /// </summary>
-        public Type DataAccessService
-        {
-            get; set;
-        }
+        public Type DataAccessService { get; set; }
 
         /// <summary>
         /// Gets or sets the entity type
         /// </summary>
-        public Type EntityType
-        {
-            get; set;
-        }
+        public Type EntityType { get; set; }
 
         /// <summary>
         /// Gets whether the record is obsolete
@@ -99,22 +71,14 @@ namespace EZNEW.Develop.UnitOfWork
         /// <summary>
         /// Gets the record identity
         /// </summary>
-        public string RecordIdentity
-        {
-            get; private set;
-        }
+        public string RecordIdentity { get; private set; }
 
         /// <summary>
         /// Gets the activation option
         /// </summary>
-        public ActivationOption ActivationOption
-        {
-            get;
-            private set;
-        }
+        public ActivationOption ActivationOption { get; private set; }
 
-        private DefaultActivationRecord()
-        { }
+        private DefaultActivationRecord() { }
 
         /// <summary>
         /// Create a activation record
@@ -132,7 +96,7 @@ namespace EZNEW.Develop.UnitOfWork
                 DataAccessService = typeof(TDataAccess),
                 EntityType = typeof(TEntity)
             };
-            activationOption = activationOption ?? ActivationOption.Default;
+            activationOption ??= ActivationOption.Default;
             record.ActivationOption = activationOption;
             if (activationOption.ForceExecute)
             {
@@ -241,10 +205,7 @@ namespace EZNEW.Develop.UnitOfWork
             {
                 return;
             }
-            if (FollowRecords == null)
-            {
-                FollowRecords = new List<IActivationRecord>(0);
-            }
+            FollowRecords ??= new List<IActivationRecord>(0);
             foreach (var childRecord in records)
             {
                 childRecord.ParentRecord = this;
@@ -300,15 +261,15 @@ namespace EZNEW.Develop.UnitOfWork
             {
                 return null;
             }
-            var dalService = ContainerManager.Resolve<TDataAccess>();
+            var dataAccessService = ContainerManager.Resolve<TDataAccess>();
             if (dataPackage.LifeSource == DataLifeSource.New) //new add value
             {
-                return dalService.Add(dataPackage.WarehouseData);
+                return dataAccessService.Add(dataPackage.WarehouseData);
             }
             else if (dataPackage.HasValueChanged) // update value
             {
                 var data = dataPackage.WarehouseData;
-                return dalService.Modify(data, dataPackage.PersistentData);
+                return dataAccessService.Modify(data, dataPackage.PersistentData);
             }
             return null;
         }
@@ -328,9 +289,9 @@ namespace EZNEW.Develop.UnitOfWork
             {
                 return null;
             }
-            var dalService = ContainerManager.Resolve<TDataAccess>();
+            var dataAccessService = ContainerManager.Resolve<TDataAccess>();
             var data = dataPackage.WarehouseData;
-            return dalService.Delete(data);
+            return dataAccessService.Delete(data);
         }
 
         /// <summary>
@@ -339,8 +300,8 @@ namespace EZNEW.Develop.UnitOfWork
         /// <returns>Return the record command</returns>
         ICommand GetRemoveConditionCommand()
         {
-            var dalService = ContainerManager.Resolve<TDataAccess>();
-            return dalService.Delete(Query);
+            var dataAccessService = ContainerManager.Resolve<TDataAccess>();
+            return dataAccessService.Delete(Query);
         }
 
         /// <summary>
@@ -349,8 +310,8 @@ namespace EZNEW.Develop.UnitOfWork
         /// <returns>Return the record command</returns>
         ICommand GetModifyExpressionCommand()
         {
-            var dalService = ContainerManager.Resolve<TDataAccess>();
-            return dalService.Modify(ModifyExpression, Query);
+            var dataAccessService = ContainerManager.Resolve<TDataAccess>();
+            return dataAccessService.Modify(ModifyExpression, Query);
         }
 
         /// <summary>

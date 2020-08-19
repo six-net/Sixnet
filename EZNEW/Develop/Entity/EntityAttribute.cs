@@ -13,26 +13,17 @@ namespace EZNEW.Develop.Entity
         /// <summary>
         /// Gets or sets the entity object name
         /// </summary>
-        public string ObjectName
-        {
-            get; set;
-        }
+        public string ObjectName { get; set; }
 
         /// <summary>
         /// Gets or sets the entity description
         /// </summary>
-        public string Description
-        {
-            get; set;
-        }
+        public string Description { get; set; }
 
         /// <summary>
         /// Gets or sets the entity group
         /// </summary>
-        public string Group
-        {
-            get; set;
-        }
+        public string Group { get; set; }
 
         #endregion
 

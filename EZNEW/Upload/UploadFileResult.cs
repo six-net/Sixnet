@@ -23,28 +23,17 @@ namespace EZNEW.Upload
         /// <summary>
         /// Gets or sets the file suffix
         /// </summary>
-        public string Suffix
-        {
-            get;
-            set;
-        }
+        public string Suffix { get; set; }
 
         /// <summary>
         /// Gets or sets the original file name
         /// </summary>
-        public string OriginalFileName
-        {
-            get; set;
-        }
+        public string OriginalFileName { get; set; }
 
         /// <summary>
         /// Gets or sets the file name
         /// </summary>
-        public string FileName
-        {
-            get;
-            set;
-        }
+        public string FileName { get; set; }
 
         /// <summary>
         /// Gets or sets the relative path
@@ -79,18 +68,12 @@ namespace EZNEW.Upload
         /// <summary>
         /// Gets or sets the upload date
         /// </summary>
-        public DateTimeOffset UploadDate
-        {
-            get; set;
-        }
+        public DateTimeOffset UploadDate { get; set; }
 
         /// <summary>
         /// Gets or sets the upload location
         /// </summary>
-        public UploadTarget Target
-        {
-            get; set;
-        }
+        public UploadTarget Target { get; set; }
 
         #endregion
     }

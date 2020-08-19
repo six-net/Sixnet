@@ -8,9 +8,6 @@
         /// <summary>
         /// Gets or sets the new set length
         /// </summary>
-        public long NewSetLength
-        {
-            get; set;
-        }
+        public long NewSetLength { get; set; }
     }
 }

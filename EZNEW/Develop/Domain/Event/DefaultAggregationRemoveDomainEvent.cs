@@ -11,9 +11,6 @@ namespace EZNEW.Develop.Domain.Event
         /// <summary>
         /// Gets or sets the remove object
         /// </summary>
-        public T Object
-        {
-            get; set;
-        }
+        public T Object { get; set; }
     }
 }

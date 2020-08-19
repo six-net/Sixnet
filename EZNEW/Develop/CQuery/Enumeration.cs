@@ -87,6 +87,18 @@ namespace EZNEW.Develop.CQuery
     }
 
     /// <summary>
+    /// Defines combine type
+    /// </summary>
+    [Serializable]
+    public enum CombineType
+    {
+        UnionAll,
+        Union,
+        Except,
+        Intersect
+    }
+
+    /// <summary>
     /// Defines condition source type
     /// </summary>
     [Serializable]

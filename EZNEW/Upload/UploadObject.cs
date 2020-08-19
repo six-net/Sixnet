@@ -11,17 +11,11 @@ namespace EZNEW.Upload
         /// <summary>
         /// Gets or sets upload object name
         /// </summary>
-        public string Name
-        {
-            get; set;
-        }
+        public string Name { get; set; }
 
         /// <summary>
         /// Gets or sets upload option
         /// </summary>
-        public UploadOption UploadOption
-        {
-            get; set;
-        }
+        public UploadOption UploadOption { get; set; }
     }
 }

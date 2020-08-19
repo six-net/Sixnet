@@ -11,18 +11,12 @@ namespace EZNEW.Develop.Entity
         /// <summary>
         /// Gets or sets the relation type
         /// </summary>
-        public Type RelationType
-        {
-            get; set;
-        }
+        public Type RelationType { get; set; }
 
         /// <summary>
         /// Gets or sets the relation field
         /// </summary>
-        public string RelationField
-        {
-            get; set;
-        }
+        public string RelationField { get; set; }
 
         /// <summary>
         /// Initialize entity relation

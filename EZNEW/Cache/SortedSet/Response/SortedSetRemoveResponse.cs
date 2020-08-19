@@ -8,9 +8,6 @@
         /// <summary>
         /// Gets or sets the remove count
         /// </summary>
-        public long RemoveCount
-        {
-            get; set;
-        }
+        public long RemoveCount { get; set; }
     }
 }

@@ -14,74 +14,57 @@ namespace EZNEW.Develop.CQuery.Translator
         /// <summary>
         /// Gets or sets the order string
         /// </summary>
-        public string OrderString
-        {
-            get; set;
-        }
+        public string OrderString { get; set; }
 
         /// <summary>
         /// Gets or sets the condition string
         /// </summary>
-        public string ConditionString
-        {
-            get; set;
-        }
+        public string ConditionString { get; set; }
 
         /// <summary>
         /// Gets or sets the parameters
         /// </summary>
-        public object Parameters
-        {
-            get; set;
-        }
+        public object Parameters { get; set; }
 
         /// <summary>
         /// Gets or sets the pre script
         /// </summary>
-        public string PreScript
-        {
-            get; set;
-        }
+        public string PreScript { get; set; }
 
         /// <summary>
         /// Gets or sets the join value
         /// </summary>
-        public string JoinScript
-        {
-            get; set;
-        }
+        public string JoinScript { get; set; }
 
         /// <summary>
         /// Gets or sets whether allow join
         /// </summary>
-        public bool AllowJoin
-        {
-            get; set;
-        }
+        public bool AllowJoin { get; set; }
 
         /// <summary>
         /// Gets or sets the with scripts
         /// </summary>
-        public List<string> WithScripts
-        {
-            get; set;
-        }
+        public List<string> WithScripts { get; set; }
 
         /// <summary>
         /// Gets or sets the recurve object name
         /// </summary>
-        public string RecurveObjectName
-        {
-            get; set;
-        }
+        public string RecurveObjectName { get; set; }
 
         /// <summary>
         /// Gets or sets the recurve pet name
         /// </summary>
-        public string RecurvePetName
-        {
-            get; set;
-        }
+        public string RecurvePetName { get; set; }
+
+        /// <summary>
+        /// Combine script
+        /// </summary>
+        public string CombineScript { get; set; }
+
+        /// <summary>
+        /// Join extra condition strinng
+        /// </summary>
+        public string JoinExtraConditionString { get; set; }
 
         #endregion
 

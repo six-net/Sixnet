@@ -40,18 +40,12 @@ namespace EZNEW.ValueType
         /// <summary>
         /// Gets or sets value factory
         /// </summary>
-        protected Func<T> ValueFactory
-        {
-            get; set;
-        }
+        protected Func<T> ValueFactory { get; set; }
 
         /// <summary>
         /// Gets or sets whether value is created
         /// </summary>
-        protected bool IsCreatedValue
-        {
-            get; set;
-        }
+        protected bool IsCreatedValue { get; set; }
 
         /// <summary>
         /// Gets the current value

@@ -8,9 +8,6 @@
         /// <summary>
         /// Gets or sets the length
         /// </summary>
-        public long Length
-        {
-            get; set;
-        }
+        public long Length { get; set; }
     }
 }

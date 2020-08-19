@@ -8,9 +8,6 @@
         /// <summary>
         /// Gets or sets the server configuration
         /// </summary>
-        public CacheServerConfiguration ServerConfiguration
-        {
-            get; set;
-        }
+        public CacheServerConfiguration ServerConfiguration { get; set; }
     }
 }

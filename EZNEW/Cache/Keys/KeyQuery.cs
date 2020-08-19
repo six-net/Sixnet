@@ -8,17 +8,11 @@
         /// <summary>
         /// Gets or sets the mate key
         /// </summary>
-        public string MateKey
-        {
-            get; set;
-        }
+        public string MateKey { get; set; }
 
         /// <summary>
         /// Gets or sets the key pattern type
         /// </summary>
-        public PatternType Type
-        {
-            get;set;
-        }
+        public PatternType Type { get; set; }
     }
 }

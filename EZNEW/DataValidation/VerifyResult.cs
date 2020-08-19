@@ -13,26 +13,17 @@ namespace EZNEW.DataValidation
         /// <summary>
         /// Gets or sets whether verify successful
         /// </summary>
-        public bool Success
-        {
-            get; set;
-        }
+        public bool Success { get; set; }
 
         /// <summary>
         /// Gets or sets the error message
         /// </summary>
-        public string ErrorMessage
-        {
-            get; set;
-        }
+        public string ErrorMessage { get; set; }
 
         /// <summary>
         /// Gets or sets the field name
         /// </summary>
-        public string FieldName
-        {
-            get; set;
-        }
+        public string FieldName { get; set; }
 
         #endregion
 

@@ -12,10 +12,7 @@ namespace EZNEW.Develop.Domain.Event
         /// <summary>
         /// Gets or sets the execute event operation
         /// </summary>
-        public Func<TEvent, DomainEventExecuteResult> ExecuteEventOperation
-        {
-            get; set;
-        }
+        public Func<TEvent, DomainEventExecuteResult> ExecuteEventOperation { get; set; }
 
         /// <summary>
         /// Execute domain event
@@ -28,7 +25,7 @@ namespace EZNEW.Develop.Domain.Event
             {
                 return DomainEventExecuteResult.EmptyResult("Did't set any event operation");
             }
-            var eventData = domainEvent as TEvent;
+            TEvent eventData = domainEvent as TEvent;
             if (eventData == null)
             {
                 return DomainEventExecuteResult.EmptyResult("Event data is null");

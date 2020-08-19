@@ -8,9 +8,6 @@
         /// <summary>
         /// Gets or sets the hash value
         /// </summary>
-        public dynamic Value
-        {
-            get; set;
-        }
+        public dynamic Value { get; set; }
     }
 }

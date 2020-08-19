@@ -16,20 +16,12 @@ namespace EZNEW.Email
         /// <summary>
         /// Gets or sets whether the email send successful
         /// </summary>
-        public bool Success
-        {
-            get;
-            set;
-        }
+        public bool Success { get; set; }
 
         /// <summary>
         /// Gets or sets the result message
         /// </summary>
-        public string Message
-        {
-            get;
-            set;
-        }
+        public string Message { get; set; }
 
         /// <summary>
         /// Gets or sets the exception
@@ -39,10 +31,7 @@ namespace EZNEW.Email
         /// <summary>
         /// Gets or sets the send info
         /// </summary>
-        public EmailSendInfo SendInfo
-        {
-            get; set;
-        }
+        public EmailSendInfo SendInfo { get; set; }
 
         /// <summary>
         /// Get a fail result

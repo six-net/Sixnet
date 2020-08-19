@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using EZNEW.Cache.Hash.Response;
 
 namespace EZNEW.Cache.Hash.Request
@@ -11,18 +12,12 @@ namespace EZNEW.Cache.Hash.Request
         /// <summary>
         /// Gets or sets the cache key
         /// </summary>
-        public CacheKey Key
-        {
-            get; set;
-        }
+        public CacheKey Key { get; set; }
 
         /// <summary>
-        /// Gets or sets the hash field
+        /// Gets or sets the hash fields
         /// </summary>
-        public string HashField
-        {
-            get; set;
-        }
+        public List<string> HashFields { get; set; }
 
         /// <summary>
         /// Execute cache operation

@@ -40,9 +40,9 @@ namespace EZNEW.Cache
     }
 
     /// <summary>
-    /// Defines set operation type
+    /// Defines combine operation
     /// </summary>
-    public enum SetOperationType
+    public enum CombineOperation
     {
         Union = 0,
         Intersect = 1,
@@ -50,9 +50,9 @@ namespace EZNEW.Cache
     }
 
     /// <summary>
-    /// Defines sorted set exclude
+    /// Defines boundary exclude type
     /// </summary>
-    public enum SortedSetExclude
+    public enum BoundaryExclude
     {
         None = 0,
         Start = 1,
@@ -61,9 +61,9 @@ namespace EZNEW.Cache
     }
 
     /// <summary>
-    /// Defines sorted order
+    /// Defines cache order
     /// </summary>
-    public enum SortedOrder
+    public enum CacheOrder
     {
         Ascending = 0,
         Descending = 1
@@ -74,6 +74,7 @@ namespace EZNEW.Cache
     /// </summary>
     public enum CacheKeyType
     {
+        Unknown = 0,
         String = 1,
         Hash = 2,
         List = 3,
@@ -158,16 +159,6 @@ namespace EZNEW.Cache
     {
         Numeric = 0,
         Alphabetic = 1
-    }
-
-    /// <summary>
-    /// Defines cache migrate options
-    /// </summary>
-    public enum CacheMigrateOptions
-    {
-        None = 0,
-        Copy = 1,
-        Replace = 2
     }
 
     /// <summary>

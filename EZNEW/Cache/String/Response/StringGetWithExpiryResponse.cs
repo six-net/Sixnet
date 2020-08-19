@@ -10,17 +10,11 @@ namespace EZNEW.Cache.String.Response
         /// <summary>
         /// Gets or sets the value
         /// </summary>
-        public string Value
-        {
-            get; set;
-        }
+        public string Value { get; set; }
 
         /// <summary>
         /// Gets or sets the expiry time
         /// </summary>
-        public TimeSpan? Expiry
-        {
-            get; set;
-        }
+        public TimeSpan? Expiry { get; set; }
     }
 }

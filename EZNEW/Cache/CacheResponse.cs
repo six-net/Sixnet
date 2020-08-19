@@ -13,38 +13,22 @@ namespace EZNEW.Cache
         /// <summary>
         /// Gets or sets whether is successful
         /// </summary>
-        public bool Success
-        {
-            get;
-            set;
-        }
+        public bool Success { get; set; }
 
         /// <summary>
         /// Gets or sets the message
         /// </summary>
-        public string Message
-        {
-            get;
-            set;
-        }
+        public string Message { get; set; }
 
         /// <summary>
         /// Gets or sets the response code
         /// </summary>
-        public string Code
-        {
-            get;
-            set;
-        }
+        public string Code { get; set; }
 
         /// <summary>
         /// Gets or sets the inner responsees
         /// </summary>
-        public List<CacheResponse> InnerResponses
-        {
-            get;
-            protected set;
-        }
+        public List<CacheResponse> InnerResponses { get; protected set; }
 
         #endregion
 

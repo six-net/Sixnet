@@ -27,12 +27,12 @@ namespace EZNEW.Develop.Domain.Aggregation
         /// <summary>
         /// Whether enable lazy load
         /// </summary>
-        protected bool loadLazyMember = true;
+        //protected bool loadLazyMember = true;
 
         /// <summary>
         /// Allow load data properties
         /// </summary>
-        protected Dictionary<string, bool> allowLoadPropertyDictionary = new Dictionary<string, bool>();
+        //protected Dictionary<string, bool> allowLoadProperties = new Dictionary<string, bool>();
 
         /// <summary>
         /// The repository object
@@ -73,32 +73,12 @@ namespace EZNEW.Develop.Domain.Aggregation
         /// <summary>
         /// Gets whether allow lazy data load
         /// </summary>
-        protected bool LoadLazyMember
-        {
-            get
-            {
-                return loadLazyMember;
-            }
-            set
-            {
-                loadLazyMember = value;
-            }
-        }
+        protected bool LoadLazyMember { get; set; } = true;
 
         /// <summary>
         /// Gets all of the properties allow to load data
         /// </summary>
-        protected Dictionary<string, bool> LoadProperties
-        {
-            get
-            {
-                return allowLoadPropertyDictionary;
-            }
-            set
-            {
-                allowLoadPropertyDictionary = value;
-            }
-        }
+        protected Dictionary<string, bool> LoadProperties { get; set; } = new Dictionary<string, bool>();
 
         /// <summary>
         /// Gets the identity value
@@ -202,10 +182,10 @@ namespace EZNEW.Develop.Domain.Aggregation
             {
                 return;
             }
-            allowLoadPropertyDictionary = allowLoadPropertyDictionary ?? new Dictionary<string, bool>();
+            LoadProperties ??= new Dictionary<string, bool>();
             foreach (var property in loadProperties)
             {
-                allowLoadPropertyDictionary[property.Key] = property.Value;
+                LoadProperties[property.Key] = property.Value;
             }
         }
 
@@ -232,7 +212,7 @@ namespace EZNEW.Develop.Domain.Aggregation
         /// </summary>
         public virtual void CloseLazyMemberLoad()
         {
-            loadLazyMember = false;
+            LoadLazyMember = false;
         }
 
         /// <summary>
@@ -240,7 +220,7 @@ namespace EZNEW.Develop.Domain.Aggregation
         /// </summary>
         public virtual void OpenLazyMemberLoad()
         {
-            loadLazyMember = true;
+            LoadLazyMember = true;
         }
 
         /// <summary>
@@ -250,17 +230,17 @@ namespace EZNEW.Develop.Domain.Aggregation
         /// <returns>Return wheather property allow load data</returns>
         protected virtual bool AllowLazyLoad(string property)
         {
-            if (!loadLazyMember || allowLoadPropertyDictionary == null || !allowLoadPropertyDictionary.ContainsKey(property))
+            if (!LoadLazyMember || LoadProperties == null || !LoadProperties.ContainsKey(property))
             {
                 return false;
             }
-            return allowLoadPropertyDictionary[property];
+            return LoadProperties[property];
         }
 
         /// <summary>
         /// Check property whether allow to lazy load
         /// </summary>
-        /// <param name="property">property</param>
+        /// <param name="property">Property</param>
         /// <returns>Return wheather property allow load data</returns>
         protected virtual bool AllowLazyLoad(Expression<Func<T, dynamic>> property)
         {
@@ -341,11 +321,7 @@ namespace EZNEW.Develop.Domain.Aggregation
         /// <returns></returns>
         public virtual bool Equals(T data)
         {
-            if (data == null)
-            {
-                return false;
-            }
-            return data.IdentityValue == IdentityValue;
+            return data?.IdentityValue == IdentityValue;
         }
 
         /// <summary>

@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Newtonsoft.Json;
 using EZNEW.Develop.CQuery;
+using EZNEW.Reflection;
 
 namespace EZNEW.DataValidation.Configuration
 {
@@ -90,7 +91,7 @@ namespace EZNEW.DataValidation.Configuration
                         }
                     }
                     Type funcType = typeof(Func<,>).MakeGenericType(modelType, typeof(object));//function type
-                    var genericLambdaMethod = QueryManager.LambdaMethod.MakeGenericMethod(funcType);
+                    var genericLambdaMethod = ReflectionManager.Expression.LambdaMethod.MakeGenericMethod(funcType);
                     var lambdaExpression = genericLambdaMethod.Invoke(null, new object[]
                     {
                         Expression.Convert(propertyExpress,typeof(object)),parameterArray

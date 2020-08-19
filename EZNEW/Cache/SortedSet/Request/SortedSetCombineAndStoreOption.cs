@@ -12,42 +12,33 @@ namespace EZNEW.Cache.SortedSet.Request
         /// <summary>
         /// Gets or sets the source keys
         /// </summary>
-        public List<CacheKey> SourceKeys
-        {
-            get; set;
-        }
+        public List<CacheKey> SourceKeys { get; set; }
 
         /// <summary>
         /// gets or sets the destination key
         /// </summary>
-        public CacheKey DestinationKey
-        {
-            get; set;
-        }
+        public CacheKey DestinationKey { get; set; }
 
         /// <summary>
         /// Gets or sets the set operation
         /// </summary>
-        public SetOperationType SetOperationType
-        {
-            get; set;
-        } = SetOperationType.Union;
+        public CombineOperation CombineOperation { get; set; } = CombineOperation.Union;
 
         /// <summary>
         /// Gets or sets the weights
         /// </summary>
-        public double[] Weights
-        {
-            get; set;
-        }
+        public double[] Weights { get; set; }
 
         /// <summary>
         /// Gets or sets the set aggregate
         /// </summary>
-        public SetAggregate Aggregate
-        {
-            get; set;
-        } = SetAggregate.Sum;
+        public SetAggregate Aggregate { get; set; } = SetAggregate.Sum;
+
+        /// <summary>
+        /// Gets or sets the cache entry expiration
+        /// When the specified cache item is not found, the cache item is created with the change expiration information 
+        /// </summary>
+        public CacheExpiration Expiration { get; set; }
 
         /// <summary>
         /// Execute cache operation

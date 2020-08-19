@@ -8,9 +8,6 @@
         /// <summary>
         /// Gets or sets whether contains value
         /// </summary>
-        public bool ContainsValue
-        {
-            get; set;
-        }
+        public bool ContainsValue { get; set; }
     }
 }

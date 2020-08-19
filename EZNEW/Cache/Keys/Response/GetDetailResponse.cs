@@ -8,9 +8,6 @@
         /// <summary>
         /// Gets or sets the cache entry
         /// </summary>
-        public CacheEntry CacheEntry
-        {
-            get; set;
-        }
+        public CacheEntry CacheEntry { get; set; }
     }
 }

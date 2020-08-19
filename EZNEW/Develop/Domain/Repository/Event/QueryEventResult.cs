@@ -11,9 +11,6 @@ namespace EZNEW.Develop.Domain.Repository.Event
         /// <summary>
         /// Gets or sets the datas
         /// </summary>
-        public List<T> Datas
-        {
-            get; set;
-        }
+        public List<T> Datas { get; set; }
     }
 }

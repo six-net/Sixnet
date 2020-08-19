@@ -15,7 +15,7 @@ namespace EZNEW.ExpressionUtil
         /// <summary>
         /// //Properties or fields access functions
         /// </summary>
-        static ConcurrentDictionary<string, dynamic> PropertyOrFieldAccessFunctions = new ConcurrentDictionary<string, dynamic>();
+        static readonly ConcurrentDictionary<string, dynamic> PropertyOrFieldAccessFunctions = new ConcurrentDictionary<string, dynamic>();
 
         /// <summary>
         /// Expression base type

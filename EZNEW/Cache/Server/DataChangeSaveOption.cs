@@ -8,17 +8,11 @@
         /// <summary>
         /// Gets or sets the time（seconds）
         /// </summary>
-        public long Seconds
-        {
-            get; set;
-        }
+        public long Seconds { get; set; }
 
         /// <summary>
         /// Gets or sets the changes number
         /// </summary>
-        public long Changes
-        {
-            get; set;
-        }
+        public long Changes { get; set; }
     }
 }

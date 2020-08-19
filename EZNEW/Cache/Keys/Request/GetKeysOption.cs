@@ -11,10 +11,7 @@ namespace EZNEW.Cache.Keys.Request
         /// <summary>
         /// Gets or sets the query condition
         /// </summary>
-        public KeyQuery Query
-        {
-            get; set;
-        }
+        public KeyQuery Query { get; set; }
 
         /// <summary>
         /// Execute cache operation

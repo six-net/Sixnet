@@ -46,7 +46,7 @@ namespace EZNEW.Develop.DataAccess
         /// <returns>Return modify command</returns>
         protected override ICommand ExecuteModifyData(Dictionary<string, dynamic> originalValues, Dictionary<string, dynamic> newValues, IQuery query)
         {
-            return Update(newValues.Keys.ToList(), newValues, query);
+            return Update(newValues.Keys, newValues, query);
         }
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace EZNEW.Develop.DataAccess
         {
             var cmd = RdbCommand.CreateNewCommand<TEntity>(OperateType.Update);
             SetCommand(cmd, parameters as Dictionary<string, dynamic>);
-            cmd.Fields = fields.ToList();
+            cmd.Fields = fields;
             cmd.Parameters = parameters;
             cmd.MustReturnValueOnSuccess = query?.MustReturnValueOnSuccess ?? false;
             cmd.Query = query;
@@ -266,16 +266,15 @@ namespace EZNEW.Develop.DataAccess
             {
                 return;
             }
-            List<string> primaryKeys = new List<string>(primaryFields.Count);
-            Dictionary<string, dynamic> primaryValues = new Dictionary<string, dynamic>(primaryFields.Count);
+            List<string> primaryKeys = new List<string>();
+            Dictionary<string, dynamic> primaryValues = new Dictionary<string, dynamic>();
             foreach (var field in primaryFields)
             {
-                string primaryKey = field.PropertyName;
-                primaryKeys.Add(primaryKey);
+                primaryKeys.Add(field);
                 dynamic value = null;
-                if (values?.TryGetValue(primaryKey, out value) ?? false)
+                if (values?.TryGetValue(field, out value) ?? false)
                 {
-                    primaryValues.Add(primaryKey, value);
+                    primaryValues.Add(field, value);
                 }
             }
             command.ObjectKeys = primaryKeys;

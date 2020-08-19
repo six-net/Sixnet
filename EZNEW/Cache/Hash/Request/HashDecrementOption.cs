@@ -11,26 +11,23 @@ namespace EZNEW.Cache.Hash.Request
         /// <summary>
         /// Gets or sets the key
         /// </summary>
-        public CacheKey Key
-        {
-            get; set;
-        }
+        public CacheKey Key { get; set; }
 
         /// <summary>
         /// Gets or sets the hash field
         /// </summary>
-        public string HashField
-        {
-            get; set;
-        }
+        public string HashField { get; set; }
 
         /// <summary>
         /// Gets or sets the decrement value
         /// </summary>
-        public dynamic DecrementValue
-        {
-            get; set;
-        }
+        public dynamic DecrementValue { get; set; }
+
+        /// <summary>
+        /// Gets or sets the cache entry expiration
+        /// When the specified cache item is not found, the cache item is created with the change expiration information 
+        /// </summary>
+        public CacheExpiration Expiration { get; set; }
 
         /// <summary>
         /// Execute cache operation

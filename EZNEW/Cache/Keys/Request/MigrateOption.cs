@@ -11,34 +11,27 @@ namespace EZNEW.Cache.Keys.Request
         /// <summary>
         /// Gets or sets the cache key
         /// </summary>
-        public CacheKey Key
-        {
-            get; set;
-        }
+        public CacheKey Key { get; set; }
 
         /// <summary>
         /// Gets or sets the destination server
         /// </summary>
-        public CacheServer DestinationServer
-        {
-            get; set;
-        }
+        public CacheServer DestinationServer { get; set; }
 
         /// <summary>
         /// Gets or sets the time out milliseconds
         /// </summary>
-        public int TimeOutMilliseconds
-        {
-            get; set;
-        }
+        public int TimeOutMilliseconds { get; set; }
 
         /// <summary>
-        /// Gets or sets the migrate options
+        /// Gets or sets whether migrate by copy
         /// </summary>
-        public CacheMigrateOptions MigrateOptions
-        {
-            get; set;
-        } = CacheMigrateOptions.None;
+        public bool CopyCurrent { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether migrate by replace
+        /// </summary>
+        public bool ReplaceDestination { get; set; } = true;
 
         /// <summary>
         /// Execute cache operation

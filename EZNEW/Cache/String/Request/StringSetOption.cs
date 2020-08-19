@@ -12,10 +12,7 @@ namespace EZNEW.Cache.String.Request
         /// <summary>
         /// Gets or sets the data items
         /// </summary>
-        public List<CacheEntry> Items
-        {
-            get; set;
-        }
+        public List<CacheEntry> Items { get; set; }
 
         /// <summary>
         /// Execute cache operation

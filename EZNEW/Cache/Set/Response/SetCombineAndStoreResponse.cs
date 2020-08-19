@@ -8,9 +8,6 @@
         /// <summary>
         /// Gets or sets the the number of elements in the resulting set.
         /// </summary>
-        public long Count
-        {
-            get; set;
-        }
+        public long Count { get; set; }
     }
 }

@@ -8,9 +8,6 @@
         /// <summary>
         /// Gets or sets the byte values
         /// </summary>
-        public byte[] ByteValues
-        {
-            get; set;
-        }
+        public byte[] ByteValues { get; set; }
     }
 }

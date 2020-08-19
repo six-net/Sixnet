@@ -23,6 +23,7 @@ namespace EZNEW.Develop.Domain.Repository
     public abstract class DefaultAggregationRepository<TModel, TEntity, TDataAccess> : DefaultAggregationRootRepository<TModel> where TModel : IAggregationRoot<TModel> where TEntity : BaseEntity<TEntity>, new() where TDataAccess : IDataAccess<TEntity>
     {
         protected IRepositoryWarehouse<TEntity, TDataAccess> repositoryWarehouse = ContainerManager.Resolve<IRepositoryWarehouse<TEntity, TDataAccess>>();
+        
         static readonly Type entityType = typeof(TEntity);
 
         static DefaultAggregationRepository()

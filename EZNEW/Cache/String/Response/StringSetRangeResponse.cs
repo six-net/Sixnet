@@ -8,9 +8,6 @@
         /// <summary>
         /// Gets or sets the value length after modified
         /// </summary>
-        public long NewValueLength
-        {
-            get; set;
-        }
+        public long NewValueLength { get; set; }
     }
 }

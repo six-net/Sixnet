@@ -8,98 +8,86 @@ namespace EZNEW.Develop.Entity
     /// </summary>
     public class EntityConfiguration
     {
-        #region Properties
+        /// <summary>
+        /// Gets or sets the entity type
+        /// </summary>
+        public Type EntityType { get; set; }
 
         /// <summary>
         /// Gets or sets the table name
         /// </summary>
-        public string TableName
-        {
-            get; set;
-        }
+        public string TableName { get; set; }
 
         /// <summary>
-        /// Gets or sets all fields
+        /// Gets or sets the comment
         /// </summary>
-        public List<EntityField> AllFields
-        {
-            get; set;
-        }
+        public string Comment { get; set; }
 
         /// <summary>
-        /// Gets or sets query fields
+        /// Gets or sets the all fields
         /// </summary>
-        public List<EntityField> QueryFields
-        {
-            get; set;
-        }
+        public Dictionary<string, EntityField> AllFields { get; set; }
 
         /// <summary>
-        /// Gets or sets primary keys
+        /// Gets or sets the query fields
         /// </summary>
-        public List<EntityField> PrimaryKeys
-        {
-            get; set;
-        }
+        public List<string> QueryFields { get; set; }
 
         /// <summary>
-        /// Gets or sets cache keys
+        /// Gets or sets the query entity fields
         /// </summary>
-        public List<EntityField> CacheKeys
-        {
-            get; set;
-        }
+        internal List<EntityField> QueryEntityFields { get; set; }
 
         /// <summary>
-        /// Gets or sets cache prefix keys
+        /// Gets or sets the must query fields
         /// </summary>
-        public List<EntityField> CachePrefixKeys
-        {
-            get; set;
-        }
+        public List<string> MustQueryFields { get; set; }
 
         /// <summary>
-        /// Gets or sets cache ignore keys
+        /// Gets or sets the edit fields
         /// </summary>
-        public List<EntityField> CacheIgnoreKeys
-        {
-            get; set;
-        }
+        public List<EntityField> EditFields { get; set; }
+
+        /// <summary>
+        /// Gets or sets the primary keys
+        /// </summary>
+        public List<string> PrimaryKeys { get; set; }
+
+        /// <summary>
+        /// Gets or sets the cache keys
+        /// </summary>
+        public List<string> CacheKeys { get; set; }
+
+        /// <summary>
+        /// Gets or sets the cache prefix keys
+        /// </summary>
+        public List<string> CachePrefixKeys { get; set; }
+
+        /// <summary>
+        /// Gets or sets the cache ignore keys
+        /// </summary>
+        public List<string> CacheIgnoreKeys { get; set; }
 
         /// <summary>
         /// Gets or sets the version key
         /// </summary>
-        public EntityField VersionField
-        {
-            get; set;
-        }
+        public string VersionField { get; set; }
 
         /// <summary>
         /// Gets or sets the refresh date key
         /// </summary>
-        public EntityField RefreshDateField
-        {
-            get; set;
-        }
+        public string RefreshDateField { get; set; }
 
         /// <summary>
         /// Gets or sets the relation fields
         /// key:relation type id
         /// value: key->field,value:relation field
         /// </summary>
-        public Dictionary<Guid, Dictionary<string, string>> RelationFields
-        {
-            get; set;
-        }
+        public Dictionary<Guid, Dictionary<string, string>> RelationFields { get; set; }
 
         /// <summary>
         /// Gets or sets the predicate type
         /// </summary>
-        public Type PredicateType
-        {
-            get; set;
-        }
-
-        #endregion
+        public Type PredicateType { get; set; }
     }
 }
