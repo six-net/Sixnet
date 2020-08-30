@@ -270,18 +270,18 @@ namespace EZNEW.Develop.CQuery
         #region Load Propertys
 
         /// <summary>
-        /// Set load data propertys
+        /// Set allow load data properties
         /// </summary>
-        /// <param name="propertys">Propertys</param>
-        void SetLoadPropertys(Dictionary<string, bool> propertys);
+        /// <param name="properties">Properties</param>
+        void SetLoadProperty(Dictionary<string, bool> properties);
 
         /// <summary>
-        /// Set load data propertys
+        /// Set allow load data properties
         /// </summary>
         /// <typeparam name="TQueryModel">Query model type</typeparam>
         /// <param name="allowLoad">Whether allow load data</param>
-        /// <param name="propertys">Propertys</param>
-        void SetLoadPropertys<TQueryModel>(bool allowLoad, params Expression<Func<TQueryModel, dynamic>>[] propertys);
+        /// <param name="properties">Properties</param>
+        void SetLoadProperty<TQueryModel>(bool allowLoad, params Expression<Func<TQueryModel, dynamic>>[] properties);
 
         /// <summary>
         /// Property is allow load data

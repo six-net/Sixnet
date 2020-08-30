@@ -555,7 +555,7 @@ namespace EZNEW.Develop.CQuery
         /// Set load data propertys
         /// </summary>
         /// <param name="properties">Allow load data properties</param>
-        public void SetLoadPropertys(Dictionary<string, bool> properties)
+        public void SetLoadProperty(Dictionary<string, bool> properties)
         {
             if (properties == null)
             {
@@ -573,7 +573,7 @@ namespace EZNEW.Develop.CQuery
         /// <typeparam name="T">Data Type</typeparam>
         /// <param name="allowLoad">allow load</param>
         /// <param name="properties">properties</param>
-        public void SetLoadPropertys<T>(bool allowLoad, params Expression<Func<T, dynamic>>[] properties)
+        public void SetLoadProperty<T>(bool allowLoad, params Expression<Func<T, dynamic>>[] properties)
         {
             if (properties == null)
             {
@@ -584,7 +584,7 @@ namespace EZNEW.Develop.CQuery
             {
                 loadPropertyValues.Add(ExpressionHelper.GetExpressionPropertyName(property.Body), allowLoad);
             }
-            SetLoadPropertys(loadPropertyValues);
+            SetLoadProperty(loadPropertyValues);
         }
 
         /// <summary>
