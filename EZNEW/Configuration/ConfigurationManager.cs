@@ -87,10 +87,6 @@ namespace EZNEW.Configuration
                         {
                             QueryModel.ConfigureQueryModelRelationEntity(type);
                         }
-                        if (type.Name == "SysModuleConfig")
-                        {
-
-                        }
                         //module configuration
                         if (moduleConfigurationType.IsAssignableFrom(type))
                         {
