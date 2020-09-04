@@ -8,6 +8,9 @@ using EZNEW.Develop.Domain.Event;
 using EZNEW.Fault;
 using EZNEW.DataValidation;
 using EZNEW.ExpressionUtil;
+using EZNEW.Response;
+using System.DirectoryServices.Protocols;
+using EZNEW.ValueType;
 
 namespace EZNEW.Develop.Domain.Aggregation
 {
@@ -23,16 +26,6 @@ namespace EZNEW.Develop.Domain.Aggregation
         }
 
         #region Fields
-
-        /// <summary>
-        /// Whether enable lazy load
-        /// </summary>
-        //protected bool loadLazyMember = true;
-
-        /// <summary>
-        /// Allow load data properties
-        /// </summary>
-        //protected Dictionary<string, bool> allowLoadProperties = new Dictionary<string, bool>();
 
         /// <summary>
         /// The repository object
@@ -113,18 +106,6 @@ namespace EZNEW.Develop.Domain.Aggregation
         /// <returns>Return whether allow to save</returns>
         protected virtual bool SaveValidation()
         {
-            //validate object primary value
-            if (IdentityValueIsNone())
-            {
-                if (IsNew)
-                {
-                    InitIdentityValue();
-                }
-                else
-                {
-                    throw new EZNEWException("the identity value for the object to be saved is not specified");
-                }
-            }
             var verifyResults = ValidationManager.Validate(this);
             var errorMessages = verifyResults.GetErrorMessages();
             if (!errorMessages.IsNullOrEmpty())
@@ -252,52 +233,50 @@ namespace EZNEW.Develop.Domain.Aggregation
         }
 
         /// <summary>
+        /// Check whether allow load data
+        /// </summary>
+        /// <typeparam name="TModel">Model type</typeparam>
+        /// <param name="property">Property</param>
+        /// <param name="lazyMember">Lazy member</param>
+        /// <returns>Return whether allow load data</returns>
+        protected virtual bool AllowLoad<TModel>(Expression<Func<T, dynamic>> property, LazyMember<TModel> lazyMember) where TModel : IAggregationRoot<TModel>
+        {
+            return AllowLazyLoad(property) && !(lazyMember.CurrentValue?.IdentityValueIsNone() ?? true);
+        }
+
+        /// <summary>
         /// Save
         /// </summary>
-        public virtual void Save()
+        public virtual Result<T> Save()
         {
-            repository.Save((T)this);
+            var saveData = repository.Save(this as T);
+            if (saveData == null)
+            {
+                return Result<T>.FailedResult("Data saved failed");
+            }
             DomainEventBus.Publish(new DefaultAggregationSaveDomainEvent<T>()
             {
-                Object = this as T
+                Object = saveData
             });
+            return Result<T>.SuccessResult("Data saved successfully", "", saveData);
         }
 
         /// <summary>
         /// Remove
         /// </summary>
-        public virtual void Remove()
+        public virtual Result Remove()
         {
-            repository.Remove((T)this);
+            if (IdentityValueIsNone())
+            {
+                throw new EZNEWException("The object does not have an identity value set and cannot perform a remove");
+            }
+            T removeData = this as T;
+            repository.Remove(removeData);
             DomainEventBus.Publish(new DefaultAggregationRemoveDomainEvent<T>()
             {
-                Object = this as T
+                Object = removeData
             });
-        }
-
-        /// <summary>
-        /// Init from similar object
-        /// </summary>
-        /// <typeparam name="TModel">Model type</typeparam>
-        /// <param name="similarObject">Similar object</param>
-        /// <returns></returns>
-        public virtual void InitFromSimilarObject<TModel>(TModel similarObject) where TModel : AggregationRoot<T>, T
-        {
-            if (similarObject == null)
-            {
-                return;
-            }
-            CopyDataFromSimilarObject(similarObject);//copy data
-        }
-
-        /// <summary>
-        /// Copy data from similar object
-        /// </summary>
-        /// <typeparam name="TModel">Model type</typeparam>
-        /// <param name="similarObject">Similar object</param>
-        /// <param name="excludePropertys">Not copy propertys</param>
-        protected virtual void CopyDataFromSimilarObject<TModel>(TModel similarObject, IEnumerable<string> excludePropertys = null) where TModel : T
-        {
+            return Result.SuccessResult("Data removed successfully");
         }
 
         /// <summary>
@@ -350,6 +329,29 @@ namespace EZNEW.Develop.Domain.Aggregation
         protected virtual string GetIdentityValue()
         {
             return defaultIdentity.ToString();
+        }
+
+        /// <summary>
+        /// Update data
+        /// </summary>
+        /// <param name="newData">New data</param>
+        /// <returns></returns>
+        internal protected virtual T OnUpdating(T newData)
+        {
+            return newData;
+        }
+
+        /// <summary>
+        /// Add data
+        /// </summary>
+        /// <returns>Return data</returns>
+        internal protected virtual T OnAdding()
+        {
+            if (IdentityValueIsNone())
+            {
+                InitIdentityValue();
+            }
+            return this as T;
         }
 
         #endregion

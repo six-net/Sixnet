@@ -16,7 +16,7 @@ namespace EZNEW.Develop.Domain.Repository
     /// <typeparam name="TSecondRelationModel">The second relation model type</typeparam>
     /// <typeparam name="TEntity">The entity type</typeparam>
     /// <typeparam name="TDataAccess">The data access</typeparam>
-    public abstract class BaseAggregationRelationRepository<TModel, TFirstRelationModel, TSecondRelationModel, TEntity, TDataAccess> : DefaultAggregationRepository<TModel, TEntity, TDataAccess> where TModel : IAggregationRoot<TModel> where TEntity : BaseEntity<TEntity>, new() where TDataAccess : IDataAccess<TEntity>
+    public abstract class BaseAggregationRelationRepository<TModel, TFirstRelationModel, TSecondRelationModel, TEntity, TDataAccess> : DefaultAggregationRepository<TModel, TEntity, TDataAccess> where TModel : AggregationRoot<TModel> where TEntity : BaseEntity<TEntity>, new() where TDataAccess : IDataAccess<TEntity>
     {
         #region Query
 

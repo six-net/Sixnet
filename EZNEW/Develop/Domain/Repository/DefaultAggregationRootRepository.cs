@@ -9,6 +9,7 @@ using EZNEW.Develop.Domain.Repository.Event;
 using EZNEW.Develop.UnitOfWork;
 using EZNEW.Fault;
 using EZNEW.Paging;
+using EZNEW.Response;
 
 namespace EZNEW.Develop.Domain.Repository
 {
@@ -16,7 +17,7 @@ namespace EZNEW.Develop.Domain.Repository
     /// Default aggregation root repository
     /// </summary>
     /// <typeparam name="TModel">Aggregation model</typeparam>
-    public abstract class DefaultAggregationRootRepository<TModel> : BaseAggregationRepository<TModel> where TModel : IAggregationRoot<TModel>
+    public abstract class DefaultAggregationRootRepository<TModel> : BaseAggregationRepository<TModel> where TModel : AggregationRoot<TModel>
     {
         #region Impl methods
 
@@ -27,9 +28,9 @@ namespace EZNEW.Develop.Domain.Repository
         /// </summary>
         /// <param name="data">Data</param>
         /// <param name="activationOption">Activation option</param>
-        public sealed override void Save(TModel data, ActivationOption activationOption = null)
+        public sealed override TModel Save(TModel data, ActivationOption activationOption = null)
         {
-            Save(new TModel[1] { data }, activationOption);
+            return Save(new TModel[1] { data }, activationOption)?.FirstOrDefault();
         }
 
         /// <summary>
@@ -37,31 +38,47 @@ namespace EZNEW.Develop.Domain.Repository
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="activationOption">Activation option</param>
-        public sealed override void Save(IEnumerable<TModel> datas, ActivationOption activationOption = null)
+        public sealed override List<TModel> Save(IEnumerable<TModel> datas, ActivationOption activationOption = null)
         {
             if (datas.IsNullOrEmpty())
             {
                 throw new EZNEWException($"{nameof(datas)} is null or empty");
             }
             var records = new List<IActivationRecord>();
+            var resultDatas = new List<TModel>();
             foreach (var data in datas)
             {
                 if (data == null)
                 {
                     continue;
                 }
-                if (!data.CanBeSave)
+                var saveData = data;
+                if (!saveData.IdentityValueIsNone() && saveData.IsNew)
                 {
-                    throw new EZNEWException($"Data:{data.IdentityValue} cann't to be save");
+                    var nowData = Get(saveData);
+                    if (nowData != null)
+                    {
+                        saveData = nowData.OnUpdating(saveData);
+                    }
                 }
-                var record = ExecuteSave(data, activationOption);
+                if (saveData.IsNew)
+                {
+                    saveData = saveData.OnAdding();
+                }
+                if (!saveData.CanBeSave)
+                {
+                    throw new EZNEWException($"Data:{saveData.IdentityValue} cann't to be save");
+                }
+                var record = ExecuteSave(saveData, activationOption);
                 if (record != null)
                 {
                     records.Add(record);
+                    resultDatas.Add(saveData);
                 }
             }
             RepositoryEventBus.PublishSave(GetType(), datas, activationOption);
             WorkManager.RegisterActivationRecord(records);
+            return resultDatas;
         }
 
         #endregion
@@ -165,6 +182,26 @@ namespace EZNEW.Develop.Domain.Repository
         public sealed override TModel Get(IQuery query)
         {
             return GetAsync(query).Result;
+        }
+
+        /// <summary>
+        /// Get data by current data
+        /// </summary>
+        /// <param name="currentData">Current data</param>
+        /// <returns>Return data</returns>
+        public sealed override TModel Get(TModel currentData)
+        {
+            return GetDataByCurrentDataAsync(currentData).Result;
+        }
+
+        /// <summary>
+        /// Get data by current data
+        /// </summary>
+        /// <param name="currentData">Current data</param>
+        /// <returns>Return data</returns>
+        public sealed override async Task<TModel> GetAsync(TModel currentData)
+        {
+            return await GetDataByCurrentDataAsync(currentData).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -483,6 +520,13 @@ namespace EZNEW.Develop.Domain.Repository
         /// <param name="query">Query object</param>
         /// <returns>Return datas</returns>
         protected abstract Task<IPaging<TModel>> GetDataPagingAsync(IQuery query);
+
+        /// <summary>
+        /// Get data by current data
+        /// </summary>
+        /// <param name="currentData">Current data</param>
+        /// <returns>Return data</returns>
+        protected abstract Task<TModel> GetDataByCurrentDataAsync(TModel currentData);
 
         /// <summary>
         /// Check data

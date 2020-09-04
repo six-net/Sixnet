@@ -6,6 +6,7 @@ using EZNEW.Develop.Domain.Aggregation;
 using EZNEW.Develop.Domain.Repository.Warehouse;
 using EZNEW.Develop.UnitOfWork;
 using EZNEW.Paging;
+using EZNEW.Response;
 
 namespace EZNEW.Develop.Domain.Repository
 {
@@ -21,14 +22,14 @@ namespace EZNEW.Develop.Domain.Repository
         /// </summary>
         /// <param name="data">Data</param>
         /// <param name="activationOption">Activation option</param>
-        public abstract void Save(TModel data, ActivationOption activationOption = null);
+        public abstract TModel Save(TModel data, ActivationOption activationOption = null);
 
         /// <summary>
         /// save datas
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="activationOption">Activation option</param>
-        public abstract void Save(IEnumerable<TModel> datas, ActivationOption activationOption = null);
+        public abstract List<TModel> Save(IEnumerable<TModel> datas, ActivationOption activationOption = null);
 
         #endregion
 
@@ -83,11 +84,25 @@ namespace EZNEW.Develop.Domain.Repository
         public abstract TModel Get(IQuery query);
 
         /// <summary>
+        /// Get data by current data
+        /// </summary>
+        /// <param name="currentData">Current data</param>
+        /// <returns>Return data</returns>
+        public abstract TModel Get(TModel currentData);
+
+        /// <summary>
         /// Get data
         /// </summary>
         /// <param name="query">Query object</param>
         /// <returns>Return data</returns>
         public abstract Task<TModel> GetAsync(IQuery query);
+
+        /// <summary>
+        /// Get data by current data
+        /// </summary>
+        /// <param name="currentData">Current data</param>
+        /// <returns>Return data</returns>
+        public abstract Task<TModel> GetAsync(TModel currentData);
 
         #endregion
 

@@ -17,7 +17,7 @@ namespace EZNEW.Develop.Domain.Repository
     /// <typeparam name="TThirdRelationModel">The third relation model</typeparam>
     /// <typeparam name="TEntity">Entity</typeparam>
     /// <typeparam name="TDataAccess">Data access</typeparam>
-    public abstract class DefaultAggregationThreeRelationRepository<TModel, TFirstRelationModel, TSecondRelationModel, TThirdRelationModel, TEntity, TDataAccess> : BaseAggregationThreeRelationRepository<TModel, TFirstRelationModel, TSecondRelationModel, TThirdRelationModel, TEntity, TDataAccess> where TModel : IAggregationRoot<TModel> where TSecondRelationModel : IAggregationRoot<TSecondRelationModel> where TFirstRelationModel : IAggregationRoot<TFirstRelationModel> where TThirdRelationModel : IAggregationRoot<TThirdRelationModel> where TEntity : BaseEntity<TEntity>, new() where TDataAccess : IDataAccess<TEntity>
+    public abstract class DefaultAggregationThreeRelationRepository<TModel, TFirstRelationModel, TSecondRelationModel, TThirdRelationModel, TEntity, TDataAccess> : BaseAggregationThreeRelationRepository<TModel, TFirstRelationModel, TSecondRelationModel, TThirdRelationModel, TEntity, TDataAccess> where TModel : AggregationRoot<TModel> where TSecondRelationModel : IAggregationRoot<TSecondRelationModel> where TFirstRelationModel : IAggregationRoot<TFirstRelationModel> where TThirdRelationModel : IAggregationRoot<TThirdRelationModel> where TEntity : BaseEntity<TEntity>, new() where TDataAccess : IDataAccess<TEntity>
     {
         #region Query
 

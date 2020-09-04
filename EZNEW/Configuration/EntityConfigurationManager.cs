@@ -177,6 +177,7 @@ namespace EZNEW.Configuration
                         editFields.Add(field);
                     }
                 }
+                entityConfig.Comment = entityAttribute.Description ?? string.Empty;
                 entityConfig.PrimaryKeys = primaryKeys;
                 entityConfig.AllFields = allFieldDict;
                 entityConfig.VersionField = versionField;

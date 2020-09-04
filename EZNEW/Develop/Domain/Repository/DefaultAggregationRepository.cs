@@ -20,10 +20,10 @@ namespace EZNEW.Develop.Domain.Repository
     /// <typeparam name="TModel">Aggregation model</typeparam>
     /// <typeparam name="TEntity">Entity</typeparam>
     /// <typeparam name="TDataAccess">Data access</typeparam>
-    public abstract class DefaultAggregationRepository<TModel, TEntity, TDataAccess> : DefaultAggregationRootRepository<TModel> where TModel : IAggregationRoot<TModel> where TEntity : BaseEntity<TEntity>, new() where TDataAccess : IDataAccess<TEntity>
+    public abstract class DefaultAggregationRepository<TModel, TEntity, TDataAccess> : DefaultAggregationRootRepository<TModel> where TModel : AggregationRoot<TModel> where TEntity : BaseEntity<TEntity>, new() where TDataAccess : IDataAccess<TEntity>
     {
         protected IRepositoryWarehouse<TEntity, TDataAccess> repositoryWarehouse = ContainerManager.Resolve<IRepositoryWarehouse<TEntity, TDataAccess>>();
-        
+
         static readonly Type entityType = typeof(TEntity);
 
         static DefaultAggregationRepository()
@@ -146,6 +146,22 @@ namespace EZNEW.Develop.Domain.Repository
             var entityPaging = await repositoryWarehouse.GetPagingAsync(query).ConfigureAwait(false);
             var dataPaging = entityPaging.ConvertTo<TModel>();
             return dataPaging;
+        }
+
+        /// <summary>
+        /// Get data by current data
+        /// </summary>
+        /// <param name="currentData">Current data</param>
+        /// <returns>Return data</returns>
+        protected override async Task<TModel> GetDataByCurrentDataAsync(TModel currentData)
+        {
+            if (currentData == null)
+            {
+                return default;
+            }
+            var entity = currentData.MapTo<TEntity>();
+            var query = QueryManager.AppendEntityIdentityCondition(new TEntity[] { entity });
+            return await GetAsync(query).ConfigureAwait(false);
         }
 
         /// <summary>

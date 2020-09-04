@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using EZNEW.Response;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace EZNEW.Develop.Domain.Aggregation
@@ -45,16 +46,6 @@ namespace EZNEW.Develop.Domain.Aggregation
         /// <returns></returns>
         bool MarkStored();
 
-        /// <summary>
-        /// Save data
-        /// </summary>
-        void Save();
-
-        /// <summary>
-        /// Remove data
-        /// </summary>
-        void Remove();
-
         #endregion
     }
 
@@ -86,5 +77,11 @@ namespace EZNEW.Develop.Domain.Aggregation
         /// <param name="loadProperties">Properties</param>
         /// <returns></returns>
         void SetLoadProperties(IEnumerable<KeyValuePair<string, bool>> loadProperties);
+
+        /// <summary>
+        /// Check identity value is none
+        /// </summary>
+        /// <returns>Return identity value whether is none</returns>
+        bool IdentityValueIsNone();
     }
 }
