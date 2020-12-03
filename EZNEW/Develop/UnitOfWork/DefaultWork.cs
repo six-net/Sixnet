@@ -9,6 +9,7 @@ using EZNEW.Develop.DataAccess.Event;
 using EZNEW.Develop.Domain.Event;
 using EZNEW.Develop.Domain.Repository.Warehouse;
 using EZNEW.Develop.Entity;
+using EZNEW.Diagnostics;
 using EZNEW.Logging;
 using EZNEW.Serialize;
 
@@ -22,7 +23,7 @@ namespace EZNEW.Develop.UnitOfWork
         /// <summary>
         /// Determine whether allow output trace log
         /// </summary>
-        readonly bool allowTraceLog = false;
+        bool allowTraceLog = false;
 
         /// <summary>
         /// Initialize default work
@@ -30,7 +31,10 @@ namespace EZNEW.Develop.UnitOfWork
         internal DefaultWork()
         {
             WorkId = Guid.NewGuid().ToString();
-            allowTraceLog = TraceLogSwitchManager.ShouldTraceFramework();
+            allowTraceLog = SwitchManager.ShouldTraceFramework(sw =>
+            {
+                allowTraceLog = SwitchManager.ShouldTraceFramework();
+            });
             DomainEventManager = new DomainEventManager();
             WorkManager.TriggerCreateWorkEvent(this);
             WorkManager.Current = this;
@@ -279,11 +283,11 @@ namespace EZNEW.Develop.UnitOfWork
 
                     //trigger command executing event
                     var eventResult = command.TriggerStartingEvent();
-                    if (!(eventResult?.AllowExecuteCommand ?? true))
+                    if (eventResult?.BreakCommand ?? false)
                     {
                         if (allowTraceLog)
                         {
-                            LogManager.LogInformation<DefaultWork>($"The execution command created by active record {record.IdentityValue} is blocked by the event handler");
+                            LogManager.LogInformation<DefaultWork>($"The execution command created by active record {record.IdentityValue} is blocked by the event handler：{eventResult?.Message}");
                         }
                     }
 

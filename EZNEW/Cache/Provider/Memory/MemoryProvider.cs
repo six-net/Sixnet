@@ -37,7 +37,7 @@ namespace EZNEW.Cache.Provider.Memory
         /// <summary>
         /// Memory cache
         /// </summary>
-        static MemoryCache MemoryCache = null;
+        static readonly MemoryCache MemoryCache = null;
 
         static MemoryProvider()
         {
@@ -1829,13 +1829,13 @@ namespace EZNEW.Cache.Provider.Memory
                     bool accordWith = false;
                     switch (option.PatternType)
                     {
-                        case PatternType.StartWith:
+                        case KeyMatchPattern.StartWith:
                             accordWith = item.Key.StartsWith(option.Pattern);
                             break;
-                        case PatternType.EndWith:
+                        case KeyMatchPattern.EndWith:
                             accordWith = item.Key.EndsWith(option.Pattern);
                             break;
-                        case PatternType.Include:
+                        case KeyMatchPattern.Include:
                             accordWith = item.Key.Contains(option.Pattern);
                             break;
                     }
@@ -3915,13 +3915,13 @@ namespace EZNEW.Cache.Provider.Memory
                 count = option.Query.PageSize;
                 switch (option.Query.Type)
                 {
-                    case PatternType.EndWith:
+                    case KeyMatchPattern.EndWith:
                         where = c => c.EndsWith(option.Query.MateKey);
                         break;
-                    case PatternType.StartWith:
+                    case KeyMatchPattern.StartWith:
                         where = c => c.StartsWith(option.Query.MateKey);
                         break;
-                    case PatternType.Include:
+                    case KeyMatchPattern.Include:
                         where = c => c.Contains(option.Query.MateKey);
                         break;
                 }

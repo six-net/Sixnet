@@ -624,7 +624,7 @@ namespace EZNEW.Cache
                         {
                             continue;
                         }
-                        values = values.Union(response.Values.Select(c => c.Value?.ToString() ?? string.Empty)).ToList();
+                        values.AddRange(response.Values.Select(c => c.Value?.ToString() ?? string.Empty));
                     }
                 }
                 return values;
@@ -659,10 +659,6 @@ namespace EZNEW.Cache
                 foreach (var val in values)
                 {
                     var data = JsonSerializeHelper.JsonToObject<T>(val);
-                    if (data == null)
-                    {
-                        continue;
-                    }
                     datas.Add(data);
                 }
                 return datas;

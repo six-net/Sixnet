@@ -26,24 +26,13 @@ namespace EZNEW.Cache
         public string Code { get; set; }
 
         /// <summary>
-        /// Gets or sets the inner responsees
+        /// Gets or sets the cache server
         /// </summary>
-        public List<CacheResponse> InnerResponses { get; protected set; }
+        public CacheServer CacheServer { get; set; }
 
         #endregion
 
-        /// <summary>
-        /// Add inner response
-        /// </summary>
-        /// <param name="innerResponses">Inner responses</param>
-        public void AddInnerResponse(params CacheResponse[] innerResponses)
-        {
-            InnerResponses ??= new List<CacheResponse>();
-            if (innerResponses != null && innerResponses.Length > 0)
-            {
-                InnerResponses.AddRange(innerResponses);
-            }
-        }
+        #region Methods
 
         /// <summary>
         /// Get empty response
@@ -51,7 +40,12 @@ namespace EZNEW.Cache
         /// <returns>Return empty cache response</returns>
         public static CacheResponse Empty()
         {
-            return new CacheResponse();
+            return new CacheResponse()
+            {
+                Code = "0",
+                Success = true,
+                Message = "Empty response"
+            };
         }
 
         /// <summary>
@@ -63,9 +57,11 @@ namespace EZNEW.Cache
         /// <returns>Return data object</returns>
         public static T FailResponse<T>(string code, string message = "") where T : CacheResponse, new()
         {
-            T response = new T();
-            response.Code = code;
-            response.Success = false;
+            T response = new T
+            {
+                Code = code,
+                Success = false
+            };
             if (string.IsNullOrWhiteSpace(message))
             {
                 CacheCodes.CodeMessages.TryGetValue(code, out message);
@@ -81,9 +77,13 @@ namespace EZNEW.Cache
         /// <returns>Return data object</returns>
         public static T SuccessResponse<T>() where T : CacheResponse, new()
         {
-            T response = new T();
-            response.Success = true;
+            T response = new T
+            {
+                Success = true
+            };
             return response;
         }
+
+        #endregion
     }
 }

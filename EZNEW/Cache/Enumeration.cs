@@ -164,10 +164,21 @@ namespace EZNEW.Cache
     /// <summary>
     /// Defines key match pattern
     /// </summary>
-    public enum PatternType
+    public enum KeyMatchPattern
     {
         Include = 2,
         StartWith = 4,
         EndWith = 8
+    }
+
+    /// <summary>
+    /// Defines cache structure pattern
+    /// </summary>
+    [Flags]
+    public enum CacheStructurePattern
+    {
+        InMemory = 2,
+        Distribute = 4,
+        All = 8
     }
 }

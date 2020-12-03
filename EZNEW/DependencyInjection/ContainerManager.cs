@@ -11,6 +11,7 @@ using EZNEW.Upload.Configuration;
 using EZNEW.FileAccess.Configuration;
 using EZNEW.Application;
 using System.Runtime.InteropServices.ComTypes;
+using EZNEW.Data.Cache;
 
 namespace EZNEW.DependencyInjection
 {
@@ -146,13 +147,13 @@ namespace EZNEW.DependencyInjection
                 container.Register(defaultServices.ToArray());
             }
             RegisterComponentConfiguration();
-            configureServiceAction?.Invoke(container);
-            SetDefaultServiceCollection(defaultServices);
-            Container = container;
             if (registerDefaultProjectService)
             {
                 RegisterDefaultProjectService();
             }
+            configureServiceAction?.Invoke(container);
+            SetDefaultServiceCollection(defaultServices);
+            Container = container;
         }
 
         /// <summary>
@@ -331,6 +332,9 @@ namespace EZNEW.DependencyInjection
                     }
                 }
             }
+
+            //Data cache provider
+            Register<IDataCacheProvider, DefaultDataCacheProvider>();
         }
 
         /// <summary>

@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using EZNEW.Cache.Command.Result;
+using EZNEW.Logging;
 
 namespace EZNEW.Cache
 {
@@ -21,6 +23,21 @@ namespace EZNEW.Cache
         public CacheCommandFlags CommandFlags { get; set; } = CacheCommandFlags.None;
 
         /// <summary>
+        /// Gets or sets the cache structure pattern
+        /// </summary>
+        public CacheStructurePattern StructurePattern { get; set; } = CacheStructurePattern.Distribute;
+
+        /// <summary>
+        /// Determines whether in memory cache first
+        /// </summary>
+        public virtual bool InMemoryFirst { get; set; } = false;
+
+        /// <summary>
+        /// Verify response
+        /// </summary>
+        public virtual Func<TResponse, bool> VerifyResponse { get; set; } = res => res?.Success ?? false;
+
+        /// <summary>
         /// Execute cache operation
         /// </summary>
         /// <returns>Return cache result</returns>
@@ -33,15 +50,32 @@ namespace EZNEW.Cache
             }
             CacheResult<TResponse> result = new CacheResult<TResponse>();
 
+            //In memory first
+            if (InMemoryFirst && servers.Any(c => c.ServerType == CacheServerType.InMemory))
+            {
+                var memoryProvider = CacheManager.Configuration.GetCacheProvider(CacheServerType.InMemory);
+                if (memoryProvider != null)
+                {
+                    var cacheResponse = await ExecuteCacheOperationAsync(memoryProvider, new CacheServer() { ServerType = CacheServerType.InMemory }).ConfigureAwait(false);
+                    if (VerifyResponse?.Invoke(cacheResponse) ?? true)
+                    {
+                        result.AddResponse(cacheResponse);
+                    }
+                }
+                servers = servers.Where(c => c.ServerType != CacheServerType.InMemory).ToList();
+            }
+
             //Single cache server
             if (servers.Count == 1)
             {
                 var firstServer = servers.First();
                 var provider = CacheManager.Configuration.GetCacheProvider(firstServer.ServerType);
-                if (provider != null)
+                if (provider == null)
                 {
-                    result.AddResponse(await ExecuteCacheOperationAsync(provider, firstServer).ConfigureAwait(false));
+                    LogManager.LogError<CacheRequestOption<TResponse>>($"Cache server :{firstServer.ServerType} no provider");
+                    return result;
                 }
+                result.AddResponse(await ExecuteCacheOperationAsync(provider, firstServer).ConfigureAwait(false));
                 return result;
             }
 
@@ -105,7 +139,7 @@ namespace EZNEW.Cache
         /// <returns>Return cache servers</returns>
         protected virtual List<CacheServer> GetCacheServers()
         {
-            return CacheManager.Configuration.GetCacheServers(this);
+            return CacheManager.Configuration.GetCacheServers(this)?.OrderBy(c => c.ServerType).ToList();
         }
     }
 }

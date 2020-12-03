@@ -241,19 +241,18 @@ namespace EZNEW.Develop.Command
 
             if (SyncExecutingEventHandlers.IsNullOrEmpty())
             {
-                return CommandStartingEventExecuteResult.DefaultSuccess; ;
+                return CommandStartingEventExecuteResult.DefaultSuccess;
             }
-            var result = new CommandStartingEventExecuteResult();
+            CommandStartingEventExecuteResult result = null;
             foreach (var handler in SyncExecutingEventHandlers)
             {
-                var eventResult = handler.Item1(handler.Item2);
-                result.AllowExecuteCommand = result.AllowExecuteCommand && eventResult.AllowExecuteCommand;
-                if (!result.AllowExecuteCommand)
+                result = handler.Item1(handler.Item2);
+                if (result?.BreakCommand ?? false)
                 {
                     break;
                 }
             }
-            return result;
+            return result ?? CommandStartingEventExecuteResult.DefaultSuccess;
 
             #endregion
         }

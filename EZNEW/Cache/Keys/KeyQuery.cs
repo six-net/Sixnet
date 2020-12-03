@@ -13,6 +13,6 @@
         /// <summary>
         /// Gets or sets the key pattern type
         /// </summary>
-        public PatternType Type { get; set; }
+        public KeyMatchPattern Type { get; set; }
     }
 }

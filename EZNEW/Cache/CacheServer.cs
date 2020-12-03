@@ -7,7 +7,7 @@ namespace EZNEW.Cache
     /// </summary>
     public class CacheServer
     {
-        SortedDictionary<string, dynamic> serverConfig = new SortedDictionary<string, dynamic>();
+        private readonly SortedDictionary<string, dynamic> serverConfig = new SortedDictionary<string, dynamic>();
         CacheServerType serverType;
         bool initKey = false;
         string key = string.Empty;

@@ -21,7 +21,7 @@ namespace EZNEW.Cache.Hash.Request
         /// <summary>
         /// Gets or sets the pattern type
         /// </summary>
-        public PatternType PatternType { get; set; }
+        public KeyMatchPattern PatternType { get; set; }
 
         /// <summary>
         /// Gets or sets the page size

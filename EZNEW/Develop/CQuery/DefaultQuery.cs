@@ -10,6 +10,8 @@ using EZNEW.Fault;
 using EZNEW.Develop.DataAccess;
 using EZNEW.Paging;
 using EZNEW.Develop.Entity;
+using EZNEW.Cache;
+using EZNEW.Data.Cache;
 
 namespace EZNEW.Develop.CQuery
 {

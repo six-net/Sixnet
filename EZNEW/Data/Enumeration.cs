@@ -12,6 +12,9 @@ namespace EZNEW.Data
         SQLServer = 110,
         MySQL = 120,
         Oracle = 130,
-        MongoDB = 140,
+        //MongoDB = 140,
+        SQLite = 150,
+        PostgreSQL = 160,
+        Access = 170
     }
 }

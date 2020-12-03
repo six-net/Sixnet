@@ -210,6 +210,18 @@ namespace EZNEW.Cache
             return GetActualKey();
         }
 
+        public override bool Equals(object obj)
+        {
+            var targetObj = obj as CacheKey;
+            var targetKey = targetObj?.ToString();
+            return ToString() == targetKey;
+        }
+
+        public override int GetHashCode()
+        {
+            return GetActualKey().GetHashCode();
+        }
+
         #endregion
     }
 

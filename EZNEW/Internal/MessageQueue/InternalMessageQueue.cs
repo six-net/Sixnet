@@ -74,7 +74,7 @@ namespace EZNEW.Internal.MessageQueue
         /// Gets or sets the number of milliseconds to wait for take, or System.Threading.Timeout.Infinite (-1)
         /// to wait indefinitely
         /// </summary>
-        public static int TakeMillisecondsTimeout { get; set; } = -1; 
+        public static int TakeMillisecondsTimeout { get; set; } = -1;
 
         #endregion
 
@@ -83,19 +83,21 @@ namespace EZNEW.Internal.MessageQueue
             MessageCommandCollection = new BlockingCollection<IInternalMessageQueueCommand>(MaxQueuedMessages);
             ConsumeAction = token =>
             {
-                Func<bool> IsStopConsume = () => StopConsume || token.IsCancellationRequested || MessageCommandCollection.IsCompleted;
+                bool IsStopConsume() => StopConsume || token.IsCancellationRequested || MessageCommandCollection.IsCompleted;
+                Type commandType = null;
                 while (!IsStopConsume())
                 {
                     try
                     {
                         if (MessageCommandCollection.TryTake(out var cmd, TakeMillisecondsTimeout) && cmd != null)
                         {
+                            commandType = cmd.GetType();
                             cmd.Run();
                         }
                     }
                     catch (Exception ex)
                     {
-                        LogManager.LogError(ex, ex.Message);
+                        LogManager.LogError(commandType, ex, ex.Message);
                     }
                 }
                 Interlocked.Decrement(ref CurrentConsumerCount);

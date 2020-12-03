@@ -8,6 +8,7 @@ using EZNEW.Develop.CQuery.CriteriaConverter;
 using EZNEW.Develop.Entity;
 using EZNEW.Develop.DataAccess;
 using EZNEW.Data;
+using EZNEW.Cache;
 
 namespace EZNEW.Develop.CQuery
 {
