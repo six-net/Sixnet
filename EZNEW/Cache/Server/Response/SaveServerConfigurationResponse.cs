@@ -1,4 +1,4 @@
-﻿namespace EZNEW.Cache.Server.Response
+﻿namespace EZNEW.Cache.Server
 {
     /// <summary>
     /// Save server configuration response

@@ -4,21 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using EZNEW.Cache.Command.Result;
-using EZNEW.Cache.Hash.Request;
-using EZNEW.Cache.Hash.Response;
-using EZNEW.Cache.Keys.Request;
-using EZNEW.Cache.Keys.Response;
-using EZNEW.Cache.List.Request;
-using EZNEW.Cache.List.Response;
+using EZNEW.Cache.Hash;
+using EZNEW.Cache.Keys;
+using EZNEW.Cache.List;
 using EZNEW.Cache.Provider.Memory;
-using EZNEW.Cache.Server.Request;
-using EZNEW.Cache.Server.Response;
-using EZNEW.Cache.Set.Request;
-using EZNEW.Cache.Set.Response;
-using EZNEW.Cache.SortedSet.Request;
-using EZNEW.Cache.SortedSet.Response;
-using EZNEW.Cache.String.Request;
-using EZNEW.Cache.String.Response;
+using EZNEW.Cache.Server;
+using EZNEW.Cache.Set;
+using EZNEW.Cache.SortedSet;
+using EZNEW.Cache.String;
 using EZNEW.Serialize;
 
 namespace EZNEW.Cache
@@ -180,11 +173,11 @@ namespace EZNEW.Cache
             /// If the original string length stored by the key is smaller than the offset (say, the string is only 5 characters long, but you set the offset to 10),  
             /// the space between the original character and the offset will be filled with zerobytes (zerobytes, "\x00")
             /// </summary>
-            /// <param name="stringSetRangeOption">Set range option</param>
+            /// <param name="stringSetRangeOptions">Set range options</param>
             /// <returns>Return cache set result</returns>
-            public static async Task<CacheResult<StringSetRangeResponse>> SetRangeAsync(StringSetRangeOption stringSetRangeOption)
+            public static async Task<CacheResult<StringSetRangeResponse>> SetRangeAsync(StringSetRangeOptions stringSetRangeOptions)
             {
-                return await ExecuteCommandAsync(stringSetRangeOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(stringSetRangeOptions).ConfigureAwait(false);
             }
 
             /// <summary>
@@ -193,11 +186,11 @@ namespace EZNEW.Cache
             /// If the original string length stored by the key is smaller than the offset (say, the string is only 5 characters long, but you set the offset to 10),  
             /// the space between the original character and the offset will be filled with zerobytes (zerobytes, "\x00")
             /// </summary>
-            /// <param name="stringSetRangeOption">Set range option</param>
+            /// <param name="stringSetRangeOptions">Set range options</param>
             /// <returns>Return cache set result</returns>
-            public static CacheResult<StringSetRangeResponse> SetRange(StringSetRangeOption stringSetRangeOption)
+            public static CacheResult<StringSetRangeResponse> SetRange(StringSetRangeOptions stringSetRangeOptions)
             {
-                return SetRangeAsync(stringSetRangeOption).Result;
+                return SetRangeAsync(stringSetRangeOptions).Result;
             }
 
             #endregion
@@ -210,11 +203,11 @@ namespace EZNEW.Cache
             /// The string is stretched (grown) to ensure that it can hold the value at the specified offset. When the string value is stretched, the empty space is filled with 0
             /// The offset parameter must be greater than or equal to 0 and less than 2^32
             /// </summary>
-            /// <param name="stringSetBitOption">Set bit option</param>
+            /// <param name="stringSetBitOptions">Set bit options</param>
             /// <returns>Return cache set result</returns>
-            public static async Task<CacheResult<StringSetBitResponse>> SetBitAsync(StringSetBitOption stringSetBitOption)
+            public static async Task<CacheResult<StringSetBitResponse>> SetBitAsync(StringSetBitOptions stringSetBitOptions)
             {
-                return await ExecuteCommandAsync(stringSetBitOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(stringSetBitOptions).ConfigureAwait(false);
             }
 
             /// <summary>
@@ -223,11 +216,11 @@ namespace EZNEW.Cache
             /// The string is stretched (grown) to ensure that it can hold the value at the specified offset. When the string value is stretched, the empty space is filled with 0
             /// The offset parameter must be greater than or equal to 0 and less than 2^32
             /// </summary>
-            /// <param name="stringSetBitOption">Set bit option</param>
+            /// <param name="stringSetBitOptions">Set bit options</param>
             /// <returns>Return cache set result</returns>
-            public static CacheResult<StringSetBitResponse> SetBit(StringSetBitOption stringSetBitOption)
+            public static CacheResult<StringSetBitResponse> SetBit(StringSetBitOptions stringSetBitOptions)
             {
-                return ExecuteCommandAsync(stringSetBitOption).Result;
+                return ExecuteCommandAsync(stringSetBitOptions).Result;
             }
 
             #endregion
@@ -239,11 +232,11 @@ namespace EZNEW.Cache
             /// If the key already holds other values, SET will overwrite the old values, regardless of the type
             /// When the SET command sets a key with a time to live (TTL), the original TTL of the key will be cleared
             /// </summary>
-            /// <param name="stringSetOption">String set option</param>
+            /// <param name="stringSetOptions">String set options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<StringSetResponse>> SetAsync(StringSetOption stringSetOption)
+            public static async Task<CacheResult<StringSetResponse>> SetAsync(StringSetOptions stringSetOptions)
             {
-                return await ExecuteCommandAsync(stringSetOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(stringSetOptions).ConfigureAwait(false);
             }
 
             /// <summary>
@@ -251,11 +244,11 @@ namespace EZNEW.Cache
             /// If the key already holds other values, overwrite the old values
             /// When the SET command sets a key with a time to live (TTL), the original TTL of the key will be cleared
             /// </summary>
-            /// <param name="stringSetOption">String set option</param>
+            /// <param name="stringSetOptions">String set options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<StringSetResponse> Set(StringSetOption stringSetOption)
+            public static CacheResult<StringSetResponse> Set(StringSetOptions stringSetOptions)
             {
-                return ExecuteCommandAsync(stringSetOption).Result;
+                return ExecuteCommandAsync(stringSetOptions).Result;
             }
 
             /// <summary>
@@ -271,7 +264,7 @@ namespace EZNEW.Cache
             /// <returns>Return cache result</returns>
             public static async Task<CacheResult<StringSetResponse>> SetAsync(CacheKey key, string value, DateTimeOffset? absoluteExpiration = null, CacheSetWhen when = CacheSetWhen.Always, CacheObject cacheObject = null)
             {
-                return await SetAsync(new StringSetOption()
+                return await SetAsync(new StringSetOptions()
                 {
                     CacheObject = cacheObject,
                     Items = new List<CacheEntry>()
@@ -321,7 +314,7 @@ namespace EZNEW.Cache
             /// <returns>Return cache result</returns>
             public static async Task<CacheResult<StringSetResponse>> SetByRelativeExpirationAsync(CacheKey key, string value, TimeSpan? absoluteExpirationRelativeToNow = null, bool slidingExpiration = true, CacheSetWhen when = CacheSetWhen.Always, CacheObject cacheObject = null)
             {
-                return await SetAsync(new StringSetOption()
+                return await SetAsync(new StringSetOptions()
                 {
                     CacheObject = cacheObject,
                     Items = new List<CacheEntry>()
@@ -365,21 +358,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Returns the length of the string value stored by key
             /// </summary>
-            /// <param name="stringLengthOption">String length option</param>
+            /// <param name="stringLengthOptions">String length options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<StringLengthResponse>> LengthAsync(StringLengthOption stringLengthOption)
+            public static async Task<CacheResult<StringLengthResponse>> LengthAsync(StringLengthOptions stringLengthOptions)
             {
-                return await ExecuteCommandAsync(stringLengthOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(stringLengthOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Returns the length of the string value stored by key
             /// </summary>
-            /// <param name="stringLengthOption">String length option</param>
+            /// <param name="stringLengthOptions">String length options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<StringLengthResponse> Length(StringLengthOption stringLengthOption)
+            public static CacheResult<StringLengthResponse> Length(StringLengthOptions stringLengthOptions)
             {
-                return ExecuteCommandAsync(stringLengthOption).Result;
+                return ExecuteCommandAsync(stringLengthOptions).Result;
             }
 
             #endregion
@@ -391,11 +384,11 @@ namespace EZNEW.Cache
             /// If the key key does not exist, then its value will be initialized to 0 first, and then execute the command
             /// If the value stored by the key cannot be interpreted as a number, the command will return an error
             /// </summary>
-            /// <param name="stringIncrementOption">String increment option</param>
+            /// <param name="stringIncrementOptions">String increment options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<StringIncrementResponse>> IncrementAsync(StringIncrementOption stringIncrementOption)
+            public static async Task<CacheResult<StringIncrementResponse>> IncrementAsync(StringIncrementOptions stringIncrementOptions)
             {
-                return await ExecuteCommandAsync(stringIncrementOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(stringIncrementOptions).ConfigureAwait(false);
             }
 
             /// <summary>
@@ -403,11 +396,11 @@ namespace EZNEW.Cache
             /// If the key key does not exist, then its value will be initialized to 0 first, and then execute the command
             /// If the value stored by the key cannot be interpreted as a number, the command will return an error
             /// </summary>
-            /// <param name="stringIncrementOption">String increment option</param>
+            /// <param name="stringIncrementOptions">String increment options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<StringIncrementResponse> Increment(StringIncrementOption stringIncrementOption)
+            public static CacheResult<StringIncrementResponse> Increment(StringIncrementOptions stringIncrementOptions)
             {
-                return ExecuteCommandAsync(stringIncrementOption).Result;
+                return ExecuteCommandAsync(stringIncrementOptions).Result;
             }
 
             #endregion
@@ -419,11 +412,11 @@ namespace EZNEW.Cache
             /// If the key key does not exist, then return an empty string, otherwise, return the value of the key key
             /// If the value of key is not of type string, then return an error.
             /// </summary>
-            /// <param name="stringGetWithExpiryOption">String get with expiry option</param>
+            /// <param name="stringGetWithExpiryOptions">String get with expiry options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<StringGetWithExpiryResponse>> GetWithExpiryAsync(StringGetWithExpiryOption stringGetWithExpiryOption)
+            public static async Task<CacheResult<StringGetWithExpiryResponse>> GetWithExpiryAsync(StringGetWithExpiryOptions stringGetWithExpiryOptions)
             {
-                return await ExecuteCommandAsync(stringGetWithExpiryOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(stringGetWithExpiryOptions).ConfigureAwait(false);
             }
 
             /// <summary>
@@ -431,11 +424,11 @@ namespace EZNEW.Cache
             /// If the key key does not exist, then return an empty string, otherwise, return the value of the key key
             /// If the value of key is not of type string, then return an error.
             /// </summary>
-            /// <param name="stringGetWithExpiryOption">String get with expiry option</param>
+            /// <param name="stringGetWithExpiryOptions">String get with expiry options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<StringGetWithExpiryResponse> GetWithExpiry(StringGetWithExpiryOption stringGetWithExpiryOption)
+            public static CacheResult<StringGetWithExpiryResponse> GetWithExpiry(StringGetWithExpiryOptions stringGetWithExpiryOptions)
             {
-                return ExecuteCommandAsync(stringGetWithExpiryOption).Result;
+                return ExecuteCommandAsync(stringGetWithExpiryOptions).Result;
             }
 
             #endregion
@@ -446,22 +439,22 @@ namespace EZNEW.Cache
             /// Set the value of the key key to value and return the old value of the key key before it is set
             /// When the key key exists but is not a string type, the command returns an error
             /// </summary>
-            /// <param name="stringGetSetOption">String get set option</param>
+            /// <param name="stringGetSetOptions">String get set options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<StringGetSetResponse>> GetSetAsync(StringGetSetOption stringGetSetOption)
+            public static async Task<CacheResult<StringGetSetResponse>> GetSetAsync(StringGetSetOptions stringGetSetOptions)
             {
-                return await ExecuteCommandAsync(stringGetSetOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(stringGetSetOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Set the value of the key key to value and return the old value of the key key before it is set
             /// When the key key exists but is not a string type, the command returns an error
             /// </summary>
-            /// <param name="stringGetSetOption">String get set option</param>
+            /// <param name="stringGetSetOptions">String get set options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<StringGetSetResponse> GetSet(StringGetSetOption stringGetSetOption)
+            public static CacheResult<StringGetSetResponse> GetSet(StringGetSetOptions stringGetSetOptions)
             {
-                return ExecuteCommandAsync(stringGetSetOption).Result;
+                return ExecuteCommandAsync(stringGetSetOptions).Result;
             }
 
             #endregion
@@ -472,22 +465,22 @@ namespace EZNEW.Cache
             /// Returns the specified part of the string value stored by the key key, the range of the string interception is determined by the two offsets of start and end (including start and end)
             /// Negative offset means counting from the end of the string, -1 means the last character, -2 means the penultimate character, and so on
             /// </summary>
-            /// <param name="stringGetRangeOption">String get range option</param>
+            /// <param name="stringGetRangeOptions">String get range options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<StringGetRangeResponse>> GetRangeAsync(StringGetRangeOption stringGetRangeOption)
+            public static async Task<CacheResult<StringGetRangeResponse>> GetRangeAsync(StringGetRangeOptions stringGetRangeOptions)
             {
-                return await ExecuteCommandAsync(stringGetRangeOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(stringGetRangeOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Returns the specified part of the string value stored by the key key, the range of the string interception is determined by the two offsets of start and end (including start and end)
             /// Negative offset means counting from the end of the string, -1 means the last character, -2 means the penultimate character, and so on
             /// </summary>
-            /// <param name="stringGetRangeOption">String get range option</param>
+            /// <param name="stringGetRangeOptions">String get range options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<StringGetRangeResponse> GetRange(StringGetRangeOption stringGetRangeOption)
+            public static CacheResult<StringGetRangeResponse> GetRange(StringGetRangeOptions stringGetRangeOptions)
             {
-                return ExecuteCommandAsync(stringGetRangeOption).Result;
+                return ExecuteCommandAsync(stringGetRangeOptions).Result;
             }
 
             #endregion
@@ -498,22 +491,22 @@ namespace EZNEW.Cache
             /// For the string value stored in key, get the bit at the specified offset
             /// When offset is greater than the length of the string value, or the key does not exist, return 0
             /// </summary>
-            /// <param name="stringGetBitOption">String get bit option</param>
+            /// <param name="stringGetBitOptions">String get bit options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<StringGetBitResponse>> GetBitAsync(StringGetBitOption stringGetBitOption)
+            public static async Task<CacheResult<StringGetBitResponse>> GetBitAsync(StringGetBitOptions stringGetBitOptions)
             {
-                return await ExecuteCommandAsync(stringGetBitOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(stringGetBitOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// For the string value stored in key, get the bit at the specified offset
             /// When offset is greater than the length of the string value, or the key does not exist, return 0
             /// </summary>
-            /// <param name="stringGetBitOption">String get bit option</param>
+            /// <param name="stringGetBitOptions">String get bit options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<StringGetBitResponse> GetBit(StringGetBitOption stringGetBitOption)
+            public static CacheResult<StringGetBitResponse> GetBit(StringGetBitOptions stringGetBitOptions)
             {
-                return ExecuteCommandAsync(stringGetBitOption).Result;
+                return ExecuteCommandAsync(stringGetBitOptions).Result;
             }
 
             #endregion
@@ -523,21 +516,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Returns the value of the given string key or keys
             /// </summary>
-            /// <param name="stringGetOption">String get option</param>
+            /// <param name="stringGetOptions">String get options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<StringGetResponse>> GetAsync(StringGetOption stringGetOption)
+            public static async Task<CacheResult<StringGetResponse>> GetAsync(StringGetOptions stringGetOptions)
             {
-                return await ExecuteCommandAsync(stringGetOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(stringGetOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Returns the value of the given string key or keys
             /// </summary>
-            /// <param name="stringGetOption">String get option</param>
+            /// <param name="stringGetOptions">String get options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<StringGetResponse> Get(StringGetOption stringGetOption)
+            public static CacheResult<StringGetResponse> Get(StringGetOptions stringGetOptions)
             {
-                return GetAsync(stringGetOption).Result;
+                return GetAsync(stringGetOptions).Result;
             }
 
             /// <summary>
@@ -610,7 +603,7 @@ namespace EZNEW.Cache
                 {
                     return new List<string>(0);
                 }
-                var result = await GetAsync(new StringGetOption()
+                var result = await GetAsync(new StringGetOptions()
                 {
                     CacheObject = cacheObject,
                     Keys = keys.ToList()
@@ -685,11 +678,11 @@ namespace EZNEW.Cache
             /// If the key key does not exist, the value of the key key will be initialized to 0 first, and then perform the operation
             /// If the value stored by the key cannot be interpreted as a number, an error will be returned
             /// </summary>
-            /// <param name="stringDecrementOption">String decrement option</param>
+            /// <param name="stringDecrementOptions">String decrement options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<StringDecrementResponse>> DecrementAsync(StringDecrementOption stringDecrementOption)
+            public static async Task<CacheResult<StringDecrementResponse>> DecrementAsync(StringDecrementOptions stringDecrementOptions)
             {
-                return await ExecuteCommandAsync(stringDecrementOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(stringDecrementOptions).ConfigureAwait(false);
             }
 
             /// <summary>
@@ -697,11 +690,11 @@ namespace EZNEW.Cache
             /// If the key key does not exist, the value of the key key will be initialized to 0 first, and then perform the operation
             /// If the value stored by the key cannot be interpreted as a number, an error will be returned
             /// </summary>
-            /// <param name="stringDecrementOption">String decrement option</param>
+            /// <param name="stringDecrementOptions">String decrement options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<StringDecrementResponse> Decrement(StringDecrementOption stringDecrementOption)
+            public static CacheResult<StringDecrementResponse> Decrement(StringDecrementOptions stringDecrementOptions)
             {
-                return DecrementAsync(stringDecrementOption).Result;
+                return DecrementAsync(stringDecrementOptions).Result;
             }
 
             #endregion
@@ -712,22 +705,22 @@ namespace EZNEW.Cache
             /// Returns the position of the first binary bit in the bitmap
             /// By default, the command will detect the entire bitmap, but the user can also specify the range to be detected through the optional start parameter and end parameter
             /// </summary>
-            /// <param name="stringBitPositionOption">String bit position option</param>
+            /// <param name="stringBitPositionOptions">String bit position options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<StringBitPositionResponse>> BitPositionAsync(StringBitPositionOption stringBitPositionOption)
+            public static async Task<CacheResult<StringBitPositionResponse>> BitPositionAsync(StringBitPositionOptions stringBitPositionOptions)
             {
-                return await ExecuteCommandAsync(stringBitPositionOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(stringBitPositionOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Returns the position of the first binary bit in the bitmap
             /// By default, the command will detect the entire bitmap, but the user can also specify the range to be detected through the optional start parameter and end parameter
             /// </summary>
-            /// <param name="stringBitPositionOption">String bit position option</param>
+            /// <param name="stringBitPositionOptions">String bit position options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<StringBitPositionResponse> BitPosition(StringBitPositionOption stringBitPositionOption)
+            public static CacheResult<StringBitPositionResponse> BitPosition(StringBitPositionOptions stringBitPositionOptions)
             {
-                return BitPositionAsync(stringBitPositionOption).Result;
+                return BitPositionAsync(stringBitPositionOptions).Result;
             }
 
             #endregion
@@ -738,22 +731,22 @@ namespace EZNEW.Cache
             /// Perform bit operations on one or more string keys that hold binary bits, and save the result to destkey
             /// Except NOT operation, other operations can accept one or more keys as input
             /// </summary>
-            /// <param name="stringBitOperationOption">String bit operation option</param>
+            /// <param name="stringBitOperationOptions">String bit operation options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<StringBitOperationResponse>> BitOperationAsync(StringBitOperationOption stringBitOperationOption)
+            public static async Task<CacheResult<StringBitOperationResponse>> BitOperationAsync(StringBitOperationOptions stringBitOperationOptions)
             {
-                return await ExecuteCommandAsync(stringBitOperationOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(stringBitOperationOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Perform bit operations on one or more string keys that hold binary bits, and save the result to destkey
             /// Except NOT operation, other operations can accept one or more keys as input
             /// </summary>
-            /// <param name="stringBitOperationOption">String bit operation option</param>
+            /// <param name="stringBitOperationOptions">String bit operation options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<StringBitOperationResponse> BitOperation(StringBitOperationOption stringBitOperationOption)
+            public static CacheResult<StringBitOperationResponse> BitOperation(StringBitOperationOptions stringBitOperationOptions)
             {
-                return BitOperationAsync(stringBitOperationOption).Result;
+                return BitOperationAsync(stringBitOperationOptions).Result;
             }
 
             #endregion
@@ -764,22 +757,22 @@ namespace EZNEW.Cache
             /// Calculate the number of bits set to 1 in a given string.
             /// Under normal circumstances, the given entire string will be counted, by specifying additional start or end parameters, you can make the count only on a specific bit
             /// </summary>
-            /// <param name="stringBitCountOption">String bit count option</param>
+            /// <param name="stringBitCountOptions">String bit count options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<StringBitCountResponse>> BitCountAsync(StringBitCountOption stringBitCountOption)
+            public static async Task<CacheResult<StringBitCountResponse>> BitCountAsync(StringBitCountOptions stringBitCountOptions)
             {
-                return await ExecuteCommandAsync(stringBitCountOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(stringBitCountOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Calculate the number of bits set to 1 in a given string.
             /// Under normal circumstances, the given entire string will be counted, by specifying additional start or end parameters, you can make the count only on a specific bit
             /// </summary>
-            /// <param name="stringBitCountOption">String bit count option</param>
+            /// <param name="stringBitCountOptions">String bit count options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<StringBitCountResponse> BitCount(StringBitCountOption stringBitCountOption)
+            public static CacheResult<StringBitCountResponse> BitCount(StringBitCountOptions stringBitCountOptions)
             {
-                return BitCountAsync(stringBitCountOption).Result;
+                return BitCountAsync(stringBitCountOptions).Result;
             }
 
             #endregion
@@ -790,22 +783,22 @@ namespace EZNEW.Cache
             /// If the key key already exists and its value is a string, the value will be appended to the end of the key key's existing value
             /// If the key does not exist, simply set the value of the key key to value
             /// </summary>
-            /// <param name="stringAppendOption">String append option</param>
+            /// <param name="stringAppendOptions">String append options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<StringAppendResponse>> AppendAsync(StringAppendOption stringAppendOption)
+            public static async Task<CacheResult<StringAppendResponse>> AppendAsync(StringAppendOptions stringAppendOptions)
             {
-                return await ExecuteCommandAsync(stringAppendOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(stringAppendOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// If the key key already exists and its value is a string, the value will be appended to the end of the key key's existing value
             /// If the key does not exist, simply set the value of the key key to value
             /// </summary>
-            /// <param name="stringAppendOption">String append option</param>
+            /// <param name="stringAppendOptions">String append options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<StringAppendResponse> Append(StringAppendOption stringAppendOption)
+            public static CacheResult<StringAppendResponse> Append(StringAppendOptions stringAppendOptions)
             {
-                return AppendAsync(stringAppendOption).Result;
+                return AppendAsync(stringAppendOptions).Result;
             }
 
             #endregion
@@ -828,11 +821,11 @@ namespace EZNEW.Cache
             /// You can also use negative subscripts, with -1 for the last element of the list, -2 for the penultimate element of the list, and so on
             /// When key is not a list type, an error is returned
             /// </summary>
-            /// <param name="listTrimOption">List trim option</param>
+            /// <param name="listTrimOptions">List trim options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<ListTrimResponse>> TrimAsync(ListTrimOption listTrimOption)
+            public static async Task<CacheResult<ListTrimResponse>> TrimAsync(ListTrimOptions listTrimOptions)
             {
-                return await ExecuteCommandAsync(listTrimOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(listTrimOptions).ConfigureAwait(false);
             }
 
             /// <summary>
@@ -841,11 +834,11 @@ namespace EZNEW.Cache
             /// You can also use negative subscripts, with -1 for the last element of the list, -2 for the penultimate element of the list, and so on
             /// When key is not a list type, an error is returned
             /// </summary>
-            /// <param name="listTrimOption">List trim option</param>
+            /// <param name="listTrimOptions">List trim options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<ListTrimResponse> Trim(ListTrimOption listTrimOption)
+            public static CacheResult<ListTrimResponse> Trim(ListTrimOptions listTrimOptions)
             {
-                return TrimAsync(listTrimOption).Result;
+                return TrimAsync(listTrimOptions).Result;
             }
 
             #endregion
@@ -856,22 +849,22 @@ namespace EZNEW.Cache
             /// Set the value of the element whose index of the list key is index to value
             /// When the index parameter is out of range, or an operation is performed on an empty list (the key does not exist), an error is returned
             /// </summary>
-            /// <param name="listSetByIndexOption">List set by index option</param>
+            /// <param name="listSetByIndexOptions">List set by index options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<ListSetByIndexResponse>> SetByIndexAsync(ListSetByIndexOption listSetByIndexOption)
+            public static async Task<CacheResult<ListSetByIndexResponse>> SetByIndexAsync(ListSetByIndexOptions listSetByIndexOptions)
             {
-                return await ExecuteCommandAsync(listSetByIndexOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(listSetByIndexOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Set the value of the element whose index of the list key is index to value
             /// When the index parameter is out of range, or an operation is performed on an empty list (the key does not exist), an error is returned
             /// </summary>
-            /// <param name="listSetByIndexOption">List set by index option</param>
+            /// <param name="listSetByIndexOptions">List set by index options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<ListSetByIndexResponse> SetByIndex(ListSetByIndexOption listSetByIndexOption)
+            public static CacheResult<ListSetByIndexResponse> SetByIndex(ListSetByIndexOptions listSetByIndexOptions)
             {
-                return SetByIndexAsync(listSetByIndexOption).Result;
+                return SetByIndexAsync(listSetByIndexOptions).Result;
             }
 
             #endregion
@@ -882,22 +875,22 @@ namespace EZNEW.Cache
             /// Insert one or more values ​​into the end of the list key (far right).
             /// If there are multiple value values, then each value value is inserted into the end of the table in order from left to right
             /// </summary>
-            /// <param name="listRightPushOption">List right push option</param>
+            /// <param name="listRightPushOptions">List right push options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<ListRightPushResponse>> RightPushAsync(ListRightPushOption listRightPushOption)
+            public static async Task<CacheResult<ListRightPushResponse>> RightPushAsync(ListRightPushOptions listRightPushOptions)
             {
-                return await ExecuteCommandAsync(listRightPushOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(listRightPushOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Insert one or more values ​​into the end of the list key (far right).
             /// If there are multiple value values, then each value value is inserted into the end of the table in order from left to right
             /// </summary>
-            /// <param name="listRightPushOption">List right push option</param>
+            /// <param name="listRightPushOptions">List right push options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<ListRightPushResponse> RightPush(ListRightPushOption listRightPushOption)
+            public static CacheResult<ListRightPushResponse> RightPush(ListRightPushOptions listRightPushOptions)
             {
-                return RightPushAsync(listRightPushOption).Result;
+                return RightPushAsync(listRightPushOptions).Result;
             }
 
             #endregion
@@ -908,22 +901,22 @@ namespace EZNEW.Cache
             /// Pop the last element (tail element) in the list source and return it to the client
             /// Insert the element popped by source into the destination list as the head element of the destination list
             /// </summary>
-            /// <param name="listRightPopLeftPushOption">List right pop left push option</param>
+            /// <param name="listRightPopLeftPushOptions">List right pop left push options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<ListRightPopLeftPushResponse>> RightPopLeftPushAsync(ListRightPopLeftPushOption listRightPopLeftPushOption)
+            public static async Task<CacheResult<ListRightPopLeftPushResponse>> RightPopLeftPushAsync(ListRightPopLeftPushOptions listRightPopLeftPushOptions)
             {
-                return await ExecuteCommandAsync(listRightPopLeftPushOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(listRightPopLeftPushOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Pop the last element (tail element) in the list source and return it to the client
             /// Insert the element popped by source into the destination list as the head element of the destination list
             /// </summary>
-            /// <param name="listRightPopLeftPushOption">List right pop left push option</param>
+            /// <param name="listRightPopLeftPushOptions">List right pop left push options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<ListRightPopLeftPushResponse> RightPopLeftPush(ListRightPopLeftPushOption listRightPopLeftPushOption)
+            public static CacheResult<ListRightPopLeftPushResponse> RightPopLeftPush(ListRightPopLeftPushOptions listRightPopLeftPushOptions)
             {
-                return RightPopLeftPushAsync(listRightPopLeftPushOption).Result;
+                return RightPopLeftPushAsync(listRightPopLeftPushOptions).Result;
             }
 
             #endregion
@@ -933,21 +926,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Remove and return the tail element of the list key.
             /// </summary>
-            /// <param name="listRightPopOption">List right pop option</param>
+            /// <param name="listRightPopOptions">List right pop options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<ListRightPopResponse>> RightPopAsync(ListRightPopOption listRightPopOption)
+            public static async Task<CacheResult<ListRightPopResponse>> RightPopAsync(ListRightPopOptions listRightPopOptions)
             {
-                return await ExecuteCommandAsync(listRightPopOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(listRightPopOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Remove and return the tail element of the list key.
             /// </summary>
-            /// <param name="listRightPopOption">List right pop option</param>
+            /// <param name="listRightPopOptions">List right pop options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<ListRightPopResponse> RightPop(ListRightPopOption listRightPopOption)
+            public static CacheResult<ListRightPopResponse> RightPop(ListRightPopOptions listRightPopOptions)
             {
-                return RightPopAsync(listRightPopOption).Result;
+                return RightPopAsync(listRightPopOptions).Result;
             }
 
             #endregion
@@ -960,11 +953,11 @@ namespace EZNEW.Cache
             /// count is less than 0: search from the end of the table to the head of the table, remove the elements equal to value, the number is the absolute value of count
             /// count equals 0: remove all values ​​in the table that are equal to value
             /// </summary>
-            /// <param name="listRemoveOption">List remove option</param>
+            /// <param name="listRemoveOptions">List remove options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<ListRemoveResponse>> RemoveAsync(ListRemoveOption listRemoveOption)
+            public static async Task<CacheResult<ListRemoveResponse>> RemoveAsync(ListRemoveOptions listRemoveOptions)
             {
-                return await ExecuteCommandAsync(listRemoveOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(listRemoveOptions).ConfigureAwait(false);
             }
 
             /// <summary>
@@ -973,11 +966,11 @@ namespace EZNEW.Cache
             /// count is less than 0: search from the end of the table to the head of the table, remove the elements equal to value, the number is the absolute value of count
             /// count equals 0: remove all values ​​in the table that are equal to value
             /// </summary>
-            /// <param name="listRemoveOption">List remove option</param>
+            /// <param name="listRemoveOptions">List remove options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<ListRemoveResponse> Remove(ListRemoveOption listRemoveOption)
+            public static CacheResult<ListRemoveResponse> Remove(ListRemoveOptions listRemoveOptions)
             {
-                return RemoveAsync(listRemoveOption).Result;
+                return RemoveAsync(listRemoveOptions).Result;
             }
 
             #endregion
@@ -989,11 +982,11 @@ namespace EZNEW.Cache
             /// The subscript (index) parameters start and stop are both based on 0, that is, 0 represents the first element of the list, 1 represents the second element of the list, and so on
             /// You can also use negative subscripts, with -1 for the last element of the list, -2 for the penultimate element of the list, and so on
             /// </summary>
-            /// <param name="listRangeOption">List range option</param>
+            /// <param name="listRangeOptions">List range options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<ListRangeResponse>> RangeAsync(ListRangeOption listRangeOption)
+            public static async Task<CacheResult<ListRangeResponse>> RangeAsync(ListRangeOptions listRangeOptions)
             {
-                return await ExecuteCommandAsync(listRangeOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(listRangeOptions).ConfigureAwait(false);
             }
 
             /// <summary>
@@ -1001,11 +994,11 @@ namespace EZNEW.Cache
             /// The subscript (index) parameters start and stop are both based on 0, that is, 0 represents the first element of the list, 1 represents the second element of the list, and so on
             /// You can also use negative subscripts, with -1 for the last element of the list, -2 for the penultimate element of the list, and so on
             /// </summary>
-            /// <param name="listRangeOption">List range option</param>
+            /// <param name="listRangeOptions">List range options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<ListRangeResponse> Range(ListRangeOption listRangeOption)
+            public static CacheResult<ListRangeResponse> Range(ListRangeOptions listRangeOptions)
             {
-                return RangeAsync(listRangeOption).Result;
+                return RangeAsync(listRangeOptions).Result;
             }
 
             #endregion
@@ -1017,11 +1010,11 @@ namespace EZNEW.Cache
             /// If the key does not exist, the key is interpreted as an empty list and returns 0 
             /// If key is not a list type, return an error.
             /// </summary>
-            /// <param name="listLengthOption">List length option</param>
+            /// <param name="listLengthOptions">List length options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<ListLengthResponse>> LengthAsync(ListLengthOption listLengthOption)
+            public static async Task<CacheResult<ListLengthResponse>> LengthAsync(ListLengthOptions listLengthOptions)
             {
-                return await ExecuteCommandAsync(listLengthOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(listLengthOptions).ConfigureAwait(false);
             }
 
             /// <summary>
@@ -1029,11 +1022,11 @@ namespace EZNEW.Cache
             /// If the key does not exist, the key is interpreted as an empty list and returns 0 
             /// If key is not a list type, return an error.
             /// </summary>
-            /// <param name="listLengthOption">List length option</param>
+            /// <param name="listLengthOptions">List length options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<ListLengthResponse> Length(ListLengthOption listLengthOption)
+            public static CacheResult<ListLengthResponse> Length(ListLengthOptions listLengthOptions)
             {
-                return LengthAsync(listLengthOption).Result;
+                return LengthAsync(listLengthOptions).Result;
             }
 
             #endregion
@@ -1044,22 +1037,22 @@ namespace EZNEW.Cache
             /// Insert one or more values ​​into the header of the list key
             /// If the key does not exist, an empty list will be created and the operation will be performed
             /// </summary>
-            /// <param name="listLeftPushOption">List left push option</param>
+            /// <param name="listLeftPushOptions">List left push options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<ListLeftPushResponse>> LeftPushAsync(ListLeftPushOption listLeftPushOption)
+            public static async Task<CacheResult<ListLeftPushResponse>> LeftPushAsync(ListLeftPushOptions listLeftPushOptions)
             {
-                return await ExecuteCommandAsync(listLeftPushOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(listLeftPushOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Insert one or more values ​​into the header of the list key
             /// If the key does not exist, an empty list will be created and the operation will be performed
             /// </summary>
-            /// <param name="listLeftPushOption">List left push option</param>
+            /// <param name="listLeftPushOptions">List left push options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<ListLeftPushResponse> LeftPush(ListLeftPushOption listLeftPushOption)
+            public static CacheResult<ListLeftPushResponse> LeftPush(ListLeftPushOptions listLeftPushOptions)
             {
-                return LeftPushAsync(listLeftPushOption).Result;
+                return LeftPushAsync(listLeftPushOptions).Result;
             }
 
             #endregion
@@ -1069,21 +1062,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Remove and return the head element of the list key
             /// </summary>
-            /// <param name="listLeftPopOption">List left pop option</param>
+            /// <param name="listLeftPopOptions">List left pop options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<ListLeftPopResponse>> LeftPopAsync(ListLeftPopOption listLeftPopOption)
+            public static async Task<CacheResult<ListLeftPopResponse>> LeftPopAsync(ListLeftPopOptions listLeftPopOptions)
             {
-                return await ExecuteCommandAsync(listLeftPopOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(listLeftPopOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Remove and return the head element of the list key
             /// </summary>
-            /// <param name="listLeftPopOption">List left pop option</param>
+            /// <param name="listLeftPopOptions">List left pop options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<ListLeftPopResponse> LeftPop(ListLeftPopOption listLeftPopOption)
+            public static CacheResult<ListLeftPopResponse> LeftPop(ListLeftPopOptions listLeftPopOptions)
             {
-                return LeftPopAsync(listLeftPopOption).Result;
+                return LeftPopAsync(listLeftPopOptions).Result;
             }
 
             #endregion
@@ -1093,21 +1086,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Insert the value value into the list key, before the value pivot
             /// </summary>
-            /// <param name="listInsertBeforeOption">List insert before option</param>
+            /// <param name="listInsertBeforeOptions">List insert before options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<ListInsertBeforeResponse>> InsertBeforeAsync(ListInsertBeforeOption listInsertBeforeOption)
+            public static async Task<CacheResult<ListInsertBeforeResponse>> InsertBeforeAsync(ListInsertBeforeOptions listInsertBeforeOptions)
             {
-                return await ExecuteCommandAsync(listInsertBeforeOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(listInsertBeforeOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Insert the value value into the list key, before the value pivot
             /// </summary>
-            /// <param name="listInsertBeforeOption">List insert before option</param>
+            /// <param name="listInsertBeforeOptions">List insert before options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<ListInsertBeforeResponse> InsertBefore(ListInsertBeforeOption listInsertBeforeOption)
+            public static CacheResult<ListInsertBeforeResponse> InsertBefore(ListInsertBeforeOptions listInsertBeforeOptions)
             {
-                return InsertBeforeAsync(listInsertBeforeOption).Result;
+                return InsertBeforeAsync(listInsertBeforeOptions).Result;
             }
 
             #endregion
@@ -1117,21 +1110,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Insert the value value into the list key, after the value pivot
             /// </summary>
-            /// <param name="listInsertAfterOption">List insert after option</param>
+            /// <param name="listInsertAfterOptions">List insert after options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<ListInsertAfterResponse>> InsertAfterAsync(ListInsertAfterOption listInsertAfterOption)
+            public static async Task<CacheResult<ListInsertAfterResponse>> InsertAfterAsync(ListInsertAfterOptions listInsertAfterOptions)
             {
-                return await ExecuteCommandAsync(listInsertAfterOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(listInsertAfterOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Insert the value value into the list key, after the value pivot
             /// </summary>
-            /// <param name="listInsertAfterOption">List insert after option</param>
+            /// <param name="listInsertAfterOptions">List insert after options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<ListInsertAfterResponse> InsertAfter(ListInsertAfterOption listInsertAfterOption)
+            public static CacheResult<ListInsertAfterResponse> InsertAfter(ListInsertAfterOptions listInsertAfterOptions)
             {
-                return InsertAfterAsync(listInsertAfterOption).Result;
+                return InsertAfterAsync(listInsertAfterOptions).Result;
             }
 
             #endregion
@@ -1143,11 +1136,11 @@ namespace EZNEW.Cache
             /// The subscript (index) parameters start and stop are both based on 0, that is, 0 represents the first element of the list, 1 represents the second element of the list, and so on
             /// You can also use negative subscripts, with -1 for the last element of the list, -2 for the penultimate element of the list, and so on
             /// </summary>
-            /// <param name="listGetByIndexOption">List get by index option</param>
+            /// <param name="listGetByIndexOptions">List get by index options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<ListGetByIndexResponse>> GetByIndexAsync(ListGetByIndexOption listGetByIndexOption)
+            public static async Task<CacheResult<ListGetByIndexResponse>> GetByIndexAsync(ListGetByIndexOptions listGetByIndexOptions)
             {
-                return await ExecuteCommandAsync(listGetByIndexOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(listGetByIndexOptions).ConfigureAwait(false);
             }
 
             /// <summary>
@@ -1155,11 +1148,11 @@ namespace EZNEW.Cache
             /// The subscript (index) parameters start and stop are both based on 0, that is, 0 represents the first element of the list, 1 represents the second element of the list, and so on
             /// You can also use negative subscripts, with -1 for the last element of the list, -2 for the penultimate element of the list, and so on
             /// </summary>
-            /// <param name="listGetByIndexOption">List get by index option</param>
+            /// <param name="listGetByIndexOptions">List get by index options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<ListGetByIndexResponse> GetByIndex(ListGetByIndexOption listGetByIndexOption)
+            public static CacheResult<ListGetByIndexResponse> GetByIndex(ListGetByIndexOptions listGetByIndexOptions)
             {
-                return GetByIndexAsync(listGetByIndexOption).Result;
+                return GetByIndexAsync(listGetByIndexOptions).Result;
             }
 
             #endregion
@@ -1179,21 +1172,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Return the values ​​of all fields in the hash table key
             /// </summary>
-            /// <param name="hashValuesOption">Hash values option</param>
+            /// <param name="hashValuesOptions">Hash values options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<HashValuesResponse>> ValuesAsync(HashValuesOption hashValuesOption)
+            public static async Task<CacheResult<HashValuesResponse>> ValuesAsync(HashValuesOptions hashValuesOptions)
             {
-                return await ExecuteCommandAsync(hashValuesOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(hashValuesOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Return the values ​​of all fields in the hash table key
             /// </summary>
-            /// <param name="hashValuesOption">Hash values option</param>
+            /// <param name="hashValuesOptions">Hash values options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<HashValuesResponse> Values(HashValuesOption hashValuesOption)
+            public static CacheResult<HashValuesResponse> Values(HashValuesOptions hashValuesOptions)
             {
-                return ValuesAsync(hashValuesOption).Result;
+                return ValuesAsync(hashValuesOptions).Result;
             }
 
             #endregion
@@ -1205,11 +1198,11 @@ namespace EZNEW.Cache
             /// If the given hash table does not exist, then a new hash table will be created and perform the operation
             /// If the field field already exists in the hash table, its old value will be overwritten by the new value
             /// </summary>
-            /// <param name="hashSetOption">Hash set option</param>
+            /// <param name="hashSetOptions">Hash set options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<HashSetResponse>> SetAsync(HashSetOption hashSetOption)
+            public static async Task<CacheResult<HashSetResponse>> SetAsync(HashSetOptions hashSetOptions)
             {
-                return await ExecuteCommandAsync(hashSetOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(hashSetOptions).ConfigureAwait(false);
             }
 
             /// <summary>
@@ -1217,11 +1210,11 @@ namespace EZNEW.Cache
             /// If the given hash table does not exist, then a new hash table will be created and perform the operation
             /// If the field field already exists in the hash table, its old value will be overwritten by the new value
             /// </summary>
-            /// <param name="hashSetOption">Hash set option</param>
+            /// <param name="hashSetOptions">Hash set options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<HashSetResponse> Set(HashSetOption hashSetOption)
+            public static CacheResult<HashSetResponse> Set(HashSetOptions hashSetOptions)
             {
-                return SetAsync(hashSetOption).Result;
+                return SetAsync(hashSetOptions).Result;
             }
 
             #endregion
@@ -1231,21 +1224,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// returns the number of fields in the hash table key
             /// </summary>
-            /// <param name="hashLengthOption">Hash length option</param>
+            /// <param name="hashLengthOptions">Hash length options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<HashLengthResponse>> LengthAsync(HashLengthOption hashLengthOption)
+            public static async Task<CacheResult<HashLengthResponse>> LengthAsync(HashLengthOptions hashLengthOptions)
             {
-                return await ExecuteCommandAsync(hashLengthOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(hashLengthOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// returns the number of fields in the hash table key
             /// </summary>
-            /// <param name="hashLengthOption">Hash length option</param>
+            /// <param name="hashLengthOptions">Hash length options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<HashLengthResponse> Length(HashLengthOption hashLengthOption)
+            public static CacheResult<HashLengthResponse> Length(HashLengthOptions hashLengthOptions)
             {
-                return LengthAsync(hashLengthOption).Result;
+                return LengthAsync(hashLengthOptions).Result;
             }
 
             #endregion
@@ -1255,21 +1248,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Return all keys in the hash table key
             /// </summary>
-            /// <param name="hashKeysOption">Hash keys option</param>
+            /// <param name="hashKeysOptions">Hash keys options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<HashKeysResponse>> KeysAsync(HashKeysOption hashKeysOption)
+            public static async Task<CacheResult<HashKeysResponse>> KeysAsync(HashKeysOptions hashKeysOptions)
             {
-                return await ExecuteCommandAsync(hashKeysOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(hashKeysOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Return all keys in the hash table key
             /// </summary>
-            /// <param name="hashKeysOption">Hash keys option</param>
+            /// <param name="hashKeysOptions">Hash keys options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<HashKeysResponse> Keys(HashKeysOption hashKeysOption)
+            public static CacheResult<HashKeysResponse> Keys(HashKeysOptions hashKeysOptions)
             {
-                return KeysAsync(hashKeysOption).Result;
+                return KeysAsync(hashKeysOptions).Result;
             }
 
             #endregion
@@ -1279,21 +1272,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Add incremental increment to the value of the field field in the hash table key
             /// </summary>
-            /// <param name="hashIncrementOption">Hash increment option</param>
+            /// <param name="hashIncrementOptions">Hash increment options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<HashIncrementResponse>> IncrementAsync(HashIncrementOption hashIncrementOption)
+            public static async Task<CacheResult<HashIncrementResponse>> IncrementAsync(HashIncrementOptions hashIncrementOptions)
             {
-                return await ExecuteCommandAsync(hashIncrementOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(hashIncrementOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Add incremental increment to the value of the field field in the hash table key
             /// </summary>
-            /// <param name="hashIncrementOption">Hash increment option</param>
+            /// <param name="hashIncrementOptions">Hash increment options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<HashIncrementResponse> Increment(HashIncrementOption hashIncrementOption)
+            public static CacheResult<HashIncrementResponse> Increment(HashIncrementOptions hashIncrementOptions)
             {
-                return IncrementAsync(hashIncrementOption).Result;
+                return IncrementAsync(hashIncrementOptions).Result;
             }
 
             #endregion
@@ -1303,21 +1296,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Returns the value of the given field in the hash table
             /// </summary>
-            /// <param name="hashGetOption">Hash get option</param>
+            /// <param name="hashGetOptions">Hash get options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<HashGetResponse>> GetAsync(HashGetOption hashGetOption)
+            public static async Task<CacheResult<HashGetResponse>> GetAsync(HashGetOptions hashGetOptions)
             {
-                return await ExecuteCommandAsync(hashGetOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(hashGetOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Returns the value of the given field in the hash table
             /// </summary>
-            /// <param name="hashGetOption">Hash get option</param>
+            /// <param name="hashGetOptions">Hash get options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<HashGetResponse> Get(HashGetOption hashGetOption)
+            public static CacheResult<HashGetResponse> Get(HashGetOptions hashGetOptions)
             {
-                return GetAsync(hashGetOption).Result;
+                return GetAsync(hashGetOptions).Result;
             }
 
             #endregion
@@ -1327,21 +1320,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Return the values ​​of all fields in the hash table key
             /// </summary>
-            /// <param name="hashGetAllOption">Hash get all option</param>
+            /// <param name="hashGetAllOptions">Hash get all options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<HashGetAllResponse>> GetAllAsync(HashGetAllOption hashGetAllOption)
+            public static async Task<CacheResult<HashGetAllResponse>> GetAllAsync(HashGetAllOptions hashGetAllOptions)
             {
-                return await ExecuteCommandAsync(hashGetAllOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(hashGetAllOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Return the values ​​of all fields in the hash table key
             /// </summary>
-            /// <param name="hashGetAllOption">Hash get all option</param>
+            /// <param name="hashGetAllOptions">Hash get all options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<HashGetAllResponse> GetAll(HashGetAllOption hashGetAllOption)
+            public static CacheResult<HashGetAllResponse> GetAll(HashGetAllOptions hashGetAllOptions)
             {
-                return GetAllAsync(hashGetAllOption).Result;
+                return GetAllAsync(hashGetAllOptions).Result;
             }
 
             #endregion
@@ -1351,21 +1344,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Check if the given field exists in the hash of the hash table
             /// </summary>
-            /// <param name="hashExistsOption">Hash exists option</param>
+            /// <param name="hashExistsOptions">Hash exists options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<HashExistsResponse>> ExistAsync(HashExistsOption hashExistsOption)
+            public static async Task<CacheResult<HashExistsResponse>> ExistAsync(HashExistsOptions hashExistsOptions)
             {
-                return await ExecuteCommandAsync(hashExistsOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(hashExistsOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Check if the given field exists in the hash of the hash table
             /// </summary>
-            /// <param name="hashExistsOption">Hash exists option</param>
+            /// <param name="hashExistsOptions">Hash exists options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<HashExistsResponse> Exist(HashExistsOption hashExistsOption)
+            public static CacheResult<HashExistsResponse> Exist(HashExistsOptions hashExistsOptions)
             {
-                return ExistAsync(hashExistsOption).Result;
+                return ExistAsync(hashExistsOptions).Result;
             }
 
             #endregion
@@ -1375,21 +1368,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Delete one or more specified fields in the hash table key, the non-existing fields will be ignored
             /// </summary>
-            /// <param name="hashDeleteOption">Hash delete option</param>
+            /// <param name="hashDeleteOptions">Hash delete options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<HashDeleteResponse>> DeleteAsync(HashDeleteOption hashDeleteOption)
+            public static async Task<CacheResult<HashDeleteResponse>> DeleteAsync(HashDeleteOptions hashDeleteOptions)
             {
-                return await ExecuteCommandAsync(hashDeleteOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(hashDeleteOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Delete one or more specified fields in the hash table key, the non-existing fields will be ignored
             /// </summary>
-            /// <param name="hashDeleteOption">Hash delete option</param>
+            /// <param name="hashDeleteOptions">Hash delete options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<HashDeleteResponse> Delete(HashDeleteOption hashDeleteOption)
+            public static CacheResult<HashDeleteResponse> Delete(HashDeleteOptions hashDeleteOptions)
             {
-                return DeleteAsync(hashDeleteOption).Result;
+                return DeleteAsync(hashDeleteOptions).Result;
             }
 
             #endregion
@@ -1399,21 +1392,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Is the value of the field in the hash table key minus the increment increment
             /// </summary>
-            /// <param name="hashDecrementOption">Hash decrement option</param>
+            /// <param name="hashDecrementOptions">Hash decrement options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<HashDecrementResponse>> DecrementAsync(HashDecrementOption hashDecrementOption)
+            public static async Task<CacheResult<HashDecrementResponse>> DecrementAsync(HashDecrementOptions hashDecrementOptions)
             {
-                return await ExecuteCommandAsync(hashDecrementOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(hashDecrementOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Is the value of the field in the hash table key minus the increment increment
             /// </summary>
-            /// <param name="hashDecrementOption">Hash decrement option</param>
+            /// <param name="hashDecrementOptions">Hash decrement options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<HashDecrementResponse> Decrement(HashDecrementOption hashDecrementOption)
+            public static CacheResult<HashDecrementResponse> Decrement(HashDecrementOptions hashDecrementOptions)
             {
-                return DecrementAsync(hashDecrementOption).Result;
+                return DecrementAsync(hashDecrementOptions).Result;
             }
 
             #endregion
@@ -1423,21 +1416,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Each element returned is a key-value pair, a key-value pair consists of a key and a value
             /// </summary>
-            /// <param name="hashScanOption">Hash scan option</param>
+            /// <param name="hashScanOptions">Hash scan options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<HashScanResponse>> ScanAsync(HashScanOption hashScanOption)
+            public static async Task<CacheResult<HashScanResponse>> ScanAsync(HashScanOptions hashScanOptions)
             {
-                return await ExecuteCommandAsync(hashScanOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(hashScanOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Each element returned is a key-value pair, a key-value pair consists of a key and a value
             /// </summary>
-            /// <param name="hashScanOption">Hash scan option</param>
+            /// <param name="hashScanOptions">Hash scan options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<HashScanResponse> Scan(HashScanOption hashScanOption)
+            public static CacheResult<HashScanResponse> Scan(HashScanOptions hashScanOptions)
             {
-                return ScanAsync(hashScanOption).Result;
+                return ScanAsync(hashScanOptions).Result;
             }
 
             #endregion
@@ -1457,21 +1450,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Remove one or more member elements in the collection key, non-existent member elements will be ignored
             /// </summary>
-            /// <param name="setRemoveOption">Set remove option</param>
+            /// <param name="setRemoveOptions">Set remove options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<SetRemoveResponse>> RemoveAsync(SetRemoveOption setRemoveOption)
+            public static async Task<CacheResult<SetRemoveResponse>> RemoveAsync(SetRemoveOptions setRemoveOptions)
             {
-                return await ExecuteCommandAsync(setRemoveOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(setRemoveOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Remove one or more member elements in the collection key, non-existent member elements will be ignored
             /// </summary>
-            /// <param name="setRemoveOption">Set remove option</param>
+            /// <param name="setRemoveOptions">Set remove options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<SetRemoveResponse> Remove(SetRemoveOption setRemoveOption)
+            public static CacheResult<SetRemoveResponse> Remove(SetRemoveOptions setRemoveOptions)
             {
-                return RemoveAsync(setRemoveOption).Result;
+                return RemoveAsync(setRemoveOptions).Result;
             }
 
             #endregion
@@ -1481,21 +1474,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Then return a set of random elements in the collection
             /// </summary>
-            /// <param name="setRandomMembersOption">Set random members option</param>
+            /// <param name="setRandomMembersOptions">Set random members options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<SetRandomMembersResponse>> RandomMembersAsync(SetRandomMembersOption setRandomMembersOption)
+            public static async Task<CacheResult<SetRandomMembersResponse>> RandomMembersAsync(SetRandomMembersOptions setRandomMembersOptions)
             {
-                return await ExecuteCommandAsync(setRandomMembersOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(setRandomMembersOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Return a set of random elements in the collection
             /// </summary>
-            /// <param name="setRandomMembersOption">Set random members option</param>
+            /// <param name="setRandomMembersOptions">Set random members options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<SetRandomMembersResponse> RandomMembers(SetRandomMembersOption setRandomMembersOption)
+            public static CacheResult<SetRandomMembersResponse> RandomMembers(SetRandomMembersOptions setRandomMembersOptions)
             {
-                return RandomMembersAsync(setRandomMembersOption).Result;
+                return RandomMembersAsync(setRandomMembersOptions).Result;
             }
 
             #endregion
@@ -1505,21 +1498,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Returns a random element in the collection
             /// </summary>
-            /// <param name="setRandomMemberOption">Set random member option</param>
+            /// <param name="setRandomMemberOptions">Set random member options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<SetRandomMemberResponse>> RandomMemberAsync(SetRandomMemberOption setRandomMemberOption)
+            public static async Task<CacheResult<SetRandomMemberResponse>> RandomMemberAsync(SetRandomMemberOptions setRandomMemberOptions)
             {
-                return await ExecuteCommandAsync(setRandomMemberOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(setRandomMemberOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Returns a random element in the collection
             /// </summary>
-            /// <param name="setRandomMemberOption">Set random member option</param>
+            /// <param name="setRandomMemberOptions">Set random member options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<SetRandomMemberResponse> RandomMember(SetRandomMemberOption setRandomMemberOption)
+            public static CacheResult<SetRandomMemberResponse> RandomMember(SetRandomMemberOptions setRandomMemberOptions)
             {
-                return RandomMemberAsync(setRandomMemberOption).Result;
+                return RandomMemberAsync(setRandomMemberOptions).Result;
             }
 
             #endregion
@@ -1529,21 +1522,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Remove and return a random element in the collection
             /// </summary>
-            /// <param name="setPopOption">Set pop option</param>
+            /// <param name="setPopOptions">Set pop options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<SetPopResponse>> PopAsync(SetPopOption setPopOption)
+            public static async Task<CacheResult<SetPopResponse>> PopAsync(SetPopOptions setPopOptions)
             {
-                return await ExecuteCommandAsync(setPopOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(setPopOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Remove and return a random element in the collection
             /// </summary>
-            /// <param name="setPopOption">Set pop option</param>
+            /// <param name="setPopOptions">Set pop options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<SetPopResponse> Pop(SetPopOption setPopOption)
+            public static CacheResult<SetPopResponse> Pop(SetPopOptions setPopOptions)
             {
-                return PopAsync(setPopOption).Result;
+                return PopAsync(setPopOptions).Result;
             }
 
             #endregion
@@ -1553,21 +1546,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Move the member element from the source collection to the destination collection
             /// </summary>
-            /// <param name="setMoveOption">Set move option</param>
+            /// <param name="setMoveOptions">Set move options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<SetMoveResponse>> MoveAsync(SetMoveOption setMoveOption)
+            public static async Task<CacheResult<SetMoveResponse>> MoveAsync(SetMoveOptions setMoveOptions)
             {
-                return await ExecuteCommandAsync(setMoveOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(setMoveOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Move the member element from the source collection to the destination collection
             /// </summary>
-            /// <param name="setMoveOption">Set move option</param>
+            /// <param name="setMoveOptions">Set move options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<SetMoveResponse> Move(SetMoveOption setMoveOption)
+            public static CacheResult<SetMoveResponse> Move(SetMoveOptions setMoveOptions)
             {
-                return MoveAsync(setMoveOption).Result;
+                return MoveAsync(setMoveOptions).Result;
             }
 
             #endregion
@@ -1577,21 +1570,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Return all members in the collection key
             /// </summary>
-            /// <param name="setMembersOption">Set members option</param>
+            /// <param name="setMembersOptions">Set members options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<SetMembersResponse>> MembersAsync(SetMembersOption setMembersOption)
+            public static async Task<CacheResult<SetMembersResponse>> MembersAsync(SetMembersOptions setMembersOptions)
             {
-                return await ExecuteCommandAsync(setMembersOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(setMembersOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Return all members in the collection key
             /// </summary>
-            /// <param name="setMembersOption">Set members option</param>
+            /// <param name="setMembersOptions">Set members options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<SetMembersResponse> Members(SetMembersOption setMembersOption)
+            public static CacheResult<SetMembersResponse> Members(SetMembersOptions setMembersOptions)
             {
-                return MembersAsync(setMembersOption).Result;
+                return MembersAsync(setMembersOptions).Result;
             }
 
             #endregion
@@ -1601,21 +1594,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Returns the number of elements in the collection
             /// </summary>
-            /// <param name="setLengthOption">Set length option</param>
+            /// <param name="setLengthOptions">Set length options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<SetLengthResponse>> LengthAsync(SetLengthOption setLengthOption)
+            public static async Task<CacheResult<SetLengthResponse>> LengthAsync(SetLengthOptions setLengthOptions)
             {
-                return await ExecuteCommandAsync(setLengthOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(setLengthOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Returns the number of elements in the collection
             /// </summary>
-            /// <param name="setLengthOption">Set length option</param>
+            /// <param name="setLengthOptions">Set length options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<SetLengthResponse> Length(SetLengthOption setLengthOption)
+            public static CacheResult<SetLengthResponse> Length(SetLengthOptions setLengthOptions)
             {
-                return LengthAsync(setLengthOption).Result;
+                return LengthAsync(setLengthOptions).Result;
             }
 
             #endregion
@@ -1625,21 +1618,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Determine whether the member element is a member of the set key
             /// </summary>
-            /// <param name="setContainsOption">Set contaims option</param>
+            /// <param name="setContainsOptions">Set contaims options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<SetContainsResponse>> ContainsAsync(SetContainsOption setContainsOption)
+            public static async Task<CacheResult<SetContainsResponse>> ContainsAsync(SetContainsOptions setContainsOptions)
             {
-                return await ExecuteCommandAsync(setContainsOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(setContainsOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Determine whether the member element is a member of the set key
             /// </summary>
-            /// <param name="setContainsOption">Set contaims option</param>
+            /// <param name="setContainsOptions">Set contaims options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<SetContainsResponse> Contains(SetContainsOption setContainsOption)
+            public static CacheResult<SetContainsResponse> Contains(SetContainsOptions setContainsOptions)
             {
-                return ContainsAsync(setContainsOption).Result;
+                return ContainsAsync(setContainsOptions).Result;
             }
 
             #endregion
@@ -1649,21 +1642,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// According to the operation mode, return the processing results of multiple collections
             /// </summary>
-            /// <param name="setCombineOption">Set combine option</param>
+            /// <param name="setCombineOptions">Set combine options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<SetCombineResponse>> CombineAsync(SetCombineOption setCombineOption)
+            public static async Task<CacheResult<SetCombineResponse>> CombineAsync(SetCombineOptions setCombineOptions)
             {
-                return await ExecuteCommandAsync(setCombineOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(setCombineOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// According to the operation mode, return the processing results of multiple collections
             /// </summary>
-            /// <param name="setCombineOption">Set combine option</param>
+            /// <param name="setCombineOptions">Set combine options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<SetCombineResponse> Combine(SetCombineOption setCombineOption)
+            public static CacheResult<SetCombineResponse> Combine(SetCombineOptions setCombineOptions)
             {
-                return CombineAsync(setCombineOption).Result;
+                return CombineAsync(setCombineOptions).Result;
             }
 
             #endregion
@@ -1673,21 +1666,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Return the processing results of multiple collections according to the operation mode, and store the results to the specified key value at the same time
             /// </summary>
-            /// <param name="setCombineAndStoreOption">Set combine and store option</param>
+            /// <param name="setCombineAndStoreOptions">Set combine and store options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<SetCombineAndStoreResponse>> CombineAndStoreAsync(SetCombineAndStoreOption setCombineAndStoreOption)
+            public static async Task<CacheResult<SetCombineAndStoreResponse>> CombineAndStoreAsync(SetCombineAndStoreOptions setCombineAndStoreOptions)
             {
-                return await ExecuteCommandAsync(setCombineAndStoreOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(setCombineAndStoreOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Return the processing results of multiple collections according to the operation mode, and store the results to the specified key value at the same time
             /// </summary>
-            /// <param name="setCombineAndStoreOption">Set combine and store option</param>
+            /// <param name="setCombineAndStoreOptions">Set combine and store options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<SetCombineAndStoreResponse> CombineAndStore(SetCombineAndStoreOption setCombineAndStoreOption)
+            public static CacheResult<SetCombineAndStoreResponse> CombineAndStore(SetCombineAndStoreOptions setCombineAndStoreOptions)
             {
-                return CombineAndStoreAsync(setCombineAndStoreOption).Result;
+                return CombineAndStoreAsync(setCombineAndStoreOptions).Result;
             }
 
             #endregion
@@ -1698,22 +1691,22 @@ namespace EZNEW.Cache
             /// Add one or more member elements to the collection key, the member elements already in the collection will be ignored
             /// If the key does not exist, create a collection that contains only the member element as a member
             /// </summary>
-            /// <param name="setAddOption">Set add option</param>
+            /// <param name="setAddOptions">Set add options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<SetAddResponse>> AddAsync(SetAddOption setAddOption)
+            public static async Task<CacheResult<SetAddResponse>> AddAsync(SetAddOptions setAddOptions)
             {
-                return await ExecuteCommandAsync(setAddOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(setAddOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Add one or more member elements to the collection key, the member elements already in the collection will be ignored
             /// If the key does not exist, create a collection that contains only the member element as a member
             /// </summary>
-            /// <param name="setAddOption">Set add option</param>
+            /// <param name="setAddOptions">Set add options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<SetAddResponse> Add(SetAddOption setAddOption)
+            public static CacheResult<SetAddResponse> Add(SetAddOptions setAddOptions)
             {
-                return AddAsync(setAddOption).Result;
+                return AddAsync(setAddOptions).Result;
             }
 
             #endregion
@@ -1733,21 +1726,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Returns the score value of the member member in the ordered set key
             /// </summary>
-            /// <param name="sortedSetScoreOption">Sorted set score option</param>
+            /// <param name="sortedSetScoreOptions">Sorted set score options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<SortedSetScoreResponse>> ScoreAsync(SortedSetScoreOption sortedSetScoreOption)
+            public static async Task<CacheResult<SortedSetScoreResponse>> ScoreAsync(SortedSetScoreOptions sortedSetScoreOptions)
             {
-                return await ExecuteCommandAsync(sortedSetScoreOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(sortedSetScoreOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Returns the score value of the member member in the ordered set key
             /// </summary>
-            /// <param name="sortedSetScoreOption">Sorted set score option</param>
+            /// <param name="sortedSetScoreOptions">Sorted set score options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<SortedSetScoreResponse> Score(SortedSetScoreOption sortedSetScoreOption)
+            public static CacheResult<SortedSetScoreResponse> Score(SortedSetScoreOptions sortedSetScoreOptions)
             {
-                return ScoreAsync(sortedSetScoreOption).Result;
+                return ScoreAsync(sortedSetScoreOptions).Result;
             }
 
             #endregion
@@ -1757,21 +1750,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Remove the elements in the specified range after sorting the elements
             /// </summary>
-            /// <param name="sortedSetRemoveRangeByValueOption">Sorted set remove range by value option</param>
+            /// <param name="sortedSetRemoveRangeByValueOptions">Sorted set remove range by value options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<SortedSetRemoveRangeByValueResponse>> RemoveRangeByValueAsync(SortedSetRemoveRangeByValueOption sortedSetRemoveRangeByValueOption)
+            public static async Task<CacheResult<SortedSetRemoveRangeByValueResponse>> RemoveRangeByValueAsync(SortedSetRemoveRangeByValueOptions sortedSetRemoveRangeByValueOptions)
             {
-                return await ExecuteCommandAsync(sortedSetRemoveRangeByValueOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(sortedSetRemoveRangeByValueOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Remove the elements in the specified range after sorting the elements
             /// </summary>
-            /// <param name="sortedSetRemoveRangeByValueOption">Sorted set remove range by value option</param>
+            /// <param name="sortedSetRemoveRangeByValueOptions">Sorted set remove range by value options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<SortedSetRemoveRangeByValueResponse> RemoveRangeByValue(SortedSetRemoveRangeByValueOption sortedSetRemoveRangeByValueOption)
+            public static CacheResult<SortedSetRemoveRangeByValueResponse> RemoveRangeByValue(SortedSetRemoveRangeByValueOptions sortedSetRemoveRangeByValueOptions)
             {
-                return RemoveRangeByValueAsync(sortedSetRemoveRangeByValueOption).Result;
+                return RemoveRangeByValueAsync(sortedSetRemoveRangeByValueOptions).Result;
             }
 
             #endregion
@@ -1781,21 +1774,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Remove all members in the ordered set key whose score value is between min and max
             /// </summary>
-            /// <param name="sortedSetRemoveRangeByScoreOption">Sorted set remove range by score option</param>
+            /// <param name="sortedSetRemoveRangeByScoreOptions">Sorted set remove range by score options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<SortedSetRemoveRangeByScoreResponse>> RemoveRangeByScoreAsync(SortedSetRemoveRangeByScoreOption sortedSetRemoveRangeByScoreOption)
+            public static async Task<CacheResult<SortedSetRemoveRangeByScoreResponse>> RemoveRangeByScoreAsync(SortedSetRemoveRangeByScoreOptions sortedSetRemoveRangeByScoreOptions)
             {
-                return await ExecuteCommandAsync(sortedSetRemoveRangeByScoreOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(sortedSetRemoveRangeByScoreOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Remove all members in the ordered set key whose score value is between min and max
             /// </summary>
-            /// <param name="sortedSetRemoveRangeByScoreOption">Sorted set remove range by score option</param>
+            /// <param name="sortedSetRemoveRangeByScoreOptions">Sorted set remove range by score options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<SortedSetRemoveRangeByScoreResponse> RemoveRangeByScore(SortedSetRemoveRangeByScoreOption sortedSetRemoveRangeByScoreOption)
+            public static CacheResult<SortedSetRemoveRangeByScoreResponse> RemoveRangeByScore(SortedSetRemoveRangeByScoreOptions sortedSetRemoveRangeByScoreOptions)
             {
-                return RemoveRangeByScoreAsync(sortedSetRemoveRangeByScoreOption).Result;
+                return RemoveRangeByScoreAsync(sortedSetRemoveRangeByScoreOptions).Result;
             }
 
             #endregion
@@ -1807,11 +1800,11 @@ namespace EZNEW.Cache
             /// The subscript parameters start and stop are both based on 0, that is, 0 means the first member of the ordered set, 1 means the second member of the ordered set, and so on. 
             /// You can also use negative subscripts, with -1 for the last member, -2 for the penultimate member, and so on.
             /// </summary>
-            /// <param name="sortedSetRemoveRangeByRankOption">Sorted set range by rank option</param>
+            /// <param name="sortedSetRemoveRangeByRankOptions">Sorted set range by rank options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<SortedSetRemoveRangeByRankResponse>> RemoveRangeByRankAsync(SortedSetRemoveRangeByRankOption sortedSetRemoveRangeByRankOption)
+            public static async Task<CacheResult<SortedSetRemoveRangeByRankResponse>> RemoveRangeByRankAsync(SortedSetRemoveRangeByRankOptions sortedSetRemoveRangeByRankOptions)
             {
-                return await ExecuteCommandAsync(sortedSetRemoveRangeByRankOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(sortedSetRemoveRangeByRankOptions).ConfigureAwait(false);
             }
 
             /// <summary>
@@ -1819,11 +1812,11 @@ namespace EZNEW.Cache
             /// The subscript parameters start and stop are both based on 0, that is, 0 means the first member of the ordered set, 1 means the second member of the ordered set, and so on. 
             /// You can also use negative subscripts, with -1 for the last member, -2 for the penultimate member, and so on.
             /// </summary>
-            /// <param name="sortedSetRemoveRangeByRankOption">Sorted set range by rank option</param>
+            /// <param name="sortedSetRemoveRangeByRankOptions">Sorted set range by rank options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<SortedSetRemoveRangeByRankResponse> RemoveRangeByRank(SortedSetRemoveRangeByRankOption sortedSetRemoveRangeByRankOption)
+            public static CacheResult<SortedSetRemoveRangeByRankResponse> RemoveRangeByRank(SortedSetRemoveRangeByRankOptions sortedSetRemoveRangeByRankOptions)
             {
-                return RemoveRangeByRankAsync(sortedSetRemoveRangeByRankOption).Result;
+                return RemoveRangeByRankAsync(sortedSetRemoveRangeByRankOptions).Result;
             }
 
             #endregion
@@ -1833,21 +1826,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Remove the specified element in the ordered collection
             /// </summary>
-            /// <param name="sortedSetRemoveOption">Sorted set remove option</param>
+            /// <param name="sortedSetRemoveOptions">Sorted set remove options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<SortedSetRemoveResponse>> RemoveAsync(SortedSetRemoveOption sortedSetRemoveOption)
+            public static async Task<CacheResult<SortedSetRemoveResponse>> RemoveAsync(SortedSetRemoveOptions sortedSetRemoveOptions)
             {
-                return await ExecuteCommandAsync(sortedSetRemoveOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(sortedSetRemoveOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Remove the specified element in the ordered collection
             /// </summary>
-            /// <param name="sortedSetRemoveOption">Sorted set remove option</param>
+            /// <param name="sortedSetRemoveOptions">Sorted set remove options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<SortedSetRemoveResponse> Remove(SortedSetRemoveOption sortedSetRemoveOption)
+            public static CacheResult<SortedSetRemoveResponse> Remove(SortedSetRemoveOptions sortedSetRemoveOptions)
             {
-                return RemoveAsync(sortedSetRemoveOption).Result;
+                return RemoveAsync(sortedSetRemoveOptions).Result;
             }
 
             #endregion
@@ -1858,22 +1851,22 @@ namespace EZNEW.Cache
             /// Returns the ranking of the member member in the ordered set key. The members of the ordered set are arranged in order of increasing score value (from small to large) by default
             /// The ranking is based on 0, that is, the member with the smallest score is ranked 0
             /// </summary>
-            /// <param name="sortedSetRankOption">Sorted set rank option</param>
+            /// <param name="sortedSetRankOptions">Sorted set rank options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<SortedSetRankResponse>> RankAsync(SortedSetRankOption sortedSetRankOption)
+            public static async Task<CacheResult<SortedSetRankResponse>> RankAsync(SortedSetRankOptions sortedSetRankOptions)
             {
-                return await ExecuteCommandAsync(sortedSetRankOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(sortedSetRankOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Returns the ranking of the member member in the ordered set key. The members of the ordered set are arranged in order of increasing score value (from small to large) by default
             /// The ranking is based on 0, that is, the member with the smallest score is ranked 0
             /// </summary>
-            /// <param name="sortedSetRankOption">Sorted set rank option</param>
+            /// <param name="sortedSetRankOptions">Sorted set rank options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<SortedSetRankResponse> Rank(SortedSetRankOption sortedSetRankOption)
+            public static CacheResult<SortedSetRankResponse> Rank(SortedSetRankOptions sortedSetRankOptions)
             {
-                return RankAsync(sortedSetRankOption).Result;
+                return RankAsync(sortedSetRankOptions).Result;
             }
 
             #endregion
@@ -1883,21 +1876,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Returns the elements in the ordered set between min and max
             /// </summary>
-            /// <param name="sortedSetRangeByValueOption">Sorted set range by value option</param>
+            /// <param name="sortedSetRangeByValueOptions">Sorted set range by value options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<SortedSetRangeByValueResponse>> RangeByValueAsync(SortedSetRangeByValueOption sortedSetRangeByValueOption)
+            public static async Task<CacheResult<SortedSetRangeByValueResponse>> RangeByValueAsync(SortedSetRangeByValueOptions sortedSetRangeByValueOptions)
             {
-                return await ExecuteCommandAsync(sortedSetRangeByValueOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(sortedSetRangeByValueOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Returns the elements in the ordered set between min and max
             /// </summary>
-            /// <param name="sortedSetRangeByValueOption">Sorted set range by value option</param>
+            /// <param name="sortedSetRangeByValueOptions">Sorted set range by value options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<SortedSetRangeByValueResponse> RangeByValue(SortedSetRangeByValueOption sortedSetRangeByValueOption)
+            public static CacheResult<SortedSetRangeByValueResponse> RangeByValue(SortedSetRangeByValueOptions sortedSetRangeByValueOptions)
             {
-                return RangeByValueAsync(sortedSetRangeByValueOption).Result;
+                return RangeByValueAsync(sortedSetRangeByValueOptions).Result;
             }
 
             #endregion
@@ -1907,21 +1900,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Returns the value and score of the members in the specified interval in the ordered set key, the positions are arranged according to score
             /// </summary>
-            /// <param name="sortedSetRangeByScoreWithScoresOption">Sorted set range by score with scores option</param>
+            /// <param name="sortedSetRangeByScoreWithScoresOptions">Sorted set range by score with scores options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<SortedSetRangeByScoreWithScoresResponse>> RangeByScoreWithScoresAsync(SortedSetRangeByScoreWithScoresOption sortedSetRangeByScoreWithScoresOption)
+            public static async Task<CacheResult<SortedSetRangeByScoreWithScoresResponse>> RangeByScoreWithScoresAsync(SortedSetRangeByScoreWithScoresOptions sortedSetRangeByScoreWithScoresOptions)
             {
-                return await ExecuteCommandAsync(sortedSetRangeByScoreWithScoresOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(sortedSetRangeByScoreWithScoresOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Returns the value and score of the members in the specified interval in the ordered set key, the positions are arranged according to score
             /// </summary>
-            /// <param name="sortedSetRangeByScoreWithScoresOption">Sorted set range by score with scores option</param>
+            /// <param name="sortedSetRangeByScoreWithScoresOptions">Sorted set range by score with scores options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<SortedSetRangeByScoreWithScoresResponse> RangeByScoreWithScores(SortedSetRangeByScoreWithScoresOption sortedSetRangeByScoreWithScoresOption)
+            public static CacheResult<SortedSetRangeByScoreWithScoresResponse> RangeByScoreWithScores(SortedSetRangeByScoreWithScoresOptions sortedSetRangeByScoreWithScoresOptions)
             {
-                return RangeByScoreWithScoresAsync(sortedSetRangeByScoreWithScoresOption).Result;
+                return RangeByScoreWithScoresAsync(sortedSetRangeByScoreWithScoresOptions).Result;
             }
 
             #endregion
@@ -1931,21 +1924,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Return the value of the members in the specified interval in the ordered set key, the position is arranged by score
             /// </summary>
-            /// <param name="sortedSetRangeByScoreOption">Sorted set range by score option</param>
+            /// <param name="sortedSetRangeByScoreOptions">Sorted set range by score options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<SortedSetRangeByScoreResponse>> RangeByScoreAsync(SortedSetRangeByScoreOption sortedSetRangeByScoreOption)
+            public static async Task<CacheResult<SortedSetRangeByScoreResponse>> RangeByScoreAsync(SortedSetRangeByScoreOptions sortedSetRangeByScoreOptions)
             {
-                return await ExecuteCommandAsync(sortedSetRangeByScoreOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(sortedSetRangeByScoreOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Return the value of the members in the specified interval in the ordered set key, the position is arranged by score
             /// </summary>
-            /// <param name="sortedSetRangeByScoreOption">Sorted set range by score option</param>
+            /// <param name="sortedSetRangeByScoreOptions">Sorted set range by score options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<SortedSetRangeByScoreResponse> RangeByScore(SortedSetRangeByScoreOption sortedSetRangeByScoreOption)
+            public static CacheResult<SortedSetRangeByScoreResponse> RangeByScore(SortedSetRangeByScoreOptions sortedSetRangeByScoreOptions)
             {
-                return RangeByScoreAsync(sortedSetRangeByScoreOption).Result;
+                return RangeByScoreAsync(sortedSetRangeByScoreOptions).Result;
             }
 
             #endregion
@@ -1955,21 +1948,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Returns the value and score of the members in the specified interval in the ordered set key, the positions are arranged according to score
             /// </summary>
-            /// <param name="sortedSetRangeByRankWithScoresOption">Sorted set range by rank with scores option</param>
+            /// <param name="sortedSetRangeByRankWithScoresOptions">Sorted set range by rank with scores options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<SortedSetRangeByRankWithScoresResponse>> RangeByRankWithScoresAsync(SortedSetRangeByRankWithScoresOption sortedSetRangeByRankWithScoresOption)
+            public static async Task<CacheResult<SortedSetRangeByRankWithScoresResponse>> RangeByRankWithScoresAsync(SortedSetRangeByRankWithScoresOptions sortedSetRangeByRankWithScoresOptions)
             {
-                return await ExecuteCommandAsync(sortedSetRangeByRankWithScoresOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(sortedSetRangeByRankWithScoresOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Returns the value and score of the members in the specified interval in the ordered set key, the positions are arranged according to score
             /// </summary>
-            /// <param name="sortedSetRangeByRankWithScoresOption">Sorted set range by rank with scores option</param>
+            /// <param name="sortedSetRangeByRankWithScoresOptions">Sorted set range by rank with scores options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<SortedSetRangeByRankWithScoresResponse> RangeByRankWithScores(SortedSetRangeByRankWithScoresOption sortedSetRangeByRankWithScoresOption)
+            public static CacheResult<SortedSetRangeByRankWithScoresResponse> RangeByRankWithScores(SortedSetRangeByRankWithScoresOptions sortedSetRangeByRankWithScoresOptions)
             {
-                return RangeByRankWithScoresAsync(sortedSetRangeByRankWithScoresOption).Result;
+                return RangeByRankWithScoresAsync(sortedSetRangeByRankWithScoresOptions).Result;
             }
 
             #endregion
@@ -1979,21 +1972,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Return the value of the members in the specified interval in the ordered set key, the positions are arranged by score
             /// </summary>
-            /// <param name="sortedSetRangeByRankOption">Sorted set range by rank option</param>
+            /// <param name="sortedSetRangeByRankOptions">Sorted set range by rank options</param>
             /// <returns>sorted set range by rank response</returns>
-            public static async Task<CacheResult<SortedSetRangeByRankResponse>> RangeByRankAsync(SortedSetRangeByRankOption sortedSetRangeByRankOption)
+            public static async Task<CacheResult<SortedSetRangeByRankResponse>> RangeByRankAsync(SortedSetRangeByRankOptions sortedSetRangeByRankOptions)
             {
-                return await ExecuteCommandAsync(sortedSetRangeByRankOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(sortedSetRangeByRankOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Return the value of the members in the specified interval in the ordered set key, the positions are arranged by score
             /// </summary>
-            /// <param name="sortedSetRangeByRankOption">Sorted set range by rank option</param>
+            /// <param name="sortedSetRangeByRankOptions">Sorted set range by rank options</param>
             /// <returns>sorted set range by rank response</returns>
-            public static CacheResult<SortedSetRangeByRankResponse> RangeByRank(SortedSetRangeByRankOption sortedSetRangeByRankOption)
+            public static CacheResult<SortedSetRangeByRankResponse> RangeByRank(SortedSetRangeByRankOptions sortedSetRangeByRankOptions)
             {
-                return RangeByRankAsync(sortedSetRangeByRankOption).Result;
+                return RangeByRankAsync(sortedSetRangeByRankOptions).Result;
             }
 
             #endregion
@@ -2003,21 +1996,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Returns the number of members whose value is between min and max in the ordered set key
             /// </summary>
-            /// <param name="sortedSetLengthByValueOption">Sorted set length by value option</param>
+            /// <param name="sortedSetLengthByValueOptions">Sorted set length by value options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<SortedSetLengthByValueResponse>> LengthByValueAsync(SortedSetLengthByValueOption sortedSetLengthByValueOption)
+            public static async Task<CacheResult<SortedSetLengthByValueResponse>> LengthByValueAsync(SortedSetLengthByValueOptions sortedSetLengthByValueOptions)
             {
-                return await ExecuteCommandAsync(sortedSetLengthByValueOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(sortedSetLengthByValueOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Returns the number of members whose value is between min and max in the ordered set key
             /// </summary>
-            /// <param name="sortedSetLengthByValueOption">Sorted set length by value option</param>
+            /// <param name="sortedSetLengthByValueOptions">Sorted set length by value options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<SortedSetLengthByValueResponse> LengthByValue(SortedSetLengthByValueOption sortedSetLengthByValueOption)
+            public static CacheResult<SortedSetLengthByValueResponse> LengthByValue(SortedSetLengthByValueOptions sortedSetLengthByValueOptions)
             {
-                return LengthByValueAsync(sortedSetLengthByValueOption).Result;
+                return LengthByValueAsync(sortedSetLengthByValueOptions).Result;
             }
 
             #endregion
@@ -2027,21 +2020,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Returns the number of members in the ordered set key whose score value is between min and max (including the score value equal to min or max by default)
             /// </summary>
-            /// <param name="sortedSetLengthOption">Sorted set length option</param>
+            /// <param name="sortedSetLengthOptions">Sorted set length options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<SortedSetLengthResponse>> LengthAsync(SortedSetLengthOption sortedSetLengthOption)
+            public static async Task<CacheResult<SortedSetLengthResponse>> LengthAsync(SortedSetLengthOptions sortedSetLengthOptions)
             {
-                return await ExecuteCommandAsync(sortedSetLengthOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(sortedSetLengthOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Returns the number of members in the ordered set key whose score value is between min and max (including the score value equal to min or max by default)
             /// </summary>
-            /// <param name="sortedSetLengthOption">Sorted set length option</param>
+            /// <param name="sortedSetLengthOptions">Sorted set length options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<SortedSetLengthResponse> Length(SortedSetLengthOption sortedSetLengthOption)
+            public static CacheResult<SortedSetLengthResponse> Length(SortedSetLengthOptions sortedSetLengthOptions)
             {
-                return LengthAsync(sortedSetLengthOption).Result;
+                return LengthAsync(sortedSetLengthOptions).Result;
             }
 
             #endregion
@@ -2051,21 +2044,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Add the incremental increment to the score value of the member of the ordered set key
             /// </summary>
-            /// <param name="sortedSetIncrementOption">Sorted set increment option</param>
+            /// <param name="sortedSetIncrementOptions">Sorted set increment options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<SortedSetIncrementResponse>> IncrementAsync(SortedSetIncrementOption sortedSetIncrementOption)
+            public static async Task<CacheResult<SortedSetIncrementResponse>> IncrementAsync(SortedSetIncrementOptions sortedSetIncrementOptions)
             {
-                return await ExecuteCommandAsync(sortedSetIncrementOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(sortedSetIncrementOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Add the incremental increment to the score value of the member of the ordered set key
             /// </summary>
-            /// <param name="sortedSetIncrementOption">Sorted set increment option</param>
+            /// <param name="sortedSetIncrementOptions">Sorted set increment options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<SortedSetIncrementResponse> Increment(SortedSetIncrementOption sortedSetIncrementOption)
+            public static CacheResult<SortedSetIncrementResponse> Increment(SortedSetIncrementOptions sortedSetIncrementOptions)
             {
-                return IncrementAsync(sortedSetIncrementOption).Result;
+                return IncrementAsync(sortedSetIncrementOptions).Result;
             }
 
             #endregion
@@ -2075,21 +2068,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// is the score value of the member of the ordered set key minus the increment increment
             /// </summary>
-            /// <param name="sortedSetDecrementOption">Sorted set decrement option</param>
+            /// <param name="sortedSetDecrementOptions">Sorted set decrement options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<SortedSetDecrementResponse>> DecrementAsync(SortedSetDecrementOption sortedSetDecrementOption)
+            public static async Task<CacheResult<SortedSetDecrementResponse>> DecrementAsync(SortedSetDecrementOptions sortedSetDecrementOptions)
             {
-                return await ExecuteCommandAsync(sortedSetDecrementOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(sortedSetDecrementOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// is the score value of the member of the ordered set key minus the increment increment
             /// </summary>
-            /// <param name="sortedSetDecrementOption">Sorted set decrement option</param>
+            /// <param name="sortedSetDecrementOptions">Sorted set decrement options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<SortedSetDecrementResponse> Decrement(SortedSetDecrementOption sortedSetDecrementOption)
+            public static CacheResult<SortedSetDecrementResponse> Decrement(SortedSetDecrementOptions sortedSetDecrementOptions)
             {
-                return DecrementAsync(sortedSetDecrementOption).Result;
+                return DecrementAsync(sortedSetDecrementOptions).Result;
             }
 
             #endregion
@@ -2099,21 +2092,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Aggregate multiple ordered collections and save to destination
             /// </summary>
-            /// <param name="sortedSetCombineAndStoreOption">Sorted set combine and store option</param>
+            /// <param name="sortedSetCombineAndStoreOptions">Sorted set combine and store options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<SortedSetCombineAndStoreResponse>> CombineAndStoreAsync(SortedSetCombineAndStoreOption sortedSetCombineAndStoreOption)
+            public static async Task<CacheResult<SortedSetCombineAndStoreResponse>> CombineAndStoreAsync(SortedSetCombineAndStoreOptions sortedSetCombineAndStoreOptions)
             {
-                return await ExecuteCommandAsync(sortedSetCombineAndStoreOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(sortedSetCombineAndStoreOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Aggregate multiple ordered collections and save to destination
             /// </summary>
-            /// <param name="sortedSetCombineAndStoreOption">Sorted set combine and store option</param>
+            /// <param name="sortedSetCombineAndStoreOptions">Sorted set combine and store options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<SortedSetCombineAndStoreResponse> CombineAndStore(SortedSetCombineAndStoreOption sortedSetCombineAndStoreOption)
+            public static CacheResult<SortedSetCombineAndStoreResponse> CombineAndStore(SortedSetCombineAndStoreOptions sortedSetCombineAndStoreOptions)
             {
-                return CombineAndStoreAsync(sortedSetCombineAndStoreOption).Result;
+                return CombineAndStoreAsync(sortedSetCombineAndStoreOptions).Result;
             }
 
             #endregion
@@ -2123,21 +2116,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Add one or more member elements and their score values ​​to the ordered set key
             /// </summary>
-            /// <param name="sortedSetAddOption">Sorted set add option</param>
+            /// <param name="sortedSetAddOptions">Sorted set add options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<SortedSetAddResponse>> AddAsync(SortedSetAddOption sortedSetAddOption)
+            public static async Task<CacheResult<SortedSetAddResponse>> AddAsync(SortedSetAddOptions sortedSetAddOptions)
             {
-                return await ExecuteCommandAsync(sortedSetAddOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(sortedSetAddOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Add one or more member elements and their score values ​​to the ordered set key
             /// </summary>
-            /// <param name="sortedSetAddOption">Sorted set add option</param>
+            /// <param name="sortedSetAddOptions">Sorted set add options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<SortedSetAddResponse> Add(SortedSetAddOption sortedSetAddOption)
+            public static CacheResult<SortedSetAddResponse> Add(SortedSetAddOptions sortedSetAddOptions)
             {
-                return AddAsync(sortedSetAddOption).Result;
+                return AddAsync(sortedSetAddOptions).Result;
             }
 
             #endregion
@@ -2157,21 +2150,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Return or save the sorted elements in the given list, collection, ordered set key
             /// </summary>
-            /// <param name="sortOption">Sort option</param>
+            /// <param name="sortOptions">Sort options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<SortResponse>> SortAsync(SortOption sortOption)
+            public static async Task<CacheResult<SortResponse>> SortAsync(SortOptions sortOptions)
             {
-                return await ExecuteCommandAsync(sortOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(sortOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Return or save the sorted elements in the given list, collection, ordered set key
             /// </summary>
-            /// <param name="sortOption">Sort option</param>
+            /// <param name="sortOptions">Sort options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<SortResponse> Sort(SortOption sortOption)
+            public static CacheResult<SortResponse> Sort(SortOptions sortOptions)
             {
-                return SortAsync(sortOption).Result;
+                return SortAsync(sortOptions).Result;
             }
 
             #endregion
@@ -2181,21 +2174,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Return or save the sorted elements in the given list, collection, ordered set key, and save to the specified key value
             /// </summary>
-            /// <param name="sortAndStoreOption">Sort and store option</param>
+            /// <param name="sortAndStoreOptions">Sort and store options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<SortAndStoreResponse>> SortAndStoreAsync(SortAndStoreOption sortAndStoreOption)
+            public static async Task<CacheResult<SortAndStoreResponse>> SortAndStoreAsync(SortAndStoreOptions sortAndStoreOptions)
             {
-                return await ExecuteCommandAsync(sortAndStoreOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(sortAndStoreOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Return or save the sorted elements in the given list, collection, ordered set key, and save to the specified key value
             /// </summary>
-            /// <param name="sortAndStoreOption">Sort and store option</param>
+            /// <param name="sortAndStoreOptions">Sort and store options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<SortAndStoreResponse> SortAndStore(SortAndStoreOption sortAndStoreOption)
+            public static CacheResult<SortAndStoreResponse> SortAndStore(SortAndStoreOptions sortAndStoreOptions)
             {
-                return SortAndStoreAsync(sortAndStoreOption).Result;
+                return SortAndStoreAsync(sortAndStoreOptions).Result;
             }
 
             #endregion
@@ -2205,21 +2198,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Returns the type of value stored by key
             /// </summary>
-            /// <param name="typeOption">type option</param>
+            /// <param name="typeOptions">type options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<TypeResponse>> TypeAsync(TypeOption typeOption)
+            public static async Task<CacheResult<TypeResponse>> TypeAsync(TypeOptions typeOptions)
             {
-                return await ExecuteCommandAsync(typeOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(typeOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Returns the type of value stored by key
             /// </summary>
-            /// <param name="typeOption">type option</param>
+            /// <param name="typeOptions">type options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<TypeResponse> Type(TypeOption typeOption)
+            public static CacheResult<TypeResponse> Type(TypeOptions typeOptions)
             {
-                return TypeAsync(typeOption).Result;
+                return TypeAsync(typeOptions).Result;
             }
 
             #endregion
@@ -2229,21 +2222,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Return the remaining time to live for a given key (TTL, time to live)
             /// </summary>
-            /// <param name="timeToLiveOption">Time to live option</param>
+            /// <param name="timeToLiveOptions">Time to live options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<TimeToLiveResponse>> TimeToLiveAsync(TimeToLiveOption timeToLiveOption)
+            public static async Task<CacheResult<TimeToLiveResponse>> TimeToLiveAsync(TimeToLiveOptions timeToLiveOptions)
             {
-                return await ExecuteCommandAsync(timeToLiveOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(timeToLiveOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Return the remaining time to live for a given key (TTL, time to live)
             /// </summary>
-            /// <param name="timeToLiveOption">Time to live option</param>
+            /// <param name="timeToLiveOptions">Time to live options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<TimeToLiveResponse> TimeToLive(TimeToLiveOption timeToLiveOption)
+            public static CacheResult<TimeToLiveResponse> TimeToLive(TimeToLiveOptions timeToLiveOptions)
             {
-                return TimeToLiveAsync(timeToLiveOption).Result;
+                return TimeToLiveAsync(timeToLiveOptions).Result;
             }
 
             #endregion
@@ -2253,21 +2246,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Deserialize the given serialized value and associate it with the given key
             /// </summary>
-            /// <param name="restoreOption">Restore option</param>
-            /// <returns> Request results </returns>
-            public static async Task<CacheResult<RestoreResponse>> RestoreAsync(RestoreOption restoreOption)
+            /// <param name="restoreOptions">Restore options</param>
+            /// <returns> Return cache result </returns>
+            public static async Task<CacheResult<RestoreResponse>> RestoreAsync(RestoreOptions restoreOptions)
             {
-                return await ExecuteCommandAsync(restoreOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(restoreOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Deserialize the given serialized value and associate it with the given key
             /// </summary>
-            /// <param name="restoreOption">Restore option</param>
-            /// <returns> Request results </returns>
-            public static CacheResult<RestoreResponse> Restore(RestoreOption restoreOption)
+            /// <param name="restoreOptions">Restore options</param>
+            /// <returns> Return cache result </returns>
+            public static CacheResult<RestoreResponse> Restore(RestoreOptions restoreOptions)
             {
-                return RestoreAsync(restoreOption).Result;
+                return RestoreAsync(restoreOptions).Result;
             }
 
             #endregion
@@ -2279,11 +2272,11 @@ namespace EZNEW.Cache
             /// When the key and newkey are the same, or the key does not exist, an error is returned
             /// When newkey already exists, it will overwrite the old value
             /// </summary>
-            /// <param name="renameOption">Rename option</param>
+            /// <param name="renameOptions">Rename options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<RenameResponse>> RenameAsync(RenameOption renameOption)
+            public static async Task<CacheResult<RenameResponse>> RenameAsync(RenameOptions renameOptions)
             {
-                return await ExecuteCommandAsync(renameOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(renameOptions).ConfigureAwait(false);
             }
 
             /// <summary>
@@ -2291,11 +2284,11 @@ namespace EZNEW.Cache
             /// When the key and newkey are the same, or the key does not exist, an error is returned
             /// When newkey already exists, it will overwrite the old value
             /// </summary>
-            /// <param name="renameOption">Rename option</param>
+            /// <param name="renameOptions">Rename options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<RenameResponse> Rename(RenameOption renameOption)
+            public static CacheResult<RenameResponse> Rename(RenameOptions renameOptions)
             {
-                return RenameAsync(renameOption).Result;
+                return RenameAsync(renameOptions).Result;
             }
 
             #endregion
@@ -2305,21 +2298,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// randomly return (do not delete) a key
             /// </summary>
-            /// <param name="randomOption">Random option</param>
+            /// <param name="randomOptions">Random options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<RandomResponse>> KeyRandomAsync(RandomOption randomOption)
+            public static async Task<CacheResult<RandomResponse>> KeyRandomAsync(RandomOptions randomOptions)
             {
-                return await ExecuteCommandAsync(randomOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(randomOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// randomly return (do not delete) a key
             /// </summary>
-            /// <param name="randomOption">Random option</param>
+            /// <param name="randomOptions">Random options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<RandomResponse> KeyRandom(RandomOption randomOption)
+            public static CacheResult<RandomResponse> KeyRandom(RandomOptions randomOptions)
             {
-                return KeyRandomAsync(randomOption).Result;
+                return KeyRandomAsync(randomOptions).Result;
             }
 
             #endregion
@@ -2329,21 +2322,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Remove the survival time of a given key, and convert this key from "volatile" (with survival time key) to "persistent" (a key with no survival time and never expires)
             /// </summary>
-            /// <param name="persistOption">Persist option</param>
+            /// <param name="persistOptions">Persist options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<PersistResponse>> PersistAsync(PersistOption persistOption)
+            public static async Task<CacheResult<PersistResponse>> PersistAsync(PersistOptions persistOptions)
             {
-                return await ExecuteCommandAsync(persistOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(persistOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Remove the survival time of a given key, and convert this key from "volatile" (with survival time key) to "persistent" (a key with no survival time and never expires)
             /// </summary>
-            /// <param name="persistOption">Persist option</param>
+            /// <param name="persistOptions">Persist options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<PersistResponse> Persist(PersistOption persistOption)
+            public static CacheResult<PersistResponse> Persist(PersistOptions persistOptions)
             {
-                return PersistAsync(persistOption).Result;
+                return PersistAsync(persistOptions).Result;
             }
 
             #endregion
@@ -2351,23 +2344,23 @@ namespace EZNEW.Cache
             #region Move
 
             /// <summary>
-            /// Move the key of the current database to the given database db
+            /// Move the key of the current database to the given database
             /// </summary>
-            /// <param name="moveOption">Move option</param>
+            /// <param name="moveOptions">Move options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<MoveResponse>> MoveAsync(MoveOption moveOption)
+            public static async Task<CacheResult<MoveResponse>> MoveAsync(MoveOptions moveOptions)
             {
-                return await ExecuteCommandAsync(moveOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(moveOptions).ConfigureAwait(false);
             }
 
             /// <summary>
-            /// Move the key of the current database to the given database db
+            /// Move the key of the current database to the given database
             /// </summary>
-            /// <param name="moveOption">Move option</param>
+            /// <param name="moveOptions">Move options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<MoveResponse> Move(MoveOption moveOption)
+            public static CacheResult<MoveResponse> Move(MoveOptions moveOptions)
             {
-                return MoveAsync(moveOption).Result;
+                return MoveAsync(moveOptions).Result;
             }
 
             #endregion
@@ -2377,21 +2370,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Transfer the key atomically from the current instance to the specified database of the target instance. Once the transfer is successful, the key is guaranteed to appear on the target instance, and the key on the current instance will be deleted.
             /// </summary>
-            /// <param name="migrateOption">Migrate option</param>
+            /// <param name="migrateOptions">Migrate options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<MigrateResponse>> MigrateAsync(MigrateOption migrateOption)
+            public static async Task<CacheResult<MigrateResponse>> MigrateAsync(MigrateOptions migrateOptions)
             {
-                return await ExecuteCommandAsync(migrateOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(migrateOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Transfer the key atomically from the current instance to the specified database of the target instance. Once the transfer is successful, the key is guaranteed to appear on the target instance, and the key on the current instance will be deleted.
             /// </summary>
-            /// <param name="migrateOption">Migrate option</param>
+            /// <param name="migrateOptions">Migrate options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<MigrateResponse> Migrate(MigrateOption migrateOption)
+            public static CacheResult<MigrateResponse> Migrate(MigrateOptions migrateOptions)
             {
-                return MigrateAsync(migrateOption).Result;
+                return MigrateAsync(migrateOptions).Result;
             }
 
             #endregion
@@ -2401,21 +2394,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Set the survival time for the given key. When the key expires (the survival time is 0), it will be automatically deleted
             /// </summary>
-            /// <param name="expireOption">Expire option</param>
+            /// <param name="expireOptions">Expire options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<ExpireResponse>> ExpireAsync(ExpireOption expireOption)
+            public static async Task<CacheResult<ExpireResponse>> ExpireAsync(ExpireOptions expireOptions)
             {
-                return await ExecuteCommandAsync(expireOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(expireOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Set the survival time for the given key. When the key expires (the survival time is 0), it will be automatically deleted
             /// </summary>
-            /// <param name="expireOption">Expire option</param>
+            /// <param name="expireOptions">Expire options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<ExpireResponse> Expire(ExpireOption expireOption)
+            public static CacheResult<ExpireResponse> Expire(ExpireOptions expireOptions)
             {
-                return ExpireAsync(expireOption).Result;
+                return ExpireAsync(expireOptions).Result;
             }
 
             #endregion;
@@ -2425,21 +2418,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Serialize the given key and return the serialized value. Use the RESTORE command to deserialize this value
             /// </summary>
-            /// <param name="dumpOption">Dump option</param>
+            /// <param name="dumpOptions">Dump options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<DumpResponse>> DumpAsync(DumpOption dumpOption)
+            public static async Task<CacheResult<DumpResponse>> DumpAsync(DumpOptions dumpOptions)
             {
-                return await ExecuteCommandAsync(dumpOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(dumpOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Serialize the given key and return the serialized value. Use the RESTORE command to deserialize this value
             /// </summary>
-            /// <param name="dumpOption">Dump option</param>
+            /// <param name="dumpOptions">Dump options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<DumpResponse> Dump(DumpOption dumpOption)
+            public static CacheResult<DumpResponse> Dump(DumpOptions dumpOptions)
             {
-                return DumpAsync(dumpOption).Result;
+                return DumpAsync(dumpOptions).Result;
             }
 
             #endregion
@@ -2449,21 +2442,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Delete the specified key
             /// </summary>
-            /// <param name="deleteOption">Delete option</param>
+            /// <param name="deleteOptions">Delete options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<DeleteResponse>> DeleteAsync(DeleteOption deleteOption)
+            public static async Task<CacheResult<DeleteResponse>> DeleteAsync(DeleteOptions deleteOptions)
             {
-                return await ExecuteCommandAsync(deleteOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(deleteOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Delete the specified key
             /// </summary>
-            /// <param name="deleteOption">Delete option</param>
+            /// <param name="deleteOptions">Delete options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<DeleteResponse> Delete(DeleteOption deleteOption)
+            public static CacheResult<DeleteResponse> Delete(DeleteOptions deleteOptions)
             {
-                return DeleteAsync(deleteOption).Result;
+                return DeleteAsync(deleteOptions).Result;
             }
 
             #endregion
@@ -2473,21 +2466,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Find all keys that match a given pattern
             /// </summary>
-            /// <param name="getKeysOption">Get keys option</param>
+            /// <param name="getKeysOptions">Get keys options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<GetKeysResponse>> GetKeysAsync(GetKeysOption getKeysOption)
+            public static async Task<CacheResult<GetKeysResponse>> GetKeysAsync(GetKeysOptions getKeysOptions)
             {
-                return await ExecuteCommandAsync(getKeysOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(getKeysOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Find all keys that match a given pattern
             /// </summary>
-            /// <param name="getKeysOption">Get keys option</param>
+            /// <param name="getKeysOptions">Get keys options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<GetKeysResponse> GetKeys(GetKeysOption getKeysOption)
+            public static CacheResult<GetKeysResponse> GetKeys(GetKeysOptions getKeysOptions)
             {
-                return GetKeysAsync(getKeysOption).Result;
+                return GetKeysAsync(getKeysOptions).Result;
             }
 
             #endregion
@@ -2497,21 +2490,21 @@ namespace EZNEW.Cache
             /// <summary>
             /// Check whether key exist
             /// </summary>
-            /// <param name="existOption">Exist option</param>
+            /// <param name="existOptions">Exist options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<ExistResponse>> ExistAsync(ExistOption existOption)
+            public static async Task<CacheResult<ExistResponse>> ExistAsync(ExistOptions existOptions)
             {
-                return await ExecuteCommandAsync(existOption).ConfigureAwait(false);
+                return await ExecuteCommandAsync(existOptions).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Check whether key exist
             /// </summary>
-            /// <param name="existOption">Exist option</param>
+            /// <param name="existOptions">Exist options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<ExistResponse> Exist(ExistOption existOption)
+            public static CacheResult<ExistResponse> Exist(ExistOptions existOptions)
             {
-                return ExistAsync(existOption).Result;
+                return ExistAsync(existOptions).Result;
             }
 
             #endregion
@@ -2532,22 +2525,22 @@ namespace EZNEW.Cache
             /// Returns all cached databases in the server
             /// </summary>
             /// <param name="server"> server information </param>
-            /// <param name="getAllDataBaseOption">Get all database option</param>
+            /// <param name="getAllDataBaseOptions">Get all database options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<GetAllDataBaseResponse>> GetAllDataBaseAsync(CacheServer server, GetAllDataBaseOption getAllDataBaseOption)
+            public static async Task<CacheResult<GetAllDataBaseResponse>> GetAllDataBaseAsync(CacheServer server, GetAllDataBaseOptions getAllDataBaseOptions)
             {
-                return await getAllDataBaseOption.ExecuteAsync(server).ConfigureAwait(false);
+                return await getAllDataBaseOptions.ExecuteAsync(server).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Returns all cached databases in the server
             /// </summary>
             /// <param name="server"> server information </param>
-            /// <param name="getAllDataBaseOption">Get all database option</param>
+            /// <param name="getAllDataBaseOptions">Get all database options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<GetAllDataBaseResponse> GetAllDataBase(CacheServer server, GetAllDataBaseOption getAllDataBaseOption)
+            public static CacheResult<GetAllDataBaseResponse> GetAllDataBase(CacheServer server, GetAllDataBaseOptions getAllDataBaseOptions)
             {
-                return GetAllDataBaseAsync(server, getAllDataBaseOption).Result;
+                return GetAllDataBaseAsync(server, getAllDataBaseOptions).Result;
             }
 
             #endregion
@@ -2558,22 +2551,22 @@ namespace EZNEW.Cache
             /// Query key value
             /// </summary>
             /// <param name="server"> server information </param>
-            /// <param name="getKeysOption"> Get keys option </param>
+            /// <param name="getKeysOptions"> Get keys options </param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<GetKeysResponse>> GetKeysAsync(CacheServer server, GetKeysOption getKeysOption)
+            public static async Task<CacheResult<GetKeysResponse>> GetKeysAsync(CacheServer server, GetKeysOptions getKeysOptions)
             {
-                return await getKeysOption.ExecuteAsync(server).ConfigureAwait(false);
+                return await getKeysOptions.ExecuteAsync(server).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Query key value
             /// </summary>
             /// <param name="server"> server information </param>
-            /// <param name="getKeysOption"> Get keys option </param>
+            /// <param name="getKeysOptions"> Get keys options </param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<GetKeysResponse> GetKeys(CacheServer server, GetKeysOption getKeysOption)
+            public static CacheResult<GetKeysResponse> GetKeys(CacheServer server, GetKeysOptions getKeysOptions)
             {
-                return GetKeysAsync(server, getKeysOption).Result;
+                return GetKeysAsync(server, getKeysOptions).Result;
             }
 
             #endregion
@@ -2584,22 +2577,22 @@ namespace EZNEW.Cache
             /// Clear all data in the cache database
             /// </summary>
             /// <param name="server"> server information </param>
-            /// <param name="clearDataOption"> Clear data option </param>
+            /// <param name="clearDataOptions"> Clear data options </param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<ClearDataResponse>> ClearDataAsync(CacheServer server, ClearDataOption clearDataOption)
+            public static async Task<CacheResult<ClearDataResponse>> ClearDataAsync(CacheServer server, ClearDataOptions clearDataOptions)
             {
-                return await clearDataOption.ExecuteAsync(server).ConfigureAwait(false);
+                return await clearDataOptions.ExecuteAsync(server).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Clear all data in the cache database
             /// </summary>
             /// <param name="server"> server information </param>
-            /// <param name="clearDataOption"> Clear data option </param>
+            /// <param name="clearDataOptions"> Clear data options </param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<ClearDataResponse> ClearData(CacheServer server, ClearDataOption clearDataOption)
+            public static CacheResult<ClearDataResponse> ClearData(CacheServer server, ClearDataOptions clearDataOptions)
             {
-                return ClearDataAsync(server, clearDataOption).Result;
+                return ClearDataAsync(server, clearDataOptions).Result;
             }
 
             #endregion
@@ -2610,22 +2603,22 @@ namespace EZNEW.Cache
             /// Get data item details
             /// </summary>
             /// <param name="server"> server information </param>
-            /// <param name="getDetailOption"> Get detail option </param>
+            /// <param name="getDetailOptions"> Get detail options </param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<GetDetailResponse>> GetKeyDetailAsync(CacheServer server, GetDetailOption getDetailOption)
+            public static async Task<CacheResult<GetDetailResponse>> GetKeyDetailAsync(CacheServer server, GetDetailOptions getDetailOptions)
             {
-                return await getDetailOption.ExecuteAsync(server).ConfigureAwait(false);
+                return await getDetailOptions.ExecuteAsync(server).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Get data item details
             /// </summary>
             /// <param name="server"> server information </param>
-            /// <param name="getDetailOption"> Get detail option </param>
+            /// <param name="getDetailOptions"> Get detail options </param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<GetDetailResponse> GetKeyDetail(CacheServer server, GetDetailOption getDetailOption)
+            public static CacheResult<GetDetailResponse> GetKeyDetail(CacheServer server, GetDetailOptions getDetailOptions)
             {
-                return GetKeyDetailAsync(server, getDetailOption).Result;
+                return GetKeyDetailAsync(server, getDetailOptions).Result;
             }
 
             #endregion
@@ -2636,22 +2629,22 @@ namespace EZNEW.Cache
             /// Get server configuration
             /// </summary>
             /// <param name="server"> server information </param>
-            /// <param name="getServerConfigurationOption">Get server configuration option</param>
+            /// <param name="getServerConfigurationOptions">Get server configuration options</param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<GetServerConfigurationResponse>> GetServerConfigurationAsync(CacheServer server, GetServerConfigurationOption getServerConfigurationOption)
+            public static async Task<CacheResult<GetServerConfigurationResponse>> GetServerConfigurationAsync(CacheServer server, GetServerConfigurationOptions getServerConfigurationOptions)
             {
-                return await getServerConfigurationOption.ExecuteAsync(server).ConfigureAwait(false);
+                return await getServerConfigurationOptions.ExecuteAsync(server).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Get server configuration
             /// </summary>
             /// <param name="server"> server information </param>
-            /// <param name="getServerConfigurationOption">Get server configuration option</param>
+            /// <param name="getServerConfigurationOptions">Get server configuration options</param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<GetServerConfigurationResponse> GetServerConfiguration(CacheServer server, GetServerConfigurationOption getServerConfigurationOption)
+            public static CacheResult<GetServerConfigurationResponse> GetServerConfiguration(CacheServer server, GetServerConfigurationOptions getServerConfigurationOptions)
             {
-                return GetServerConfigurationAsync(server, getServerConfigurationOption).Result;
+                return GetServerConfigurationAsync(server, getServerConfigurationOptions).Result;
             }
 
             #endregion
@@ -2662,22 +2655,22 @@ namespace EZNEW.Cache
             /// Save the server configuration
             /// </summary>
             /// <param name="server"> server information </param>
-            /// <param name="saveServerConfigurationOption"> Save server configuration option </param>
+            /// <param name="saveServerConfigurationOptions"> Save server configuration options </param>
             /// <returns>Return cache result</returns>
-            public static async Task<CacheResult<SaveServerConfigurationResponse>> SaveServerConfigurationAsync(CacheServer server, SaveServerConfigurationOption saveServerConfigurationOption)
+            public static async Task<CacheResult<SaveServerConfigurationResponse>> SaveServerConfigurationAsync(CacheServer server, SaveServerConfigurationOptions saveServerConfigurationOptions)
             {
-                return await saveServerConfigurationOption.ExecuteAsync(server).ConfigureAwait(false);
+                return await saveServerConfigurationOptions.ExecuteAsync(server).ConfigureAwait(false);
             }
 
             /// <summary>
             /// Save the server configuration
             /// </summary>
             /// <param name="server"> server information </param>
-            /// <param name="saveServerConfigurationOption"> Save server configuration option </param>
+            /// <param name="saveServerConfigOptions"> Save server configuration options </param>
             /// <returns>Return cache result</returns>
-            public static CacheResult<SaveServerConfigurationResponse> SaveServerConfiguration(CacheServer server, SaveServerConfigurationOption saveServerConfigOption)
+            public static CacheResult<SaveServerConfigurationResponse> SaveServerConfiguration(CacheServer server, SaveServerConfigurationOptions saveServerConfigOptions)
             {
-                return SaveServerConfigurationAsync(server, saveServerConfigOption).Result;
+                return SaveServerConfigurationAsync(server, saveServerConfigOptions).Result;
             }
 
             #endregion
@@ -2702,7 +2695,7 @@ namespace EZNEW.Cache
             /// <summary>
             /// Get cache servers operation proxy
             /// </summary>
-            static Func<ICacheRequestOption, List<CacheServer>> GetCacheServersProxy;
+            static Func<ICacheOptions, List<CacheServer>> GetCacheServersProxy;
 
             /// <summary>
             /// Get global cache key prefix operation
@@ -2750,7 +2743,7 @@ namespace EZNEW.Cache
             /// Configure cache server
             /// </summary>
             /// <param name="getCacheServerOperation">Get cache server operation</param>
-            public static void ConfigureCacheServer(Func<ICacheRequestOption, List<CacheServer>> getCacheServerOperation)
+            public static void ConfigureCacheServer(Func<ICacheOptions, List<CacheServer>> getCacheServerOperation)
             {
                 GetCacheServersProxy = getCacheServerOperation;
             }
@@ -2758,11 +2751,11 @@ namespace EZNEW.Cache
             /// <summary>
             /// Get cache servers
             /// </summary>
-            /// <param name="cacheRequestOption">Cache request option</param>
+            /// <param name="cacheOptions">Cache options</param>
             /// <returns>Return cache servers</returns>
-            public static List<CacheServer> GetCacheServers<T>(CacheRequestOption<T> cacheRequestOption) where T : CacheResponse
+            public static List<CacheServer> GetCacheServers<T>(CacheOptions<T> cacheOptions) where T : CacheResponse
             {
-                return GetCacheServersProxy?.Invoke(cacheRequestOption) ?? new List<CacheServer>(0);
+                return GetCacheServersProxy?.Invoke(cacheOptions) ?? new List<CacheServer>(0);
             }
 
             #endregion
@@ -2841,15 +2834,15 @@ namespace EZNEW.Cache
         /// <summary>
         /// Execute cache operation
         /// </summary>
-        /// <param name="requestOption">Request option</param>
+        /// <param name="requestOptions">Request options</param>
         /// <returns>Reurn cache result</returns>
-        static async Task<CacheResult<TResponse>> ExecuteCommandAsync<TResponse>(CacheRequestOption<TResponse> requestOption) where TResponse : CacheResponse
+        static async Task<CacheResult<TResponse>> ExecuteCommandAsync<TResponse>(CacheOptions<TResponse> requestOptions) where TResponse : CacheResponse
         {
-            if (requestOption == null)
+            if (requestOptions == null)
             {
                 return CacheResult<TResponse>.EmptyResult();
             }
-            return await requestOption.ExecuteAsync().ConfigureAwait(false) ?? CacheResult<TResponse>.EmptyResult();
+            return await requestOptions.ExecuteAsync().ConfigureAwait(false) ?? CacheResult<TResponse>.EmptyResult();
         }
 
         #endregion

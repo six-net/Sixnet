@@ -1,4 +1,4 @@
-﻿namespace EZNEW.Cache.Set.Response
+﻿namespace EZNEW.Cache.Set
 {
     /// <summary>
     /// Set pop response

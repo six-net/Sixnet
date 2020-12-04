@@ -23,28 +23,28 @@ namespace EZNEW.Develop.Domain.Repository
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="activationOption">Activation option</param>
-        void Save(IEnumerable<Tuple<TFirstModel, TSecondModel, TThirdModel>> datas, ActivationOption activationOption = null);
+        void Save(IEnumerable<Tuple<TFirstModel, TSecondModel, TThirdModel>> datas, ActivationOptions activationOption = null);
 
         /// <summary>
         /// Save by first type datas
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="activationOption">Activation option</param>
-        void SaveByFirst(IEnumerable<TFirstModel> datas, ActivationOption activationOption = null);
+        void SaveByFirst(IEnumerable<TFirstModel> datas, ActivationOptions activationOption = null);
 
         /// <summary>
         /// Save by second type datas
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="activationOption">Activation option</param>
-        void SaveBySecond(IEnumerable<TSecondModel> datas, ActivationOption activationOption = null);
+        void SaveBySecond(IEnumerable<TSecondModel> datas, ActivationOptions activationOption = null);
 
         /// <summary>
         /// Save by third type datas
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="activationOption">Activation option</param>
-        void SaveByThird(IEnumerable<TThirdModel> datas, ActivationOption activationOption = null);
+        void SaveByThird(IEnumerable<TThirdModel> datas, ActivationOptions activationOption = null);
 
         #endregion
 
@@ -55,56 +55,56 @@ namespace EZNEW.Develop.Domain.Repository
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="activationOption">Activation option</param>
-        void Remove(IEnumerable<Tuple<TFirstModel, TSecondModel, TThirdModel>> datas, ActivationOption activationOption = null);
+        void Remove(IEnumerable<Tuple<TFirstModel, TSecondModel, TThirdModel>> datas, ActivationOptions activationOption = null);
 
         /// <summary>
         /// Remove by condition
         /// </summary>
         /// <param name="query">Query object</param>
         /// <param name="activationOption">Activation option</param>
-        void Remove(IQuery query, ActivationOption activationOption = null);
+        void Remove(IQuery query, ActivationOptions activationOption = null);
 
         /// <summary>
         /// Remove by first datas
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="activationOption">Activation option</param>
-        void RemoveByFirst(IEnumerable<TFirstModel> datas, ActivationOption activationOption = null);
+        void RemoveByFirst(IEnumerable<TFirstModel> datas, ActivationOptions activationOption = null);
 
         /// <summary>
         /// Remove by first
         /// </summary>
         /// <param name="query">Query object</param>
         /// <param name="activationOption">Activation option</param>
-        void RemoveByFirst(IQuery query, ActivationOption activationOption = null);
+        void RemoveByFirst(IQuery query, ActivationOptions activationOption = null);
 
         /// <summary>
         /// Remove by second datas
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="activationOption">Activation option</param>
-        void RemoveBySecond(IEnumerable<TSecondModel> datas, ActivationOption activationOption = null);
+        void RemoveBySecond(IEnumerable<TSecondModel> datas, ActivationOptions activationOption = null);
 
         /// <summary>
         /// Remove by second
         /// </summary>
         /// <param name="query">Query object</param>
         /// <param name="activationOption">Activation option</param>
-        void RemoveBySecond(IQuery query, ActivationOption activationOption = null);
+        void RemoveBySecond(IQuery query, ActivationOptions activationOption = null);
 
         /// <summary>
         /// Remove by third datas
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="activationOption">Activation option</param>
-        void RemoveByThird(IEnumerable<TThirdModel> datas, ActivationOption activationOption = null);
+        void RemoveByThird(IEnumerable<TThirdModel> datas, ActivationOptions activationOption = null);
 
         /// <summary>
         /// Remove by third
         /// </summary>
         /// <param name="query">Query object</param>
         /// <param name="activationOption">Activation option</param>
-        void RemoveByThird(IQuery query, ActivationOption activationOption = null);
+        void RemoveByThird(IQuery query, ActivationOptions activationOption = null);
 
         #endregion
 

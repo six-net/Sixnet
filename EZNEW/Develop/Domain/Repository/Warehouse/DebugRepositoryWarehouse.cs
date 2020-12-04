@@ -22,7 +22,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// <param name="datas">Datas</param>
         /// <param name="activationOption">Activation option</param>
         /// <returns>Return the activation record</returns>
-        public IActivationRecord Save(IEnumerable<TEntity> datas, ActivationOption activationOption = null)
+        public IActivationRecord Save(IEnumerable<TEntity> datas, ActivationOptions activationOption = null)
         {
             if (datas.IsNullOrEmpty())
             {
@@ -43,7 +43,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// <param name="data">Data</param>
         /// <param name="activationOption">Activation option</param>
         /// <returns>Return the activation record</returns>
-        public IActivationRecord Save(TEntity data, ActivationOption activationOption = null)
+        public IActivationRecord Save(TEntity data, ActivationOptions activationOption = null)
         {
             WarehouseManager.Save(data);
             var identityValue = data.GetIdentityValue();
@@ -60,7 +60,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// <param name="datas">Datas</param>
         /// <param name="activationOption">Activation option</param>
         /// <returns>Return the activation record</returns>
-        public IActivationRecord Remove(IEnumerable<TEntity> datas, ActivationOption activationOption = null)
+        public IActivationRecord Remove(IEnumerable<TEntity> datas, ActivationOptions activationOption = null)
         {
             if (datas.IsNullOrEmpty())
             {
@@ -81,7 +81,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// <param name="data">Data</param>
         /// <param name="activationOption">Activation option</param>
         /// <returns>Return the activation record</returns>
-        public IActivationRecord Remove(TEntity data, ActivationOption activationOption = null)
+        public IActivationRecord Remove(TEntity data, ActivationOptions activationOption = null)
         {
             WarehouseManager.Save(data);
             var identityValue = data.GetIdentityValue();
@@ -93,7 +93,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// </summary>
         /// <param name="query">Query object</param>
         /// <returns>Return the activation record</returns>
-        public IActivationRecord Remove(IQuery query, ActivationOption activationOption = null)
+        public IActivationRecord Remove(IQuery query, ActivationOptions activationOption = null)
         {
             WarehouseManager.Remove<TEntity>(query);
             var record = DefaultActivationRecord<TEntity, TDataAccess>.CreateRemoveByConditionRecord(query, activationOption);
@@ -110,7 +110,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// <param name="modifyExpression">Modify expression</param>
         /// <param name="query">Query object</param>
         /// <returns>Return activation record</returns>
-        public IActivationRecord Modify(IModify modifyExpression, IQuery query, ActivationOption activationOption = null)
+        public IActivationRecord Modify(IModify modifyExpression, IQuery query, ActivationOptions activationOption = null)
         {
             WarehouseManager.Modify<TEntity>(modifyExpression, query);
             var record = DefaultActivationRecord<TEntity, TDataAccess>.CreateModifyRecord(modifyExpression, query, activationOption);

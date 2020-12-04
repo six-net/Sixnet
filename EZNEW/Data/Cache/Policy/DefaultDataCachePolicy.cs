@@ -1,20 +1,15 @@
-﻿using EZNEW.Cache;
-using EZNEW.Cache.Hash.Request;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using EZNEW.Cache;
 using EZNEW.Cache.Keys;
-using EZNEW.Cache.Keys.Request;
-using EZNEW.Cache.String.Request;
+using EZNEW.Cache.String;
 using EZNEW.Develop.CQuery;
 using EZNEW.Develop.Entity;
-using EZNEW.Fault;
 using EZNEW.Internal.MessageQueue;
 using EZNEW.Logging;
 using EZNEW.Selection;
 using EZNEW.Serialize;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EZNEW.Data.Cache.Policy
 {
@@ -579,10 +574,11 @@ namespace EZNEW.Data.Cache.Policy
 
             #endregion
 
-            StringSetOption option = new StringSetOption()
+            StringSetOptions option = new StringSetOptions()
             {
                 CacheObject = cacheObject,
-                Items = storeItems
+                Items = storeItems,
+                CommandFlags = CacheCommandFlags.FireAndForget
             };
             var cacheResult = CacheManager.String.Set(option);
             if (cacheResult != null && !cacheResult.Responses.IsNullOrEmpty())
@@ -677,7 +673,7 @@ namespace EZNEW.Data.Cache.Policy
             {
                 return;
             }
-            DeleteOption removeCommand = new DeleteOption()
+            DeleteOptions removeCommand = new DeleteOptions()
             {
                 CacheObject = cacheObject,
                 Keys = cacheOptionKeys
@@ -716,7 +712,7 @@ namespace EZNEW.Data.Cache.Policy
             CacheKey mateKey = new CacheKey(cacheObject);
             do
             {
-                var getKeysCommand = new GetKeysOption()
+                var getKeysCommand = new GetKeysOptions()
                 {
                     CacheObject = cacheObject,
                     Query = new KeyQuery()
@@ -748,7 +744,7 @@ namespace EZNEW.Data.Cache.Policy
                 {
                     break;
                 }
-                var keyDeleteCommand = new DeleteOption()
+                var keyDeleteCommand = new DeleteOptions()
                 {
                     CacheObject = cacheObject,
                     Keys = cacheKeys
@@ -837,7 +833,7 @@ namespace EZNEW.Data.Cache.Policy
             };
             CacheKey mateKey = new CacheKey(cacheObject);
             mateKey.AddName(firstPrimaryKey);
-            var getKeysCommand = new GetKeysOption()
+            var getKeysCommand = new GetKeysOptions()
             {
                 CacheObject = cacheObject,
                 Query = new KeyQuery()

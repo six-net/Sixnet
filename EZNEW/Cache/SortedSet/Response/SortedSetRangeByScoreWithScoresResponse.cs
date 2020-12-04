@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace EZNEW.Cache.SortedSet.Response
+namespace EZNEW.Cache.SortedSet
 {
     /// <summary>
     /// Sorted set range by score with scores response

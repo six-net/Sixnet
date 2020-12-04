@@ -1,4 +1,4 @@
-﻿namespace EZNEW.Cache.Keys.Response
+﻿namespace EZNEW.Cache.Keys
 {
     /// <summary>
     /// Get keys response

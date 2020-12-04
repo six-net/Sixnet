@@ -1,4 +1,4 @@
-﻿namespace EZNEW.Cache.SortedSet.Response
+﻿namespace EZNEW.Cache.SortedSet
 {
     /// <summary>
     /// Sorted set length response

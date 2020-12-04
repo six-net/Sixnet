@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace EZNEW.Cache.String.Response
+namespace EZNEW.Cache.String
 {
     /// <summary>
     /// String get with expiry response

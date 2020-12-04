@@ -68,42 +68,42 @@ namespace EZNEW.Develop.Domain.Repository
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="activationOption">Activation option</param>
-        void RemoveByFirst(IEnumerable<TFirstRelationModel> datas, ActivationOption activationOption = null);
+        void RemoveByFirst(IEnumerable<TFirstRelationModel> datas, ActivationOptions activationOption = null);
 
         /// <summary>
         /// Remove by second datas
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <<param name="activationOption">Activation option</param>
-        void RemoveBySecond(IEnumerable<TSecondRelationModel> datas, ActivationOption activationOption = null);
+        void RemoveBySecond(IEnumerable<TSecondRelationModel> datas, ActivationOptions activationOption = null);
 
         /// <summary>
         /// Remove by third datas
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="activationOption">Activation option</param>
-        void RemoveByThird(IEnumerable<TThirdRelationModel> datas, ActivationOption activationOption = null);
+        void RemoveByThird(IEnumerable<TThirdRelationModel> datas, ActivationOptions activationOption = null);
 
         /// <summary>
         /// Remove by first
         /// </summary>
         /// <param name="query">Query object</param>
         /// <param name="activationOption">Activation option</param>
-        void RemoveByFirst(IQuery query, ActivationOption activationOption = null);
+        void RemoveByFirst(IQuery query, ActivationOptions activationOption = null);
 
         /// <summary>
         /// Remove by second
         /// </summary>
         /// <param name="query">Query object</param>
         /// <param name="activationOption">Activation option</param>
-        void RemoveBySecond(IQuery query, ActivationOption activationOption = null);
+        void RemoveBySecond(IQuery query, ActivationOptions activationOption = null);
 
         /// <summary>
         /// Remove by third
         /// </summary>
         /// <param name="query">Query object</param>
         /// <param name="activationOption">Activation option</param>
-        void RemoveByThird(IQuery query, ActivationOption activationOption = null);
+        void RemoveByThird(IQuery query, ActivationOptions activationOption = null);
 
         #endregion
     }

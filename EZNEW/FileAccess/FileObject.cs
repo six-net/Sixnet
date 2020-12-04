@@ -16,6 +16,6 @@ namespace EZNEW.FileAccess.Configuration
         /// <summary>
         /// Gets or sets the file access option
         /// </summary>
-        public FileAccessOption FileAccessOption { get; set; }
+        public FileAccessOptions FileAccessOption { get; set; }
     }
 }

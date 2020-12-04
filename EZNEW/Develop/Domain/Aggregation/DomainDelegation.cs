@@ -11,14 +11,14 @@ namespace EZNEW.Develop.Domain.Aggregation
     /// <typeparam name="T">Data type</typeparam>
     /// <param name="datas">Datas</param>
     /// <param name="option">Activation option</param>
-    public delegate void DataOperation<T>(IEnumerable<T> datas, ActivationOption option = null);
+    public delegate void DataOperation<T>(IEnumerable<T> datas, ActivationOptions option = null);
 
     /// <summary>
     /// Operation by condition
     /// </summary>
     /// <param name="query">Query object</param>
     /// <param name="option">Activation option</param>
-    public delegate void ConditionOperation(IQuery query, ActivationOption option = null);
+    public delegate void ConditionOperation(IQuery query, ActivationOptions option = null);
 
     /// <summary>
     /// Modify data operation
@@ -26,7 +26,7 @@ namespace EZNEW.Develop.Domain.Aggregation
     /// <param name="modify">Modify expression</param>
     /// <param name="query">Query object</param>
     /// <param name="option">Activation option</param>
-    public delegate void ModifyOperation(IModify modify, IQuery query, ActivationOption option = null);
+    public delegate void ModifyOperation(IModify modify, IQuery query, ActivationOptions option = null);
 
     /// <summary>
     /// Query data operation

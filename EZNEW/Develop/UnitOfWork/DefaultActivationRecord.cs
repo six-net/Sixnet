@@ -76,7 +76,7 @@ namespace EZNEW.Develop.UnitOfWork
         /// <summary>
         /// Gets the activation option
         /// </summary>
-        public ActivationOption ActivationOption { get; private set; }
+        public ActivationOptions ActivationOption { get; private set; }
 
         private DefaultActivationRecord() { }
 
@@ -87,7 +87,7 @@ namespace EZNEW.Develop.UnitOfWork
         /// <param name="identityValue">Object identity value</param>
         /// <param name="activationOption">Activation option</param>
         /// <returns>Return a new default activation record</returns>
-        public static DefaultActivationRecord<TEntity, TDataAccess> CreateRecord(ActivationOperation operation, string identityValue, ActivationOption activationOption)
+        public static DefaultActivationRecord<TEntity, TDataAccess> CreateRecord(ActivationOperation operation, string identityValue, ActivationOptions activationOption)
         {
             var record = new DefaultActivationRecord<TEntity, TDataAccess>()
             {
@@ -96,7 +96,7 @@ namespace EZNEW.Develop.UnitOfWork
                 DataAccessService = typeof(TDataAccess),
                 EntityType = typeof(TEntity)
             };
-            activationOption ??= ActivationOption.Default;
+            activationOption ??= ActivationOptions.Default;
             record.ActivationOption = activationOption;
             if (activationOption.ForceExecute)
             {
@@ -124,7 +124,7 @@ namespace EZNEW.Develop.UnitOfWork
         /// <param name="identityValue">Identity values</param>
         /// <param name="activationOption">Activation option</param>
         /// <returns>Return a new default activation record</returns>
-        public static DefaultActivationRecord<TEntity, TDataAccess> CreateSaveRecord(string identityValue, ActivationOption activationOption)
+        public static DefaultActivationRecord<TEntity, TDataAccess> CreateSaveRecord(string identityValue, ActivationOptions activationOption)
         {
             if (string.IsNullOrWhiteSpace(identityValue))
             {
@@ -139,7 +139,7 @@ namespace EZNEW.Develop.UnitOfWork
         /// <param name="identityValue">Identity value</param>
         /// <param name="activationOption">Activation option</param>
         /// <returns>Return a new default activation record</returns>
-        public static DefaultActivationRecord<TEntity, TDataAccess> CreateRemoveObjectRecord(string identityValue, ActivationOption activationOption)
+        public static DefaultActivationRecord<TEntity, TDataAccess> CreateRemoveObjectRecord(string identityValue, ActivationOptions activationOption)
         {
             if (string.IsNullOrWhiteSpace(identityValue))
             {
@@ -154,7 +154,7 @@ namespace EZNEW.Develop.UnitOfWork
         /// <param name="query">Query object</param>
         /// <param name="activationOption">Activation option</param>
         /// <returns>Return a new default activation record</returns>
-        public static DefaultActivationRecord<TEntity, TDataAccess> CreateRemoveByConditionRecord(IQuery query, ActivationOption activationOption)
+        public static DefaultActivationRecord<TEntity, TDataAccess> CreateRemoveByConditionRecord(IQuery query, ActivationOptions activationOption)
         {
             var record = CreateRecord(ActivationOperation.RemoveByCondition, null, activationOption);
             record.Query = query;
@@ -168,7 +168,7 @@ namespace EZNEW.Develop.UnitOfWork
         /// <param name="query">Query object</param>
         /// <param name="activationOption">Activation option</param>
         /// <returns>Return a new default activation record</returns>
-        public static DefaultActivationRecord<TEntity, TDataAccess> CreateModifyRecord(IModify modify, IQuery query, ActivationOption activationOption)
+        public static DefaultActivationRecord<TEntity, TDataAccess> CreateModifyRecord(IModify modify, IQuery query, ActivationOptions activationOption)
         {
             var record = CreateRecord(ActivationOperation.ModifyByExpression, null, activationOption);
             record.ModifyExpression = modify;

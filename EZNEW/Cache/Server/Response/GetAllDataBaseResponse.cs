@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace EZNEW.Cache.Server.Response
+namespace EZNEW.Cache.Server
 {
     /// <summary>
     /// Gets all data base response

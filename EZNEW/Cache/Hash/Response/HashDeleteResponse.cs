@@ -1,4 +1,4 @@
-﻿namespace EZNEW.Cache.Hash.Response
+﻿namespace EZNEW.Cache.Hash
 {
     /// <summary>
     /// Hash delete response

@@ -21,14 +21,14 @@ namespace EZNEW.FileAccess.Configuration
         /// <summary>
         /// default file option
         /// </summary>
-        static FileAccessOption Default = null;
+        static FileAccessOptions Default = null;
 
         /// <summary>
         /// file options
         /// key:file object name
         /// value:file object access option
         /// </summary>
-        static Dictionary<string, FileAccessOption> FileOptions = new Dictionary<string, FileAccessOption>();
+        static Dictionary<string, FileAccessOptions> FileOptions = new Dictionary<string, FileAccessOptions>();
 
         #endregion
 
@@ -58,7 +58,7 @@ namespace EZNEW.FileAccess.Configuration
         /// Configure default file access option
         /// </summary>
         /// <param name="fileAccessOption">File access option</param>
-        public static void ConfigureDefault(FileAccessOption fileAccessOption)
+        public static void ConfigureDefault(FileAccessOptions fileAccessOption)
         {
             Default = fileAccessOption;
         }
@@ -113,7 +113,7 @@ namespace EZNEW.FileAccess.Configuration
         /// <param name="fileAccessOption">File access option</param>
         /// <param name="relativePath">File path</param>
         /// <returns>Return file full path</returns>
-        public static string GetFileFullPath(FileAccessOption fileAccessOption, string relativePath)
+        public static string GetFileFullPath(FileAccessOptions fileAccessOption, string relativePath)
         {
             return fileAccessOption?.GetFilePath(relativePath) ?? relativePath;
         }

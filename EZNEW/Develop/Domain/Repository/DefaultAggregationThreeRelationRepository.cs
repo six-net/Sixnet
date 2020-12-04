@@ -105,7 +105,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="activationOption">Activation option</param>
-        public sealed override void RemoveByFirst(IEnumerable<TFirstRelationModel> datas, ActivationOption activationOption = null)
+        public sealed override void RemoveByFirst(IEnumerable<TFirstRelationModel> datas, ActivationOptions activationOption = null)
         {
             if (datas.IsNullOrEmpty())
             {
@@ -120,7 +120,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="activationOption">Activation option</param>
-        public sealed override void RemoveBySecond(IEnumerable<TSecondRelationModel> datas, ActivationOption activationOption = null)
+        public sealed override void RemoveBySecond(IEnumerable<TSecondRelationModel> datas, ActivationOptions activationOption = null)
         {
             if (datas.IsNullOrEmpty())
             {
@@ -135,7 +135,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="activationOption">Activation option</param>
-        public sealed override void RemoveByThird(IEnumerable<TThirdRelationModel> datas, ActivationOption activationOption = null)
+        public sealed override void RemoveByThird(IEnumerable<TThirdRelationModel> datas, ActivationOptions activationOption = null)
         {
             if (datas.IsNullOrEmpty())
             {
@@ -150,7 +150,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// </summary>
         /// <param name="query">Query object</param>
         /// <param name="activationOption">Activation option</param>
-        public sealed override void RemoveByFirst(IQuery query, ActivationOption activationOption = null)
+        public sealed override void RemoveByFirst(IQuery query, ActivationOptions activationOption = null)
         {
             var removeQuery = CreateQueryByFirst(query);
             Remove(removeQuery, activationOption);
@@ -161,7 +161,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// </summary>
         /// <param name="query">Query object</param>
         /// <param name="activationOption">Activation option</param>
-        public sealed override void RemoveBySecond(IQuery query, ActivationOption activationOption = null)
+        public sealed override void RemoveBySecond(IQuery query, ActivationOptions activationOption = null)
         {
             var removeQuery = CreateQueryBySecond(query);
             Remove(removeQuery, activationOption);
@@ -172,7 +172,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// </summary>
         /// <param name="query">Query object</param>
         /// <param name="activationOption">Activation option</param>
-        public sealed override void RemoveByThird(IQuery query, ActivationOption activationOption = null)
+        public sealed override void RemoveByThird(IQuery query, ActivationOptions activationOption = null)
         {
             var removeQuery = CreateQueryByThird(query);
             Remove(removeQuery, activationOption);

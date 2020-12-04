@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace EZNEW.Cache.Keys.Response
+namespace EZNEW.Cache.Keys
 {
     /// <summary>
     /// Time to live response

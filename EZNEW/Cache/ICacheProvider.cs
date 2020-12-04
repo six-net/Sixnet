@@ -1,18 +1,12 @@
-﻿using System.Threading.Tasks;
-using EZNEW.Cache.Hash.Request;
-using EZNEW.Cache.Hash.Response;
-using EZNEW.Cache.Keys.Request;
-using EZNEW.Cache.Keys.Response;
-using EZNEW.Cache.List.Request;
-using EZNEW.Cache.List.Response;
-using EZNEW.Cache.Server.Request;
-using EZNEW.Cache.Server.Response;
-using EZNEW.Cache.Set.Request;
-using EZNEW.Cache.Set.Response;
-using EZNEW.Cache.SortedSet.Request;
-using EZNEW.Cache.SortedSet.Response;
-using EZNEW.Cache.String.Request;
-using EZNEW.Cache.String.Response;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using EZNEW.Cache.Hash;
+using EZNEW.Cache.Keys;
+using EZNEW.Cache.List;
+using EZNEW.Cache.Server;
+using EZNEW.Cache.Set;
+using EZNEW.Cache.SortedSet;
+using EZNEW.Cache.String;
 
 namespace EZNEW.Cache
 {
@@ -33,9 +27,9 @@ namespace EZNEW.Cache
         /// sure it holds a string large enough to be able to set value at offset.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return string set range response</returns>
-        Task<StringSetRangeResponse> StringSetRangeAsync(CacheServer server, StringSetRangeOption option);
+        Task<IEnumerable<StringSetRangeResponse>> StringSetRangeAsync(CacheServer server, StringSetRangeOptions options);
 
         #endregion
 
@@ -48,9 +42,9 @@ namespace EZNEW.Cache
         /// it can hold a bit at offset.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return string set bit response</returns>
-        Task<StringSetBitResponse> StringSetBitAsync(CacheServer server, StringSetBitOption option);
+        Task<IEnumerable<StringSetBitResponse>> StringSetBitAsync(CacheServer server, StringSetBitOptions options);
 
         #endregion
 
@@ -61,9 +55,9 @@ namespace EZNEW.Cache
         /// regardless of its type.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option"></param>
+        /// <param name="options">Options</param>
         /// <returns>Return string set response</returns>
-        Task<StringSetResponse> StringSetAsync(CacheServer server, StringSetOption option);
+        Task<IEnumerable<StringSetResponse>> StringSetAsync(CacheServer server, StringSetOptions options);
 
         #endregion
 
@@ -73,9 +67,9 @@ namespace EZNEW.Cache
         /// Returns the length of the string value stored at key.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return string length response</returns>
-        Task<StringLengthResponse> StringLengthAsync(CacheServer server, StringLengthOption option);
+        Task<IEnumerable<StringLengthResponse>> StringLengthAsync(CacheServer server, StringLengthOptions options);
 
         #endregion
 
@@ -87,11 +81,10 @@ namespace EZNEW.Cache
         /// the operation. The precision of the output is fixed at 17 digits after the decimal
         /// point regardless of the actual internal precision of the computation.
         /// </summary>
-        /// <typeparam name="T">data type</typeparam>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return string increment response</returns>
-        Task<StringIncrementResponse> StringIncrementAsync(CacheServer server, StringIncrementOption option);
+        Task<IEnumerable<StringIncrementResponse>> StringIncrementAsync(CacheServer server, StringIncrementOptions options);
 
         #endregion
 
@@ -103,9 +96,9 @@ namespace EZNEW.Cache
         /// only handles string values.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return string get with expiry response</returns>
-        Task<StringGetWithExpiryResponse> StringGetWithExpiryAsync(CacheServer server, StringGetWithExpiryOption option);
+        Task<IEnumerable<StringGetWithExpiryResponse>> StringGetWithExpiryAsync(CacheServer server, StringGetWithExpiryOptions options);
 
         #endregion
 
@@ -115,9 +108,9 @@ namespace EZNEW.Cache
         /// Atomically sets key to value and returns the old value stored at key.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return string get set response</returns>
-        Task<StringGetSetResponse> StringGetSetAsync(CacheServer server, StringGetSetOption option);
+        Task<IEnumerable<StringGetSetResponse>> StringGetSetAsync(CacheServer server, StringGetSetOptions options);
 
         #endregion
 
@@ -130,9 +123,9 @@ namespace EZNEW.Cache
         /// -2 the penultimate and so forth.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return string get range response</returns>
-        Task<StringGetRangeResponse> StringGetRangeAsync(CacheServer server, StringGetRangeOption option);
+        Task<IEnumerable<StringGetRangeResponse>> StringGetRangeAsync(CacheServer server, StringGetRangeOptions options);
 
         #endregion
 
@@ -144,9 +137,9 @@ namespace EZNEW.Cache
         /// 0 bits
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return string get bit response</returns>
-        Task<StringGetBitResponse> StringGetBitAsync(CacheServer server, StringGetBitOption option);
+        Task<IEnumerable<StringGetBitResponse>> StringGetBitAsync(CacheServer server, StringGetBitOptions options);
 
         #endregion
 
@@ -157,9 +150,9 @@ namespace EZNEW.Cache
         /// string value or does not exist, the special value nil is returned.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return string get response</returns>
-        Task<StringGetResponse> StringGetAsync(CacheServer server, StringGetOption option);
+        Task<IEnumerable<StringGetResponse>> StringGetAsync(CacheServer server, StringGetOptions options);
 
         #endregion
 
@@ -172,9 +165,9 @@ namespace EZNEW.Cache
         /// as integer. This operation is limited to 64 bit signed integers.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return string decrement response</returns>
-        Task<StringDecrementResponse> StringDecrementAsync(CacheServer server, StringDecrementOption option);
+        Task<IEnumerable<StringDecrementResponse>> StringDecrementAsync(CacheServer server, StringDecrementOptions options);
 
         #endregion
 
@@ -190,9 +183,9 @@ namespace EZNEW.Cache
         /// penultimate, and so forth.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return string bit position response</returns>
-        Task<StringBitPositionResponse> StringBitPositionAsync(CacheServer server, StringBitPositionOption option);
+        Task<IEnumerable<StringBitPositionResponse>> StringBitPositionAsync(CacheServer server, StringBitPositionOptions options);
 
         #endregion
 
@@ -206,9 +199,9 @@ namespace EZNEW.Cache
         /// of the operation is always stored at destkey.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return string bit operation response</returns>
-        Task<StringBitOperationResponse> StringBitOperationAsync(CacheServer server, StringBitOperationOption option);
+        Task<IEnumerable<StringBitOperationResponse>> StringBitOperationAsync(CacheServer server, StringBitOperationOptions options);
 
         #endregion
 
@@ -223,9 +216,9 @@ namespace EZNEW.Cache
         /// last byte, -2 is the penultimate, and so forth.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return string bit count response</returns>
-        Task<StringBitCountResponse> StringBitCountAsync(CacheServer server, StringBitCountOption option);
+        Task<IEnumerable<StringBitCountResponse>> StringBitCountAsync(CacheServer server, StringBitCountOptions options);
 
         #endregion
 
@@ -237,9 +230,9 @@ namespace EZNEW.Cache
         /// so APPEND will be similar to SET in this special case.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return string append response</returns>
-        Task<StringAppendResponse> StringAppendAsync(CacheServer server, StringAppendOption option);
+        Task<IEnumerable<StringAppendResponse>> StringAppendAsync(CacheServer server, StringAppendOptions options);
 
         #endregion
 
@@ -259,9 +252,9 @@ namespace EZNEW.Cache
         /// the penultimate element and so on.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return list trim response</returns>
-        Task<ListTrimResponse> ListTrimAsync(CacheServer server, ListTrimOption option);
+        Task<IEnumerable<ListTrimResponse>> ListTrimAsync(CacheServer server, ListTrimOptions options);
 
         #endregion
 
@@ -272,9 +265,9 @@ namespace EZNEW.Cache
         ///  see ListGetByIndex. An error is returned for out of range indexes.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return list set by index response</returns>
-        Task<ListSetByIndexResponse> ListSetByIndexAsync(CacheServer server, ListSetByIndexOption option);
+        Task<IEnumerable<ListSetByIndexResponse>> ListSetByIndexAsync(CacheServer server, ListSetByIndexOptions options);
 
         #endregion
 
@@ -289,9 +282,9 @@ namespace EZNEW.Cache
         /// and c as third element.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return list right push</returns>
-        Task<ListRightPushResponse> ListRightPushAsync(CacheServer server, ListRightPushOption option);
+        Task<IEnumerable<ListRightPushResponse>> ListRightPushAsync(CacheServer server, ListRightPushOptions options);
 
         #endregion
 
@@ -303,9 +296,9 @@ namespace EZNEW.Cache
         /// at destination.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return list right pop left response</returns>
-        Task<ListRightPopLeftPushResponse> ListRightPopLeftPushAsync(CacheServer server, ListRightPopLeftPushOption option);
+        Task<IEnumerable<ListRightPopLeftPushResponse>> ListRightPopLeftPushAsync(CacheServer server, ListRightPopLeftPushOptions options);
 
         #endregion
 
@@ -315,9 +308,9 @@ namespace EZNEW.Cache
         /// Removes and returns the last element of the list stored at key.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return list right pop response</returns>
-        Task<ListRightPopResponse> ListRightPopAsync(CacheServer server, ListRightPopOption option);
+        Task<IEnumerable<ListRightPopResponse>> ListRightPopAsync(CacheServer server, ListRightPopOptions options);
 
         #endregion
 
@@ -331,9 +324,9 @@ namespace EZNEW.Cache
         /// elements equal to value.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return list remove response</returns>
-        Task<ListRemoveResponse> ListRemoveAsync(CacheServer server, ListRemoveOption option);
+        Task<IEnumerable<ListRemoveResponse>> ListRemoveAsync(CacheServer server, ListRemoveOptions options);
 
         #endregion
 
@@ -349,9 +342,9 @@ namespace EZNEW.Cache
         /// elements, that is, the rightmost item is included.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return list range response</returns>
-        Task<ListRangeResponse> ListRangeAsync(CacheServer server, ListRangeOption option);
+        Task<IEnumerable<ListRangeResponse>> ListRangeAsync(CacheServer server, ListRangeOptions options);
 
         #endregion
 
@@ -362,9 +355,9 @@ namespace EZNEW.Cache
         ///  as an empty list and 0 is returned.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return list length response</returns>
-        Task<ListLengthResponse> ListLengthAsync(CacheServer server, ListLengthOption option);
+        Task<IEnumerable<ListLengthResponse>> ListLengthAsync(CacheServer server, ListLengthOptions options);
 
         #endregion
 
@@ -375,9 +368,9 @@ namespace EZNEW.Cache
         ///  not exist, it is created as empty list before performing the push operations.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return list left push response</returns>
-        Task<ListLeftPushResponse> ListLeftPushAsync(CacheServer server, ListLeftPushOption option);
+        Task<IEnumerable<ListLeftPushResponse>> ListLeftPushAsync(CacheServer server, ListLeftPushOptions options);
 
         #endregion
 
@@ -387,9 +380,9 @@ namespace EZNEW.Cache
         /// Removes and returns the first element of the list stored at key.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return list left pop response</returns>
-        Task<ListLeftPopResponse> ListLeftPopAsync(CacheServer server, ListLeftPopOption option);
+        Task<IEnumerable<ListLeftPopResponse>> ListLeftPopAsync(CacheServer server, ListLeftPopOptions options);
 
         #endregion
 
@@ -401,9 +394,9 @@ namespace EZNEW.Cache
         /// is performed.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return list insert begore response</returns>
-        Task<ListInsertBeforeResponse> ListInsertBeforeAsync(CacheServer server, ListInsertBeforeOption option);
+        Task<IEnumerable<ListInsertBeforeResponse>> ListInsertBeforeAsync(CacheServer server, ListInsertBeforeOptions options);
 
         #endregion
 
@@ -415,9 +408,9 @@ namespace EZNEW.Cache
         /// is performed.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return list insert after response</returns>
-        Task<ListInsertAfterResponse> ListInsertAfterAsync(CacheServer server, ListInsertAfterOption option);
+        Task<IEnumerable<ListInsertAfterResponse>> ListInsertAfterAsync(CacheServer server, ListInsertAfterOptions options);
 
         #endregion
 
@@ -430,9 +423,9 @@ namespace EZNEW.Cache
         /// means the last element, -2 means the penultimate and so forth.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return list get by index response</returns>
-        Task<ListGetByIndexResponse> ListGetByIndexAsync(CacheServer server, ListGetByIndexOption option);
+        Task<IEnumerable<ListGetByIndexResponse>> ListGetByIndexAsync(CacheServer server, ListGetByIndexOptions options);
 
         #endregion
 
@@ -446,9 +439,9 @@ namespace EZNEW.Cache
         /// Returns all values in the hash stored at key.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return hash values response</returns>
-        Task<HashValuesResponse> HashValuesAsync(CacheServer server, HashValuesOption option);
+        Task<IEnumerable<HashValuesResponse>> HashValuesAsync(CacheServer server, HashValuesOptions options);
 
         #endregion
 
@@ -459,9 +452,9 @@ namespace EZNEW.Cache
         ///  holding a hash is created. If field already exists in the hash, it is overwritten.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return hash set response</returns>
-        Task<HashSetResponse> HashSetAsync(CacheServer server, HashSetOption option);
+        Task<IEnumerable<HashSetResponse>> HashSetAsync(CacheServer server, HashSetOptions options);
 
         #endregion
 
@@ -471,9 +464,9 @@ namespace EZNEW.Cache
         /// Returns the number of fields contained in the hash stored at key.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return hash length response</returns>
-        Task<HashLengthResponse> HashLengthAsync(CacheServer server, HashLengthOption option);
+        Task<IEnumerable<HashLengthResponse>> HashLengthAsync(CacheServer server, HashLengthOptions options);
 
         #endregion
 
@@ -483,9 +476,9 @@ namespace EZNEW.Cache
         /// Returns all field names in the hash stored at key.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return hash keys response</returns>
-        Task<HashKeysResponse> HashKeysAsync(CacheServer server, HashKeysOption option);
+        Task<IEnumerable<HashKeysResponse>> HashKeysAsync(CacheServer server, HashKeysOptions options);
 
         #endregion
 
@@ -497,11 +490,10 @@ namespace EZNEW.Cache
         /// exist or holds a string that cannot be interpreted as integer, the value is set
         /// to 0 before the operation is performed.
         /// </summary>
-        /// <typeparam name="T">data type</typeparam>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return hash increment response</returns>
-        Task<HashIncrementResponse> HashIncrementAsync(CacheServer server, HashIncrementOption option);
+        Task<IEnumerable<HashIncrementResponse>> HashIncrementAsync(CacheServer server, HashIncrementOptions options);
 
         #endregion
 
@@ -511,9 +503,9 @@ namespace EZNEW.Cache
         /// Returns the value associated with field in the hash stored at key.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return hash get response</returns>
-        Task<HashGetResponse> HashGetAsync(CacheServer server, HashGetOption option);
+        Task<IEnumerable<HashGetResponse>> HashGetAsync(CacheServer server, HashGetOptions options);
 
         #endregion
 
@@ -523,9 +515,9 @@ namespace EZNEW.Cache
         /// Returns all fields and values of the hash stored at key.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return hash get all response</returns>
-        Task<HashGetAllResponse> HashGetAllAsync(CacheServer server, HashGetAllOption option);
+        Task<IEnumerable<HashGetAllResponse>> HashGetAllAsync(CacheServer server, HashGetAllOptions options);
 
         #endregion
 
@@ -535,9 +527,9 @@ namespace EZNEW.Cache
         /// Returns if field is an existing field in the hash stored at key.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return hash exists response</returns>
-        Task<HashExistsResponse> HashExistAsync(CacheServer server, HashExistsOption option);
+        Task<IEnumerable<HashExistsResponse>> HashExistAsync(CacheServer server, HashExistsOptions options);
 
         #endregion
 
@@ -548,9 +540,9 @@ namespace EZNEW.Cache
         /// are ignored. Non-existing keys are treated as empty hashes and this option returns 0
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return hash delete response</returns>
-        Task<HashDeleteResponse> HashDeleteAsync(CacheServer server, HashDeleteOption option);
+        Task<IEnumerable<HashDeleteResponse>> HashDeleteAsync(CacheServer server, HashDeleteOptions options);
 
         #endregion
 
@@ -561,11 +553,10 @@ namespace EZNEW.Cache
         ///  point number, by the specified decrement. If the field does not exist, it is
         ///  set to 0 before performing the operation.
         /// </summary>
-        /// <typeparam name="T">data type</typeparam>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return hash decrement response</returns>
-        Task<HashDecrementResponse> HashDecrementAsync(CacheServer server, HashDecrementOption option);
+        Task<IEnumerable<HashDecrementResponse>> HashDecrementAsync(CacheServer server, HashDecrementOptions options);
 
         #endregion
 
@@ -574,10 +565,10 @@ namespace EZNEW.Cache
         /// <summary>
         /// The hash scan option is used to incrementally iterate over a hash
         /// </summary>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return hash scan response</returns>
-        Task<HashScanResponse> HashScanAsync(CacheServer server, HashScanOption option);
+        Task<IEnumerable<HashScanResponse>> HashScanAsync(CacheServer server, HashScanOptions options);
 
         #endregion
 
@@ -592,9 +583,9 @@ namespace EZNEW.Cache
         /// are not a member of this set are ignored.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return set remove response</returns>
-        Task<SetRemoveResponse> SetRemoveAsync(CacheServer server, SetRemoveOption option);
+        Task<IEnumerable<SetRemoveResponse>> SetRemoveAsync(CacheServer server, SetRemoveOptions options);
 
         #endregion
 
@@ -607,9 +598,9 @@ namespace EZNEW.Cache
         /// absolute value of the specified count.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return set random members response</returns>
-        Task<SetRandomMembersResponse> SetRandomMembersAsync(CacheServer server, SetRandomMembersOption option);
+        Task<IEnumerable<SetRandomMembersResponse>> SetRandomMembersAsync(CacheServer server, SetRandomMembersOptions options);
 
         #endregion
 
@@ -619,9 +610,9 @@ namespace EZNEW.Cache
         /// Return a random element from the set value stored at key.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return set random member</returns>
-        Task<SetRandomMemberResponse> SetRandomMemberAsync(CacheServer server, SetRandomMemberOption option);
+        Task<IEnumerable<SetRandomMemberResponse>> SetRandomMemberAsync(CacheServer server, SetRandomMemberOptions options);
 
         #endregion
 
@@ -631,9 +622,9 @@ namespace EZNEW.Cache
         /// Removes and returns a random element from the set value stored at key.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return set pop response</returns>
-        Task<SetPopResponse> SetPopAsync(CacheServer server, SetPopOption option);
+        Task<IEnumerable<SetPopResponse>> SetPopAsync(CacheServer server, SetPopOptions options);
 
         #endregion
 
@@ -646,9 +637,9 @@ namespace EZNEW.Cache
         /// the destination set, it is only removed from the source set.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return set move response</returns>
-        Task<SetMoveResponse> SetMoveAsync(CacheServer server, SetMoveOption option);
+        Task<IEnumerable<SetMoveResponse>> SetMoveAsync(CacheServer server, SetMoveOptions options);
 
         #endregion
 
@@ -658,9 +649,9 @@ namespace EZNEW.Cache
         /// Returns all the members of the set value stored at key.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return set members response</returns>
-        Task<SetMembersResponse> SetMembersAsync(CacheServer server, SetMembersOption option);
+        Task<IEnumerable<SetMembersResponse>> SetMembersAsync(CacheServer server, SetMembersOptions options);
 
         #endregion
 
@@ -670,9 +661,9 @@ namespace EZNEW.Cache
         /// Returns the set cardinality (number of elements) of the set stored at key.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return set length response</returns>
-        Task<SetLengthResponse> SetLengthAsync(CacheServer server, SetLengthOption option);
+        Task<IEnumerable<SetLengthResponse>> SetLengthAsync(CacheServer server, SetLengthOptions options);
 
         #endregion
 
@@ -682,9 +673,9 @@ namespace EZNEW.Cache
         /// Returns if member is a member of the set stored at key.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return set contains response</returns>
-        Task<SetContainsResponse> SetContainsAsync(CacheServer server, SetContainsOption option);
+        Task<IEnumerable<SetContainsResponse>> SetContainsAsync(CacheServer server, SetContainsOptions options);
 
         #endregion
 
@@ -695,9 +686,9 @@ namespace EZNEW.Cache
         /// the given sets.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return set combine response</returns>
-        Task<SetCombineResponse> SetCombineAsync(CacheServer server, SetCombineOption option);
+        Task<IEnumerable<SetCombineResponse>> SetCombineAsync(CacheServer server, SetCombineOptions options);
 
         #endregion
 
@@ -708,9 +699,9 @@ namespace EZNEW.Cache
         ///  it is stored in destination. If destination already exists, it is overwritten.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return set combine and store response</returns>
-        Task<SetCombineAndStoreResponse> SetCombineAndStoreAsync(CacheServer server, SetCombineAndStoreOption option);
+        Task<IEnumerable<SetCombineAndStoreResponse>> SetCombineAndStoreAsync(CacheServer server, SetCombineAndStoreOptions options);
 
         #endregion
 
@@ -722,9 +713,9 @@ namespace EZNEW.Cache
         /// created before adding the specified members.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return set add response</returns>
-        Task<SetAddResponse> SetAddAsync(CacheServer server, SetAddOption option);
+        Task<IEnumerable<SetAddResponse>> SetAddAsync(CacheServer server, SetAddOptions options);
 
         #endregion
 
@@ -739,9 +730,9 @@ namespace EZNEW.Cache
         /// in the sorted set, or key does not exist, nil is returned.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return sorted set score response</returns>
-        Task<SortedSetScoreResponse> SortedSetScoreAsync(CacheServer server, SortedSetScoreOption option);
+        Task<IEnumerable<SortedSetScoreResponse>> SortedSetScoreAsync(CacheServer server, SortedSetScoreOptions options);
 
         #endregion
 
@@ -753,9 +744,9 @@ namespace EZNEW.Cache
         /// set stored at key between the lexicographical range specified by min and max.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return sorted set remove range by value response</returns>
-        Task<SortedSetRemoveRangeByValueResponse> SortedSetRemoveRangeByValueAsync(CacheServer server, SortedSetRemoveRangeByValueOption option);
+        Task<IEnumerable<SortedSetRemoveRangeByValueResponse>> SortedSetRemoveRangeByValueAsync(CacheServer server, SortedSetRemoveRangeByValueOptions options);
 
         #endregion
 
@@ -766,9 +757,9 @@ namespace EZNEW.Cache
         ///  and max (inclusive by default).
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return sorted set remove range by score response</returns>
-        Task<SortedSetRemoveRangeByScoreResponse> SortedSetRemoveRangeByScoreAsync(CacheServer server, SortedSetRemoveRangeByScoreOption option);
+        Task<IEnumerable<SortedSetRemoveRangeByScoreResponse>> SortedSetRemoveRangeByScoreAsync(CacheServer server, SortedSetRemoveRangeByScoreOptions options);
 
         #endregion
 
@@ -783,9 +774,9 @@ namespace EZNEW.Cache
         /// and so forth.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return sorted set remove range by rank response</returns>
-        Task<SortedSetRemoveRangeByRankResponse> SortedSetRemoveRangeByRankAsync(CacheServer server, SortedSetRemoveRangeByRankOption option);
+        Task<IEnumerable<SortedSetRemoveRangeByRankResponse>> SortedSetRemoveRangeByRankAsync(CacheServer server, SortedSetRemoveRangeByRankOptions options);
 
         #endregion
 
@@ -796,9 +787,9 @@ namespace EZNEW.Cache
         /// members are ignored.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return sorted set remove response</returns>
-        Task<SortedSetRemoveResponse> SortedSetRemoveAsync(CacheServer server, SortedSetRemoveOption option);
+        Task<IEnumerable<SortedSetRemoveResponse>> SortedSetRemoveAsync(CacheServer server, SortedSetRemoveOptions options);
 
         #endregion
 
@@ -810,9 +801,9 @@ namespace EZNEW.Cache
         /// that the member with the lowest score has rank 0.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return sorted set rank response</returns>
-        Task<SortedSetRankResponse> SortedSetRankAsync(CacheServer server, SortedSetRankOption option);
+        Task<IEnumerable<SortedSetRankResponse>> SortedSetRankAsync(CacheServer server, SortedSetRankOptions options);
 
         #endregion
 
@@ -824,9 +815,9 @@ namespace EZNEW.Cache
         /// sorted set at key with a value between min and max.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return sorted set range by value response</returns>
-        Task<SortedSetRangeByValueResponse> SortedSetRangeByValueAsync(CacheServer server, SortedSetRangeByValueOption option);
+        Task<IEnumerable<SortedSetRangeByValueResponse>> SortedSetRangeByValueAsync(CacheServer server, SortedSetRangeByValueOptions options);
 
         #endregion
 
@@ -840,9 +831,9 @@ namespace EZNEW.Cache
         /// methods the values are inclusive.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return sorted set range by score with scores response</returns>
-        Task<SortedSetRangeByScoreWithScoresResponse> SortedSetRangeByScoreWithScoresAsync(CacheServer server, SortedSetRangeByScoreWithScoresOption option);
+        Task<IEnumerable<SortedSetRangeByScoreWithScoresResponse>> SortedSetRangeByScoreWithScoresAsync(CacheServer server, SortedSetRangeByScoreWithScoresOptions options);
 
         #endregion
 
@@ -856,9 +847,9 @@ namespace EZNEW.Cache
         /// methods the values are inclusive.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return sorted set range by score response</returns>
-        Task<SortedSetRangeByScoreResponse> SortedSetRangeByScoreAsync(CacheServer server, SortedSetRangeByScoreOption option);
+        Task<IEnumerable<SortedSetRangeByScoreResponse>> SortedSetRangeByScoreAsync(CacheServer server, SortedSetRangeByScoreOptions options);
 
         #endregion
 
@@ -874,9 +865,9 @@ namespace EZNEW.Cache
         /// element and so on.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return sorted set range by rank with scores response</returns>
-        Task<SortedSetRangeByRankWithScoresResponse> SortedSetRangeByRankWithScoresAsync(CacheServer server, SortedSetRangeByRankWithScoresOption option);
+        Task<IEnumerable<SortedSetRangeByRankWithScoresResponse>> SortedSetRangeByRankWithScoresAsync(CacheServer server, SortedSetRangeByRankWithScoresOptions options);
 
         #endregion
 
@@ -892,9 +883,9 @@ namespace EZNEW.Cache
         /// element and so on.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return sorted set range by rank response</returns>
-        Task<SortedSetRangeByRankResponse> SortedSetRangeByRankAsync(CacheServer server, SortedSetRangeByRankOption option);
+        Task<IEnumerable<SortedSetRangeByRankResponse>> SortedSetRangeByRankAsync(CacheServer server, SortedSetRangeByRankOptions options);
 
         #endregion
 
@@ -906,9 +897,9 @@ namespace EZNEW.Cache
         /// in the sorted set at key with a value between min and max.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">response</param>
+        /// <param name="options">response</param>
         /// <returns>Return sorted set lenght by value response</returns>
-        Task<SortedSetLengthByValueResponse> SortedSetLengthByValueAsync(CacheServer server, SortedSetLengthByValueOption option);
+        Task<IEnumerable<SortedSetLengthByValueResponse>> SortedSetLengthByValueAsync(CacheServer server, SortedSetLengthByValueOptions options);
 
         #endregion
 
@@ -919,9 +910,9 @@ namespace EZNEW.Cache
         /// at key.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return sorted set length response</returns>
-        Task<SortedSetLengthResponse> SortedSetLengthAsync(CacheServer server, SortedSetLengthOption option);
+        Task<IEnumerable<SortedSetLengthResponse>> SortedSetLengthAsync(CacheServer server, SortedSetLengthOptions options);
 
         #endregion
 
@@ -933,9 +924,9 @@ namespace EZNEW.Cache
         /// score (as if its previous score was 0.0).
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return sorted set increment response</returns>
-        Task<SortedSetIncrementResponse> SortedSetIncrementAsync(CacheServer server, SortedSetIncrementOption option);
+        Task<IEnumerable<SortedSetIncrementResponse>> SortedSetIncrementAsync(CacheServer server, SortedSetIncrementOptions options);
 
         #endregion
 
@@ -947,9 +938,9 @@ namespace EZNEW.Cache
         /// score (as if its previous score was 0.0).
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return sorted set decrement response</returns>
-        Task<SortedSetDecrementResponse> SortedSetDecrementAsync(CacheServer server, SortedSetDecrementOption option);
+        Task<IEnumerable<SortedSetDecrementResponse>> SortedSetDecrementAsync(CacheServer server, SortedSetDecrementOptions options);
 
         #endregion
 
@@ -961,9 +952,9 @@ namespace EZNEW.Cache
         /// aggregation (defaults to sum)
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return sorted set combine and store response</returns>
-        Task<SortedSetCombineAndStoreResponse> SortedSetCombineAndStoreAsync(CacheServer server, SortedSetCombineAndStoreOption option);
+        Task<IEnumerable<SortedSetCombineAndStoreResponse>> SortedSetCombineAndStoreAsync(CacheServer server, SortedSetCombineAndStoreOptions options);
 
         #endregion
 
@@ -976,9 +967,9 @@ namespace EZNEW.Cache
         /// ordering.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return sorted set add response</returns>
-        Task<SortedSetAddResponse> SortedSetAddAsync(CacheServer server, SortedSetAddOption option);
+        Task<IEnumerable<SortedSetAddResponse>> SortedSetAddAsync(CacheServer server, SortedSetAddOptions options);
 
         #endregion
 
@@ -999,9 +990,9 @@ namespace EZNEW.Cache
         /// fields using -> notation (again, refer to redis documentation).
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return sort response</returns>
-        Task<SortResponse> SortAsync(CacheServer server, SortOption option);
+        Task<IEnumerable<SortResponse>> SortAsync(CacheServer server, SortOptions options);
 
         #endregion
 
@@ -1018,9 +1009,9 @@ namespace EZNEW.Cache
         /// fields using -> notation (again, refer to redis documentation).
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return sort and store response</returns>
-        Task<SortAndStoreResponse> SortAndStoreAsync(CacheServer server, SortAndStoreOption option);
+        Task<IEnumerable<SortAndStoreResponse>> SortAndStoreAsync(CacheServer server, SortAndStoreOptions options);
 
         #endregion
 
@@ -1035,9 +1026,9 @@ namespace EZNEW.Cache
         /// different types that can be returned are: string, list, set, zset and hash.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return key type response</returns>
-        Task<TypeResponse> KeyTypeAsync(CacheServer server, TypeOption option);
+        Task<IEnumerable<TypeResponse>> KeyTypeAsync(CacheServer server, TypeOptions options);
 
         #endregion
 
@@ -1049,9 +1040,9 @@ namespace EZNEW.Cache
         /// to be part of the dataset.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return key time to live response</returns>
-        Task<TimeToLiveResponse> KeyTimeToLiveAsync(CacheServer server, TimeToLiveOption option);
+        Task<IEnumerable<TimeToLiveResponse>> KeyTimeToLiveAsync(CacheServer server, TimeToLiveOptions options);
 
         #endregion
 
@@ -1063,9 +1054,9 @@ namespace EZNEW.Cache
         /// any expire, otherwise the specified expire time(in milliseconds) is set.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return key restore response</returns>
-        Task<RestoreResponse> KeyRestoreAsync(CacheServer server, RestoreOption option);
+        Task<IEnumerable<RestoreResponse>> KeyRestoreAsync(CacheServer server, RestoreOptions options);
 
         #endregion
 
@@ -1076,9 +1067,9 @@ namespace EZNEW.Cache
         /// are the same, or when key does not exist.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return key rename response</returns>
-        Task<RenameResponse> KeyRenameAsync(CacheServer server, RenameOption option);
+        Task<IEnumerable<RenameResponse>> KeyRenameAsync(CacheServer server, RenameOptions options);
 
         #endregion
 
@@ -1088,9 +1079,9 @@ namespace EZNEW.Cache
         /// Return a random key from the currently selected database.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return key random response</returns>
-        Task<RandomResponse> KeyRandomAsync(CacheServer server, RandomOption option);
+        Task<IEnumerable<RandomResponse>> KeyRandomAsync(CacheServer server, RandomOptions options);
 
         #endregion
 
@@ -1101,9 +1092,9 @@ namespace EZNEW.Cache
         /// an expire set) to persistent (a key that will never expire as no timeout is associated).
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return key persist response</returns>
-        Task<PersistResponse> KeyPersistAsync(CacheServer server, PersistOption option);
+        Task<IEnumerable<PersistResponse>> KeyPersistAsync(CacheServer server, PersistOptions options);
 
         #endregion
 
@@ -1116,9 +1107,9 @@ namespace EZNEW.Cache
         /// a locking primitive because of this.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return key move response</returns>
-        Task<MoveResponse> KeyMoveAsync(CacheServer server, MoveOption option);
+        Task<IEnumerable<MoveResponse>> KeyMoveAsync(CacheServer server, MoveOptions options);
 
         #endregion
 
@@ -1130,9 +1121,9 @@ namespace EZNEW.Cache
         /// and is guaranteed to exist in the target instance.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return key migrate response</returns>
-        Task<MigrateResponse> KeyMigrateAsync(CacheServer server, MigrateOption option);
+        Task<IEnumerable<MigrateResponse>> KeyMigrateAsync(CacheServer server, MigrateOptions options);
 
         #endregion
 
@@ -1144,9 +1135,9 @@ namespace EZNEW.Cache
         /// terminology.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return key expire response</returns>
-        Task<ExpireResponse> KeyExpireAsync(CacheServer server, ExpireOption option);
+        Task<IEnumerable<ExpireResponse>> KeyExpireAsync(CacheServer server, ExpireOptions options);
 
         #endregion;
 
@@ -1158,9 +1149,9 @@ namespace EZNEW.Cache
         /// RESTORE option.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return key dump response</returns>
-        Task<DumpResponse> KeyDumpAsync(CacheServer server, DumpOption option);
+        Task<IEnumerable<DumpResponse>> KeyDumpAsync(CacheServer server, DumpOptions options);
 
         #endregion
 
@@ -1170,9 +1161,9 @@ namespace EZNEW.Cache
         /// Removes the specified keys. A key is ignored if it does not exist.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return key delete response</returns>
-        Task<DeleteResponse> KeyDeleteAsync(CacheServer server, DeleteOption option);
+        Task<IEnumerable<DeleteResponse>> KeyDeleteAsync(CacheServer server, DeleteOptions options);
 
         #endregion
 
@@ -1182,9 +1173,9 @@ namespace EZNEW.Cache
         /// Key exists
         /// </summary>
         /// <param name="server">server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return exists key response</returns>
-        Task<ExistResponse> KeyExistAsync(CacheServer server, ExistOption option);
+        Task<IEnumerable<ExistResponse>> KeyExistAsync(CacheServer server, ExistOptions options);
 
         #endregion
 
@@ -1198,9 +1189,9 @@ namespace EZNEW.Cache
         /// Get all database
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return get all database response</returns>
-        Task<GetAllDataBaseResponse> GetAllDataBaseAsync(CacheServer server, GetAllDataBaseOption option);
+        Task<IEnumerable<GetAllDataBaseResponse>> GetAllDataBaseAsync(CacheServer server, GetAllDataBaseOptions options);
 
         #endregion
 
@@ -1210,9 +1201,9 @@ namespace EZNEW.Cache
         /// Query keys
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return get keys response</returns>
-        Task<GetKeysResponse> GetKeysAsync(CacheServer server, GetKeysOption option);
+        Task<IEnumerable<GetKeysResponse>> GetKeysAsync(CacheServer server, GetKeysOptions options);
 
         #endregion
 
@@ -1222,9 +1213,9 @@ namespace EZNEW.Cache
         /// Clear database data
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return clear data response</returns>
-        Task<ClearDataResponse> ClearDataAsync(CacheServer server, ClearDataOption option);
+        Task<IEnumerable<ClearDataResponse>> ClearDataAsync(CacheServer server, ClearDataOptions options);
 
         #endregion
 
@@ -1234,9 +1225,9 @@ namespace EZNEW.Cache
         /// Get cache item detail
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return get key detail response</returns>
-        Task<GetDetailResponse> GetKeyDetailAsync(CacheServer server, GetDetailOption option);
+        Task<IEnumerable<GetDetailResponse>> GetKeyDetailAsync(CacheServer server, GetDetailOptions options);
 
         #endregion
 
@@ -1246,9 +1237,9 @@ namespace EZNEW.Cache
         /// Get server config
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return get server configuration response</returns>
-        Task<GetServerConfigurationResponse> GetServerConfigurationAsync(CacheServer server, GetServerConfigurationOption option);
+        Task<IEnumerable<GetServerConfigurationResponse>> GetServerConfigurationAsync(CacheServer server, GetServerConfigurationOptions options);
 
         #endregion
 
@@ -1258,9 +1249,9 @@ namespace EZNEW.Cache
         /// Save server config
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return save server config response</returns>
-        Task<SaveServerConfigurationResponse> SaveServerConfigurationAsync(CacheServer server, SaveServerConfigurationOption option);
+        Task<IEnumerable<SaveServerConfigurationResponse>> SaveServerConfigurationAsync(CacheServer server, SaveServerConfigurationOptions options);
 
         #endregion
 

@@ -1,4 +1,4 @@
-﻿namespace EZNEW.Cache.List.Response
+﻿namespace EZNEW.Cache.List
 {
     /// <summary>
     /// List right pop left push response

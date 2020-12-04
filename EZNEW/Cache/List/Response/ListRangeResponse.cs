@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace EZNEW.Cache.List.Response
+namespace EZNEW.Cache.List
 {
     /// <summary>
     /// List range response

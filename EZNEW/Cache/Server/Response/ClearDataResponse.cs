@@ -1,4 +1,4 @@
-﻿namespace EZNEW.Cache.Server.Response
+﻿namespace EZNEW.Cache.Server
 {
     /// <summary>
     /// Clear data response

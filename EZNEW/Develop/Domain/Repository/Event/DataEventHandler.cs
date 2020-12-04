@@ -37,7 +37,7 @@ namespace EZNEW.Develop.Domain.Repository.Event
         /// <param name="datas">datas</param>
         /// <param name="activationOption">activation option</param>
         /// <returns></returns>
-        public IRepositoryEventExecuteResult Execute(IEnumerable<T> datas, ActivationOption activationOption = null)
+        public IRepositoryEventExecuteResult Execute(IEnumerable<T> datas, ActivationOptions activationOption = null)
         {
             if (datas.IsNullOrEmpty() || Operation == null)
             {

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace EZNEW.Cache.Hash.Response
+namespace EZNEW.Cache.Hash
 {
     /// <summary>
     /// Hash keys response

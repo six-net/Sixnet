@@ -19,7 +19,7 @@ namespace EZNEW.Data
         /// <param name="executeOption">Execute option</param>
         /// <param name="commands">Commands</param>
         /// <returns>Return effect data numbers</returns>
-        int Execute(DatabaseServer server, CommandExecuteOption executeOption, IEnumerable<ICommand> commands);
+        int Execute(DatabaseServer server, CommandExecuteOptions executeOption, IEnumerable<ICommand> commands);
 
         /// <summary>
         /// Execute command
@@ -28,7 +28,7 @@ namespace EZNEW.Data
         /// <param name="executeOption">Execute option</param>
         /// <param name="commands">Commands</param>
         /// <returns>Return effect data numbers</returns>
-        int Execute(DatabaseServer server, CommandExecuteOption executeOption, params ICommand[] commands);
+        int Execute(DatabaseServer server, CommandExecuteOptions executeOption, params ICommand[] commands);
 
         /// <summary>
         /// Execute command
@@ -37,7 +37,7 @@ namespace EZNEW.Data
         /// <param name="executeOption">Execute option</param>
         /// <param name="commands">Commands</param>
         /// <returns>Return effect data numbers</returns>
-        Task<int> ExecuteAsync(DatabaseServer server, CommandExecuteOption executeOption, IEnumerable<ICommand> commands);
+        Task<int> ExecuteAsync(DatabaseServer server, CommandExecuteOptions executeOption, IEnumerable<ICommand> commands);
 
         /// <summary>
         /// Execute command
@@ -46,7 +46,7 @@ namespace EZNEW.Data
         /// <param name="executeOption">Execute option</param>
         /// <param name="commands">Commands</param>
         /// <returns>Return effect data numbers</returns>
-        Task<int> ExecuteAsync(DatabaseServer server, CommandExecuteOption executeOption, params ICommand[] commands);
+        Task<int> ExecuteAsync(DatabaseServer server, CommandExecuteOptions executeOption, params ICommand[] commands);
 
         #endregion
 

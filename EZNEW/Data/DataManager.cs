@@ -482,7 +482,7 @@ namespace EZNEW.Data
         /// </summary>
         /// <param name="converterConfigName">Converter config name</param>
         /// <param name="converterParseOperation">Converter parse operation</param>
-        public static void ConfigureCriteriaConverterParser(string converterConfigName, Func<CriteriaConverterParseOption, string> converterParseOperation)
+        public static void ConfigureCriteriaConverterParser(string converterConfigName, Func<CriteriaConverterParseOptions, string> converterParseOperation)
         {
             ConfigurationManager.Data.ConfigureCriteriaConverterParser(converterConfigName, converterParseOperation);
         }
@@ -492,7 +492,7 @@ namespace EZNEW.Data
         /// </summary>
         /// <param name="converterConfigName">Converter config name</param>
         /// <returns>Return convert parse operation</returns>
-        public static Func<CriteriaConverterParseOption, string> GetCriteriaConverterParser(string converterConfigName)
+        public static Func<CriteriaConverterParseOptions, string> GetCriteriaConverterParser(string converterConfigName)
         {
             return ConfigurationManager.Data.GetCriteriaConverterParser(converterConfigName);
         }

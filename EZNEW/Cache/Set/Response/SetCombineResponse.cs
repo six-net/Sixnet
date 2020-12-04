@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace EZNEW.Cache.Set.Response
+namespace EZNEW.Cache.Set
 {
     /// <summary>
     /// Set combine response

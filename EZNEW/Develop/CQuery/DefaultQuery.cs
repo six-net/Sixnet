@@ -285,7 +285,7 @@ namespace EZNEW.Develop.CQuery
         /// <param name="value">Value</param>
         /// <param name="converter">Converter</param>
         /// <param name="queryOption">query parameter option</param>
-        public IQuery AddCriteria(QueryOperator queryOperator, string fieldName, CriteriaOperator criteriaOperator, dynamic value, ICriteriaConverter converter = null, QueryParameterOption queryOption = null)
+        public IQuery AddCriteria(QueryOperator queryOperator, string fieldName, CriteriaOperator criteriaOperator, dynamic value, ICriteriaConverter converter = null, QueryParameterOptions queryOption = null)
         {
             if (string.IsNullOrWhiteSpace(fieldName))
             {
@@ -302,12 +302,12 @@ namespace EZNEW.Develop.CQuery
         /// <param name="queryOperator">Connect operator</param>
         /// <param name="queryItem">query item</param>
         /// <param name="queryOption">query parameter option</param>
-        public IQuery AddQueryItem(QueryOperator queryOperator, IQueryItem queryItem, QueryParameterOption queryOption = null)
+        public IQuery AddQueryItem(QueryOperator queryOperator, IQueryItem queryItem, QueryParameterOptions queryOption = null)
         {
             #region invoke handler
 
             var queryItemTypeId = queryItem?.GetType().GUID ?? Guid.Empty;
-            Func<DefaultQuery, IQueryItem, QueryParameterOption, IQueryItem> handler = null;
+            Func<DefaultQuery, IQueryItem, QueryParameterOptions, IQueryItem> handler = null;
             QueryManager.AddQueryItemHandlers?.TryGetValue(queryItemTypeId, out handler);
             if (handler != null)
             {

@@ -23,14 +23,14 @@ namespace EZNEW.Develop.Domain.Repository
         /// </summary>
         /// <param name="data">Data</param>
         /// <param name="activationOption">Activation option</param>
-        TModel Save(TModel data, ActivationOption activationOption = null);
+        TModel Save(TModel data, ActivationOptions activationOption = null);
 
         /// <summary>
         /// Save datas
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="activationOption">Activation option</param>
-        List<TModel> Save(IEnumerable<TModel> datas, ActivationOption activationOption = null);
+        List<TModel> Save(IEnumerable<TModel> datas, ActivationOptions activationOption = null);
 
         #endregion
 
@@ -41,14 +41,14 @@ namespace EZNEW.Develop.Domain.Repository
         /// </summary>
         /// <param name="data">Data</param>
         /// <param name="activationOption">Activation option</param>
-        void Remove(TModel data, ActivationOption activationOption = null);
+        void Remove(TModel data, ActivationOptions activationOption = null);
 
         /// <summary>
         /// Remove datas
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="activationOption">Activation option</param>
-        void Remove(IEnumerable<TModel> datas, ActivationOption activationOption = null);
+        void Remove(IEnumerable<TModel> datas, ActivationOptions activationOption = null);
 
         #endregion
 
@@ -59,7 +59,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// </summary>
         /// <param name="query">Query object</param>
         /// <param name="activationOption">Activation option</param>
-        void Remove(IQuery query, ActivationOption activationOption = null);
+        void Remove(IQuery query, ActivationOptions activationOption = null);
 
         #endregion
 
@@ -71,7 +71,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// <param name="expression">Modify expression</param>
         /// <param name="query">Query object</param>
         /// <param name="activationOption">Activation option</param>
-        void Modify(IModify expression, IQuery query, ActivationOption activationOption = null);
+        void Modify(IModify expression, IQuery query, ActivationOptions activationOption = null);
 
         #endregion
 

@@ -21,21 +21,21 @@ namespace EZNEW.Develop.Domain.Repository
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="activationOption">Activation option</param>
-        public abstract void Save(IEnumerable<Tuple<TFirstModel, TSecondModel>> datas, ActivationOption activationOption = null);
+        public abstract void Save(IEnumerable<Tuple<TFirstModel, TSecondModel>> datas, ActivationOptions activationOption = null);
 
         /// <summary>
         /// Save by first type datas
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="activationOption">Activation option</param>
-        public abstract void SaveByFirst(IEnumerable<TFirstModel> datas, ActivationOption activationOption = null);
+        public abstract void SaveByFirst(IEnumerable<TFirstModel> datas, ActivationOptions activationOption = null);
 
         /// <summary>
         /// Save by second type datas
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="activationOption">Activation option</param>
-        public abstract void SaveBySecond(IEnumerable<TSecondModel> datas, ActivationOption activationOption = null);
+        public abstract void SaveBySecond(IEnumerable<TSecondModel> datas, ActivationOptions activationOption = null);
 
         #endregion
 
@@ -46,42 +46,42 @@ namespace EZNEW.Develop.Domain.Repository
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="activationOption">Activation option</param>
-        public abstract void Remove(IEnumerable<Tuple<TFirstModel, TSecondModel>> datas, ActivationOption activationOption = null);
+        public abstract void Remove(IEnumerable<Tuple<TFirstModel, TSecondModel>> datas, ActivationOptions activationOption = null);
 
         /// <summary>
         /// Remove by condition
         /// </summary>
         /// <param name="query">Query object</param>
         /// <param name="activationOption">Activation option</param>
-        public abstract void Remove(IQuery query, ActivationOption activationOption = null);
+        public abstract void Remove(IQuery query, ActivationOptions activationOption = null);
 
         /// <summary>
         /// Remove by first datas
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="activationOption">Activation option</param>
-        public abstract void RemoveByFirst(IEnumerable<TFirstModel> datas, ActivationOption activationOption = null);
+        public abstract void RemoveByFirst(IEnumerable<TFirstModel> datas, ActivationOptions activationOption = null);
 
         /// <summary>
         /// Remove by first
         /// </summary>
         /// <param name="query">Query object</param>
         /// <param name="activationOption">Activation option</param>
-        public abstract void RemoveByFirst(IQuery query, ActivationOption activationOption = null);
+        public abstract void RemoveByFirst(IQuery query, ActivationOptions activationOption = null);
 
         /// <summary>
         /// Remove by second datas
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="activationOption">Activation option</param>
-        public abstract void RemoveBySecond(IEnumerable<TSecondModel> datas, ActivationOption activationOption = null);
+        public abstract void RemoveBySecond(IEnumerable<TSecondModel> datas, ActivationOptions activationOption = null);
 
         /// <summary>
         /// Remove by second
         /// </summary>
         /// <param name="query">Query object</param>
         /// <param name="activationOption">Activation option</param>
-        public abstract void RemoveBySecond(IQuery query, ActivationOption activationOption = null);
+        public abstract void RemoveBySecond(IQuery query, ActivationOptions activationOption = null);
 
         #endregion
 

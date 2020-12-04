@@ -488,7 +488,7 @@ namespace EZNEW.Develop.UnitOfWork
         /// <returns>Return the data effect numbers</returns>
         public static async Task<int> ExecuteAsync(IEnumerable<ICommand> commands)
         {
-            return await ExecuteAsync(CommandExecuteOption.Default, commands).ConfigureAwait(false);
+            return await ExecuteAsync(CommandExecuteOptions.Default, commands).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -497,7 +497,7 @@ namespace EZNEW.Develop.UnitOfWork
         /// <param name="executeOption">Execute option</param>
         /// <param name="commands">Commands</param>
         /// <returns>Return effect data number</returns>
-        public static async Task<int> ExecuteAsync(CommandExecuteOption executeOption, params ICommand[] commands)
+        public static async Task<int> ExecuteAsync(CommandExecuteOptions executeOption, params ICommand[] commands)
         {
             IEnumerable<ICommand> cmdCollection = commands;
             return await ExecuteAsync(executeOption, cmdCollection).ConfigureAwait(false);
@@ -509,13 +509,13 @@ namespace EZNEW.Develop.UnitOfWork
         /// <param name="executeOption">Execute option</param>
         /// <param name="commands">Commands</param>
         /// <returns>Return effect data number</returns>
-        public static async Task<int> ExecuteAsync(CommandExecuteOption executeOption, IEnumerable<ICommand> commands)
+        public static async Task<int> ExecuteAsync(CommandExecuteOptions executeOption, IEnumerable<ICommand> commands)
         {
             if (commands.IsNullOrEmpty())
             {
                 return await Task.FromResult(0).ConfigureAwait(false);
             }
-            return await CommandExecuteManager.ExecuteAsync(executeOption ?? CommandExecuteOption.Default, commands).ConfigureAwait(false);
+            return await CommandExecuteManager.ExecuteAsync(executeOption ?? CommandExecuteOptions.Default, commands).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -526,7 +526,7 @@ namespace EZNEW.Develop.UnitOfWork
         /// <param name="commandTextType">Command text type</param>
         /// <param name="executeOption">Execute option</param>
         /// <returns>Return data effect number</returns>
-        public static async Task<int> ExecuteAsync(string commandText, object parameters = null, CommandTextType commandTextType = CommandTextType.Text, CommandExecuteOption executeOption = null)
+        public static async Task<int> ExecuteAsync(string commandText, object parameters = null, CommandTextType commandTextType = CommandTextType.Text, CommandExecuteOptions executeOption = null)
         {
             var rdbCmd = RdbCommand.CreateNewCommand(OperateType.Query, parameters);
             rdbCmd.CommandType = commandTextType;
@@ -561,7 +561,7 @@ namespace EZNEW.Develop.UnitOfWork
         /// <param name="executeOption">Execute option</param>
         /// <param name="commands">Commands</param>
         /// <returns>Return data effects</returns>
-        public static int Execute(CommandExecuteOption executeOption, params ICommand[] commands)
+        public static int Execute(CommandExecuteOptions executeOption, params ICommand[] commands)
         {
             return ExecuteAsync(executeOption, commands).Result;
         }
@@ -572,7 +572,7 @@ namespace EZNEW.Develop.UnitOfWork
         /// <param name="executeOption">Execute option</param>
         /// <param name="commands">Commands</param>
         /// <returns>Return data effects number</returns>
-        public static int Execute(CommandExecuteOption executeOption, IEnumerable<ICommand> commands)
+        public static int Execute(CommandExecuteOptions executeOption, IEnumerable<ICommand> commands)
         {
             return ExecuteAsync(executeOption, commands).Result;
         }
@@ -585,7 +585,7 @@ namespace EZNEW.Develop.UnitOfWork
         /// <param name="commandTextType">Command text type</param>
         /// <param name="executeOption">Execute option</param>
         /// <returns>Return data effects number</returns>
-        public static int Execute(string commandText, object parameters = null, CommandTextType commandTextType = CommandTextType.Text, CommandExecuteOption executeOption = null)
+        public static int Execute(string commandText, object parameters = null, CommandTextType commandTextType = CommandTextType.Text, CommandExecuteOptions executeOption = null)
         {
             return ExecuteAsync(commandText, parameters, commandTextType, executeOption).Result;
         }

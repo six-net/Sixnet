@@ -28,7 +28,7 @@ namespace EZNEW.Develop.Command
         /// <param name="executeOption">Execute option</param>
         /// <param name="commands">Commands</param>
         /// <returns>Return data effect numbers</returns>
-        int Execute(CommandExecuteOption executeOption, IEnumerable<ICommand> commands);
+        int Execute(CommandExecuteOptions executeOption, IEnumerable<ICommand> commands);
 
         /// <summary>
         /// Execute command
@@ -36,7 +36,7 @@ namespace EZNEW.Develop.Command
         /// <param name="executeOption">Execute option</param>
         /// <param name="commands">Commands</param>
         /// <returns>Return data effect numbers</returns>
-        int Execute(CommandExecuteOption executeOption, params ICommand[] commands);
+        int Execute(CommandExecuteOptions executeOption, params ICommand[] commands);
 
         /// <summary>
         /// Execute command
@@ -44,7 +44,7 @@ namespace EZNEW.Develop.Command
         /// <param name="executeOption">Execute option</param>
         /// <param name="commands">Commands</param>
         /// <returns>Return data effect numbers</returns>
-        Task<int> ExecuteAsync(CommandExecuteOption executeOption, IEnumerable<ICommand> commands);
+        Task<int> ExecuteAsync(CommandExecuteOptions executeOption, IEnumerable<ICommand> commands);
 
         /// <summary>
         /// Execute command
@@ -52,7 +52,7 @@ namespace EZNEW.Develop.Command
         /// <param name="executeOption">Execute option</param>
         /// <param name="commands">Commands</param>
         /// <returns>Return data effect numbers</returns>
-        Task<int> ExecuteAsync(CommandExecuteOption executeOption, params ICommand[] commands);
+        Task<int> ExecuteAsync(CommandExecuteOptions executeOption, params ICommand[] commands);
 
         #endregion
 

@@ -22,14 +22,14 @@ namespace EZNEW.Develop.Domain.Repository
         /// </summary>
         /// <param name="data">Data</param>
         /// <param name="activationOption">Activation option</param>
-        public abstract TModel Save(TModel data, ActivationOption activationOption = null);
+        public abstract TModel Save(TModel data, ActivationOptions activationOption = null);
 
         /// <summary>
         /// save datas
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="activationOption">Activation option</param>
-        public abstract List<TModel> Save(IEnumerable<TModel> datas, ActivationOption activationOption = null);
+        public abstract List<TModel> Save(IEnumerable<TModel> datas, ActivationOptions activationOption = null);
 
         #endregion
 
@@ -40,14 +40,14 @@ namespace EZNEW.Develop.Domain.Repository
         /// </summary>
         /// <param name="data">Data</param>
         /// <param name="activationOption">Activation option</param>
-        public abstract void Remove(TModel data, ActivationOption activationOption = null);
+        public abstract void Remove(TModel data, ActivationOptions activationOption = null);
 
         /// <summary>
         /// Remove datas
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="activationOption">Activation option</param>
-        public abstract void Remove(IEnumerable<TModel> datas, ActivationOption activationOption = null);
+        public abstract void Remove(IEnumerable<TModel> datas, ActivationOptions activationOption = null);
 
         #endregion
 
@@ -58,7 +58,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// </summary>
         /// <param name="query">Query object</param>
         /// <param name="activationOption">Activation option</param>
-        public abstract void Remove(IQuery query, ActivationOption activationOption = null);
+        public abstract void Remove(IQuery query, ActivationOptions activationOption = null);
 
         #endregion
 
@@ -70,7 +70,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// <param name="expression">Modify expression</param>
         /// <param name="query">Query object</param>
         /// <param name="activationOption">Activation option</param>
-        public abstract void Modify(IModify expression, IQuery query, ActivationOption activationOption = null);
+        public abstract void Modify(IModify expression, IQuery query, ActivationOptions activationOption = null);
 
         #endregion
 

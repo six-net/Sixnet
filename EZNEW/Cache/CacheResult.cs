@@ -18,7 +18,13 @@ namespace EZNEW.Cache.Command.Result
         /// <param name="responses">Cache responses</param>
         public void AddResponse(params TResponse[] responses)
         {
-            if (responses == null || responses.Length < 1)
+            IEnumerable<TResponse> responsesCollection = responses;
+            AddResponse(responses);
+        }
+
+        public void AddResponse(IEnumerable<TResponse> responses)
+        {
+            if (responses.IsNullOrEmpty())
             {
                 return;
             }

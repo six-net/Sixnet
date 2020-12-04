@@ -1,4 +1,4 @@
-﻿namespace EZNEW.Cache.String.Response
+﻿namespace EZNEW.Cache.String
 {
     /// <summary>
     /// String increment response

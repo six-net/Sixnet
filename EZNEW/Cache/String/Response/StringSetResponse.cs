@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace EZNEW.Cache.String.Response
+namespace EZNEW.Cache.String
 {
     /// <summary>
     /// String value set response

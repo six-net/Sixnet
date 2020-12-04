@@ -20,7 +20,7 @@ namespace EZNEW.Token
         /// </summary>
         /// <param name="tokenOption">Token option</param>
         /// <returns>Return the token value</returns>
-        public static TokenValue Encode(TokenOption tokenOption)
+        public static TokenValue Encode(TokenOptions tokenOption)
         {
             var tokenEngine = GetTokenEngine(tokenOption?.TokenType ?? string.Empty);
             return tokenEngine.Encode(tokenOption);
@@ -35,7 +35,7 @@ namespace EZNEW.Token
         /// </summary>
         /// <param name="tokenOption">Token option</param>
         /// <returns>Return token string</returns>
-        public static string Decode(TokenOption tokenOption)
+        public static string Decode(TokenOptions tokenOption)
         {
             var tokenEngine = GetTokenEngine(tokenOption?.TokenType ?? string.Empty);
             return tokenEngine.Decode(tokenOption);
@@ -46,7 +46,7 @@ namespace EZNEW.Token
         /// </summary>
         /// <param name="tokenOption">Token option</param>
         /// <returns>Return dictionary value</returns>
-        public static Dictionary<string, object> DecodeToDictionary(TokenOption tokenOption)
+        public static Dictionary<string, object> DecodeToDictionary(TokenOptions tokenOption)
         {
             var tokenEngine = GetTokenEngine(tokenOption?.TokenType ?? string.Empty);
             return tokenEngine.DecodeToDictionary(tokenOption);
@@ -58,7 +58,7 @@ namespace EZNEW.Token
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="tokenOption">Token option</param>
         /// <returns>Return data object</returns>
-        public static T DecodeToObject<T>(TokenOption tokenOption)
+        public static T DecodeToObject<T>(TokenOptions tokenOption)
         {
             var tokenEngine = GetTokenEngine(tokenOption?.TokenType ?? string.Empty);
             return tokenEngine.DecodeToObject<T>(tokenOption);

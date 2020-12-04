@@ -6,26 +6,17 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using EZNEW.Cache.Constant;
-using EZNEW.Cache.Hash.Request;
-using EZNEW.Cache.Hash.Response;
-using EZNEW.Cache.Keys.Request;
-using EZNEW.Cache.Keys.Response;
-using EZNEW.Cache.List.Request;
-using EZNEW.Cache.List.Response;
-using EZNEW.Cache.Server.Request;
-using EZNEW.Cache.Server.Response;
-using EZNEW.Cache.Set.Request;
-using EZNEW.Cache.Set.Response;
 using EZNEW.Cache.SortedSet;
-using EZNEW.Cache.SortedSet.Request;
-using EZNEW.Cache.SortedSet.Response;
-using EZNEW.Cache.String.Request;
-using EZNEW.Cache.String.Response;
 using EZNEW.Code;
 using EZNEW.Selection;
 using EZNEW.Cache.Provider.Memory.Abstractions;
 using System.Collections;
-using System.IO;
+using EZNEW.Cache.Keys;
+using EZNEW.Cache.String;
+using EZNEW.Cache.List;
+using EZNEW.Cache.Set;
+using EZNEW.Cache.Server;
+using EZNEW.Cache.Hash;
 
 namespace EZNEW.Cache.Provider.Memory
 {
@@ -34,14 +25,35 @@ namespace EZNEW.Cache.Provider.Memory
     /// </summary>
     public class MemoryProvider : ICacheProvider
     {
+        ///// <summary>
+        ///// Memory cache
+        ///// </summary>
+        //static readonly MemoryCache MemoryCache = null;
+
         /// <summary>
-        /// Memory cache
+        /// Default memory cache name
         /// </summary>
-        static readonly MemoryCache MemoryCache = null;
+        const string DefaultMemoryCacheName = "EZNEW_MEMORYCACHEDEFAULTNAME";
+
+        /// <summary>
+        /// Memory cache collection
+        /// </summary>
+        static readonly Dictionary<string, MemoryCacheDatabase> MemoryCacheCollection = new Dictionary<string, MemoryCacheDatabase>();
 
         static MemoryProvider()
         {
-            MemoryCache = new MemoryCache(Options.Create(new MemoryCacheOptions()));
+            MemoryCacheCollection = new Dictionary<string, MemoryCacheDatabase>()
+            {
+                {
+                    DefaultMemoryCacheName
+                    ,new MemoryCacheDatabase()
+                    {
+                       Index=0,
+                       Name=DefaultMemoryCacheName,
+                       Store=new MemoryCache(Options.Create(new MemoryCacheOptions()))
+                    }
+                }
+            };
         }
 
         #region String
@@ -52,54 +64,60 @@ namespace EZNEW.Cache.Provider.Memory
         /// Overwrites part of the string stored at key, starting at the specified offset,
         /// for the entire length of value. If the offset is larger than the current length
         /// of the string at key, the string is padded with zero-bytes to make offset fit.
-        /// Non-existing keys are considered as empty strings, so this option will make
+        /// Non-existing keys are considered as empty strings, so this options will make
         /// sure it holds a string large enough to be able to set value at offset.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return string set range response</returns>
-        public async Task<StringSetRangeResponse> StringSetRangeAsync(CacheServer server, StringSetRangeOption option)
+        public async Task<IEnumerable<StringSetRangeResponse>> StringSetRangeAsync(CacheServer server, StringSetRangeOptions options)
         {
-            string key = option?.Key?.GetActualKey();
+            string key = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(key))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<StringSetRangeResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<StringSetRangeResponse>(CacheCodes.KeyIsNullOrEmpty));
             }
-            if (option.Offset < 0)
+            if (options.Offset < 0)
             {
-                return await Task.FromResult(CacheResponse.FailResponse<StringSetRangeResponse>(CacheCodes.OffsetLessZero)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<StringSetRangeResponse>(CacheCodes.OffsetLessZero));
             }
-            var found = MemoryCache.TryGetEntry(key, out ICacheEntry cacheEntry);
-            var cacheValue = found ? cacheEntry?.Value?.ToString() ?? string.Empty : string.Empty;
-            var currentLength = cacheValue.Length;
-            var minLength = option.Offset;
-            if (currentLength == minLength)
+            var databases = GetDatabases(server);
+            List<StringSetRangeResponse> responses = new List<StringSetRangeResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                cacheValue = cacheValue + option.Value ?? string.Empty;
-            }
-            else if (currentLength > minLength)
-            {
-                cacheValue = cacheValue.Insert(minLength, option.Value);
-            }
-            else
-            {
-                cacheValue += new string('\x00', minLength - currentLength) + option.Value;
-            }
-            if (found)
-            {
-                cacheEntry.SetValue(cacheValue);
-            }
-            else
-            {
-                using (var newEntry = MemoryCache.CreateEntry(key))
+                var found = db.Store.TryGetEntry(key, out ICacheEntry cacheEntry);
+                var cacheValue = found ? cacheEntry?.Value?.ToString() ?? string.Empty : string.Empty;
+                var currentLength = cacheValue.Length;
+                var minLength = options.Offset;
+                if (currentLength == minLength)
                 {
-                    newEntry.Value = cacheValue;
-                    SetExpiration(newEntry, option.Expiration);
+                    cacheValue = cacheValue + options.Value ?? string.Empty;
                 }
+                else if (currentLength > minLength)
+                {
+                    cacheValue = cacheValue.Insert(minLength, options.Value);
+                }
+                else
+                {
+                    cacheValue += new string('\x00', minLength - currentLength) + options.Value;
+                }
+                if (found)
+                {
+                    cacheEntry.SetValue(cacheValue);
+                }
+                else
+                {
+                    using (var newEntry = db.Store.CreateEntry(key))
+                    {
+                        newEntry.Value = cacheValue;
+                        SetExpiration(newEntry, options.Expiration);
+                    }
+                }
+                var response = CacheResponse.SuccessResponse<StringSetRangeResponse>(server, db);
+                response.NewValueLength = cacheValue?.Length ?? 0;
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<StringSetRangeResponse>();
-            response.NewValueLength = cacheValue?.Length ?? 0;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -113,60 +131,66 @@ namespace EZNEW.Cache.Provider.Memory
         /// it can hold a bit at offset.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return string set bit response</returns>
-        public async Task<StringSetBitResponse> StringSetBitAsync(CacheServer server, StringSetBitOption option)
+        public async Task<IEnumerable<StringSetBitResponse>> StringSetBitAsync(CacheServer server, StringSetBitOptions options)
         {
-            string key = option?.Key?.GetActualKey() ?? string.Empty;
+            string key = options?.Key?.GetActualKey() ?? string.Empty;
             if (string.IsNullOrWhiteSpace(key))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<StringSetBitResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<StringSetBitResponse>(CacheCodes.KeyIsNullOrEmpty));
             }
-            if (option.Offset < 0)
+            if (options.Offset < 0)
             {
-                return await Task.FromResult(CacheResponse.FailResponse<StringSetBitResponse>(CacheCodes.OffsetLessZero)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<StringSetBitResponse>(CacheCodes.OffsetLessZero));
             }
-            var found = MemoryCache.TryGetEntry(key, out ICacheEntry cacheEntry);
-            var bitValue = option.Bit ? '1' : '0';
-            var oldBitValue = false;
-            var cacheValue = found ? cacheEntry?.Value?.ToString() ?? string.Empty : string.Empty;
+            var databases = GetDatabases(server);
+            List<StringSetBitResponse> responses = new List<StringSetBitResponse>(databases.Count);
+            foreach (var db in databases)
+            {
+                var found = db.Store.TryGetEntry(key, out ICacheEntry cacheEntry);
+                var bitValue = options.Bit ? '1' : '0';
+                var oldBitValue = false;
+                var cacheValue = found ? cacheEntry?.Value?.ToString() ?? string.Empty : string.Empty;
 
-            string binaryValue = cacheValue.ToBinaryString(GetEncoding());
-            var binaryArray = binaryValue.ToCharArray();
-            if (binaryArray.Length > option.Offset)
-            {
-                oldBitValue = binaryArray[option.Offset] == '1';
-                binaryArray[option.Offset] = bitValue;
-            }
-            else
-            {
-                var diffLength = option.Offset - binaryArray.LongLength;
-                var diffArray = new char[diffLength + 1];
-                for (var r = 0; r < diffLength; r++)
+                string binaryValue = cacheValue.ToBinaryString(GetEncoding());
+                var binaryArray = binaryValue.ToCharArray();
+                if (binaryArray.Length > options.Offset)
                 {
-                    diffArray[r] = '0';
+                    oldBitValue = binaryArray[options.Offset] == '1';
+                    binaryArray[options.Offset] = bitValue;
                 }
-                diffArray[diffLength] = bitValue;
-                binaryArray = binaryArray.Concat(diffArray).ToArray();
-            }
-            cacheValue = new string(binaryArray);
-            cacheValue = cacheValue.ToOriginalString(GetEncoding());
+                else
+                {
+                    var diffLength = options.Offset - binaryArray.LongLength;
+                    var diffArray = new char[diffLength + 1];
+                    for (var r = 0; r < diffLength; r++)
+                    {
+                        diffArray[r] = '0';
+                    }
+                    diffArray[diffLength] = bitValue;
+                    binaryArray = binaryArray.Concat(diffArray).ToArray();
+                }
+                cacheValue = new string(binaryArray);
+                cacheValue = cacheValue.ToOriginalString(GetEncoding());
 
-            if (found)
-            {
-                cacheEntry.SetValue(cacheValue);
-            }
-            else
-            {
-                using (var entry = MemoryCache.CreateEntry(key))
+                if (found)
                 {
-                    entry.Value = cacheValue;
-                    SetExpiration(entry, option.Expiration);
+                    cacheEntry.SetValue(cacheValue);
                 }
+                else
+                {
+                    using (var entry = db.Store.CreateEntry(key))
+                    {
+                        entry.Value = cacheValue;
+                        SetExpiration(entry, options.Expiration);
+                    }
+                }
+                var response = CacheResponse.SuccessResponse<StringSetBitResponse>(server, db);
+                response.OldBitValue = oldBitValue;
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<StringSetBitResponse>();
-            response.OldBitValue = oldBitValue;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -178,44 +202,50 @@ namespace EZNEW.Cache.Provider.Memory
         /// regardless of its type.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return string set response</returns>
-        public async Task<StringSetResponse> StringSetAsync(CacheServer server, StringSetOption option)
+        public async Task<IEnumerable<StringSetResponse>> StringSetAsync(CacheServer server, StringSetOptions options)
         {
-            if (option?.Items.IsNullOrEmpty() ?? true)
+            if (options?.Items.IsNullOrEmpty() ?? true)
             {
-                return CacheResponse.FailResponse<StringSetResponse>(CacheCodes.ValuesIsNullOrEmpty);
+                return WrapResponse(CacheResponse.FailResponse<StringSetResponse>(CacheCodes.ValuesIsNullOrEmpty));
             }
-            List<StringEntrySetResult> results = new List<StringEntrySetResult>(option.Items.Count);
-            foreach (var data in option.Items)
+            List<StringEntrySetResult> results = new List<StringEntrySetResult>(options.Items.Count);
+            var databases = GetDatabases(server);
+            List<StringSetResponse> responses = new List<StringSetResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                string cacheKey = data.Key?.GetActualKey() ?? string.Empty;
-                if (string.IsNullOrWhiteSpace(cacheKey))
+                foreach (var data in options.Items)
                 {
-                    continue;
+                    string cacheKey = data.Key?.GetActualKey() ?? string.Empty;
+                    if (string.IsNullOrWhiteSpace(cacheKey))
+                    {
+                        continue;
+                    }
+                    bool found = db.Store.TryGetEntry(cacheKey, out var nowEntry);
+                    bool setCache = data.When == CacheSetWhen.Always
+                        || data.When == CacheSetWhen.Exists && found
+                        || data.When == CacheSetWhen.NotExists && !found;
+                    if (!setCache)
+                    {
+                        continue;
+                    }
+                    using (var entry = db.Store.CreateEntry(cacheKey))
+                    {
+                        entry.Value = data.Value?.ToString() ?? string.Empty;
+                        SetExpiration(entry, data.Expiration);
+                    }
+                    results.Add(new StringEntrySetResult()
+                    {
+                        Key = cacheKey,
+                        SetSuccess = true
+                    });
                 }
-                bool found = MemoryCache.TryGetEntry(cacheKey, out var nowEntry);
-                bool setCache = data.When == CacheSetWhen.Always
-                    || data.When == CacheSetWhen.Exists && found
-                    || data.When == CacheSetWhen.NotExists && !found;
-                if (!setCache)
-                {
-                    continue;
-                }
-                using (var entry = MemoryCache.CreateEntry(cacheKey))
-                {
-                    entry.Value = data.Value?.ToString() ?? string.Empty;
-                    SetExpiration(entry, data.Expiration);
-                }
-                results.Add(new StringEntrySetResult()
-                {
-                    Key = cacheKey,
-                    SetSuccess = true
-                });
+                var response = CacheResponse.SuccessResponse<StringSetResponse>(server, db);
+                response.Results = results;
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<StringSetResponse>();
-            response.Results = results;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -226,21 +256,27 @@ namespace EZNEW.Cache.Provider.Memory
         /// Returns the length of the string value stored at key.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return string length response</returns>
-        public async Task<StringLengthResponse> StringLengthAsync(CacheServer server, StringLengthOption option)
+        public async Task<IEnumerable<StringLengthResponse>> StringLengthAsync(CacheServer server, StringLengthOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<StringLengthResponse>(CacheCodes.KeyIsNullOrEmpty);
+                return WrapResponse(CacheResponse.FailResponse<StringLengthResponse>(CacheCodes.KeyIsNullOrEmpty));
             }
-            var response = CacheResponse.SuccessResponse<StringLengthResponse>();
-            if (MemoryCache.TryGetValue<string>(cacheKey, out var value))
+            var databases = GetDatabases(server);
+            List<StringLengthResponse> responses = new List<StringLengthResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                response.Length = value?.Length ?? 0;
+                var response = CacheResponse.SuccessResponse<StringLengthResponse>(server, db);
+                if (db.Store.TryGetValue<string>(cacheKey, out var value))
+                {
+                    response.Length = value?.Length ?? 0;
+                }
+                responses.Add(response);
             }
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -253,42 +289,50 @@ namespace EZNEW.Cache.Provider.Memory
         /// the operation. The precision of the output is fixed at 17 digits after the decimal
         /// point regardless of the actual internal precision of the computation.
         /// </summary>
-        /// <typeparam name="T">data type</typeparam>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return string increment response</returns>
-        public async Task<StringIncrementResponse> StringIncrementAsync(CacheServer server, StringIncrementOption option)
+        public async Task<IEnumerable<StringIncrementResponse>> StringIncrementAsync(CacheServer server, StringIncrementOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<StringIncrementResponse>(CacheCodes.KeyIsNullOrEmpty);
+                return WrapResponse(CacheResponse.FailResponse<StringIncrementResponse>(CacheCodes.KeyIsNullOrEmpty));
             }
-            long nowValue = 0;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<StringIncrementResponse> responses = new List<StringIncrementResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                if (long.TryParse(entry.Value?.ToString(), out nowValue))
+                StringIncrementResponse response = null;
+                long nowValue = 0;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    nowValue += option.Value;
-                    entry.SetValue(nowValue);
+                    if (long.TryParse(entry.Value?.ToString(), out nowValue))
+                    {
+                        nowValue += options.Value;
+                        entry.SetValue(nowValue);
+                    }
+                    else
+                    {
+                        response = CacheResponse.FailResponse<StringIncrementResponse>(CacheCodes.ValueCannotBeCalculated, server: server, database: db);
+                        responses.Add(response);
+                        continue;
+                    }
                 }
                 else
                 {
-                    return CacheResponse.FailResponse<StringIncrementResponse>(CacheCodes.ValueCannotBeCalculated);
+                    using (entry = db.Store.CreateEntry(cacheKey))
+                    {
+                        nowValue = options.Value;
+                        entry.Value = options.Value;
+                        SetExpiration(entry, options.Expiration);
+                    }
                 }
+                response = CacheResponse.SuccessResponse<StringIncrementResponse>(server, db);
+                response.NewValue = nowValue;
+                responses.Add(response);
             }
-            else
-            {
-                using (entry = MemoryCache.CreateEntry(cacheKey))
-                {
-                    nowValue = option.Value;
-                    entry.Value = option.Value;
-                    SetExpiration(entry, option.Expiration);
-                }
-            }
-            var response = CacheResponse.SuccessResponse<StringIncrementResponse>();
-            response.NewValue = nowValue;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -301,26 +345,32 @@ namespace EZNEW.Cache.Provider.Memory
         /// only handles string values.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return string get with expiry response</returns>
-        public async Task<StringGetWithExpiryResponse> StringGetWithExpiryAsync(CacheServer server, StringGetWithExpiryOption option)
+        public async Task<IEnumerable<StringGetWithExpiryResponse>> StringGetWithExpiryAsync(CacheServer server, StringGetWithExpiryOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<StringGetWithExpiryResponse>(CacheCodes.KeyIsNullOrEmpty);
+                return WrapResponse(CacheResponse.FailResponse<StringGetWithExpiryResponse>(CacheCodes.KeyIsNullOrEmpty));
             }
             string nowValue = string.Empty;
             TimeSpan? expriy = null;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<StringGetWithExpiryResponse> responses = new List<StringGetWithExpiryResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                nowValue = entry.Value?.ToString() ?? string.Empty;
-                expriy = GetExpiration(entry);
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
+                {
+                    nowValue = entry.Value?.ToString() ?? string.Empty;
+                    expriy = GetExpiration(entry).Item2;
+                }
+                var response = CacheResponse.SuccessResponse<StringGetWithExpiryResponse>(server, db);
+                response.Value = nowValue;
+                response.Expiry = expriy;
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<StringGetWithExpiryResponse>();
-            response.Value = nowValue;
-            response.Expiry = expriy;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -331,31 +381,37 @@ namespace EZNEW.Cache.Provider.Memory
         /// Atomically sets key to value and returns the old value stored at key.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return string get set response</returns>
-        public async Task<StringGetSetResponse> StringGetSetAsync(CacheServer server, StringGetSetOption option)
+        public async Task<IEnumerable<StringGetSetResponse>> StringGetSetAsync(CacheServer server, StringGetSetOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<StringGetSetResponse>(CacheCodes.KeyIsNullOrEmpty);
+                return WrapResponse(CacheResponse.FailResponse<StringGetSetResponse>(CacheCodes.KeyIsNullOrEmpty));
             }
             var oldValue = string.Empty;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<StringGetSetResponse> responses = new List<StringGetSetResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                oldValue = entry.Value?.ToString() ?? string.Empty;
-                entry.SetValue(option.NewValue);
-            }
-            else
-            {
-                using (entry = MemoryCache.CreateEntry(cacheKey))
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    entry.SetValue(option.NewValue);
+                    oldValue = entry.Value?.ToString() ?? string.Empty;
+                    entry.SetValue(options.NewValue);
                 }
+                else
+                {
+                    using (entry = db.Store.CreateEntry(cacheKey))
+                    {
+                        entry.SetValue(options.NewValue);
+                    }
+                }
+                var response = CacheResponse.SuccessResponse<StringGetSetResponse>(server, db);
+                response.OldValue = oldValue;
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<StringGetSetResponse>();
-            response.OldValue = oldValue;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -369,42 +425,50 @@ namespace EZNEW.Cache.Provider.Memory
         /// -2 the penultimate and so forth.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return string get range response</returns>
-        public async Task<StringGetRangeResponse> StringGetRangeAsync(CacheServer server, StringGetRangeOption option)
+        public async Task<IEnumerable<StringGetRangeResponse>> StringGetRangeAsync(CacheServer server, StringGetRangeOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<StringGetRangeResponse>(CacheCodes.KeyIsNullOrEmpty);
+                return WrapResponse(CacheResponse.FailResponse<StringGetRangeResponse>(CacheCodes.KeyIsNullOrEmpty));
             }
             var subValue = string.Empty;
-            if (MemoryCache.TryGetValue<string>(cacheKey, out var value) && !string.IsNullOrWhiteSpace(value))
+            var databases = GetDatabases(server);
+            List<StringGetRangeResponse> responses = new List<StringGetRangeResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                int start = option.Start;
-                int end = option.End;
-                int valueLength = (value ?? string.Empty).Length;
-                if (start < 0)
+                if (db.Store.TryGetValue<string>(cacheKey, out var value) && !string.IsNullOrWhiteSpace(value))
                 {
-                    start = value.Length - Math.Abs(start);
+                    int start = options.Start;
+                    int end = options.End;
+                    int valueLength = (value ?? string.Empty).Length;
+                    if (start < 0)
+                    {
+                        start = value.Length - Math.Abs(start);
+                    }
+                    if (start < 0 || start >= valueLength)
+                    {
+                        responses.Add(CacheResponse.FailResponse<StringGetRangeResponse>(CacheCodes.OffsetError, server: server, database: db));
+                        continue;
+                    }
+                    if (end < 0)
+                    {
+                        end = value.Length - Math.Abs(end);
+                    }
+                    if (end < 0 || end >= valueLength)
+                    {
+                        responses.Add(CacheResponse.FailResponse<StringGetRangeResponse>(CacheCodes.OffsetError, server: server, database: db));
+                        continue;
+                    }
+                    subValue = value.Substring(Math.Min(start, end), Math.Abs(end - start) + 1);
                 }
-                if (start < 0 || start >= valueLength)
-                {
-                    return await Task.FromResult(CacheResponse.FailResponse<StringGetRangeResponse>(CacheCodes.OffsetError)).ConfigureAwait(false);
-                }
-                if (end < 0)
-                {
-                    end = value.Length - Math.Abs(end);
-                }
-                if (end < 0 || end >= valueLength)
-                {
-                    return await Task.FromResult(CacheResponse.FailResponse<StringGetRangeResponse>(CacheCodes.OffsetError)).ConfigureAwait(false);
-                }
-                subValue = value.Substring(Math.Min(start, end), Math.Abs(end - start) + 1);
+                var response = CacheResponse.SuccessResponse<StringGetRangeResponse>(server, db);
+                response.Value = subValue;
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<StringGetRangeResponse>();
-            response.Value = subValue;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -417,33 +481,40 @@ namespace EZNEW.Cache.Provider.Memory
         /// 0 bits
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return string get bit response</returns>
-        public async Task<StringGetBitResponse> StringGetBitAsync(CacheServer server, StringGetBitOption option)
+        public async Task<IEnumerable<StringGetBitResponse>> StringGetBitAsync(CacheServer server, StringGetBitOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<StringGetBitResponse>(CacheCodes.KeyIsNullOrEmpty);
+                return WrapResponse(CacheResponse.FailResponse<StringGetBitResponse>(CacheCodes.KeyIsNullOrEmpty));
             }
-            char bit = '0';
-            if (MemoryCache.TryGetValue<string>(cacheKey, out var value) && !string.IsNullOrWhiteSpace(value))
+            var databases = GetDatabases(server);
+            List<StringGetBitResponse> responses = new List<StringGetBitResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var binaryArray = value.ToBinaryString(GetEncoding()).ToCharArray();
-                var offset = option.Offset;
-                if (offset < 0)
+                char bit = '0';
+                if (db.Store.TryGetValue<string>(cacheKey, out var value) && !string.IsNullOrWhiteSpace(value))
                 {
-                    offset = binaryArray.LongLength - Math.Abs(offset);
+                    var binaryArray = value.ToBinaryString(GetEncoding()).ToCharArray();
+                    var offset = options.Offset;
+                    if (offset < 0)
+                    {
+                        offset = binaryArray.LongLength - Math.Abs(offset);
+                    }
+                    if (offset < 0 || offset >= binaryArray.LongLength)
+                    {
+                        responses.Add(CacheResponse.FailResponse<StringGetBitResponse>(CacheCodes.OffsetError, server: server, database: db));
+                        continue;
+                    }
+                    bit = binaryArray[offset];
                 }
-                if (offset < 0 || offset >= binaryArray.LongLength)
-                {
-                    return await Task.FromResult(CacheResponse.FailResponse<StringGetBitResponse>(CacheCodes.OffsetError)).ConfigureAwait(false);
-                }
-                bit = binaryArray[offset];
+                var response = CacheResponse.SuccessResponse<StringGetBitResponse>(server, db);
+                response.Bit = bit == '1';
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<StringGetBitResponse>();
-            response.Bit = bit == '1';
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -455,40 +526,46 @@ namespace EZNEW.Cache.Provider.Memory
         /// string value or does not exist, the special value nil is returned.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return string get response</returns>
-        public async Task<StringGetResponse> StringGetAsync(CacheServer server, StringGetOption option)
+        public async Task<IEnumerable<StringGetResponse>> StringGetAsync(CacheServer server, StringGetOptions options)
         {
-            if (option?.Keys.IsNullOrEmpty() ?? true)
+            if (options?.Keys.IsNullOrEmpty() ?? true)
             {
-                return CacheResponse.FailResponse<StringGetResponse>(CacheCodes.KeyIsNullOrEmpty);
+                return WrapResponse(CacheResponse.FailResponse<StringGetResponse>(CacheCodes.KeyIsNullOrEmpty));
             }
-            var datas = new List<CacheEntry>();
-            foreach (var key in option.Keys)
+            var databases = GetDatabases(server);
+            List<StringGetResponse> responses = new List<StringGetResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var cacheKey = key.GetActualKey();
-                if (string.IsNullOrWhiteSpace(cacheKey))
+                var datas = new List<CacheEntry>();
+                foreach (var key in options.Keys)
                 {
-                    continue;
-                }
-                if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
-                {
-                    datas.Add(new CacheEntry()
+                    var cacheKey = key.GetActualKey();
+                    if (string.IsNullOrWhiteSpace(cacheKey))
                     {
-                        Key = key,
-                        Value = entry.Value?.ToString() ?? string.Empty,
-                        Expiration = new CacheExpiration()
+                        continue;
+                    }
+                    if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
+                    {
+                        datas.Add(new CacheEntry()
                         {
-                            AbsoluteExpiration = entry.AbsoluteExpiration,
-                            AbsoluteExpirationRelativeToNow = entry.AbsoluteExpirationRelativeToNow,
-                            SlidingExpiration = entry.SlidingExpiration.HasValue
-                        }
-                    });
+                            Key = key,
+                            Value = entry.Value?.ToString() ?? string.Empty,
+                            Expiration = new CacheExpiration()
+                            {
+                                AbsoluteExpiration = entry.AbsoluteExpiration,
+                                AbsoluteExpirationRelativeToNow = entry.AbsoluteExpirationRelativeToNow,
+                                SlidingExpiration = entry.SlidingExpiration.HasValue
+                            }
+                        });
+                    }
                 }
+                var response = CacheResponse.SuccessResponse<StringGetResponse>(server, db);
+                response.Values = datas;
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<StringGetResponse>();
-            response.Values = datas;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -501,42 +578,48 @@ namespace EZNEW.Cache.Provider.Memory
         /// contains a value of the wrong type or contains a string that is not representable
         /// as integer. This operation is limited to 64 bit signed integers.
         /// </summary>
-        /// <typeparam name="T">data type</typeparam>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return string decrement response</returns>
-        public async Task<StringDecrementResponse> StringDecrementAsync(CacheServer server, StringDecrementOption option)
+        public async Task<IEnumerable<StringDecrementResponse>> StringDecrementAsync(CacheServer server, StringDecrementOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<StringDecrementResponse>(CacheCodes.KeyIsNullOrEmpty);
+                return WrapResponse(CacheResponse.FailResponse<StringDecrementResponse>(CacheCodes.KeyIsNullOrEmpty));
             }
-            long nowValue = 0;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<StringDecrementResponse> responses = new List<StringDecrementResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                if (long.TryParse(entry.Value?.ToString(), out nowValue))
+                long nowValue = 0;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    nowValue -= option.Value;
-                    entry.SetValue(nowValue);
+                    if (long.TryParse(entry.Value?.ToString(), out nowValue))
+                    {
+                        nowValue -= options.Value;
+                        entry.SetValue(nowValue);
+                    }
+                    else
+                    {
+                        responses.Add(CacheResponse.FailResponse<StringDecrementResponse>(CacheCodes.ValueCannotBeCalculated, server: server, database: db));
+                        continue;
+                    }
                 }
                 else
                 {
-                    return CacheResponse.FailResponse<StringDecrementResponse>(CacheCodes.ValueCannotBeCalculated);
+                    using (entry = db.Store.CreateEntry(cacheKey))
+                    {
+                        nowValue = options.Value;
+                        entry.Value = options.Value;
+                        SetExpiration(entry, options.Expiration);
+                    }
                 }
+                var response = CacheResponse.SuccessResponse<StringDecrementResponse>(server, db);
+                response.NewValue = nowValue;
+                responses.Add(response);
             }
-            else
-            {
-                using (entry = MemoryCache.CreateEntry(cacheKey))
-                {
-                    nowValue = option.Value;
-                    entry.Value = option.Value;
-                    SetExpiration(entry, option.Expiration);
-                }
-            }
-            var response = CacheResponse.SuccessResponse<StringDecrementResponse>();
-            response.NewValue = nowValue;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -553,60 +636,68 @@ namespace EZNEW.Cache.Provider.Memory
         /// penultimate, and so forth.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return string bit position response</returns>
-        public async Task<StringBitPositionResponse> StringBitPositionAsync(CacheServer server, StringBitPositionOption option)
+        public async Task<IEnumerable<StringBitPositionResponse>> StringBitPositionAsync(CacheServer server, StringBitPositionOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<StringBitPositionResponse>(CacheCodes.KeyIsNullOrEmpty);
+                return WrapResponse(CacheResponse.FailResponse<StringBitPositionResponse>(CacheCodes.KeyIsNullOrEmpty));
             }
-            if ((option.Start >= 0 && option.End < option.Start) || (option.Start < 0 && option.End > option.Start))
+            if ((options.Start >= 0 && options.End < options.Start) || (options.Start < 0 && options.End > options.Start))
             {
-                return CacheResponse.FailResponse<StringBitPositionResponse>(CacheCodes.OffsetError);
+                return WrapResponse(CacheResponse.FailResponse<StringBitPositionResponse>(CacheCodes.OffsetError));
             }
-            bool hasValue = false;
-            long position = 0;
-            if (MemoryCache.TryGetValue<string>(cacheKey, out var value) && !string.IsNullOrWhiteSpace(value))
+            var databases = GetDatabases(server);
+            List<StringBitPositionResponse> responses = new List<StringBitPositionResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                char[] valueArray = value.ToBinaryString(GetEncoding()).ToCharArray();
-                var matchBit = option.Bit ? '1' : '0';
-                var length = valueArray.LongLength;
-                var start = option.Start;
-                var end = option.End;
-                if (start < 0)
+                bool hasValue = false;
+                long position = 0;
+                if (db.Store.TryGetValue<string>(cacheKey, out var value) && !string.IsNullOrWhiteSpace(value))
                 {
-                    start = length - Math.Abs(start);
-                }
-                if (start < 0 || start >= length)
-                {
-                    return await Task.FromResult(CacheResponse.FailResponse<StringBitPositionResponse>(CacheCodes.OffsetError)).ConfigureAwait(false);
-                }
-                if (end < 0)
-                {
-                    end = length - Math.Abs(end);
-                }
-                if (end < 0 || end >= length)
-                {
-                    return await Task.FromResult(CacheResponse.FailResponse<StringBitPositionResponse>(CacheCodes.OffsetError)).ConfigureAwait(false);
-                }
-                var begin = Math.Min(start, end);
-                end = Math.Max(start, end) + 1;
-                for (var i = begin; i < end; i++)
-                {
-                    if (valueArray[i] == matchBit)
+                    char[] valueArray = value.ToBinaryString(GetEncoding()).ToCharArray();
+                    var matchBit = options.Bit ? '1' : '0';
+                    var length = valueArray.LongLength;
+                    var start = options.Start;
+                    var end = options.End;
+                    if (start < 0)
                     {
-                        position = i;
-                        hasValue = true;
-                        break;
+                        start = length - Math.Abs(start);
+                    }
+                    if (start < 0 || start >= length)
+                    {
+                        responses.Add(CacheResponse.FailResponse<StringBitPositionResponse>(CacheCodes.OffsetError, server: server, database: db));
+                        continue;
+                    }
+                    if (end < 0)
+                    {
+                        end = length - Math.Abs(end);
+                    }
+                    if (end < 0 || end >= length)
+                    {
+                        responses.Add(CacheResponse.FailResponse<StringBitPositionResponse>(CacheCodes.OffsetError, server: server, database: db));
+                        continue;
+                    }
+                    var begin = Math.Min(start, end);
+                    end = Math.Max(start, end) + 1;
+                    for (var i = begin; i < end; i++)
+                    {
+                        if (valueArray[i] == matchBit)
+                        {
+                            position = i;
+                            hasValue = true;
+                            break;
+                        }
                     }
                 }
+                var response = CacheResponse.SuccessResponse<StringBitPositionResponse>(server, db);
+                response.HasValue = hasValue;
+                response.Position = position;
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<StringBitPositionResponse>();
-            response.HasValue = hasValue;
-            response.Position = position;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -615,76 +706,84 @@ namespace EZNEW.Cache.Provider.Memory
 
         /// <summary>
         /// Perform a bitwise operation between multiple keys (containing string values)
-        ///  and store the result in the destination key. The BITOP option supports four
+        ///  and store the result in the destination key. The BITOP options supports four
         ///  bitwise operations; note that NOT is a unary operator: the second key should
         ///  be omitted in this case and only the first key will be considered. The result
         /// of the operation is always stored at destkey.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return string bit operation response</returns>
-        public async Task<StringBitOperationResponse> StringBitOperationAsync(CacheServer server, StringBitOperationOption option)
+        public async Task<IEnumerable<StringBitOperationResponse>> StringBitOperationAsync(CacheServer server, StringBitOperationOptions options)
         {
-            if (option.Keys.IsNullOrEmpty() || string.IsNullOrWhiteSpace(option.DestinationKey))
+            if (options.Keys.IsNullOrEmpty() || string.IsNullOrWhiteSpace(options.DestinationKey))
             {
-                return CacheResponse.FailResponse<StringBitOperationResponse>(CacheCodes.KeyIsNullOrEmpty);
+                return WrapResponse(CacheResponse.FailResponse<StringBitOperationResponse>(CacheCodes.KeyIsNullOrEmpty));
             }
-            if (option.Keys.Count > 1 && option.Bitwise == CacheBitwise.Not)
+            if (options.Keys.Count > 1 && options.Bitwise == CacheBitwise.Not)
             {
                 throw new NotSupportedException($" CacheBitwise.Not can only operate on one key");
             }
-            BitArray bitArray = null;
-            foreach (var key in option.Keys)
+            var databases = GetDatabases(server);
+            List<StringBitOperationResponse> responses = new List<StringBitOperationResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                if (MemoryCache.TryGetEntry(key, out ICacheEntry cacheEntry))
+                BitArray bitArray = null;
+                foreach (var key in options.Keys)
                 {
-                    var binaryString = (cacheEntry?.Value?.ToString() ?? string.Empty).ToBinaryString(GetEncoding());
-                    var binaryArray = new BitArray(binaryString.Select(c => (int)c).ToArray());
-                    if (bitArray == null)
+                    if (db.Store.TryGetEntry(key, out ICacheEntry cacheEntry))
                     {
-                        bitArray = binaryArray;
-                    }
-                    else
-                    {
-                        bitArray = option.Bitwise switch
+                        var binaryString = (cacheEntry?.Value?.ToString() ?? string.Empty).ToBinaryString(GetEncoding());
+                        var binaryArray = new BitArray(binaryString.Select(c => (int)c).ToArray());
+                        if (bitArray == null)
                         {
-                            CacheBitwise.And => bitArray.And(binaryArray),
-                            CacheBitwise.Or => bitArray.Or(binaryArray),
-                            CacheBitwise.Xor => bitArray.Xor(binaryArray),
-                            CacheBitwise.Not => binaryArray.Not(),
-                            _ => throw new NotSupportedException()
-                        };
+                            bitArray = binaryArray;
+                        }
+                        else
+                        {
+                            bitArray = options.Bitwise switch
+                            {
+                                CacheBitwise.And => bitArray.And(binaryArray),
+                                CacheBitwise.Or => bitArray.Or(binaryArray),
+                                CacheBitwise.Xor => bitArray.Xor(binaryArray),
+                                CacheBitwise.Not => binaryArray.Not(),
+                                _ => throw new NotSupportedException()
+                            };
+                        }
                     }
                 }
-            }
-            if (bitArray == null)
-            {
-                return CacheResponse.FailResponse<StringBitOperationResponse>(CacheCodes.ValuesIsNullOrEmpty);
-            }
-            var bitString = string.Join("", bitArray.Cast<bool>().Select(c => c ? 1 : 0));
-            var originalString = bitString.ToOriginalString(GetEncoding());
-            var desResult = await StringSetAsync(server, new StringSetOption()
-            {
-                Items = new List<CacheEntry>()
+                if (bitArray == null)
+                {
+                    responses.Add(CacheResponse.FailResponse<StringBitOperationResponse>(CacheCodes.ValuesIsNullOrEmpty, server: server, database: db));
+                    continue;
+                }
+                var bitString = string.Join("", bitArray.Cast<bool>().Select(c => c ? 1 : 0));
+                var originalString = bitString.ToOriginalString(GetEncoding());
+                var desResult = await StringSetAsync(server, new StringSetOptions()
+                {
+                    Items = new List<CacheEntry>()
                 {
                     new CacheEntry()
                     {
-                        Key=option.DestinationKey,
+                        Key=options.DestinationKey,
                         Type=CacheKeyType.String,
                         Value=originalString,
-                        Expiration=option.Expiration
+                        Expiration=options.Expiration
                     }
                 }
-            });
-            if (desResult.Success)
-            {
-                return new StringBitOperationResponse()
+                }).ConfigureAwait(false);
+                if (!desResult.IsNullOrEmpty())
                 {
-                    Success = true,
-                    DestinationValueLength = originalString.Length
-                };
+                    responses.Add(new StringBitOperationResponse()
+                    {
+                        Success = true,
+                        DestinationValueLength = originalString.Length,
+                        CacheServer = server,
+                        Database = db
+                    });
+                }
             }
-            return CacheResponse.FailResponse<StringBitOperationResponse>("");
+            return responses;
         }
 
         #endregion
@@ -695,31 +794,37 @@ namespace EZNEW.Cache.Provider.Memory
         /// Count the number of set bits (population counting) in a string. By default all
         /// the bytes contained in the string are examined.It is possible to specify the
         /// counting operation only in an interval passing the additional arguments start
-        /// and end. Like for the GETRANGE option start and end can contain negative values
+        /// and end. Like for the GETRANGE options start and end can contain negative values
         /// in order to index bytes starting from the end of the string, where -1 is the
         /// last byte, -2 is the penultimate, and so forth.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return string bit count response</returns>
-        public async Task<StringBitCountResponse> StringBitCountAsync(CacheServer server, StringBitCountOption option)
+        public async Task<IEnumerable<StringBitCountResponse>> StringBitCountAsync(CacheServer server, StringBitCountOptions options)
         {
-            if (string.IsNullOrWhiteSpace(option?.Key))
+            if (string.IsNullOrWhiteSpace(options?.Key))
             {
-                throw new ArgumentNullException($"{nameof(StringBitCountOption)}.{nameof(StringBitCountOption.Key)}");
+                throw new ArgumentNullException($"{nameof(StringBitCountOptions)}.{nameof(StringBitCountOptions.Key)}");
             }
-            var cacheKey = option.Key.GetActualKey();
+            var cacheKey = options.Key.GetActualKey();
             long bitCount = 0;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<StringBitCountResponse> responses = new List<StringBitCountResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var value = entry.Value?.ToString() ?? string.Empty;
-                bitCount = value.ToBinaryString(GetEncoding()).Count(c => c == '1');
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
+                {
+                    var value = entry.Value?.ToString() ?? string.Empty;
+                    bitCount = value.ToBinaryString(GetEncoding()).Count(c => c == '1');
+                }
+                responses.Add(new StringBitCountResponse()
+                {
+                    Success = true,
+                    BitNum = bitCount
+                });
             }
-            return await Task.FromResult(new StringBitCountResponse()
-            {
-                Success = true,
-                BitNum = bitCount
-            }).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -727,39 +832,45 @@ namespace EZNEW.Cache.Provider.Memory
         #region StringAppend
 
         /// <summary>
-        /// If key already exists and is a string, this option appends the value at the
+        /// If key already exists and is a string, this options appends the value at the
         /// end of the string. If key does not exist it is created and set as an empty string,
         /// so APPEND will be similar to SET in this special case.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return string append response</returns>
-        public async Task<StringAppendResponse> StringAppendAsync(CacheServer server, StringAppendOption option)
+        public async Task<IEnumerable<StringAppendResponse>> StringAppendAsync(CacheServer server, StringAppendOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<StringAppendResponse>(CacheCodes.KeyIsNullOrEmpty);
+                return WrapResponse(CacheResponse.FailResponse<StringAppendResponse>(CacheCodes.KeyIsNullOrEmpty));
             }
             long valueLength = 0;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<StringAppendResponse> responses = new List<StringAppendResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var nowValue = entry.Value?.ToString() ?? string.Empty;
-                nowValue += option.Value ?? string.Empty;
-                valueLength = nowValue.Length;
-                entry.SetValue(nowValue);
-            }
-            else
-            {
-                using (entry = MemoryCache.CreateEntry(cacheKey))
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    entry.SetValue(option.Value);
-                    SetExpiration(entry, option.Expiration);
+                    var nowValue = entry.Value?.ToString() ?? string.Empty;
+                    nowValue += options.Value ?? string.Empty;
+                    valueLength = nowValue.Length;
+                    entry.SetValue(nowValue);
                 }
+                else
+                {
+                    using (entry = db.Store.CreateEntry(cacheKey))
+                    {
+                        entry.SetValue(options.Value);
+                        SetExpiration(entry, options.Expiration);
+                    }
+                }
+                var response = CacheResponse.SuccessResponse<StringAppendResponse>(server, db);
+                response.NewValueLength = valueLength;
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<StringAppendResponse>();
-            response.NewValueLength = valueLength;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -780,53 +891,63 @@ namespace EZNEW.Cache.Provider.Memory
         /// the penultimate element and so on.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return list trim response</returns>
-        public async Task<ListTrimResponse> ListTrimAsync(CacheServer server, ListTrimOption option)
+        public async Task<IEnumerable<ListTrimResponse>> ListTrimAsync(CacheServer server, ListTrimOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<ListTrimResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<ListTrimResponse>(CacheCodes.KeyIsNullOrEmpty));
             }
-            ListTrimResponse response = null;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<ListTrimResponse> responses = new List<ListTrimResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var list = entry.Value as List<string>;
-                if (list == null)
+                ListTrimResponse response = null;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<ListTrimResponse>(CacheCodes.ValueIsNotList)).ConfigureAwait(false);
+                    if (!(entry.Value is List<string> list))
+                    {
+                        responses.Add(CacheResponse.FailResponse<ListTrimResponse>(CacheCodes.ValueIsNotList, server: server, database: db));
+                        continue;
+                    }
+                    var start = options.Start;
+                    var end = options.Stop;
+                    int count = list.Count;
+                    if (start < 0)
+                    {
+                        start = count - Math.Abs(start);
+                    }
+                    if (start < 0 || start >= count)
+                    {
+                        responses.Add(CacheResponse.FailResponse<ListTrimResponse>(CacheCodes.OffsetError, server: server, database: db));
+                        continue;
+                    }
+                    if (end < 0)
+                    {
+                        end = count - Math.Abs(end);
+                    }
+                    if (end < 0 || end >= count)
+                    {
+                        responses.Add(CacheResponse.FailResponse<ListTrimResponse>(CacheCodes.OffsetError, server: server, database: db));
+                        continue;
+                    }
+                    var begin = Math.Min(start, end);
+                    var takeCount = Math.Abs(end - start) + 1;
+                    var nowList = list.Skip(begin).Take(takeCount).ToList();
+                    entry.SetValue(nowList);
+                    response = CacheResponse.SuccessResponse<ListTrimResponse>();
                 }
-                var start = option.Start;
-                var end = option.Stop;
-                int count = list.Count;
-                if (start < 0)
+                else
                 {
-                    start = count - Math.Abs(start);
+                    response = CacheResponse.FailResponse<ListTrimResponse>(CacheCodes.KeyIsNotExist);
                 }
-                if (start < 0 || start >= count)
-                {
-                    return await Task.FromResult(CacheResponse.FailResponse<ListTrimResponse>(CacheCodes.OffsetError)).ConfigureAwait(false);
-                }
-                if (end < 0)
-                {
-                    end = count - Math.Abs(end);
-                }
-                if (end < 0 || end >= count)
-                {
-                    return await Task.FromResult(CacheResponse.FailResponse<ListTrimResponse>(CacheCodes.OffsetError)).ConfigureAwait(false);
-                }
-                var begin = Math.Min(start, end);
-                var takeCount = Math.Abs(end - start) + 1;
-                var nowList = list.Skip(begin).Take(takeCount).ToList();
-                entry.SetValue(nowList);
-                response = CacheResponse.SuccessResponse<ListTrimResponse>();
+                response.CacheServer = server;
+                response.Database = db;
+                responses.Add(response);
             }
-            else
-            {
-                response = CacheResponse.FailResponse<ListTrimResponse>(CacheCodes.KeyIsNotExist);
-            }
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -838,40 +959,49 @@ namespace EZNEW.Cache.Provider.Memory
         ///  see ListGetByIndex. An error is returned for out of range indexes.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return list set by index response</returns>
-        public async Task<ListSetByIndexResponse> ListSetByIndexAsync(CacheServer server, ListSetByIndexOption option)
+        public async Task<IEnumerable<ListSetByIndexResponse>> ListSetByIndexAsync(CacheServer server, ListSetByIndexOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<ListSetByIndexResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<ListSetByIndexResponse>(CacheCodes.KeyIsNullOrEmpty));
             }
-            ListSetByIndexResponse response = null;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<ListSetByIndexResponse> responses = new List<ListSetByIndexResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var list = entry.Value as List<string>;
-                if (list == null)
+                ListSetByIndexResponse response = null;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<ListSetByIndexResponse>(CacheCodes.ValueIsNotList)).ConfigureAwait(false);
+                    var list = entry.Value as List<string>;
+                    if (list == null)
+                    {
+                        responses.Add(CacheResponse.FailResponse<ListSetByIndexResponse>(CacheCodes.ValueIsNotList, server: server, database: db));
+                        continue;
+                    }
+                    var index = options.Index;
+                    if (index < 0)
+                    {
+                        index = list.Count - Math.Abs(index);
+                    }
+                    if (index < 0 || index >= list.Count)
+                    {
+                        responses.Add(CacheResponse.FailResponse<ListSetByIndexResponse>(CacheCodes.OffsetError, server: server, database: db));
+                    }
+                    list[index] = options.Value;
+                    response = CacheResponse.SuccessResponse<ListSetByIndexResponse>();
                 }
-                var index = option.Index;
-                if (index < 0)
+                else
                 {
-                    index = list.Count - Math.Abs(index);
+                    response = CacheResponse.FailResponse<ListSetByIndexResponse>(CacheCodes.KeyIsNotExist);
                 }
-                if (index < 0 || index >= list.Count)
-                {
-                    return await Task.FromResult(CacheResponse.FailResponse<ListSetByIndexResponse>(CacheCodes.OffsetError)).ConfigureAwait(false);
-                }
-                list[index] = option.Value;
-                response = CacheResponse.SuccessResponse<ListSetByIndexResponse>();
+                response.CacheServer = server;
+                response.Database = db;
+                responses.Add(response);
             }
-            else
-            {
-                response = CacheResponse.FailResponse<ListSetByIndexResponse>(CacheCodes.KeyIsNotExist);
-            }
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -882,48 +1012,56 @@ namespace EZNEW.Cache.Provider.Memory
         /// Insert all the specified values at the tail of the list stored at key. If key
         /// does not exist, it is created as empty list before performing the push operation.
         /// Elements are inserted one after the other to the tail of the list, from the leftmost
-        /// element to the rightmost element. So for instance the option RPUSH mylist a
+        /// element to the rightmost element. So for instance the options RPUSH mylist a
         /// b c will result into a list containing a as first element, b as second element
         /// and c as third element.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return list right push</returns>
-        public async Task<ListRightPushResponse> ListRightPushAsync(CacheServer server, ListRightPushOption option)
+        public async Task<IEnumerable<ListRightPushResponse>> ListRightPushAsync(CacheServer server, ListRightPushOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<ListRightPushResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<ListRightPushResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            if (option.Values.IsNullOrEmpty())
+            if (options.Values.IsNullOrEmpty())
             {
-                return await Task.FromResult(CacheResponse.FailResponse<ListRightPushResponse>(CacheCodes.ValuesIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<ListRightPushResponse>(CacheCodes.ValuesIsNullOrEmpty, server: server));
             }
-            ListRightPushResponse response = null;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<ListRightPushResponse> responses = new List<ListRightPushResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var list = entry.Value as List<string>;
-                if (list == null)
+                ListRightPushResponse response;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<ListRightPushResponse>(CacheCodes.ValueIsNotList)).ConfigureAwait(false);
+                    if (!(entry.Value is List<string> list))
+                    {
+                        responses.Add(CacheResponse.FailResponse<ListRightPushResponse>(CacheCodes.ValueIsNotList, server: server, database: db));
+                        continue;
+                    }
+                    list = list.Concat(options.Values).ToList();
+                    entry.SetValue(list);
+                    response = CacheResponse.SuccessResponse<ListRightPushResponse>();
+                    response.NewListLength = list.Count;
                 }
-                list = list.Concat(option.Values).ToList();
-                entry.SetValue(list);
-                response = CacheResponse.SuccessResponse<ListRightPushResponse>();
-                response.NewListLength = list.Count;
-            }
-            else
-            {
-                using (entry = MemoryCache.CreateEntry(cacheKey))
+                else
                 {
-                    entry.SetValue(new List<string>(option.Values));
-                    SetExpiration(entry, option.Expiration);
+                    using (entry = db.Store.CreateEntry(cacheKey))
+                    {
+                        entry.SetValue(new List<string>(options.Values));
+                        SetExpiration(entry, options.Expiration);
+                    }
+                    response = CacheResponse.SuccessResponse<ListRightPushResponse>();
+                    response.NewListLength = options.Values.Count;
                 }
-                response = CacheResponse.SuccessResponse<ListRightPushResponse>();
-                response.NewListLength = option.Values.Count;
+                response.CacheServer = server;
+                response.Database = db;
+                responses.Add(response);
             }
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -936,62 +1074,70 @@ namespace EZNEW.Cache.Provider.Memory
         /// at destination.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return list right pop left response</returns>
-        public async Task<ListRightPopLeftPushResponse> ListRightPopLeftPushAsync(CacheServer server, ListRightPopLeftPushOption option)
+        public async Task<IEnumerable<ListRightPopLeftPushResponse>> ListRightPopLeftPushAsync(CacheServer server, ListRightPopLeftPushOptions options)
         {
-            string sourceCacheKey = option?.SourceKey?.GetActualKey();
-            string destionationCacheKey = option?.DestinationKey?.GetActualKey();
+            string sourceCacheKey = options?.SourceKey?.GetActualKey();
+            string destionationCacheKey = options?.DestinationKey?.GetActualKey();
             if (string.IsNullOrWhiteSpace(sourceCacheKey) || string.IsNullOrWhiteSpace(destionationCacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<ListRightPopLeftPushResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<ListRightPopLeftPushResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            ListRightPopLeftPushResponse response = null;
-            string value = string.Empty;
-            if (MemoryCache.TryGetEntry(sourceCacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<ListRightPopLeftPushResponse> responses = new List<ListRightPopLeftPushResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var list = entry.Value as List<string>;
-                if (list == null)
+                ListRightPopLeftPushResponse response = null;
+                if (db.Store.TryGetEntry(sourceCacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<ListRightPopLeftPushResponse>(CacheCodes.ValueIsNotList)).ConfigureAwait(false);
-                }
-                if (list.Count < 1)
-                {
-                    response = CacheResponse.FailResponse<ListRightPopLeftPushResponse>(CacheCodes.ListIsEmpty);
-                }
-
-                List<string> desList = null;
-                if (MemoryCache.TryGetEntry(destionationCacheKey, out var desEntry) && desEntry != null)
-                {
-                    desList = desEntry.Value as List<string>;
-                    if (desList == null)
+                    if (!(entry.Value is List<string> list))
                     {
-                        return await Task.FromResult(CacheResponse.FailResponse<ListRightPopLeftPushResponse>(CacheCodes.ValueIsNotList)).ConfigureAwait(false);
+                        responses.Add(CacheResponse.FailResponse<ListRightPopLeftPushResponse>(CacheCodes.ValueIsNotList, server: server, database: db));
+                        continue;
                     }
-                }
-                var index = list.Count - 1;
-                value = list[index];
-                list.RemoveAt(index);
-                if (desEntry == null)
-                {
-                    using (desEntry = MemoryCache.CreateEntry(destionationCacheKey))
+                    if (list.Count < 1)
                     {
-                        desEntry.Value = new List<string>() { value };
-                        SetExpiration(desEntry, option.Expiration);
+                        responses.Add(CacheResponse.FailResponse<ListRightPopLeftPushResponse>(CacheCodes.ListIsEmpty, server: server, database: db));
+                        continue;
                     }
+                    List<string> desList = null;
+                    if (db.Store.TryGetEntry(destionationCacheKey, out var desEntry) && desEntry != null)
+                    {
+                        desList = desEntry.Value as List<string>;
+                        if (desList == null)
+                        {
+                            responses.Add(CacheResponse.FailResponse<ListRightPopLeftPushResponse>(CacheCodes.ValueIsNotList, server: server, database: db));
+                            continue;
+                        }
+                    }
+                    var index = list.Count - 1;
+                    string value = list[index];
+                    list.RemoveAt(index);
+                    if (desEntry == null)
+                    {
+                        using (desEntry = db.Store.CreateEntry(destionationCacheKey))
+                        {
+                            desEntry.Value = new List<string>() { value };
+                            SetExpiration(desEntry, options.Expiration);
+                        }
+                    }
+                    else
+                    {
+                        desList.Insert(0, value);
+                    }
+                    response = CacheResponse.SuccessResponse<ListRightPopLeftPushResponse>();
+                    response.PopValue = value;
                 }
                 else
                 {
-                    desList.Insert(0, value);
+                    response = CacheResponse.FailResponse<ListRightPopLeftPushResponse>(CacheCodes.KeyIsNotExist);
                 }
-                response = CacheResponse.SuccessResponse<ListRightPopLeftPushResponse>();
-                response.PopValue = value;
+                response.CacheServer = server;
+                response.Database = db;
+                responses.Add(response);
             }
-            else
-            {
-                response = CacheResponse.FailResponse<ListRightPopLeftPushResponse>(CacheCodes.KeyIsNotExist);
-            }
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -1002,39 +1148,48 @@ namespace EZNEW.Cache.Provider.Memory
         /// Removes and returns the last element of the list stored at key.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return list right pop response</returns>
-        public async Task<ListRightPopResponse> ListRightPopAsync(CacheServer server, ListRightPopOption option)
+        public async Task<IEnumerable<ListRightPopResponse>> ListRightPopAsync(CacheServer server, ListRightPopOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<ListRightPopResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<ListRightPopResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            ListRightPopResponse response = null;
-            string value = string.Empty;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<ListRightPopResponse> responses = new List<ListRightPopResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var list = entry.Value as List<string>;
-                if (list == null)
+                ListRightPopResponse response = null;
+                string value = string.Empty;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<ListRightPopResponse>(CacheCodes.ValueIsNotList)).ConfigureAwait(false);
+                    if (!(entry.Value is List<string> list))
+                    {
+                        responses.Add(CacheResponse.FailResponse<ListRightPopResponse>(CacheCodes.ValueIsNotList, server: server, database: db));
+                        continue;
+                    }
+                    if (list.Count < 1)
+                    {
+                        responses.Add(CacheResponse.FailResponse<ListRightPopResponse>(CacheCodes.ListIsEmpty, server: server, database: db));
+                        continue;
+                    }
+                    var index = list.Count - 1;
+                    value = list[index];
+                    list.RemoveAt(index);
+                    response = CacheResponse.SuccessResponse<ListRightPopResponse>();
+                    response.PopValue = value;
                 }
-                if (list.Count < 1)
+                else
                 {
-                    response = CacheResponse.FailResponse<ListRightPopResponse>(CacheCodes.ListIsEmpty);
+                    response = CacheResponse.FailResponse<ListRightPopResponse>(CacheCodes.KeyIsNotExist);
                 }
-                var index = list.Count - 1;
-                value = list[index];
-                list.RemoveAt(index);
-                response = CacheResponse.SuccessResponse<ListRightPopResponse>();
-                response.PopValue = value;
+                response.CacheServer = server;
+                response.Database = db;
+                responses.Add(response);
             }
-            else
-            {
-                response = CacheResponse.FailResponse<ListRightPopResponse>(CacheCodes.KeyIsNotExist);
-            }
-            return await Task.FromResult<ListRightPopResponse>(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -1049,51 +1204,59 @@ namespace EZNEW.Cache.Provider.Memory
         /// elements equal to value.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return list remove response</returns>
-        public async Task<ListRemoveResponse> ListRemoveAsync(CacheServer server, ListRemoveOption option)
+        public async Task<IEnumerable<ListRemoveResponse>> ListRemoveAsync(CacheServer server, ListRemoveOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<ListRemoveResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<ListRemoveResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            ListRemoveResponse response = null;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<ListRemoveResponse> responses = new List<ListRemoveResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var list = entry.Value as List<string>;
-                if (list == null)
+                ListRemoveResponse response = null;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<ListRemoveResponse>(CacheCodes.ValueIsNotList)).ConfigureAwait(false);
-                }
-                var removeCount = 0;
-                if (option.Count == 0)
-                {
-                    removeCount = list.RemoveAll(a => a == option.Value);
+                    if (!(entry.Value is List<string> list))
+                    {
+                        responses.Add(CacheResponse.FailResponse<ListRemoveResponse>(CacheCodes.ValueIsNotList, server: server, database: db));
+                        continue;
+                    }
+                    var removeCount = 0;
+                    if (options.Count == 0)
+                    {
+                        removeCount = list.RemoveAll(a => a == options.Value);
+                    }
+                    else
+                    {
+                        var count = Math.Abs(options.Count);
+                        var findLast = options.Count < 0;
+                        for (var i = 0; i < count; i++)
+                        {
+                            var index = findLast ? list.FindLastIndex(c => c == options.Value) : list.FindIndex(c => c == options.Value);
+                            if (index < 0)
+                            {
+                                break;
+                            }
+                            removeCount++;
+                            list.RemoveAt(index);
+                        }
+                    }
+                    response = CacheResponse.SuccessResponse<ListRemoveResponse>();
+                    response.RemoveCount = removeCount;
                 }
                 else
                 {
-                    var count = Math.Abs(option.Count);
-                    var findLast = option.Count < 0;
-                    for (var i = 0; i < count; i++)
-                    {
-                        var index = findLast ? list.FindLastIndex(c => c == option.Value) : list.FindIndex(c => c == option.Value);
-                        if (index < 0)
-                        {
-                            break;
-                        }
-                        removeCount++;
-                        list.RemoveAt(index);
-                    }
+                    response = CacheResponse.FailResponse<ListRemoveResponse>(CacheCodes.KeyIsNotExist);
                 }
-                response = CacheResponse.SuccessResponse<ListRemoveResponse>();
-                response.RemoveCount = removeCount;
+                response.CacheServer = server;
+                response.Database = db;
+                responses.Add(response);
             }
-            else
-            {
-                response = CacheResponse.FailResponse<ListRemoveResponse>(CacheCodes.KeyIsNotExist);
-            }
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -1110,50 +1273,60 @@ namespace EZNEW.Cache.Provider.Memory
         /// elements, that is, the rightmost item is included.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return list range response</returns>
-        public async Task<ListRangeResponse> ListRangeAsync(CacheServer server, ListRangeOption option)
+        public async Task<IEnumerable<ListRangeResponse>> ListRangeAsync(CacheServer server, ListRangeOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<ListRangeResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<ListRangeResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            ListRangeResponse response = null;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<ListRangeResponse> responses = new List<ListRangeResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var list = entry.Value as List<string>;
-                if (list == null)
+                ListRangeResponse response;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<ListRangeResponse>(CacheCodes.ValueIsNotList)).ConfigureAwait(false);
+                    if (!(entry.Value is List<string> list))
+                    {
+                        responses.Add(CacheResponse.FailResponse<ListRangeResponse>(CacheCodes.ValueIsNotList, server: server, database: db));
+                        continue;
+                    }
+                    var start = options.Start;
+                    if (start < 0)
+                    {
+                        start = list.Count - Math.Abs(start);
+                    }
+                    if (start < 0 || start >= list.Count)
+                    {
+                        responses.Add(CacheResponse.FailResponse<ListRangeResponse>(CacheCodes.OffsetError, server: server, database: db));
+                        continue;
+                    }
+                    var end = options.Stop;
+                    if (end < 0)
+                    {
+                        end = list.Count - Math.Abs(end);
+                    }
+                    if (end < 0 || end >= list.Count)
+                    {
+                        responses.Add(CacheResponse.FailResponse<ListRangeResponse>(CacheCodes.OffsetError, server: server, database: db));
+                        continue;
+                    }
+                    var begin = Math.Min(start, end);
+                    response = CacheResponse.SuccessResponse<ListRangeResponse>();
+                    response.Values = list.GetRange(begin, Math.Abs(end - start) + 1).ToList();
                 }
-                var start = option.Start;
-                if (start < 0)
+                else
                 {
-                    start = list.Count - Math.Abs(start);
+                    response = CacheResponse.FailResponse<ListRangeResponse>(CacheCodes.KeyIsNotExist);
                 }
-                if (start < 0 || start >= list.Count)
-                {
-                    return await Task.FromResult(CacheResponse.FailResponse<ListRangeResponse>(CacheCodes.OffsetError)).ConfigureAwait(false);
-                }
-                var end = option.Stop;
-                if (end < 0)
-                {
-                    end = list.Count - Math.Abs(end);
-                }
-                if (end < 0 || end >= list.Count)
-                {
-                    return await Task.FromResult(CacheResponse.FailResponse<ListRangeResponse>(CacheCodes.OffsetError)).ConfigureAwait(false);
-                }
-                var begin = Math.Min(start, end);
-                response = CacheResponse.SuccessResponse<ListRangeResponse>();
-                response.Values = list.GetRange(begin, Math.Abs(end - start) + 1).ToList();
+                response.CacheServer = server;
+                response.Database = db;
+                responses.Add(response);
             }
-            else
-            {
-                response = CacheResponse.FailResponse<ListRangeResponse>(CacheCodes.KeyIsNotExist);
-            }
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -1165,28 +1338,36 @@ namespace EZNEW.Cache.Provider.Memory
         ///  as an empty list and 0 is returned.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return list length response</returns>
-        public async Task<ListLengthResponse> ListLengthAsync(CacheServer server, ListLengthOption option)
+        public async Task<IEnumerable<ListLengthResponse>> ListLengthAsync(CacheServer server, ListLengthOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<ListLengthResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<ListLengthResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            int length = 0;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<ListLengthResponse> responses = new List<ListLengthResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var list = entry.Value as List<string>;
-                if (list == null)
+                int length = 0;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<ListLengthResponse>(CacheCodes.ValueIsNotList)).ConfigureAwait(false);
+                    if (!(entry.Value is List<string> list))
+                    {
+                        responses.Add(CacheResponse.FailResponse<ListLengthResponse>(CacheCodes.ValueIsNotList, server: server, database: db));
+                        continue;
+                    }
+                    length = list.Count;
                 }
-                length = list.Count;
+                var response = CacheResponse.SuccessResponse<ListLengthResponse>();
+                response.Length = length;
+                response.CacheServer = server;
+                response.Database = db;
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<ListLengthResponse>();
-            response.Length = length;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -1198,43 +1379,51 @@ namespace EZNEW.Cache.Provider.Memory
         ///  not exist, it is created as empty list before performing the push operations.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return list left push response</returns>
-        public async Task<ListLeftPushResponse> ListLeftPushAsync(CacheServer server, ListLeftPushOption option)
+        public async Task<IEnumerable<ListLeftPushResponse>> ListLeftPushAsync(CacheServer server, ListLeftPushOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<ListLeftPushResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<ListLeftPushResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            if (option.Values.IsNullOrEmpty())
+            if (options.Values.IsNullOrEmpty())
             {
-                return await Task.FromResult(CacheResponse.FailResponse<ListLeftPushResponse>(CacheCodes.ValuesIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<ListLeftPushResponse>(CacheCodes.ValuesIsNullOrEmpty, server: server));
             }
-            ListLeftPushResponse response = null;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<ListLeftPushResponse> responses = new List<ListLeftPushResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                List<string> list = entry.Value as List<string>;
-                if (list == null)
+                ListLeftPushResponse response;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<ListLeftPushResponse>(CacheCodes.ValueIsNotList)).ConfigureAwait(false);
+                    if (!(entry.Value is List<string> list))
+                    {
+                        responses.Add(CacheResponse.FailResponse<ListLeftPushResponse>(CacheCodes.ValueIsNotList, server: server, database: db));
+                        continue;
+                    }
+                    list = options.Values.Concat(list).ToList();
+                    entry.SetValue(list);
+                    response = CacheResponse.SuccessResponse<ListLeftPushResponse>();
+                    response.NewListLength = list.Count;
                 }
-                list = option.Values.Concat(list).ToList();
-                entry.SetValue(list);
-                response = CacheResponse.SuccessResponse<ListLeftPushResponse>();
-                response.NewListLength = list.Count;
-            }
-            else
-            {
-                using (entry = MemoryCache.CreateEntry(cacheKey))
+                else
                 {
-                    entry.SetValue(new List<string>(option.Values));
-                    SetExpiration(entry, option.Expiration);
+                    using (entry = db.Store.CreateEntry(cacheKey))
+                    {
+                        entry.SetValue(new List<string>(options.Values));
+                        SetExpiration(entry, options.Expiration);
+                    }
+                    response = CacheResponse.SuccessResponse<ListLeftPushResponse>();
+                    response.NewListLength = options.Values.Count;
                 }
-                response = CacheResponse.SuccessResponse<ListLeftPushResponse>();
-                response.NewListLength = option.Values.Count;
+                response.CacheServer = server;
+                response.Database = db;
+                responses.Add(response);
             }
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -1245,39 +1434,48 @@ namespace EZNEW.Cache.Provider.Memory
         /// Removes and returns the first element of the list stored at key.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return list left pop response</returns>
-        public async Task<ListLeftPopResponse> ListLeftPopAsync(CacheServer server, ListLeftPopOption option)
+        public async Task<IEnumerable<ListLeftPopResponse>> ListLeftPopAsync(CacheServer server, ListLeftPopOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<ListLeftPopResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<ListLeftPopResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            ListLeftPopResponse response = null;
-            string value = string.Empty;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<ListLeftPopResponse> responses = new List<ListLeftPopResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var list = entry.Value as List<string>;
-                if (list == null)
+                ListLeftPopResponse response = null;
+                string value = string.Empty;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<ListLeftPopResponse>(CacheCodes.ValueIsNotList)).ConfigureAwait(false);
+                    if (!(entry.Value is List<string> list))
+                    {
+                        responses.Add(CacheResponse.FailResponse<ListLeftPopResponse>(CacheCodes.ValueIsNotList, server: server, database: db));
+                        continue;
+                    }
+                    if (list.Count < 1)
+                    {
+                        responses.Add(CacheResponse.FailResponse<ListLeftPopResponse>(CacheCodes.ListIsEmpty, server: server, database: db));
+                        continue;
+                    }
+                    value = list[0];
+                    list.RemoveAt(0);
+                    entry.SetValue(list);
+                    response = CacheResponse.SuccessResponse<ListLeftPopResponse>();
+                    response.PopValue = value;
                 }
-                if (list.Count < 1)
+                else
                 {
-                    response = CacheResponse.FailResponse<ListLeftPopResponse>(CacheCodes.ListIsEmpty);
+                    response = CacheResponse.FailResponse<ListLeftPopResponse>(CacheCodes.KeyIsNotExist);
                 }
-                value = list[0];
-                list.RemoveAt(0);
-                entry.SetValue(list);
-                response = CacheResponse.SuccessResponse<ListLeftPopResponse>();
-                response.PopValue = value;
+                response.CacheServer = server;
+                response.Database = db;
+                responses.Add(response);
             }
-            else
-            {
-                response = CacheResponse.FailResponse<ListLeftPopResponse>(CacheCodes.KeyIsNotExist);
-            }
-            return await Task.FromResult<ListLeftPopResponse>(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -1290,38 +1488,46 @@ namespace EZNEW.Cache.Provider.Memory
         /// is performed.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return list insert begore response</returns>
-        public async Task<ListInsertBeforeResponse> ListInsertBeforeAsync(CacheServer server, ListInsertBeforeOption option)
+        public async Task<IEnumerable<ListInsertBeforeResponse>> ListInsertBeforeAsync(CacheServer server, ListInsertBeforeOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<ListInsertBeforeResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<ListInsertBeforeResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            int newLength = 0;
-            bool hasInsertValue = false;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<ListInsertBeforeResponse> responses = new List<ListInsertBeforeResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var list = entry.Value as List<string>;
-                if (list == null)
+                int newLength = 0;
+                bool hasInsertValue = false;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<ListInsertBeforeResponse>(CacheCodes.ValueIsNotList)).ConfigureAwait(false);
+                    if (!(entry.Value is List<string> list))
+                    {
+                        responses.Add(CacheResponse.FailResponse<ListInsertBeforeResponse>(CacheCodes.ValueIsNotList, server: server, database: db));
+                        continue;
+                    }
+                    var index = list.FindIndex(c => c == options.PivotValue);
+                    if (index >= 0)
+                    {
+                        list.Insert(index, options.InsertValue);
+                        entry.SetValue(list);
+                        hasInsertValue = true;
+                    }
+                    newLength = list.Count;
                 }
-                var index = list.FindIndex(c => c == option.PivotValue);
-                if (index >= 0)
+                responses.Add(new ListInsertBeforeResponse()
                 {
-                    list.Insert(index, option.InsertValue);
-                    entry.SetValue(list);
-                    hasInsertValue = true;
-                }
-                newLength = list.Count;
+                    Success = hasInsertValue,
+                    NewListLength = newLength,
+                    CacheServer = server,
+                    Database = db
+                });
             }
-            return await Task.FromResult(new ListInsertBeforeResponse()
-            {
-                Success = hasInsertValue,
-                NewListLength = newLength
-            }).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -1334,38 +1540,47 @@ namespace EZNEW.Cache.Provider.Memory
         /// is performed.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return list insert after response</returns>
-        public async Task<ListInsertAfterResponse> ListInsertAfterAsync(CacheServer server, ListInsertAfterOption option)
+        public async Task<IEnumerable<ListInsertAfterResponse>> ListInsertAfterAsync(CacheServer server, ListInsertAfterOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<ListInsertAfterResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<ListInsertAfterResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            int newLength = 0;
-            bool hasInsertValue = false;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<ListInsertAfterResponse> responses = new List<ListInsertAfterResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var list = entry.Value as List<string>;
-                if (list == null)
+                int newLength = 0;
+                bool hasInsertValue = false;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<ListInsertAfterResponse>(CacheCodes.ValueIsNotList)).ConfigureAwait(false);
+                    var list = entry.Value as List<string>;
+                    if (list == null)
+                    {
+                        responses.Add(CacheResponse.FailResponse<ListInsertAfterResponse>(CacheCodes.ValueIsNotList, server: server, database: db));
+                        continue;
+                    }
+                    var index = list.FindIndex(c => c == options.PivotValue);
+                    if (index >= 0)
+                    {
+                        list.Insert(index + 1, options.InsertValue);
+                        entry.SetValue(list);
+                        hasInsertValue = true;
+                    }
+                    newLength = list.Count;
                 }
-                var index = list.FindIndex(c => c == option.PivotValue);
-                if (index >= 0)
+                responses.Add(new ListInsertAfterResponse()
                 {
-                    list.Insert(index + 1, option.InsertValue);
-                    entry.SetValue(list);
-                    hasInsertValue = true;
-                }
-                newLength = list.Count;
+                    NewListLength = newLength,
+                    Success = hasInsertValue,
+                    CacheServer = server,
+                    Database = db
+                });
             }
-            return await Task.FromResult(new ListInsertAfterResponse()
-            {
-                NewListLength = newLength,
-                Success = hasInsertValue
-            }).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -1379,37 +1594,46 @@ namespace EZNEW.Cache.Provider.Memory
         /// means the last element, -2 means the penultimate and so forth.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return list get by index response</returns>
-        public async Task<ListGetByIndexResponse> ListGetByIndexAsync(CacheServer server, ListGetByIndexOption option)
+        public async Task<IEnumerable<ListGetByIndexResponse>> ListGetByIndexAsync(CacheServer server, ListGetByIndexOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<ListGetByIndexResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<ListGetByIndexResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            var value = "";
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<ListGetByIndexResponse> responses = new List<ListGetByIndexResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var list = entry.Value as List<string>;
-                if (list == null)
+                var value = "";
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<ListGetByIndexResponse>(CacheCodes.ValueIsNotList)).ConfigureAwait(false);
+                    var list = entry.Value as List<string>;
+                    if (list == null)
+                    {
+                        responses.Add(CacheResponse.FailResponse<ListGetByIndexResponse>(CacheCodes.ValueIsNotList, server: server, database: db));
+                        continue;
+                    }
+                    var index = options.Index;
+                    if (index < 0)
+                    {
+                        index = list.Count - Math.Abs(index);
+                    }
+                    if (index < 0 || index >= list.Count)
+                    {
+                        responses.Add(CacheResponse.FailResponse<ListGetByIndexResponse>(CacheCodes.OffsetError, server: server, database: db));
+                    }
+                    value = list[index];
                 }
-                var index = option.Index;
-                if (index < 0)
-                {
-                    index = list.Count - Math.Abs(index);
-                }
-                if (index < 0 || index >= list.Count)
-                {
-                    return await Task.FromResult(CacheResponse.FailResponse<ListGetByIndexResponse>(CacheCodes.OffsetError)).ConfigureAwait(false);
-                }
-                value = list[index];
+                var response = CacheResponse.SuccessResponse<ListGetByIndexResponse>();
+                response.Value = value;
+                response.CacheServer = server;
+                response.Database = db;
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<ListGetByIndexResponse>();
-            response.Value = value;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -1424,29 +1648,36 @@ namespace EZNEW.Cache.Provider.Memory
         /// Returns all values in the hash stored at key.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return hash values response</returns>
-        public async Task<HashValuesResponse> HashValuesAsync(CacheServer server, HashValuesOption option)
+        public async Task<IEnumerable<HashValuesResponse>> HashValuesAsync(CacheServer server, HashValuesOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<HashValuesResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<HashValuesResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            List<dynamic> values = null;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<HashValuesResponse> responses = new List<HashValuesResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var dict = entry.Value as ConcurrentDictionary<string, dynamic>;
-                if (dict == null)
+                List<dynamic> values = null;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<HashValuesResponse>(CacheCodes.ValueIsNotDict)).ConfigureAwait(false);
+                    var dict = entry.Value as ConcurrentDictionary<string, dynamic>;
+                    if (dict == null)
+                    {
+                        responses.Add(CacheResponse.FailResponse<HashValuesResponse>(CacheCodes.ValueIsNotDict, server: server, database: db));
+                        continue;
+                    }
+                    values = dict.Values.ToList();
                 }
-                values = dict.Values.ToList();
+                values = values ?? new List<dynamic>(0);
+                var response = CacheResponse.SuccessResponse<HashValuesResponse>(server, db);
+                response.Values = values;
+                responses.Add(response);
             }
-            values = values ?? new List<dynamic>(0);
-            var response = CacheResponse.SuccessResponse<HashValuesResponse>();
-            response.Values = values;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -1458,38 +1689,45 @@ namespace EZNEW.Cache.Provider.Memory
         ///  holding a hash is created. If field already exists in the hash, it is overwritten.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return hash set response</returns>
-        public async Task<HashSetResponse> HashSetAsync(CacheServer server, HashSetOption option)
+        public async Task<IEnumerable<HashSetResponse>> HashSetAsync(CacheServer server, HashSetOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<HashSetResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<HashSetResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<HashSetResponse> responses = new List<HashSetResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var dict = entry.Value as ConcurrentDictionary<string, dynamic>;
-                if (dict == null)
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<HashSetResponse>(CacheCodes.ValueIsNotDict)).ConfigureAwait(false);
+                    var dict = entry.Value as ConcurrentDictionary<string, dynamic>;
+                    if (dict == null)
+                    {
+                        responses.Add(CacheResponse.FailResponse<HashSetResponse>(CacheCodes.ValueIsNotDict, server: server, database: db));
+                        continue;
+                    }
+                    foreach (var item in options.Items)
+                    {
+                        dict[item.Key] = item.Value;
+                    }
                 }
-                foreach (var item in option.Items)
+                else
                 {
-                    dict[item.Key] = item.Value;
+                    using (entry = db.Store.CreateEntry(cacheKey))
+                    {
+                        var value = new ConcurrentDictionary<string, dynamic>(options.Items);
+                        entry.SetValue(value);
+                        SetExpiration(entry, options.Expiration);
+                    }
                 }
+                var response = CacheResponse.SuccessResponse<HashSetResponse>(server, db);
+                responses.Add(response);
             }
-            else
-            {
-                using (entry = MemoryCache.CreateEntry(cacheKey))
-                {
-                    var value = new ConcurrentDictionary<string, dynamic>(option.Items);
-                    entry.SetValue(value);
-                    SetExpiration(entry, option.Expiration);
-                }
-            }
-            var response = CacheResponse.SuccessResponse<HashSetResponse>();
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -1500,28 +1738,34 @@ namespace EZNEW.Cache.Provider.Memory
         /// Returns the number of fields contained in the hash stored at key.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return hash length response</returns>
-        public async Task<HashLengthResponse> HashLengthAsync(CacheServer server, HashLengthOption option)
+        public async Task<IEnumerable<HashLengthResponse>> HashLengthAsync(CacheServer server, HashLengthOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<HashLengthResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<HashLengthResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            int length = 0;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<HashLengthResponse> responses = new List<HashLengthResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var dict = entry.Value as ConcurrentDictionary<string, dynamic>;
-                if (dict == null)
+                int length = 0;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<HashLengthResponse>(CacheCodes.ValueIsNotDict)).ConfigureAwait(false);
+                    var dict = entry.Value as ConcurrentDictionary<string, dynamic>;
+                    if (dict == null)
+                    {
+                        responses.Add(CacheResponse.FailResponse<HashLengthResponse>(CacheCodes.ValueIsNotDict, server: server, database: db));
+                    }
+                    length = dict.Keys.Count;
                 }
-                length = dict.Keys.Count;
+                var response = CacheResponse.SuccessResponse<HashLengthResponse>(server, db);
+                response.Length = length;
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<HashLengthResponse>();
-            response.Length = length;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -1532,29 +1776,35 @@ namespace EZNEW.Cache.Provider.Memory
         /// Returns all field names in the hash stored at key.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return hash keys response</returns>
-        public async Task<HashKeysResponse> HashKeysAsync(CacheServer server, HashKeysOption option)
+        public async Task<IEnumerable<HashKeysResponse>> HashKeysAsync(CacheServer server, HashKeysOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<HashKeysResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<HashKeysResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            List<string> keys = null;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<HashKeysResponse> responses = new List<HashKeysResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var dict = entry.Value as ConcurrentDictionary<string, dynamic>;
-                if (dict == null)
+                List<string> keys = null;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<HashKeysResponse>(CacheCodes.ValueIsNotDict)).ConfigureAwait(false);
+                    var dict = entry.Value as ConcurrentDictionary<string, dynamic>;
+                    if (dict == null)
+                    {
+                        responses.Add(CacheResponse.FailResponse<HashKeysResponse>(CacheCodes.ValueIsNotDict, server: server, database: db));
+                        continue;
+                    }
+                    keys = dict.Keys.ToList();
                 }
-                keys = dict.Keys.ToList();
+                keys = keys ?? new List<string>(0);
+                var response = CacheResponse.SuccessResponse<HashKeysResponse>(server, db);
+                response.HashKeys = keys;
             }
-            keys = keys ?? new List<string>(0);
-            var response = CacheResponse.SuccessResponse<HashKeysResponse>();
-            response.HashKeys = keys;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -1567,48 +1817,54 @@ namespace EZNEW.Cache.Provider.Memory
         /// exist or holds a string that cannot be interpreted as integer, the value is set
         /// to 0 before the operation is performed.
         /// </summary>
-        /// <typeparam name="T">data type</typeparam>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return hash increment response</returns>
-        public async Task<HashIncrementResponse> HashIncrementAsync(CacheServer server, HashIncrementOption option)
+        public async Task<IEnumerable<HashIncrementResponse>> HashIncrementAsync(CacheServer server, HashIncrementOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<HashIncrementResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<HashIncrementResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            var newValue = option.IncrementValue;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<HashIncrementResponse> responses = new List<HashIncrementResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var dict = entry.Value as ConcurrentDictionary<string, dynamic>;
-                if (dict == null)
+                var newValue = options.IncrementValue;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<HashIncrementResponse>(CacheCodes.ValueIsNotDict)).ConfigureAwait(false);
-                }
-                if (dict.TryGetValue(option.HashField, out var value))
-                {
-                    dict[option.HashField] = newValue = value + option.IncrementValue;
+                    var dict = entry.Value as ConcurrentDictionary<string, dynamic>;
+                    if (dict == null)
+                    {
+                        responses.Add(CacheResponse.FailResponse<HashIncrementResponse>(CacheCodes.ValueIsNotDict, server: server, database: db));
+                        continue;
+                    }
+                    if (dict.TryGetValue(options.HashField, out var value))
+                    {
+                        dict[options.HashField] = newValue = value + options.IncrementValue;
+                    }
+                    else
+                    {
+                        dict[options.HashField] = options.IncrementValue;
+                    }
                 }
                 else
                 {
-                    dict[option.HashField] = option.IncrementValue;
+                    using (entry = db.Store.CreateEntry(cacheKey))
+                    {
+                        var value = new ConcurrentDictionary<string, dynamic>();
+                        value[options.HashField] = options.IncrementValue;
+                        entry.SetValue(value);
+                        SetExpiration(entry, options.Expiration);
+                    }
                 }
+                var response = CacheResponse.SuccessResponse<HashIncrementResponse>(server, db);
+                response.HashField = options.HashField;
+                response.NewValue = newValue;
+                responses.Add(response);
             }
-            else
-            {
-                using (entry = MemoryCache.CreateEntry(cacheKey))
-                {
-                    var value = new ConcurrentDictionary<string, dynamic>();
-                    value[option.HashField] = option.IncrementValue;
-                    entry.SetValue(value);
-                    SetExpiration(entry, option.Expiration);
-                }
-            }
-            var response = CacheResponse.SuccessResponse<HashIncrementResponse>();
-            response.HashField = option.HashField;
-            response.NewValue = newValue;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -1619,28 +1875,35 @@ namespace EZNEW.Cache.Provider.Memory
         /// Returns the value associated with field in the hash stored at key.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return hash get response</returns>
-        public async Task<HashGetResponse> HashGetAsync(CacheServer server, HashGetOption option)
+        public async Task<IEnumerable<HashGetResponse>> HashGetAsync(CacheServer server, HashGetOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<HashGetResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<HashGetResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            dynamic value = null;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<HashGetResponse> responses = new List<HashGetResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var dict = entry.Value as ConcurrentDictionary<string, dynamic>;
-                if (dict == null)
+                dynamic value = null;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<HashGetResponse>(CacheCodes.ValueIsNotDict)).ConfigureAwait(false);
+                    var dict = entry.Value as ConcurrentDictionary<string, dynamic>;
+                    if (dict == null)
+                    {
+                        responses.Add(CacheResponse.FailResponse<HashGetResponse>(CacheCodes.ValueIsNotDict, server: server, database: db));
+                        continue;
+                    }
+                    dict.TryGetValue(options.HashField, out value);
                 }
-                dict.TryGetValue(option.HashField, out value);
+                var response = CacheResponse.SuccessResponse<HashGetResponse>(server, db);
+                response.Value = value;
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<HashGetResponse>();
-            response.Value = value;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -1651,28 +1914,35 @@ namespace EZNEW.Cache.Provider.Memory
         /// Returns all fields and values of the hash stored at key.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return hash get all response</returns>
-        public async Task<HashGetAllResponse> HashGetAllAsync(CacheServer server, HashGetAllOption option)
+        public async Task<IEnumerable<HashGetAllResponse>> HashGetAllAsync(CacheServer server, HashGetAllOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<HashGetAllResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<HashGetAllResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            ConcurrentDictionary<string, dynamic> values = null;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<HashGetAllResponse> responses = new List<HashGetAllResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var dict = entry.Value as ConcurrentDictionary<string, dynamic>;
-                if (dict == null)
+                ConcurrentDictionary<string, dynamic> values = null;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<HashGetAllResponse>(CacheCodes.ValueIsNotDict)).ConfigureAwait(false);
+                    var dict = entry.Value as ConcurrentDictionary<string, dynamic>;
+                    if (dict == null)
+                    {
+                        responses.Add(CacheResponse.FailResponse<HashGetAllResponse>(CacheCodes.ValueIsNotDict, server: server, database: db));
+                        continue;
+                    }
+                    values = new ConcurrentDictionary<string, dynamic>(dict);
                 }
-                values = new ConcurrentDictionary<string, dynamic>(dict);
+                var response = CacheResponse.SuccessResponse<HashGetAllResponse>(server, db);
+                response.HashValues = values?.ToDictionary(c => c.Key, c => c.Value) ?? new Dictionary<string, dynamic>(0);
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<HashGetAllResponse>();
-            response.HashValues = values?.ToDictionary(c => c.Key, c => c.Value) ?? new Dictionary<string, dynamic>(0);
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -1683,28 +1953,35 @@ namespace EZNEW.Cache.Provider.Memory
         /// Returns if field is an existing field in the hash stored at key.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return hash exists response</returns>
-        public async Task<HashExistsResponse> HashExistAsync(CacheServer server, HashExistsOption option)
+        public async Task<IEnumerable<HashExistsResponse>> HashExistAsync(CacheServer server, HashExistsOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<HashExistsResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<HashExistsResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            bool existKey = false;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<HashExistsResponse> responses = new List<HashExistsResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var dict = entry.Value as ConcurrentDictionary<string, dynamic>;
-                if (dict == null)
+                bool existKey = false;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<HashExistsResponse>(CacheCodes.ValueIsNotDict)).ConfigureAwait(false);
+                    var dict = entry.Value as ConcurrentDictionary<string, dynamic>;
+                    if (dict == null)
+                    {
+                        responses.Add(CacheResponse.FailResponse<HashExistsResponse>(CacheCodes.ValueIsNotDict, server: server, database: db));
+                        continue;
+                    }
+                    existKey = dict.ContainsKey(options.HashField);
                 }
-                existKey = dict.ContainsKey(option.HashField);
+                var response = CacheResponse.SuccessResponse<HashExistsResponse>(server, db);
+                response.HasField = existKey;
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<HashExistsResponse>();
-            response.HasField = existKey;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -1713,35 +1990,44 @@ namespace EZNEW.Cache.Provider.Memory
 
         /// <summary>
         /// Removes the specified fields from the hash stored at key. Non-existing fields
-        /// are ignored. Non-existing keys are treated as empty hashes and this option returns 0
+        /// are ignored. Non-existing keys are treated as empty hashes and this options returns 0
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return hash delete response</returns>
-        public async Task<HashDeleteResponse> HashDeleteAsync(CacheServer server, HashDeleteOption option)
+        public async Task<IEnumerable<HashDeleteResponse>> HashDeleteAsync(CacheServer server, HashDeleteOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<HashDeleteResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<HashDeleteResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            bool remove = false;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<HashDeleteResponse> responses = new List<HashDeleteResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var dict = entry.Value as ConcurrentDictionary<string, dynamic>;
-                if (dict == null)
+                bool remove = false;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<HashDeleteResponse>(CacheCodes.ValueIsNotDict)).ConfigureAwait(false);
+                    var dict = entry.Value as ConcurrentDictionary<string, dynamic>;
+                    if (dict == null)
+                    {
+                        responses.Add(CacheResponse.FailResponse<HashDeleteResponse>(CacheCodes.ValueIsNotDict, server: server, database: db));
+                        continue;
+                    }
+                    foreach (var field in options.HashFields)
+                    {
+                        remove |= dict.TryRemove(field, out var value);
+                    }
                 }
-                foreach (var field in option.HashFields)
+                responses.Add(new HashDeleteResponse()
                 {
-                    remove |= dict.TryRemove(field, out var value);
-                }
+                    Success = remove,
+                    CacheServer = server,
+                    Database = db
+                });
             }
-            return await Task.FromResult(new HashDeleteResponse()
-            {
-                Success = remove
-            }).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -1753,49 +2039,55 @@ namespace EZNEW.Cache.Provider.Memory
         ///  point number, by the specified decrement. If the field does not exist, it is
         ///  set to 0 before performing the operation.
         /// </summary>
-        /// <typeparam name="T">data type</typeparam>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return hash decrement response</returns>
-        public async Task<HashDecrementResponse> HashDecrementAsync(CacheServer server, HashDecrementOption option)
+        public async Task<IEnumerable<HashDecrementResponse>> HashDecrementAsync(CacheServer server, HashDecrementOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<HashDecrementResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                WrapResponse(CacheResponse.FailResponse<HashDecrementResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            var newValue = option.DecrementValue;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<HashDecrementResponse> responses = new List<HashDecrementResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var dict = entry.Value as ConcurrentDictionary<string, dynamic>;
-                if (dict == null)
+                var newValue = options.DecrementValue;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<HashDecrementResponse>(CacheCodes.ValueIsNotDict)).ConfigureAwait(false);
-                }
-                if (dict.TryGetValue(option.HashField, out var value))
-                {
-                    dict[option.HashField] = newValue = value - option.DecrementValue;
+                    var dict = entry.Value as ConcurrentDictionary<string, dynamic>;
+                    if (dict == null)
+                    {
+                        responses.Add(CacheResponse.FailResponse<HashDecrementResponse>(CacheCodes.ValueIsNotDict, server: server, database: db));
+                        continue;
+                    }
+                    if (dict.TryGetValue(options.HashField, out var value))
+                    {
+                        dict[options.HashField] = newValue = value - options.DecrementValue;
+                    }
+                    else
+                    {
+                        dict[options.HashField] = options.DecrementValue;
+                    }
+                    entry.SetValue(dict);
                 }
                 else
                 {
-                    dict[option.HashField] = option.DecrementValue;
+                    using (entry = db.Store.CreateEntry(cacheKey))
+                    {
+                        var value = new ConcurrentDictionary<string, dynamic>();
+                        value[options.HashField] = options.DecrementValue;
+                        entry.SetValue(value);
+                        SetExpiration(entry, options.Expiration);
+                    }
                 }
-                entry.SetValue(dict);
+                var response = CacheResponse.SuccessResponse<HashDecrementResponse>(server, db);
+                response.HashField = options.HashField;
+                response.NewValue = newValue;
+                responses.Add(response);
             }
-            else
-            {
-                using (entry = MemoryCache.CreateEntry(cacheKey))
-                {
-                    var value = new ConcurrentDictionary<string, dynamic>();
-                    value[option.HashField] = option.DecrementValue;
-                    entry.SetValue(value);
-                    SetExpiration(entry, option.Expiration);
-                }
-            }
-            var response = CacheResponse.SuccessResponse<HashDecrementResponse>();
-            response.HashField = option.HashField;
-            response.NewValue = newValue;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -1803,55 +2095,62 @@ namespace EZNEW.Cache.Provider.Memory
         #region HashScan
 
         /// <summary>
-        /// The HSCAN option is used to incrementally iterate over a hash
+        /// The HSCAN options is used to incrementally iterate over a hash
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return hash scan response</returns>
-        public async Task<HashScanResponse> HashScanAsync(CacheServer server, HashScanOption option)
+        public async Task<IEnumerable<HashScanResponse>> HashScanAsync(CacheServer server, HashScanOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<HashScanResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                WrapResponse(CacheResponse.FailResponse<HashScanResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            Dictionary<string, dynamic> values = new Dictionary<string, dynamic>();
-            if (option.PageSize > 0 && MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<HashScanResponse> responses = new List<HashScanResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var dict = entry.Value as ConcurrentDictionary<string, dynamic>;
-                if (dict == null)
+                Dictionary<string, dynamic> values = new Dictionary<string, dynamic>();
+                if (options.PageSize > 0 && db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<HashScanResponse>(CacheCodes.ValueIsNotDict)).ConfigureAwait(false);
-                }
-                var pageSize = option.PageSize;
-                foreach (var item in dict)
-                {
-                    bool accordWith = false;
-                    switch (option.PatternType)
+                    var dict = entry.Value as ConcurrentDictionary<string, dynamic>;
+                    if (dict == null)
                     {
-                        case KeyMatchPattern.StartWith:
-                            accordWith = item.Key.StartsWith(option.Pattern);
-                            break;
-                        case KeyMatchPattern.EndWith:
-                            accordWith = item.Key.EndsWith(option.Pattern);
-                            break;
-                        case KeyMatchPattern.Include:
-                            accordWith = item.Key.Contains(option.Pattern);
-                            break;
+                        responses.Add(CacheResponse.FailResponse<HashScanResponse>(CacheCodes.ValueIsNotDict, server: server, database: db));
+                        continue;
                     }
-                    if (accordWith)
+                    var pageSize = options.PageSize;
+                    foreach (var item in dict)
                     {
-                        values.Add(item.Key, item.Value);
-                        if (values.Count >= pageSize)
+                        bool accordWith = false;
+                        switch (options.PatternType)
                         {
-                            break;
+                            case KeyMatchPattern.StartWith:
+                                accordWith = item.Key.StartsWith(options.Pattern);
+                                break;
+                            case KeyMatchPattern.EndWith:
+                                accordWith = item.Key.EndsWith(options.Pattern);
+                                break;
+                            case KeyMatchPattern.Include:
+                                accordWith = item.Key.Contains(options.Pattern);
+                                break;
+                        }
+                        if (accordWith)
+                        {
+                            values.Add(item.Key, item.Value);
+                            if (values.Count >= pageSize)
+                            {
+                                break;
+                            }
                         }
                     }
                 }
+                var response = CacheResponse.SuccessResponse<HashScanResponse>(server, db);
+                response.HashValues = values;
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<HashScanResponse>();
-            response.HashValues = values;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -1867,34 +2166,41 @@ namespace EZNEW.Cache.Provider.Memory
         /// are not a member of this set are ignored.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return set remove response</returns>
-        public async Task<SetRemoveResponse> SetRemoveAsync(CacheServer server, SetRemoveOption option)
+        public async Task<IEnumerable<SetRemoveResponse>> SetRemoveAsync(CacheServer server, SetRemoveOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<SetRemoveResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<SetRemoveResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            int removeCount = 0;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null && !option.RemoveMembers.IsNullOrEmpty())
+            var databases = GetDatabases(server);
+            List<SetRemoveResponse> responses = new List<SetRemoveResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var dict = entry.Value as ConcurrentDictionary<string, byte>;
-                if (dict == null)
+                int removeCount = 0;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null && !options.RemoveMembers.IsNullOrEmpty())
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<SetRemoveResponse>(CacheCodes.ValueIsNotSet)).ConfigureAwait(false);
-                }
-                foreach (var member in option.RemoveMembers)
-                {
-                    if (dict.TryRemove(member, out var value))
+                    var dict = entry.Value as ConcurrentDictionary<string, byte>;
+                    if (dict == null)
                     {
-                        removeCount++;
+                        responses.Add(CacheResponse.FailResponse<SetRemoveResponse>(CacheCodes.ValueIsNotSet, server: server, database: db));
+                        continue;
+                    }
+                    foreach (var member in options.RemoveMembers)
+                    {
+                        if (dict.TryRemove(member, out var value))
+                        {
+                            removeCount++;
+                        }
                     }
                 }
+                var response = CacheResponse.SuccessResponse<SetRemoveResponse>(server, db);
+                response.RemoveCount = removeCount;
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<SetRemoveResponse>();
-            response.RemoveCount = removeCount;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -1903,54 +2209,61 @@ namespace EZNEW.Cache.Provider.Memory
 
         /// <summary>
         /// Return an array of count distinct elements if count is positive. If called with
-        /// a negative count the behavior changes and the option is allowed to return the
+        /// a negative count the behavior changes and the options is allowed to return the
         /// same element multiple times. In this case the numer of returned elements is the
         /// absolute value of the specified count.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return set random members response</returns>
-        public async Task<SetRandomMembersResponse> SetRandomMembersAsync(CacheServer server, SetRandomMembersOption option)
+        public async Task<IEnumerable<SetRandomMembersResponse>> SetRandomMembersAsync(CacheServer server, SetRandomMembersOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<SetRandomMembersResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<SetRandomMembersResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            List<string> members = new List<string>();
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null && option.Count != 0)
+            var databases = GetDatabases(server);
+            List<SetRandomMembersResponse> responses = new List<SetRandomMembersResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var dict = entry.Value as ConcurrentDictionary<string, byte>;
-                if (dict == null)
+                List<string> members = new List<string>();
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null && options.Count != 0)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<SetRandomMembersResponse>(CacheCodes.ValueIsNotSet)).ConfigureAwait(false);
-                }
-                bool allowSame = option.Count < 0;
-                var count = Math.Abs(option.Count);
-                var keys = dict.Keys;
-                if (keys.Count <= count)
-                {
-                    members.AddRange(keys);
-                }
-                else if (allowSame)
-                {
-
-                    for (var c = 0; c < count; c++)
+                    var dict = entry.Value as ConcurrentDictionary<string, byte>;
+                    if (dict == null)
                     {
-                        var ranIndex = RandomNumberHelper.GetRandomNumber(keys.Count - 1);
-                        var ranMember = keys.ElementAt(ranIndex);
-                        members.Add(ranMember);
+                        responses.Add(CacheResponse.FailResponse<SetRandomMembersResponse>(CacheCodes.ValueIsNotSet, server: server, database: db));
+                        continue;
+                    }
+                    bool allowSame = options.Count < 0;
+                    var count = Math.Abs(options.Count);
+                    var keys = dict.Keys;
+                    if (keys.Count <= count)
+                    {
+                        members.AddRange(keys);
+                    }
+                    else if (allowSame)
+                    {
+
+                        for (var c = 0; c < count; c++)
+                        {
+                            var ranIndex = RandomNumberHelper.GetRandomNumber(keys.Count - 1);
+                            var ranMember = keys.ElementAt(ranIndex);
+                            members.Add(ranMember);
+                        }
+                    }
+                    else
+                    {
+                        ShuffleNet<string> shuffle = new ShuffleNet<string>(keys);
+                        members.AddRange(shuffle.TakeNextValues(count));
                     }
                 }
-                else
-                {
-                    ShuffleNet<string> shuffle = new ShuffleNet<string>(keys);
-                    members.AddRange(shuffle.TakeNextValues(count));
-                }
+                var response = CacheResponse.SuccessResponse<SetRandomMembersResponse>(server, db);
+                response.Members = members;
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<SetRandomMembersResponse>();
-            response.Members = members;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -1961,33 +2274,40 @@ namespace EZNEW.Cache.Provider.Memory
         /// Return a random element from the set value stored at key.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return set random member</returns>
-        public async Task<SetRandomMemberResponse> SetRandomMemberAsync(CacheServer server, SetRandomMemberOption option)
+        public async Task<IEnumerable<SetRandomMemberResponse>> SetRandomMemberAsync(CacheServer server, SetRandomMemberOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<SetRandomMemberResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<SetRandomMemberResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            string member = string.Empty;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<SetRandomMemberResponse> responses = new List<SetRandomMemberResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var dict = entry.Value as ConcurrentDictionary<string, byte>;
-                if (dict == null)
+                string member = string.Empty;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<SetRandomMemberResponse>(CacheCodes.ValueIsNotSet)).ConfigureAwait(false);
+                    var dict = entry.Value as ConcurrentDictionary<string, byte>;
+                    if (dict == null)
+                    {
+                        responses.Add(CacheResponse.FailResponse<SetRandomMemberResponse>(CacheCodes.ValueIsNotSet, server: server, database: db));
+                        continue;
+                    }
+                    var keys = dict.Keys;
+                    if (!keys.IsNullOrEmpty())
+                    {
+                        var ranIndex = RandomNumberHelper.GetRandomNumber(keys.Count - 1);
+                        member = keys.ElementAt(ranIndex);
+                    }
                 }
-                var keys = dict.Keys;
-                if (!keys.IsNullOrEmpty())
-                {
-                    var ranIndex = RandomNumberHelper.GetRandomNumber(keys.Count - 1);
-                    member = keys.ElementAt(ranIndex);
-                }
+                var response = CacheResponse.SuccessResponse<SetRandomMemberResponse>(server, db);
+                response.Member = member;
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<SetRandomMemberResponse>();
-            response.Member = member;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -1998,34 +2318,41 @@ namespace EZNEW.Cache.Provider.Memory
         /// Removes and returns a random element from the set value stored at key.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return set pop response</returns>
-        public async Task<SetPopResponse> SetPopAsync(CacheServer server, SetPopOption option)
+        public async Task<IEnumerable<SetPopResponse>> SetPopAsync(CacheServer server, SetPopOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<SetPopResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<SetPopResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            string member = string.Empty;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<SetPopResponse> responses = new List<SetPopResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var dict = entry.Value as ConcurrentDictionary<string, byte>;
-                if (dict == null)
+                string member = string.Empty;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<SetPopResponse>(CacheCodes.ValueIsNotSet)).ConfigureAwait(false);
+                    var dict = entry.Value as ConcurrentDictionary<string, byte>;
+                    if (dict == null)
+                    {
+                        responses.Add(CacheResponse.FailResponse<SetPopResponse>(CacheCodes.ValueIsNotSet, server: server, database: db));
+                        continue;
+                    }
+                    var keys = dict.Keys;
+                    if (!keys.IsNullOrEmpty())
+                    {
+                        var ranIndex = RandomNumberHelper.GetRandomNumber(keys.Count - 1);
+                        member = keys.ElementAt(ranIndex);
+                        dict.TryRemove(member, out var value);
+                    }
                 }
-                var keys = dict.Keys;
-                if (!keys.IsNullOrEmpty())
-                {
-                    var ranIndex = RandomNumberHelper.GetRandomNumber(keys.Count - 1);
-                    member = keys.ElementAt(ranIndex);
-                    dict.TryRemove(member, out var value);
-                }
+                var response = CacheResponse.SuccessResponse<SetPopResponse>(server, db);
+                response.PopValue = member;
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<SetPopResponse>();
-            response.PopValue = member;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -2039,57 +2366,67 @@ namespace EZNEW.Cache.Provider.Memory
         /// the destination set, it is only removed from the source set.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return set move response</returns>
-        public async Task<SetMoveResponse> SetMoveAsync(CacheServer server, SetMoveOption option)
+        public async Task<IEnumerable<SetMoveResponse>> SetMoveAsync(CacheServer server, SetMoveOptions options)
         {
-            string cacheKey = option?.SourceKey?.GetActualKey();
-            string desKey = option?.DestinationKey?.GetActualKey();
+            string cacheKey = options?.SourceKey?.GetActualKey();
+            string desKey = options?.DestinationKey?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey) || string.IsNullOrWhiteSpace(desKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<SetMoveResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<SetMoveResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            bool isRemove = false;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<SetMoveResponse> responses = new List<SetMoveResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var dict = entry.Value as ConcurrentDictionary<string, byte>;
-                if (dict == null)
+                bool isRemove = false;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<SetMoveResponse>(CacheCodes.ValueIsNotSet)).ConfigureAwait(false);
-                }
-                MemoryCache.TryGetEntry(desKey, out var desEntry);
-                ConcurrentDictionary<string, byte> desDict = null;
-                if (desEntry != null)
-                {
-                    desDict = desEntry.Value as ConcurrentDictionary<string, byte>;
-                    if (desDict == null)
+                    var dict = entry.Value as ConcurrentDictionary<string, byte>;
+                    if (dict == null)
                     {
-                        return await Task.FromResult(CacheResponse.FailResponse<SetMoveResponse>(CacheCodes.ValueIsNotSet)).ConfigureAwait(false);
+                        responses.Add(CacheResponse.FailResponse<SetMoveResponse>(CacheCodes.ValueIsNotSet, server: server, database: db));
+                        continue;
                     }
-                }
-                if (dict.TryRemove(option.MoveMember, out var value))
-                {
-                    isRemove = true;
-                    if (desDict != null)
+                    db.Store.TryGetEntry(desKey, out var desEntry);
+                    ConcurrentDictionary<string, byte> desDict = null;
+                    if (desEntry != null)
                     {
-                        desDict[option.MoveMember] = 0;
-                    }
-                    else
-                    {
-                        using (desEntry = MemoryCache.CreateEntry(desKey))
+                        desDict = desEntry.Value as ConcurrentDictionary<string, byte>;
+                        if (desDict == null)
                         {
-                            desDict = new ConcurrentDictionary<string, byte>();
-                            desDict.TryAdd(option.MoveMember, 0);
-                            desEntry.SetValue(desDict);
-                            SetExpiration(desEntry, option.Expiration);
+                            responses.Add(CacheResponse.FailResponse<SetMoveResponse>(CacheCodes.ValueIsNotSet, server: server, database: db));
+                            continue;
+                        }
+                    }
+                    if (dict.TryRemove(options.MoveMember, out var value))
+                    {
+                        isRemove = true;
+                        if (desDict != null)
+                        {
+                            desDict[options.MoveMember] = 0;
+                        }
+                        else
+                        {
+                            using (desEntry = db.Store.CreateEntry(desKey))
+                            {
+                                desDict = new ConcurrentDictionary<string, byte>();
+                                desDict.TryAdd(options.MoveMember, 0);
+                                desEntry.SetValue(desDict);
+                                SetExpiration(desEntry, options.Expiration);
+                            }
                         }
                     }
                 }
+                responses.Add(new SetMoveResponse()
+                {
+                    Success = isRemove,
+                    CacheServer = server,
+                    Database = db
+                });
             }
-            return await Task.FromResult(new SetMoveResponse()
-            {
-                Success = isRemove
-            }).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -2100,30 +2437,37 @@ namespace EZNEW.Cache.Provider.Memory
         /// Returns all the members of the set value stored at key.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return set members response</returns>
-        public async Task<SetMembersResponse> SetMembersAsync(CacheServer server, SetMembersOption option)
+        public async Task<IEnumerable<SetMembersResponse>> SetMembersAsync(CacheServer server, SetMembersOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<SetMembersResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<SetMembersResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            List<string> members = null;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<SetMembersResponse> responses = new List<SetMembersResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var dict = entry.Value as ConcurrentDictionary<string, byte>;
-                if (dict == null)
+                List<string> members = null;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<SetMembersResponse>(CacheCodes.ValueIsNotSet)).ConfigureAwait(false);
+                    var dict = entry.Value as ConcurrentDictionary<string, byte>;
+                    if (dict == null)
+                    {
+                        responses.Add(CacheResponse.FailResponse<SetMembersResponse>(CacheCodes.ValueIsNotSet, server: server, database: db));
+                        continue;
+                    }
+                    members = new List<string>(dict.Count);
+                    members.AddRange(dict.Keys);
                 }
-                members = new List<string>(dict.Count);
-                members.AddRange(dict.Keys);
+                members = members ?? new List<string>(0);
+                var response = CacheResponse.SuccessResponse<SetMembersResponse>(server, db);
+                response.Members = members;
+                responses.Add(response);
             }
-            members = members ?? new List<string>(0);
-            var response = CacheResponse.SuccessResponse<SetMembersResponse>();
-            response.Members = members;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -2134,28 +2478,35 @@ namespace EZNEW.Cache.Provider.Memory
         /// Returns the set cardinality (number of elements) of the set stored at key.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return set length response</returns>
-        public async Task<SetLengthResponse> SetLengthAsync(CacheServer server, SetLengthOption option)
+        public async Task<IEnumerable<SetLengthResponse>> SetLengthAsync(CacheServer server, SetLengthOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<SetLengthResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<SetLengthResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            int length = 0;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<SetLengthResponse> responses = new List<SetLengthResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var dict = entry.Value as ConcurrentDictionary<string, byte>;
-                if (dict == null)
+                int length = 0;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<SetLengthResponse>(CacheCodes.ValueIsNotSet)).ConfigureAwait(false);
+                    var dict = entry.Value as ConcurrentDictionary<string, byte>;
+                    if (dict == null)
+                    {
+                        responses.Add(CacheResponse.FailResponse<SetLengthResponse>(CacheCodes.ValueIsNotSet, server: server, database: db));
+                        continue;
+                    }
+                    length = dict.Count;
                 }
-                length = dict.Count;
+                var response = CacheResponse.SuccessResponse<SetLengthResponse>(server, db);
+                response.Length = length;
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<SetLengthResponse>();
-            response.Length = length;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -2166,28 +2517,35 @@ namespace EZNEW.Cache.Provider.Memory
         /// Returns if member is a member of the set stored at key.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return set contains response</returns>
-        public async Task<SetContainsResponse> SetContainsAsync(CacheServer server, SetContainsOption option)
+        public async Task<IEnumerable<SetContainsResponse>> SetContainsAsync(CacheServer server, SetContainsOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<SetContainsResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<SetContainsResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            bool existMember = false;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<SetContainsResponse> responses = new List<SetContainsResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var dict = entry.Value as ConcurrentDictionary<string, byte>;
-                if (dict == null)
+                bool existMember = false;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<SetContainsResponse>(CacheCodes.ValueIsNotSet)).ConfigureAwait(false);
+                    var dict = entry.Value as ConcurrentDictionary<string, byte>;
+                    if (dict == null)
+                    {
+                        responses.Add(CacheResponse.FailResponse<SetContainsResponse>(CacheCodes.ValueIsNotSet, server: server, database: db));
+                        continue;
+                    }
+                    existMember = dict.ContainsKey(options.Member);
                 }
-                existMember = dict.ContainsKey(option.Member);
+                var response = CacheResponse.SuccessResponse<SetContainsResponse>(server, db);
+                response.ContainsValue = existMember;
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<SetContainsResponse>();
-            response.ContainsValue = existMember;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -2199,59 +2557,66 @@ namespace EZNEW.Cache.Provider.Memory
         /// the given sets.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return set combine response</returns>
-        public async Task<SetCombineResponse> SetCombineAsync(CacheServer server, SetCombineOption option)
+        public async Task<IEnumerable<SetCombineResponse>> SetCombineAsync(CacheServer server, SetCombineOptions options)
         {
-            if (option?.Keys.IsNullOrEmpty() ?? true)
+            if (options?.Keys.IsNullOrEmpty() ?? true)
             {
-                return await Task.FromResult(CacheResponse.FailResponse<SetCombineResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<SetCombineResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            List<string> members = null;
-            foreach (var key in option.Keys)
+            var databases = GetDatabases(server);
+            List<SetCombineResponse> responses = new List<SetCombineResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var cacheKey = key?.GetActualKey() ?? string.Empty;
-                if (string.IsNullOrWhiteSpace(cacheKey))
+                List<string> members = null;
+                foreach (var key in options.Keys)
                 {
-                    continue;
-                }
-                if (MemoryCache.TryGetEntry(cacheKey, out var nowEntry) && nowEntry != null)
-                {
-                    var nowDict = nowEntry.Value as ConcurrentDictionary<string, byte>;
-                    if (nowDict == null)
-                    {
-                        return await Task.FromResult(CacheResponse.FailResponse<SetCombineResponse>(CacheCodes.ValueIsNotSet)).ConfigureAwait(false);
-                    }
-                    if (nowDict.IsNullOrEmpty())
+                    var cacheKey = key?.GetActualKey() ?? string.Empty;
+                    if (string.IsNullOrWhiteSpace(cacheKey))
                     {
                         continue;
                     }
-                    if (members.IsNullOrEmpty())
+                    if (db.Store.TryGetEntry(cacheKey, out var nowEntry) && nowEntry != null)
                     {
-                        members = new List<string>(nowDict.Count);
-                        members.AddRange(nowDict.Keys);
-                    }
-                    else
-                    {
-                        switch (option.CombineOperation)
+                        var nowDict = nowEntry.Value as ConcurrentDictionary<string, byte>;
+                        if (nowDict == null)
                         {
-                            case CombineOperation.Union:
-                                members = members.Union(nowDict.Keys).ToList();
-                                break;
-                            case CombineOperation.Intersect:
-                                members = members.Intersect(nowDict.Keys).ToList();
-                                break;
-                            case CombineOperation.Difference:
-                                members = members.Except(nowDict.Keys).ToList();
-                                break;
+                            responses.Add(CacheResponse.FailResponse<SetCombineResponse>(CacheCodes.ValueIsNotSet, server: server, database: db));
+                            continue;
+                        }
+                        if (nowDict.IsNullOrEmpty())
+                        {
+                            continue;
+                        }
+                        if (members.IsNullOrEmpty())
+                        {
+                            members = new List<string>(nowDict.Count);
+                            members.AddRange(nowDict.Keys);
+                        }
+                        else
+                        {
+                            switch (options.CombineOperation)
+                            {
+                                case CombineOperation.Union:
+                                    members = members.Union(nowDict.Keys).ToList();
+                                    break;
+                                case CombineOperation.Intersect:
+                                    members = members.Intersect(nowDict.Keys).ToList();
+                                    break;
+                                case CombineOperation.Difference:
+                                    members = members.Except(nowDict.Keys).ToList();
+                                    break;
+                            }
                         }
                     }
                 }
+                members = members ?? new List<string>(0);
+                var response = CacheResponse.SuccessResponse<SetCombineResponse>(server, db);
+                response.CombineValues = members;
+                responses.Add(response);
             }
-            members = members ?? new List<string>(0);
-            var response = CacheResponse.SuccessResponse<SetCombineResponse>();
-            response.CombineValues = members;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -2259,91 +2624,98 @@ namespace EZNEW.Cache.Provider.Memory
         #region SetCombineAndStore
 
         /// <summary>
-        /// This option is equal to SetCombine, but instead of returning the resulting set,
+        /// This options is equal to SetCombine, but instead of returning the resulting set,
         ///  it is stored in destination. If destination already exists, it is overwritten.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return set combine and store response</returns>
-        public async Task<SetCombineAndStoreResponse> SetCombineAndStoreAsync(CacheServer server, SetCombineAndStoreOption option)
+        public async Task<IEnumerable<SetCombineAndStoreResponse>> SetCombineAndStoreAsync(CacheServer server, SetCombineAndStoreOptions options)
         {
-            var desCacheKey = option.DestinationKey?.GetActualKey() ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(desCacheKey) || (option?.SourceKeys.IsNullOrEmpty() ?? true))
+            var desCacheKey = options.DestinationKey?.GetActualKey() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(desCacheKey) || (options?.SourceKeys.IsNullOrEmpty() ?? true))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<SetCombineAndStoreResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<SetCombineAndStoreResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            List<string> members = null;
-            foreach (var key in option.SourceKeys)
+            var databases = GetDatabases(server);
+            List<SetCombineAndStoreResponse> responses = new List<SetCombineAndStoreResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var cacheKey = key?.GetActualKey() ?? string.Empty;
-                if (string.IsNullOrWhiteSpace(cacheKey))
+                List<string> members = null;
+                foreach (var key in options.SourceKeys)
                 {
-                    continue;
-                }
-                if (MemoryCache.TryGetEntry(cacheKey, out var nowEntry) && nowEntry != null)
-                {
-                    var nowDict = nowEntry.Value as ConcurrentDictionary<string, byte>;
-                    if (nowDict == null)
-                    {
-                        return await Task.FromResult(CacheResponse.FailResponse<SetCombineAndStoreResponse>(CacheCodes.ValueIsNotSet)).ConfigureAwait(false);
-                    }
-                    if (nowDict.IsNullOrEmpty())
+                    var cacheKey = key?.GetActualKey() ?? string.Empty;
+                    if (string.IsNullOrWhiteSpace(cacheKey))
                     {
                         continue;
                     }
-                    if (members.IsNullOrEmpty())
+                    if (db.Store.TryGetEntry(cacheKey, out var nowEntry) && nowEntry != null)
                     {
-                        members = new List<string>(nowDict.Count);
-                        members.AddRange(nowDict.Keys);
-                    }
-                    else
-                    {
-                        switch (option.CombineOperation)
+                        var nowDict = nowEntry.Value as ConcurrentDictionary<string, byte>;
+                        if (nowDict == null)
                         {
-                            case CombineOperation.Union:
-                                members = members.Union(nowDict.Keys).ToList();
-                                break;
-                            case CombineOperation.Intersect:
-                                members = members.Intersect(nowDict.Keys).ToList();
-                                break;
-                            case CombineOperation.Difference:
-                                members = members.Except(nowDict.Keys).ToList();
-                                break;
+                            responses.Add(CacheResponse.FailResponse<SetCombineAndStoreResponse>(CacheCodes.ValueIsNotSet, server: server, database: db));
+                            continue;
+                        }
+                        if (nowDict.IsNullOrEmpty())
+                        {
+                            continue;
+                        }
+                        if (members.IsNullOrEmpty())
+                        {
+                            members = new List<string>(nowDict.Count);
+                            members.AddRange(nowDict.Keys);
+                        }
+                        else
+                        {
+                            switch (options.CombineOperation)
+                            {
+                                case CombineOperation.Union:
+                                    members = members.Union(nowDict.Keys).ToList();
+                                    break;
+                                case CombineOperation.Intersect:
+                                    members = members.Intersect(nowDict.Keys).ToList();
+                                    break;
+                                case CombineOperation.Difference:
+                                    members = members.Except(nowDict.Keys).ToList();
+                                    break;
+                            }
                         }
                     }
                 }
-            }
-            members = members ?? new List<string>(0);
-            MemoryCache.TryGetEntry(desCacheKey, out var desEntry);
-            if (desEntry != null)
-            {
-                var desDict = desEntry.Value as ConcurrentDictionary<string, byte>;
-                if (desDict == null)
+                members = members ?? new List<string>(0);
+                db.Store.TryGetEntry(desCacheKey, out var desEntry);
+                if (desEntry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<SetCombineAndStoreResponse>(CacheCodes.ValueIsNotSet)).ConfigureAwait(false);
-                }
-                foreach (var mem in members)
-                {
-                    desDict[mem] = 0;
-                }
-            }
-            else
-            {
-                using (desEntry = MemoryCache.CreateEntry(desCacheKey))
-                {
-                    ConcurrentDictionary<string, byte> desDict
-                        = new ConcurrentDictionary<string, byte>();
-                    members.ForEach(m =>
+                    var desDict = desEntry.Value as ConcurrentDictionary<string, byte>;
+                    if (desDict == null)
                     {
-                        desDict.TryAdd(m, 0);
-                    });
-                    desEntry.SetValue(desDict);
-                    SetExpiration(desEntry, option.Expiration);
+                        responses.Add(CacheResponse.FailResponse<SetCombineAndStoreResponse>(CacheCodes.ValueIsNotSet, server: server, database: db));
+                        continue;
+                    }
+                    foreach (var mem in members)
+                    {
+                        desDict[mem] = 0;
+                    }
                 }
+                else
+                {
+                    using (desEntry = db.Store.CreateEntry(desCacheKey))
+                    {
+                        ConcurrentDictionary<string, byte> desDict = new ConcurrentDictionary<string, byte>();
+                        members.ForEach(m =>
+                        {
+                            desDict.TryAdd(m, 0);
+                        });
+                        desEntry.SetValue(desDict);
+                        SetExpiration(desEntry, options.Expiration);
+                    }
+                }
+                var response = CacheResponse.SuccessResponse<SetCombineAndStoreResponse>(server, db);
+                response.Count = members.Count;
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<SetCombineAndStoreResponse>();
-            response.Count = members.Count;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -2356,45 +2728,53 @@ namespace EZNEW.Cache.Provider.Memory
         /// created before adding the specified members.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return set add response</returns>
-        public async Task<SetAddResponse> SetAddAsync(CacheServer server, SetAddOption option)
+        public async Task<IEnumerable<SetAddResponse>> SetAddAsync(CacheServer server, SetAddOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<SetAddResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<SetAddResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<SetAddResponse> responses = new List<SetAddResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var dict = entry.Value as ConcurrentDictionary<string, byte>;
-                if (dict == null)
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<SetAddResponse>(CacheCodes.ValueIsNotSet)).ConfigureAwait(false);
-                }
-                foreach (var member in option.Members)
-                {
-                    dict[member] = 0;
-                }
-            }
-            else
-            {
-                using (entry = MemoryCache.CreateEntry(cacheKey))
-                {
-                    ConcurrentDictionary<string, byte> desDict
-                        = new ConcurrentDictionary<string, byte>();
-                    foreach (var member in option.Members)
+                    var dict = entry.Value as ConcurrentDictionary<string, byte>;
+                    if (dict == null)
                     {
-                        desDict[member] = 0;
+                        responses.Add(CacheResponse.FailResponse<SetAddResponse>(CacheCodes.ValueIsNotSet, server: server, database: db));
+                        continue;
                     }
-                    entry.SetValue(desDict);
-                    SetExpiration(entry, option.Expiration);
+                    foreach (var member in options.Members)
+                    {
+                        dict[member] = 0;
+                    }
                 }
+                else
+                {
+                    using (entry = db.Store.CreateEntry(cacheKey))
+                    {
+                        ConcurrentDictionary<string, byte> desDict = new ConcurrentDictionary<string, byte>();
+                        foreach (var member in options.Members)
+                        {
+                            desDict[member] = 0;
+                        }
+                        entry.SetValue(desDict);
+                        SetExpiration(entry, options.Expiration);
+                    }
+                }
+                responses.Add(new SetAddResponse()
+                {
+                    Success = true,
+                    CacheServer = server,
+                    Database = db
+                });
             }
-            return await Task.FromResult(new SetAddResponse()
-            {
-                Success = true
-            }).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -2410,31 +2790,38 @@ namespace EZNEW.Cache.Provider.Memory
         /// in the sorted set, or key does not exist, nil is returned.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return sorted set score response</returns>
-        public async Task<SortedSetScoreResponse> SortedSetScoreAsync(CacheServer server, SortedSetScoreOption option)
+        public async Task<IEnumerable<SortedSetScoreResponse>> SortedSetScoreAsync(CacheServer server, SortedSetScoreOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<SortedSetScoreResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<SortedSetScoreResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            double? score = null;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<SortedSetScoreResponse> responses = new List<SortedSetScoreResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var dict = entry.Value as ConcurrentDictionary<string, double>;
-                if (dict == null)
+                double? score = null;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<SortedSetScoreResponse>(CacheCodes.ValueIsNotSortedSet)).ConfigureAwait(false);
+                    var dict = entry.Value as ConcurrentDictionary<string, double>;
+                    if (dict == null)
+                    {
+                        responses.Add(CacheResponse.FailResponse<SortedSetScoreResponse>(CacheCodes.ValueIsNotSortedSet, server: server, database: db));
+                        continue;
+                    }
+                    if (dict.TryGetValue(options.Member, out var memberScore))
+                    {
+                        score = memberScore;
+                    }
                 }
-                if (dict.TryGetValue(option.Member, out var memberScore))
-                {
-                    score = memberScore;
-                }
+                var response = CacheResponse.SuccessResponse<SortedSetScoreResponse>(server, db);
+                response.Score = score;
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<SortedSetScoreResponse>();
-            response.Score = score;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -2443,64 +2830,71 @@ namespace EZNEW.Cache.Provider.Memory
 
         /// <summary>
         /// When all the elements in a sorted set are inserted with the same score, in order
-        /// to force lexicographical ordering, this option removes all elements in the sorted
+        /// to force lexicographical ordering, this options removes all elements in the sorted
         /// set stored at key between the lexicographical range specified by min and max.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return sorted set remove range by value response</returns>
-        public async Task<SortedSetRemoveRangeByValueResponse> SortedSetRemoveRangeByValueAsync(CacheServer server, SortedSetRemoveRangeByValueOption option)
+        public async Task<IEnumerable<SortedSetRemoveRangeByValueResponse>> SortedSetRemoveRangeByValueAsync(CacheServer server, SortedSetRemoveRangeByValueOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<SortedSetRemoveRangeByValueResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<SortedSetRemoveRangeByValueResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            int removeCount = 0;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<SortedSetRemoveRangeByValueResponse> responses = new List<SortedSetRemoveRangeByValueResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var dict = entry.Value as ConcurrentDictionary<string, double>;
-                if (dict == null)
+                int removeCount = 0;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<SortedSetRemoveRangeByValueResponse>(CacheCodes.ValueIsNotSortedSet)).ConfigureAwait(false);
-                }
-                var min = option.MinValue;
-                var max = option.MaxValue;
-                if (string.Compare(min, max) > 0)
-                {
-                    min = max;
-                    max = option.MinValue;
-                }
-                var removeValues = dict.Where(c =>
-                {
-                    return string.Compare(c.Key, min) >= 0 && string.Compare(c.Key, max) <= 0;
-                });
-                foreach (var removeItem in removeValues)
-                {
-                    switch (option.Exclude)
+                    var dict = entry.Value as ConcurrentDictionary<string, double>;
+                    if (dict == null)
                     {
-                        case BoundaryExclude.Both:
-                            if (removeItem.Key == min || removeItem.Key == max)
-                                continue;
-                            break;
-                        case BoundaryExclude.Start:
-                            if (removeItem.Key == min)
-                                continue;
-                            break;
-                        case BoundaryExclude.Stop:
-                            if (removeItem.Key == max)
-                                continue;
-                            break;
+                        responses.Add(CacheResponse.FailResponse<SortedSetRemoveRangeByValueResponse>(CacheCodes.ValueIsNotSortedSet, server: server, database: db));
+                        continue;
                     }
-                    if (dict.TryRemove(removeItem.Key, out var value))
+                    var min = options.MinValue;
+                    var max = options.MaxValue;
+                    if (string.Compare(min, max) > 0)
                     {
-                        removeCount++;
+                        min = max;
+                        max = options.MinValue;
+                    }
+                    var removeValues = dict.Where(c =>
+                    {
+                        return string.Compare(c.Key, min) >= 0 && string.Compare(c.Key, max) <= 0;
+                    });
+                    foreach (var removeItem in removeValues)
+                    {
+                        switch (options.Exclude)
+                        {
+                            case BoundaryExclude.Both:
+                                if (removeItem.Key == min || removeItem.Key == max)
+                                    continue;
+                                break;
+                            case BoundaryExclude.Start:
+                                if (removeItem.Key == min)
+                                    continue;
+                                break;
+                            case BoundaryExclude.Stop:
+                                if (removeItem.Key == max)
+                                    continue;
+                                break;
+                        }
+                        if (dict.TryRemove(removeItem.Key, out var value))
+                        {
+                            removeCount++;
+                        }
                     }
                 }
+                var response = CacheResponse.SuccessResponse<SortedSetRemoveRangeByValueResponse>(server, db);
+                response.RemoveCount = removeCount;
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<SortedSetRemoveRangeByValueResponse>();
-            response.RemoveCount = removeCount;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -2512,57 +2906,64 @@ namespace EZNEW.Cache.Provider.Memory
         ///  and max (inclusive by default).
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return sorted set remove range by score response</returns>
-        public async Task<SortedSetRemoveRangeByScoreResponse> SortedSetRemoveRangeByScoreAsync(CacheServer server, SortedSetRemoveRangeByScoreOption option)
+        public async Task<IEnumerable<SortedSetRemoveRangeByScoreResponse>> SortedSetRemoveRangeByScoreAsync(CacheServer server, SortedSetRemoveRangeByScoreOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<SortedSetRemoveRangeByScoreResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<SortedSetRemoveRangeByScoreResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            int removeCount = 0;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<SortedSetRemoveRangeByScoreResponse> responses = new List<SortedSetRemoveRangeByScoreResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var dict = entry.Value as ConcurrentDictionary<string, double>;
-                if (dict == null)
+                int removeCount = 0;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<SortedSetRemoveRangeByScoreResponse>(CacheCodes.ValueIsNotSortedSet)).ConfigureAwait(false);
-                }
-                var min = option.Start;
-                var max = option.Stop;
-                if (min > max)
-                {
-                    min = max;
-                    max = option.Start;
-                }
-                var removeValues = dict.Where(c => c.Value >= min && c.Value <= max);
-                foreach (var removeItem in removeValues)
-                {
-                    switch (option.Exclude)
+                    var dict = entry.Value as ConcurrentDictionary<string, double>;
+                    if (dict == null)
                     {
-                        case BoundaryExclude.Both:
-                            if (removeItem.Value == min || removeItem.Value == max)
-                                continue;
-                            break;
-                        case BoundaryExclude.Start:
-                            if (removeItem.Value == min)
-                                continue;
-                            break;
-                        case BoundaryExclude.Stop:
-                            if (removeItem.Value == max)
-                                continue;
-                            break;
+                        responses.Add(CacheResponse.FailResponse<SortedSetRemoveRangeByScoreResponse>(CacheCodes.ValueIsNotSortedSet, server: server, database: db));
+                        continue;
                     }
-                    if (dict.TryRemove(removeItem.Key, out var value))
+                    var min = options.Start;
+                    var max = options.Stop;
+                    if (min > max)
                     {
-                        removeCount++;
+                        min = max;
+                        max = options.Start;
+                    }
+                    var removeValues = dict.Where(c => c.Value >= min && c.Value <= max);
+                    foreach (var removeItem in removeValues)
+                    {
+                        switch (options.Exclude)
+                        {
+                            case BoundaryExclude.Both:
+                                if (removeItem.Value == min || removeItem.Value == max)
+                                    continue;
+                                break;
+                            case BoundaryExclude.Start:
+                                if (removeItem.Value == min)
+                                    continue;
+                                break;
+                            case BoundaryExclude.Stop:
+                                if (removeItem.Value == max)
+                                    continue;
+                                break;
+                        }
+                        if (dict.TryRemove(removeItem.Key, out var value))
+                        {
+                            removeCount++;
+                        }
                     }
                 }
+                var response = CacheResponse.SuccessResponse<SortedSetRemoveRangeByScoreResponse>(server, db);
+                response.RemoveCount = removeCount;
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<SortedSetRemoveRangeByScoreResponse>();
-            response.RemoveCount = removeCount;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -2578,56 +2979,63 @@ namespace EZNEW.Cache.Provider.Memory
         /// and so forth.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return sorted set remove range by rank response</returns>
-        public async Task<SortedSetRemoveRangeByRankResponse> SortedSetRemoveRangeByRankAsync(CacheServer server, SortedSetRemoveRangeByRankOption option)
+        public async Task<IEnumerable<SortedSetRemoveRangeByRankResponse>> SortedSetRemoveRangeByRankAsync(CacheServer server, SortedSetRemoveRangeByRankOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<SortedSetRemoveRangeByRankResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<SortedSetRemoveRangeByRankResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            int removeCount = 0;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<SortedSetRemoveRangeByRankResponse> responses = new List<SortedSetRemoveRangeByRankResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var dict = entry.Value as ConcurrentDictionary<string, double>;
-                if (dict == null)
+                int removeCount = 0;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<SortedSetRemoveRangeByRankResponse>(CacheCodes.ValueIsNotSortedSet)).ConfigureAwait(false);
-                }
-                var min = option.Start;
-                var max = option.Stop;
-                var dataCount = dict.Count;
-                if (min < 0)
-                {
-                    min = dataCount - Math.Abs(min);
-                }
-                if (max < 0)
-                {
-                    max = dataCount - Math.Abs(max);
-                }
-                if (min > max)
-                {
-                    min = max;
-                    max = option.Start;
-                }
-                if (min < dataCount && max < dataCount)
-                {
-                    int skipCount = min;
-                    int takeCount = max - min + 1;
-                    var removeItems = dict.OrderBy(c => c.Value).Skip(skipCount).Take(takeCount);
-                    foreach (var rmi in removeItems)
+                    var dict = entry.Value as ConcurrentDictionary<string, double>;
+                    if (dict == null)
                     {
-                        if (dict.TryRemove(rmi.Key, out var value))
+                        responses.Add(CacheResponse.FailResponse<SortedSetRemoveRangeByRankResponse>(CacheCodes.ValueIsNotSortedSet, server: server, database: db));
+                        continue;
+                    }
+                    var min = options.Start;
+                    var max = options.Stop;
+                    var dataCount = dict.Count;
+                    if (min < 0)
+                    {
+                        min = dataCount - Math.Abs(min);
+                    }
+                    if (max < 0)
+                    {
+                        max = dataCount - Math.Abs(max);
+                    }
+                    if (min > max)
+                    {
+                        min = max;
+                        max = options.Start;
+                    }
+                    if (min < dataCount && max < dataCount)
+                    {
+                        int skipCount = min;
+                        int takeCount = max - min + 1;
+                        var removeItems = dict.OrderBy(c => c.Value).Skip(skipCount).Take(takeCount);
+                        foreach (var rmi in removeItems)
                         {
-                            removeCount++;
+                            if (dict.TryRemove(rmi.Key, out var value))
+                            {
+                                removeCount++;
+                            }
                         }
                     }
                 }
+                var response = CacheResponse.SuccessResponse<SortedSetRemoveRangeByRankResponse>(server, db);
+                response.RemoveCount = removeCount;
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<SortedSetRemoveRangeByRankResponse>();
-            response.RemoveCount = removeCount;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -2639,34 +3047,41 @@ namespace EZNEW.Cache.Provider.Memory
         /// members are ignored.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return sorted set remove response</returns>
-        public async Task<SortedSetRemoveResponse> SortedSetRemoveAsync(CacheServer server, SortedSetRemoveOption option)
+        public async Task<IEnumerable<SortedSetRemoveResponse>> SortedSetRemoveAsync(CacheServer server, SortedSetRemoveOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<SortedSetRemoveResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<SortedSetRemoveResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            int removeCount = 0;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null && !option.RemoveMembers.IsNullOrEmpty())
+            var databases = GetDatabases(server);
+            List<SortedSetRemoveResponse> responses = new List<SortedSetRemoveResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var dict = entry.Value as ConcurrentDictionary<string, double>;
-                if (dict == null)
+                int removeCount = 0;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null && !options.RemoveMembers.IsNullOrEmpty())
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<SortedSetRemoveResponse>(CacheCodes.ValueIsNotSortedSet)).ConfigureAwait(false);
-                }
-                foreach (var rmem in option.RemoveMembers)
-                {
-                    if (dict.TryRemove(rmem, out var value))
+                    var dict = entry.Value as ConcurrentDictionary<string, double>;
+                    if (dict == null)
                     {
-                        removeCount++;
+                        responses.Add(CacheResponse.FailResponse<SortedSetRemoveResponse>(CacheCodes.ValueIsNotSortedSet, server: server, database: db));
+                        continue;
+                    }
+                    foreach (var rmem in options.RemoveMembers)
+                    {
+                        if (dict.TryRemove(rmem, out var value))
+                        {
+                            removeCount++;
+                        }
                     }
                 }
+                var response = CacheResponse.SuccessResponse<SortedSetRemoveResponse>(server, db);
+                response.RemoveCount = removeCount;
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<SortedSetRemoveResponse>();
-            response.RemoveCount = removeCount;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -2679,48 +3094,55 @@ namespace EZNEW.Cache.Provider.Memory
         /// that the member with the lowest score has rank 0.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return sorted set rank response</returns>
-        public async Task<SortedSetRankResponse> SortedSetRankAsync(CacheServer server, SortedSetRankOption option)
+        public async Task<IEnumerable<SortedSetRankResponse>> SortedSetRankAsync(CacheServer server, SortedSetRankOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<SortedSetRankResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<SortedSetRankResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            long? rank = null;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<SortedSetRankResponse> responses = new List<SortedSetRankResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var dict = entry.Value as ConcurrentDictionary<string, double>;
-                if (dict == null)
+                long? rank = null;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<SortedSetRankResponse>(CacheCodes.ValueIsNotSortedSet)).ConfigureAwait(false);
-                }
-                if (!dict.IsNullOrEmpty() && dict.ContainsKey(option.Member))
-                {
-                    rank = -1;
-                    IOrderedEnumerable<KeyValuePair<string, double>> ranks = null;
-                    if (option.Order == CacheOrder.Ascending)
+                    var dict = entry.Value as ConcurrentDictionary<string, double>;
+                    if (dict == null)
                     {
-                        ranks = dict.OrderBy(c => c.Value);
+                        responses.Add(CacheResponse.FailResponse<SortedSetRankResponse>(CacheCodes.ValueIsNotSortedSet, server: server, database: db));
+                        continue;
                     }
-                    else
+                    if (!dict.IsNullOrEmpty() && dict.ContainsKey(options.Member))
                     {
-                        ranks = dict.OrderByDescending(c => c.Value);
-                    }
-                    foreach (var item in ranks)
-                    {
-                        rank++;
-                        if (item.Key == option.Member)
+                        rank = -1;
+                        IOrderedEnumerable<KeyValuePair<string, double>> ranks = null;
+                        if (options.Order == CacheOrder.Ascending)
                         {
-                            break;
+                            ranks = dict.OrderBy(c => c.Value);
+                        }
+                        else
+                        {
+                            ranks = dict.OrderByDescending(c => c.Value);
+                        }
+                        foreach (var item in ranks)
+                        {
+                            rank++;
+                            if (item.Key == options.Member)
+                            {
+                                break;
+                            }
                         }
                     }
                 }
+                var response = CacheResponse.SuccessResponse<SortedSetRankResponse>(server, db);
+                response.Rank = rank;
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<SortedSetRankResponse>();
-            response.Rank = rank;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -2729,65 +3151,72 @@ namespace EZNEW.Cache.Provider.Memory
 
         /// <summary>
         /// When all the elements in a sorted set are inserted with the same score, in order
-        /// to force lexicographical ordering, this option returns all the elements in the
+        /// to force lexicographical ordering, this options returns all the elements in the
         /// sorted set at key with a value between min and max.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return sorted set range by value response</returns>
-        public async Task<SortedSetRangeByValueResponse> SortedSetRangeByValueAsync(CacheServer server, SortedSetRangeByValueOption option)
+        public async Task<IEnumerable<SortedSetRangeByValueResponse>> SortedSetRangeByValueAsync(CacheServer server, SortedSetRangeByValueOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<SortedSetRangeByValueResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<SortedSetRangeByValueResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            List<string> members = null;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<SortedSetRangeByValueResponse> responses = new List<SortedSetRangeByValueResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var dict = entry.Value as ConcurrentDictionary<string, double>;
-                if (dict == null)
+                List<string> members = null;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<SortedSetRangeByValueResponse>(CacheCodes.ValueIsNotSortedSet)).ConfigureAwait(false);
-                }
-                var min = option.MinValue;
-                var max = option.MaxValue;
-                if (string.Compare(min, max) > 0)
-                {
-                    min = max;
-                    max = option.MinValue;
-                }
-                var values = dict.Where(c =>
-                {
-                    return option.Exclude switch
+                    var dict = entry.Value as ConcurrentDictionary<string, double>;
+                    if (dict == null)
                     {
-                        BoundaryExclude.Both => string.Compare(c.Key, min) > 0 && string.Compare(c.Key, max) < 0,
-                        BoundaryExclude.Start => string.Compare(c.Key, min) > 0 && string.Compare(c.Key, max) <= 0,
-                        BoundaryExclude.Stop => string.Compare(c.Key, min) >= 0 && string.Compare(c.Key, max) < 0,
-                        _ => string.Compare(c.Key, min) >= 0 && string.Compare(c.Key, max) <= 0
-                    };
-                });
-                if (option.Order == CacheOrder.Descending)
-                {
-                    values = values.OrderByDescending(c => c.Key);
+                        responses.Add(CacheResponse.FailResponse<SortedSetRangeByValueResponse>(CacheCodes.ValueIsNotSortedSet, server: server, database: db));
+                        continue;
+                    }
+                    var min = options.MinValue;
+                    var max = options.MaxValue;
+                    if (string.Compare(min, max) > 0)
+                    {
+                        min = max;
+                        max = options.MinValue;
+                    }
+                    var values = dict.Where(c =>
+                    {
+                        return options.Exclude switch
+                        {
+                            BoundaryExclude.Both => string.Compare(c.Key, min) > 0 && string.Compare(c.Key, max) < 0,
+                            BoundaryExclude.Start => string.Compare(c.Key, min) > 0 && string.Compare(c.Key, max) <= 0,
+                            BoundaryExclude.Stop => string.Compare(c.Key, min) >= 0 && string.Compare(c.Key, max) < 0,
+                            _ => string.Compare(c.Key, min) >= 0 && string.Compare(c.Key, max) <= 0
+                        };
+                    });
+                    if (options.Order == CacheOrder.Descending)
+                    {
+                        values = values.OrderByDescending(c => c.Key);
+                    }
+                    else
+                    {
+                        values = values.OrderBy(c => c.Key);
+                    }
+                    if (options.Offset > 0)
+                    {
+                        values = values.Skip(options.Offset);
+                    }
+                    if (options.Count >= 0)
+                    {
+                        values = values.Take(options.Count);
+                    }
+                    members = values.Select(c => c.Key).ToList();
                 }
-                else
-                {
-                    values = values.OrderBy(c => c.Key);
-                }
-                if (option.Offset > 0)
-                {
-                    values = values.Skip(option.Offset);
-                }
-                if (option.Count >= 0)
-                {
-                    values = values.Take(option.Count);
-                }
-                members = values.Select(c => c.Key).ToList();
+                var response = CacheResponse.SuccessResponse<SortedSetRangeByValueResponse>(server, db);
+                response.Members = members ?? new List<string>(0);
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<SortedSetRangeByValueResponse>();
-            response.Members = members ?? new List<string>(0);
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -2802,65 +3231,72 @@ namespace EZNEW.Cache.Provider.Memory
         /// methods the values are inclusive.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return sorted set range by score with scores response</returns>
-        public async Task<SortedSetRangeByScoreWithScoresResponse> SortedSetRangeByScoreWithScoresAsync(CacheServer server, SortedSetRangeByScoreWithScoresOption option)
+        public async Task<IEnumerable<SortedSetRangeByScoreWithScoresResponse>> SortedSetRangeByScoreWithScoresAsync(CacheServer server, SortedSetRangeByScoreWithScoresOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<SortedSetRangeByScoreWithScoresResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<SortedSetRangeByScoreWithScoresResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            List<SortedSetMember> members = null;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<SortedSetRangeByScoreWithScoresResponse> responses = new List<SortedSetRangeByScoreWithScoresResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var dict = entry.Value as ConcurrentDictionary<string, double>;
-                if (dict == null)
+                List<SortedSetMember> members = null;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<SortedSetRangeByScoreWithScoresResponse>(CacheCodes.ValueIsNotSortedSet)).ConfigureAwait(false);
-                }
-                var min = option.Start;
-                var max = option.Stop;
-                if (min > max)
-                {
-                    min = max;
-                    max = option.Start;
-                }
-                var values = dict.Where(c =>
-                {
-                    return option.Exclude switch
+                    var dict = entry.Value as ConcurrentDictionary<string, double>;
+                    if (dict == null)
                     {
-                        BoundaryExclude.Both => c.Value > min && c.Value < max,
-                        BoundaryExclude.Start => c.Value > min && c.Value <= max,
-                        BoundaryExclude.Stop => c.Value >= min && c.Value < max,
-                        _ => c.Value >= min && c.Value <= max,
-                    };
-                });
-                if (option.Order == CacheOrder.Descending)
-                {
-                    values = values.OrderByDescending(c => c.Value);
+                        responses.Add(CacheResponse.FailResponse<SortedSetRangeByScoreWithScoresResponse>(CacheCodes.ValueIsNotSortedSet, server: server, database: db));
+                        continue;
+                    }
+                    var min = options.Start;
+                    var max = options.Stop;
+                    if (min > max)
+                    {
+                        min = max;
+                        max = options.Start;
+                    }
+                    var values = dict.Where(c =>
+                    {
+                        return options.Exclude switch
+                        {
+                            BoundaryExclude.Both => c.Value > min && c.Value < max,
+                            BoundaryExclude.Start => c.Value > min && c.Value <= max,
+                            BoundaryExclude.Stop => c.Value >= min && c.Value < max,
+                            _ => c.Value >= min && c.Value <= max,
+                        };
+                    });
+                    if (options.Order == CacheOrder.Descending)
+                    {
+                        values = values.OrderByDescending(c => c.Value);
+                    }
+                    else
+                    {
+                        values = values.OrderBy(c => c.Value);
+                    }
+                    if (options.Offset > 0)
+                    {
+                        values = values.Skip(options.Offset);
+                    }
+                    if (options.Count >= 0)
+                    {
+                        values = values.Take(options.Count);
+                    }
+                    members = values.Select(c => new SortedSetMember()
+                    {
+                        Value = c.Key,
+                        Score = c.Value
+                    }).ToList();
                 }
-                else
-                {
-                    values = values.OrderBy(c => c.Value);
-                }
-                if (option.Offset > 0)
-                {
-                    values = values.Skip(option.Offset);
-                }
-                if (option.Count >= 0)
-                {
-                    values = values.Take(option.Count);
-                }
-                members = values.Select(c => new SortedSetMember()
-                {
-                    Value = c.Key,
-                    Score = c.Value
-                }).ToList();
+                var response = CacheResponse.SuccessResponse<SortedSetRangeByScoreWithScoresResponse>(server, db);
+                response.Members = members;
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<SortedSetRangeByScoreWithScoresResponse>();
-            response.Members = members;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -2875,29 +3311,34 @@ namespace EZNEW.Cache.Provider.Memory
         /// methods the values are inclusive.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return sorted set range by score response</returns>
-        public async Task<SortedSetRangeByScoreResponse> SortedSetRangeByScoreAsync(CacheServer server, SortedSetRangeByScoreOption option)
+        public async Task<IEnumerable<SortedSetRangeByScoreResponse>> SortedSetRangeByScoreAsync(CacheServer server, SortedSetRangeByScoreOptions options)
         {
-            var result = await SortedSetRangeByScoreWithScoresAsync(server, new SortedSetRangeByScoreWithScoresOption()
+            var setResponses = await SortedSetRangeByScoreWithScoresAsync(server, new SortedSetRangeByScoreWithScoresOptions()
             {
-                CacheObject = option.CacheObject,
-                CommandFlags = option.CommandFlags,
-                Exclude = option.Exclude,
-                Key = option.Key,
-                Order = option.Order,
-                Offset = option.Offset,
-                Count = option.Count,
-                Start = option.Start,
-                Stop = option.Stop
+                CacheObject = options.CacheObject,
+                CommandFlags = options.CommandFlags,
+                Exclude = options.Exclude,
+                Key = options.Key,
+                Order = options.Order,
+                Offset = options.Offset,
+                Count = options.Count,
+                Start = options.Start,
+                Stop = options.Stop
             }).ConfigureAwait(false);
-            if (result == null || !result.Success)
+            if (setResponses.IsNullOrEmpty())
             {
-                return CacheResponse.FailResponse<SortedSetRangeByScoreResponse>(result?.Code, result?.Message);
+                return Array.Empty<SortedSetRangeByScoreResponse>();
             }
-            var response = CacheResponse.SuccessResponse<SortedSetRangeByScoreResponse>();
-            response.Members = result.Members?.Select(c => c.Value).ToList() ?? new List<string>(0);
-            return await Task.FromResult(response).ConfigureAwait(false);
+            List<SortedSetRangeByScoreResponse> responses = new List<SortedSetRangeByScoreResponse>(setResponses.GetCount());
+            foreach (var setRes in setResponses)
+            {
+                var response = CacheResponse.SuccessResponse<SortedSetRangeByScoreResponse>(server, setRes.Database);
+                response.Members = setRes.Members?.Select(c => c.Value).ToList() ?? new List<string>(0);
+                responses.Add(response);
+            }
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -2914,63 +3355,70 @@ namespace EZNEW.Cache.Provider.Memory
         /// element and so on.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return sorted set range by rank with scores response</returns>
-        public async Task<SortedSetRangeByRankWithScoresResponse> SortedSetRangeByRankWithScoresAsync(CacheServer server, SortedSetRangeByRankWithScoresOption option)
+        public async Task<IEnumerable<SortedSetRangeByRankWithScoresResponse>> SortedSetRangeByRankWithScoresAsync(CacheServer server, SortedSetRangeByRankWithScoresOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<SortedSetRangeByRankWithScoresResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<SortedSetRangeByRankWithScoresResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            List<SortedSetMember> members = null;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<SortedSetRangeByRankWithScoresResponse> responses = new List<SortedSetRangeByRankWithScoresResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var dict = entry.Value as ConcurrentDictionary<string, double>;
-                if (dict == null)
+                List<SortedSetMember> members = null;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<SortedSetRangeByRankWithScoresResponse>(CacheCodes.ValueIsNotSortedSet)).ConfigureAwait(false);
-                }
-                var min = option.Start;
-                var max = option.Stop;
-                var dataCount = dict.Count;
-                if (min < 0)
-                {
-                    min = dataCount - Math.Abs(min);
-                }
-                if (max < 0)
-                {
-                    max = dataCount - Math.Abs(max);
-                }
-                if (min > max)
-                {
-                    min = max;
-                    max = option.Start;
-                }
-                if (min < dataCount)
-                {
-                    int skipCount = min;
-                    int takeCount = max - min + 1;
-                    IEnumerable<KeyValuePair<string, double>> valueDict = dict;
-                    if (option.Order == CacheOrder.Descending)
+                    var dict = entry.Value as ConcurrentDictionary<string, double>;
+                    if (dict == null)
                     {
-                        valueDict = dict.OrderByDescending(c => c.Value);
+                        responses.Add(CacheResponse.FailResponse<SortedSetRangeByRankWithScoresResponse>(CacheCodes.ValueIsNotSortedSet, server: server, database: db));
+                        continue;
                     }
-                    else
+                    var min = options.Start;
+                    var max = options.Stop;
+                    var dataCount = dict.Count;
+                    if (min < 0)
                     {
-                        valueDict = dict.OrderBy(c => c.Value);
+                        min = dataCount - Math.Abs(min);
                     }
-                    var items = valueDict.Skip(skipCount).Take(takeCount < 0 ? int.MaxValue : takeCount);
-                    members = items.Select(c => new SortedSetMember()
+                    if (max < 0)
                     {
-                        Score = c.Value,
-                        Value = c.Key
-                    }).ToList();
+                        max = dataCount - Math.Abs(max);
+                    }
+                    if (min > max)
+                    {
+                        min = max;
+                        max = options.Start;
+                    }
+                    if (min < dataCount)
+                    {
+                        int skipCount = min;
+                        int takeCount = max - min + 1;
+                        IEnumerable<KeyValuePair<string, double>> valueDict = dict;
+                        if (options.Order == CacheOrder.Descending)
+                        {
+                            valueDict = dict.OrderByDescending(c => c.Value);
+                        }
+                        else
+                        {
+                            valueDict = dict.OrderBy(c => c.Value);
+                        }
+                        var items = valueDict.Skip(skipCount).Take(takeCount < 0 ? int.MaxValue : takeCount);
+                        members = items.Select(c => new SortedSetMember()
+                        {
+                            Score = c.Value,
+                            Value = c.Key
+                        }).ToList();
+                    }
                 }
+                var response = CacheResponse.SuccessResponse<SortedSetRangeByRankWithScoresResponse>(server, db);
+                response.Members = members ?? new List<SortedSetMember>(0);
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<SortedSetRangeByRankWithScoresResponse>();
-            response.Members = members ?? new List<SortedSetMember>(0);
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -2987,26 +3435,31 @@ namespace EZNEW.Cache.Provider.Memory
         /// element and so on.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return sorted set range by rank response</returns>
-        public async Task<SortedSetRangeByRankResponse> SortedSetRangeByRankAsync(CacheServer server, SortedSetRangeByRankOption option)
+        public async Task<IEnumerable<SortedSetRangeByRankResponse>> SortedSetRangeByRankAsync(CacheServer server, SortedSetRangeByRankOptions options)
         {
-            var result = await SortedSetRangeByRankWithScoresAsync(server, new SortedSetRangeByRankWithScoresOption()
+            var setResponses = await SortedSetRangeByRankWithScoresAsync(server, new SortedSetRangeByRankWithScoresOptions()
             {
-                CacheObject = option.CacheObject,
-                CommandFlags = option.CommandFlags,
-                Key = option.Key,
-                Order = option.Order,
-                Start = option.Start,
-                Stop = option.Stop
+                CacheObject = options.CacheObject,
+                CommandFlags = options.CommandFlags,
+                Key = options.Key,
+                Order = options.Order,
+                Start = options.Start,
+                Stop = options.Stop
             }).ConfigureAwait(false);
-            if (result == null || !result.Success)
+            if (setResponses.IsNullOrEmpty())
             {
-                return CacheResponse.FailResponse<SortedSetRangeByRankResponse>(result?.Code, result?.Message);
+                return Array.Empty<SortedSetRangeByRankResponse>();
             }
-            var response = CacheResponse.SuccessResponse<SortedSetRangeByRankResponse>();
-            response.Members = result.Members?.Select(c => c.Value).ToList() ?? new List<string>(0);
-            return await Task.FromResult(response).ConfigureAwait(false);
+            List<SortedSetRangeByRankResponse> responses = new List<SortedSetRangeByRankResponse>(setResponses.GetCount());
+            foreach (var setRes in setResponses)
+            {
+                var response = CacheResponse.SuccessResponse<SortedSetRangeByRankResponse>(server, setRes.Database);
+                response.Members = setRes.Members?.Select(c => c.Value).ToList() ?? new List<string>(0);
+                responses.Add(response);
+            }
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -3015,31 +3468,36 @@ namespace EZNEW.Cache.Provider.Memory
 
         /// <summary>
         /// When all the elements in a sorted set are inserted with the same score, in order
-        /// to force lexicographical ordering, this option returns the number of elements
+        /// to force lexicographical ordering, this options returns the number of elements
         /// in the sorted set at key with a value between min and max.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">response</param>
+        /// <param name="options">response</param>
         /// <returns>Return sorted set lenght by value response</returns>
-        public async Task<SortedSetLengthByValueResponse> SortedSetLengthByValueAsync(CacheServer server, SortedSetLengthByValueOption option)
+        public async Task<IEnumerable<SortedSetLengthByValueResponse>> SortedSetLengthByValueAsync(CacheServer server, SortedSetLengthByValueOptions options)
         {
-            var result = await SortedSetRangeByValueAsync(server, new SortedSetRangeByValueOption()
+            var setResponses = await SortedSetRangeByValueAsync(server, new SortedSetRangeByValueOptions()
             {
-                CacheObject = option.CacheObject,
-                CommandFlags = option.CommandFlags,
-                Key = option.Key,
-                MinValue = option.MinValue,
-                MaxValue = option.MaxValue,
+                CacheObject = options.CacheObject,
+                CommandFlags = options.CommandFlags,
+                Key = options.Key,
+                MinValue = options.MinValue,
+                MaxValue = options.MaxValue,
                 Offset = 0,
                 Count = -1
             }).ConfigureAwait(false);
-            if (result == null || !result.Success)
+            if (setResponses.IsNullOrEmpty())
             {
-                return CacheResponse.FailResponse<SortedSetLengthByValueResponse>(result?.Code, result?.Message);
+                return Array.Empty<SortedSetLengthByValueResponse>();
             }
-            var response = CacheResponse.SuccessResponse<SortedSetLengthByValueResponse>();
-            response.Length = result.Members?.Count ?? 0;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            List<SortedSetLengthByValueResponse> responses = new List<SortedSetLengthByValueResponse>(setResponses.GetCount());
+            foreach (var setRes in setResponses)
+            {
+                var response = CacheResponse.SuccessResponse<SortedSetLengthByValueResponse>(server, setRes.Database);
+                response.Length = setRes.Members?.Count ?? 0;
+                responses.Add(response);
+            }
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -3051,25 +3509,30 @@ namespace EZNEW.Cache.Provider.Memory
         /// at key.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return sorted set length response</returns>
-        public async Task<SortedSetLengthResponse> SortedSetLengthAsync(CacheServer server, SortedSetLengthOption option)
+        public async Task<IEnumerable<SortedSetLengthResponse>> SortedSetLengthAsync(CacheServer server, SortedSetLengthOptions options)
         {
-            var result = await SortedSetRangeByScoreAsync(server, new SortedSetRangeByScoreOption()
+            var setResponses = await SortedSetRangeByScoreAsync(server, new SortedSetRangeByScoreOptions()
             {
-                CacheObject = option.CacheObject,
-                CommandFlags = option.CommandFlags,
-                Key = option.Key,
+                CacheObject = options.CacheObject,
+                CommandFlags = options.CommandFlags,
+                Key = options.Key,
                 Offset = 0,
                 Count = -1,
             }).ConfigureAwait(false);
-            if (result == null || !result.Success)
+            if (setResponses.IsNullOrEmpty())
             {
-                return CacheResponse.FailResponse<SortedSetLengthResponse>(result?.Code, result?.Message);
+                return Array.Empty<SortedSetLengthResponse>();
             }
-            var response = CacheResponse.SuccessResponse<SortedSetLengthResponse>();
-            response.Length = result.Members?.Count ?? 0;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            List<SortedSetLengthResponse> responses = new List<SortedSetLengthResponse>(setResponses.GetCount());
+            foreach (var setRes in setResponses)
+            {
+                var response = CacheResponse.SuccessResponse<SortedSetLengthResponse>(server, setRes.Database);
+                response.Length = setRes.Members?.Count ?? 0;
+                responses.Add(response);
+            }
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -3082,32 +3545,39 @@ namespace EZNEW.Cache.Provider.Memory
         /// score (as if its previous score was 0.0).
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return sorted set increment response</returns>
-        public async Task<SortedSetIncrementResponse> SortedSetIncrementAsync(CacheServer server, SortedSetIncrementOption option)
+        public async Task<IEnumerable<SortedSetIncrementResponse>> SortedSetIncrementAsync(CacheServer server, SortedSetIncrementOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<SortedSetIncrementResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<SortedSetIncrementResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            double score = 0;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<SortedSetIncrementResponse> responses = new List<SortedSetIncrementResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var dict = entry.Value as ConcurrentDictionary<string, double>;
-                if (dict == null)
+                double score = 0;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<SortedSetIncrementResponse>(CacheCodes.ValueIsNotSortedSet)).ConfigureAwait(false);
+                    var dict = entry.Value as ConcurrentDictionary<string, double>;
+                    if (dict == null)
+                    {
+                        responses.Add(CacheResponse.FailResponse<SortedSetIncrementResponse>(CacheCodes.ValueIsNotSortedSet, server: server, database: db));
+                        continue;
+                    }
+                    if (dict.TryGetValue(options.Member, out var memberScore))
+                    {
+                        score = memberScore + options.IncrementScore;
+                        dict[options.Member] = score;
+                    }
                 }
-                if (dict.TryGetValue(option.Member, out var memberScore))
-                {
-                    score = memberScore + option.IncrementScore;
-                    dict[option.Member] = score;
-                }
+                var response = CacheResponse.SuccessResponse<SortedSetIncrementResponse>(server, db);
+                response.NewScore = score;
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<SortedSetIncrementResponse>();
-            response.NewScore = score;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -3120,32 +3590,39 @@ namespace EZNEW.Cache.Provider.Memory
         /// score (as if its previous score was 0.0).
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return sorted set decrement response</returns>
-        public async Task<SortedSetDecrementResponse> SortedSetDecrementAsync(CacheServer server, SortedSetDecrementOption option)
+        public async Task<IEnumerable<SortedSetDecrementResponse>> SortedSetDecrementAsync(CacheServer server, SortedSetDecrementOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<SortedSetDecrementResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<SortedSetDecrementResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            double score = 0;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<SortedSetDecrementResponse> responses = new List<SortedSetDecrementResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var dict = entry.Value as ConcurrentDictionary<string, double>;
-                if (dict == null)
+                double score = 0;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<SortedSetDecrementResponse>(CacheCodes.ValueIsNotSortedSet)).ConfigureAwait(false);
+                    var dict = entry.Value as ConcurrentDictionary<string, double>;
+                    if (dict == null)
+                    {
+                        responses.Add(CacheResponse.FailResponse<SortedSetDecrementResponse>(CacheCodes.ValueIsNotSortedSet, server: server, database: db));
+                        continue;
+                    }
+                    if (dict.TryGetValue(options.Member, out var memberScore))
+                    {
+                        score = memberScore - options.DecrementScore;
+                        dict[options.Member] = score;
+                    }
                 }
-                if (dict.TryGetValue(option.Member, out var memberScore))
-                {
-                    score = memberScore - option.DecrementScore;
-                    dict[option.Member] = score;
-                }
+                var response = CacheResponse.SuccessResponse<SortedSetDecrementResponse>(server, db);
+                response.NewScore = score;
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<SortedSetDecrementResponse>();
-            response.NewScore = score;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -3158,109 +3635,117 @@ namespace EZNEW.Cache.Provider.Memory
         /// aggregation (defaults to sum)
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return sorted set combine and store response</returns>
-        public async Task<SortedSetCombineAndStoreResponse> SortedSetCombineAndStoreAsync(CacheServer server, SortedSetCombineAndStoreOption option)
+        public async Task<IEnumerable<SortedSetCombineAndStoreResponse>> SortedSetCombineAndStoreAsync(CacheServer server, SortedSetCombineAndStoreOptions options)
         {
-            var desCacheKey = option.DestinationKey?.GetActualKey() ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(desCacheKey) || (option?.SourceKeys.IsNullOrEmpty() ?? true))
+            var desCacheKey = options.DestinationKey?.GetActualKey() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(desCacheKey) || (options?.SourceKeys.IsNullOrEmpty() ?? true))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<SortedSetCombineAndStoreResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<SortedSetCombineAndStoreResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            HashSet<string> members = null;
-            Dictionary<string, List<double>> allMembers = new Dictionary<string, List<double>>();
-            for (int i = 0; i < option.SourceKeys.Count; i++)
+            var databases = GetDatabases(server);
+            List<SortedSetCombineAndStoreResponse> responses = new List<SortedSetCombineAndStoreResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var key = option.SourceKeys[i];
-                var cacheKey = key?.GetActualKey() ?? string.Empty;
-                if (string.IsNullOrWhiteSpace(cacheKey))
+                HashSet<string> members = null;
+                Dictionary<string, List<double>> allMembers = new Dictionary<string, List<double>>();
+                for (int i = 0; i < options.SourceKeys.Count; i++)
                 {
-                    continue;
-                }
-                if (MemoryCache.TryGetEntry(cacheKey, out var nowEntry) && nowEntry != null)
-                {
-                    var nowDict = nowEntry.Value as ConcurrentDictionary<string, double>;
-                    if (nowDict == null)
-                    {
-                        return await Task.FromResult(CacheResponse.FailResponse<SortedSetCombineAndStoreResponse>(CacheCodes.ValueIsNotSet)).ConfigureAwait(false);
-                    }
-                    if (nowDict.IsNullOrEmpty())
+                    var key = options.SourceKeys[i];
+                    var cacheKey = key?.GetActualKey() ?? string.Empty;
+                    if (string.IsNullOrWhiteSpace(cacheKey))
                     {
                         continue;
                     }
-                    if (members.IsNullOrEmpty())
+                    if (db.Store.TryGetEntry(cacheKey, out var nowEntry) && nowEntry != null)
                     {
-                        members = new HashSet<string>(nowDict.Keys);
-                    }
-                    else
-                    {
-                        switch (option.CombineOperation)
+                        var nowDict = nowEntry.Value as ConcurrentDictionary<string, double>;
+                        if (nowDict == null)
                         {
-                            case CombineOperation.Union:
-                                members.UnionWith(nowDict.Keys);
-                                break;
-                            case CombineOperation.Intersect:
-                                members.IntersectWith(nowDict.Keys);
-                                break;
-                            case CombineOperation.Difference:
-                                members.ExceptWith(nowDict.Keys);
-                                break;
+                            responses.Add(CacheResponse.FailResponse<SortedSetCombineAndStoreResponse>(CacheCodes.ValueIsNotSet, server: server, database: db));
+                            continue;
                         }
-                    }
-                    double weight = 1;
-                    if (option?.Weights?.Length >= i + 1)
-                    {
-                        weight = option.Weights[i];
-                    }
-                    foreach (var item in nowDict)
-                    {
-                        if (allMembers.TryGetValue(item.Key, out var scores) && !scores.IsNullOrEmpty())
+                        if (nowDict.IsNullOrEmpty())
                         {
-                            scores.Add(item.Value * weight);
+                            continue;
+                        }
+                        if (members.IsNullOrEmpty())
+                        {
+                            members = new HashSet<string>(nowDict.Keys);
                         }
                         else
                         {
-                            allMembers[item.Key] = new List<double>() { item.Value * weight };
+                            switch (options.CombineOperation)
+                            {
+                                case CombineOperation.Union:
+                                    members.UnionWith(nowDict.Keys);
+                                    break;
+                                case CombineOperation.Intersect:
+                                    members.IntersectWith(nowDict.Keys);
+                                    break;
+                                case CombineOperation.Difference:
+                                    members.ExceptWith(nowDict.Keys);
+                                    break;
+                            }
+                        }
+                        double weight = 1;
+                        if (options?.Weights?.Length >= i + 1)
+                        {
+                            weight = options.Weights[i];
+                        }
+                        foreach (var item in nowDict)
+                        {
+                            if (allMembers.TryGetValue(item.Key, out var scores) && !scores.IsNullOrEmpty())
+                            {
+                                scores.Add(item.Value * weight);
+                            }
+                            else
+                            {
+                                allMembers[item.Key] = new List<double>() { item.Value * weight };
+                            }
                         }
                     }
                 }
-            }
-            Dictionary<string, double> resultItems = new Dictionary<string, double>();
-            foreach (var member in members)
-            {
-                double memberScore = 0;
-                if (allMembers.TryGetValue(member, out var scores) && !scores.IsNullOrEmpty())
+                Dictionary<string, double> resultItems = new Dictionary<string, double>();
+                foreach (var member in members)
                 {
-                    memberScore = option.Aggregate switch
+                    double memberScore = 0;
+                    if (allMembers.TryGetValue(member, out var scores) && !scores.IsNullOrEmpty())
                     {
-                        SetAggregate.Max => scores.Max(),
-                        SetAggregate.Min => scores.Min(),
-                        SetAggregate.Sum => scores.Sum(),
-                        _ => 0
-                    };
+                        memberScore = options.Aggregate switch
+                        {
+                            SetAggregate.Max => scores.Max(),
+                            SetAggregate.Min => scores.Min(),
+                            SetAggregate.Sum => scores.Sum(),
+                            _ => 0
+                        };
+                    }
+                    resultItems.Add(member, memberScore);
                 }
-                resultItems.Add(member, memberScore);
-            }
-            if (MemoryCache.TryGetEntry(desCacheKey, out var desEntry) && desEntry != null)
-            {
-                var desDict = desEntry.Value as ConcurrentDictionary<string, double>;
-                if (desDict == null)
+                if (db.Store.TryGetEntry(desCacheKey, out var desEntry) && desEntry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<SortedSetCombineAndStoreResponse>(CacheCodes.ValueIsNotSet)).ConfigureAwait(false);
+                    var desDict = desEntry.Value as ConcurrentDictionary<string, double>;
+                    if (desDict == null)
+                    {
+                        responses.Add(CacheResponse.FailResponse<SortedSetCombineAndStoreResponse>(CacheCodes.ValueIsNotSet, server: server, database: db));
+                        continue;
+                    }
+                    desEntry.Value = resultItems;
                 }
-                desEntry.Value = resultItems;
-            }
-            else
-            {
-                using (desEntry = MemoryCache.CreateEntry(desCacheKey))
+                else
                 {
-                    desEntry.SetValue(resultItems);
-                    SetExpiration(desEntry, option.Expiration);
+                    using (desEntry = db.Store.CreateEntry(desCacheKey))
+                    {
+                        desEntry.SetValue(resultItems);
+                        SetExpiration(desEntry, options.Expiration);
+                    }
                 }
+                var response = CacheResponse.SuccessResponse<SortedSetCombineAndStoreResponse>(server, db);
+                response.NewSetLength = resultItems.Count;
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<SortedSetCombineAndStoreResponse>();
-            response.NewSetLength = resultItems.Count;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -3274,50 +3759,57 @@ namespace EZNEW.Cache.Provider.Memory
         /// ordering.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return sorted set add response</returns>
-        public async Task<SortedSetAddResponse> SortedSetAddAsync(CacheServer server, SortedSetAddOption option)
+        public async Task<IEnumerable<SortedSetAddResponse>> SortedSetAddAsync(CacheServer server, SortedSetAddOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<SortedSetAddResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<SortedSetAddResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            if (option.Members.IsNullOrEmpty())
+            if (options.Members.IsNullOrEmpty())
             {
-                return await Task.FromResult(CacheResponse.FailResponse<SortedSetAddResponse>(CacheCodes.ValuesIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<SortedSetAddResponse>(CacheCodes.ValuesIsNullOrEmpty, server: server));
             }
-            long length = 0;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<SortedSetAddResponse> responses = new List<SortedSetAddResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var dict = entry.Value as ConcurrentDictionary<string, double>;
-                if (dict == null)
+                long length = 0;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    return await Task.FromResult(CacheResponse.FailResponse<SortedSetAddResponse>(CacheCodes.ValueIsNotSortedSet)).ConfigureAwait(false);
-                }
-                foreach (var mem in option.Members)
-                {
-                    dict[mem.Value] = mem.Score;
-                }
-                length = dict.Count;
-            }
-            else
-            {
-                using (entry = MemoryCache.CreateEntry(cacheKey))
-                {
-                    ConcurrentDictionary<string, double> newDict = new ConcurrentDictionary<string, double>();
-                    option.Members.ForEach(c =>
+                    var dict = entry.Value as ConcurrentDictionary<string, double>;
+                    if (dict == null)
                     {
-                        newDict.TryAdd(c.Value, c.Score);
-                    });
-                    length = newDict.Count;
-                    entry.SetValue(newDict);
-                    SetExpiration(entry, option.Expiration);
+                        responses.Add(CacheResponse.FailResponse<SortedSetAddResponse>(CacheCodes.ValueIsNotSortedSet, server: server, database: db));
+                        continue;
+                    }
+                    foreach (var mem in options.Members)
+                    {
+                        dict[mem.Value] = mem.Score;
+                    }
+                    length = dict.Count;
                 }
+                else
+                {
+                    using (entry = db.Store.CreateEntry(cacheKey))
+                    {
+                        ConcurrentDictionary<string, double> newDict = new ConcurrentDictionary<string, double>();
+                        options.Members.ForEach(c =>
+                        {
+                            newDict.TryAdd(c.Value, c.Score);
+                        });
+                        length = newDict.Count;
+                        entry.SetValue(newDict);
+                        SetExpiration(entry, options.Expiration);
+                    }
+                }
+                var response = CacheResponse.SuccessResponse<SortedSetAddResponse>(server, db);
+                response.Length = length;
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<SortedSetAddResponse>();
-            response.Length = length;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -3339,25 +3831,27 @@ namespace EZNEW.Cache.Provider.Memory
         /// fields using -> notation (again, refer to redis documentation).
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return sort response</returns>
-        public async Task<SortResponse> SortAsync(CacheServer server, SortOption option)
+        public async Task<IEnumerable<SortResponse>> SortAsync(CacheServer server, SortOptions options)
         {
-            var keyTypeResult = await KeyTypeAsync(server, new TypeOption()
+            var keyTypeResponses = await KeyTypeAsync(server, new TypeOptions()
             {
-                CacheObject = option.CacheObject,
-                CommandFlags = option.CommandFlags,
-                Key = option.Key
+                CacheObject = options.CacheObject,
+                CommandFlags = options.CommandFlags,
+                Key = options.Key
             }).ConfigureAwait(false);
-            if (keyTypeResult.Success)
+            List<SortResponse> responses = null;
+            if (!keyTypeResponses.IsNullOrEmpty())
             {
+                responses = new List<SortResponse>(keyTypeResponses.GetCount());
                 Func<IEnumerable<string>, IEnumerable<string>> filterValueFuc = (originalValues) =>
                 {
-                    if (originalValues.IsNullOrEmpty() || originalValues.Count() <= option.Offset)
+                    if (originalValues.IsNullOrEmpty() || originalValues.Count() <= options.Offset)
                     {
                         return Array.Empty<string>();
                     }
-                    if (option.Order == CacheOrder.Descending)
+                    if (options.Order == CacheOrder.Descending)
                     {
                         originalValues = originalValues.OrderByDescending(c => c);
                     }
@@ -3365,83 +3859,112 @@ namespace EZNEW.Cache.Provider.Memory
                     {
                         originalValues = originalValues.OrderBy(c => c);
                     }
-                    if (option.Offset > 0)
+                    if (options.Offset > 0)
                     {
-                        originalValues = originalValues.Skip(option.Offset);
+                        originalValues = originalValues.Skip(options.Offset);
                     }
-                    if (option.Count > 0)
+                    if (options.Count > 0)
                     {
-                        originalValues = originalValues.Take(option.Count);
+                        originalValues = originalValues.Take(options.Count);
                     }
                     return originalValues;
                 };
 
-                IEnumerable<string> values = null;
-                bool support = true;
-                switch (keyTypeResult.KeyType)
+                foreach (var keyTypeRes in keyTypeResponses)
                 {
-                    case CacheKeyType.List:
-                        IEnumerable<string> listValues = (await ListRangeAsync(server, new ListRangeOption()
-                        {
-                            CacheObject = option.CacheObject,
-                            CommandFlags = option.CommandFlags,
-                            Key = option.Key,
-                            Start = 0,
-                            Stop = -1
-                        }).ConfigureAwait(false))?.Values ?? new List<string>(0);
-                        values = filterValueFuc(listValues);
-                        break;
-                    case CacheKeyType.Set:
-                        IEnumerable<string> setMembers = (await SetMembersAsync(server, new SetMembersOption()
-                        {
-                            CacheObject = option.CacheObject,
-                            CommandFlags = option.CommandFlags,
-                            Key = option.Key
-                        }).ConfigureAwait(false))?.Members ?? new List<string>(0);
-                        values = filterValueFuc(setMembers);
-                        break;
-                    case CacheKeyType.SortedSet:
-                        IEnumerable<SortedSetMember> sortedSetMembers = (await SortedSetRangeByRankWithScoresAsync(server, new SortedSetRangeByRankWithScoresOption()
-                        {
-                            CacheObject = option.CacheObject,
-                            CommandFlags = option.CommandFlags,
-                            Key = option.Key,
-                            Order = option.Order,
-                            Start = 0,
-                            Stop = -1
-                        }).ConfigureAwait(false))?.Members ?? new List<SortedSetMember>(0);
-                        if (sortedSetMembers.Count() <= option.Offset)
-                        {
-                            values = Array.Empty<string>();
-                        }
-                        else
-                        {
-                            if (option.Offset > 0)
+                    IEnumerable<string> values = null;
+                    bool support = true;
+                    switch (keyTypeRes.KeyType)
+                    {
+                        case CacheKeyType.List:
+                            var listResponses = await ListRangeAsync(server, new ListRangeOptions()
                             {
-                                sortedSetMembers = sortedSetMembers.Skip(option.Offset);
-                            }
-                            if (option.Count > 0)
+                                CacheObject = options.CacheObject,
+                                CommandFlags = options.CommandFlags,
+                                Key = options.Key,
+                                Start = 0,
+                                Stop = -1
+                            }).ConfigureAwait(false);
+                            foreach (var listRes in listResponses)
                             {
-                                sortedSetMembers = sortedSetMembers.Take(option.Count);
+                                values = filterValueFuc(listRes.Values);
+                                responses.Add(new SortResponse()
+                                {
+                                    Success = true,
+                                    Values = values?.ToList() ?? new List<string>(0),
+                                    CacheServer = server,
+                                    Database = listRes.Database
+                                });
                             }
-                            values = sortedSetMembers.Select(c => c.Value).ToList();
-                        }
-                        break;
-                    default:
-                        support = false;
-                        break;
+                            break;
+                        case CacheKeyType.Set:
+                            var setResponses = await SetMembersAsync(server, new SetMembersOptions()
+                            {
+                                CacheObject = options.CacheObject,
+                                CommandFlags = options.CommandFlags,
+                                Key = options.Key
+                            }).ConfigureAwait(false);
+                            foreach (var setRes in setResponses)
+                            {
+                                values = filterValueFuc(setRes.Members);
+                                responses.Add(new SortResponse()
+                                {
+                                    Success = true,
+                                    Values = values?.ToList() ?? new List<string>(0),
+                                    CacheServer = server,
+                                    Database = setRes.Database
+                                });
+                            }
+                            break;
+                        case CacheKeyType.SortedSet:
+                            var sortedSetResponses = await SortedSetRangeByRankWithScoresAsync(server, new SortedSetRangeByRankWithScoresOptions()
+                            {
+                                CacheObject = options.CacheObject,
+                                CommandFlags = options.CommandFlags,
+                                Key = options.Key,
+                                Order = options.Order,
+                                Start = 0,
+                                Stop = -1
+                            }).ConfigureAwait(false);
+                            foreach (var sortedSetRes in sortedSetResponses)
+                            {
+                                IEnumerable<SortedSetMember> sortedSetMembers = sortedSetRes.Members ?? new List<SortedSetMember>(0);
+                                if (sortedSetMembers.GetCount() <= options.Offset)
+                                {
+                                    values = Array.Empty<string>();
+                                }
+                                else
+                                {
+                                    if (options.Offset > 0)
+                                    {
+                                        sortedSetMembers = sortedSetMembers.Skip(options.Offset);
+                                    }
+                                    if (options.Count > 0)
+                                    {
+                                        sortedSetMembers = sortedSetMembers.Take(options.Count);
+                                    }
+                                    values = sortedSetMembers.Select(c => c.Value).ToList();
+                                }
+                                responses.Add(new SortResponse()
+                                {
+                                    Success = true,
+                                    Values = values?.ToList() ?? new List<string>(0),
+                                    CacheServer = server,
+                                    Database = sortedSetRes.Database
+                                });
+                            }
+                            break;
+                        default:
+                            support = false;
+                            break;
+                    }
+                    if (!support)
+                    {
+                        responses.Add(CacheResponse.FailResponse<SortResponse>(CacheCodes.OperationIsNotSupported, server: server, database: keyTypeRes.Database));
+                    }
                 }
-                if (!support)
-                {
-                    return await Task.FromResult(CacheResponse.FailResponse<SortResponse>(CacheCodes.OperationIsNotSupported)).ConfigureAwait(false);
-                }
-                return await Task.FromResult(new SortResponse()
-                {
-                    Success = true,
-                    Values = values?.ToList() ?? new List<string>(0)
-                }).ConfigureAwait(false);
             }
-            return await Task.FromResult(CacheResponse.FailResponse<SortResponse>(CacheCodes.OperationIsNotSupported)).ConfigureAwait(false);
+            return await Task.FromResult(responses ?? new List<SortResponse>(0)).ConfigureAwait(false);
         }
 
         #endregion
@@ -3459,45 +3982,49 @@ namespace EZNEW.Cache.Provider.Memory
         /// fields using -> notation (again, refer to redis documentation).
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return sort and store response</returns>
-        public async Task<SortAndStoreResponse> SortAndStoreAsync(CacheServer server, SortAndStoreOption option)
+        public async Task<IEnumerable<SortAndStoreResponse>> SortAndStoreAsync(CacheServer server, SortAndStoreOptions options)
         {
-            if (string.IsNullOrWhiteSpace(option?.SourceKey))
+            if (string.IsNullOrWhiteSpace(options?.SourceKey))
             {
-                throw new ArgumentNullException($"{nameof(SortAndStoreOption)}.{nameof(SortAndStoreOption.SourceKey)}");
+                throw new ArgumentNullException($"{nameof(SortAndStoreOptions)}.{nameof(SortAndStoreOptions.SourceKey)}");
             }
-            if (string.IsNullOrWhiteSpace(option?.DestinationKey))
+            if (string.IsNullOrWhiteSpace(options?.DestinationKey))
             {
-                throw new ArgumentNullException($"{nameof(SortAndStoreOption)}.{nameof(SortAndStoreOption.DestinationKey)}");
+                throw new ArgumentNullException($"{nameof(SortAndStoreOptions)}.{nameof(SortAndStoreOptions.DestinationKey)}");
             }
-            var sortResult = await SortAsync(server, new SortOption()
+            var sortResponses = await SortAsync(server, new SortOptions()
             {
-                CacheObject = option.CacheObject,
-                CommandFlags = option.CommandFlags,
-                SortType = option.SortType,
-                Count = option.Count,
-                By = option.By,
-                Gets = option.Gets,
-                Key = option.SourceKey,
-                Offset = option.Offset,
-                Order = option.Order
+                CacheObject = options.CacheObject,
+                CommandFlags = options.CommandFlags,
+                SortType = options.SortType,
+                Count = options.Count,
+                By = options.By,
+                Gets = options.Gets,
+                Key = options.SourceKey,
+                Offset = options.Offset,
+                Order = options.Order
             }).ConfigureAwait(false);
-
-            if (sortResult?.Success ?? false)
+            List<SortAndStoreResponse> responses = null;
+            if (!sortResponses.IsNullOrEmpty())
             {
-                var values = sortResult.Values;
-                await ListLeftPushAsync(server, new ListLeftPushOption()
+                responses = new List<SortAndStoreResponse>(sortResponses.GetCount());
+                foreach (var sortRes in sortResponses)
                 {
-                    CacheObject = option.CacheObject,
-                    CommandFlags = option.CommandFlags,
-                    Expiration = option.Expiration,
-                    Key = option.DestinationKey,
-                    Values = values
-                }).ConfigureAwait(false);
-                return CacheResponse.SuccessResponse<SortAndStoreResponse>();
+                    var values = sortRes.Values;
+                    await ListLeftPushAsync(server, new ListLeftPushOptions()
+                    {
+                        CacheObject = options.CacheObject,
+                        CommandFlags = options.CommandFlags,
+                        Expiration = options.Expiration,
+                        Key = options.DestinationKey,
+                        Values = values
+                    }).ConfigureAwait(false);
+                    responses.Add(CacheResponse.SuccessResponse<SortAndStoreResponse>(server, sortRes.Database));
+                }
             }
-            return CacheResponse.FailResponse<SortAndStoreResponse>(CacheCodes.OperationIsNotSupported);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -3513,43 +4040,49 @@ namespace EZNEW.Cache.Provider.Memory
         /// different types that can be returned are: string, list, set, zset and hash.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return key type response</returns>
-        public async Task<TypeResponse> KeyTypeAsync(CacheServer server, TypeOption option)
+        public async Task<IEnumerable<TypeResponse>> KeyTypeAsync(CacheServer server, TypeOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<TypeResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<TypeResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            TypeResponse response = null;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<TypeResponse> responses = new List<TypeResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                CacheKeyType cacheKeyType = CacheKeyType.String;
-                if (entry.Value is List<string>)
+                TypeResponse response = null;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    cacheKeyType = CacheKeyType.List;
+                    CacheKeyType cacheKeyType = CacheKeyType.String;
+                    if (entry.Value is List<string>)
+                    {
+                        cacheKeyType = CacheKeyType.List;
+                    }
+                    else if (entry.Value is ConcurrentDictionary<string, dynamic>)
+                    {
+                        cacheKeyType = CacheKeyType.Hash;
+                    }
+                    else if (entry.Value is ConcurrentDictionary<string, byte>)
+                    {
+                        cacheKeyType = CacheKeyType.Set;
+                    }
+                    else if (entry.Value is ConcurrentDictionary<string, double>)
+                    {
+                        cacheKeyType = CacheKeyType.SortedSet;
+                    }
+                    response = CacheResponse.SuccessResponse<TypeResponse>(server, db);
+                    response.KeyType = cacheKeyType;
                 }
-                else if (entry.Value is ConcurrentDictionary<string, dynamic>)
+                else
                 {
-                    cacheKeyType = CacheKeyType.Hash;
+                    response = CacheResponse.FailResponse<TypeResponse>(CacheCodes.KeyIsNotExist, server: server, database: db);
                 }
-                else if (entry.Value is ConcurrentDictionary<string, byte>)
-                {
-                    cacheKeyType = CacheKeyType.Set;
-                }
-                else if (entry.Value is ConcurrentDictionary<string, double>)
-                {
-                    cacheKeyType = CacheKeyType.SortedSet;
-                }
-                response = TypeResponse.SuccessResponse<TypeResponse>();
-                response.KeyType = cacheKeyType;
+                responses.Add(response);
             }
-            else
-            {
-                response = CacheResponse.FailResponse<TypeResponse>(CacheCodes.KeyIsNotExist);
-            }
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -3562,27 +4095,35 @@ namespace EZNEW.Cache.Provider.Memory
         /// to be part of the dataset.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return key time to live response</returns>
-        public async Task<TimeToLiveResponse> KeyTimeToLiveAsync(CacheServer server, TimeToLiveOption option)
+        public async Task<IEnumerable<TimeToLiveResponse>> KeyTimeToLiveAsync(CacheServer server, TimeToLiveOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<TimeToLiveResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<TimeToLiveResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            TimeToLiveResponse response = null;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<TimeToLiveResponse> responses = new List<TimeToLiveResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                response = CacheResponse.SuccessResponse<TimeToLiveResponse>();
-                var expiration = GetExpiration(entry);
-                response.TimeToLiveSeconds = (long)(expiration?.TotalSeconds ?? 0);
+                TimeToLiveResponse response = null;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
+                {
+                    response = CacheResponse.SuccessResponse<TimeToLiveResponse>();
+                    var expiration = GetExpiration(entry);
+                    response.TimeToLiveSeconds = (long)(expiration.Item2?.TotalSeconds ?? 0);
+                }
+                else
+                {
+                    response = CacheResponse.FailResponse<TimeToLiveResponse>(CacheCodes.KeyIsNotExist);
+                }
+                response.CacheServer = server;
+                response.Database = db;
+                responses.Add(response);
             }
-            else
-            {
-                response = CacheResponse.FailResponse<TimeToLiveResponse>(CacheCodes.KeyIsNotExist);
-            }
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -3595,22 +4136,27 @@ namespace EZNEW.Cache.Provider.Memory
         /// any expire, otherwise the specified expire time(in milliseconds) is set.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return key restore response</returns>
-        public async Task<RestoreResponse> KeyRestoreAsync(CacheServer server, RestoreOption option)
+        public async Task<IEnumerable<RestoreResponse>> KeyRestoreAsync(CacheServer server, RestoreOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<RestoreResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<RestoreResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            using (var entry = MemoryCache.CreateEntry(cacheKey))
+            var databases = GetDatabases(server);
+            List<RestoreResponse> responses = new List<RestoreResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                entry.SetValue(GetEncoding().GetString(option.Value));
-                SetExpiration(entry, option.Expiration);
+                using (var entry = db.Store.CreateEntry(cacheKey))
+                {
+                    entry.SetValue(GetEncoding().GetString(options.Value));
+                    SetExpiration(entry, options.Expiration);
+                }
+                responses.Add(CacheResponse.SuccessResponse<RestoreResponse>(server, db));
             }
-            var response = CacheResponse.SuccessResponse<RestoreResponse>();
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -3622,36 +4168,44 @@ namespace EZNEW.Cache.Provider.Memory
         /// are the same, or when key does not exist.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return key rename response</returns>
-        public async Task<RenameResponse> KeyRenameAsync(CacheServer server, RenameOption option)
+        public async Task<IEnumerable<RenameResponse>> KeyRenameAsync(CacheServer server, RenameOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
-            string newCacheKey = option?.NewKey?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
+            string newCacheKey = options?.NewKey?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey) || string.IsNullOrWhiteSpace(newCacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<RenameResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<RenameResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            RenameResponse response = null;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<RenameResponse> responses = new List<RenameResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                using (var newEntry = MemoryCache.CreateEntry(newCacheKey))
+                RenameResponse response = null;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    newEntry.SetValue(entry.Value);
-                    newEntry.AbsoluteExpiration = entry.AbsoluteExpiration;
-                    newEntry.AbsoluteExpirationRelativeToNow = entry.AbsoluteExpirationRelativeToNow;
-                    newEntry.Priority = entry.Priority;
-                    newEntry.Size = entry.Size;
-                    newEntry.SlidingExpiration = entry.SlidingExpiration;
+                    using (var newEntry = db.Store.CreateEntry(newCacheKey))
+                    {
+                        newEntry.SetValue(entry.Value);
+                        newEntry.AbsoluteExpiration = entry.AbsoluteExpiration;
+                        newEntry.AbsoluteExpirationRelativeToNow = entry.AbsoluteExpirationRelativeToNow;
+                        newEntry.Priority = entry.Priority;
+                        newEntry.Size = entry.Size;
+                        newEntry.SlidingExpiration = entry.SlidingExpiration;
+                    }
+                    db.Store.Remove(cacheKey);
+                    response = CacheResponse.SuccessResponse<RenameResponse>();
                 }
-                MemoryCache.Remove(cacheKey);
-                response = CacheResponse.SuccessResponse<RenameResponse>();
+                else
+                {
+                    response = CacheResponse.FailResponse<RenameResponse>(CacheCodes.KeyIsNotExist);
+                }
+                response.CacheServer = server;
+                response.Database = db;
+                responses.Add(response);
             }
-            else
-            {
-                response = CacheResponse.FailResponse<RenameResponse>(CacheCodes.KeyIsNotExist);
-            }
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -3662,13 +4216,19 @@ namespace EZNEW.Cache.Provider.Memory
         /// Return a random key from the currently selected database.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return key random response</returns>
-        public async Task<RandomResponse> KeyRandomAsync(CacheServer server, RandomOption option)
+        public async Task<IEnumerable<RandomResponse>> KeyRandomAsync(CacheServer server, RandomOptions options)
         {
-            var response = CacheResponse.SuccessResponse<RandomResponse>();
-            response.Key = MemoryCache.GetRandomKey();
-            return await Task.FromResult(response).ConfigureAwait(false);
+            var databases = GetDatabases(server);
+            List<RandomResponse> responses = new List<RandomResponse>(databases.Count);
+            foreach (var db in databases)
+            {
+                var response = CacheResponse.SuccessResponse<RandomResponse>(server, db);
+                response.Key = db.Store.GetRandomKey();
+                responses.Add(response);
+            }
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -3680,29 +4240,37 @@ namespace EZNEW.Cache.Provider.Memory
         /// an expire set) to persistent (a key that will never expire as no timeout is associated).
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return key persist response</returns>
-        public async Task<PersistResponse> KeyPersistAsync(CacheServer server, PersistOption option)
+        public async Task<IEnumerable<PersistResponse>> KeyPersistAsync(CacheServer server, PersistOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<PersistResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<PersistResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            PersistResponse response = null;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<PersistResponse> responses = new List<PersistResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                using (var newEntry = MemoryCache.CreateEntry(cacheKey))
+                PersistResponse response = null;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    newEntry.SetValue(entry.Value);
+                    using (var newEntry = db.Store.CreateEntry(cacheKey))
+                    {
+                        newEntry.SetValue(entry.Value);
+                    }
+                    response = CacheResponse.SuccessResponse<PersistResponse>();
                 }
-                response = CacheResponse.SuccessResponse<PersistResponse>();
+                else
+                {
+                    response = CacheResponse.FailResponse<PersistResponse>(CacheCodes.KeyIsNotExist);
+                }
+                response.CacheServer = server;
+                response.Database = db;
+                responses.Add(response);
             }
-            else
-            {
-                response = CacheResponse.FailResponse<PersistResponse>(CacheCodes.KeyIsNotExist);
-            }
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -3716,11 +4284,39 @@ namespace EZNEW.Cache.Provider.Memory
         /// a locking primitive because of this.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return key move response</returns>
-        public async Task<MoveResponse> KeyMoveAsync(CacheServer server, MoveOption option)
+        public async Task<IEnumerable<MoveResponse>> KeyMoveAsync(CacheServer server, MoveOptions options)
         {
-            return await Task.FromResult(CacheResponse.FailResponse<MoveResponse>(CacheCodes.OperationIsNotSupported)).ConfigureAwait(false);
+            string cacheKey = options?.Key?.GetActualKey();
+            if (string.IsNullOrWhiteSpace(cacheKey))
+            {
+                return WrapResponse(CacheResponse.FailResponse<MoveResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
+            }
+            MemoryCacheDatabase desDatabase = GetDatabase(options.DatabaseName);
+            if (desDatabase == null)
+            {
+                return WrapResponse(CacheResponse.FailResponse<MoveResponse>("", "Destination database not find", server: server));
+            }
+            var databases = GetDatabases(server);
+            List<MoveResponse> responses = new List<MoveResponse>(databases.Count);
+            foreach (var db in databases)
+            {
+                if (db.Store.TryGetEntry(cacheKey, out var entry))
+                {
+                    using (var desEntry = desDatabase.Store.CreateEntry(cacheKey))
+                    {
+                        desEntry.Value = entry.Value;
+                        SetExpiration(desEntry, GetCacheExpiration(entry));
+                    }
+                    responses.Add(CacheResponse.SuccessResponse<MoveResponse>(server, db));
+                }
+                else
+                {
+                    responses.Add(CacheResponse.FailResponse<MoveResponse>("", $"Not find key:{cacheKey}", server, db));
+                }
+            }
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -3733,11 +4329,11 @@ namespace EZNEW.Cache.Provider.Memory
         /// and is guaranteed to exist in the target instance.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return key migrate response</returns>
-        public async Task<MigrateResponse> KeyMigrateAsync(CacheServer server, MigrateOption option)
+        public async Task<IEnumerable<MigrateResponse>> KeyMigrateAsync(CacheServer server, MigrateOptions options)
         {
-            return await Task.FromResult(CacheResponse.FailResponse<MigrateResponse>(CacheCodes.OperationIsNotSupported)).ConfigureAwait(false);
+            return WrapResponse(await Task.FromResult(CacheResponse.FailResponse<MigrateResponse>(CacheCodes.OperationIsNotSupported, server: server)).ConfigureAwait(false));
         }
 
         #endregion
@@ -3750,26 +4346,34 @@ namespace EZNEW.Cache.Provider.Memory
         /// terminology.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return key expire response</returns>
-        public async Task<ExpireResponse> KeyExpireAsync(CacheServer server, ExpireOption option)
+        public async Task<IEnumerable<ExpireResponse>> KeyExpireAsync(CacheServer server, ExpireOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<ExpireResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<ExpireResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            ExpireResponse response = null;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<ExpireResponse> responses = new List<ExpireResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                SetExpiration(entry, option.Expiration);
-                response = CacheResponse.SuccessResponse<ExpireResponse>();
+                ExpireResponse response = null;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
+                {
+                    SetExpiration(entry, options.Expiration);
+                    response = CacheResponse.SuccessResponse<ExpireResponse>();
+                }
+                else
+                {
+                    response = CacheResponse.FailResponse<ExpireResponse>(CacheCodes.KeyIsNotExist);
+                }
+                response.CacheServer = server;
+                response.Database = db;
+                responses.Add(response);
             }
-            else
-            {
-                response = CacheResponse.FailResponse<ExpireResponse>(CacheCodes.KeyIsNotExist);
-            }
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion;
@@ -3779,29 +4383,37 @@ namespace EZNEW.Cache.Provider.Memory
         /// <summary>
         /// Serialize the value stored at key in a format and return it to
         /// the user. The returned value can be synthesized back into a Redis key using the
-        /// RESTORE option.
+        /// RESTORE options.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return key dump response</returns>
-        public async Task<DumpResponse> KeyDumpAsync(CacheServer server, DumpOption option)
+        public async Task<IEnumerable<DumpResponse>> KeyDumpAsync(CacheServer server, DumpOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<DumpResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<DumpResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            DumpResponse response = null;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<DumpResponse> responses = new List<DumpResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                response = CacheResponse.SuccessResponse<DumpResponse>();
-                response.ByteValues = GetEncoding().GetBytes(entry.Value?.ToString() ?? string.Empty);
+                DumpResponse response = null;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
+                {
+                    response = CacheResponse.SuccessResponse<DumpResponse>();
+                    response.ByteValues = GetEncoding().GetBytes(entry.Value?.ToString() ?? string.Empty);
+                }
+                else
+                {
+                    response = CacheResponse.FailResponse<DumpResponse>(CacheCodes.KeyIsNotExist);
+                }
+                response.CacheServer = server;
+                response.Database = db;
+                responses.Add(response);
             }
-            else
-            {
-                response = CacheResponse.FailResponse<DumpResponse>(CacheCodes.KeyIsNotExist);
-            }
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -3812,27 +4424,33 @@ namespace EZNEW.Cache.Provider.Memory
         /// Removes the specified keys. A key is ignored if it does not exist.
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return key delete response</returns>
-        public async Task<DeleteResponse> KeyDeleteAsync(CacheServer server, DeleteOption option)
+        public async Task<IEnumerable<DeleteResponse>> KeyDeleteAsync(CacheServer server, DeleteOptions options)
         {
-            if (option.Keys?.IsNullOrEmpty() ?? true)
+            if (options.Keys?.IsNullOrEmpty() ?? true)
             {
-                return await Task.FromResult(CacheResponse.FailResponse<DeleteResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<DeleteResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            long deleteCount = 0;
-            foreach (var key in option.Keys)
+            var databases = GetDatabases(server);
+            List<DeleteResponse> responses = new List<DeleteResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var cacheKey = key?.GetActualKey() ?? string.Empty;
-                if (MemoryCache.TryGetEntry(cacheKey, out var entry))
+                long deleteCount = 0;
+                foreach (var key in options.Keys)
                 {
-                    deleteCount++;
-                    MemoryCache.Remove(cacheKey);
+                    var cacheKey = key?.GetActualKey() ?? string.Empty;
+                    if (db.Store.TryGetEntry(cacheKey, out var entry))
+                    {
+                        deleteCount++;
+                        db.Store.Remove(cacheKey);
+                    }
                 }
+                var response = CacheResponse.SuccessResponse<DeleteResponse>(server, db);
+                response.DeleteCount = deleteCount;
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<DeleteResponse>();
-            response.DeleteCount = deleteCount;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -3843,26 +4461,32 @@ namespace EZNEW.Cache.Provider.Memory
         /// Key exists
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return exists response</returns>
-        public async Task<ExistResponse> KeyExistAsync(CacheServer server, ExistOption option)
+        public async Task<IEnumerable<ExistResponse>> KeyExistAsync(CacheServer server, ExistOptions options)
         {
-            if (option.Keys?.IsNullOrEmpty() ?? true)
+            if (options.Keys?.IsNullOrEmpty() ?? true)
             {
-                return await Task.FromResult(CacheResponse.FailResponse<ExistResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<ExistResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            long count = 0;
-            foreach (var key in option.Keys)
+            var databases = GetDatabases(server);
+            List<ExistResponse> responses = new List<ExistResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                var cacheKey = key?.GetActualKey() ?? string.Empty;
-                if (MemoryCache.TryGetEntry(key?.GetActualKey(), out var entry))
+                long count = 0;
+                foreach (var key in options.Keys)
                 {
-                    count++;
+                    var cacheKey = key?.GetActualKey() ?? string.Empty;
+                    if (db.Store.TryGetEntry(key?.GetActualKey(), out var entry))
+                    {
+                        count++;
+                    }
                 }
+                var response = CacheResponse.SuccessResponse<ExistResponse>(server, db);
+                response.KeyCount = count;
+                responses.Add(response);
             }
-            var response = CacheResponse.SuccessResponse<ExistResponse>();
-            response.KeyCount = count;
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -3877,20 +4501,13 @@ namespace EZNEW.Cache.Provider.Memory
         /// Get all database
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return get all database response</returns>
-        public async Task<GetAllDataBaseResponse> GetAllDataBaseAsync(CacheServer server, GetAllDataBaseOption option)
+        public async Task<IEnumerable<GetAllDataBaseResponse>> GetAllDataBaseAsync(CacheServer server, GetAllDataBaseOptions options)
         {
-            var response = CacheResponse.SuccessResponse<GetAllDataBaseResponse>();
-            response.Databases = new List<CacheDatabase>()
-            {
-                new CacheDatabase()
-                {
-                    Index=0,
-                    Name="MemoryCache"
-                }
-            };
-            return await Task.FromResult<GetAllDataBaseResponse>(response).ConfigureAwait(false);
+            var response = CacheResponse.SuccessResponse<GetAllDataBaseResponse>(server);
+            response.Databases = GetDatabases(server).Select(c => { CacheDatabase database = c; return database; }).ToList();
+            return WrapResponse(await Task.FromResult(response).ConfigureAwait(false));
         }
 
         #endregion
@@ -3901,35 +4518,41 @@ namespace EZNEW.Cache.Provider.Memory
         /// Query keys
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return get keys response</returns>
-        public async Task<GetKeysResponse> GetKeysAsync(CacheServer server, GetKeysOption option)
+        public async Task<IEnumerable<GetKeysResponse>> GetKeysAsync(CacheServer server, GetKeysOptions options)
         {
-            var allKeys = MemoryCache.GetAllKeys();
-            Func<string, bool> where = c => true;
-            int skip = 0;
-            int count = allKeys.Count;
-            if (option.Query != null)
+            var databases = GetDatabases(server);
+            List<GetKeysResponse> responses = new List<GetKeysResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                skip = (option.Query.Page - 1) * option.Query.PageSize;
-                count = option.Query.PageSize;
-                switch (option.Query.Type)
+                var allKeys = db.Store.GetAllKeys();
+                Func<string, bool> where = c => true;
+                int skip = 0;
+                int count = allKeys.Count;
+                if (options.Query != null)
                 {
-                    case KeyMatchPattern.EndWith:
-                        where = c => c.EndsWith(option.Query.MateKey);
-                        break;
-                    case KeyMatchPattern.StartWith:
-                        where = c => c.StartsWith(option.Query.MateKey);
-                        break;
-                    case KeyMatchPattern.Include:
-                        where = c => c.Contains(option.Query.MateKey);
-                        break;
+                    skip = (options.Query.Page - 1) * options.Query.PageSize;
+                    count = options.Query.PageSize;
+                    switch (options.Query.Type)
+                    {
+                        case KeyMatchPattern.EndWith:
+                            where = c => c.EndsWith(options.Query.MateKey);
+                            break;
+                        case KeyMatchPattern.StartWith:
+                            where = c => c.StartsWith(options.Query.MateKey);
+                            break;
+                        case KeyMatchPattern.Include:
+                            where = c => c.Contains(options.Query.MateKey);
+                            break;
+                    }
                 }
+                var keys = allKeys.Where(c => where(c)).Skip(skip).Take(count).Select(c => ConstantCacheKey.Create(c)).ToList();
+                var response = CacheResponse.SuccessResponse<GetKeysResponse>(server, db);
+                response.Keys = new CachePaging<CacheKey>(options.Query?.Page ?? 1, options.Query?.PageSize ?? allKeys.Count, allKeys.Count, keys);
+                responses.Add(response);
             }
-            var keys = allKeys.Where(c => where(c)).Skip(skip).Take(count).Select(c => ConstantCacheKey.Create(c)).ToList();
-            var response = CacheResponse.SuccessResponse<GetKeysResponse>();
-            response.Keys = new CachePaging<CacheKey>(option.Query?.Page ?? 1, option.Query?.PageSize ?? allKeys.Count, allKeys.Count, keys);
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -3940,12 +4563,18 @@ namespace EZNEW.Cache.Provider.Memory
         /// Clear database data
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return clear data response</returns>
-        public async Task<ClearDataResponse> ClearDataAsync(CacheServer server, ClearDataOption option)
+        public async Task<IEnumerable<ClearDataResponse>> ClearDataAsync(CacheServer server, ClearDataOptions options)
         {
-            MemoryCache.Compact(1);
-            return await Task.FromResult(CacheResponse.SuccessResponse<ClearDataResponse>()).ConfigureAwait(false);
+            var databases = GetDatabases(server);
+            List<ClearDataResponse> responses = new List<ClearDataResponse>(databases.Count);
+            foreach (var db in databases)
+            {
+                db.Store.Compact(1);
+                responses.Add(CacheResponse.SuccessResponse<ClearDataResponse>(server, db));
+            }
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -3956,55 +4585,63 @@ namespace EZNEW.Cache.Provider.Memory
         /// Get cache item detail
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return get key detail response</returns>
-        public async Task<GetDetailResponse> GetKeyDetailAsync(CacheServer server, GetDetailOption option)
+        public async Task<IEnumerable<GetDetailResponse>> GetKeyDetailAsync(CacheServer server, GetDetailOptions options)
         {
-            string cacheKey = option?.Key?.GetActualKey();
+            string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return await Task.FromResult(CacheResponse.FailResponse<GetDetailResponse>(CacheCodes.KeyIsNullOrEmpty)).ConfigureAwait(false);
+                return WrapResponse(CacheResponse.FailResponse<GetDetailResponse>(CacheCodes.KeyIsNullOrEmpty, server: server));
             }
-            GetDetailResponse response = null;
-            if (MemoryCache.TryGetEntry(cacheKey, out var entry) && entry != null)
+            var databases = GetDatabases(server);
+            List<GetDetailResponse> responses = new List<GetDetailResponse>(databases.Count);
+            foreach (var db in databases)
             {
-                CacheKeyType cacheKeyType = CacheKeyType.String;
-                if (entry.Value is List<string>)
+                GetDetailResponse response = null;
+                if (db.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    cacheKeyType = CacheKeyType.List;
-                }
-                else if (entry.Value is ConcurrentDictionary<string, dynamic>)
-                {
-                    cacheKeyType = CacheKeyType.Hash;
-                }
-                else if (entry.Value is ConcurrentDictionary<string, byte>)
-                {
-                    cacheKeyType = CacheKeyType.Set;
-                }
-                else if (entry.Value is ConcurrentDictionary<string, double>)
-                {
-                    cacheKeyType = CacheKeyType.SortedSet;
-                }
-                response = CacheResponse.SuccessResponse<GetDetailResponse>();
-                response.CacheEntry = new CacheEntry()
-                {
-                    Key = option.Key,
-                    Value = entry.Value,
-                    Type = cacheKeyType,
-                    When = CacheSetWhen.Always,
-                    Expiration = new CacheExpiration()
+                    CacheKeyType cacheKeyType = CacheKeyType.String;
+                    if (entry.Value is List<string>)
                     {
-                        AbsoluteExpiration = entry.AbsoluteExpiration,
-                        AbsoluteExpirationRelativeToNow = entry.AbsoluteExpirationRelativeToNow,
-                        SlidingExpiration = entry.SlidingExpiration.HasValue
+                        cacheKeyType = CacheKeyType.List;
                     }
-                };
+                    else if (entry.Value is ConcurrentDictionary<string, dynamic>)
+                    {
+                        cacheKeyType = CacheKeyType.Hash;
+                    }
+                    else if (entry.Value is ConcurrentDictionary<string, byte>)
+                    {
+                        cacheKeyType = CacheKeyType.Set;
+                    }
+                    else if (entry.Value is ConcurrentDictionary<string, double>)
+                    {
+                        cacheKeyType = CacheKeyType.SortedSet;
+                    }
+                    response = CacheResponse.SuccessResponse<GetDetailResponse>();
+                    response.CacheEntry = new CacheEntry()
+                    {
+                        Key = options.Key,
+                        Value = entry.Value,
+                        Type = cacheKeyType,
+                        When = CacheSetWhen.Always,
+                        Expiration = new CacheExpiration()
+                        {
+                            AbsoluteExpiration = entry.AbsoluteExpiration,
+                            AbsoluteExpirationRelativeToNow = entry.AbsoluteExpirationRelativeToNow,
+                            SlidingExpiration = entry.SlidingExpiration.HasValue
+                        }
+                    };
+                }
+                else
+                {
+                    response = CacheResponse.FailResponse<GetDetailResponse>(CacheCodes.KeyIsNotExist);
+                }
+                response.CacheServer = server;
+                response.Database = db;
+                responses.Add(response);
             }
-            else
-            {
-                response = CacheResponse.FailResponse<GetDetailResponse>(CacheCodes.KeyIsNotExist);
-            }
-            return await Task.FromResult(response).ConfigureAwait(false);
+            return await Task.FromResult(responses).ConfigureAwait(false);
         }
 
         #endregion
@@ -4015,11 +4652,11 @@ namespace EZNEW.Cache.Provider.Memory
         /// Get server config
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return get server config response</returns>
-        public async Task<GetServerConfigurationResponse> GetServerConfigurationAsync(CacheServer server, GetServerConfigurationOption option)
+        public async Task<IEnumerable<GetServerConfigurationResponse>> GetServerConfigurationAsync(CacheServer server, GetServerConfigurationOptions options)
         {
-            return await Task.FromResult(CacheResponse.FailResponse<GetServerConfigurationResponse>(CacheCodes.OperationIsNotSupported)).ConfigureAwait(false);
+            return WrapResponse(await Task.FromResult(CacheResponse.FailResponse<GetServerConfigurationResponse>(CacheCodes.OperationIsNotSupported)).ConfigureAwait(false));
         }
 
         #endregion
@@ -4030,11 +4667,11 @@ namespace EZNEW.Cache.Provider.Memory
         /// Save server config
         /// </summary>
         /// <param name="server">Server</param>
-        /// <param name="option">Option</param>
+        /// <param name="options">Options</param>
         /// <returns>Return save server config response</returns>
-        public async Task<SaveServerConfigurationResponse> SaveServerConfigurationAsync(CacheServer server, SaveServerConfigurationOption option)
+        public async Task<IEnumerable<SaveServerConfigurationResponse>> SaveServerConfigurationAsync(CacheServer server, SaveServerConfigurationOptions options)
         {
-            return await Task.FromResult(CacheResponse.FailResponse<SaveServerConfigurationResponse>(CacheCodes.OperationIsNotSupported)).ConfigureAwait(false);
+            return WrapResponse(await Task.FromResult(CacheResponse.FailResponse<SaveServerConfigurationResponse>(CacheCodes.OperationIsNotSupported)).ConfigureAwait(false));
         }
 
         #endregion
@@ -4077,26 +4714,50 @@ namespace EZNEW.Cache.Provider.Memory
         /// </summary>
         /// <param name="cacheEntry">Cache entry</param>
         /// <returns>Return expiration time</returns>
-        static TimeSpan? GetExpiration(ICacheEntry cacheEntry)
+        static Tuple<bool, TimeSpan?> GetExpiration(ICacheEntry cacheEntry)
         {
             if (cacheEntry == null)
             {
-                return null;
+                return new Tuple<bool, TimeSpan?>(false, null);
             }
+            TimeSpan? value = null;
+            bool slidingExpiration = false;
             if (cacheEntry.SlidingExpiration.HasValue)
             {
-                return cacheEntry.SlidingExpiration;
+                value = cacheEntry.SlidingExpiration;
+                slidingExpiration = true;
             }
             else if (cacheEntry.AbsoluteExpiration.HasValue)
             {
                 var nowDate = DateTimeOffset.Now;
                 if (cacheEntry.AbsoluteExpiration.Value <= nowDate)
                 {
-                    return TimeSpan.Zero;
+                    value = TimeSpan.Zero;
                 }
-                return cacheEntry.AbsoluteExpiration.Value - nowDate;
+                else
+                {
+                    value = cacheEntry.AbsoluteExpiration.Value - nowDate;
+                }
             }
-            return null;
+            return new Tuple<bool, TimeSpan?>(slidingExpiration, value);
+        }
+
+        static CacheExpiration GetCacheExpiration(ICacheEntry cacheEntry)
+        {
+            var expirationOptions = GetExpiration(cacheEntry);
+            var expiration = new CacheExpiration()
+            {
+                SlidingExpiration = expirationOptions.Item1
+            };
+            if (expirationOptions.Item1)
+            {
+                expiration.AbsoluteExpirationRelativeToNow = expirationOptions.Item2;
+            }
+            else
+            {
+                expiration.AbsoluteExpiration = DateTimeOffset.Now.AddMilliseconds(expirationOptions.Item2?.TotalMilliseconds ?? 0);
+            }
+            return expiration;
         }
 
         /// <summary>
@@ -4106,6 +4767,56 @@ namespace EZNEW.Cache.Provider.Memory
         static Encoding GetEncoding()
         {
             return CacheManager.Configuration.DefaultEncoding ?? Encoding.UTF8;
+        }
+
+        static IEnumerable<T> WrapResponse<T>(params T[] responses)
+        {
+            if (responses.IsNullOrEmpty())
+            {
+                return Array.Empty<T>();
+            }
+            return responses;
+        }
+
+        static MemoryCacheDatabase GetDatabase(string databaseName)
+        {
+            MemoryCacheCollection.TryGetValue(databaseName, out var database);
+            return database;
+        }
+
+        static List<MemoryCacheDatabase> GetDatabases(IEnumerable<string> databaseNames)
+        {
+            if (databaseNames.IsNullOrEmpty())
+            {
+                databaseNames = new string[1] { DefaultMemoryCacheName };
+            }
+            return MemoryCacheCollection.Where(c => databaseNames.Contains(c.Key)).Select(c => c.Value).ToList();
+        }
+
+        static List<MemoryCacheDatabase> GetDatabases(CacheServer server)
+        {
+            return GetDatabases(server?.Databases);
+        }
+
+        /// <summary>
+        /// Add databases
+        /// </summary>
+        /// <param name="databaseNames">Database names</param>
+        public static void AddDatabase(params string[] databaseNames)
+        {
+            if (databaseNames.IsNullOrEmpty())
+            {
+                return;
+            }
+            foreach (var dbName in databaseNames)
+            {
+                MemoryCacheCollection[dbName] = new MemoryCacheDatabase()
+                {
+                    Index = 0,
+                    Name = dbName,
+                    Store = new MemoryCache(Options.Create(new MemoryCacheOptions()))
+                };
+            }
         }
 
         #endregion

@@ -37,7 +37,7 @@ namespace EZNEW.Develop.CQuery
         {
             if (subquery != null)
             {
-                sourceQuery = sourceQuery.AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, fieldName, CriteriaOperator.In, subquery, null, new QueryParameterOption()
+                sourceQuery = sourceQuery.AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, fieldName, CriteriaOperator.In, subquery, null, new QueryParameterOptions()
                 {
                     QueryFieldName = subqueryFieldName
                 });

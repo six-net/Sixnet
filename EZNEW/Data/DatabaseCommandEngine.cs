@@ -38,7 +38,7 @@ namespace EZNEW.Data
         /// <param name="executeOption">Execute option</param>
         /// <param name="commands">Commands</param>
         /// <returns>Return effect data numbers</returns>
-        public int Execute(CommandExecuteOption executeOption, IEnumerable<ICommand> commands)
+        public int Execute(CommandExecuteOptions executeOption, IEnumerable<ICommand> commands)
         {
             return ExecuteAsync(executeOption, commands).Result;
         }
@@ -49,7 +49,7 @@ namespace EZNEW.Data
         /// <param name="executeOption">Execute option</param>
         /// <param name="commands">Commands</param>
         /// <returns>Return effect data numbers</returns>
-        public int Execute(CommandExecuteOption executeOption, params ICommand[] commands)
+        public int Execute(CommandExecuteOptions executeOption, params ICommand[] commands)
         {
             return ExecuteAsync(executeOption, commands).Result;
         }
@@ -60,7 +60,7 @@ namespace EZNEW.Data
         /// <param name="executeOption">Execute option</param>
         /// <param name="commands">Commands</param>
         /// <returns>Return effect data numbers</returns>
-        public async Task<int> ExecuteAsync(CommandExecuteOption executeOption, IEnumerable<ICommand> commands)
+        public async Task<int> ExecuteAsync(CommandExecuteOptions executeOption, IEnumerable<ICommand> commands)
         {
             if (commands.IsNullOrEmpty())
             {
@@ -130,7 +130,7 @@ namespace EZNEW.Data
         /// <param name="executeOption">Execute option</param>
         /// <param name="commands">Commands</param>
         /// <returns>Return effect data numbers</returns>
-        public async Task<int> ExecuteAsync(CommandExecuteOption executeOption, params ICommand[] commands)
+        public async Task<int> ExecuteAsync(CommandExecuteOptions executeOption, params ICommand[] commands)
         {
             IEnumerable<ICommand> cmdCollection = commands;
             return await ExecuteAsync(executeOption, cmdCollection).ConfigureAwait(false);

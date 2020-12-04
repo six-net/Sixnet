@@ -447,13 +447,13 @@ namespace EZNEW.Develop.UnitOfWork
         /// Get command execute option
         /// </summary>
         /// <returns>Return command execute option</returns>
-        CommandExecuteOption GetCommandExecuteOption()
+        CommandExecuteOptions GetCommandExecuteOption()
         {
             if (!IsolationLevel.HasValue)
             {
-                return CommandExecuteOption.Default;
+                return CommandExecuteOptions.Default;
             }
-            return new CommandExecuteOption()
+            return new CommandExecuteOptions()
             {
                 IsolationLevel = IsolationLevel
             };

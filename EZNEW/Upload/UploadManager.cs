@@ -18,7 +18,7 @@ namespace EZNEW.Upload
     {
         static UploadManager()
         {
-            Default = new UploadOption()
+            Default = new UploadOptions()
             {
                 Remote = false
             };
@@ -29,7 +29,7 @@ namespace EZNEW.Upload
         /// <summary>
         /// default upload option
         /// </summary>
-        static UploadOption Default = null;
+        static UploadOptions Default = null;
 
         /// <summary>
         /// Upload object configurations
@@ -75,7 +75,7 @@ namespace EZNEW.Upload
         /// Configure default upload option
         /// </summary>
         /// <param name="uploadOption">Upload option</param>
-        public static void ConfigureDefault(UploadOption uploadOption)
+        public static void ConfigureDefault(UploadOptions uploadOption)
         {
             Default = uploadOption;
         }
@@ -109,7 +109,7 @@ namespace EZNEW.Upload
         /// </summary>
         /// <param name="uploadObjectName">Upload object name</param>
         /// <returns>Return the upload option</returns>
-        static UploadOption GetUploadOption(string uploadObjectName)
+        static UploadOptions GetUploadOption(string uploadObjectName)
         {
             var currentOption = Default;
             if (UploadObjectConfigurations.TryGetValue(uploadObjectName ?? string.Empty, out var uploadObject) || uploadObject?.UploadOption != null)
@@ -192,7 +192,7 @@ namespace EZNEW.Upload
         /// <param name="files">Files</param>
         /// <param name="parameters">Parameters</param>
         /// <returns>Return the upload result</returns>
-        public static async Task<UploadResult> UploadByOptionAsync(UploadOption uploadOption, IEnumerable<UploadFile> fileOptions, Dictionary<string, byte[]> files, Dictionary<string, string> parameters = null)
+        public static async Task<UploadResult> UploadByOptionAsync(UploadOptions uploadOption, IEnumerable<UploadFile> fileOptions, Dictionary<string, byte[]> files, Dictionary<string, string> parameters = null)
         {
             if (files == null || files.Count <= 0)
             {
@@ -222,7 +222,7 @@ namespace EZNEW.Upload
         /// <param name="files">Files</param>
         /// <param name="parameters">Parameters</param>
         /// <returns>Return the upload result</returns>
-        public static UploadResult UploadByOption(UploadOption uploadOption, IEnumerable<UploadFile> fileOptions, Dictionary<string, byte[]> files, Dictionary<string, string> parameters = null)
+        public static UploadResult UploadByOption(UploadOptions uploadOption, IEnumerable<UploadFile> fileOptions, Dictionary<string, byte[]> files, Dictionary<string, string> parameters = null)
         {
             return UploadByOptionAsync(uploadOption, fileOptions, files, parameters).Result;
         }
@@ -239,7 +239,7 @@ namespace EZNEW.Upload
         /// <param name="files">Upload files</param>
         /// <param name="parameters">Parameters</param>
         /// <returns>Return the upload result</returns>
-        public static async Task<UploadResult> RemoteUploadAsync(RemoteServerOption remoteOption, List<UploadFile> fileOptions, Dictionary<string, byte[]> files, Dictionary<string, string> parameters = null)
+        public static async Task<UploadResult> RemoteUploadAsync(RemoteServerOptions remoteOption, List<UploadFile> fileOptions, Dictionary<string, byte[]> files, Dictionary<string, string> parameters = null)
         {
             if (remoteOption == null || string.IsNullOrWhiteSpace(remoteOption.Host))
             {
@@ -267,7 +267,7 @@ namespace EZNEW.Upload
         /// <param name="files">Upload files</param>
         /// <param name="parameters">Parameters</param>
         /// <returns>Return the upload result</returns>
-        public static UploadResult RemoteUpload(RemoteServerOption remoteOption, List<UploadFile> fileOptions, Dictionary<string, byte[]> files, Dictionary<string, string> parameters = null)
+        public static UploadResult RemoteUpload(RemoteServerOptions remoteOption, List<UploadFile> fileOptions, Dictionary<string, byte[]> files, Dictionary<string, string> parameters = null)
         {
             return RemoteUploadAsync(remoteOption, fileOptions, files, parameters).Result;
         }
@@ -280,7 +280,7 @@ namespace EZNEW.Upload
         /// <param name="file">Upload file</param>
         /// <param name="parameters">Parameters</param>
         /// <returns>Return the upload result</returns>
-        public static async Task<UploadResult> RemoteUploadAsync(RemoteServerOption remoteOption, UploadFile fileOption, byte[] file, object parameters = null)
+        public static async Task<UploadResult> RemoteUploadAsync(RemoteServerOptions remoteOption, UploadFile fileOption, byte[] file, object parameters = null)
         {
             if (fileOption == null)
             {
@@ -302,7 +302,7 @@ namespace EZNEW.Upload
         /// <param name="file">Upload file</param>
         /// <param name="parameters">Parameters</param>
         /// <returns>Return the upload result</returns>
-        public static UploadResult RemoteUpload(RemoteServerOption remoteOption, UploadFile fileOption, byte[] file, object parameters = null)
+        public static UploadResult RemoteUpload(RemoteServerOptions remoteOption, UploadFile fileOption, byte[] file, object parameters = null)
         {
             return RemoteUploadAsync(remoteOption, fileOption, file, parameters).Result;
         }
@@ -318,7 +318,7 @@ namespace EZNEW.Upload
         /// <param name="fileOptions">File options</param>
         /// <param name="files">Files</param>
         /// <returns>Return the upload result</returns>
-        public static async Task<UploadResult> LocalUploadAsync(UploadOption uploadOption, List<UploadFile> fileOptions, Dictionary<string, byte[]> files)
+        public static async Task<UploadResult> LocalUploadAsync(UploadOptions uploadOption, List<UploadFile> fileOptions, Dictionary<string, byte[]> files)
         {
             if (fileOptions.IsNullOrEmpty() || files == null || files.Count <= 0)
             {
@@ -359,7 +359,7 @@ namespace EZNEW.Upload
         /// <param name="fileOptions">File options</param>
         /// <param name="files">Files</param>
         /// <returns>Return the upload result</returns>
-        public static UploadResult LocalUpload(UploadOption uploadOption, List<UploadFile> fileOptions, Dictionary<string, byte[]> files)
+        public static UploadResult LocalUpload(UploadOptions uploadOption, List<UploadFile> fileOptions, Dictionary<string, byte[]> files)
         {
             return LocalUploadAsync(uploadOption, fileOptions, files).Result;
         }
@@ -371,7 +371,7 @@ namespace EZNEW.Upload
         /// <param name="fileOption">File option</param>
         /// <param name="file">File</param>
         /// <returns>Return the upload result</returns>
-        public static async Task<UploadResult> LocalUploadAsync(UploadOption uploadOption, UploadFile fileOption, byte[] file)
+        public static async Task<UploadResult> LocalUploadAsync(UploadOptions uploadOption, UploadFile fileOption, byte[] file)
         {
             var fileResult = await LocalUploadFileAsync(uploadOption, fileOption, file).ConfigureAwait(false);
             return new UploadResult()
@@ -392,7 +392,7 @@ namespace EZNEW.Upload
         /// <param name="fileOption">File option</param>
         /// <param name="file">File</param>
         /// <returns>Return the upload result</returns>
-        public static UploadResult LocalUpload(UploadOption uploadOption, UploadFile fileOption, byte[] file)
+        public static UploadResult LocalUpload(UploadOptions uploadOption, UploadFile fileOption, byte[] file)
         {
             return LocalUploadAsync(uploadOption, fileOption, file).Result;
         }
@@ -404,7 +404,7 @@ namespace EZNEW.Upload
         /// <param name="fileOption">File option</param>
         /// <param name="file">File</param>
         /// <returns>upload file result</returns>
-        static async Task<UploadFileResult> LocalUploadFileAsync(UploadOption uploadOption, UploadFile fileOption, byte[] file)
+        static async Task<UploadFileResult> LocalUploadFileAsync(UploadOptions uploadOption, UploadFile fileOption, byte[] file)
         {
             #region verify parameters
 

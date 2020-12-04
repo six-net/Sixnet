@@ -36,7 +36,7 @@ namespace EZNEW.Develop.Domain.Repository.Event
         /// <param name="query">Query object</param>
         /// <param name="option">Activation option</param>
         /// <returns>Return repository event execute result</returns>
-        public IRepositoryEventExecuteResult Execute(IQuery query, ActivationOption option = null)
+        public IRepositoryEventExecuteResult Execute(IQuery query, ActivationOptions option = null)
         {
             if (Operation == null)
             {

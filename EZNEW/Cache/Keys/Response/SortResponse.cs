@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace EZNEW.Cache.Keys.Response
+namespace EZNEW.Cache.Keys
 {
     /// <summary>
     /// Sort response

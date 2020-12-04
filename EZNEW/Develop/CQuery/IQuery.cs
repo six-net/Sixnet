@@ -502,7 +502,7 @@ namespace EZNEW.Develop.CQuery
         /// <param name="value">Value</param>
         /// <param name="converter">Converter</param>
         /// <param name="queryOption">query parameter option</param>
-        IQuery AddCriteria(QueryOperator queryOperator, string fieldName, CriteriaOperator criteriaOperator, dynamic value, ICriteriaConverter converter = null, QueryParameterOption queryOption = null);
+        IQuery AddCriteria(QueryOperator queryOperator, string fieldName, CriteriaOperator criteriaOperator, dynamic value, ICriteriaConverter converter = null, QueryParameterOptions queryOption = null);
 
         #endregion
 
@@ -514,7 +514,7 @@ namespace EZNEW.Develop.CQuery
         /// <param name="queryOperator">Connect operator</param>
         /// <param name="queryItem">query item</param>
         /// <param name="queryOption">query parameter option</param>
-        IQuery AddQueryItem(QueryOperator queryOperator, IQueryItem queryItem, QueryParameterOption queryOption = null);
+        IQuery AddQueryItem(QueryOperator queryOperator, IQueryItem queryItem, QueryParameterOptions queryOption = null);
 
         #endregion
 

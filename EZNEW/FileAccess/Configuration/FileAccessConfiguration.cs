@@ -12,7 +12,7 @@ namespace EZNEW.FileAccess.Configuration
         /// <summary>
         /// Gets or sets the default file access option
         /// </summary>
-        public FileAccessOption Default { get; set; }
+        public FileAccessOptions Default { get; set; }
 
         /// <summary>
         /// Gets or sets the file objects configuration

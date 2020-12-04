@@ -28,7 +28,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// </summary>
         /// <param name="data">Data</param>
         /// <param name="activationOption">Activation option</param>
-        public sealed override TModel Save(TModel data, ActivationOption activationOption = null)
+        public sealed override TModel Save(TModel data, ActivationOptions activationOption = null)
         {
             return Save(new TModel[1] { data }, activationOption)?.FirstOrDefault();
         }
@@ -38,7 +38,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="activationOption">Activation option</param>
-        public sealed override List<TModel> Save(IEnumerable<TModel> datas, ActivationOption activationOption = null)
+        public sealed override List<TModel> Save(IEnumerable<TModel> datas, ActivationOptions activationOption = null)
         {
             if (datas.IsNullOrEmpty())
             {
@@ -90,7 +90,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// </summary>
         /// <param name="data">Data</param>
         /// <param name="activationOption">Activation option</param>
-        public sealed override void Remove(TModel data, ActivationOption activationOption = null)
+        public sealed override void Remove(TModel data, ActivationOptions activationOption = null)
         {
             Remove(new TModel[1] { data }, activationOption);
         }
@@ -100,7 +100,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="activationOption">Activation option</param>
-        public sealed override void Remove(IEnumerable<TModel> datas, ActivationOption activationOption = null)
+        public sealed override void Remove(IEnumerable<TModel> datas, ActivationOptions activationOption = null)
         {
             if (datas.IsNullOrEmpty())
             {
@@ -136,7 +136,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// </summary>
         /// <param name="query">Query object</param>
         /// <param name="activationOption">Activation option</param>
-        public sealed override void Remove(IQuery query, ActivationOption activationOption = null)
+        public sealed override void Remove(IQuery query, ActivationOptions activationOption = null)
         {
             var newQuery = RepositoryManager.HandleQueryObjectBeforeExecute(query, QueryUsageScene.Remove, AppendRemoveCondition);
             var record = ExecuteRemove(newQuery, activationOption);
@@ -158,7 +158,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// <param name="expression">Modify expression</param>
         /// <param name="query">Query object</param>
         /// <param name="activationOption">Activation option</param>
-        public sealed override void Modify(IModify expression, IQuery query, ActivationOption activationOption = null)
+        public sealed override void Modify(IModify expression, IQuery query, ActivationOptions activationOption = null)
         {
             var newQuery = RepositoryManager.HandleQueryObjectBeforeExecute(query, QueryUsageScene.Modify, AppendModifyCondition);
             var record = ExecuteModify(expression, newQuery, activationOption);
@@ -482,7 +482,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// <param name="data">Data</param>
         /// <param name="activationOption">Activation option</param>
         /// <returns>Return activation record</returns>
-        protected abstract IActivationRecord ExecuteSave(TModel data, ActivationOption activationOption = null);
+        protected abstract IActivationRecord ExecuteSave(TModel data, ActivationOptions activationOption = null);
 
         /// <summary>
         /// Execute remove
@@ -490,7 +490,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// <param name="data">Data</param>
         /// <param name="activationOption">Activation option</param>
         /// <returns>Return activation record</returns>
-        protected abstract IActivationRecord ExecuteRemove(TModel data, ActivationOption activationOption = null);
+        protected abstract IActivationRecord ExecuteRemove(TModel data, ActivationOptions activationOption = null);
 
         /// <summary>
         /// Execute Remove by condition
@@ -498,7 +498,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// <param name="query">Query object</param>
         /// <param name="activationOption">Activation option</param>
         /// <returns>Return activation record</returns>
-        protected abstract IActivationRecord ExecuteRemove(IQuery query, ActivationOption activationOption = null);
+        protected abstract IActivationRecord ExecuteRemove(IQuery query, ActivationOptions activationOption = null);
 
         /// <summary>
         /// Get data
@@ -581,7 +581,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// <param name="query">Query object</param>
         /// <param name="activationOption">Activation option</param>
         /// <returns>Return activation record</returns>
-        protected abstract IActivationRecord ExecuteModify(IModify expression, IQuery query, ActivationOption activationOption = null);
+        protected abstract IActivationRecord ExecuteModify(IModify expression, IQuery query, ActivationOptions activationOption = null);
 
         /// <summary>
         /// Query callback

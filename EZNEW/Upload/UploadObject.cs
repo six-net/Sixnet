@@ -16,6 +16,6 @@ namespace EZNEW.Upload
         /// <summary>
         /// Gets or sets upload option
         /// </summary>
-        public UploadOption UploadOption { get; set; }
+        public UploadOptions UploadOption { get; set; }
     }
 }

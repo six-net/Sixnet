@@ -21,7 +21,7 @@ namespace EZNEW.Http
         /// <summary>
         /// Http method handlers
         /// </summary>
-        static readonly Dictionary<HttpMethod, Action<HttpClient, HttpRequestMessage, HttpRequestOption>> HttpMethodRequestMessageHandlers = null;
+        static readonly Dictionary<HttpMethod, Action<HttpClient, HttpRequestMessage, HttpRequestOptions>> HttpMethodRequestMessageHandlers = null;
 
         /// <summary>
         /// Http client factory
@@ -35,7 +35,7 @@ namespace EZNEW.Http
 
         static HttpHelper()
         {
-            HttpMethodRequestMessageHandlers = new Dictionary<HttpMethod, Action<HttpClient, HttpRequestMessage, HttpRequestOption>>()
+            HttpMethodRequestMessageHandlers = new Dictionary<HttpMethod, Action<HttpClient, HttpRequestMessage, HttpRequestOptions>>()
             {
                 [HttpMethod.Post] = HttpRequestMessageSetFileAndParameter,
                 [HttpMethod.Put] = HttpRequestMessageSetFileAndParameter,
@@ -76,7 +76,7 @@ namespace EZNEW.Http
         /// </summary>
         /// <param name="httpRequestOption">Http request option</param>
         /// <returns>Return the http response message</returns>
-        public static async Task<HttpResponseMessage> SendAsync(HttpRequestOption httpRequestOption)
+        public static async Task<HttpResponseMessage> SendAsync(HttpRequestOptions httpRequestOption)
         {
             var httpClient = GetHttpClient(httpRequestOption?.HttpClientConfigName);
             var httpRequestMessage = httpRequestOption?.HttpRequestMessage ?? new HttpRequestMessage();
@@ -120,7 +120,7 @@ namespace EZNEW.Http
                 Method = httpMethod,
                 RequestUri = string.IsNullOrWhiteSpace(url) ? null : new Uri(url, UriKind.RelativeOrAbsolute),
             };
-            return await SendAsync(new HttpRequestOption()
+            return await SendAsync(new HttpRequestOptions()
             {
                 CancellationToken = cancellationToken,
                 HttpClientConfigName = httpClientConfigName,
@@ -724,7 +724,7 @@ namespace EZNEW.Http
         {
             var content = new StringContent(jsonData, Encoding.UTF8);
             content.Headers.ContentType = new MediaTypeWithQualityHeaderValue("application/json");
-            return await SendAsync(new HttpRequestOption()
+            return await SendAsync(new HttpRequestOptions()
             {
                 HttpClientConfigName = httpClientConfigName,
                 HttpCompletionOption = HttpCompletionOption.ResponseHeadersRead,
@@ -1035,7 +1035,7 @@ namespace EZNEW.Http
         /// <param name="httpClient">Http client</param>
         /// <param name="httpRequestMessage">Http request message</param>
         /// <param name="httpRequestOption">Http request post</param>
-        private static void HttpRequestMessageSetFileAndParameter(HttpClient httpClient, HttpRequestMessage httpRequestMessage, HttpRequestOption httpRequestOption)
+        private static void HttpRequestMessageSetFileAndParameter(HttpClient httpClient, HttpRequestMessage httpRequestMessage, HttpRequestOptions httpRequestOption)
         {
             if (httpRequestMessage == null || httpRequestOption == null)
             {
@@ -1097,7 +1097,7 @@ namespace EZNEW.Http
         /// <param name="httpClient">Http client</param>
         /// <param name="httpRequestMessage">Http request message</param>
         /// <param name="httpRequestOption">Http request option</param>
-        private static void AppendUrlParameter(HttpClient httpClient, HttpRequestMessage httpRequestMessage, HttpRequestOption httpRequestOption)
+        private static void AppendUrlParameter(HttpClient httpClient, HttpRequestMessage httpRequestMessage, HttpRequestOptions httpRequestOption)
         {
             if (httpRequestMessage == null || httpRequestOption == null || httpRequestOption.Parameters.IsNullOrEmpty())
             {

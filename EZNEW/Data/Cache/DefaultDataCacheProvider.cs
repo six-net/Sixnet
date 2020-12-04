@@ -5,17 +5,9 @@ using System.Threading.Tasks;
 using EZNEW.Develop.Entity;
 using EZNEW.Develop.CQuery;
 using EZNEW.Paging;
-using EZNEW.Serialize;
 using EZNEW.Develop.Command;
-using EZNEW.Cache;
-using EZNEW.Internal.MessageQueue;
-using EZNEW.Cache.Keys.Request;
-using EZNEW.Cache.Keys;
-using EZNEW.Cache.String.Request;
-using EZNEW.Cache.Keys.Response;
 using EZNEW.Data.Cache.Command;
 using EZNEW.Data.Cache.Policy;
-using System.ComponentModel;
 
 namespace EZNEW.Data.Cache
 {

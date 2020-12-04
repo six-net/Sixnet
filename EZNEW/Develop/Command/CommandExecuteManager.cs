@@ -34,7 +34,7 @@ namespace EZNEW.Develop.Command
         /// <param name="executeOption">Execute option</param>
         /// <param name="commands">Commands</param>
         /// <returns>Return the execute data effect numbers</returns>
-        internal static async Task<int> ExecuteAsync(CommandExecuteOption executeOption, IEnumerable<ICommand> commands)
+        internal static async Task<int> ExecuteAsync(CommandExecuteOptions executeOption, IEnumerable<ICommand> commands)
         {
             if (commands.IsNullOrEmpty())
             {
@@ -50,7 +50,7 @@ namespace EZNEW.Develop.Command
         /// <param name="executeOption">Execute option</param>
         /// <param name="commandEngineGroup">Command engine group</param>
         /// <returns>Return the execute data effect numbers</returns>
-        internal static async Task<int> ExecuteAsync(CommandExecuteOption executeOption, IEnumerable<Tuple<ICommandEngine, List<ICommand>>> commandEngineGroup)
+        internal static async Task<int> ExecuteAsync(CommandExecuteOptions executeOption, IEnumerable<Tuple<ICommandEngine, List<ICommand>>> commandEngineGroup)
         {
             if (commandEngineGroup.IsNullOrEmpty())
             {

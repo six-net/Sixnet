@@ -110,7 +110,7 @@ namespace EZNEW.Configuration
             /// <summary>
             /// criteria convert parse config
             /// </summary>
-            static readonly Dictionary<string, Func<CriteriaConverterParseOption, string>> CriteriaConverterParsers = new Dictionary<string, Func<CriteriaConverterParseOption, string>>();
+            static readonly Dictionary<string, Func<CriteriaConverterParseOptions, string>> CriteriaConverterParsers = new Dictionary<string, Func<CriteriaConverterParseOptions, string>>();
 
             #endregion
 
@@ -590,7 +590,7 @@ namespace EZNEW.Configuration
             /// </summary>
             /// <param name="converterConfigName">Converter config name</param>
             /// <param name="converterParseOperation">Converter parse operation</param>
-            internal static void ConfigureCriteriaConverterParser(string converterConfigName, Func<CriteriaConverterParseOption, string> converterParseOperation)
+            internal static void ConfigureCriteriaConverterParser(string converterConfigName, Func<CriteriaConverterParseOptions, string> converterParseOperation)
             {
                 if (string.IsNullOrWhiteSpace(converterConfigName) || converterParseOperation == null)
                 {
@@ -604,7 +604,7 @@ namespace EZNEW.Configuration
             /// </summary>
             /// <param name="converterConfigName">Converter config name</param>
             /// <returns>Return convert parse operation</returns>
-            internal static Func<CriteriaConverterParseOption, string> GetCriteriaConverterParser(string converterConfigName)
+            internal static Func<CriteriaConverterParseOptions, string> GetCriteriaConverterParser(string converterConfigName)
             {
                 CriteriaConverterParsers.TryGetValue(converterConfigName, out var parse);
                 return parse;
