@@ -2690,7 +2690,7 @@ namespace EZNEW.Cache
             /// <summary>
             /// Cache providers
             /// </summary>
-            static Dictionary<CacheServerType, ICacheProvider> Providers = new Dictionary<CacheServerType, ICacheProvider>();
+            static readonly Dictionary<CacheServerType, ICacheProvider> Providers = new Dictionary<CacheServerType, ICacheProvider>();
 
             /// <summary>
             /// Get cache servers operation proxy
@@ -2729,6 +2729,11 @@ namespace EZNEW.Cache
             /// Gets or sets the cache default encoding
             /// </summary>
             public static Encoding DefaultEncoding = Encoding.UTF8;
+
+            /// <summary>
+            /// Gets or sets whether throw exception when not get any database
+            /// </summary>
+            public static bool ThrowNoDatabaseException = false;
 
             #endregion
 
