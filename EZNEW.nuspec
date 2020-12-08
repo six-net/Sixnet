@@ -10,6 +10,7 @@
     <licenseUrl>https://github.com/eznew-net/EZNEW/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/eznew-net</projectUrl>
     <iconUrl>http://www.eznew.net/nugetico.png</iconUrl>
+	<icon>images\nugeticon.png</icon>
     <description>A simple, easy-to-use, flexible, and efficient .NET development framework</description>
     <copyright>Copyright © DingBin.Li</copyright>
     <tags>.NET,EZNEW,DDD</tags>
@@ -31,5 +32,6 @@
   <files>
     <file src="EZNEW\bin\$configuration$\netstandard2.0\EZNEW.dll" target="lib\netstandard2.0" />
 	<file src="EZNEW\bin\$configuration$\netstandard2.0\EZNEW.pdb" target="lib\netstandard2.0" />
+	<file src="..\nugeticon.png" target="images\" />
   </files>
 </package>
