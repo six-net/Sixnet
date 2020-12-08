@@ -7,7 +7,6 @@
     <authors>DingBin.Li</authors>
     <owners>EZNEW</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <licenseUrl>https://github.com/eznew-net/EZNEW/blob/master/LICENSE</licenseUrl>
 	<license type="expression">MIT</license>
     <projectUrl>https://github.com/eznew-net</projectUrl>
     <iconUrl>http://www.eznew.net/nugetico.png</iconUrl>
