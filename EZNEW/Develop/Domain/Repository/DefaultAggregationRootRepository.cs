@@ -27,18 +27,18 @@ namespace EZNEW.Develop.Domain.Repository
         /// Save data
         /// </summary>
         /// <param name="data">Data</param>
-        /// <param name="activationOption">Activation option</param>
-        public sealed override TModel Save(TModel data, ActivationOptions activationOption = null)
+        /// <param name="activationOptions">Activation options</param>
+        public sealed override TModel Save(TModel data, ActivationOptions activationOptions = null)
         {
-            return Save(new TModel[1] { data }, activationOption)?.FirstOrDefault();
+            return Save(new TModel[1] { data }, activationOptions)?.FirstOrDefault();
         }
 
         /// <summary>
         /// save datas
         /// </summary>
         /// <param name="datas">Datas</param>
-        /// <param name="activationOption">Activation option</param>
-        public sealed override List<TModel> Save(IEnumerable<TModel> datas, ActivationOptions activationOption = null)
+        /// <param name="activationOptions">Activation options</param>
+        public sealed override List<TModel> Save(IEnumerable<TModel> datas, ActivationOptions activationOptions = null)
         {
             if (datas.IsNullOrEmpty())
             {
@@ -69,14 +69,14 @@ namespace EZNEW.Develop.Domain.Repository
                 {
                     throw new EZNEWException($"Data:{saveData.IdentityValue} cann't to be save");
                 }
-                var record = ExecuteSave(saveData, activationOption);
+                var record = ExecuteSave(saveData, activationOptions);
                 if (record != null)
                 {
                     records.Add(record);
                     resultDatas.Add(saveData);
                 }
             }
-            RepositoryEventBus.PublishSave(GetType(), datas, activationOption);
+            RepositoryEventBus.PublishSave(GetType(), datas, activationOptions);
             WorkManager.RegisterActivationRecord(records);
             return resultDatas;
         }
@@ -89,18 +89,18 @@ namespace EZNEW.Develop.Domain.Repository
         /// Remove data
         /// </summary>
         /// <param name="data">Data</param>
-        /// <param name="activationOption">Activation option</param>
-        public sealed override void Remove(TModel data, ActivationOptions activationOption = null)
+        /// <param name="activationOptions">Activation options</param>
+        public sealed override void Remove(TModel data, ActivationOptions activationOptions = null)
         {
-            Remove(new TModel[1] { data }, activationOption);
+            Remove(new TModel[1] { data }, activationOptions);
         }
 
         /// <summary>
         /// Remove datas
         /// </summary>
         /// <param name="datas">Datas</param>
-        /// <param name="activationOption">Activation option</param>
-        public sealed override void Remove(IEnumerable<TModel> datas, ActivationOptions activationOption = null)
+        /// <param name="activationOptions">Activation options</param>
+        public sealed override void Remove(IEnumerable<TModel> datas, ActivationOptions activationOptions = null)
         {
             if (datas.IsNullOrEmpty())
             {
@@ -117,13 +117,13 @@ namespace EZNEW.Develop.Domain.Repository
                 {
                     throw new EZNEWException($"Data:{data.IdentityValue} cann't to be remove");
                 }
-                var record = ExecuteRemove(data, activationOption);//Execute remove
+                var record = ExecuteRemove(data, activationOptions);//Execute remove
                 if (record != null)
                 {
                     records.Add(record);
                 }
             }
-            RepositoryEventBus.PublishRemove(GetType(), datas, activationOption);
+            RepositoryEventBus.PublishRemove(GetType(), datas, activationOptions);
             WorkManager.RegisterActivationRecord(records);
         }
 
@@ -135,14 +135,14 @@ namespace EZNEW.Develop.Domain.Repository
         /// Remove by condition
         /// </summary>
         /// <param name="query">Query object</param>
-        /// <param name="activationOption">Activation option</param>
-        public sealed override void Remove(IQuery query, ActivationOptions activationOption = null)
+        /// <param name="activationOptions">Activation options</param>
+        public sealed override void Remove(IQuery query, ActivationOptions activationOptions = null)
         {
             var newQuery = RepositoryManager.HandleQueryObjectBeforeExecute(query, QueryUsageScene.Remove, AppendRemoveCondition);
-            var record = ExecuteRemove(newQuery, activationOption);
+            var record = ExecuteRemove(newQuery, activationOptions);
             if (record != null)
             {
-                RepositoryEventBus.PublishRemove<TModel>(GetType(), newQuery, activationOption);
+                RepositoryEventBus.PublishRemove<TModel>(GetType(), newQuery, activationOptions);
                 WorkManager.RegisterActivationRecord(record);
                 RepositoryManager.HandleQueryObjectAfterExecute(query, newQuery, QueryUsageScene.Remove);
             }
@@ -157,14 +157,14 @@ namespace EZNEW.Develop.Domain.Repository
         /// </summary>
         /// <param name="expression">Modify expression</param>
         /// <param name="query">Query object</param>
-        /// <param name="activationOption">Activation option</param>
-        public sealed override void Modify(IModify expression, IQuery query, ActivationOptions activationOption = null)
+        /// <param name="activationOptions">Activation options</param>
+        public sealed override void Modify(IModify expression, IQuery query, ActivationOptions activationOptions = null)
         {
             var newQuery = RepositoryManager.HandleQueryObjectBeforeExecute(query, QueryUsageScene.Modify, AppendModifyCondition);
-            var record = ExecuteModify(expression, newQuery, activationOption);
+            var record = ExecuteModify(expression, newQuery, activationOptions);
             if (record != null)
             {
-                RepositoryEventBus.PublishModify<TModel>(GetType(), expression, newQuery, activationOption);
+                RepositoryEventBus.PublishModify<TModel>(GetType(), expression, newQuery, activationOptions);
                 WorkManager.RegisterActivationRecord(record);
                 RepositoryManager.HandleQueryObjectAfterExecute(query, newQuery, QueryUsageScene.Modify);
             }
@@ -480,25 +480,25 @@ namespace EZNEW.Develop.Domain.Repository
         /// Execute save
         /// </summary>
         /// <param name="data">Data</param>
-        /// <param name="activationOption">Activation option</param>
+        /// <param name="activationOptions">Activation options</param>
         /// <returns>Return activation record</returns>
-        protected abstract IActivationRecord ExecuteSave(TModel data, ActivationOptions activationOption = null);
+        protected abstract IActivationRecord ExecuteSave(TModel data, ActivationOptions activationOptions = null);
 
         /// <summary>
         /// Execute remove
         /// </summary>
         /// <param name="data">Data</param>
-        /// <param name="activationOption">Activation option</param>
+        /// <param name="activationOptions">Activation options</param>
         /// <returns>Return activation record</returns>
-        protected abstract IActivationRecord ExecuteRemove(TModel data, ActivationOptions activationOption = null);
+        protected abstract IActivationRecord ExecuteRemove(TModel data, ActivationOptions activationOptions = null);
 
         /// <summary>
         /// Execute Remove by condition
         /// </summary>
         /// <param name="query">Query object</param>
-        /// <param name="activationOption">Activation option</param>
+        /// <param name="activationOptions">Activation options</param>
         /// <returns>Return activation record</returns>
-        protected abstract IActivationRecord ExecuteRemove(IQuery query, ActivationOptions activationOption = null);
+        protected abstract IActivationRecord ExecuteRemove(IQuery query, ActivationOptions activationOptions = null);
 
         /// <summary>
         /// Get data
@@ -579,9 +579,9 @@ namespace EZNEW.Develop.Domain.Repository
         /// </summary>
         /// <param name="expression">Modify expression</param>
         /// <param name="query">Query object</param>
-        /// <param name="activationOption">Activation option</param>
+        /// <param name="activationOptions">Activation options</param>
         /// <returns>Return activation record</returns>
-        protected abstract IActivationRecord ExecuteModify(IModify expression, IQuery query, ActivationOptions activationOption = null);
+        protected abstract IActivationRecord ExecuteModify(IModify expression, IQuery query, ActivationOptions activationOptions = null);
 
         /// <summary>
         /// Query callback

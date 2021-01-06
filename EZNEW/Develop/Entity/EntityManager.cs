@@ -55,7 +55,7 @@ namespace EZNEW.Develop.Entity
         /// </summary>
         /// <param name="entityTypeId">Entity type id</param>
         /// <returns>Return entity configuration</returns>
-        internal static EntityConfiguration GetEntityConfiguration(Guid entityTypeId)
+        public static EntityConfiguration GetEntityConfiguration(Guid entityTypeId)
         {
             return ConfigurationManager.Entity.GetEntityConfiguration(entityTypeId);
         }

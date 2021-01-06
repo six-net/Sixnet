@@ -39,15 +39,15 @@ namespace EZNEW.Develop.Domain.Repository
         /// Save
         /// </summary>
         /// <param name="datas">Datas</param>
-        /// <param name="activationOption">Activation option</param>
-        public sealed override void Save(IEnumerable<Tuple<TFirstModel, TSecondModel, TThirdModel>> datas, ActivationOptions activationOption = null)
+        /// <param name="activationOptions">Activation options</param>
+        public sealed override void Save(IEnumerable<Tuple<TFirstModel, TSecondModel, TThirdModel>> datas, ActivationOptions activationOptions = null)
         {
-            var records = ExecuteSave(datas, activationOption);
+            var records = ExecuteSave(datas, activationOptions);
             if (records.IsNullOrEmpty())
             {
                 return;
             }
-            RepositoryEventBus.PublishSave(GetType(), datas, activationOption);
+            RepositoryEventBus.PublishSave(GetType(), datas, activationOptions);
             WorkManager.RegisterActivationRecord(records);
         }
 
@@ -55,15 +55,15 @@ namespace EZNEW.Develop.Domain.Repository
         /// Save by first type datas
         /// </summary>
         /// <param name="datas">Datas</param>
-        /// <param name="activationOption">Activation option</param>
-        public sealed override void SaveByFirst(IEnumerable<TFirstModel> datas, ActivationOptions activationOption = null)
+        /// <param name="activationOptions">Activation options</param>
+        public sealed override void SaveByFirst(IEnumerable<TFirstModel> datas, ActivationOptions activationOptions = null)
         {
-            var saveRecords = ExecuteSaveByFirst(datas, activationOption);
+            var saveRecords = ExecuteSaveByFirst(datas, activationOptions);
             if (saveRecords.IsNullOrEmpty())
             {
                 return;
             }
-            RepositoryEventBus.PublishSave(GetType(), datas, activationOption);
+            RepositoryEventBus.PublishSave(GetType(), datas, activationOptions);
             WorkManager.RegisterActivationRecord(saveRecords);
         }
 
@@ -71,15 +71,15 @@ namespace EZNEW.Develop.Domain.Repository
         /// Save by second type datas
         /// </summary>
         /// <param name="datas">Datas</param>
-        /// <param name="activationOption">Activation option</param>
-        public sealed override void SaveBySecond(IEnumerable<TSecondModel> datas, ActivationOptions activationOption = null)
+        /// <param name="activationOptions">Activation options</param>
+        public sealed override void SaveBySecond(IEnumerable<TSecondModel> datas, ActivationOptions activationOptions = null)
         {
-            var saveRecords = ExecuteSaveBySecond(datas, activationOption);
+            var saveRecords = ExecuteSaveBySecond(datas, activationOptions);
             if (saveRecords.IsNullOrEmpty())
             {
                 return;
             }
-            RepositoryEventBus.PublishSave(GetType(), datas, activationOption);
+            RepositoryEventBus.PublishSave(GetType(), datas, activationOptions);
             WorkManager.RegisterActivationRecord(saveRecords);
         }
 
@@ -87,15 +87,15 @@ namespace EZNEW.Develop.Domain.Repository
         /// Save by third datas
         /// </summary>
         /// <param name="datas">Datas</param>
-        /// <param name="activationOption">Activation option</param>
-        public sealed override void SaveByThird(IEnumerable<TThirdModel> datas, ActivationOptions activationOption = null)
+        /// <param name="activationOptions">Activation options</param>
+        public sealed override void SaveByThird(IEnumerable<TThirdModel> datas, ActivationOptions activationOptions = null)
         {
-            var saveRecords = ExecuteSaveByThird(datas, activationOption);
+            var saveRecords = ExecuteSaveByThird(datas, activationOptions);
             if (saveRecords.IsNullOrEmpty())
             {
                 return;
             }
-            RepositoryEventBus.PublishSave(GetType(), datas, activationOption);
+            RepositoryEventBus.PublishSave(GetType(), datas, activationOptions);
             WorkManager.RegisterActivationRecord(saveRecords);
         }
 
@@ -107,15 +107,15 @@ namespace EZNEW.Develop.Domain.Repository
         /// Save async
         /// </summary>
         /// <param name="datas">Datas</param>
-        /// <param name="activationOption">Activation option</param>
-        public sealed override void Remove(IEnumerable<Tuple<TFirstModel, TSecondModel, TThirdModel>> datas, ActivationOptions activationOption = null)
+        /// <param name="activationOptions">Activation options</param>
+        public sealed override void Remove(IEnumerable<Tuple<TFirstModel, TSecondModel, TThirdModel>> datas, ActivationOptions activationOptions = null)
         {
-            var records = ExecuteRemove(datas, activationOption);
+            var records = ExecuteRemove(datas, activationOptions);
             if (records.IsNullOrEmpty())
             {
                 return;
             }
-            RepositoryEventBus.PublishRemove(GetType(), datas, activationOption);
+            RepositoryEventBus.PublishRemove(GetType(), datas, activationOptions);
             WorkManager.RegisterActivationRecord(records);
         }
 
@@ -123,16 +123,16 @@ namespace EZNEW.Develop.Domain.Repository
         /// Remove by condition
         /// </summary>
         /// <param name="query">Query object</param>
-        /// <param name="activationOption">Activation option</param>
-        public sealed override void Remove(IQuery query, ActivationOptions activationOption = null)
+        /// <param name="activationOptions">Activation options</param>
+        public sealed override void Remove(IQuery query, ActivationOptions activationOptions = null)
         {
             var newQuery = RepositoryManager.HandleQueryObjectBeforeExecute(query, QueryUsageScene.Remove, AppendRemoveCondition);
-            var record = ExecuteRemove(newQuery, activationOption);
+            var record = ExecuteRemove(newQuery, activationOptions);
             if (record == null)
             {
                 return;
             }
-            RepositoryEventBus.PublishRemove<Tuple<TFirstModel, TSecondModel, TThirdModel>>(GetType(), newQuery, activationOption);
+            RepositoryEventBus.PublishRemove<Tuple<TFirstModel, TSecondModel, TThirdModel>>(GetType(), newQuery, activationOptions);
             WorkManager.RegisterActivationRecord(record);
             RepositoryManager.HandleQueryObjectAfterExecute(query, newQuery, QueryUsageScene.Remove);
         }
@@ -141,78 +141,78 @@ namespace EZNEW.Develop.Domain.Repository
         /// Remove by first datas
         /// </summary>
         /// <param name="datas">Datas</param>
-        /// <param name="activationOption">Activation option</param>
-        public sealed override void RemoveByFirst(IEnumerable<TFirstModel> datas, ActivationOptions activationOption = null)
+        /// <param name="activationOptions">Activation options</param>
+        public sealed override void RemoveByFirst(IEnumerable<TFirstModel> datas, ActivationOptions activationOptions = null)
         {
             if (datas.IsNullOrEmpty())
             {
                 return;
             }
             var query = CreateQueryByFirst(datas);
-            Remove(query, activationOption);
+            Remove(query, activationOptions);
         }
 
         /// <summary>
         /// Remove by first
         /// </summary>
         /// <param name="query">Query object</param>
-        /// <param name="activationOption">Activation option</param>
-        public sealed override void RemoveByFirst(IQuery query, ActivationOptions activationOption = null)
+        /// <param name="activationOptions">Activation options</param>
+        public sealed override void RemoveByFirst(IQuery query, ActivationOptions activationOptions = null)
         {
             var removeQuery = CreateQueryByFirst(query);
-            Remove(removeQuery, activationOption);
+            Remove(removeQuery, activationOptions);
         }
 
         /// <summary>
         /// Remove by second datas
         /// </summary>
         /// <param name="datas">Datas</param>
-        /// <param name="activationOption">Activation option</param>
-        public sealed override void RemoveBySecond(IEnumerable<TSecondModel> datas, ActivationOptions activationOption = null)
+        /// <param name="activationOptions">Activation options</param>
+        public sealed override void RemoveBySecond(IEnumerable<TSecondModel> datas, ActivationOptions activationOptions = null)
         {
             if (datas.IsNullOrEmpty())
             {
                 return;
             }
             var query = CreateQueryBySecond(datas);
-            Remove(query, activationOption);
+            Remove(query, activationOptions);
         }
 
         /// <summary>
         /// Remove by first
         /// </summary>
         /// <param name="query">Query object</param>
-        /// <param name="activationOption">Activation option</param>
-        public sealed override void RemoveBySecond(IQuery query, ActivationOptions activationOption = null)
+        /// <param name="activationOptions">Activation options</param>
+        public sealed override void RemoveBySecond(IQuery query, ActivationOptions activationOptions = null)
         {
             var removeQuery = CreateQueryBySecond(query);
-            Remove(removeQuery, activationOption);
+            Remove(removeQuery, activationOptions);
         }
 
         /// <summary>
         /// Remove by third datas
         /// </summary>
         /// <param name="datas">Datas</param>
-        /// <param name="activationOption">Activation option</param>
-        public sealed override void RemoveByThird(IEnumerable<TThirdModel> datas, ActivationOptions activationOption = null)
+        /// <param name="activationOptions">Activation options</param>
+        public sealed override void RemoveByThird(IEnumerable<TThirdModel> datas, ActivationOptions activationOptions = null)
         {
             if (datas.IsNullOrEmpty())
             {
                 return;
             }
             var query = CreateQueryByThird(datas);
-            Remove(query, activationOption);
+            Remove(query, activationOptions);
         }
 
         /// <summary>
         /// Remove by third
         /// </summary>
         /// <param name="query">Query object</param>
-        /// <param name="activationOption">Activation option</param>
-        public sealed override void RemoveByThird(IQuery query, ActivationOptions activationOption = null)
+        /// <param name="activationOptions">Activation options</param>
+        public sealed override void RemoveByThird(IQuery query, ActivationOptions activationOptions = null)
         {
             var removeQuery = CreateQueryByThird(query);
-            Remove(removeQuery, activationOption);
+            Remove(removeQuery, activationOptions);
         }
 
         #endregion
@@ -452,9 +452,9 @@ namespace EZNEW.Develop.Domain.Repository
         /// Execute save
         /// </summary>
         /// <param name="datas">Datas</param>
-        /// <param name="activationOption">Activation option</param>
+        /// <param name="activationOptions">Activation options</param>
         /// <returns>Return activation records</returns>
-        public virtual List<IActivationRecord> ExecuteSave(IEnumerable<Tuple<TFirstModel, TSecondModel, TThirdModel>> datas, ActivationOptions activationOption = null)
+        public virtual List<IActivationRecord> ExecuteSave(IEnumerable<Tuple<TFirstModel, TSecondModel, TThirdModel>> datas, ActivationOptions activationOptions = null)
         {
             if (datas.IsNullOrEmpty())
             {
@@ -464,7 +464,7 @@ namespace EZNEW.Develop.Domain.Repository
             List<IActivationRecord> records = new List<IActivationRecord>(entitys.Count);
             foreach (var entity in entitys)
             {
-                records.Add(repositoryWarehouse.Save(entity, activationOption));
+                records.Add(repositoryWarehouse.Save(entity, activationOptions));
             }
             return records;
         }
@@ -473,9 +473,9 @@ namespace EZNEW.Develop.Domain.Repository
         /// Execute save by first datas
         /// </summary>
         /// <param name="datas">Datas</param>
-        /// <param name="activationOption">Activation option</param>
+        /// <param name="activationOptions">Activation options</param>
         /// <returns>Return activation records</returns>
-        public virtual List<IActivationRecord> ExecuteSaveByFirst(IEnumerable<TFirstModel> datas, ActivationOptions activationOption = null)
+        public virtual List<IActivationRecord> ExecuteSaveByFirst(IEnumerable<TFirstModel> datas, ActivationOptions activationOptions = null)
         {
             if (datas.IsNullOrEmpty())
             {
@@ -485,7 +485,7 @@ namespace EZNEW.Develop.Domain.Repository
             List<IActivationRecord> records = new List<IActivationRecord>(entitys.Count);
             foreach (var entity in entitys)
             {
-                records.Add(repositoryWarehouse.Save(entity, activationOption));
+                records.Add(repositoryWarehouse.Save(entity, activationOptions));
             }
             return records;
         }
@@ -494,9 +494,9 @@ namespace EZNEW.Develop.Domain.Repository
         /// Execute save by second datas
         /// </summary>
         /// <param name="datas">Datas</param>
-        /// <param name="activationOption">Activation option</param>
+        /// <param name="activationOptions">Activation options</param>
         /// <returns>Return activation record</returns>
-        public virtual List<IActivationRecord> ExecuteSaveBySecond(IEnumerable<TSecondModel> datas, ActivationOptions activationOption = null)
+        public virtual List<IActivationRecord> ExecuteSaveBySecond(IEnumerable<TSecondModel> datas, ActivationOptions activationOptions = null)
         {
             if (datas.IsNullOrEmpty())
             {
@@ -506,7 +506,7 @@ namespace EZNEW.Develop.Domain.Repository
             List<IActivationRecord> records = new List<IActivationRecord>(entitys.Count);
             foreach (var entity in entitys)
             {
-                records.Add(repositoryWarehouse.Save(entity, activationOption));
+                records.Add(repositoryWarehouse.Save(entity, activationOptions));
             }
             return records;
         }
@@ -515,9 +515,9 @@ namespace EZNEW.Develop.Domain.Repository
         /// Execute save by third datas
         /// </summary>
         /// <param name="datas">Datas</param>
-        /// <param name="activationOption">Activation option</param>
+        /// <param name="activationOptions">Activation options</param>
         /// <returns>Return activation records</returns>
-        public virtual List<IActivationRecord> ExecuteSaveByThird(IEnumerable<TThirdModel> datas, ActivationOptions activationOption = null)
+        public virtual List<IActivationRecord> ExecuteSaveByThird(IEnumerable<TThirdModel> datas, ActivationOptions activationOptions = null)
         {
             if (datas.IsNullOrEmpty())
             {
@@ -527,7 +527,7 @@ namespace EZNEW.Develop.Domain.Repository
             List<IActivationRecord> records = new List<IActivationRecord>(entitys.Count);
             foreach (var entity in entitys)
             {
-                records.Add(repositoryWarehouse.Save(entity, activationOption));
+                records.Add(repositoryWarehouse.Save(entity, activationOptions));
             }
             return records;
         }
@@ -536,9 +536,9 @@ namespace EZNEW.Develop.Domain.Repository
         /// execute Remove
         /// </summary>
         /// <param name="datas">Datas</param>
-        /// <param name="activationOption">Activation option</param>
+        /// <param name="activationOptions">Activation options</param>
         /// <returns>Return activation records</returns>
-        public virtual List<IActivationRecord> ExecuteRemove(IEnumerable<Tuple<TFirstModel, TSecondModel, TThirdModel>> datas, ActivationOptions activationOption = null)
+        public virtual List<IActivationRecord> ExecuteRemove(IEnumerable<Tuple<TFirstModel, TSecondModel, TThirdModel>> datas, ActivationOptions activationOptions = null)
         {
             if (datas.IsNullOrEmpty())
             {
@@ -548,7 +548,7 @@ namespace EZNEW.Develop.Domain.Repository
             List<IActivationRecord> records = new List<IActivationRecord>(entitys.Count);
             foreach (var entity in entitys)
             {
-                records.Add(repositoryWarehouse.Remove(entity, activationOption));
+                records.Add(repositoryWarehouse.Remove(entity, activationOptions));
             }
             return records;
         }
@@ -557,11 +557,11 @@ namespace EZNEW.Develop.Domain.Repository
         /// execute Remove
         /// </summary>
         /// <param name="query">Query object</param>
-        /// <param name="activationOption">Activation option</param>
+        /// <param name="activationOptions">Activation options</param>
         /// <returns>Return activation record</returns>
-        public virtual IActivationRecord ExecuteRemove(IQuery query, ActivationOptions activationOption = null)
+        public virtual IActivationRecord ExecuteRemove(IQuery query, ActivationOptions activationOptions = null)
         {
-            return repositoryWarehouse.Remove(query, activationOption);
+            return repositoryWarehouse.Remove(query, activationOptions);
         }
 
         /// <summary>

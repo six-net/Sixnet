@@ -69,39 +69,39 @@ namespace EZNEW.Develop.Domain.Repository
         /// Execute save
         /// </summary>
         /// <param name="data">Data</param>
-        /// <param name="activationOption">Activation option</param>
+        /// <param name="activationOptions">Activation options</param>
         /// <returns>Return activation record</returns>
-        protected override IActivationRecord ExecuteSave(TModel data, ActivationOptions activationOption = null)
+        protected override IActivationRecord ExecuteSave(TModel data, ActivationOptions activationOptions = null)
         {
             var entity = data?.MapTo<TEntity>();
-            return ExecuteSaveEntity(entity, activationOption);
+            return ExecuteSaveEntity(entity, activationOptions);
         }
 
         /// <summary>
         /// Execute Remove
         /// </summary>
         /// <param name="data">Data</param>
-        /// <param name="activationOption">Activation option</param>
+        /// <param name="activationOptions">Activation options</param>
         /// <returns>Return activation record</returns>
-        protected override IActivationRecord ExecuteRemove(TModel data, ActivationOptions activationOption = null)
+        protected override IActivationRecord ExecuteRemove(TModel data, ActivationOptions activationOptions = null)
         {
             if (data == null)
             {
                 return null;
             }
             var entity = data.MapTo<TEntity>();
-            return ExecuteRemoveEntity(entity, activationOption);
+            return ExecuteRemoveEntity(entity, activationOptions);
         }
 
         /// <summary>
         /// Execute Remove
         /// </summary>
         /// <param name="query">Query object</param>
-        /// <param name="activationOption">Activation option</param>
+        /// <param name="activationOptions">Activation options</param>
         /// <returns>Return actionvaton record</returns>
-        protected override IActivationRecord ExecuteRemove(IQuery query, ActivationOptions activationOption = null)
+        protected override IActivationRecord ExecuteRemove(IQuery query, ActivationOptions activationOptions = null)
         {
-            return repositoryWarehouse.Remove(query, activationOption);
+            return repositoryWarehouse.Remove(query, activationOptions);
         }
 
         /// <summary>
@@ -233,44 +233,44 @@ namespace EZNEW.Develop.Domain.Repository
         /// </summary>
         /// <param name="expression">Modify expression</param>
         /// <param name="query">Query object</param>
-        /// <param name="activationOption">Activation option</param>
+        /// <param name="activationOptions">Activation options</param>
         /// <returns>Return activation record</returns>
-        protected override IActivationRecord ExecuteModify(IModify expression, IQuery query, ActivationOptions activationOption = null)
+        protected override IActivationRecord ExecuteModify(IModify expression, IQuery query, ActivationOptions activationOptions = null)
         {
-            return repositoryWarehouse.Modify(expression, query, activationOption);
+            return repositoryWarehouse.Modify(expression, query, activationOptions);
         }
 
         /// <summary>
         /// Execute save entity
         /// </summary>
         /// <param name="datas">Datas</param>
-        /// <param name="activationOption">Activation option</param>
+        /// <param name="activationOptions">Activation options</param>
         /// <returns>Return activation record</returns>
-        protected virtual IActivationRecord ExecuteSaveEntity(IEnumerable<TEntity> datas, ActivationOptions activationOption = null)
+        protected virtual IActivationRecord ExecuteSaveEntity(IEnumerable<TEntity> datas, ActivationOptions activationOptions = null)
         {
-            return repositoryWarehouse.Save(datas, activationOption);
+            return repositoryWarehouse.Save(datas, activationOptions);
         }
 
         /// <summary>
         /// Execute save entity
         /// </summary>
         /// <param name="data">Data</param>
-        /// <param name="activationOption">Activation option</param>
+        /// <param name="activationOptions">Activation options</param>
         /// <returns>Return activation record</returns>
-        protected virtual IActivationRecord ExecuteSaveEntity(TEntity data, ActivationOptions activationOption = null)
+        protected virtual IActivationRecord ExecuteSaveEntity(TEntity data, ActivationOptions activationOptions = null)
         {
-            return repositoryWarehouse.Save(data, activationOption);
+            return repositoryWarehouse.Save(data, activationOptions);
         }
 
         /// <summary>
         /// Save entity
         /// </summary>
         /// <param name="datas">Datas</param>
-        /// <param name="activationOption">Activation option</param>
+        /// <param name="activationOptions">Activation options</param>
         /// <returns></returns>
-        protected virtual void SaveEntity(IEnumerable<TEntity> datas, ActivationOptions activationOption = null)
+        protected virtual void SaveEntity(IEnumerable<TEntity> datas, ActivationOptions activationOptions = null)
         {
-            var record = ExecuteSaveEntity(datas, activationOption);
+            var record = ExecuteSaveEntity(datas, activationOptions);
             if (record != null)
             {
                 WorkManager.RegisterActivationRecord(record);
@@ -281,33 +281,33 @@ namespace EZNEW.Develop.Domain.Repository
         /// Execute remove entitys
         /// </summary>
         /// <param name="datas">Datas</param>
-        /// <param name="activationOption">Activation option</param>
+        /// <param name="activationOptions">Activation options</param>
         /// <returns>Return activation record</returns>
-        protected virtual IActivationRecord ExecuteRemoveEntity(IEnumerable<TEntity> datas, ActivationOptions activationOption = null)
+        protected virtual IActivationRecord ExecuteRemoveEntity(IEnumerable<TEntity> datas, ActivationOptions activationOptions = null)
         {
-            return repositoryWarehouse.Remove(datas, activationOption);
+            return repositoryWarehouse.Remove(datas, activationOptions);
         }
 
         /// <summary>
         /// Execute remove entity
         /// </summary>
         /// <param name="data">Data</param>
-        /// <param name="activationOption">Activation option</param>
+        /// <param name="activationOptions">Activation options</param>
         /// <returns>Return activation record</returns>
-        protected virtual IActivationRecord ExecuteRemoveEntity(TEntity data, ActivationOptions activationOption = null)
+        protected virtual IActivationRecord ExecuteRemoveEntity(TEntity data, ActivationOptions activationOptions = null)
         {
-            return repositoryWarehouse.Remove(data, activationOption);
+            return repositoryWarehouse.Remove(data, activationOptions);
         }
 
         /// <summary>
         /// Remove entitys
         /// </summary>
         /// <param name="datas">Datas</param>
-        /// <param name="activationOption">Activation option</param>
+        /// <param name="activationOptions">Activation options</param>
         /// <returns></returns>
-        protected virtual void RemoveEntity(IEnumerable<TEntity> datas, ActivationOptions activationOption = null)
+        protected virtual void RemoveEntity(IEnumerable<TEntity> datas, ActivationOptions activationOptions = null)
         {
-            var record = ExecuteRemoveEntity(datas, activationOption);
+            var record = ExecuteRemoveEntity(datas, activationOptions);
             if (record != null)
             {
                 WorkManager.RegisterActivationRecord(record);

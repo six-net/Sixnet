@@ -45,7 +45,7 @@ namespace EZNEW.Configuration
                 {
                     return;
                 }
-                var entityAttribute = (entityType.GetCustomAttributes(typeof(EntityAttribute), false)?.FirstOrDefault()) as EntityAttribute;
+                EntityAttribute entityAttribute = (entityType.GetCustomAttributes(typeof(EntityAttribute), false)?.FirstOrDefault()) as EntityAttribute;
                 if (entityAttribute == null)
                 {
                     return;
@@ -56,6 +56,7 @@ namespace EZNEW.Configuration
                 {
                     entityConfig = new EntityConfiguration();
                 }
+                entityConfig.Structure = entityAttribute.Structure;
                 //table name
                 if (string.IsNullOrWhiteSpace(entityConfig.TableName))
                 {
@@ -80,20 +81,26 @@ namespace EZNEW.Configuration
                 foreach (var property in propertys)
                 {
                     var fieldName = property.Name;
+                    var fieldRole = FieldRole.None;
                     var propertyName = fieldName;
                     EntityFieldAttribute entityFieldAttribute = (property.GetCustomAttributes(typeof(EntityFieldAttribute), false)?.FirstOrDefault()) as EntityFieldAttribute;
+                    fieldRole = entityFieldAttribute?.Role ?? FieldRole.None;
                     fieldName = entityFieldAttribute?.Name ?? fieldName;
                     var propertyField = new EntityField()
                     {
                         FieldName = fieldName,
                         PropertyName = propertyName,
                         QueryFormat = entityFieldAttribute?.QueryFormat ?? string.Empty,
-                        CacheOption = entityFieldAttribute?.CacheOption ?? EntityFieldCacheOption.None,
+                        CacheRole = entityFieldAttribute?.CacheRole ?? FieldCacheRole.None,
                         IsDisableEdit = entityFieldAttribute?.DisableEdit ?? false,
                         IsDisableQuery = entityFieldAttribute?.DisableQuery ?? false,
-                        IsPrimaryKey = entityFieldAttribute?.PrimaryKey ?? false,
-                        IsRefreshDate = entityFieldAttribute?.RefreshDate ?? false,
-                        IsVersion = entityFieldAttribute?.IsVersion ?? false,
+                        IsPrimaryKey = (fieldRole & FieldRole.PrimaryKey) != 0,
+                        IsRefreshDate = (fieldRole & FieldRole.RefreshDate) != 0,
+                        IsVersion = (fieldRole & FieldRole.Version) != 0,
+                        IsLevel = (fieldRole & FieldRole.Level) != 0,
+                        IsSort = (fieldRole & FieldRole.Sort) != 0,
+                        IsParent = (fieldRole & FieldRole.Parent) != 0,
+                        IsDisplayName = (fieldRole & FieldRole.Display) != 0,
                         DataType = property.PropertyType,
                         DbTypeName = entityFieldAttribute.DbTypeName,
                         MaxLength = entityFieldAttribute.MaxLength,
@@ -108,15 +115,15 @@ namespace EZNEW.Configuration
                     }
                     else
                     {
-                        if ((propertyField.CacheOption & EntityFieldCacheOption.CacheKey) != 0)
+                        if ((propertyField.CacheRole & FieldCacheRole.CacheKey) != 0)
                         {
                             cacheKeys.Add(propertyName);
                         }
-                        if ((propertyField.CacheOption & EntityFieldCacheOption.CacheKeyPrefix) != 0)
+                        if ((propertyField.CacheRole & FieldCacheRole.CacheKeyPrefix) != 0)
                         {
                             cachePrefixKeys.Add(propertyName);
                         }
-                        if ((propertyField.CacheOption & EntityFieldCacheOption.Ignore) != 0)
+                        if ((propertyField.CacheRole & FieldCacheRole.Ignore) != 0)
                         {
                             cacheIgnoreKeys.Add(propertyName);
                         }

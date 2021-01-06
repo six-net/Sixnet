@@ -56,29 +56,29 @@ namespace EZNEW.Develop.Domain.Repository
         /// Remove by first datas
         /// </summary>
         /// <param name="datas">Datas</param>
-        /// <param name="activationOption">Activation option</param>
-        public abstract void RemoveByFirst(IEnumerable<TFirstRelationModel> datas, ActivationOptions activationOption = null);
+        /// <param name="activationOptions">Activation options</param>
+        public abstract void RemoveByFirst(IEnumerable<TFirstRelationModel> datas, ActivationOptions activationOptions = null);
 
         /// <summary>
         /// Remove by second datas
         /// </summary>
         /// <param name="datas">Datas</param>
-        /// <param name="activationOption">Activation option</param>
-        public abstract void RemoveBySecond(IEnumerable<TSecondRelationModel> datas, ActivationOptions activationOption = null);
+        /// <param name="activationOptions">Activation options</param>
+        public abstract void RemoveBySecond(IEnumerable<TSecondRelationModel> datas, ActivationOptions activationOptions = null);
 
         /// <summary>
         /// Remove by first
         /// </summary>
         /// <param name="query">Query object</param>
-        /// <param name="activationOption">Activation option</param>
-        public abstract void RemoveByFirst(IQuery query, ActivationOptions activationOption = null);
+        /// <param name="activationOptions">Activation options</param>
+        public abstract void RemoveByFirst(IQuery query, ActivationOptions activationOptions = null);
 
         /// <summary>
         /// Remove by second
         /// </summary>
         /// <param name="query">Query object</param>
-        /// <param name="activationOption">Activation option</param>
-        public abstract void RemoveBySecond(IQuery query, ActivationOptions activationOption = null);
+        /// <param name="activationOptions">Activation options</param>
+        public abstract void RemoveBySecond(IQuery query, ActivationOptions activationOptions = null);
 
         #endregion
     }

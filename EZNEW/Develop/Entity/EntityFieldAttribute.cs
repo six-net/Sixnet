@@ -18,15 +18,15 @@ namespace EZNEW.Develop.Entity
         /// </summary>
         public string Description { get; set; }
 
-        /// <summary>
-        /// Gets or sets whether the field is primary key
-        /// </summary>
-        public bool PrimaryKey { get; set; }
+        ///// <summary>
+        ///// Gets or sets whether the field is primary key
+        ///// </summary>
+        //public bool PrimaryKey { get; set; }
 
         /// <summary>
-        /// Gets or sets the cache option
+        /// Gets or sets the cache role
         /// </summary>
-        public EntityFieldCacheOption CacheOption { get; set; } = EntityFieldCacheOption.None;
+        public FieldCacheRole CacheRole { get; set; } = FieldCacheRole.None;
 
         /// <summary>
         /// Gets or sets whether disable the field in query
@@ -38,15 +38,15 @@ namespace EZNEW.Develop.Entity
         /// </summary>
         public bool DisableEdit { get; set; }
 
-        /// <summary>
-        /// Gets or sets whether the field is version field
-        /// </summary>
-        public bool IsVersion { get; set; }
+        ///// <summary>
+        ///// Gets or sets whether the field is version field
+        ///// </summary>
+        //public bool IsVersion { get; set; }
 
-        /// <summary>
-        /// Gets or sets whether the field is refresh date field
-        /// </summary>
-        public bool RefreshDate { get; set; }
+        ///// <summary>
+        ///// Gets or sets whether the field is refresh date field
+        ///// </summary>
+        //public bool RefreshDate { get; set; }
 
         /// <summary>
         /// Gets or sets the database type name
@@ -72,5 +72,10 @@ namespace EZNEW.Develop.Entity
         /// Gets or sets the query format
         /// </summary>
         public string QueryFormat { get; set; }
+
+        /// <summary>
+        /// Gets or sets the field role
+        /// </summary>
+        public FieldRole Role { get; set; } = FieldRole.None;
     }
 }

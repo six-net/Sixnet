@@ -89,5 +89,10 @@ namespace EZNEW.Develop.Entity
         /// Gets or sets the predicate type
         /// </summary>
         public Type PredicateType { get; set; }
+
+        /// <summary>
+        /// Gets or sets the entity structure
+        /// </summary>
+        public EntityStructure Structure { get; set; } = EntityStructure.Normal;
     }
 }

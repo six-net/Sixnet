@@ -20,17 +20,17 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// Save datas
         /// </summary>
         /// <param name="datas">Datas</param>
-        /// <param name="activationOption">Activation option</param>
+        /// <param name="activationOptions">Activation options</param>
         /// <returns>Return the activation record</returns>
-        IActivationRecord Save(IEnumerable<TEntity> datas, ActivationOptions activationOption = null);
+        IActivationRecord Save(IEnumerable<TEntity> datas, ActivationOptions activationOptions = null);
 
         /// <summary>
         /// Save data
         /// </summary>
         /// <param name="data">Data</param>
-        /// <param name="activationOption">Activation option</param>
+        /// <param name="activationOptions">Activation options</param>
         /// <returns>Return the activation record</returns>
-        IActivationRecord Save(TEntity data, ActivationOptions activationOption = null);
+        IActivationRecord Save(TEntity data, ActivationOptions activationOptions = null);
 
         #endregion
 
@@ -40,25 +40,25 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// Remove datas
         /// </summary>
         /// <param name="datas">Datas</param>
-        /// <param name="activationOption">Activation option</param>
+        /// <param name="activationOptions">Activation options</param>
         /// <returns>Return the activation record</returns>
-        IActivationRecord Remove(IEnumerable<TEntity> datas, ActivationOptions activationOption = null);
+        IActivationRecord Remove(IEnumerable<TEntity> datas, ActivationOptions activationOptions = null);
 
         /// <summary>
         /// Remove data
         /// </summary>
         /// <param name="data">Data</param>
-        /// <param name="activationOption">Activation option</param>
+        /// <param name="activationOptions">Activation options</param>
         /// <returns>Return the activation record</returns>
-        IActivationRecord Remove(TEntity data, ActivationOptions activationOption = null);
+        IActivationRecord Remove(TEntity data, ActivationOptions activationOptions = null);
 
         /// <summary>
         /// Remove by condition
         /// </summary>
         /// <param name="query">Query object</param>
-        /// <param name="activationOption">Activation option</param>
+        /// <param name="activationOptions">Activation options</param>
         /// <returns>Return the activation record</returns>
-        IActivationRecord Remove(IQuery query, ActivationOptions activationOption = null);
+        IActivationRecord Remove(IQuery query, ActivationOptions activationOptions = null);
 
         #endregion
 
@@ -69,9 +69,9 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// </summary>
         /// <param name="modifyExpression">Modify expression</param>
         /// <param name="query">Query object</param>
-        /// <param name="activationOption">Activation option</param>
+        /// <param name="activationOptions">Activation options</param>
         /// <returns>Return the activation record</returns>
-        IActivationRecord Modify(IModify modifyExpression, IQuery query, ActivationOptions activationOption = null);
+        IActivationRecord Modify(IModify modifyExpression, IQuery query, ActivationOptions activationOptions = null);
 
         #endregion
 

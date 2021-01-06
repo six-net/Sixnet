@@ -25,6 +25,11 @@ namespace EZNEW.Develop.Entity
         /// </summary>
         public string Group { get; set; }
 
+        /// <summary>
+        /// Gets or sets the entity structure
+        /// </summary>
+        public EntityStructure Structure { get; set; } = EntityStructure.Normal;
+
         #endregion
 
         /// <summary>

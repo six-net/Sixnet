@@ -10,6 +10,11 @@
         /// </summary>
         public static readonly ActivationOptions Default = new ActivationOptions();
 
+        public static readonly ActivationOptions ForceExecuteActivation = new ActivationOptions()
+        {
+            ForceExecute = true
+        };
+
         /// <summary>
         /// Gets or sets whether force execute the activation record
         /// </summary>

@@ -35,15 +35,15 @@ namespace EZNEW.Develop.Domain.Repository.Event
         /// Execute
         /// </summary>
         /// <param name="datas">datas</param>
-        /// <param name="activationOption">activation option</param>
+        /// <param name="activationOptions">activation option</param>
         /// <returns></returns>
-        public IRepositoryEventExecuteResult Execute(IEnumerable<T> datas, ActivationOptions activationOption = null)
+        public IRepositoryEventExecuteResult Execute(IEnumerable<T> datas, ActivationOptions activationOptions = null)
         {
             if (datas.IsNullOrEmpty() || Operation == null)
             {
                 return DataOperationEventExecuteResult.Empty;
             }
-            Operation(datas, activationOption);
+            Operation(datas, activationOptions);
             return DataOperationEventExecuteResult.Empty;
         }
     }

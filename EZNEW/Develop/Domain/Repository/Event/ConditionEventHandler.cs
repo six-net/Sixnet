@@ -34,15 +34,15 @@ namespace EZNEW.Develop.Domain.Repository.Event
         /// Execute
         /// </summary>
         /// <param name="query">Query object</param>
-        /// <param name="option">Activation option</param>
+        /// <param name="options">Activation options</param>
         /// <returns>Return repository event execute result</returns>
-        public IRepositoryEventExecuteResult Execute(IQuery query, ActivationOptions option = null)
+        public IRepositoryEventExecuteResult Execute(IQuery query, ActivationOptions options = null)
         {
             if (Operation == null)
             {
                 return DataOperationEventExecuteResult.Empty;
             }
-            Operation(query, option);
+            Operation(query, options);
             return DataOperationEventExecuteResult.Empty;
         }
     }

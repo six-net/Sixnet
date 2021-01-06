@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using System.Collections;
 using System.Threading;
 using EZNEW.Paging;
 using EZNEW.Develop.CQuery.CriteriaConverter;
-using EZNEW.Develop.Entity;
 using EZNEW.Develop.DataAccess;
-using EZNEW.Data;
-using EZNEW.Cache;
 
 namespace EZNEW.Develop.CQuery
 {

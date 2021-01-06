@@ -74,9 +74,9 @@ namespace EZNEW.Develop.UnitOfWork
         public string RecordIdentity { get; private set; }
 
         /// <summary>
-        /// Gets the activation option
+        /// Gets the activation options
         /// </summary>
-        public ActivationOptions ActivationOption { get; private set; }
+        public ActivationOptions ActivationOptions { get; private set; }
 
         private DefaultActivationRecord() { }
 
@@ -85,9 +85,9 @@ namespace EZNEW.Develop.UnitOfWork
         /// </summary>
         /// <param name="operation">Activation operation</param>
         /// <param name="identityValue">Object identity value</param>
-        /// <param name="activationOption">Activation option</param>
+        /// <param name="activationOptions">Activation options</param>
         /// <returns>Return a new default activation record</returns>
-        public static DefaultActivationRecord<TEntity, TDataAccess> CreateRecord(ActivationOperation operation, string identityValue, ActivationOptions activationOption)
+        public static DefaultActivationRecord<TEntity, TDataAccess> CreateRecord(ActivationOperation operation, string identityValue, ActivationOptions activationOptions)
         {
             var record = new DefaultActivationRecord<TEntity, TDataAccess>()
             {
@@ -96,9 +96,9 @@ namespace EZNEW.Develop.UnitOfWork
                 DataAccessService = typeof(TDataAccess),
                 EntityType = typeof(TEntity)
             };
-            activationOption ??= ActivationOptions.Default;
-            record.ActivationOption = activationOption;
-            if (activationOption.ForceExecute)
+            activationOptions ??= ActivationOptions.Default;
+            record.ActivationOptions = activationOptions;
+            if (activationOptions.ForceExecute)
             {
                 record.RecordIdentity = Guid.NewGuid().ToString();
             }
@@ -122,41 +122,41 @@ namespace EZNEW.Develop.UnitOfWork
         /// Create a save record
         /// </summary>
         /// <param name="identityValue">Identity values</param>
-        /// <param name="activationOption">Activation option</param>
+        /// <param name="activationOptions">Activation options</param>
         /// <returns>Return a new default activation record</returns>
-        public static DefaultActivationRecord<TEntity, TDataAccess> CreateSaveRecord(string identityValue, ActivationOptions activationOption)
+        public static DefaultActivationRecord<TEntity, TDataAccess> CreateSaveRecord(string identityValue, ActivationOptions activationOptions)
         {
             if (string.IsNullOrWhiteSpace(identityValue))
             {
                 throw new EZNEWException("IdentityValue is null or empty");
             }
-            return CreateRecord(ActivationOperation.SaveObject, identityValue, activationOption);
+            return CreateRecord(ActivationOperation.SaveObject, identityValue, activationOptions);
         }
 
         /// <summary>
         /// Create remove object record
         /// </summary>
         /// <param name="identityValue">Identity value</param>
-        /// <param name="activationOption">Activation option</param>
+        /// <param name="activationOptions">Activation options</param>
         /// <returns>Return a new default activation record</returns>
-        public static DefaultActivationRecord<TEntity, TDataAccess> CreateRemoveObjectRecord(string identityValue, ActivationOptions activationOption)
+        public static DefaultActivationRecord<TEntity, TDataAccess> CreateRemoveObjectRecord(string identityValue, ActivationOptions activationOptions)
         {
             if (string.IsNullOrWhiteSpace(identityValue))
             {
                 throw new EZNEWException("identityValue is null or empty");
             }
-            return CreateRecord(ActivationOperation.RemoveByObject, identityValue, activationOption);
+            return CreateRecord(ActivationOperation.RemoveByObject, identityValue, activationOptions);
         }
 
         /// <summary>
         /// Create remove by condition record
         /// </summary>
         /// <param name="query">Query object</param>
-        /// <param name="activationOption">Activation option</param>
+        /// <param name="activationOptions">Activation options</param>
         /// <returns>Return a new default activation record</returns>
-        public static DefaultActivationRecord<TEntity, TDataAccess> CreateRemoveByConditionRecord(IQuery query, ActivationOptions activationOption)
+        public static DefaultActivationRecord<TEntity, TDataAccess> CreateRemoveByConditionRecord(IQuery query, ActivationOptions activationOptions)
         {
-            var record = CreateRecord(ActivationOperation.RemoveByCondition, null, activationOption);
+            var record = CreateRecord(ActivationOperation.RemoveByCondition, null, activationOptions);
             record.Query = query;
             return record;
         }
@@ -166,11 +166,11 @@ namespace EZNEW.Develop.UnitOfWork
         /// </summary>
         /// <param name="modify">Modify expression</param>
         /// <param name="query">Query object</param>
-        /// <param name="activationOption">Activation option</param>
+        /// <param name="activationOptions">Activation options</param>
         /// <returns>Return a new default activation record</returns>
-        public static DefaultActivationRecord<TEntity, TDataAccess> CreateModifyRecord(IModify modify, IQuery query, ActivationOptions activationOption)
+        public static DefaultActivationRecord<TEntity, TDataAccess> CreateModifyRecord(IModify modify, IQuery query, ActivationOptions activationOptions)
         {
-            var record = CreateRecord(ActivationOperation.ModifyByExpression, null, activationOption);
+            var record = CreateRecord(ActivationOperation.ModifyByExpression, null, activationOptions);
             record.ModifyExpression = modify;
             record.Query = query;
             return record;
@@ -257,7 +257,7 @@ namespace EZNEW.Develop.UnitOfWork
                 return null;
             }
             var dataPackage = WarehouseManager.GetDataPackage<TEntity>(IdentityValue);
-            if (dataPackage == null || (!ActivationOption.ForceExecute && dataPackage.Operate != WarehouseDataOperate.Save))
+            if (dataPackage == null || (!ActivationOptions.ForceExecute && dataPackage.Operate != WarehouseDataOperate.Save))
             {
                 return null;
             }
@@ -285,7 +285,7 @@ namespace EZNEW.Develop.UnitOfWork
                 return null;
             }
             var dataPackage = WarehouseManager.GetDataPackage<TEntity>(IdentityValue);
-            if (dataPackage == null || (!ActivationOption.ForceExecute && (dataPackage.Operate != WarehouseDataOperate.Remove || dataPackage.IsRealRemove)))
+            if (dataPackage == null || (!ActivationOptions.ForceExecute && (dataPackage.Operate != WarehouseDataOperate.Remove || dataPackage.IsRealRemove)))
             {
                 return null;
             }
