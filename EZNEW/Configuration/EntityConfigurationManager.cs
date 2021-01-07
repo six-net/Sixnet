@@ -102,11 +102,11 @@ namespace EZNEW.Configuration
                         IsParent = (fieldRole & FieldRole.Parent) != 0,
                         IsDisplayName = (fieldRole & FieldRole.Display) != 0,
                         DataType = property.PropertyType,
-                        DbTypeName = entityFieldAttribute.DbTypeName,
-                        MaxLength = entityFieldAttribute.MaxLength,
-                        IsFixedLength = entityFieldAttribute.IsFixedLength,
-                        IsRequired = entityFieldAttribute.IsRequired,
-                        Comment = entityFieldAttribute.Description
+                        DbTypeName = entityFieldAttribute?.DbTypeName,
+                        MaxLength = entityFieldAttribute?.MaxLength ?? 0,
+                        IsFixedLength = entityFieldAttribute?.IsFixedLength ?? false,
+                        IsRequired = entityFieldAttribute?.IsRequired ?? false,
+                        Comment = entityFieldAttribute?.Description ?? string.Empty
                     };
                     allFields.Add(propertyField);
                     if (propertyField.IsPrimaryKey)
