@@ -34,7 +34,7 @@ namespace EZNEW.Develop.DataAccess
             var command = ExecuteAdd(data);
 
             //publish add event
-            DataAccessEventBus.PublishAddEvent(data, data.GetAllPropertyValues());
+            DataAccessEventBus.PublishAddEvent(data, data.GetAllValues());
 
             return command;
         }
@@ -97,11 +97,11 @@ namespace EZNEW.Develop.DataAccess
             string versionFieldName = EntityManager.GetVersionField(entityType);
             if (!string.IsNullOrWhiteSpace(versionFieldName))
             {
-                var nowVersionValue = newData.GetPropertyValue(versionFieldName);
+                var nowVersionValue = newData.GetValue(versionFieldName);
                 if (!modifyValues.ContainsKey(versionFieldName))
                 {
                     var newVersionValue = nowVersionValue + 1;
-                    newData.SetPropertyValue(versionFieldName, newVersionValue);
+                    newData.SetValue(versionFieldName, newVersionValue);
                     modifyValues.Add(versionFieldName, newVersionValue);
                 }
                 query = AndExtensions.And(query, versionFieldName, CriteriaOperator.Equal, nowVersionValue);
@@ -117,14 +117,14 @@ namespace EZNEW.Develop.DataAccess
                 if (!modifyValues.ContainsKey(refreshFieldName))
                 {
                     var nowDate = DateTimeOffset.Now;
-                    newData.SetPropertyValue(refreshFieldName, nowDate);
+                    newData.SetValue(refreshFieldName, nowDate);
                     modifyValues.Add(refreshFieldName, nowDate);
                 }
             }
 
             #endregion
 
-            var originValues = oldData.GetAllPropertyValues();
+            var originValues = oldData.GetAllValues();
             var command = ExecuteModifyData(originValues, modifyValues, query);
 
             //publish modify data event
@@ -601,7 +601,7 @@ namespace EZNEW.Develop.DataAccess
                 return;
             }
             long initValue = 1;
-            data.SetPropertyValue(versionField, initValue);
+            data.SetValue(versionField, initValue);
         }
 
         /// <summary>
@@ -619,7 +619,7 @@ namespace EZNEW.Develop.DataAccess
             {
                 return;
             }
-            data.SetPropertyValue(refreshDateField, DateTimeOffset.Now);
+            data.SetValue(refreshDateField, DateTimeOffset.Now);
         }
 
         #endregion

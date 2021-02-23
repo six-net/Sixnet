@@ -9,21 +9,21 @@ namespace EZNEW.Token
     public static class TokenManager
     {
         /// <summary>
-        /// Token engines
+        /// Token providers
         /// </summary>
-        static readonly Dictionary<string, ITokenEngine> TokenEngines = new Dictionary<string, ITokenEngine>();
+        static readonly Dictionary<string, ITokenProvider> TokenProviders = new Dictionary<string, ITokenProvider>();
 
         #region Encode
 
         /// <summary>
         /// Encode
         /// </summary>
-        /// <param name="tokenOption">Token option</param>
+        /// <param name="tokenOptions">Token options</param>
         /// <returns>Return the token value</returns>
-        public static TokenValue Encode(TokenOptions tokenOption)
+        public static TokenValue Encode(TokenOptions tokenOptions)
         {
-            var tokenEngine = GetTokenEngine(tokenOption?.TokenType ?? string.Empty);
-            return tokenEngine.Encode(tokenOption);
+            var tokenProvider = GetTokenProvider(tokenOptions?.TokenType ?? string.Empty);
+            return tokenProvider.Encode(tokenOptions);
         }
 
         #endregion
@@ -33,71 +33,71 @@ namespace EZNEW.Token
         /// <summary>
         /// Decode token value
         /// </summary>
-        /// <param name="tokenOption">Token option</param>
+        /// <param name="tokenOptions">Token options</param>
         /// <returns>Return token string</returns>
-        public static string Decode(TokenOptions tokenOption)
+        public static string Decode(TokenOptions tokenOptions)
         {
-            var tokenEngine = GetTokenEngine(tokenOption?.TokenType ?? string.Empty);
-            return tokenEngine.Decode(tokenOption);
+            var tokenProvider = GetTokenProvider(tokenOptions?.TokenType ?? string.Empty);
+            return tokenProvider.Decode(tokenOptions);
         }
 
         /// <summary>
         /// Decode token to a dictionary
         /// </summary>
-        /// <param name="tokenOption">Token option</param>
+        /// <param name="tokenOptions">Token options</param>
         /// <returns>Return dictionary value</returns>
-        public static Dictionary<string, object> DecodeToDictionary(TokenOptions tokenOption)
+        public static Dictionary<string, object> DecodeToDictionary(TokenOptions tokenOptions)
         {
-            var tokenEngine = GetTokenEngine(tokenOption?.TokenType ?? string.Empty);
-            return tokenEngine.DecodeToDictionary(tokenOption);
+            var tokenProvider = GetTokenProvider(tokenOptions?.TokenType ?? string.Empty);
+            return tokenProvider.DecodeToDictionary(tokenOptions);
         }
 
         /// <summary>
         /// Decode token to object
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
-        /// <param name="tokenOption">Token option</param>
+        /// <param name="tokenOptions">Token options</param>
         /// <returns>Return data object</returns>
-        public static T DecodeToObject<T>(TokenOptions tokenOption)
+        public static T DecodeToObject<T>(TokenOptions tokenOptions)
         {
-            var tokenEngine = GetTokenEngine(tokenOption?.TokenType ?? string.Empty);
-            return tokenEngine.DecodeToObject<T>(tokenOption);
+            var tokenProvider = GetTokenProvider(tokenOptions?.TokenType ?? string.Empty);
+            return tokenProvider.DecodeToObject<T>(tokenOptions);
         }
 
         #endregion
 
-        #region Configure token engine
+        #region Configure token provider
 
         /// <summary>
-        /// Configure token engine
+        /// Configure token provider
         /// </summary>
         /// <param name="tokenType">Token type</param>
-        /// <param name="tokenEngine">Token engine</param>
-        public static void ConfigureTokenEngine(string tokenType, ITokenEngine tokenEngine)
+        /// <param name="tokenProvider">Token provider</param>
+        public static void ConfigureTokenProvider(string tokenType, ITokenProvider tokenProvider)
         {
-            TokenEngines[tokenType] = tokenEngine;
+            TokenProviders[tokenType] = tokenProvider;
         }
 
         #endregion
 
-        #region Gets token engine
+        #region Gets token provider
 
         /// <summary>
-        /// Gets token engine by token type
+        /// Gets token provider by token type
         /// </summary>
         /// <param name="tokenType">Token type</param>
-        /// <returns>Return token engine</returns>
-        static ITokenEngine GetTokenEngine(string tokenType)
+        /// <returns>Return token provider</returns>
+        static ITokenProvider GetTokenProvider(string tokenType)
         {
-            if (string.IsNullOrWhiteSpace(tokenType) || TokenEngines == null || TokenEngines.Count <= 0)
+            if (string.IsNullOrWhiteSpace(tokenType) || TokenProviders == null || TokenProviders.Count < 1)
             {
-                throw new Exception("Token engine is not found");
+                throw new Exception("Token provider is not found");
             }
-            if (TokenEngines.ContainsKey(tokenType))
+            if (TokenProviders.ContainsKey(tokenType))
             {
-                return TokenEngines[tokenType];
+                return TokenProviders[tokenType];
             }
-            throw new Exception("Token engine is not found");
+            throw new Exception("Token provider is not found");
         }
 
         #endregion

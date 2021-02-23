@@ -176,7 +176,7 @@ namespace EZNEW.Develop.CQuery
             {
                 throw new EZNEWException(string.Format("Type:{0} isn't set primary keys", entityType.FullName));
             }
-            var firstData = datas.ElementAt(0).GetPropertyValue(keys.ElementAt(0));
+            var firstData = datas.ElementAt(0).GetValue(keys.ElementAt(0));
             var dataType = firstData.GetType();
             dynamic keyValueList = Activator.CreateInstance(typeof(List<>).MakeGenericType(dataType));
             var keyCount = keys.GetCount();
@@ -184,14 +184,14 @@ namespace EZNEW.Develop.CQuery
             {
                 if (keyCount == 1)
                 {
-                    keyValueList.Add(entity.GetPropertyValue(keys.ElementAt(0)));
+                    keyValueList.Add(entity.GetValue(keys.ElementAt(0)));
                 }
                 else
                 {
                     IQuery entityQuery = Create();
                     foreach (var key in keys)
                     {
-                        entityQuery = AndExtensions.And(entityQuery, key, exclude ? CriteriaOperator.NotEqual : CriteriaOperator.Equal, entity.GetPropertyValue(key));
+                        entityQuery = AndExtensions.And(entityQuery, key, exclude ? CriteriaOperator.NotEqual : CriteriaOperator.Equal, entity.GetValue(key));
                     }
                     originalQuery.Or(entityQuery);
                 }
@@ -235,7 +235,7 @@ namespace EZNEW.Develop.CQuery
             foreach (var key in keys)
             {
                 var criteriaOperator = exclude ? CriteriaOperator.NotEqual : CriteriaOperator.Equal;
-                originalQuery = AndExtensions.And(originalQuery, key, criteriaOperator, data.GetPropertyValue(key), null);
+                originalQuery = AndExtensions.And(originalQuery, key, criteriaOperator, data.GetValue(key), null);
             }
             return originalQuery;
         }

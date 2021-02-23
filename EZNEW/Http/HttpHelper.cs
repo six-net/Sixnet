@@ -74,30 +74,30 @@ namespace EZNEW.Http
         /// <summary>
         /// Send http request
         /// </summary>
-        /// <param name="httpRequestOption">Http request option</param>
+        /// <param name="httpRequestOptions">Http request options</param>
         /// <returns>Return the http response message</returns>
-        public static async Task<HttpResponseMessage> SendAsync(HttpRequestOptions httpRequestOption)
+        public static async Task<HttpResponseMessage> SendAsync(HttpRequestOptions httpRequestOptions)
         {
-            var httpClient = GetHttpClient(httpRequestOption?.HttpClientConfigName);
-            var httpRequestMessage = httpRequestOption?.HttpRequestMessage ?? new HttpRequestMessage();
+            var httpClient = GetHttpClient(httpRequestOptions?.HttpClientConfigName);
+            var httpRequestMessage = httpRequestOptions?.HttpRequestMessage ?? new HttpRequestMessage();
             if (HttpMethodRequestMessageHandlers.TryGetValue(httpRequestMessage.Method, out var handler) && handler != null)
             {
-                handler(httpClient, httpRequestMessage, httpRequestOption);
+                handler(httpClient, httpRequestMessage, httpRequestOptions);
             }
             //headers
-            if (!httpRequestOption.Headers.IsNullOrEmpty())
+            if (!httpRequestOptions.Headers.IsNullOrEmpty())
             {
-                foreach (var header in httpRequestOption.Headers)
+                foreach (var header in httpRequestOptions.Headers)
                 {
                     httpRequestMessage.Headers.TryAddWithoutValidation(header.Key, header.Value);
                 }
             }
             //token
-            if (httpRequestMessage.Headers.Authorization == null && !string.IsNullOrWhiteSpace(httpRequestOption.Token))
+            if (httpRequestMessage.Headers.Authorization == null && !string.IsNullOrWhiteSpace(httpRequestOptions.Token))
             {
-                httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue(httpRequestOption.AuthorizationScheme, httpRequestOption.Token);
+                httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue(httpRequestOptions.AuthorizationScheme, httpRequestOptions.Token);
             }
-            return await httpClient.SendAsync(httpRequestOption.HttpRequestMessage, httpRequestOption.HttpCompletionOption, httpRequestOption.CancellationToken).ConfigureAwait(false);
+            return await httpClient.SendAsync(httpRequestOptions.HttpRequestMessage, httpRequestOptions.HttpCompletionOption, httpRequestOptions.CancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -732,7 +732,8 @@ namespace EZNEW.Http
                 HttpRequestMessage = new HttpRequestMessage()
                 {
                     Content = content,
-                    RequestUri = new Uri(url)
+                    RequestUri = new Uri(url),
+                    Method = HttpMethod.Post
                 }
             }).ConfigureAwait(false);
         }
@@ -1034,37 +1035,42 @@ namespace EZNEW.Http
         /// </summary>
         /// <param name="httpClient">Http client</param>
         /// <param name="httpRequestMessage">Http request message</param>
-        /// <param name="httpRequestOption">Http request post</param>
-        private static void HttpRequestMessageSetFileAndParameter(HttpClient httpClient, HttpRequestMessage httpRequestMessage, HttpRequestOptions httpRequestOption)
+        /// <param name="httpRequestOptions">Http request options</param>
+        private static void HttpRequestMessageSetFileAndParameter(HttpClient httpClient, HttpRequestMessage httpRequestMessage, HttpRequestOptions httpRequestOptions)
         {
-            if (httpRequestMessage == null || httpRequestOption == null)
+            if (httpRequestMessage == null || httpRequestOptions == null)
             {
                 return;
             }
             var originalContent = httpRequestMessage.Content;
-            var httpContent = originalContent as MultipartFormDataContent;
-            if (httpContent == null)
+            MultipartFormDataContent multipartFormDataContent = originalContent as MultipartFormDataContent;
+            if ((!httpRequestOptions.Files.IsNullOrEmpty() || !httpRequestOptions.Parameters.IsNullOrEmpty()) && multipartFormDataContent == null)
             {
-                httpContent = new MultipartFormDataContent();
+                multipartFormDataContent = new MultipartFormDataContent();
                 if (originalContent != null)
                 {
-                    httpContent.Add(originalContent);
+                    multipartFormDataContent.Add(originalContent);
                 }
+            }
+
+            if (multipartFormDataContent == null)
+            {
+                return;
             }
 
             #region Files
 
-            if (!httpRequestOption.Files.IsNullOrEmpty())
+            if (!httpRequestOptions.Files.IsNullOrEmpty())
             {
                 int fileCount = 0;
-                foreach (var item in httpRequestOption.Files)
+                foreach (var item in httpRequestOptions.Files)
                 {
                     if (item.Value == null || item.Value.Length <= 0)
                     {
                         continue;
                     }
                     HttpContent content = new StreamContent(new MemoryStream(item.Value));
-                    httpContent.Add(content, "file" + fileCount.ToString(), item.Key);
+                    multipartFormDataContent.Add(content, "file" + fileCount.ToString(), item.Key);
                     fileCount++;
                 }
             }
@@ -1073,18 +1079,18 @@ namespace EZNEW.Http
 
             #region Parameters
 
-            if (!httpRequestOption.Parameters.IsNullOrEmpty())
+            if (!httpRequestOptions.Parameters.IsNullOrEmpty())
             {
-                foreach (string key in httpRequestOption.Parameters.Keys)
+                foreach (string key in httpRequestOptions.Parameters.Keys)
                 {
-                    var stringContent = new StringContent(httpRequestOption.Parameters[key]);
-                    httpContent.Add(stringContent, key);
+                    var stringContent = new StringContent(httpRequestOptions.Parameters[key]);
+                    multipartFormDataContent.Add(stringContent, key);
                 }
             }
 
             #endregion
 
-            httpRequestMessage.Content = httpContent;
+            httpRequestMessage.Content = multipartFormDataContent;
         }
 
         #endregion

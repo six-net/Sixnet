@@ -2706,14 +2706,14 @@ namespace EZNEW.Cache
             /// Get cache object prefixs
             /// </summary>
             static Func<CacheObject, List<string>> GetCacheObjectPrefixs = o =>
-             {
-                 string objectName = o?.ObjectName;
-                 if (!string.IsNullOrWhiteSpace(objectName))
-                 {
-                     return new List<string>() { objectName };
-                 }
-                 return new List<string>(0);
-             };
+            {
+                string objectName = o?.ObjectName;
+                if (!string.IsNullOrWhiteSpace(objectName))
+                {
+                    return new List<string>() { objectName };
+                }
+                return new List<string>(0);
+            };
 
             /// <summary>
             /// Gets or sets the each key name split word

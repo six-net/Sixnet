@@ -5,8 +5,6 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EZNEW.ExpressionUtil
 {
@@ -20,12 +18,12 @@ namespace EZNEW.ExpressionUtil
         /// <summary>
         /// Expression base type
         /// </summary>
-        static Type BaseExpressType = typeof(System.Linq.Expressions.Expression);
+        static readonly Type BaseExpressType = typeof(System.Linq.Expressions.Expression);
 
         /// <summary>
         /// Generate lambda method
         /// </summary>
-        static MethodInfo LambdaMethod = null;
+        static readonly MethodInfo LambdaMethod = null;
 
         static ExpressionHelper()
         {
@@ -178,7 +176,7 @@ namespace EZNEW.ExpressionUtil
                 .GetDefaultMembers()
                 .OfType<PropertyInfo>()
                 .Any(p => p.GetGetMethod() == methodExpression.Method);
-        } 
+        }
 
         #endregion
 
@@ -474,6 +472,47 @@ namespace EZNEW.ExpressionUtil
             var function = lambdaExpression.Compile();
             PropertyOrFieldAccessFunctions[funcKey] = function;
             return function;
+        }
+
+        #endregion
+
+        #region Ensure cast expression
+
+        public static Expression EnsureCastExpression(Expression expression, Type targetType, bool allowWidening = false)
+        {
+            Type expressionType = expression.Type;
+
+            // check if a cast or conversion is required
+            if (expressionType == targetType || (!expressionType.IsValueType && targetType.IsAssignableFrom(expressionType)))
+            {
+                return expression;
+            }
+
+            if (targetType.IsValueType)
+            {
+                Expression convert = Expression.Unbox(expression, targetType);
+
+                if (allowWidening && targetType.IsPrimitive)
+                {
+                    MethodInfo toTargetTypeMethod = typeof(Convert)
+                        .GetMethod("To" + targetType.Name, new[] { typeof(object) });
+
+                    if (toTargetTypeMethod != null)
+                    {
+                        convert = Expression.Condition(
+                            Expression.TypeIs(expression, targetType),
+                            convert,
+                            Expression.Call(toTargetTypeMethod, expression));
+                    }
+                }
+
+                return Expression.Condition(
+                    Expression.Equal(expression, Expression.Constant(null, typeof(object))),
+                    Expression.Default(targetType),
+                    convert);
+            }
+
+            return Expression.Convert(expression, targetType);
         }
 
         #endregion

@@ -460,7 +460,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
             bool validValue = false;
             if (!nowDataPackages.IsNullOrEmpty())
             {
-                value = nowDataPackages.Max(c => c.WarehouseData.GetPropertyValue<TValue>(propertyName));
+                value = nowDataPackages.Max(c => c.WarehouseData.GetValue<TValue>(propertyName));
                 validValue = true;
             }
             var result = new ComputeResult<TValue>()
@@ -499,7 +499,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
             bool validValue = false;
             if (!nowDataPackages.IsNullOrEmpty())
             {
-                value = nowDataPackages.Min(c => c.WarehouseData.GetPropertyValue<TValue>(propertyName));
+                value = nowDataPackages.Min(c => c.WarehouseData.GetValue<TValue>(propertyName));
                 validValue = true;
             }
             var result = new ComputeResult<TValue>()
@@ -540,7 +540,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
             {
                 nowDataPackages.ForEach(c =>
                 {
-                    value += c.WarehouseData.GetPropertyValue<TValue>(propertyName);
+                    value += c.WarehouseData.GetValue<TValue>(propertyName);
                 });
                 validValue = true;
             }

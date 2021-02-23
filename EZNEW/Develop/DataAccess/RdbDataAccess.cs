@@ -28,7 +28,7 @@ namespace EZNEW.Develop.DataAccess
         protected override ICommand ExecuteAdd(TEntity data)
         {
             var cmd = RdbCommand.CreateNewCommand<TEntity>(OperateType.Insert, data.GetCommandParameters());
-            SetCommand(cmd, data.GetAllPropertyValues());
+            SetCommand(cmd, data.GetAllValues());
             cmd.MustReturnValueOnSuccess = true;
             return cmd;
         }

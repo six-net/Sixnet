@@ -28,7 +28,7 @@
         {
             get
             {
-                return CommitCommandCount - AllowEmptyResultCommandCount <= 0 || ExecutedSuccess;
+                return CommitCommandCount - AllowEmptyResultCommandCount < 1 || ExecutedSuccess;
             }
         }
 

@@ -56,7 +56,7 @@ namespace EZNEW.Diagnostics
         /// </summary>
         public static void EnableFrameworkTrace()
         {
-            AddSwitch(SwitchConstants.FrameworkSwitchNames.EZNEW_TraceLog, nameof(TraceEventType.Verbose));
+            AddSwitch(EZNEWConstants.SwitchNames.FrameworkTraceLog, nameof(TraceEventType.Verbose));
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace EZNEW.Diagnostics
         /// </summary>
         public static void DisableFrameworkTrace()
         {
-            RemoveSwitch(SwitchConstants.FrameworkSwitchNames.EZNEW_TraceLog);
+            RemoveSwitch(EZNEWConstants.SwitchNames.FrameworkTraceLog);
         }
 
         /// <summary>
@@ -76,9 +76,9 @@ namespace EZNEW.Diagnostics
         {
             if (listenAction != null)
             {
-                AddSwitchListener(SwitchConstants.FrameworkSwitchNames.EZNEW_TraceLog, listenAction);
+                AddSwitchListener(EZNEWConstants.SwitchNames.FrameworkTraceLog, listenAction);
             }
-            return ShouldTrace(SwitchConstants.FrameworkSwitchNames.EZNEW_TraceLog, TraceEventType.Verbose);
+            return ShouldTrace(EZNEWConstants.SwitchNames.FrameworkTraceLog, TraceEventType.Verbose);
         }
 
         /// <summary>

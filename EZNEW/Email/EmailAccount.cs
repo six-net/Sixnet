@@ -58,6 +58,20 @@ namespace EZNEW.Email
 
         #endregion
 
+        public EmailAccount Clone()
+        {
+            return new EmailAccount()
+            {
+                SendPersonName = SendPersonName,
+                SendEmailAddress = SendEmailAddress,
+                UserName = UserName,
+                SmtpAddress = SmtpAddress,
+                Password = Password,
+                Port = Port,
+                EnableSsl = EnableSsl
+            };
+        }
+
         /// <summary>
         /// Gets the email account identity key
         /// </summary>

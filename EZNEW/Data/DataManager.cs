@@ -27,7 +27,7 @@ namespace EZNEW.Data
     {
         static DataManager()
         {
-            ContainerManager.Container?.Register(typeof(ICommandEngine), typeof(DatabaseCommandEngine));
+            ContainerManager.Container?.Register(typeof(ICommandExecutor), typeof(DatabaseCommandExecutor));
             SqlMapper.Settings.ApplyNullValues = true;
         }
 
@@ -63,7 +63,7 @@ namespace EZNEW.Data
                 //register database engine
                 if (!string.IsNullOrWhiteSpace(serverItem.Value.EngineFullTypeName))
                 {
-                    IDatabaseEngine engine = (IDatabaseEngine)Activator.CreateInstance(Type.GetType(serverItem.Value.EngineFullTypeName));
+                    IDatabaseProvider engine = (IDatabaseProvider)Activator.CreateInstance(Type.GetType(serverItem.Value.EngineFullTypeName));
                     ConfigureDatabaseEngine(serverItem.Key, engine);
                 }
                 //configure entity
@@ -235,7 +235,7 @@ namespace EZNEW.Data
         /// </summary>
         /// <param name="serverType">Database server type</param>
         /// <param name="databaseEngine">Database engine</param>
-        public static void ConfigureDatabaseEngine(DatabaseServerType serverType, IDatabaseEngine databaseEngine)
+        public static void ConfigureDatabaseEngine(DatabaseServerType serverType, IDatabaseProvider databaseEngine)
         {
             ConfigurationManager.Data.ConfigureDatabaseEngine(serverType, databaseEngine);
         }
@@ -245,7 +245,7 @@ namespace EZNEW.Data
         /// </summary>
         /// <param name="serverType">Database server type</param>
         /// <returns>Return database engine</returns>
-        public static IDatabaseEngine GetDatabaseEngine(DatabaseServerType serverType)
+        public static IDatabaseProvider GetDatabaseEngine(DatabaseServerType serverType)
         {
             return ConfigurationManager.Data.GetDatabaseEngine(serverType);
         }

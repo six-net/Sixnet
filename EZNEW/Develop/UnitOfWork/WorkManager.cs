@@ -10,6 +10,8 @@ using EZNEW.Develop.Entity;
 using EZNEW.Develop.Command;
 using EZNEW.Paging;
 using System.Runtime.CompilerServices;
+using EZNEW.Develop.Message;
+using EZNEW.Data;
 
 namespace EZNEW.Develop.UnitOfWork
 {
@@ -18,6 +20,26 @@ namespace EZNEW.Develop.UnitOfWork
     /// </summary>
     public class WorkManager
     {
+        static WorkManager()
+        {
+            SubscribeCreateWorkEvent(w =>
+            {
+                MessageManager.Init();
+            });
+            SubscribeWorkCommitSuccessEvent((work, res, cmds) =>
+            {
+                MessageManager.Commit(true);
+            });
+            SubscribeWorkRollbackEvent(w =>
+            {
+                MessageManager.Clear();
+            });
+            SubscribeWorkCommitFailEvent((work, res, cmds) =>
+            {
+                MessageManager.Clear();
+            });
+        }
+
         #region Fields
 
         /// <summary>
@@ -494,28 +516,28 @@ namespace EZNEW.Develop.UnitOfWork
         /// <summary>
         /// Execute command
         /// </summary>
-        /// <param name="executeOption">Execute option</param>
+        /// <param name="executeOptions">Execute options</param>
         /// <param name="commands">Commands</param>
-        /// <returns>Return effect data number</returns>
-        public static async Task<int> ExecuteAsync(CommandExecuteOptions executeOption, params ICommand[] commands)
+        /// <returns>Return the effect data number</returns>
+        public static async Task<int> ExecuteAsync(CommandExecuteOptions executeOptions, params ICommand[] commands)
         {
             IEnumerable<ICommand> cmdCollection = commands;
-            return await ExecuteAsync(executeOption, cmdCollection).ConfigureAwait(false);
+            return await ExecuteAsync(executeOptions, cmdCollection).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Execute command
         /// </summary>
-        /// <param name="executeOption">Execute option</param>
+        /// <param name="executeOptions">Execute options</param>
         /// <param name="commands">Commands</param>
-        /// <returns>Return effect data number</returns>
-        public static async Task<int> ExecuteAsync(CommandExecuteOptions executeOption, IEnumerable<ICommand> commands)
+        /// <returns>Return the effect data number</returns>
+        public static async Task<int> ExecuteAsync(CommandExecuteOptions executeOptions, IEnumerable<ICommand> commands)
         {
             if (commands.IsNullOrEmpty())
             {
                 return await Task.FromResult(0).ConfigureAwait(false);
             }
-            return await CommandExecuteManager.ExecuteAsync(executeOption ?? CommandExecuteOptions.Default, commands).ConfigureAwait(false);
+            return await CommandExecuteManager.ExecuteAsync(executeOptions ?? CommandExecuteOptions.Default, commands).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -524,15 +546,15 @@ namespace EZNEW.Develop.UnitOfWork
         /// <param name="commandText">Command text</param>
         /// <param name="parameters">Parameters</param>
         /// <param name="commandTextType">Command text type</param>
-        /// <param name="executeOption">Execute option</param>
-        /// <returns>Return data effect number</returns>
-        public static async Task<int> ExecuteAsync(string commandText, object parameters = null, CommandTextType commandTextType = CommandTextType.Text, CommandExecuteOptions executeOption = null)
+        /// <param name="executeOptions">Execute options</param>
+        /// <returns>Return the effect data number</returns>
+        public static async Task<int> ExecuteAsync(string commandText, object parameters = null, CommandTextType commandTextType = CommandTextType.Text, CommandExecuteOptions executeOptions = null)
         {
             var rdbCmd = RdbCommand.CreateNewCommand(OperateType.Query, parameters);
             rdbCmd.CommandType = commandTextType;
             rdbCmd.CommandText = commandText;
             rdbCmd.ExecuteMode = CommandExecuteMode.CommandText;
-            return await ExecuteAsync(executeOption, rdbCmd).ConfigureAwait(false);
+            return await ExecuteAsync(executeOptions, rdbCmd).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -558,23 +580,23 @@ namespace EZNEW.Develop.UnitOfWork
         /// <summary>
         /// Execute command
         /// </summary>
-        /// <param name="executeOption">Execute option</param>
+        /// <param name="executeOptions">Execute option</param>
         /// <param name="commands">Commands</param>
-        /// <returns>Return data effects</returns>
-        public static int Execute(CommandExecuteOptions executeOption, params ICommand[] commands)
+        /// <returns>Return the data effect number</returns>
+        public static int Execute(CommandExecuteOptions executeOptions, params ICommand[] commands)
         {
-            return ExecuteAsync(executeOption, commands).Result;
+            return ExecuteAsync(executeOptions, commands).Result;
         }
 
         /// <summary>
         /// Execute command
         /// </summary>
-        /// <param name="executeOption">Execute option</param>
+        /// <param name="executeOptions">Execute options</param>
         /// <param name="commands">Commands</param>
         /// <returns>Return data effects number</returns>
-        public static int Execute(CommandExecuteOptions executeOption, IEnumerable<ICommand> commands)
+        public static int Execute(CommandExecuteOptions executeOptions, IEnumerable<ICommand> commands)
         {
-            return ExecuteAsync(executeOption, commands).Result;
+            return ExecuteAsync(executeOptions, commands).Result;
         }
 
         /// <summary>
@@ -583,11 +605,11 @@ namespace EZNEW.Develop.UnitOfWork
         /// <param name="commandText">Command text</param>
         /// <param name="parameters">Parameters</param>
         /// <param name="commandTextType">Command text type</param>
-        /// <param name="executeOption">Execute option</param>
+        /// <param name="executeOptions">Execute options</param>
         /// <returns>Return data effects number</returns>
-        public static int Execute(string commandText, object parameters = null, CommandTextType commandTextType = CommandTextType.Text, CommandExecuteOptions executeOption = null)
+        public static int Execute(string commandText, object parameters = null, CommandTextType commandTextType = CommandTextType.Text, CommandExecuteOptions executeOptions = null)
         {
-            return ExecuteAsync(commandText, parameters, commandTextType, executeOption).Result;
+            return ExecuteAsync(commandText, parameters, commandTextType, executeOptions).Result;
         }
 
         #endregion
@@ -640,6 +662,73 @@ namespace EZNEW.Develop.UnitOfWork
         public static void Rollback()
         {
             Current?.Rollback();
+        }
+
+        #endregion
+
+        #region Bulk insert
+
+        /// <summary>
+        /// Bulk insert datas
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="server">Database server</param>
+        /// <param name="datas">Datas</param>
+        /// <param name="tableName">Table name,will use the configuration entity name or object type name when it is null or empty</param>
+        /// <param name="bulkInsertOptions">Bulk insert options</param>
+        public static void BulkInsert<T>(DatabaseServer server, IEnumerable<T> datas, string tableName = "", IBulkInsertOptions bulkInsertOptions = null)
+        {
+            BulkInsertAsync(server, datas, tableName, bulkInsertOptions).Wait();
+        }
+
+        /// <summary>
+        /// Bulk insert datas
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="server">Database server</param>
+        /// <param name="datas">Datas</param>
+        /// <param name="tableName">Table name,will use the configuration entity name or object type name when it is null or empty</param>
+        /// <param name="bulkInsertOptions">Bulk insert options</param>
+        public static async Task BulkInsertAsync<T>(DatabaseServer server, IEnumerable<T> datas, string tableName = "", IBulkInsertOptions bulkInsertOptions = null)
+        {
+            var datatable = datas.ToDataTable();
+            if (datatable == null)
+            {
+                return;
+            }
+            if (string.IsNullOrWhiteSpace(tableName))
+            {
+                Type dataType = typeof(T);
+                tableName = DataManager.GetEntityObjectName(DatabaseServerType.Oracle, typeof(T));
+                if (string.IsNullOrWhiteSpace(tableName))
+                {
+                    tableName = dataType.Name;
+                }
+            }
+            datatable.TableName = tableName;
+            await BulkInsertAsync(server, datas.ToDataTable(), bulkInsertOptions).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Bulk insert datas
+        /// </summary>
+        /// <param name="server">Database server</param>
+        /// <param name="dataTable">Data table</param>
+        /// <param name="bulkInsertOptions">Bulk insert options</param>
+        public static void BulkInsert(DatabaseServer server, DataTable dataTable, IBulkInsertOptions bulkInsertOptions = null)
+        {
+            BulkInsertAsync(server, dataTable, bulkInsertOptions).Wait();
+        }
+
+        /// <summary>
+        /// Bulk insert datas
+        /// </summary>
+        /// <param name="server">Database server</param>
+        /// <param name="dataTable">Data table</param>
+        /// <param name="bulkInsertOptions">Bulk insert options</param>
+        public static async Task BulkInsertAsync(DatabaseServer server, DataTable dataTable, IBulkInsertOptions bulkInsertOptions = null)
+        {
+            await CommandExecuteManager.BulkInsertAsync(server, dataTable, bulkInsertOptions).ConfigureAwait(false);
         }
 
         #endregion

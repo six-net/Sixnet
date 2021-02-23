@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 
 namespace EZNEW.Develop.Entity
 {
@@ -105,6 +103,11 @@ namespace EZNEW.Develop.Entity
         /// Whether is display name field
         /// </summary>
         public bool IsDisplayName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the value provider
+        /// </summary>
+        internal IEntityPropertyValueProvider ValueProvider { get; set; }
 
         #endregion
 

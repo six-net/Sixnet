@@ -214,11 +214,11 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
             //over new value
             foreach (var field in newQueryFields)
             {
-                var newPropertyVal = newData.GetPropertyValue(field);
-                PersistentData.SetPropertyValue(field, newPropertyVal);
+                var newPropertyVal = newData.GetValue(field);
+                PersistentData.SetValue(field, newPropertyVal);
                 if (!modifyValues.ContainsKey(field))
                 {
-                    WarehouseData.SetPropertyValue(field, newPropertyVal);
+                    WarehouseData.SetValue(field, newPropertyVal);
                 }
             }
             AddQueryFields(newQueryFields);
@@ -242,10 +242,10 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
             }
             foreach (var mv in modifyValues)
             {
-                var nowValue = data.GetPropertyValue(mv.Key);
+                var nowValue = data.GetValue(mv.Key);
                 var modifyValue = mv.Value;
                 var newValue = modifyValue.GetModifyValue(nowValue);
-                data.SetPropertyValue(mv.Key, newValue);
+                data.SetValue(mv.Key, newValue);
             }
         }
 
@@ -259,8 +259,8 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
                 return;
             }
             modifyValues?.Clear();
-            var newValues = WarehouseData.GetAllPropertyValues();
-            var nowValues = PersistentData.GetAllPropertyValues();
+            var newValues = WarehouseData.GetAllValues();
+            var nowValues = PersistentData.GetAllValues();
             foreach (var newItem in newValues)
             {
                 if (!nowValues.ContainsKey(newItem.Key))

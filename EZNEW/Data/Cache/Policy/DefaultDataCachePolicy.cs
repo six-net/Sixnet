@@ -6,8 +6,8 @@ using EZNEW.Cache.Keys;
 using EZNEW.Cache.String;
 using EZNEW.Develop.CQuery;
 using EZNEW.Develop.Entity;
-using EZNEW.Internal.MessageQueue;
 using EZNEW.Logging;
+using EZNEW.Queue;
 using EZNEW.Selection;
 using EZNEW.Serialize;
 
@@ -346,8 +346,8 @@ namespace EZNEW.Data.Cache.Policy
                     }
                     else
                     {
-                        var internalMsgItem = new AddCacheDataInternalMessageItem<T>(AddCacheData, queryDataCallbackContext);
-                        InternalMessageQueue.Enqueue(internalMsgItem);
+                        var internalMsgItem = new InternalQueueAddCacheDataItem<T>(AddCacheData, queryDataCallbackContext);
+                        InternalQueueManager.GetQueue(EZNEWConstants.InternalQueueNames.DataCache).Enqueue(internalMsgItem);
                     }
                 }
             }
@@ -436,7 +436,7 @@ namespace EZNEW.Data.Cache.Policy
                     {
                         foreach (var preKey in cachePrefixKeys)
                         {
-                            var preKeyVal = data.GetPropertyValue(preKey)?.ToString() ?? string.Empty;
+                            var preKeyVal = data.GetValue(preKey)?.ToString() ?? string.Empty;
                             if (string.IsNullOrWhiteSpace(preKeyVal))
                             {
                                 LogManager.LogError<DefaultDataCachePolicy>($"Data type :{entityType.FullName},Identity value:{data.GetIdentityValue()},Cache prefix key:{preKey},value is null or empty,unable to set cache data");
@@ -454,7 +454,7 @@ namespace EZNEW.Data.Cache.Policy
                     var dataCacheKey = new CacheKey(cacheObject, dataPrefixKey);
                     foreach (string pk in primaryKeys)
                     {
-                        var pkValue = data.GetPropertyValue(pk)?.ToString() ?? string.Empty;
+                        var pkValue = data.GetValue(pk)?.ToString() ?? string.Empty;
                         if (string.IsNullOrWhiteSpace(pkValue))
                         {
                             LogManager.LogError<DefaultDataCachePolicy>($"Data type :{entityType.FullName},Identity value:{data.GetIdentityValue()},Primary key:{pk},value is null or empty,unable to set cache data");
@@ -484,7 +484,7 @@ namespace EZNEW.Data.Cache.Policy
                         foreach (string key in cacheKeys)
                         {
                             var otherCacheKey = new CacheKey(cacheObject, dataPrefixKey);
-                            var cacheKeyValue = data.GetPropertyValue(key)?.ToString() ?? string.Empty;
+                            var cacheKeyValue = data.GetValue(key)?.ToString() ?? string.Empty;
                             if (string.IsNullOrWhiteSpace(cacheKeyValue))
                             {
                                 LogManager.LogError<DefaultDataCachePolicy>($"Data type :{entityType.FullName},Identity value:{data.GetIdentityValue()},Cache key:{key},value is null or empty,unable to set cache data");
@@ -643,7 +643,7 @@ namespace EZNEW.Data.Cache.Policy
                 {
                     foreach (var preKey in cachePrefixKeys)
                     {
-                        var preKeyVal = data.GetPropertyValue(preKey)?.ToString() ?? string.Empty;
+                        var preKeyVal = data.GetValue(preKey)?.ToString() ?? string.Empty;
                         dataPrefixKey.AddName(preKey, preKeyVal);
                     }
                 }
@@ -652,7 +652,7 @@ namespace EZNEW.Data.Cache.Policy
                 var dataCacheKey = new CacheKey(cacheObject, dataPrefixKey);
                 foreach (string pk in primaryKeys)
                 {
-                    var pkValue = data.GetPropertyValue(pk);
+                    var pkValue = data.GetValue(pk);
                     dataCacheKey.AddName(pk, pkValue == null ? string.Empty : pkValue.ToString());
                 }
                 cacheOptionKeys.Add(dataCacheKey);
@@ -663,7 +663,7 @@ namespace EZNEW.Data.Cache.Policy
                     foreach (string key in cacheKeys)
                     {
                         var otherCacheKey = new CacheKey(cacheObject, dataPrefixKey);
-                        var cacheKeyValue = data.GetPropertyValue(key);
+                        var cacheKeyValue = data.GetValue(key);
                         otherCacheKey.AddName(key, cacheKeyValue == null ? string.Empty : cacheKeyValue.ToString());
                         cacheOptionKeys.Add(otherCacheKey);
                     }

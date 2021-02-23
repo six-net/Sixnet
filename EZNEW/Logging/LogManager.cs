@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.Logging;
 using EZNEW.DependencyInjection;
-using EZNEW.Internal.MessageQueue;
+using EZNEW.Queue;
 
 namespace EZNEW.Logging
 {
@@ -61,7 +61,7 @@ namespace EZNEW.Logging
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         static void WriteLog(string loggerCategoryName, LogLevel logLevel, EventId eventId, Exception exception, string message, params object[] args)
         {
-            var writeLogCommand = new WriteLogInternalMessageCommand()
+            var writeLogCommand = new InternalQueueLogItem()
             {
                 LogCategoryName = loggerCategoryName,
                 LogLevel = logLevel,
@@ -70,7 +70,7 @@ namespace EZNEW.Logging
                 Message = message,
                 Args = args
             };
-            InternalMessageQueue.Enqueue(writeLogCommand);
+            InternalQueueManager.GetQueue(EZNEWConstants.InternalQueueNames.Logging).Enqueue(writeLogCommand);
         }
 
         #endregion

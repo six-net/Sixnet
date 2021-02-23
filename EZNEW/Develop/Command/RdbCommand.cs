@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using EZNEW.Develop.Command.Modify;
 using EZNEW.Develop.CQuery;
 using EZNEW.Develop.UnitOfWork;
-using EZNEW.Internal.MessageQueue;
 
 namespace EZNEW.Develop.Command
 {

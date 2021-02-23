@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using EZNEW.Develop.Entity;
 using EZNEW.ExpressionUtil;
+using EZNEW.Reflection;
 
 namespace EZNEW.Configuration
 {
@@ -41,16 +42,13 @@ namespace EZNEW.Configuration
                     return;
                 }
                 var typeGuid = entityType.GUID;
-                if (EntityConfigurations.ContainsKey(typeGuid))
+                if (EntityConfigurations.ContainsKey(typeGuid) || !((entityType.GetCustomAttributes(typeof(EntityAttribute), false)?.FirstOrDefault()) is EntityAttribute entityAttribute))
                 {
                     return;
                 }
-                EntityAttribute entityAttribute = (entityType.GetCustomAttributes(typeof(EntityAttribute), false)?.FirstOrDefault()) as EntityAttribute;
-                if (entityAttribute == null)
-                {
-                    return;
-                }
-                var propertys = entityType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+                IEnumerable<MemberInfo> memberInfos = new List<MemberInfo>(0);
+                memberInfos = memberInfos.Union(entityType.GetProperties(BindingFlags.Public | BindingFlags.Instance));
+                memberInfos = memberInfos.Union(entityType.GetFields(BindingFlags.Public | BindingFlags.Instance));
                 string objectName = string.IsNullOrWhiteSpace(entityAttribute.ObjectName) ? entityType.Name : entityAttribute.ObjectName;
                 if (!EntityConfigurations.TryGetValue(typeGuid, out EntityConfiguration entityConfig))
                 {
@@ -63,7 +61,6 @@ namespace EZNEW.Configuration
                     entityConfig.TableName = objectName;
                 }
                 //fields
-                //Dictionary<string, EntityField> allFields = new Dictionary<string, EntityField>();
                 List<EntityField> allFields = new List<EntityField>();
                 List<string> primaryKeys = new List<string>();
 
@@ -72,20 +69,28 @@ namespace EZNEW.Configuration
                 List<string> cachePrefixKeys = new List<string>();
                 List<string> cacheIgnoreKeys = new List<string>();
 
-                //List<string> queryFields = new List<string>();
                 List<string> mustQueryFields = new List<string>();
                 List<EntityField> editFields = new List<EntityField>();
                 List<EntityField> queryEntityFields = new List<EntityField>();
                 string versionField = null;
                 string refreshDateField = null;
-                foreach (var property in propertys)
+                foreach (var member in memberInfos)
                 {
-                    var fieldName = property.Name;
+                    var fieldName = member.Name;
                     var fieldRole = FieldRole.None;
                     var propertyName = fieldName;
-                    EntityFieldAttribute entityFieldAttribute = (property.GetCustomAttributes(typeof(EntityFieldAttribute), false)?.FirstOrDefault()) as EntityFieldAttribute;
+                    EntityFieldAttribute entityFieldAttribute = (member.GetCustomAttributes(typeof(EntityFieldAttribute), false)?.FirstOrDefault()) as EntityFieldAttribute;
                     fieldRole = entityFieldAttribute?.Role ?? FieldRole.None;
                     fieldName = entityFieldAttribute?.Name ?? fieldName;
+                    Type memberType = null;
+                    if (member is PropertyInfo propertyInfo)
+                    {
+                        memberType = propertyInfo.PropertyType;
+                    }
+                    if (member is FieldInfo fieldInfo)
+                    {
+                        memberType = fieldInfo.FieldType;
+                    }
                     var propertyField = new EntityField()
                     {
                         FieldName = fieldName,
@@ -101,14 +106,23 @@ namespace EZNEW.Configuration
                         IsSort = (fieldRole & FieldRole.Sort) != 0,
                         IsParent = (fieldRole & FieldRole.Parent) != 0,
                         IsDisplayName = (fieldRole & FieldRole.Display) != 0,
-                        DataType = property.PropertyType,
+                        DataType = memberType,
                         DbTypeName = entityFieldAttribute?.DbTypeName,
                         MaxLength = entityFieldAttribute?.MaxLength ?? 0,
                         IsFixedLength = entityFieldAttribute?.IsFixedLength ?? false,
                         IsRequired = entityFieldAttribute?.IsRequired ?? false,
                         Comment = entityFieldAttribute?.Description ?? string.Empty
                     };
+
+                    //value provider
+                    var valueProvider = GetValueProvider(entityType, member);
+                    if (valueProvider != null)
+                    {
+                        propertyField.ValueProvider = valueProvider;
+                    }
+
                     allFields.Add(propertyField);
+
                     if (propertyField.IsPrimaryKey)
                     {
                         primaryKeys.Add(propertyName);
@@ -138,7 +152,7 @@ namespace EZNEW.Configuration
                     }
 
                     //relation config
-                    var relationAttributes = property.GetCustomAttributes(typeof(EntityRelationAttribute), false);
+                    var relationAttributes = member.GetCustomAttributes(typeof(EntityRelationAttribute), false);
                     if (relationAttributes.IsNullOrEmpty())
                     {
                         continue;
@@ -149,8 +163,7 @@ namespace EZNEW.Configuration
                     }
                     foreach (var attrObj in relationAttributes)
                     {
-                        EntityRelationAttribute relationAttr = attrObj as EntityRelationAttribute;
-                        if (relationAttr == null || relationAttr.RelationType == null || string.IsNullOrWhiteSpace(relationAttr.RelationField))
+                        if (!(attrObj is EntityRelationAttribute relationAttr) || relationAttr.RelationType == null || string.IsNullOrWhiteSpace(relationAttr.RelationField))
                         {
                             continue;
                         }
@@ -590,6 +603,74 @@ namespace EZNEW.Configuration
                 Dictionary<string, string> relationFields = null;
                 entityConfig?.RelationFields?.TryGetValue(relationEntityType.GUID, out relationFields);
                 return relationFields ?? new Dictionary<string, string>(0);
+            }
+
+            #endregion
+
+            #region Get entity property value provider
+
+            public static IEntityPropertyValueProvider GetValueProvider(Type entityType, MemberInfo member)
+            {
+                ParameterExpression instanceExpression = Expression.Parameter(entityType);
+
+                //getter
+                Array parameterArray = Array.CreateInstance(typeof(ParameterExpression), 1);
+                parameterArray.SetValue(instanceExpression, 0);
+                Expression propertyExpression = Expression.PropertyOrField(instanceExpression, member.Name);
+                Type funcType = typeof(Func<,>).MakeGenericType(entityType, typeof(object));//function type
+                var genericLambdaMethod = ReflectionManager.Expression.LambdaMethod.MakeGenericMethod(funcType);
+                var lambdaExpression = genericLambdaMethod.Invoke(null, new object[]
+                {
+                        Expression.Convert(propertyExpression,typeof(object)),parameterArray
+                });
+                Type propertyProviderType = typeof(DefaultEntityPropertyValueProvider<>).MakeGenericType(entityType);
+                var propertyProvider = Activator.CreateInstance(propertyProviderType);
+                var setGetterMethod = propertyProviderType.GetMethod("SetGetter");
+                setGetterMethod.Invoke(propertyProvider, new object[] { lambdaExpression });
+
+                //setter
+                lambdaExpression = null;
+                Type valueType = typeof(object);
+                genericLambdaMethod = ReflectionManager.Expression.LambdaMethod.MakeGenericMethod(typeof(Action<,>).MakeGenericType(entityType, valueType));
+                ParameterExpression valueParameter = Expression.Parameter(valueType, "value");
+                var parameterExpressionArray = new ParameterExpression[2] { instanceExpression, valueParameter };
+                if (member is PropertyInfo propertyInfo)
+                {
+                    Expression readValueParameter = ExpressionHelper.EnsureCastExpression(valueParameter, propertyInfo.PropertyType);
+                    MethodInfo setMethod = propertyInfo.GetSetMethod(true);
+                    if (setMethod == null)
+                    {
+                        throw new ArgumentException("Property does not have a setter.");
+                    }
+
+                    Expression readInstanceParameter = ExpressionHelper.EnsureCastExpression(instanceExpression, member.DeclaringType);
+                    Expression setExpression = Expression.Call(readInstanceParameter, setMethod, readValueParameter);
+
+                    lambdaExpression = genericLambdaMethod.Invoke(null, new object[]
+                    {
+                        setExpression,parameterExpressionArray
+                    });
+                }
+                else if (member is FieldInfo fieldInfo)
+                {
+                    Expression sourceExpression = ExpressionHelper.EnsureCastExpression(instanceExpression, fieldInfo.DeclaringType);
+                    Expression fieldExpression = Expression.Field(sourceExpression, fieldInfo);
+
+                    Expression valueExpression = ExpressionHelper.EnsureCastExpression(valueParameter, fieldExpression.Type);
+                    BinaryExpression assignExpression = Expression.Assign(fieldExpression, valueExpression);
+
+                    lambdaExpression = genericLambdaMethod.Invoke(null, new object[]
+                    {
+                        assignExpression,parameterExpressionArray
+                    });
+                }
+                if (lambdaExpression != null)
+                {
+                    var setSetterMethod = propertyProviderType.GetMethod("SetSetter");
+                    setSetterMethod.Invoke(propertyProvider, new object[] { lambdaExpression });
+                }
+
+                return propertyProvider as IEntityPropertyValueProvider;
             }
 
             #endregion

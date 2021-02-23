@@ -5,7 +5,7 @@ namespace EZNEW.Develop.Entity
     /// <summary>
     /// Entity relation
     /// </summary>
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = true)]
     public class EntityRelationAttribute : Attribute
     {
         /// <summary>

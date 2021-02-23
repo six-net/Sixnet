@@ -26,6 +26,15 @@ namespace EZNEW.Mapper
         /// <returns>Return the target data object</returns>
         public static TTarget MapTo<TTarget>(object sourceObject)
         {
+            if (sourceObject == null)
+            {
+                return default;
+            }
+            var targetType = typeof(TTarget);
+            if (targetType == sourceObject.GetType())
+            {
+                return (TTarget)sourceObject;
+            }
             if (Current == null)
             {
                 throw new EZNEWException($"{nameof(Current)} mapper is not initialized");

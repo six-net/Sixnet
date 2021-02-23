@@ -8,6 +8,7 @@ using EZNEW.Paging;
 using EZNEW.DependencyInjection;
 using EZNEW.Develop.Command;
 using EZNEW.Data.Cache.Command;
+using EZNEW.Queue;
 
 namespace EZNEW.Data.Cache
 {

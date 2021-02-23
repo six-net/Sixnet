@@ -51,7 +51,7 @@ namespace EZNEW.Develop.UnitOfWork
         /// command execute engine
         /// key:engine key
         /// </summary>
-        Dictionary<string, Tuple<ICommandEngine, List<ICommand>>> commandEngineGroups = null;
+        Dictionary<string, Tuple<ICommandExecutor, List<ICommand>>> commandEngineGroups = null;
 
         /// <summary>
         /// allow empty result command count
@@ -264,7 +264,7 @@ namespace EZNEW.Develop.UnitOfWork
             //resolve records
             ResolveActivationRecord();
             var recordIds = activationMaxRecordIds.Values.OrderBy(c => c);
-            commandEngineGroups = new Dictionary<string, Tuple<ICommandEngine, List<ICommand>>>(activationMaxRecordIds.Count);
+            commandEngineGroups = new Dictionary<string, Tuple<ICommandExecutor, List<ICommand>>>(activationMaxRecordIds.Count);
             commandCollection = new List<ICommand>(activationMaxRecordIds.Count);
             allowEmptyResultCommandCount = 0;
             foreach (var recordId in recordIds)
@@ -296,7 +296,7 @@ namespace EZNEW.Develop.UnitOfWork
                     {
                         allowEmptyResultCommandCount += 1;
                     }
-                    var commandEngines = CommandExecuteManager.GetCommandEngines(command);
+                    var commandEngines = CommandExecuteManager.GetCommandExecutors(command);
                     if (commandEngines.IsNullOrEmpty())
                     {
                         continue;
@@ -308,9 +308,9 @@ namespace EZNEW.Develop.UnitOfWork
                             continue;
                         }
                         var engineKey = engine.IdentityKey;
-                        if (!commandEngineGroups.TryGetValue(engineKey, out Tuple<ICommandEngine, List<ICommand>> engineValues))
+                        if (!commandEngineGroups.TryGetValue(engineKey, out Tuple<ICommandExecutor, List<ICommand>> engineValues))
                         {
-                            engineValues = new Tuple<ICommandEngine, List<ICommand>>(engine, new List<ICommand>(activationRecordValues.Count));
+                            engineValues = new Tuple<ICommandExecutor, List<ICommand>>(engine, new List<ICommand>(activationRecordValues.Count));
                         }
                         engineValues.Item2.Add(command);
                         commandEngineGroups[engineKey] = engineValues;
@@ -379,25 +379,29 @@ namespace EZNEW.Develop.UnitOfWork
 
                 //build commands
                 BuildCommand();
+                WorkCommitResult commitResult = null;
                 if (commandEngineGroups.IsNullOrEmpty())
                 {
-                    return WorkCommitResult.Empty();
+                    commitResult = WorkCommitResult.Empty();
                 }
-                var executeOption = GetCommandExecuteOption();
-
-                if (allowTraceLog)
+                else
                 {
-                    LogManager.LogInformation<DefaultWork>($"Work：{WorkId},Command execute option：{JsonSerializeHelper.ObjectToJson(executeOption)}");
-                    LogManager.LogInformation<DefaultWork>($"Work：{WorkId},Command engine keys：{string.Join(",", commandEngineGroups.Keys)},Command count：{commandCollection.Count}");
+                    var executeOptions = GetCommandExecuteOptions();
+
+                    if (allowTraceLog)
+                    {
+                        LogManager.LogInformation<DefaultWork>($"Work：{WorkId},Command execute options：{JsonSerializeHelper.ObjectToJson(executeOptions)}");
+                        LogManager.LogInformation<DefaultWork>($"Work：{WorkId},Command engine keys：{string.Join(",", commandEngineGroups.Keys)},Command count：{commandCollection.Count}");
+                    }
+
+                    int returnValue = await CommandExecuteManager.ExecuteAsync(executeOptions, commandEngineGroups.Values).ConfigureAwait(false);
+                    commitResult = new WorkCommitResult()
+                    {
+                        CommitCommandCount = commandCollection.Count,
+                        ExecutedDataCount = returnValue,
+                        AllowEmptyResultCommandCount = allowEmptyResultCommandCount
+                    };
                 }
-
-                var result = await CommandExecuteManager.ExecuteAsync(executeOption, commandEngineGroups.Values).ConfigureAwait(false);
-                var commitResult = new WorkCommitResult()
-                {
-                    CommitCommandCount = commandCollection.Count,
-                    ExecutedDataCount = result,
-                    AllowEmptyResultCommandCount = allowEmptyResultCommandCount
-                };
 
                 // trigger command callback event
                 TriggerCommandCallbackEvent(commitResult.EmptyResultOrSuccess);
@@ -420,7 +424,7 @@ namespace EZNEW.Develop.UnitOfWork
 
                 if (allowTraceLog)
                 {
-                    LogManager.LogInformation<DefaultWork>($"Work：{WorkId},Commit command count：{commitResult.CommitCommandCount},Execute data count：{result},Allow empty result command result：{allowEmptyResultCommandCount}");
+                    LogManager.LogInformation<DefaultWork>($"Work：{WorkId},Commit command count：{commitResult.CommitCommandCount},Execute data count：{commitResult.ExecutedDataCount},Allow empty result command result：{allowEmptyResultCommandCount}");
                 }
 
                 return commitResult;
@@ -444,10 +448,10 @@ namespace EZNEW.Develop.UnitOfWork
         }
 
         /// <summary>
-        /// Get command execute option
+        /// Get command execute options
         /// </summary>
-        /// <returns>Return command execute option</returns>
-        CommandExecuteOptions GetCommandExecuteOption()
+        /// <returns>Return the command execute options</returns>
+        CommandExecuteOptions GetCommandExecuteOptions()
         {
             if (!IsolationLevel.HasValue)
             {

@@ -43,7 +43,7 @@ namespace EZNEW.Configuration
             /// <summary>
             /// Gets the database engines
             /// </summary>
-            static Dictionary<DatabaseServerType, IDatabaseEngine> DatabaseEngines { get; } = new Dictionary<DatabaseServerType, IDatabaseEngine>();
+            static Dictionary<DatabaseServerType, IDatabaseProvider> DatabaseEngines { get; } = new Dictionary<DatabaseServerType, IDatabaseProvider>();
 
             /// <summary>
             /// servertype&entity object name
@@ -194,7 +194,7 @@ namespace EZNEW.Configuration
             /// </summary>
             /// <param name="serverType">Database server type</param>
             /// <param name="databaseEngine">Database engine</param>
-            internal static void ConfigureDatabaseEngine(DatabaseServerType serverType, IDatabaseEngine databaseEngine)
+            internal static void ConfigureDatabaseEngine(DatabaseServerType serverType, IDatabaseProvider databaseEngine)
             {
                 if (databaseEngine == null)
                 {
@@ -209,7 +209,7 @@ namespace EZNEW.Configuration
             /// </summary>
             /// <param name="serverType">Database server type</param>
             /// <returns>Return database engine</returns>
-            internal static IDatabaseEngine GetDatabaseEngine(DatabaseServerType serverType)
+            internal static IDatabaseProvider GetDatabaseEngine(DatabaseServerType serverType)
             {
                 DatabaseEngines.TryGetValue(serverType, out var databaseEngine);
                 return databaseEngine;

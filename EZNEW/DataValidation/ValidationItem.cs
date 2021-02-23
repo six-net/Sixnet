@@ -1,8 +1,8 @@
-﻿using System;
+﻿using EZNEW.DataValidation.Validators;
+using EZNEW.ExpressionUtil;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
-using EZNEW.DataValidation.Validators;
-using EZNEW.ExpressionUtil;
 
 namespace EZNEW.DataValidation
 {
@@ -59,9 +59,8 @@ namespace EZNEW.DataValidation
             this.validator = validator;
             this.fieldName = fieldName;
             errorMessage = field.ErrorMessage;
-            if (field.CompareValue is Expression<Func<T, dynamic>>)
+            if (field.CompareValue is Expression<Func<T, dynamic>> compareExpress)
             {
-                Expression<Func<T, dynamic>> compareExpress = (Expression<Func<T, dynamic>>)field.CompareValue;
                 comparePropertyName = ExpressionHelper.GetExpressionText(compareExpress);
                 compareValue = compareExpress.Compile();
             }

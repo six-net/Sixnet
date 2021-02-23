@@ -12,7 +12,7 @@ namespace EZNEW.Serialize
     public static class JsonSerializeHelper
     {
         private static readonly IJsonSerializer JsonSerializer = null;
-        private static JsonSerializeSetting ResolveNonPublicSetting = new JsonSerializeSetting() { ResolveNonPublic = true };
+        private static readonly JsonSerializeSetting ResolveNonPublicSetting = new JsonSerializeSetting() { ResolveNonPublic = true };
         static JsonSerializeHelper()
         {
             JsonSerializer = ContainerManager.Resolve<IJsonSerializer>();

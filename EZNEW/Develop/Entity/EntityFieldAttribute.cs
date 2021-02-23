@@ -5,7 +5,7 @@ namespace EZNEW.Develop.Entity
     /// <summary>
     /// Entity field attribute
     /// </summary>
-    [AttributeUsage(AttributeTargets.Property)]
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
     public class EntityFieldAttribute : Attribute
     {
         /// <summary>

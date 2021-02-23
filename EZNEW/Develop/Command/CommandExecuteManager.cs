@@ -8,6 +8,7 @@ using EZNEW.Develop.Entity;
 using EZNEW.DependencyInjection;
 using EZNEW.Paging;
 using System.Text.RegularExpressions;
+using EZNEW.Data;
 
 namespace EZNEW.Develop.Command
 {
@@ -17,60 +18,60 @@ namespace EZNEW.Develop.Command
     public static class CommandExecuteManager
     {
         /// <summary>
-        /// Gets or sets the command execute engines
+        /// Gets or sets the command executors
         /// </summary>
-        public static Func<ICommand, List<ICommandEngine>> ResolveCommandEngine { get; set; }
+        public static Func<ICommand, List<ICommandExecutor>> GetCommandExecutorProxy { get; set; }
 
         /// <summary>
-        /// Gets or sets whether allow none command engine
+        /// Gets or sets whether allow none command executor
         /// </summary>
-        public static bool AllowNoneCommandEngine { get; set; } = false;
+        public static bool AllowNoneCommandExecutor { get; set; } = false;
 
         #region Execute command
 
         /// <summary>
         /// Execute command
         /// </summary>
-        /// <param name="executeOption">Execute option</param>
+        /// <param name="executeOptions">Execute options</param>
         /// <param name="commands">Commands</param>
         /// <returns>Return the execute data effect numbers</returns>
-        internal static async Task<int> ExecuteAsync(CommandExecuteOptions executeOption, IEnumerable<ICommand> commands)
+        internal static async Task<int> ExecuteAsync(CommandExecuteOptions executeOptions, IEnumerable<ICommand> commands)
         {
             if (commands.IsNullOrEmpty())
             {
                 return 0;
             }
-            var cmdEngineGroupDictionary = GroupCommandByEngines(commands);
-            return await ExecuteAsync(executeOption, cmdEngineGroupDictionary.Values).ConfigureAwait(false);
+            var cmdExecutorGroupDictionary = GroupCommandByExecutor(commands);
+            return await ExecuteAsync(executeOptions, cmdExecutorGroupDictionary.Values).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Execute command
         /// </summary>
-        /// <param name="executeOption">Execute option</param>
-        /// <param name="commandEngineGroup">Command engine group</param>
+        /// <param name="executeOptions">Execute options</param>
+        /// <param name="commandExecutorGroup">Command executor group</param>
         /// <returns>Return the execute data effect numbers</returns>
-        internal static async Task<int> ExecuteAsync(CommandExecuteOptions executeOption, IEnumerable<Tuple<ICommandEngine, List<ICommand>>> commandEngineGroup)
+        internal static async Task<int> ExecuteAsync(CommandExecuteOptions executeOptions, IEnumerable<Tuple<ICommandExecutor, List<ICommand>>> commandExecutorGroup)
         {
-            if (commandEngineGroup.IsNullOrEmpty())
+            if (commandExecutorGroup.IsNullOrEmpty())
             {
                 return 0;
             }
-            var groupCount = commandEngineGroup.Count();
+            var groupCount = commandExecutorGroup.Count();
 
-            //Single engine
+            //Single executor
             if (groupCount == 1)
             {
-                var firstGroup = commandEngineGroup.First();
-                return await firstGroup.Item1.ExecuteAsync(executeOption, firstGroup.Item2).ConfigureAwait(false);
+                var firstGroup = commandExecutorGroup.First();
+                return await firstGroup.Item1.ExecuteAsync(executeOptions, firstGroup.Item2).ConfigureAwait(false);
             }
 
-            //Multiple engine
+            //Multiple executor
             Task<int>[] valueTasks = new Task<int>[groupCount];
             var groupIndex = 0;
-            foreach (var engineGroupItem in commandEngineGroup)
+            foreach (var executorGroupItem in commandExecutorGroup)
             {
-                valueTasks[groupIndex] = engineGroupItem.Item1.ExecuteAsync(executeOption, engineGroupItem.Item2);
+                valueTasks[groupIndex] = executorGroupItem.Item1.ExecuteAsync(executeOptions, executorGroupItem.Item2);
                 groupIndex++;
             }
             return (await Task.WhenAll(valueTasks).ConfigureAwait(false)).Sum();
@@ -88,28 +89,28 @@ namespace EZNEW.Develop.Command
         /// <returns>Return datas</returns>
         internal static async Task<IEnumerable<T>> QueryAsync<T>(ICommand command)
         {
-            var groupEngines = GroupCommandByEngines(new List<ICommand>(1) { command });
-            if (groupEngines == null || groupEngines.Count <= 0)
+            var groupExecutors = GroupCommandByExecutor(new List<ICommand>(1) { command });
+            if (groupExecutors == null || groupExecutors.Count <= 0)
             {
                 return Array.Empty<T>();
             }
 
-            #region Single engine
+            #region Single executor
 
-            if (groupEngines.Count == 1)
+            if (groupExecutors.Count == 1)
             {
-                return await groupEngines.First().Value.Item1.QueryAsync<T>(command).ConfigureAwait(false);
+                return await groupExecutors.First().Value.Item1.QueryAsync<T>(command).ConfigureAwait(false);
             }
 
             #endregion
 
-            #region Multiple engines
+            #region Multiple executors
 
-            Task<IEnumerable<T>>[] queryTasks = new Task<IEnumerable<T>>[groupEngines.Count];
+            Task<IEnumerable<T>>[] queryTasks = new Task<IEnumerable<T>>[groupExecutors.Count];
             var groupIndex = 0;
-            foreach (var engineGroup in groupEngines)
+            foreach (var executorGroup in groupExecutors)
             {
-                queryTasks[groupIndex] = engineGroup.Value.Item1.QueryAsync<T>(command);
+                queryTasks[groupIndex] = executorGroup.Value.Item1.QueryAsync<T>(command);
                 groupIndex++;
             }
             var datas = (await Task.WhenAll(queryTasks).ConfigureAwait(false)).SelectMany(c => c);
@@ -140,22 +141,22 @@ namespace EZNEW.Develop.Command
             {
                 throw new EZNEWException($"Paging information is not set");
             }
-            var groupEngines = GroupCommandByEngines(new List<ICommand>(1) { command });
-            if (groupEngines == null || groupEngines.Count <= 0)
+            var groupExecutors = GroupCommandByExecutor(new List<ICommand>(1) { command });
+            if (groupExecutors == null || groupExecutors.Count <= 0)
             {
                 return Pager.Empty<T>();
             }
 
-            #region Single engine
+            #region Single executor
 
-            if (groupEngines.Count == 1)
+            if (groupExecutors.Count == 1)
             {
-                return await groupEngines.First().Value.Item1.QueryPagingAsync<T>(command).ConfigureAwait(false);
+                return await groupExecutors.First().Value.Item1.QueryPagingAsync<T>(command).ConfigureAwait(false);
             }
 
             #endregion
 
-            #region Multiple engines
+            #region Multiple executors
 
             int pageSize = command.Query.PagingInfo.PageSize;
             int page = command.Query.PagingInfo.Page;
@@ -163,11 +164,11 @@ namespace EZNEW.Develop.Command
             command.Query.PagingInfo.Page = 1;
 
             //Paging task
-            Task<IPaging<T>>[] pagingTasks = new Task<IPaging<T>>[groupEngines.Count];
+            Task<IPaging<T>>[] pagingTasks = new Task<IPaging<T>>[groupExecutors.Count];
             var groupIndex = 0;
-            foreach (var groupEngine in groupEngines)
+            foreach (var groupExecutor in groupExecutors)
             {
-                pagingTasks[groupIndex] = groupEngine.Value.Item1.QueryPagingAsync<T>(command);
+                pagingTasks[groupIndex] = groupExecutor.Value.Item1.QueryPagingAsync<T>(command);
                 groupIndex++;
             }
             var allPagings = await Task.WhenAll(pagingTasks).ConfigureAwait(false);
@@ -201,14 +202,14 @@ namespace EZNEW.Develop.Command
         /// <returns>Return whether does the data exist</returns>
         internal static async Task<bool> QueryAsync(ICommand command)
         {
-            var groupEngines = GroupCommandByEngines(new List<ICommand>(1) { command });
-            if (groupEngines == null || groupEngines.Count <= 0)
+            var groupExecutors = GroupCommandByExecutor(new List<ICommand>(1) { command });
+            if (groupExecutors == null || groupExecutors.Count <= 0)
             {
                 return false;
             }
-            foreach (var groupEngine in groupEngines)
+            foreach (var groupExecutor in groupExecutors)
             {
-                var result = await groupEngine.Value.Item1.QueryAsync(command).ConfigureAwait(false);
+                var result = await groupExecutor.Value.Item1.QueryAsync(command).ConfigureAwait(false);
                 if (result)
                 {
                     return result;
@@ -225,25 +226,25 @@ namespace EZNEW.Develop.Command
         /// <returns>Return data</returns>
         internal static async Task<T> AggregateValueAsync<T>(ICommand command)
         {
-            var groupEngines = GroupCommandByEngines(new List<ICommand>(1) { command });
-            if (groupEngines == null || groupEngines.Count <= 0)
+            var groupExecutors = GroupCommandByExecutor(new List<ICommand>(1) { command });
+            if (groupExecutors == null || groupExecutors.Count <= 0)
             {
                 return default;
             }
 
-            //Single engine
-            if (groupEngines.Count == 1)
+            //Single executor
+            if (groupExecutors.Count == 1)
             {
-                var firstGroup = groupEngines.First();
+                var firstGroup = groupExecutors.First();
                 return await firstGroup.Value.Item1.AggregateValueAsync<T>(command).ConfigureAwait(false);
             }
 
-            //Multiple engine
-            var aggregateTasks = new Task<T>[groupEngines.Count];
+            //Multiple executor
+            var aggregateTasks = new Task<T>[groupExecutors.Count];
             var groupIndex = 0;
-            foreach (var groupEngine in groupEngines)
+            foreach (var groupExecutor in groupExecutors)
             {
-                aggregateTasks[groupIndex] = groupEngine.Value.Item1.AggregateValueAsync<T>(command);
+                aggregateTasks[groupIndex] = groupExecutor.Value.Item1.AggregateValueAsync<T>(command);
                 groupIndex++;
             }
             var datas = await Task.WhenAll(aggregateTasks).ConfigureAwait(false);
@@ -274,25 +275,25 @@ namespace EZNEW.Develop.Command
         /// <returns>Return data set</returns>
         internal static async Task<DataSet> QueryMultipleAsync(ICommand command)
         {
-            var groupEngines = GroupCommandByEngines(new List<ICommand>(1) { command });
-            if (groupEngines == null || groupEngines.Count <= 0)
+            var groupExecutors = GroupCommandByExecutor(new List<ICommand>(1) { command });
+            if (groupExecutors == null || groupExecutors.Count <= 0)
             {
                 return new DataSet();
             }
 
-            //Single engine
-            if (groupEngines.Count == 1)
+            //Single executor
+            if (groupExecutors.Count == 1)
             {
-                var firstGroup = groupEngines.First();
+                var firstGroup = groupExecutors.First();
                 return await firstGroup.Value.Item1.QueryMultipleAsync(command).ConfigureAwait(false);
             }
 
-            //Multiple engine
-            var queryTasks = new Task<DataSet>[groupEngines.Count];
+            //Multiple executor
+            var queryTasks = new Task<DataSet>[groupExecutors.Count];
             var groupIndex = 0;
-            foreach (var groupEngine in groupEngines)
+            foreach (var groupExecutor in groupExecutors)
             {
-                queryTasks[groupIndex] = groupEngine.Value.Item1.QueryMultipleAsync(command);
+                queryTasks[groupIndex] = groupExecutor.Value.Item1.QueryMultipleAsync(command);
                 groupIndex++;
             }
 
@@ -314,94 +315,94 @@ namespace EZNEW.Develop.Command
 
         #endregion
 
-        #region Group command engine
+        #region Group command by executor
 
         /// <summary>
-        /// Group command engine
+        /// Group command executor
         /// </summary>
         /// <param name="commands">Commands</param>
-        /// <returns>Return command engine group</returns>
-        static Dictionary<string, Tuple<ICommandEngine, List<ICommand>>> GroupCommandByEngines(IEnumerable<ICommand> commands)
+        /// <returns>Return command executor group</returns>
+        static Dictionary<string, Tuple<ICommandExecutor, List<ICommand>>> GroupCommandByExecutor(IEnumerable<ICommand> commands)
         {
             if (commands.IsNullOrEmpty())
             {
-                return new Dictionary<string, Tuple<ICommandEngine, List<ICommand>>>(0);
+                return new Dictionary<string, Tuple<ICommandExecutor, List<ICommand>>>(0);
             }
-            if (ResolveCommandEngine == null)
+            if (GetCommandExecutorProxy == null)
             {
-                var defaultCmdEngine = ContainerManager.Resolve<ICommandEngine>();
-                if (defaultCmdEngine != null)
+                var defaultCmdExecutor = ContainerManager.Resolve<ICommandExecutor>();
+                if (defaultCmdExecutor != null)
                 {
-                    return new Dictionary<string, Tuple<ICommandEngine, List<ICommand>>>()
+                    return new Dictionary<string, Tuple<ICommandExecutor, List<ICommand>>>()
                     {
                         {
-                            defaultCmdEngine.IdentityKey,
-                            new Tuple<ICommandEngine, List<ICommand>>(defaultCmdEngine,commands.ToList())
+                            defaultCmdExecutor.IdentityKey,
+                            new Tuple<ICommandExecutor, List<ICommand>>(defaultCmdExecutor,commands.ToList())
                         }
                     };
                 }
-                throw new EZNEWException($"{nameof(ResolveCommandEngine)} didn't set any value");
+                throw new EZNEWException($"{nameof(GetCommandExecutorProxy)} didn't set any value");
             }
-            var cmdEngineDict = new Dictionary<string, Tuple<ICommandEngine, List<ICommand>>>();
+            var cmdExecutorDict = new Dictionary<string, Tuple<ICommandExecutor, List<ICommand>>>();
             foreach (var command in commands)
             {
                 if (command == null)
                 {
                     continue;
                 }
-                var cmdEngines = ResolveCommandEngine(command);
-                if (cmdEngines.IsNullOrEmpty())
+                var cmdExecutors = GetCommandExecutorProxy(command);
+                if (cmdExecutors.IsNullOrEmpty())
                 {
                     continue;
                 }
-                foreach (var engine in cmdEngines)
+                foreach (var executor in cmdExecutors)
                 {
-                    if (engine == null)
+                    if (executor == null)
                     {
                         continue;
                     }
-                    var engineKey = engine.IdentityKey;
-                    cmdEngineDict.TryGetValue(engineKey, out Tuple<ICommandEngine, List<ICommand>> engineValues);
-                    if (engineValues == null)
+                    var executorKey = executor.IdentityKey;
+                    cmdExecutorDict.TryGetValue(executorKey, out Tuple<ICommandExecutor, List<ICommand>> executorValues);
+                    if (executorValues == null)
                     {
-                        engineValues = new Tuple<ICommandEngine, List<ICommand>>(engine, new List<ICommand>());
+                        executorValues = new Tuple<ICommandExecutor, List<ICommand>>(executor, new List<ICommand>());
                     }
-                    engineValues.Item2.Add(command);
-                    cmdEngineDict[engineKey] = engineValues;
+                    executorValues.Item2.Add(command);
+                    cmdExecutorDict[executorKey] = executorValues;
                 }
             }
-            return cmdEngineDict;
+            return cmdExecutorDict;
         }
 
         /// <summary>
-        /// Gets command engine
+        /// Gets command executors
         /// </summary>
         /// <param name="command">Command</param>
-        /// <returns>Return command engines</returns>
-        internal static List<ICommandEngine> GetCommandEngines(ICommand command)
+        /// <returns>Return command executors</returns>
+        internal static List<ICommandExecutor> GetCommandExecutors(ICommand command)
         {
             if (command == null)
             {
-                return new List<ICommandEngine>(0);
+                return new List<ICommandExecutor>(0);
             }
-            List<ICommandEngine> commandEngines = null;
-            if (ResolveCommandEngine == null)
+            List<ICommandExecutor> commandExecutors = null;
+            if (GetCommandExecutorProxy == null)
             {
-                var defaultCmdEngine = ContainerManager.Resolve<ICommandEngine>();
-                if (defaultCmdEngine != null)
+                var defaultCmdExecutor = ContainerManager.Resolve<ICommandExecutor>();
+                if (defaultCmdExecutor != null)
                 {
-                    commandEngines = new List<ICommandEngine>(1) { defaultCmdEngine };
+                    commandExecutors = new List<ICommandExecutor>(1) { defaultCmdExecutor };
                 }
             }
             else
             {
-                commandEngines = ResolveCommandEngine(command);
+                commandExecutors = GetCommandExecutorProxy(command);
             }
-            if (!AllowNoneCommandEngine && commandEngines.IsNullOrEmpty())
+            if (!AllowNoneCommandExecutor && commandExecutors.IsNullOrEmpty())
             {
-                throw new EZNEWException("Didn't set any command engines");
+                throw new EZNEWException("Didn't set any command executors");
             }
-            return commandEngines ?? new List<ICommandEngine>(0);
+            return commandExecutors ?? new List<ICommandExecutor>(0);
         }
 
         #endregion
@@ -444,6 +445,25 @@ namespace EZNEW.Develop.Command
                 count++;
             }
             return result / count;
+        }
+
+        #endregion
+
+        #region Bulk insert
+
+        /// <summary>
+        /// Bulk insert datas
+        /// </summary>
+        /// <param name="server">Database server</param>
+        /// <param name="dataTable">Data table</param>
+        /// <param name="bulkInsertOptions">Bulk insert options</param>
+        internal static async Task BulkInsertAsync(DatabaseServer server, DataTable dataTable, IBulkInsertOptions bulkInsertOptions = null)
+        {
+            var defaultCmdExecutor = ContainerManager.Resolve<ICommandExecutor>();
+            if (defaultCmdExecutor != null)
+            {
+                await defaultCmdExecutor.BulkInsertAsync(server, dataTable, bulkInsertOptions).ConfigureAwait(false);
+            }
         }
 
         #endregion

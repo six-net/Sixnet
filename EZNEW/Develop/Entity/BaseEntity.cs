@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using static EZNEW.Dapper.SqlMapper;
 using EZNEW.Develop.Command;
 using EZNEW.Develop.CQuery;
 using EZNEW.Fault;
+using EZNEW.ValueType;
+using static EZNEW.Dapper.SqlMapper;
 
 namespace EZNEW.Develop.Entity
 {
@@ -13,7 +14,6 @@ namespace EZNEW.Develop.Entity
     /// </summary>
     public abstract class BaseEntity<T> : IQueryModel<T> where T : BaseEntity<T>, new()
     {
-        protected Dictionary<string, dynamic> valueDict = new Dictionary<string, dynamic>();//field values
         string identityValue = string.Empty;
         bool loadedIdentityValue = false;
         protected static Type entityType = typeof(T);
@@ -29,17 +29,28 @@ namespace EZNEW.Develop.Entity
 
         #region Methods
 
+        IEntityPropertyValueProvider GetValueProvider(string propertyName)
+        {
+            var valueProvider = EntityManager.GetEntityField(entityType, propertyName)?.ValueProvider;
+            if (valueProvider == null)
+            {
+                throw new EZNEWException($"{entityType.FullName} => {propertyName}'s value provider is null");
+            }
+            return valueProvider;
+        }
+
         /// <summary>
         /// Gets the modifed values
         /// </summary>
         /// <returns>Return the modify values</returns>
         internal Dictionary<string, dynamic> GetModifyValues(T oldValue)
         {
+            var valueDict = GetAllValues();
             if (oldValue == null)
             {
                 return valueDict;
             }
-            var oldValues = oldValue.GetAllPropertyValues();
+            var oldValues = oldValue.GetAllValues();
             if (oldValues.IsNullOrEmpty())
             {
                 return valueDict;
@@ -71,10 +82,7 @@ namespace EZNEW.Develop.Entity
             Dictionary<string, dynamic> values = new Dictionary<string, dynamic>(keysCount);
             foreach (var key in primaryKeys)
             {
-                if (valueDict.ContainsKey(key))
-                {
-                    values.Add(key, valueDict[key]);
-                }
+                values.Add(key, GetValue(key));
             }
             return values;
         }
@@ -131,48 +139,68 @@ namespace EZNEW.Develop.Entity
         }
 
         /// <summary>
-        /// Gets the property name
+        /// Gets the property or field name
         /// </summary>
-        /// <param name="propertyName">Property name</param>
-        /// <returns>Return property value</returns>
-        public dynamic GetPropertyValue(string propertyName)
+        /// <param name="name">Property or field name</param>
+        /// <returns>Return the value</returns>
+        public dynamic GetValue(string name)
         {
-            valueDict.TryGetValue(propertyName, out var value);
-            return value;
+            var valueProvider = GetValueProvider(name);
+            return valueProvider.Get(this);
         }
 
         /// <summary>
-        /// Gets the property value
+        /// Gets the property or field name
         /// </summary>
         /// <typeparam name="TValue">Value type</typeparam>
-        /// <param name="propertyName">Property name</param>
-        /// <returns>Return the property value</returns>
-        public TValue GetPropertyValue<TValue>(string propertyName)
+        /// <param name="name">Property or field name</param>
+        /// <returns>Return the value</returns>
+        public TValue GetValue<TValue>(string name)
         {
-            return valueDict.GetValue<TValue>(propertyName);
+            var value = GetValue(name);
+            if (value is TValue)
+            {
+                return value;
+            }
+            return DataConverter.Convert<TValue>(value);
         }
 
         /// <summary>
-        /// Sets the property value
+        /// Sets the property or field value
         /// </summary>
-        /// <param name="propertyName">Property name</param>
+        /// <param name="name">Property or field name</param>
         /// <param name="value">Value</param>
-        public void SetPropertyValue(string propertyName, dynamic value)
+        public void SetValue(string name, dynamic value)
         {
-            IEnumerableExtensions.SetValue(valueDict, propertyName, value);
-            if (loadedIdentityValue && EntityManager.IsPrimaryKey(entityType, propertyName))
+            var valueProvider = GetValueProvider(name);
+            valueProvider.Set(this, value);
+            if (loadedIdentityValue && EntityManager.IsPrimaryKey(entityType, name))
             {
                 loadedIdentityValue = false;
             }
         }
 
         /// <summary>
-        /// Gets all property values
+        /// Gets all property or field values
         /// </summary>
         /// <returns>Return all property values</returns>
-        public Dictionary<string, dynamic> GetAllPropertyValues()
+        public Dictionary<string, dynamic> GetAllValues()
         {
-            return valueDict;
+            var entityConfig = EntityManager.GetEntityConfiguration(entityType);
+            if (entityConfig == null)
+            {
+                throw new EZNEWException($"Get {entityType.FullName}'s configuration is null");
+            }
+            var allValues = new Dictionary<string, dynamic>(entityConfig.AllFields.Count);
+            foreach (var field in entityConfig.AllFields)
+            {
+                if (field.Value?.ValueProvider == null)
+                {
+                    throw new EZNEWException($"{entityType.FullName} => {field.Key}'s value provider is null");
+                }
+                allValues[field.Key] = field.Value.ValueProvider.Get(this);
+            }
+            return allValues;
         }
 
         /// <summary>
@@ -189,7 +217,7 @@ namespace EZNEW.Develop.Entity
             }
             foreach (var fieldItem in entityConfig.AllFields)
             {
-                var value = GetPropertyValue(fieldItem.Key);
+                var value = GetValue(fieldItem.Key);
                 var dbType = LookupDbType(fieldItem.Value.DataType, fieldItem.Key, false, out ITypeHandler handler);
                 parameters.Add(fieldItem.Key, value, dbType: dbType);
             }
@@ -210,8 +238,8 @@ namespace EZNEW.Develop.Entity
             }
             foreach (var key in primaryKeys)
             {
-                var value = GetPropertyValue(key);
-                newData.SetPropertyValue(key, value);
+                var value = GetValue(key);
+                newData.SetValue(key, value);
             }
             return newData;
         }
@@ -222,11 +250,17 @@ namespace EZNEW.Develop.Entity
         /// <returns>Return a new entity object</returns>
         public T Copy()
         {
-            var newData = new T();
-            newData.valueDict = valueDict.Select(c => c).ToDictionary(c => c.Key, c => c.Value);
-            newData.QueryDataTotalCount = QueryDataTotalCount;
-            newData.loadedIdentityValue = loadedIdentityValue;
-            newData.identityValue = identityValue;
+            var newData = new T
+            {
+                QueryDataTotalCount = QueryDataTotalCount,
+                loadedIdentityValue = loadedIdentityValue,
+                identityValue = identityValue
+            };
+            var allValues = GetAllValues();
+            foreach (var item in allValues)
+            {
+                newData.SetValue(item.Key, item.Value);
+            }
             return newData;
         }
 
