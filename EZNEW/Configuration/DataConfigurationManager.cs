@@ -41,9 +41,9 @@ namespace EZNEW.Configuration
             static readonly Dictionary<DatabaseServerType, IQueryTranslator> DatabaseServerQueryTranslators = new Dictionary<DatabaseServerType, IQueryTranslator>();
 
             /// <summary>
-            /// Gets the database engines
+            /// Gets the database providers
             /// </summary>
-            static Dictionary<DatabaseServerType, IDatabaseProvider> DatabaseEngines { get; } = new Dictionary<DatabaseServerType, IDatabaseProvider>();
+            static Dictionary<DatabaseServerType, IDatabaseProvider> DatabaseProviders { get; } = new Dictionary<DatabaseServerType, IDatabaseProvider>();
 
             /// <summary>
             /// servertype&entity object name
@@ -187,32 +187,32 @@ namespace EZNEW.Configuration
 
             #endregion
 
-            #region Database engine
+            #region Database provider
 
             /// <summary>
-            /// Configure database engine
+            /// Configure database provider
             /// </summary>
             /// <param name="serverType">Database server type</param>
-            /// <param name="databaseEngine">Database engine</param>
-            internal static void ConfigureDatabaseEngine(DatabaseServerType serverType, IDatabaseProvider databaseEngine)
+            /// <param name="databaseProvider">Database provider</param>
+            internal static void ConfigureDatabaseProvider(DatabaseServerType serverType, IDatabaseProvider databaseProvider)
             {
-                if (databaseEngine == null)
+                if (databaseProvider == null)
                 {
                     return;
                 }
-                DatabaseEngines[serverType] = databaseEngine;
+                DatabaseProviders[serverType] = databaseProvider;
                 InitDatabaseAllEntityConfiguration(serverType);
             }
 
             /// <summary>
-            /// Get database engine
+            /// Get database provider
             /// </summary>
             /// <param name="serverType">Database server type</param>
-            /// <returns>Return database engine</returns>
-            internal static IDatabaseProvider GetDatabaseEngine(DatabaseServerType serverType)
+            /// <returns>Return database provider</returns>
+            internal static IDatabaseProvider GetDatabaseProvider(DatabaseServerType serverType)
             {
-                DatabaseEngines.TryGetValue(serverType, out var databaseEngine);
-                return databaseEngine;
+                DatabaseProviders.TryGetValue(serverType, out var databaseProvider);
+                return databaseProvider;
             }
 
             /// <summary>

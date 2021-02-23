@@ -9,9 +9,9 @@ namespace EZNEW.Data.Configuration
     public class DatabaseServerConfiguration
     {
         /// <summary>
-        /// Gets or sets the database engine type full name
+        /// Gets or sets the database provider type full name
         /// </summary>
-        public string EngineFullTypeName { get; set; }
+        public string DatabaseProviderFullTypeName { get; set; }
 
         /// <summary>
         /// Gets or sets the entity configuration

@@ -91,10 +91,10 @@ namespace EZNEW.Data
 
             #endregion
 
-            #region Verify database server executor
+            #region Verify database server provider
 
             IEnumerable<DatabaseServerType> serverTypeList = serverInfos.Values.Select(c => c.ServerType).Distinct();
-            VerifyServerEngine(serverTypeList);
+            VerifyServerProvider(serverTypeList);
 
             #endregion
 
@@ -105,8 +105,8 @@ namespace EZNEW.Data
             {
                 var firstGroup = commandGroup.First();
                 var databaseServer = serverInfos[firstGroup.Key];
-                var executor = DataManager.GetDatabaseEngine(databaseServer.ServerType);
-                return await executor.ExecuteAsync(databaseServer, executeOption, firstGroup.Value).ConfigureAwait(false);
+                var provider = DataManager.GetDatabaseProvider(databaseServer.ServerType);
+                return await provider.ExecuteAsync(databaseServer, executeOption, firstGroup.Value).ConfigureAwait(false);
             }
 
             //Multiple database server
@@ -115,8 +115,8 @@ namespace EZNEW.Data
             foreach (var cmdGroup in commandGroup)
             {
                 var databaseServer = serverInfos[cmdGroup.Key];
-                var executor = DataManager.GetDatabaseEngine(databaseServer.ServerType);
-                executeTasks[groupIndex] = executor.ExecuteAsync(databaseServer, executeOption, cmdGroup.Value.Select(c => c.Clone()));
+                var provider = DataManager.GetDatabaseProvider(databaseServer.ServerType);
+                executeTasks[groupIndex] = provider.ExecuteAsync(databaseServer, executeOption, cmdGroup.Value.Select(c => c.Clone()));
                 groupIndex++;
             }
             return (await Task.WhenAll(executeTasks).ConfigureAwait(false)).Sum();
@@ -158,12 +158,12 @@ namespace EZNEW.Data
         public async Task<bool> QueryAsync(ICommand command)
         {
             var servers = GetServers(command);
-            VerifyServerEngine(servers.Select(c => c.ServerType));
+            VerifyServerProvider(servers.Select(c => c.ServerType));
             bool result = false;
             foreach (var server in servers)
             {
-                var executor = DataManager.GetDatabaseEngine(server.ServerType);
-                result = result || await executor.QueryAsync(server, command).ConfigureAwait(false);
+                var provider = DataManager.GetDatabaseProvider(server.ServerType);
+                result = result || await provider.QueryAsync(server, command).ConfigureAwait(false);
                 if (result)
                 {
                     break;
@@ -192,13 +192,13 @@ namespace EZNEW.Data
         public async Task<IEnumerable<T>> QueryAsync<T>(ICommand command)
         {
             var servers = GetServers(command);
-            VerifyServerEngine(servers.Select(c => c.ServerType));
+            VerifyServerProvider(servers.Select(c => c.ServerType));
             IEnumerable<T> datas = null;
             if (servers.Count == 1)
             {
                 var nowServer = servers[0];
-                var executor = DataManager.GetDatabaseEngine(nowServer.ServerType);
-                datas = executor.Query<T>(nowServer, command);
+                var provider = DataManager.GetDatabaseProvider(nowServer.ServerType);
+                datas = provider.Query<T>(nowServer, command);
             }
             else
             {
@@ -209,8 +209,8 @@ namespace EZNEW.Data
                 int serverIndex = 0;
                 foreach (var server in servers)
                 {
-                    var executor = DataManager.GetDatabaseEngine(server.ServerType);
-                    queryTasks[serverIndex] = executor.QueryAsync<T>(server, command);
+                    var provider = DataManager.GetDatabaseProvider(server.ServerType);
+                    queryTasks[serverIndex] = provider.QueryAsync<T>(server, command);
                     serverIndex++;
                 }
                 datas = (await Task.WhenAll(queryTasks).ConfigureAwait(false)).SelectMany(c => c).Distinct(entityCompare);
@@ -246,7 +246,7 @@ namespace EZNEW.Data
         public async Task<IPaging<T>> QueryPagingAsync<T>(ICommand command) where T : BaseEntity<T>, new()
         {
             var servers = GetServers(command);
-            VerifyServerEngine(servers.Select(c => c.ServerType));
+            VerifyServerProvider(servers.Select(c => c.ServerType));
 
             #region Single server
 
@@ -303,8 +303,8 @@ namespace EZNEW.Data
         /// <returns>Return data paging</returns>
         async Task<IPaging<T>> SingleServerPagingAsync<T>(DatabaseServer server, ICommand command) where T : BaseEntity<T>, new()
         {
-            var executor = DataManager.GetDatabaseEngine(server.ServerType);
-            IEnumerable<T> datas = await executor.QueryPagingAsync<T>(server, command).ConfigureAwait(false);
+            var provider = DataManager.GetDatabaseProvider(server.ServerType);
+            IEnumerable<T> datas = await provider.QueryPagingAsync<T>(server, command).ConfigureAwait(false);
             if (datas.IsNullOrEmpty())
             {
                 return Pager.Empty<T>();
@@ -332,14 +332,14 @@ namespace EZNEW.Data
         public async Task<T> AggregateValueAsync<T>(ICommand command)
         {
             var servers = GetServers(command);
-            VerifyServerEngine(servers.Select(c => c.ServerType));
+            VerifyServerProvider(servers.Select(c => c.ServerType));
 
             //Single server
             if (servers.Count == 1)
             {
                 var server = servers.First();
-                var executor = DataManager.GetDatabaseEngine(server.ServerType);
-                return await executor.AggregateValueAsync<T>(server, command).ConfigureAwait(false);
+                var provider = DataManager.GetDatabaseProvider(server.ServerType);
+                return await provider.AggregateValueAsync<T>(server, command).ConfigureAwait(false);
             }
 
             //Multiple server
@@ -347,8 +347,8 @@ namespace EZNEW.Data
             var serverIndex = 0;
             foreach (var server in servers)
             {
-                var executor = DataManager.GetDatabaseEngine(server.ServerType);
-                aggregateTasks[serverIndex] = executor.AggregateValueAsync<T>(server, command);
+                var provider = DataManager.GetDatabaseProvider(server.ServerType);
+                aggregateTasks[serverIndex] = provider.AggregateValueAsync<T>(server, command);
                 serverIndex++;
             }
             var datas = await Task.WhenAll(aggregateTasks).ConfigureAwait(false);
@@ -380,14 +380,14 @@ namespace EZNEW.Data
         public async Task<DataSet> QueryMultipleAsync(ICommand command)
         {
             var servers = GetServers(command);
-            VerifyServerEngine(servers.Select(c => c.ServerType));
+            VerifyServerProvider(servers.Select(c => c.ServerType));
 
             //Single server
             if (servers.Count == 1)
             {
                 var server = servers.FirstOrDefault();
-                var executor = DataManager.GetDatabaseEngine(server.ServerType);
-                return await executor.QueryMultipleAsync(server, command).ConfigureAwait(false);
+                var provider = DataManager.GetDatabaseProvider(server.ServerType);
+                return await provider.QueryMultipleAsync(server, command).ConfigureAwait(false);
             }
 
             //Multiple server
@@ -395,8 +395,8 @@ namespace EZNEW.Data
             var serverIndex = 0;
             foreach (var server in servers)
             {
-                var executor = DataManager.GetDatabaseEngine(server.ServerType);
-                queryTasks[serverIndex] = executor.QueryMultipleAsync(server, command);
+                var provider = DataManager.GetDatabaseProvider(server.ServerType);
+                queryTasks[serverIndex] = provider.QueryMultipleAsync(server, command);
                 serverIndex++;
             }
             DataSet allDataSet = new DataSet();
@@ -431,8 +431,8 @@ namespace EZNEW.Data
             {
                 return;
             }
-            var executor = DataManager.GetDatabaseEngine(server.ServerType);
-            await executor.BulkInsertAsync(server, dataTable, bulkInsertOptions).ConfigureAwait(false);
+            var provider = DataManager.GetDatabaseProvider(server.ServerType);
+            await provider.BulkInsertAsync(server, dataTable, bulkInsertOptions).ConfigureAwait(false);
         }
 
         #endregion
@@ -459,10 +459,10 @@ namespace EZNEW.Data
         }
 
         /// <summary>
-        /// Verify database server executor
+        /// Verify database server provider
         /// </summary>
         /// <param name="serverTypes">Database server types</param>
-        void VerifyServerEngine(IEnumerable<DatabaseServerType> serverTypes)
+        void VerifyServerProvider(IEnumerable<DatabaseServerType> serverTypes)
         {
             if (serverTypes.IsNullOrEmpty())
             {
@@ -470,10 +470,10 @@ namespace EZNEW.Data
             }
             foreach (var serverType in serverTypes)
             {
-                var databaseEngine = DataManager.GetDatabaseEngine(serverType);
-                if (databaseEngine == null)
+                var databaseProvider = DataManager.GetDatabaseProvider(serverType);
+                if (databaseProvider == null)
                 {
-                    throw new EZNEWException($"No execution executor for configuring database type {serverType}");
+                    throw new EZNEWException($"No provider for configuring database type {serverType}");
                 }
             }
         }
