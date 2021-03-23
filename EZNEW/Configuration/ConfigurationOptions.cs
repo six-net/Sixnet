@@ -30,6 +30,12 @@ namespace EZNEW.Configuration
         /// <summary>
         /// Configuration exclude file regex
         /// </summary>
-        public static readonly Regex ConfigurationExcludeFileRegex = new Regex($@"^{ApplicationManager.ApplicationExecutableDirectory.Replace(@"\", @"\\")}.*(System\.|Microsoft\.|Google\.|IdentityModel\.|AutoMapper\.|MySql\.|Newtonsoft\.|Oracle\.|{RegexPathDirectorySeparator}runtimes{RegexPathDirectorySeparator}|{RegexPathDirectorySeparator}wwwroot{RegexPathDirectorySeparator}|\.resources\.).*$");
+        public static readonly Regex ConfigurationExcludeFileRegex = new Regex($@"^{ApplicationManager.ApplicationExecutableDirectory.Replace(@"\", @"\\")}.*(System\.|Microsoft\.|Google\.|IdentityModel\.|AutoMapper\.|MySql\.|Newtonsoft\.|Oracle\.|{RegexPathDirectorySeparator}runtimes{RegexPathDirectorySeparator}|{RegexPathDirectorySeparator}wwwroot{RegexPathDirectorySeparator}|\.resources\.{ConfigurationOptions.AdditionalMatchRegex}).*$");
+
+        /// <summary>
+        /// Additional match regex.
+        /// User it with DefaultConfigureFileMatchPattern.Default.
+        /// </summary>
+        public static string AdditionalMatchRegex = string.Empty;
     }
 }
