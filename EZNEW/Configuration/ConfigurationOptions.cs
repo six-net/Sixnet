@@ -28,14 +28,14 @@ namespace EZNEW.Configuration
         internal static readonly string RegexPathDirectorySeparator = $"{Path.DirectorySeparatorChar}".Replace(@"\", @"\\");
 
         /// <summary>
-        /// Configuration exclude file regex
+        /// Configuration exclude file regex expression
         /// </summary>
-        public static readonly Regex ConfigurationExcludeFileRegex = new Regex($@"^{ApplicationManager.ApplicationExecutableDirectory.Replace(@"\", @"\\")}.*(System\.|Microsoft\.|Google\.|IdentityModel\.|AutoMapper\.|MySql\.|Newtonsoft\.|Oracle\.|{RegexPathDirectorySeparator}runtimes{RegexPathDirectorySeparator}|{RegexPathDirectorySeparator}wwwroot{RegexPathDirectorySeparator}|\.resources\.{ConfigurationOptions.AdditionalMatchRegex}).*$");
+        public static Regex ConfigurationExcludeFileRegex => new Regex($@"^{ApplicationManager.ApplicationExecutableDirectory.Replace(@"\", @"\\")}.*(System\.|Microsoft\.|Google\.|IdentityModel\.|AutoMapper\.|MySql\.|Newtonsoft\.|Oracle\.|{RegexPathDirectorySeparator}runtimes{RegexPathDirectorySeparator}|{RegexPathDirectorySeparator}wwwroot{RegexPathDirectorySeparator}|\.resources\.{AdditionalMatchRegexExpression}).*$");
 
         /// <summary>
-        /// Additional match regex.
+        /// Additional match regex expression.
         /// User it with DefaultConfigureFileMatchPattern.Default.
         /// </summary>
-        public static string AdditionalMatchRegex = string.Empty;
+        public static string AdditionalMatchRegexExpression = string.Empty;
     }
 }
