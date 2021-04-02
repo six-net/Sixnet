@@ -274,7 +274,7 @@ namespace EZNEW.Develop.DataAccess
         /// </summary>
         /// <param name="query">Query object</param>
         /// <returns>Return data paging</returns>
-        public IPaging<TEntity> GetPaging(IQuery query)
+        public PagingInfo<TEntity> GetPaging(IQuery query)
         {
             return GetPagingAsync(query).Result;
         }
@@ -284,7 +284,7 @@ namespace EZNEW.Develop.DataAccess
         /// </summary>
         /// <param name="query">Query object</param>
         /// <returns>Return data paging</returns>
-        public async Task<IPaging<TEntity>> GetPagingAsync(IQuery query)
+        public async Task<PagingInfo<TEntity>> GetPagingAsync(IQuery query)
         {
             var dataPaging = await ExecuteGetPagingAsync(query).ConfigureAwait(false);
 
@@ -529,7 +529,7 @@ namespace EZNEW.Develop.DataAccess
         /// </summary>
         /// <param name="query">Query object</param>
         /// <returns>Return data paging</returns>
-        protected abstract Task<IPaging<TEntity>> ExecuteGetPagingAsync(IQuery query);
+        protected abstract Task<PagingInfo<TEntity>> ExecuteGetPagingAsync(IQuery query);
 
         /// <summary>
         /// Execute exists

@@ -1,4 +1,5 @@
 ﻿using System;
+using Newtonsoft.Json;
 
 namespace EZNEW.Response
 {
@@ -116,6 +117,7 @@ namespace EZNEW.Response
         /// <summary>
         /// Gets or sets data object
         /// </summary>
+        [JsonIgnore]
         public T Object
         {
             get

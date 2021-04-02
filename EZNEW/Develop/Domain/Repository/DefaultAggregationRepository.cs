@@ -141,7 +141,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// </summary>
         /// <param name="query">Query object</param>
         /// <returns>Return data paging</returns>
-        protected override async Task<IPaging<TModel>> GetDataPagingAsync(IQuery query)
+        protected override async Task<PagingInfo<TModel>> GetDataPagingAsync(IQuery query)
         {
             var entityPaging = await repositoryWarehouse.GetPagingAsync(query).ConfigureAwait(false);
             var dataPaging = entityPaging.ConvertTo<TModel>();

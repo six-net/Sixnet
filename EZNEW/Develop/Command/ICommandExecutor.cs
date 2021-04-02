@@ -81,7 +81,7 @@ namespace EZNEW.Develop.Command
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="command">Command</param>
         /// <returns>Return data paging</returns>
-        IPaging<T> QueryPaging<T>(ICommand command) where T : BaseEntity<T>, new();
+        PagingInfo<T> QueryPaging<T>(ICommand command) where T : BaseEntity<T>, new();
 
         /// <summary>
         /// Query data paging
@@ -89,7 +89,7 @@ namespace EZNEW.Develop.Command
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="command">Command</param>
         /// <returns>Return data paging</returns>
-        Task<IPaging<T>> QueryPagingAsync<T>(ICommand command) where T : BaseEntity<T>, new();
+        Task<PagingInfo<T>> QueryPagingAsync<T>(ICommand command) where T : BaseEntity<T>, new();
 
         /// <summary>
         /// Determine whether does the data exist

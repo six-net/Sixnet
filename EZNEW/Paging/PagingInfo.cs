@@ -10,7 +10,7 @@ namespace EZNEW.Paging
     /// Paging default implement
     /// </summary>
     [JsonObject]
-    public class DefaultPaging<T> : IPaging<T>
+    public class PagingInfo<T> : IEnumerable<T>
     {
         #region Constructor
 
@@ -21,7 +21,7 @@ namespace EZNEW.Paging
         /// <param name="pageSize">Page size</param>
         /// <param name="totalCount">Total data</param>
         /// <param name="datas">Datas</param>
-        public DefaultPaging(long pageIndex, int pageSize, long totalCount, IEnumerable<T> datas)
+        public PagingInfo(long pageIndex, int pageSize, long totalCount, IEnumerable<T> datas)
         {
             if (!datas.IsNullOrEmpty())
             {
@@ -99,9 +99,9 @@ namespace EZNEW.Paging
         /// Return a empty paging object
         /// </summary>
         /// <returns></returns>
-        public static DefaultPaging<T> Empty()
+        public static PagingInfo<T> Empty()
         {
-            return new DefaultPaging<T>(1, 0, 0, Array.Empty<T>());
+            return new PagingInfo<T>(1, 0, 0, Array.Empty<T>());
         }
 
         /// <summary>
@@ -109,9 +109,9 @@ namespace EZNEW.Paging
         /// </summary>
         /// <typeparam name="TTarget">TTarget object type</typeparam>
         /// <returns>Return the target paging object</returns>
-        public IPaging<TTarget> ConvertTo<TTarget>()
+        public PagingInfo<TTarget> ConvertTo<TTarget>()
         {
-            return new DefaultPaging<TTarget>(Page, PageSize, TotalCount, this.Select(c => c.MapTo<TTarget>()));
+            return new PagingInfo<TTarget>(Page, PageSize, TotalCount, this.Select(c => c.MapTo<TTarget>()));
         }
 
         #endregion

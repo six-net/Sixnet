@@ -20,7 +20,7 @@ namespace EZNEW.Configuration
         {
             static Data()
             {
-                Init();
+                InternalConfigurationManager.Confirure();
             }
 
             #region Properties

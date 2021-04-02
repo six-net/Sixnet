@@ -90,7 +90,7 @@ namespace EZNEW.Data.Cache
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="command">Cache action command</param>
         /// <returns>Return data paging</returns>
-        IPaging<T> GetPaging<T>(GetDataPagingCacheCommand<T> command) where T : BaseEntity<T>, new();
+        PagingInfo<T> GetPaging<T>(GetDataPagingCacheCommand<T> command) where T : BaseEntity<T>, new();
 
         /// <summary>
         /// Get data paging
@@ -98,7 +98,7 @@ namespace EZNEW.Data.Cache
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="command">Cache action command</param>
         /// <returns>Return data paging</returns>
-        Task<IPaging<T>> GetPagingAsync<T>(GetDataPagingCacheCommand<T> command) where T : BaseEntity<T>, new();
+        Task<PagingInfo<T>> GetPagingAsync<T>(GetDataPagingCacheCommand<T> command) where T : BaseEntity<T>, new();
 
         #endregion
 

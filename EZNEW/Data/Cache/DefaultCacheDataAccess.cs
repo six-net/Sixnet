@@ -239,7 +239,7 @@ namespace EZNEW.Data.Cache
         /// </summary>
         /// <param name="query">Query condition</param>
         /// <returns>Return data paging</returns>
-        public virtual IPaging<TEntity> GetPaging(IQuery query)
+        public virtual PagingInfo<TEntity> GetPaging(IQuery query)
         {
             return GetPagingAsync(query).Result;
         }
@@ -249,7 +249,7 @@ namespace EZNEW.Data.Cache
         /// </summary>
         /// <param name="query">Query condition</param>
         /// <returns>Return data paging</returns>
-        public virtual async Task<IPaging<TEntity>> GetPagingAsync(IQuery query)
+        public virtual async Task<PagingInfo<TEntity>> GetPagingAsync(IQuery query)
         {
             return await dataCacheProvider.GetPagingAsync(new GetDataPagingCacheCommand<TEntity>()
             {

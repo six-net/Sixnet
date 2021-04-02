@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.Versioning;
 
@@ -49,6 +50,16 @@ namespace EZNEW.Application
                     releaseLastWriteTime = Directory.GetLastWriteTime(releasePath);
                 }
                 appPath = hasDebug || hasRelease ? debugLastWriteTime >= releaseLastWriteTime ? debugPath : releasePath : appPath;
+
+                var targetFrameworkFolders = Directory.EnumerateDirectories(appPath, "net*", SearchOption.TopDirectoryOnly);
+                if (!targetFrameworkFolders.IsNullOrEmpty())
+                {
+                    var targetFolder = targetFrameworkFolders
+                        .Select(c => new DirectoryInfo(c))
+                        .OrderByDescending(c => c.LastWriteTime)
+                        .FirstOrDefault();
+                    appPath = targetFolder.FullName;
+                }
             }
             return appPath;
         }

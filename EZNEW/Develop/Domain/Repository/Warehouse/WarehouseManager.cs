@@ -83,7 +83,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// <param name="originalPaging">Original paging</param>
         /// <param name="query">Query object</param>
         /// <returns>Return the newest data paging</returns>
-        public static IPaging<TEntity> MergePaging<TEntity>(IPaging<TEntity> originalPaging, IQuery query) where TEntity : BaseEntity<TEntity>, new()
+        public static PagingInfo<TEntity> MergePaging<TEntity>(PagingInfo<TEntity> originalPaging, IQuery query) where TEntity : BaseEntity<TEntity>, new()
         {
             if (originalPaging == null)
             {

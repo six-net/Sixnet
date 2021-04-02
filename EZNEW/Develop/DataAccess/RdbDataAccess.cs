@@ -142,7 +142,7 @@ namespace EZNEW.Develop.DataAccess
         /// </summary>
         /// <param name="query">Query object</param>
         /// <returns>Return data paging</returns>
-        protected override async Task<IPaging<TEntity>> ExecuteGetPagingAsync(IQuery query)
+        protected override async Task<PagingInfo<TEntity>> ExecuteGetPagingAsync(IQuery query)
         {
             ICommand cmd = RdbCommand.CreateNewCommand<TEntity>(OperateType.Query);
             SetCommand(cmd, null);

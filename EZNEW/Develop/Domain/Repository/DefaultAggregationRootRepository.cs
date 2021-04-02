@@ -272,7 +272,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// </summary>
         /// <param name="query">Query object</param>
         /// <returns>Return data paging</returns>
-        public sealed override IPaging<TModel> GetPaging(IQuery query)
+        public sealed override PagingInfo<TModel> GetPaging(IQuery query)
         {
             return GetPagingAsync(query).Result;
         }
@@ -282,7 +282,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// </summary>
         /// <param name="query">Query object</param>
         /// <returns>Return data paging</returns>
-        public sealed override async Task<IPaging<TModel>> GetPagingAsync(IQuery query)
+        public sealed override async Task<PagingInfo<TModel>> GetPagingAsync(IQuery query)
         {
             var newQuery = RepositoryManager.HandleQueryObjectBeforeExecute(query, QueryUsageScene.Query, AppendQueryCondition);
             var paging = await GetDataPagingAsync(newQuery).ConfigureAwait(false);
@@ -519,7 +519,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// </summary>
         /// <param name="query">Query object</param>
         /// <returns>Return datas</returns>
-        protected abstract Task<IPaging<TModel>> GetDataPagingAsync(IQuery query);
+        protected abstract Task<PagingInfo<TModel>> GetDataPagingAsync(IQuery query);
 
         /// <summary>
         /// Get data by current data

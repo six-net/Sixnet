@@ -131,14 +131,14 @@ namespace EZNEW.Develop.Domain.Repository
         /// </summary>
         /// <param name="query">Query object</param>
         /// <returns>Return data paging</returns>
-        public abstract IPaging<TModel> GetPaging(IQuery query);
+        public abstract PagingInfo<TModel> GetPaging(IQuery query);
 
         /// <summary>
         /// Get data paging
         /// </summary>
         /// <param name="query">Query object</param>
         /// <returns>Return data paging</returns>
-        public abstract Task<IPaging<TModel>> GetPagingAsync(IQuery query);
+        public abstract Task<PagingInfo<TModel>> GetPagingAsync(IQuery query);
 
         #endregion
 

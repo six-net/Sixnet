@@ -9,9 +9,8 @@ using Microsoft.Extensions.Configuration;
 using EZNEW.Logging;
 using EZNEW.Upload.Configuration;
 using EZNEW.FileAccess.Configuration;
-using EZNEW.Application;
-using System.Runtime.InteropServices.ComTypes;
 using EZNEW.Data.Cache;
+using EZNEW.Configuration;
 
 namespace EZNEW.DependencyInjection
 {
@@ -290,16 +289,13 @@ namespace EZNEW.DependencyInjection
         /// </summary>
         static void RegisterDefaultProjectService()
         {
-            var appPath = ApplicationManager.GetApplicationExecutableDirectory();
-            var conventionFiles = new string[] { "DataAccess", "Business", "Repository", "Service", "Domain" };
-            IEnumerable<FileInfo> files = new DirectoryInfo(appPath).GetFiles("*.dll", SearchOption.AllDirectories)?.
-                Where(c => conventionFiles.Any(kw => c.Name.Contains(kw))) ?? Array.Empty<FileInfo>();
-            List<Type> allTypes = new List<Type>();
+            var files = ConfigurationManager.GetMatchedFiles();
+            IEnumerable<Type> allTypes = Array.Empty<Type>();
             foreach (var file in files)
             {
                 try
                 {
-                    allTypes.AddRange(Assembly.LoadFrom(file.FullName).GetTypes());
+                    allTypes = allTypes.Union(Assembly.LoadFrom(file.FullName).GetTypes());
                 }
                 catch (Exception ex)
                 {

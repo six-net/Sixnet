@@ -135,7 +135,7 @@ namespace EZNEW.Develop.Command
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="command">Command</param>
         /// <returns>Return datas</returns>
-        internal static async Task<IPaging<T>> QueryPagingAsync<T>(ICommand command) where T : BaseEntity<T>, new()
+        internal static async Task<PagingInfo<T>> QueryPagingAsync<T>(ICommand command) where T : BaseEntity<T>, new()
         {
             if (command.Query?.PagingInfo == null)
             {
@@ -164,7 +164,7 @@ namespace EZNEW.Develop.Command
             command.Query.PagingInfo.Page = 1;
 
             //Paging task
-            Task<IPaging<T>>[] pagingTasks = new Task<IPaging<T>>[groupExecutors.Count];
+            Task<PagingInfo<T>>[] pagingTasks = new Task<PagingInfo<T>>[groupExecutors.Count];
             var groupIndex = 0;
             foreach (var groupExecutor in groupExecutors)
             {

@@ -15,6 +15,6 @@ namespace EZNEW.Data.Cache.Command
         /// <summary>
         /// Gets or sets get database data paging function
         /// </summary>
-        public Func<IQuery, Task<IPaging<T>>> GetDatabaseDataPagingProxyAsync { get; set; }
+        public Func<IQuery, Task<PagingInfo<T>>> GetDatabaseDataPagingProxyAsync { get; set; }
     }
 }

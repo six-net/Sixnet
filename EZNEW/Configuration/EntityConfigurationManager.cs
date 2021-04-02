@@ -18,7 +18,7 @@ namespace EZNEW.Configuration
         {
             static Entity()
             {
-                Init();
+                InternalConfigurationManager.Confirure();
             }
 
             /// <summary>
@@ -26,6 +26,8 @@ namespace EZNEW.Configuration
             /// Key:Entity type guid
             /// </summary>
             internal static readonly Dictionary<Guid, EntityConfiguration> EntityConfigurations = new Dictionary<Guid, EntityConfiguration>();
+
+            static readonly Type booleanType = typeof(bool);
 
             #region Entity
 

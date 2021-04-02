@@ -5,30 +5,42 @@ using System.Text;
 namespace EZNEW.Configuration
 {
     /// <summary>
-    /// Defines default configure file match pattern
+    /// Defines file match pattern
     /// </summary>
     [Serializable]
-    public enum DefaultConfigureFileMatchPattern
+    public enum FileMatchPattern
     {
         /// <summary>
         /// Match all files
         /// </summary>
         None = 0,
         /// <summary>
-        /// Match files without default exclude files
-        /// </summary>
-        Default = 2,
-        /// <summary>
         /// Match files by convention
         /// </summary>
-        Convention = 4,
+        Convention = 2,
+        /// <summary>
+        /// Match files with the file name prefix
+        /// </summary>
+        FileNamePrefix = 4,
+        /// <summary>
+        /// Match files with the file name suffix
+        /// </summary>
+        FileNameSuffix = 8,
         /// <summary>
         /// Match files by file name words
         /// </summary>
-        IncludeFileName = 8,
+        IncludeFileName = 16,
         /// <summary>
-        /// Mathch files without file name words
+        /// Match files without file name words
         /// </summary>
-        ExcludeFileName = 16
+        ExcludeFileName = 32,
+        /// <summary>
+        /// Match files by regex
+        /// </summary>
+        ExcludeByRegex = 64,
+        /// <summary>
+        /// Match files without regex
+        /// </summary>
+        IncludeByRegex = 128,
     }
 }

@@ -232,7 +232,7 @@ namespace EZNEW.Data
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="command">Command</param>
         /// <returns>Return data paging</returns>
-        public IPaging<T> QueryPaging<T>(ICommand command) where T : BaseEntity<T>, new()
+        public PagingInfo<T> QueryPaging<T>(ICommand command) where T : BaseEntity<T>, new()
         {
             return QueryPagingAsync<T>(command).Result;
         }
@@ -243,7 +243,7 @@ namespace EZNEW.Data
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="command">Command</param>
         /// <returns>Return data paging</returns>
-        public async Task<IPaging<T>> QueryPagingAsync<T>(ICommand command) where T : BaseEntity<T>, new()
+        public async Task<PagingInfo<T>> QueryPagingAsync<T>(ICommand command) where T : BaseEntity<T>, new()
         {
             var servers = GetServers(command);
             VerifyServerProvider(servers.Select(c => c.ServerType));
@@ -264,7 +264,7 @@ namespace EZNEW.Data
             command.Query.PagingInfo.PageSize = page * pageSize;
             command.Query.PagingInfo.Page = 1;
 
-            Task<IPaging<T>>[] pagingTasks = new Task<IPaging<T>>[servers.Count];
+            Task<PagingInfo<T>>[] pagingTasks = new Task<PagingInfo<T>>[servers.Count];
             int serverIndex = 0;
             foreach (var server in servers)
             {
@@ -301,7 +301,7 @@ namespace EZNEW.Data
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="command">Command</param>
         /// <returns>Return data paging</returns>
-        async Task<IPaging<T>> SingleServerPagingAsync<T>(DatabaseServer server, ICommand command) where T : BaseEntity<T>, new()
+        async Task<PagingInfo<T>> SingleServerPagingAsync<T>(DatabaseServer server, ICommand command) where T : BaseEntity<T>, new()
         {
             var provider = DataManager.GetDatabaseProvider(server.ServerType);
             IEnumerable<T> datas = await provider.QueryPagingAsync<T>(server, command).ConfigureAwait(false);

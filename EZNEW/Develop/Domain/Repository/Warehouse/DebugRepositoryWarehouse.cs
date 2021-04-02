@@ -150,7 +150,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// </summary>
         /// <param name="query">Query object</param>
         /// <returns>Return data paging</returns>
-        public async Task<IPaging<TEntity>> GetPagingAsync(IQuery query)
+        public async Task<PagingInfo<TEntity>> GetPagingAsync(IQuery query)
         {
             var paging = Pager.Empty<TEntity>();
             paging = WarehouseManager.MergePaging(paging, query);

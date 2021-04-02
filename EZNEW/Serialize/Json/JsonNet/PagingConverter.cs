@@ -20,7 +20,7 @@ namespace EZNEW.Serialize.Json.JsonNet
             {
                 return false;
             }
-            var pagingType = typeof(IPaging<>);
+            var pagingType = typeof(PagingInfo<>);
             var genericType = objectType.GetGenericTypeDefinition();
             if (genericType == null)
             {
@@ -40,7 +40,7 @@ namespace EZNEW.Serialize.Json.JsonNet
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             Type genericType = objectType.GetGenericArguments()[0];
-            Type pagingType = typeof(DefaultPaging<>).MakeGenericType(genericType);
+            Type pagingType = typeof(PagingInfo<>).MakeGenericType(genericType);
             return serializer.Deserialize(reader, pagingType);
         }
 

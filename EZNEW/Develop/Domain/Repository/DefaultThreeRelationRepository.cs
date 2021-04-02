@@ -270,7 +270,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// </summary>
         /// <param name="query">Query object</param>
         /// <returns>Return data paging</returns>
-        public sealed override IPaging<Tuple<TFirstModel, TSecondModel, TThirdModel>> GetPaging(IQuery query)
+        public sealed override PagingInfo<Tuple<TFirstModel, TSecondModel, TThirdModel>> GetPaging(IQuery query)
         {
             return GetPagingAsync(query).Result;
         }
@@ -280,7 +280,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// </summary>
         /// <param name="query">Query object</param>
         /// <returns>Return data paging</returns>
-        public sealed override async Task<IPaging<Tuple<TFirstModel, TSecondModel, TThirdModel>>> GetPagingAsync(IQuery query)
+        public sealed override async Task<PagingInfo<Tuple<TFirstModel, TSecondModel, TThirdModel>>> GetPagingAsync(IQuery query)
         {
             var newQuery = RepositoryManager.HandleQueryObjectBeforeExecute(query, QueryUsageScene.Query, AppendQueryCondition);
             var paging = await ExecuteGetPagingAsync(newQuery).ConfigureAwait(false);
@@ -625,7 +625,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// </summary>
         /// <param name="query">Query object</param>
         /// <returns>Return data paging</returns>
-        public virtual async Task<IPaging<Tuple<TFirstModel, TSecondModel, TThirdModel>>> ExecuteGetPagingAsync(IQuery query)
+        public virtual async Task<PagingInfo<Tuple<TFirstModel, TSecondModel, TThirdModel>>> ExecuteGetPagingAsync(IQuery query)
         {
             var entityPaging = await repositoryWarehouse.GetPagingAsync(query).ConfigureAwait(false);
             if (entityPaging.IsNullOrEmpty())

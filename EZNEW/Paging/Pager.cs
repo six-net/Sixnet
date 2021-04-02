@@ -18,18 +18,18 @@ namespace EZNEW.Paging
         /// <param name="totalCount">Total count</param>
         /// <param name="datas">Datas</param>
         /// <returns>Return a paging object</returns>
-        public static IPaging<T> Create<T>(long pageIndex, int pageSize, long totalCount, IEnumerable<T> datas)
+        public static PagingInfo<T> Create<T>(long pageIndex, int pageSize, long totalCount, IEnumerable<T> datas)
         {
-            return new DefaultPaging<T>(pageIndex, pageSize, totalCount, datas);
+            return new PagingInfo<T>(pageIndex, pageSize, totalCount, datas);
         }
 
         /// <summary>
         /// Get a empty paging object
         /// </summary>
         /// <returns>Return a empty paging object</returns>
-        public static IPaging<T> Empty<T>()
+        public static PagingInfo<T> Empty<T>()
         {
-            return DefaultPaging<T>.Empty();
+            return PagingInfo<T>.Empty();
         }
     }
 }

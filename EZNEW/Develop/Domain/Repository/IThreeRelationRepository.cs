@@ -143,14 +143,14 @@ namespace EZNEW.Develop.Domain.Repository
         /// </summary>
         /// <param name="query">Query object</param>
         /// <returns>Return data paging</returns>
-        IPaging<Tuple<TFirstModel, TSecondModel, TThirdModel>> GetPaging(IQuery query);
+        PagingInfo<Tuple<TFirstModel, TSecondModel, TThirdModel>> GetPaging(IQuery query);
 
         /// <summary>
         /// Get data paging
         /// </summary>
         /// <param name="query">Query object</param>
         /// <returns>Return data paging</returns>
-        Task<IPaging<Tuple<TFirstModel, TSecondModel, TThirdModel>>> GetPagingAsync(IQuery query);
+        Task<PagingInfo<Tuple<TFirstModel, TSecondModel, TThirdModel>>> GetPagingAsync(IQuery query);
 
         /// <summary>
         /// Get First by Second

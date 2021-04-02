@@ -96,7 +96,7 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
         /// </summary>
         /// <param name="query">Query object</param>
         /// <returns>Return data paging</returns>
-        Task<IPaging<TEntity>> GetPagingAsync(IQuery query);
+        Task<PagingInfo<TEntity>> GetPagingAsync(IQuery query);
 
         /// <summary>
         /// Exist data

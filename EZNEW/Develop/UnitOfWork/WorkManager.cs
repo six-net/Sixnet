@@ -331,7 +331,7 @@ namespace EZNEW.Develop.UnitOfWork
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="command">Command</param>
         /// <returns>Return datas</returns>
-        public static IPaging<T> QueryPaging<T>(ICommand command) where T : BaseEntity<T>, new()
+        public static PagingInfo<T> QueryPaging<T>(ICommand command) where T : BaseEntity<T>, new()
         {
             return QueryPagingAsync<T>(command).Result;
         }
@@ -342,7 +342,7 @@ namespace EZNEW.Develop.UnitOfWork
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="command">Command</param>
         /// <returns>Return data paging</returns>
-        public static async Task<IPaging<T>> QueryPagingAsync<T>(ICommand command) where T : BaseEntity<T>, new()
+        public static async Task<PagingInfo<T>> QueryPagingAsync<T>(ICommand command) where T : BaseEntity<T>, new()
         {
             if (command?.IsObsolete ?? true)
             {

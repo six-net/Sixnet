@@ -114,14 +114,14 @@ namespace EZNEW.Develop.DataAccess
         /// </summary>
         /// <param name="query">Query object</param>
         /// <returns>Return data paging</returns>
-        IPaging<T> GetPaging(IQuery query);
+        PagingInfo<T> GetPaging(IQuery query);
 
         /// <summary>
         /// Query data paging
         /// </summary>
         /// <param name="query">Query object</param>
         /// <returns>Return data paging</returns>
-        Task<IPaging<T>> GetPagingAsync(IQuery query);
+        Task<PagingInfo<T>> GetPagingAsync(IQuery query);
 
         /// <summary>
         /// Determine whether data is exist

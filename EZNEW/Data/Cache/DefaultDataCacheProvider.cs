@@ -190,7 +190,7 @@ namespace EZNEW.Data.Cache
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="command">Cache action command</param>
         /// <returns>Return data paging</returns>
-        public IPaging<T> GetPaging<T>(GetDataPagingCacheCommand<T> command) where T : BaseEntity<T>, new()
+        public PagingInfo<T> GetPaging<T>(GetDataPagingCacheCommand<T> command) where T : BaseEntity<T>, new()
         {
             return GetPagingAsync(command).Result;
         }
@@ -201,7 +201,7 @@ namespace EZNEW.Data.Cache
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="command">Cache action command</param>
         /// <returns>Return data paging</returns>
-        public async Task<IPaging<T>> GetPagingAsync<T>(GetDataPagingCacheCommand<T> command) where T : BaseEntity<T>, new()
+        public async Task<PagingInfo<T>> GetPagingAsync<T>(GetDataPagingCacheCommand<T> command) where T : BaseEntity<T>, new()
         {
             var pageQueryProxy = command.GetDatabaseDataPagingProxyAsync;
             var query = command.Query;
@@ -222,7 +222,7 @@ namespace EZNEW.Data.Cache
                 pagingQuery.ClearNotQueryFields();
                 pagingQuery.AddQueryFields(primaryKeys.ToArray());
             }
-            IPaging<T> dataPaging = await pageQueryProxy(pagingQuery).ConfigureAwait(false);
+            PagingInfo<T> dataPaging = await pageQueryProxy(pagingQuery).ConfigureAwait(false);
 
             #endregion
 

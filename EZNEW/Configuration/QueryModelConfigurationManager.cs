@@ -11,7 +11,7 @@ namespace EZNEW.Configuration
         {
             static QueryModel()
             {
-                Init();
+                InternalConfigurationManager.Confirure();
             }
 
             /// <summary>
