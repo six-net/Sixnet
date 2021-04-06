@@ -258,7 +258,7 @@ namespace EZNEW.Develop.Domain.Aggregation
             {
                 Object = saveData
             });
-            return Result<T>.SuccessResult("Data saved successfully", "", saveData);
+            return Result<T>.SuccessResult(saveData, "Data saved successfully", "");
         }
 
         /// <summary>
