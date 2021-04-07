@@ -197,7 +197,7 @@ namespace EZNEW.Response
         /// <returns>Return a successful result</returns>
         public static Result<T> SuccessResult(string message)
         {
-            return SuccessResult(message: message);
+            return SuccessResult(default, message, string.Empty);
         }
 
         /// <summary>
