@@ -25,7 +25,7 @@ namespace EZNEW.Develop.Domain.Repository
     public abstract class DefaultThreeRelationRepository<TFirstModel, TSecondModel, TThirdModel, TEntity, TDataAccess> : BaseThreeRelationRepository<TFirstModel, TSecondModel, TThirdModel> where TSecondModel : IAggregationRoot<TSecondModel> where TFirstModel : IAggregationRoot<TFirstModel> where TThirdModel : IAggregationRoot<TThirdModel> where TEntity : BaseEntity<TEntity>, new() where TDataAccess : IDataAccess<TEntity>
     {
         readonly IRepositoryWarehouse<TEntity, TDataAccess> repositoryWarehouse = ContainerManager.Resolve<IRepositoryWarehouse<TEntity, TDataAccess>>();
-        
+
         static readonly Type entityType = typeof(TEntity);
 
         static DefaultThreeRelationRepository()
@@ -628,11 +628,11 @@ namespace EZNEW.Develop.Domain.Repository
         public virtual async Task<PagingInfo<Tuple<TFirstModel, TSecondModel, TThirdModel>>> ExecuteGetPagingAsync(IQuery query)
         {
             var entityPaging = await repositoryWarehouse.GetPagingAsync(query).ConfigureAwait(false);
-            if (entityPaging.IsNullOrEmpty())
+            if (entityPaging?.Items.IsNullOrEmpty() ?? true)
             {
                 return Pager.Empty<Tuple<TFirstModel, TSecondModel, TThirdModel>>();
             }
-            var datas = entityPaging.Select(c => CreateRelationDataByEntity(c));
+            var datas = entityPaging.Items.Select(c => CreateRelationDataByEntity(c));
             return Pager.Create(entityPaging.Page, entityPaging.PageSize, entityPaging.TotalCount, datas);
         }
 

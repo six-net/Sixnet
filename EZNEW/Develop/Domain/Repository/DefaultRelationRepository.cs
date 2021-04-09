@@ -449,11 +449,11 @@ namespace EZNEW.Develop.Domain.Repository
         public virtual async Task<PagingInfo<Tuple<TFirstModel, TSecondModel>>> ExecuteGetPagingAsync(IQuery query)
         {
             var entityPaging = await repositoryWarehouse.GetPagingAsync(query).ConfigureAwait(false);
-            if (entityPaging.IsNullOrEmpty())
+            if (entityPaging?.Items.IsNullOrEmpty() ?? true)
             {
                 return Pager.Empty<Tuple<TFirstModel, TSecondModel>>();
             }
-            var datas = entityPaging.Select(c => CreateRelationDataByEntity(c));
+            var datas = entityPaging.Items.Select(c => CreateRelationDataByEntity(c));
             return Pager.Create(entityPaging.Page, entityPaging.PageSize, entityPaging.TotalCount, datas);
         }
 

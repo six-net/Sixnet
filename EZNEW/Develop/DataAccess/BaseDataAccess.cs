@@ -289,7 +289,7 @@ namespace EZNEW.Develop.DataAccess
             var dataPaging = await ExecuteGetPagingAsync(query).ConfigureAwait(false);
 
             //publish query event
-            DataAccessEventBus.PublishQueryEvent(query, dataPaging);
+            DataAccessEventBus.PublishQueryEvent(query, dataPaging?.Items);
 
             return dataPaging;
         }

@@ -226,14 +226,14 @@ namespace EZNEW.Data.Cache
 
             #endregion
 
-            if (dataPaging.IsNullOrEmpty())
+            if (dataPaging?.Items.IsNullOrEmpty() ?? true)
             {
                 return Pager.Empty<T>();
             }
 
             #region second,query data by primary keys
 
-            IQuery subQuery = QueryManager.AppendEntityIdentityCondition(dataPaging);
+            IQuery subQuery = QueryManager.AppendEntityIdentityCondition(dataPaging.Items);
             if (query != null)
             {
                 subQuery.AddQueryFields(query.QueryFields.ToArray());

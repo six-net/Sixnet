@@ -2,15 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using EZNEW.Data;
-using Newtonsoft.Json;
 
 namespace EZNEW.Paging
 {
     /// <summary>
     /// Paging default implement
     /// </summary>
-    [JsonObject]
-    public class PagingInfo<T> : IEnumerable<T>
+    public class PagingInfo<T>
     {
         #region Constructor
 
@@ -87,15 +85,6 @@ namespace EZNEW.Paging
         }
 
         /// <summary>
-        /// Returns an enumerator that iterates through the EZNEW.Paging.Paging<>
-        /// </summary>
-        /// <returns>A EZNEW.Paging.Paging<>.Enumerator for the EZNEW.Paging.Paging<></returns>
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        /// <summary>
         /// Return a empty paging object
         /// </summary>
         /// <returns></returns>
@@ -111,7 +100,7 @@ namespace EZNEW.Paging
         /// <returns>Return the target paging object</returns>
         public PagingInfo<TTarget> ConvertTo<TTarget>()
         {
-            return new PagingInfo<TTarget>(Page, PageSize, TotalCount, this.Select(c => c.MapTo<TTarget>()));
+            return new PagingInfo<TTarget>(Page, PageSize, TotalCount, Items.Select(c => c.MapTo<TTarget>()));
         }
 
         #endregion

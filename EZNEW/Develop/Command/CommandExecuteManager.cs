@@ -177,8 +177,15 @@ namespace EZNEW.Develop.Command
             long totalCount = 0;
             foreach (var paging in allPagings)
             {
+                if (paging == null)
+                {
+                    continue;
+                }
                 totalCount += paging.TotalCount;
-                datas = datas.Union(paging);
+                if (!paging.Items.IsNullOrEmpty())
+                {
+                    datas = datas.Union(paging.Items);
+                }
             }
             if (command.Query != null)
             {

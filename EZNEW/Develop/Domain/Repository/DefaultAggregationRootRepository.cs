@@ -286,7 +286,7 @@ namespace EZNEW.Develop.Domain.Repository
         {
             var newQuery = RepositoryManager.HandleQueryObjectBeforeExecute(query, QueryUsageScene.Query, AppendQueryCondition);
             var paging = await GetDataPagingAsync(newQuery).ConfigureAwait(false);
-            IEnumerable<TModel> datas = paging;
+            IEnumerable<TModel> datas = paging?.Items ?? Array.Empty<TModel>();
             QueryCallback(newQuery, true, datas);
             RepositoryEventBus.PublishQuery(GetType(), datas, newQuery, result =>
             {

@@ -90,8 +90,8 @@ namespace EZNEW.Develop.Domain.Repository.Warehouse
                 originalPaging = Pager.Empty<TEntity>();
             }
             var totalCount = originalPaging.TotalCount;
-            var dataCount = originalPaging.Count();
-            var datas = Merge(originalPaging, query, true);
+            var dataCount = originalPaging.Items.GetCount();
+            var datas = Merge(originalPaging.Items, query, true);
             var newDataCount = datas.Count;
             var diffCount = newDataCount - dataCount;
             totalCount += diffCount;
