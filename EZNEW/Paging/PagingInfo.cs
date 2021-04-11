@@ -46,29 +46,29 @@ namespace EZNEW.Paging
         /// <summary>
         /// Gets the current page
         /// </summary>
-        public long Page { get; } = 1;
+        public long Page { get; protected set; } = 1;
 
         /// <summary>
         /// Gets the page size
         /// </summary>
-        public int PageSize { get; } = DataManager.DefaultPageSize;
+        public int PageSize { get; protected set; } = DataManager.DefaultPageSize;
 
         /// <summary>
         /// Gets the page count
         /// </summary>
-        public long PageCount { get; } = 0;
+        public long PageCount { get; protected set; } = 0;
 
         /// <summary>
         /// Gets the data total count
         /// </summary>
-        public long TotalCount { get; } = 0;
+        public long TotalCount { get; protected set; } = 0;
 
         /// <summary>
         /// Gets the datas
         /// </summary>
         public IEnumerable<T> Items
         {
-            get;
+            get; protected set;
         } = Array.Empty<T>();
 
         #endregion
