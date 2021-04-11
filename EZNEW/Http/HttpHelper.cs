@@ -24,14 +24,14 @@ namespace EZNEW.Http
         static readonly Dictionary<HttpMethod, Action<HttpClient, HttpRequestMessage, HttpRequestOptions>> HttpMethodRequestMessageHandlers = null;
 
         /// <summary>
-        /// Http client factory
-        /// </summary>
-        public static readonly IHttpClientFactory HttpClientFactory = null;
-
-        /// <summary>
         /// Default http client
         /// </summary>
-        public static readonly HttpClient DefaultHttpClient = null;
+        static HttpClient DefaultHttpClient = null;
+
+        /// <summary>
+        /// Default http client handler
+        /// </summary>
+        private static readonly HttpClientHandler DefaultHttpClientHandler = new HttpClientHandler();
 
         static HttpHelper()
         {
@@ -43,13 +43,20 @@ namespace EZNEW.Http
                 [HttpMethod.Get] = AppendUrlParameter,
                 [HttpMethod.Delete] = AppendUrlParameter
             };
-
-            HttpClientFactory = ContainerManager.Resolve<IHttpClientFactory>();
-            if (HttpClientFactory == null)
-            {
-                DefaultHttpClient = new HttpClient();
-            }
         }
+
+        #region Configuration
+
+        /// <summary>
+        /// Configure default http behavior
+        /// </summary>
+        /// <param name="action"></param>
+        public static void ConfigureDefaultHttpBehavior(Action<HttpClientHandler> action)
+        {
+            action?.Invoke(DefaultHttpClientHandler);
+        }
+
+        #endregion
 
         #region Get http client
 
@@ -60,11 +67,24 @@ namespace EZNEW.Http
         /// <returns>Return the http client</returns>
         static HttpClient GetHttpClient(string clientConfigName = "")
         {
-            if (HttpClientFactory == null)
+            var httpClientFactory = ContainerManager.Resolve<IHttpClientFactory>();
+            if (string.IsNullOrWhiteSpace(clientConfigName) || httpClientFactory == null)
             {
+                if (DefaultHttpClient != null)
+                {
+                    return DefaultHttpClient;
+                }
+                lock (DefaultHttpClientHandler)
+                {
+                    if (DefaultHttpClient != null)
+                    {
+                        return DefaultHttpClient;
+                    }
+                    DefaultHttpClient = new HttpClient(DefaultHttpClientHandler);
+                }
                 return DefaultHttpClient;
             }
-            return string.IsNullOrWhiteSpace(clientConfigName) ? HttpClientFactory.CreateClient() : HttpClientFactory.CreateClient(clientConfigName);
+            return string.IsNullOrWhiteSpace(clientConfigName) ? httpClientFactory.CreateClient() : httpClientFactory.CreateClient(clientConfigName);
         }
 
         #endregion
