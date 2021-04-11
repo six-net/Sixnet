@@ -16,10 +16,6 @@ namespace EZNEW.Serialize.Json.JsonNet
         /// big number converter
         /// </summary>
         static readonly BigNumberConverter BigNumberConverter = new BigNumberConverter();
-        /// <summary>
-        /// paging converter
-        /// </summary>
-        static readonly PagingConverter PagingConverter = new PagingConverter();
 
         /// <summary>
         /// Serializes a data object as a string
@@ -69,7 +65,6 @@ namespace EZNEW.Serialize.Json.JsonNet
             }
             JsonSerializerSettings settings = new JsonSerializerSettings()
             {
-                Converters = new List<JsonConverter>() { PagingConverter },
                 ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor
             };
             if (jsonSerializeSetting != null)
