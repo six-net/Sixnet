@@ -262,17 +262,26 @@ namespace System.Collections.Generic
             }
             if (!datas.IsNullOrEmpty())
             {
-                Type boolType = typeof(bool);
                 foreach (var data in datas)
                 {
                     DataRow row = table.NewRow();
                     foreach (var property in properties)
                     {
-                        row[property.Name] = property.GetValue(data);
+                        var propertyVal = property.GetValue(data);
+                        if (propertyVal == null)
+                        {
+                            propertyVal = DBNull.Value;
+                        }
+                        row[property.Name] = propertyVal;
                     }
                     foreach (var field in fields)
                     {
-                        row[field.Name] = field.GetValue(data);
+                        var fieldVal = field.GetValue(data);
+                        if (fieldVal == null)
+                        {
+                            fieldVal = DBNull.Value;
+                        }
+                        row[field.Name] = fieldVal;
                     }
                     table.Rows.Add(row);
                 }
