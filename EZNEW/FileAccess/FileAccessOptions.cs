@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using EZNEW.Selection;
 
-namespace EZNEW.FileAccess.Configuration
+namespace EZNEW.FileAccess
 {
     /// <summary>
     /// File access options

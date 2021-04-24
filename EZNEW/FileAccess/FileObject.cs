@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace EZNEW.FileAccess.Configuration
+namespace EZNEW.FileAccess
 {
     /// <summary>
     /// File object
@@ -14,8 +14,8 @@ namespace EZNEW.FileAccess.Configuration
         public string Name { get; set; }
 
         /// <summary>
-        /// Gets or sets the file access option
+        /// Gets or sets the file access options
         /// </summary>
-        public FileAccessOptions FileAccessOption { get; set; }
+        public FileAccessOptions FileAccessOptions { get; set; }
     }
 }

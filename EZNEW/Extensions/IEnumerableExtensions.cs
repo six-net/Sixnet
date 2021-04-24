@@ -26,6 +26,22 @@ namespace System.Collections.Generic
             return datas == null || !datas.Any();
         }
 
+        /// <summary>
+        /// Determines whether the collection is null or empty
+        /// </summary>
+        /// <param name="enumerable"></param>
+        /// <returns></returns>
+        internal static bool InternalIsNullOrEmpty(this IEnumerable enumerable)
+        {
+            if (enumerable == null)
+                return true;
+            if (enumerable is ICollection enumerableAsICollection)
+                return enumerableAsICollection.Count < 1;
+            var iter = enumerable.GetEnumerator();
+            using (iter as IDisposable) //ensure iter is correctly disposed of if the enumerator implements IDisposable
+                return !iter.MoveNext();
+        }
+
         #endregion
 
         #region Dictionary extension methods
@@ -238,11 +254,11 @@ namespace System.Collections.Generic
             var fields = dataType.GetFields(BindingFlags.Public | BindingFlags.Instance);
             foreach (var property in properties)
             {
-                table.Columns.Add(property.Name, property.PropertyType);
+                table.Columns.Add(property.Name, property.PropertyType.GetRealValueType());
             }
             foreach (var field in fields)
             {
-                table.Columns.Add(field.Name, field.FieldType);
+                table.Columns.Add(field.Name, field.FieldType.GetRealValueType());
             }
             if (!datas.IsNullOrEmpty())
             {

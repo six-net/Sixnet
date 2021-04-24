@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using Microsoft.Extensions.Options;
 using EZNEW.DependencyInjection;
+using EZNEW.FileAccess.Configuration;
 
-namespace EZNEW.FileAccess.Configuration
+namespace EZNEW.FileAccess
 {
     /// <summary>
     /// File access manager
@@ -28,7 +29,7 @@ namespace EZNEW.FileAccess.Configuration
         /// key:file object name
         /// value:file object access option
         /// </summary>
-        static Dictionary<string, FileAccessOptions> FileOptions = new Dictionary<string, FileAccessOptions>();
+        static readonly Dictionary<string, FileAccessOptions> FileOptions = new Dictionary<string, FileAccessOptions>();
 
         #endregion
 
@@ -79,11 +80,11 @@ namespace EZNEW.FileAccess.Configuration
             }
             foreach (var fileObject in fileObjects)
             {
-                if (fileObject == null || string.IsNullOrWhiteSpace(fileObject.Name) || fileObject.FileAccessOption == null)
+                if (fileObject == null || string.IsNullOrWhiteSpace(fileObject.Name) || fileObject.FileAccessOptions == null)
                 {
                     continue;
                 }
-                FileOptions[fileObject.Name] = fileObject.FileAccessOption;
+                FileOptions[fileObject.Name] = fileObject.FileAccessOptions;
             }
         }
 
@@ -99,12 +100,12 @@ namespace EZNEW.FileAccess.Configuration
         /// <returns>Return the file full path</returns>
         public static string GetFileFullPath(string fileObjectName, string relativePath)
         {
-            FileOptions.TryGetValue(fileObjectName, out var fileAccessOption);
-            if (fileAccessOption == null)
+            FileOptions.TryGetValue(fileObjectName, out var fileAccessOptions);
+            if (fileAccessOptions == null)
             {
-                fileAccessOption = Default;
+                fileAccessOptions = Default;
             }
-            return GetFileFullPath(fileAccessOption, relativePath);
+            return GetFileFullPath(fileAccessOptions, relativePath);
         }
 
         /// <summary>

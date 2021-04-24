@@ -94,5 +94,23 @@ namespace System
         }
 
         #endregion
+
+        #region Get real value type
+
+        /// <summary>
+        /// Get real value type
+        /// </summary>
+        /// <param name="originalType">Original type</param>
+        /// <returns>Return the real value type</returns>
+        public static Type GetRealValueType(this Type originalType)
+        {
+            if (originalType.IsGenericType && typeof(Nullable<>).Equals(originalType.GetGenericTypeDefinition()))
+            {
+                return originalType.GenericTypeArguments[0];
+            }
+            return originalType;
+        }
+
+        #endregion
     }
 }
