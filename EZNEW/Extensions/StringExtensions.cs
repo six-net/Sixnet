@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
 using EZNEW.Security;
+using EZNEW.Security.Cryptography;
 
 namespace System
 {

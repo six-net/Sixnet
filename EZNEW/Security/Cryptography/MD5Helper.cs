@@ -2,7 +2,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace EZNEW.Security
+namespace EZNEW.Security.Cryptography
 {
     /// <summary>
     /// MD5 algorithm helper
@@ -12,7 +12,7 @@ namespace EZNEW.Security
         /// <summary>
         /// md5 provider
         /// </summary>
-        static MD5CryptoServiceProvider MD5CryptoServiceProvider = new MD5CryptoServiceProvider();
+        static readonly MD5CryptoServiceProvider MD5CryptoServiceProvider = new MD5CryptoServiceProvider();
 
         #region Encrypts string
 
