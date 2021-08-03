@@ -75,7 +75,8 @@ namespace EZNEW.Configuration
                 List<EntityField> editFields = new List<EntityField>();
                 List<EntityField> queryEntityFields = new List<EntityField>();
                 string versionField = null;
-                string refreshDateField = null;
+                string refreshDateTimeField = null;
+                string creationDateTimeField = null;
                 foreach (var member in memberInfos)
                 {
                     var fieldName = member.Name;
@@ -99,10 +100,12 @@ namespace EZNEW.Configuration
                         PropertyName = propertyName,
                         QueryFormat = entityFieldAttribute?.QueryFormat ?? string.Empty,
                         CacheRole = entityFieldAttribute?.CacheRole ?? FieldCacheRole.None,
+                        Role = fieldRole,
                         IsDisableEdit = entityFieldAttribute?.DisableEdit ?? false,
                         IsDisableQuery = entityFieldAttribute?.DisableQuery ?? false,
                         IsPrimaryKey = (fieldRole & FieldRole.PrimaryKey) != 0,
-                        IsRefreshDate = (fieldRole & FieldRole.RefreshDate) != 0,
+                        IsRefreshDateTime = (fieldRole & FieldRole.RefreshDateTime) != 0,
+                        IsCreationDateTime = (fieldRole & FieldRole.CreationDateTime) != 0,
                         IsVersion = (fieldRole & FieldRole.Version) != 0,
                         IsLevel = (fieldRole & FieldRole.Level) != 0,
                         IsSort = (fieldRole & FieldRole.Sort) != 0,
@@ -148,9 +151,13 @@ namespace EZNEW.Configuration
                     {
                         versionField = propertyName;
                     }
-                    if (propertyField.IsRefreshDate)
+                    if (propertyField.IsRefreshDateTime)
                     {
-                        refreshDateField = propertyName;
+                        refreshDateTimeField = propertyName;
+                    }
+                    if (propertyField.IsCreationDateTime)
+                    {
+                        creationDateTimeField = propertyName;
                     }
 
                     //relation config
@@ -203,7 +210,8 @@ namespace EZNEW.Configuration
                 entityConfig.PrimaryKeys = primaryKeys;
                 entityConfig.AllFields = allFieldDict;
                 entityConfig.VersionField = versionField;
-                entityConfig.RefreshDateField = refreshDateField;
+                entityConfig.RefreshDateTimeField = refreshDateTimeField;
+                entityConfig.CreationDateTimeField = creationDateTimeField;
                 entityConfig.CacheKeys = cacheKeys;
                 entityConfig.CachePrefixKeys = cachePrefixKeys;
                 entityConfig.CacheIgnoreKeys = cacheIgnoreKeys;
@@ -550,37 +558,74 @@ namespace EZNEW.Configuration
 
             #endregion
 
-            #region Refresh date field
+            #region Refresh datetime field
 
-            #region Set refresh date field
+            #region Set refresh datetime field
 
             /// <summary>
-            /// Set refresh date field
+            /// Set refresh datetime field
             /// </summary>
             /// <param name="entityType">Entity type</param>
-            /// <param name="fieldName">Refresh date field name</param>
-            internal static void SetRefreshDateField(Type entityType, string fieldName)
+            /// <param name="fieldName">Refresh datetime field name</param>
+            internal static void SetRefreshDateTimeField(Type entityType, string fieldName)
             {
                 var entityConfig = GetEntityConfiguration(entityType);
                 if (entityConfig != null)
                 {
-                    entityConfig.RefreshDateField = fieldName;
+                    entityConfig.RefreshDateTimeField = fieldName;
                 }
             }
 
             #endregion
 
-            #region Get refreshdate field
+            #region Get refresh datetime field
 
             /// <summary>
-            /// Get refresh date field
+            /// Get refresh datetime field
             /// </summary>
             /// <param name="entityType">Entity type</param>
-            /// <returns>Return the refresh date field name</returns>
-            internal static string GetRefreshDateField(Type entityType)
+            /// <returns>Return the refresh datetime field name</returns>
+            internal static string GetRefreshDateTimeField(Type entityType)
             {
                 var entityConfig = GetEntityConfiguration(entityType);
-                return entityConfig?.RefreshDateField ?? string.Empty;
+                return entityConfig?.RefreshDateTimeField ?? string.Empty;
+            }
+
+            #endregion
+
+            #endregion
+
+            #region Creation datetime field
+
+            #region Set creation datetime field
+
+            /// <summary>
+            /// Set creation datetime field
+            /// </summary>
+            /// <param name="entityType">Entity type</param>
+            /// <param name="fieldName">Creation datetime field name</param>
+            internal static void SetCreationDateTimeField(Type entityType, string fieldName)
+            {
+                var entityConfig = GetEntityConfiguration(entityType);
+                if (entityConfig != null)
+                {
+                    entityConfig.CreationDateTimeField = fieldName;
+                }
+            }
+
+            #endregion
+
+            #region Get creation datetime field
+
+            /// <summary>
+            /// Get creation datetime field
+            /// </summary>
+            /// <param name="entityType">Entity type</param>
+            /// <returns>Return the creation datetime field name</returns>
+            internal static string GetCreationDateTimeField(Type entityType)
+            {
+                var entityConfig = GetEntityConfiguration(entityType);
+                return entityConfig?.CreationDateTimeField ?? string.Empty;
             }
 
             #endregion

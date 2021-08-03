@@ -69,14 +69,19 @@ namespace EZNEW.Develop.Entity
         public List<string> CacheIgnoreKeys { get; set; }
 
         /// <summary>
-        /// Gets or sets the version key
+        /// Gets or sets the version field name
         /// </summary>
         public string VersionField { get; set; }
 
         /// <summary>
-        /// Gets or sets the refresh date key
+        /// Gets or sets the refresh datetime field name
         /// </summary>
-        public string RefreshDateField { get; set; }
+        public string RefreshDateTimeField { get; set; }
+
+        /// <summary>
+        /// Gets or sets the creation datatime field name
+        /// </summary>
+        public string CreationDateTimeField { get; set; }
 
         /// <summary>
         /// Gets or sets the relation fields

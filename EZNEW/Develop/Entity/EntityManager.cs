@@ -423,62 +423,62 @@ namespace EZNEW.Develop.Entity
 
         #endregion
 
-        #region Refresh date field
+        #region Refresh datetime field
 
-        #region Set refresh date field
+        #region Set refresh datetime field
 
         /// <summary>
-        /// Set refresh date field
+        /// Set refresh datetime field
         /// </summary>
         /// <param name="entityTypeAssemblyQualifiedName">Entity type full name</param>
         /// <param name="fieldName">Refresh date field name</param>
-        public static void SetRefreshDateField(string entityTypeAssemblyQualifiedName, string fieldName)
+        public static void SetRefreshDateTimeField(string entityTypeAssemblyQualifiedName, string fieldName)
         {
             var type = Type.GetType(entityTypeAssemblyQualifiedName);
-            SetRefreshDateField(type, fieldName);
+            SetRefreshDateTimeField(type, fieldName);
         }
 
         /// <summary>
-        /// Set refresh date field
+        /// Set refresh datetime field
         /// </summary>
         /// <param name="entityType">Entity type</param>
-        /// <param name="fieldName">Refresh date field name</param>
-        public static void SetRefreshDateField(Type entityType, string fieldName)
+        /// <param name="fieldName">Refresh datetime field name</param>
+        public static void SetRefreshDateTimeField(Type entityType, string fieldName)
         {
-            ConfigurationManager.Entity.SetVersionField(entityType, fieldName);
+            ConfigurationManager.Entity.SetRefreshDateTimeField(entityType, fieldName);
         }
 
         /// <summary>
-        /// Set refresh date field
+        /// Set refresh datetime field
         /// </summary>
         /// <typeparam name="TEntity">Entity type</typeparam>
-        /// <param name="field">Refresh date field</param>
-        public static void SetRefreshDateField<TEntity>(Expression<Func<TEntity, dynamic>> field)
+        /// <param name="field">Refresh datetime field</param>
+        public static void SetRefreshDateTimeField<TEntity>(Expression<Func<TEntity, dynamic>> field)
         {
             if (field == null)
             {
                 return;
             }
-            SetRefreshDateField(typeof(TEntity), ExpressionHelper.GetExpressionPropertyName(field.Body));
+            SetRefreshDateTimeField(typeof(TEntity), ExpressionHelper.GetExpressionPropertyName(field.Body));
         }
 
         #endregion
 
-        #region Get refreshdate field
+        #region Get refresh datetime field
 
         /// <summary>
-        /// Get refresh date field
+        /// Get refresh datetime field
         /// </summary>
         /// <param name="entityTypeAssemblyQualifiedName">Entity type full name</param>
-        /// <returns>Return the refresh date field name</returns>
-        public static string GetRefreshDateField(string entityTypeAssemblyQualifiedName)
+        /// <returns>Return the refresh datetime field name</returns>
+        public static string GetRefreshDateTimeField(string entityTypeAssemblyQualifiedName)
         {
             if (string.IsNullOrWhiteSpace(entityTypeAssemblyQualifiedName))
             {
                 return string.Empty;
             }
             var type = Type.GetType(entityTypeAssemblyQualifiedName);
-            return GetRefreshDateField(type);
+            return GetRefreshDateTimeField(type);
         }
 
         /// <summary>
@@ -486,9 +486,81 @@ namespace EZNEW.Develop.Entity
         /// </summary>
         /// <param name="entityType">Entity type</param>
         /// <returns>Return the refresh date field name</returns>
-        public static string GetRefreshDateField(Type entityType)
+        public static string GetRefreshDateTimeField(Type entityType)
         {
-            return ConfigurationManager.Entity.GetRefreshDateField(entityType);
+            return ConfigurationManager.Entity.GetRefreshDateTimeField(entityType);
+        }
+
+        #endregion 
+
+        #endregion
+
+        #region Creation datetime field
+
+        #region Set creation datetime field
+
+        /// <summary>
+        /// Set creation datetime field
+        /// </summary>
+        /// <param name="entityTypeAssemblyQualifiedName">Entity type full name</param>
+        /// <param name="fieldName">Creation datetime field name</param>
+        public static void SetCreationDateTimeField(string entityTypeAssemblyQualifiedName, string fieldName)
+        {
+            var type = Type.GetType(entityTypeAssemblyQualifiedName);
+            SetCreationDateTimeField(type, fieldName);
+        }
+
+        /// <summary>
+        /// Set creation datetime field
+        /// </summary>
+        /// <param name="entityType">Entity type</param>
+        /// <param name="fieldName">Creation datetime field name</param>
+        public static void SetCreationDateTimeField(Type entityType, string fieldName)
+        {
+            ConfigurationManager.Entity.SetCreationDateTimeField(entityType, fieldName);
+        }
+
+        /// <summary>
+        /// Set creation datetime field
+        /// </summary>
+        /// <typeparam name="TEntity">Entity type</typeparam>
+        /// <param name="field">Creation datetime field</param>
+        public static void SetCreationDateTimeField<TEntity>(Expression<Func<TEntity, dynamic>> field)
+        {
+            if (field == null)
+            {
+                return;
+            }
+            SetCreationDateTimeField(typeof(TEntity), ExpressionHelper.GetExpressionPropertyName(field.Body));
+        }
+
+        #endregion
+
+        #region Get creation datetime field
+
+        /// <summary>
+        /// Get creation datetime field
+        /// </summary>
+        /// <param name="entityTypeAssemblyQualifiedName">Entity type full name</param>
+        /// <returns>Return the creation datetime field name</returns>
+        public static string GetCreationDateTimeField(string entityTypeAssemblyQualifiedName)
+        {
+            if (string.IsNullOrWhiteSpace(entityTypeAssemblyQualifiedName))
+            {
+                return string.Empty;
+            }
+            var type = Type.GetType(entityTypeAssemblyQualifiedName);
+            return GetCreationDateTimeField(type);
+        }
+
+        /// <summary>
+        /// Get creation datetime field
+        /// </summary>
+        /// <param name="entityType">Entity type</param>
+        /// <returns>Return the creation datetime field name</returns>
+        public static string GetCreationDateTimeField(Type entityType)
+        {
+            return ConfigurationManager.Entity.GetCreationDateTimeField(entityType);
         }
 
         #endregion 

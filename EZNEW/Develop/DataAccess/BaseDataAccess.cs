@@ -30,7 +30,7 @@ namespace EZNEW.Develop.DataAccess
         public ICommand Add(TEntity data)
         {
             InitVersionFieldValue(data);//init version field value
-            InitRefreshDateFieldValue(data);//init refresh date value
+            InitDefaultDateTimeFieldValue(data);//init refresh date value
             var command = ExecuteAdd(data);
 
             //publish add event
@@ -111,7 +111,7 @@ namespace EZNEW.Develop.DataAccess
 
             #region refresh date
 
-            string refreshFieldName = EntityManager.GetRefreshDateField(entityType);
+            string refreshFieldName = EntityManager.GetRefreshDateTimeField(entityType);
             if (!string.IsNullOrWhiteSpace(refreshFieldName))
             {
                 if (!modifyValues.ContainsKey(refreshFieldName))
@@ -162,7 +162,7 @@ namespace EZNEW.Develop.DataAccess
 
             #region update date
 
-            string refreshFieldName = EntityManager.GetRefreshDateField(typeof(TEntity));
+            string refreshFieldName = EntityManager.GetRefreshDateTimeField(typeof(TEntity));
             if (!string.IsNullOrWhiteSpace(refreshFieldName))
             {
                 if (!fieldAndValues.ContainsKey(refreshFieldName))
@@ -605,21 +605,32 @@ namespace EZNEW.Develop.DataAccess
         }
 
         /// <summary>
-        /// Init refresh date
+        /// Init default datetime
         /// </summary>
         /// <param name="data">Entity data</param>
-        protected void InitRefreshDateFieldValue(TEntity data)
+        protected void InitDefaultDateTimeFieldValue(TEntity data)
         {
             if (data == null)
             {
                 return;
             }
-            string refreshDateField = EntityManager.GetRefreshDateField(typeof(TEntity));
+
+            DateTimeOffset nowDate = DateTimeOffset.Now;
+
+            //Creation datetime
+            string creationDateTimeField = EntityManager.GetCreationDateTimeField(typeof(TEntity));
+            if (string.IsNullOrWhiteSpace(creationDateTimeField))
+            {
+                return;
+            }
+
+            //Refresh datetime
+            string refreshDateField = EntityManager.GetRefreshDateTimeField(typeof(TEntity));
             if (string.IsNullOrWhiteSpace(refreshDateField))
             {
                 return;
             }
-            data.SetValue(refreshDateField, DateTimeOffset.Now);
+            data.SetValue(refreshDateField, nowDate);
         }
 
         #endregion

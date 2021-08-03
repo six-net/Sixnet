@@ -35,6 +35,11 @@ namespace EZNEW.Develop.Entity
         public bool IsPrimaryKey { get; set; }
 
         /// <summary>
+        /// Gets or sets the field role
+        /// </summary>
+        public FieldRole Role { get; set; }
+
+        /// <summary>
         /// Gets or sets cache option
         /// </summary>
         public FieldCacheRole CacheRole { get; set; }
@@ -55,9 +60,14 @@ namespace EZNEW.Develop.Entity
         public bool IsVersion { get; set; }
 
         /// <summary>
-        /// Gets or sets whether the property is refresh data field
+        /// Indecates whether the property is refresh datetime field
         /// </summary>
-        public bool IsRefreshDate { get; set; }
+        public bool IsRefreshDateTime { get; set; }
+
+        /// <summary>
+        /// Indecates whether the property is creation datetime field
+        /// </summary>
+        public bool IsCreationDateTime { get; set; }
 
         /// <summary>
         /// Gets or sets the data type

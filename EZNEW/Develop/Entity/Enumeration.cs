@@ -37,10 +37,11 @@ namespace EZNEW.Develop.Entity
         PrimaryKey = 2,
         ForeignKey = 4,
         Version = 8,
-        RefreshDate = 16,
+        RefreshDateTime = 16,
         Sort = 32,
         Level = 64,
         Parent = 128,
-        Display = 256
+        Display = 256,
+        CreationDateTime = 512
     }
 }
