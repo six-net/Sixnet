@@ -30,11 +30,6 @@ namespace EZNEW.Develop.Entity
         public string QueryFormat { get; set; }
 
         /// <summary>
-        /// Gets or sets whether the property is primary key
-        /// </summary>
-        public bool IsPrimaryKey { get; set; }
-
-        /// <summary>
         /// Gets or sets the field role
         /// </summary>
         public FieldRole Role { get; set; }
@@ -53,21 +48,6 @@ namespace EZNEW.Develop.Entity
         /// Gets or sets whether disable the field in edit
         /// </summary>
         public bool IsDisableEdit { get; set; }
-
-        /// <summary>
-        /// Gets or sets whether the property is version field
-        /// </summary>
-        public bool IsVersion { get; set; }
-
-        /// <summary>
-        /// Indecates whether the property is refresh datetime field
-        /// </summary>
-        public bool IsRefreshDateTime { get; set; }
-
-        /// <summary>
-        /// Indecates whether the property is creation datetime field
-        /// </summary>
-        public bool IsCreationDateTime { get; set; }
 
         /// <summary>
         /// Gets or sets the data type
@@ -95,26 +75,6 @@ namespace EZNEW.Develop.Entity
         public bool IsRequired { get; set; }
 
         /// <summary>
-        /// Whether is parent field
-        /// </summary>
-        public bool IsParent { get; set; }
-
-        /// <summary>
-        /// Whether is sort field
-        /// </summary>
-        public bool IsSort { get; set; }
-
-        /// <summary>
-        /// Whether is level field
-        /// </summary>
-        public bool IsLevel { get; set; }
-
-        /// <summary>
-        /// Whether is display name field
-        /// </summary>
-        public bool IsDisplayName { get; set; }
-
-        /// <summary>
         /// Gets or sets the value provider
         /// </summary>
         internal IEntityPropertyValueProvider ValueProvider { get; set; }
@@ -139,6 +99,35 @@ namespace EZNEW.Develop.Entity
         public static implicit operator EntityField(string value)
         {
             return new EntityField() { FieldName = value, PropertyName = value };
+        }
+
+        /// <summary>
+        /// Indecates field has the specified role
+        /// </summary>
+        /// <param name="role">Field role</param>
+        /// <returns></returns>
+        public bool InRole(FieldRole role)
+        {
+            return (Role & role) == role;
+        }
+
+        /// <summary>
+        /// Indecates field has the specified cache role
+        /// </summary>
+        /// <param name="cacheRole">Cache role</param>
+        /// <returns></returns>
+        public bool InCacheRole(FieldCacheRole cacheRole)
+        {
+            return (CacheRole & cacheRole) == cacheRole;
+        }
+
+        /// <summary>
+        /// Indecates field must query
+        /// </summary>
+        /// <returns></returns>
+        public bool ShouldMustQuery()
+        {
+            return InRole(FieldRole.PrimaryKey) || InRole(FieldRole.Version);
         }
 
         /// <summary>

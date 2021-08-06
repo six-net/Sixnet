@@ -268,7 +268,7 @@ namespace EZNEW.Develop.Domain.Aggregation
         {
             if (IdentityValueIsNone())
             {
-                throw new EZNEWException("The object does not have an identity value set and cannot perform a remove");
+                throw new EZNEWException("Identity value not set");
             }
             T removeData = this as T;
             repository.Remove(removeData);

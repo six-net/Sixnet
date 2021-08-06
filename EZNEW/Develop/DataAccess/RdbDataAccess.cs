@@ -98,6 +98,15 @@ namespace EZNEW.Develop.DataAccess
         /// <returns>Return delete command</returns>
         protected override ICommand ExecuteDeleteByCondition(IQuery query)
         {
+            //Whether is logic delete
+            var obsoleteField = EntityManager.GetObsoleteField(entityType);
+            if (!string.IsNullOrWhiteSpace(obsoleteField))
+            {
+                var modifyExp = ModifyFactory.Create();
+                modifyExp.Set(obsoleteField, true);
+                return Modify(modifyExp, query);
+            }
+
             var cmd = RdbCommand.CreateNewCommand<TEntity>(OperateType.Delete);
             SetCommand(cmd, null);
             cmd.MustReturnValueOnSuccess = query?.MustReturnValueOnSuccess ?? false;

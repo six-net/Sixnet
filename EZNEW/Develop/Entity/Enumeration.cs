@@ -42,6 +42,7 @@ namespace EZNEW.Develop.Entity
         Level = 64,
         Parent = 128,
         Display = 256,
-        CreationDateTime = 512
+        CreationDateTime = 512,
+        ObsoleteTag = 1024
     }
 }

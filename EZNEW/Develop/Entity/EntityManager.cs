@@ -491,7 +491,7 @@ namespace EZNEW.Develop.Entity
             return ConfigurationManager.Entity.GetRefreshDateTimeField(entityType);
         }
 
-        #endregion 
+        #endregion
 
         #endregion
 
@@ -563,7 +563,39 @@ namespace EZNEW.Develop.Entity
             return ConfigurationManager.Entity.GetCreationDateTimeField(entityType);
         }
 
-        #endregion 
+        #endregion
+
+        #endregion
+
+        #region Obsolete field
+
+        #region Set obsolete field
+
+        /// <summary>
+        /// Set obsolete field
+        /// </summary>
+        /// <param name="entityType">Entity type</param>
+        /// <param name="fieldName">Obsolete field name</param>
+        public static void SetObsoleteField(Type entityType, string fieldName)
+        {
+            ConfigurationManager.Entity.SetObsoleteField(entityType, fieldName);
+        }
+
+        #endregion
+
+        #region Get obsolete field
+
+        /// <summary>
+        /// Get obsolete field
+        /// </summary>
+        /// <param name="entityType">Entity type</param>
+        /// <returns>Return the obsolete field name</returns>
+        public static string GetObsoleteField(Type entityType)
+        {
+            return ConfigurationManager.Entity.GetObsoleteField(entityType);
+        }
+
+        #endregion
 
         #endregion
 

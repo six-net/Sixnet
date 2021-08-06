@@ -192,6 +192,7 @@ namespace EZNEW.Develop.DataAccess
         /// <returns>Return command</returns>
         public ICommand Delete(TEntity data)
         {
+            //Execute delete
             var command = ExecuteDeleteData(data);
 
             //publish delete data event
@@ -619,18 +620,17 @@ namespace EZNEW.Develop.DataAccess
 
             //Creation datetime
             string creationDateTimeField = EntityManager.GetCreationDateTimeField(typeof(TEntity));
-            if (string.IsNullOrWhiteSpace(creationDateTimeField))
+            if (!string.IsNullOrWhiteSpace(creationDateTimeField))
             {
-                return;
+                data.SetValue(creationDateTimeField, nowDate);
             }
 
             //Refresh datetime
-            string refreshDateField = EntityManager.GetRefreshDateTimeField(typeof(TEntity));
-            if (string.IsNullOrWhiteSpace(refreshDateField))
+            string refreshDateTimeField = EntityManager.GetRefreshDateTimeField(typeof(TEntity));
+            if (!string.IsNullOrWhiteSpace(refreshDateTimeField))
             {
-                return;
+                data.SetValue(refreshDateTimeField, nowDate);
             }
-            data.SetValue(refreshDateField, nowDate);
         }
 
         #endregion
