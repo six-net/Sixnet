@@ -84,6 +84,11 @@ namespace EZNEW.Develop.Entity
         public string CreationDateTimeField { get; set; }
 
         /// <summary>
+        /// Gets or sets the obsolete field
+        /// </summary>
+        public string ObsoleteField { get; set; }
+
+        /// <summary>
         /// Gets or sets the relation fields
         /// key:relation type id
         /// value: key->field,value:relation field

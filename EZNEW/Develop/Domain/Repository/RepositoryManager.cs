@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using EZNEW.Develop.CQuery;
 
 namespace EZNEW.Develop.Domain.Repository
@@ -8,6 +9,8 @@ namespace EZNEW.Develop.Domain.Repository
     /// </summary>
     internal static class RepositoryManager
     {
+        #region IQuery handler
+
         /// <summary>
         /// Handle IQuery before execute
         /// </summary>
@@ -35,5 +38,7 @@ namespace EZNEW.Develop.Domain.Repository
         {
             originalQuery?.Reset();
         }
+
+        #endregion
     }
 }

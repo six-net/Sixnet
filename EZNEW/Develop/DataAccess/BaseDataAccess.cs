@@ -70,7 +70,8 @@ namespace EZNEW.Develop.DataAccess
         /// <returns>Return command</returns>
         public ICommand Modify(TEntity newData, TEntity oldData)
         {
-            return Modify(newData, oldData, QueryManager.AppendEntityIdentityCondition(newData));
+            var modifyQuery = QueryManager.AppendEntityIdentityCondition(newData).ExcludeObsoleteData();
+            return Modify(newData, oldData, modifyQuery);
         }
 
         /// <summary>
@@ -82,14 +83,15 @@ namespace EZNEW.Develop.DataAccess
         /// <returns>Return command</returns>
         public ICommand Modify(TEntity newData, TEntity oldData, IQuery query)
         {
-            Dictionary<string, dynamic> modifyValues = newData.GetModifyValues(oldData);
-            if (modifyValues == null || modifyValues.Count < 1)
-            {
-                return null;
-            }
             if (query == null)
             {
-                throw new EZNEWException("The data modification condition is null");
+                throw new ArgumentNullException($"{nameof(query)}");
+            }
+
+            Dictionary<string, dynamic> modifyValues = newData.GetModifyValues(oldData);
+            if (modifyValues.IsNullOrEmpty())
+            {
+                return null;
             }
 
             #region control version
@@ -97,7 +99,7 @@ namespace EZNEW.Develop.DataAccess
             string versionFieldName = EntityManager.GetVersionField(entityType);
             if (!string.IsNullOrWhiteSpace(versionFieldName))
             {
-                var nowVersionValue = newData.GetValue(versionFieldName);
+                var nowVersionValue = oldData.GetValue(versionFieldName);
                 if (!modifyValues.ContainsKey(versionFieldName))
                 {
                     var newVersionValue = nowVersionValue + 1;
@@ -192,6 +194,7 @@ namespace EZNEW.Develop.DataAccess
         /// <returns>Return command</returns>
         public ICommand Delete(TEntity data)
         {
+            //Execute delete
             var command = ExecuteDeleteData(data);
 
             //publish delete data event
@@ -619,18 +622,17 @@ namespace EZNEW.Develop.DataAccess
 
             //Creation datetime
             string creationDateTimeField = EntityManager.GetCreationDateTimeField(typeof(TEntity));
-            if (string.IsNullOrWhiteSpace(creationDateTimeField))
+            if (!string.IsNullOrWhiteSpace(creationDateTimeField))
             {
-                return;
+                data.SetValue(creationDateTimeField, nowDate);
             }
 
             //Refresh datetime
-            string refreshDateField = EntityManager.GetRefreshDateTimeField(typeof(TEntity));
-            if (string.IsNullOrWhiteSpace(refreshDateField))
+            string refreshDateTimeField = EntityManager.GetRefreshDateTimeField(typeof(TEntity));
+            if (!string.IsNullOrWhiteSpace(refreshDateTimeField))
             {
-                return;
+                data.SetValue(refreshDateTimeField, nowDate);
             }
-            data.SetValue(refreshDateField, nowDate);
         }
 
         #endregion

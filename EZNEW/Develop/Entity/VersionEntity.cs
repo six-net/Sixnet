@@ -7,7 +7,7 @@ namespace EZNEW.Develop.Entity
     /// <summary>
     /// Defines version entity
     /// </summary>
-    public abstract class VersionEntity<TEntity> : DateTimeEntity<TEntity>, IVersionEntity where TEntity : BaseEntity<TEntity>, new()
+    public abstract class VersionEntity<TEntity> : RecordEntity<TEntity>, IVersionEntity where TEntity : BaseEntity<TEntity>, new()
     {
         /// <summary>
         /// Gets or sets the version value

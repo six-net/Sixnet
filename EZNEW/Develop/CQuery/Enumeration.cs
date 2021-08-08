@@ -106,7 +106,8 @@ namespace EZNEW.Develop.CQuery
     {
         Repository = 2,
         Subuery = 4,
-        JoinQuery = 8
+        JoinQuery = 8,
+        CombineQuery = 16
     }
 
     /// <summary>

@@ -41,13 +41,18 @@ namespace EZNEW.Develop.CQuery
         /// <summary>
         /// Gets or sets a method to generate global condition
         /// </summary>
-        private static readonly List<Func<GlobalConditionFilter, GlobalCondition>> GetGlobalConditionProxys = new List<Func<GlobalConditionFilter, GlobalCondition>>();
+        private static readonly List<Func<GlobalConditionFilter, GlobalCondition>> GetGlobalConditionDelegates = new List<Func<GlobalConditionFilter, GlobalCondition>>();
 
         /// <summary>
         /// Gets or sets a value to determine whether copy parameter IQuery object,default is true
         /// parameter IQuery:subquery,join item
         /// </summary>
         public static bool EnableCopyParameterQueryObject = true;
+
+        /// <summary>
+        /// Indecates whether filter obsolete data
+        /// </summary>
+        public static bool FilterObsoleteData { get; set; } = true;
 
         #endregion
 
@@ -337,17 +342,23 @@ namespace EZNEW.Develop.CQuery
 
         #region Global condition
 
+        #region Configure global condition
+
         /// <summary>
         /// Configure global condition
         /// </summary>
-        /// <param name="getGlobalConditionOperation">Get global condition operation</param>
-        public static void ConfigureGlobalCondition(Func<GlobalConditionFilter, GlobalCondition> getGlobalConditionOperation)
+        /// <param name="getGlobalConditionDelegate">Get global condition delegate</param>
+        public static void ConfigureGlobalCondition(Func<GlobalConditionFilter, GlobalCondition> getGlobalConditionDelegate)
         {
-            if (getGlobalConditionOperation != null)
+            if (getGlobalConditionDelegate != null)
             {
-                GetGlobalConditionProxys.Add(getGlobalConditionOperation);
+                GetGlobalConditionDelegates.Add(getGlobalConditionDelegate);
             }
         }
+
+        #endregion
+
+        #region Get global condition
 
         /// <summary>
         /// Get global condition
@@ -370,11 +381,11 @@ namespace EZNEW.Develop.CQuery
                 conditionFilter.OriginalQuery.SetEntityType(conditionFilter.EntityType);
             }
             GlobalCondition globalCondition = null;
-            if (!GetGlobalConditionProxys.IsNullOrEmpty() && conditionFilter.OriginalQuery.AllowSetGlobalCondition())
+            if (!GetGlobalConditionDelegates.IsNullOrEmpty() && conditionFilter.OriginalQuery.AllowSetGlobalCondition())
             {
-                foreach (var globalConditionProxy in GetGlobalConditionProxys)
+                foreach (var globalConditionDelegate in GetGlobalConditionDelegates)
                 {
-                    var nowGlobalCondition = globalConditionProxy(conditionFilter);
+                    var nowGlobalCondition = globalConditionDelegate(conditionFilter);
                     if (nowGlobalCondition?.Value == null)
                     {
                         continue;
@@ -389,8 +400,101 @@ namespace EZNEW.Develop.CQuery
                     }
                 }
             }
+
+            //filter obsolete data
+            if (FilterObsoleteData)
+            {
+                var obsoleteField = EntityManager.GetObsoleteField(conditionFilter.EntityType);
+                if (!string.IsNullOrWhiteSpace(obsoleteField) && !conditionFilter.OriginalQuery.IncludeObsolete)
+                {
+                    globalCondition ??= new GlobalCondition();
+                    if (globalCondition.Value == null)
+                    {
+                        globalCondition.Value = Create().SetEntityType(conditionFilter.EntityType);
+                    }
+                    globalCondition.Value = globalCondition.Value.Equal(obsoleteField, false);
+                }
+            }
+
             return globalCondition;
         }
+
+        #endregion
+
+        #region Set global condition
+
+        #region Set global condition
+
+        /// <summary>
+        /// Set global condition
+        /// </summary>
+        /// <param name="entityType">Entity type</param>
+        /// <param name="originalQuery">Origin query</param>
+        /// <returns>Return the newest query object</returns>
+        internal static IQuery SetGlobalCondition(Type entityType, IQuery originalQuery, QueryUsageScene usageScene)
+        {
+            originalQuery ??= Create();
+            originalQuery.SetEntityType(entityType);
+
+            //Condition filter
+            GlobalConditionFilter conditionFilter = new GlobalConditionFilter()
+            {
+                UsageSceneEntityType = entityType,
+                UsageScene = usageScene
+            };
+            return SetQueryObjectGlobalCondition(originalQuery, conditionFilter, QuerySourceType.Repository);
+        }
+
+        #endregion
+
+        #region Set query global condition
+
+        static IQuery SetQueryObjectGlobalCondition(IQuery query, GlobalConditionFilter conditionFilter, QuerySourceType querySourceType)
+        {
+            if (query != null)
+            {
+                conditionFilter.SourceType = querySourceType;
+                conditionFilter.EntityType = query.GetEntityType();
+                conditionFilter.OriginalQuery = query;
+
+                //global condition
+                var conditionFilterResult = GetGlobalCondition(conditionFilter);
+                conditionFilterResult?.AppendTo(query);
+
+                //filter oboslete data
+                query = query.ExcludeObsoleteData();
+
+                //subqueries
+                if (!query.Subqueries.IsNullOrEmpty())
+                {
+                    foreach (var squery in query.Subqueries)
+                    {
+                        SetQueryObjectGlobalCondition(squery, conditionFilter, QuerySourceType.Subuery);
+                    }
+                }
+                //join
+                if (!query.JoinItems.IsNullOrEmpty())
+                {
+                    foreach (var jitem in query.JoinItems)
+                    {
+                        SetQueryObjectGlobalCondition(jitem.JoinQuery, conditionFilter, QuerySourceType.JoinQuery);
+                    }
+                }
+                //combine
+                if (!query.CombineItems.IsNullOrEmpty())
+                {
+                    foreach (var citem in query.CombineItems)
+                    {
+                        SetQueryObjectGlobalCondition(citem.CombineQuery, conditionFilter, QuerySourceType.CombineQuery);
+                    }
+                }
+            }
+            return query;
+        }
+
+        #endregion
+
+        #endregion
 
         #endregion
 

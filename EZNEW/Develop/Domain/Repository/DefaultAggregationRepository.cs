@@ -318,142 +318,6 @@ namespace EZNEW.Develop.Domain.Repository
 
         #region Global condition
 
-        #region Append repository condition
-
-        /// <summary>
-        /// Append repository condition
-        /// </summary>
-        /// <param name="originalQuery">Original query</param>
-        /// <returns>Return the newest query object</returns>
-        IQuery AppendRepositoryCondition(IQuery originalQuery, QueryUsageScene usageScene)
-        {
-            if (originalQuery == null)
-            {
-                originalQuery = QueryManager.Create();
-                originalQuery.SetEntityType(entityType);
-            }
-            else
-            {
-                originalQuery.SetEntityType(entityType);
-            }
-
-            //primary query
-            GlobalConditionFilter conditionFilter = new GlobalConditionFilter()
-            {
-                OriginalQuery = originalQuery,
-                UsageSceneEntityType = entityType,
-                EntityType = entityType,
-                SourceType = QuerySourceType.Repository,
-                UsageScene = usageScene
-            };
-            var conditionFilterResult = QueryManager.GetGlobalCondition(conditionFilter);
-            if (conditionFilterResult != null)
-            {
-                conditionFilterResult.AppendTo(originalQuery);
-            }
-            //subqueries
-            if (!originalQuery.Subqueries.IsNullOrEmpty())
-            {
-                foreach (var squery in originalQuery.Subqueries)
-                {
-                    AppendSubqueryCondition(squery, conditionFilter);
-                }
-            }
-            //join
-            if (!originalQuery.JoinItems.IsNullOrEmpty())
-            {
-                foreach (var jitem in originalQuery.JoinItems)
-                {
-                    AppendJoinQueryCondition(jitem.JoinQuery, conditionFilter);
-                }
-            }
-            return originalQuery;
-        }
-
-        #endregion
-
-        #region Append subqueries condition
-
-        /// <summary>
-        /// Append subqueries condition
-        /// </summary>
-        /// <param name="subquery">Subquery</param>
-        /// <param name="conditionFilter">Condition filter</param>
-        void AppendSubqueryCondition(IQuery subquery, GlobalConditionFilter conditionFilter)
-        {
-            if (subquery == null)
-            {
-                return;
-            }
-            conditionFilter.SourceType = QuerySourceType.Subuery;
-            conditionFilter.EntityType = subquery.GetEntityType();
-            conditionFilter.OriginalQuery = subquery;
-            var conditionFilterResult = QueryManager.GetGlobalCondition(conditionFilter);
-            if (conditionFilterResult != null)
-            {
-                conditionFilterResult.AppendTo(subquery);
-            }
-            //subqueries
-            if (!subquery.Subqueries.IsNullOrEmpty())
-            {
-                foreach (var squery in subquery.Subqueries)
-                {
-                    AppendSubqueryCondition(squery, conditionFilter);
-                }
-            }
-            //join
-            if (!subquery.JoinItems.IsNullOrEmpty())
-            {
-                foreach (var jitem in subquery.JoinItems)
-                {
-                    AppendJoinQueryCondition(jitem.JoinQuery, conditionFilter);
-                }
-            }
-        }
-
-        #endregion
-
-        #region Append join condition
-
-        /// <summary>
-        /// Append join query condition
-        /// </summary>
-        /// <param name="joinQuery">Join query</param>
-        /// <param name="conditionFilter">Condition filter</param>
-        void AppendJoinQueryCondition(IQuery joinQuery, GlobalConditionFilter conditionFilter)
-        {
-            if (joinQuery == null)
-            {
-                return;
-            }
-            conditionFilter.SourceType = QuerySourceType.JoinQuery;
-            conditionFilter.EntityType = joinQuery.GetEntityType();
-            conditionFilter.OriginalQuery = joinQuery;
-            var conditionFilterResult = QueryManager.GetGlobalCondition(conditionFilter);
-            if (conditionFilterResult != null)
-            {
-                conditionFilterResult.AppendTo(joinQuery);
-            }
-            //subqueries
-            if (!joinQuery.Subqueries.IsNullOrEmpty())
-            {
-                foreach (var squery in joinQuery.Subqueries)
-                {
-                    AppendSubqueryCondition(squery, conditionFilter);
-                }
-            }
-            //join query
-            if (!joinQuery.JoinItems.IsNullOrEmpty())
-            {
-                foreach (var jitem in joinQuery.JoinItems)
-                {
-                    AppendJoinQueryCondition(jitem.JoinQuery, conditionFilter);
-                }
-            }
-        }
-
-        #endregion
-
         #region Append Remove extra condition
 
         /// <summary>
@@ -463,7 +327,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns>Return the newest query object</returns>
         protected override IQuery AppendRemoveCondition(IQuery originalQuery)
         {
-            return AppendRepositoryCondition(originalQuery, QueryUsageScene.Remove);
+            return QueryManager.SetGlobalCondition(entityType, originalQuery, QueryUsageScene.Remove);
         }
 
         #endregion
@@ -477,7 +341,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns>Return the newest query object</returns>
         protected override IQuery AppendModifyCondition(IQuery originalQuery)
         {
-            return AppendRepositoryCondition(originalQuery, QueryUsageScene.Modify);
+            return QueryManager.SetGlobalCondition(entityType, originalQuery, QueryUsageScene.Modify);
         }
 
         #endregion
@@ -491,7 +355,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns>Return the newest query object</returns>
         protected override IQuery AppendQueryCondition(IQuery originalQuery)
         {
-            return AppendRepositoryCondition(originalQuery, QueryUsageScene.Query);
+            return QueryManager.SetGlobalCondition(entityType, originalQuery, QueryUsageScene.Query);
         }
 
         #endregion
@@ -505,7 +369,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns>Return the newest query object</returns>
         protected override IQuery AppendExistCondition(IQuery originalQuery)
         {
-            return AppendRepositoryCondition(originalQuery, QueryUsageScene.Exist);
+            return QueryManager.SetGlobalCondition(entityType, originalQuery, QueryUsageScene.Exist);
         }
 
         #endregion
@@ -519,7 +383,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns>Return the newest query object</returns>
         protected override IQuery AppendCountCondition(IQuery originalQuery)
         {
-            return AppendRepositoryCondition(originalQuery, QueryUsageScene.Count);
+            return QueryManager.SetGlobalCondition(entityType, originalQuery, QueryUsageScene.Count);
         }
 
         #endregion
@@ -533,7 +397,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns>Return the newest query object</returns>
         protected override IQuery AppendMaxCondition(IQuery originalQuery)
         {
-            return AppendRepositoryCondition(originalQuery, QueryUsageScene.Max);
+            return QueryManager.SetGlobalCondition(entityType, originalQuery, QueryUsageScene.Max);
         }
 
         #endregion
@@ -547,7 +411,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns>Return the newest query object</returns>
         protected override IQuery AppendMinCondition(IQuery originalQuery)
         {
-            return AppendRepositoryCondition(originalQuery, QueryUsageScene.Min);
+            return QueryManager.SetGlobalCondition(entityType, originalQuery, QueryUsageScene.Min);
         }
 
         #endregion
@@ -561,7 +425,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns>Return the newest query object</returns>
         protected override IQuery AppendSumCondition(IQuery originalQuery)
         {
-            return AppendRepositoryCondition(originalQuery, QueryUsageScene.Sum);
+            return QueryManager.SetGlobalCondition(entityType, originalQuery, QueryUsageScene.Sum);
         }
 
         #endregion
@@ -575,7 +439,7 @@ namespace EZNEW.Develop.Domain.Repository
         /// <returns>Return the newest query object</returns>
         protected override IQuery AppendAvgCondition(IQuery originalQuery)
         {
-            return AppendRepositoryCondition(originalQuery, QueryUsageScene.Avg);
+            return QueryManager.SetGlobalCondition(entityType, originalQuery, QueryUsageScene.Avg);
         }
 
         #endregion

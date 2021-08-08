@@ -151,6 +151,11 @@ namespace EZNEW.Develop.CQuery
         /// </summary>
         DataIsolationLevel? IsolationLevel { get; set; }
 
+        /// <summary>
+        /// Indecates whether query obsolete data
+        /// </summary>
+        bool IncludeObsolete { get; set; }
+
         #endregion
 
         #region Methods

@@ -77,6 +77,7 @@ namespace EZNEW.Configuration
                 string versionField = null;
                 string refreshDateTimeField = null;
                 string creationDateTimeField = null;
+                string obsoleteField = null;
                 foreach (var member in memberInfos)
                 {
                     var fieldName = member.Name;
@@ -103,14 +104,6 @@ namespace EZNEW.Configuration
                         Role = fieldRole,
                         IsDisableEdit = entityFieldAttribute?.DisableEdit ?? false,
                         IsDisableQuery = entityFieldAttribute?.DisableQuery ?? false,
-                        IsPrimaryKey = (fieldRole & FieldRole.PrimaryKey) != 0,
-                        IsRefreshDateTime = (fieldRole & FieldRole.RefreshDateTime) != 0,
-                        IsCreationDateTime = (fieldRole & FieldRole.CreationDateTime) != 0,
-                        IsVersion = (fieldRole & FieldRole.Version) != 0,
-                        IsLevel = (fieldRole & FieldRole.Level) != 0,
-                        IsSort = (fieldRole & FieldRole.Sort) != 0,
-                        IsParent = (fieldRole & FieldRole.Parent) != 0,
-                        IsDisplayName = (fieldRole & FieldRole.Display) != 0,
                         DataType = memberType,
                         DbTypeName = entityFieldAttribute?.DbTypeName,
                         MaxLength = entityFieldAttribute?.MaxLength ?? 0,
@@ -128,36 +121,40 @@ namespace EZNEW.Configuration
 
                     allFields.Add(propertyField);
 
-                    if (propertyField.IsPrimaryKey)
+                    if (propertyField.InRole(FieldRole.PrimaryKey))
                     {
                         primaryKeys.Add(propertyName);
                     }
                     else
                     {
-                        if ((propertyField.CacheRole & FieldCacheRole.CacheKey) != 0)
+                        if (propertyField.InCacheRole(FieldCacheRole.CacheKey))
                         {
                             cacheKeys.Add(propertyName);
                         }
-                        if ((propertyField.CacheRole & FieldCacheRole.CacheKeyPrefix) != 0)
+                        if (propertyField.InCacheRole(FieldCacheRole.CacheKeyPrefix))
                         {
                             cachePrefixKeys.Add(propertyName);
                         }
-                        if ((propertyField.CacheRole & FieldCacheRole.Ignore) != 0)
+                        if (propertyField.InCacheRole(FieldCacheRole.Ignore))
                         {
                             cacheIgnoreKeys.Add(propertyName);
                         }
                     }
-                    if (propertyField.IsVersion)
+                    if (propertyField.InRole(FieldRole.Version))
                     {
                         versionField = propertyName;
                     }
-                    if (propertyField.IsRefreshDateTime)
+                    if (propertyField.InRole(FieldRole.RefreshDateTime))
                     {
                         refreshDateTimeField = propertyName;
                     }
-                    if (propertyField.IsCreationDateTime)
+                    if (propertyField.InRole(FieldRole.CreationDateTime))
                     {
                         creationDateTimeField = propertyName;
+                    }
+                    if (propertyField.InRole(FieldRole.ObsoleteTag))
+                    {
+                        obsoleteField = propertyName;
                     }
 
                     //relation config
@@ -187,12 +184,12 @@ namespace EZNEW.Configuration
                         entityConfig.RelationFields[relationTypeId] = values;
                     }
                 }
-                allFields = allFields.OrderByDescending(c => c.IsPrimaryKey).ThenByDescending(c => cacheKeys.Contains(c.PropertyName)).ToList();
+                allFields = allFields.OrderByDescending(c => c.InRole(FieldRole.PrimaryKey)).ThenByDescending(c => cacheKeys.Contains(c.PropertyName)).ToList();
                 var allFieldDict = new Dictionary<string, EntityField>(allFields.Count);
                 foreach (var field in allFields)
                 {
                     allFieldDict[field.PropertyName] = field;
-                    var mustQueryField = field.IsPrimaryKey || field.IsVersion;
+                    var mustQueryField = field.ShouldMustQuery();
                     if (mustQueryField)
                     {
                         mustQueryFields.Add(field.PropertyName);
@@ -212,6 +209,7 @@ namespace EZNEW.Configuration
                 entityConfig.VersionField = versionField;
                 entityConfig.RefreshDateTimeField = refreshDateTimeField;
                 entityConfig.CreationDateTimeField = creationDateTimeField;
+                entityConfig.ObsoleteField = obsoleteField;
                 entityConfig.CacheKeys = cacheKeys;
                 entityConfig.CachePrefixKeys = cachePrefixKeys;
                 entityConfig.CacheIgnoreKeys = cacheIgnoreKeys;
@@ -451,6 +449,10 @@ namespace EZNEW.Configuration
                 {
                     entityConfig.PrimaryKeys = entityConfig.PrimaryKeys.Union(keyNames).ToList();
                 }
+                foreach (var name in keyNames)
+                {
+                    SetFieldRole(entityType, name, FieldRole.PrimaryKey);
+                }
             }
 
             /// <summary>
@@ -460,12 +462,12 @@ namespace EZNEW.Configuration
             /// <param name="keyNames">Primary key names</param>
             internal static void AddPrimaryKey(string typeAssemblyQualifiedName, params string[] keyNames)
             {
-                if (string.IsNullOrWhiteSpace(typeAssemblyQualifiedName) || keyNames == null || keyNames.Length <= 0)
+                if (string.IsNullOrWhiteSpace(typeAssemblyQualifiedName) || keyNames.IsNullOrEmpty())
                 {
                     return;
                 }
                 var type = Type.GetType(typeAssemblyQualifiedName);
-                AddPrimaryKey(type);
+                AddPrimaryKey(type, keyNames);
             }
 
             /// <summary>
@@ -536,6 +538,7 @@ namespace EZNEW.Configuration
                 if (entityConfig != null)
                 {
                     entityConfig.VersionField = fieldName;
+                    SetFieldRole(entityType, fieldName, FieldRole.Version);
                 }
             }
 
@@ -573,6 +576,7 @@ namespace EZNEW.Configuration
                 if (entityConfig != null)
                 {
                     entityConfig.RefreshDateTimeField = fieldName;
+                    SetFieldRole(entityType, fieldName, FieldRole.RefreshDateTime);
                 }
             }
 
@@ -610,6 +614,7 @@ namespace EZNEW.Configuration
                 if (entityConfig != null)
                 {
                     entityConfig.CreationDateTimeField = fieldName;
+                    SetFieldRole(entityType, fieldName, FieldRole.CreationDateTime);
                 }
             }
 
@@ -626,6 +631,44 @@ namespace EZNEW.Configuration
             {
                 var entityConfig = GetEntityConfiguration(entityType);
                 return entityConfig?.CreationDateTimeField ?? string.Empty;
+            }
+
+            #endregion
+
+            #endregion
+
+            #region Obsolete field
+
+            #region Set obsolete field
+
+            /// <summary>
+            /// Set obsolete field
+            /// </summary>
+            /// <param name="entityType">Entity type</param>
+            /// <param name="fieldName">Obsolete field name</param>
+            internal static void SetObsoleteField(Type entityType, string fieldName)
+            {
+                var entityConfig = GetEntityConfiguration(entityType);
+                if (entityConfig != null)
+                {
+                    entityConfig.ObsoleteField = fieldName;
+                    SetFieldRole(entityType, fieldName, FieldRole.ObsoleteTag);
+                }
+            }
+
+            #endregion
+
+            #region Get obsolete field
+
+            /// <summary>
+            /// Get obsolete field
+            /// </summary>
+            /// <param name="entityType">Entity type</param>
+            /// <returns>Return the obsolete field name</returns>
+            internal static string GetObsoleteField(Type entityType)
+            {
+                var entityConfig = GetEntityConfiguration(entityType);
+                return entityConfig?.ObsoleteField ?? string.Empty;
             }
 
             #endregion
@@ -651,6 +694,59 @@ namespace EZNEW.Configuration
                 entityConfig?.RelationFields?.TryGetValue(relationEntityType.GUID, out relationFields);
                 return relationFields ?? new Dictionary<string, string>(0);
             }
+
+            #endregion
+
+            #region Role field
+
+            #region Set Field role
+
+            /// <summary>
+            /// Set field role
+            /// </summary>
+            /// <param name="entityType">Entity type</param>
+            /// <param name="fieldName">Field name</param>
+            /// <param name="role">Field role</param>
+            internal static void SetFieldRole(Type entityType, string fieldName, FieldRole role)
+            {
+                var field = GetEntityField(entityType, fieldName);
+                if (field != null && (field.Role & role) != role)
+                {
+                    field.Role |= role;
+                }
+            }
+
+            #endregion
+
+            #region Get role fields
+
+            /// <summary>
+            /// Get role fields
+            /// </summary>
+            /// <param name="entityType">Entity type</param>
+            /// <param name="role">Field role</param>
+            /// <returns>Return the field names</returns>
+            internal static IEnumerable<EntityField> GetFieldsByRole(Type entityType, FieldRole role)
+            {
+                return GetEntityConfiguration(entityType)?.AllFields?.Where(c => (c.Value.Role & role) != 0)?.Select(c => c.Value);
+            }
+
+            #endregion
+
+            #region Get role field
+
+            /// <summary>
+            /// Get role field
+            /// </summary>
+            /// <param name="entityType">Entity type</param>
+            /// <param name="role">Field role</param>
+            /// <returns>Return the field</returns>
+            internal static EntityField GetFieldByRole(Type entityType, FieldRole role)
+            {
+                return GetFieldsByRole(entityType, role)?.FirstOrDefault();
+            }
+
+            #endregion
 
             #endregion
 

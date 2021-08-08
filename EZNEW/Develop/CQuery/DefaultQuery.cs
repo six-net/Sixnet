@@ -270,6 +270,11 @@ namespace EZNEW.Develop.CQuery
         /// </summary>
         public DataIsolationLevel? IsolationLevel { get; set; }
 
+        /// <summary>
+        /// Indecates whether query obsolete data
+        /// </summary>
+        public bool IncludeObsolete { get; set; }
+
         #endregion
 
         #region Functions

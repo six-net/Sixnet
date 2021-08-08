@@ -189,7 +189,7 @@ namespace EZNEW.Develop.Entity
             var entityConfig = EntityManager.GetEntityConfiguration(entityType);
             if (entityConfig == null)
             {
-                throw new EZNEWException($"Get {entityType.FullName}'s configuration is null");
+                throw new EZNEWException($"{entityType.FullName}'s configuration is null");
             }
             var allValues = new Dictionary<string, dynamic>(entityConfig.AllFields.Count);
             foreach (var field in entityConfig.AllFields)

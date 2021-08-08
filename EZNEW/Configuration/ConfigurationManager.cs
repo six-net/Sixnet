@@ -65,7 +65,7 @@ namespace EZNEW.Configuration
         /// <returns></returns>
         internal static IEnumerable<FileInfo> GetMatchedFiles()
         {
-            return FilterFiles(new DirectoryInfo(ApplicationManager.ApplicationExecutableDirectory).GetFiles("*.dll", ConfigurationManager.Setting.FileSearchOption));
+            return FilterFiles(new DirectoryInfo(ApplicationManager.ApplicationExecutableDirectory).GetFiles("*.dll", Setting.FileSearchOption));
         }
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace EZNEW.Configuration
             {
                 return Array.Empty<FileInfo>();
             }
-            setting ??= ConfigurationManager.Setting;
+            setting ??= Setting;
             return originalFiles.Where(c =>
             {
                 var matched = setting.FileMatchPattern switch
