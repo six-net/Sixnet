@@ -54,7 +54,10 @@ namespace EZNEW.Configuration
                 string objectName = string.IsNullOrWhiteSpace(entityAttribute.ObjectName) ? entityType.Name : entityAttribute.ObjectName;
                 if (!EntityConfigurations.TryGetValue(typeGuid, out EntityConfiguration entityConfig))
                 {
-                    entityConfig = new EntityConfiguration();
+                    entityConfig = new EntityConfiguration()
+                    {
+                        Group = entityAttribute?.Group ?? string.Empty
+                    };
                 }
                 entityConfig.Structure = entityAttribute.Structure;
                 //table name

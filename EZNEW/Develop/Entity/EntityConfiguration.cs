@@ -19,6 +19,11 @@ namespace EZNEW.Develop.Entity
         public string TableName { get; set; }
 
         /// <summary>
+        /// Gets or sets the entity group
+        /// </summary>
+        public string Group { get; set; }
+
+        /// <summary>
         /// Gets or sets the comment
         /// </summary>
         public string Comment { get; set; }
