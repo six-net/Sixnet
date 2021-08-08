@@ -138,17 +138,10 @@ namespace EZNEW.Configuration
                         {
                             continue;
                         }
-                        var baseType = type.BaseType;
-                        bool isEntity = false;
-                        if (baseType != null && baseType.IsGenericType)
+                        bool isEntity = (type.GetCustomAttributes(typeof(EntityAttribute), false)?.FirstOrDefault()) is EntityAttribute entityAttribute;
+                        if (isEntity)
                         {
-                            //Entity
-                            var genericType = baseType.GetGenericTypeDefinition();
-                            if (genericType == entityGenericType)
-                            {
-                                isEntity = true;
-                                ConfigurationManager.Entity.ConfigureEntity(type);
-                            }
+                            ConfigurationManager.Entity.ConfigureEntity(type);
                         }
                         //query model
                         var queryModelInterface = type.GetInterface(queryModelGenericType.Name);
