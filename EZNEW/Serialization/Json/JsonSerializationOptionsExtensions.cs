@@ -47,17 +47,22 @@ namespace EZNEW.Serialization.Json
             {
                 return sourceJsonSerializerOptions;
             }
+            sourceJsonSerializerOptions.DefaultIgnoreCondition = jsonSerializationOptions.DefaultIgnoreCondition;
             sourceJsonSerializerOptions.ReadCommentHandling = jsonSerializationOptions.ReadCommentHandling;
             sourceJsonSerializerOptions.PropertyNameCaseInsensitive = jsonSerializationOptions.PropertyNameCaseInsensitive;
             sourceJsonSerializerOptions.PropertyNamingPolicy = jsonSerializationOptions.PropertyNamingPolicy;
             sourceJsonSerializerOptions.MaxDepth = jsonSerializationOptions.MaxDepth;
+            sourceJsonSerializerOptions.IncludeFields = jsonSerializationOptions.IncludeFields;
+            sourceJsonSerializerOptions.IgnoreReadOnlyFields = jsonSerializationOptions.IgnoreReadOnlyFields;
             sourceJsonSerializerOptions.IgnoreReadOnlyProperties = jsonSerializationOptions.IgnoreReadOnlyProperties;
+            sourceJsonSerializerOptions.ReferenceHandler = jsonSerializationOptions.ReferenceHandler;
             sourceJsonSerializerOptions.WriteIndented = jsonSerializationOptions.WriteIndented;
             sourceJsonSerializerOptions.IgnoreNullValues = jsonSerializationOptions.IgnoreNullValues;
             sourceJsonSerializerOptions.DictionaryKeyPolicy = jsonSerializationOptions.DictionaryKeyPolicy;
             sourceJsonSerializerOptions.Encoder = jsonSerializationOptions.Encoder;
             sourceJsonSerializerOptions.DefaultBufferSize = jsonSerializationOptions.DefaultBufferSize;
             sourceJsonSerializerOptions.AllowTrailingCommas = jsonSerializationOptions.AllowTrailingCommas;
+            sourceJsonSerializerOptions.NumberHandling = jsonSerializationOptions.NumberHandling;
 
             if (sourceJsonSerializerOptions.PropertyNamingPolicy == null)
             {
