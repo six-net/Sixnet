@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Microsoft.Extensions.Options;
 using EZNEW.DependencyInjection;
-using EZNEW.FileAccess.Configuration;
 
 namespace EZNEW.FileAccess
 {
@@ -56,12 +55,12 @@ namespace EZNEW.FileAccess
         #region Configure default file access option
 
         /// <summary>
-        /// Configure default file access option
+        /// Configure default file access behavior
         /// </summary>
-        /// <param name="fileAccessOption">File access option</param>
-        public static void ConfigureDefault(FileAccessOptions fileAccessOption)
+        /// <param name="fileAccessOptions">File access option</param>
+        public static void ConfigureDefault(FileAccessOptions fileAccessOptions)
         {
-            Default = fileAccessOption;
+            Default = fileAccessOptions;
         }
 
         #endregion

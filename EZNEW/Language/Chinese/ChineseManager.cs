@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using EZNEW.DependencyInjection;
-using EZNEW.Fault;
+using EZNEW.Exceptions;
 
 namespace EZNEW.Language.Chinese
 {

@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
-using EZNEW.Develop.Entity;
+using EZNEW.Development.Entity;
 using EZNEW.Paging;
 using EZNEW.DependencyInjection;
-using EZNEW.Develop.Command;
+using EZNEW.Development.Command;
 using EZNEW.Data.Cache.Command;
 using EZNEW.Queue;
 

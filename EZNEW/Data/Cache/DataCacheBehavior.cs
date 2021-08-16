@@ -1,8 +1,8 @@
-﻿using EZNEW.Data.Cache.Policy;
-using EZNEW.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using EZNEW.Data.Cache.Policy;
+using EZNEW.Logging;
 
 namespace EZNEW.Data.Cache
 {
@@ -14,7 +14,7 @@ namespace EZNEW.Data.Cache
         /// <summary>
         /// Gets or sets the exception handling
         /// </summary>
-        public DataCacheExceptionHandling ExceptionHandling { get; set; }
+        public DataCacheExceptionHandling ExceptionHandling { get; set; } = DataCacheExceptionHandling.Continue;
 
         /// <summary>
         /// Get starting result

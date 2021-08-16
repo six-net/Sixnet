@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using Newtonsoft.Json;
-using EZNEW.Develop.CQuery;
 using EZNEW.Reflection;
 
 namespace EZNEW.DataValidation.Configuration
@@ -32,7 +30,6 @@ namespace EZNEW.DataValidation.Configuration
         /// <summary>
         /// Gets or sets the type validation rules
         /// </summary>
-        [JsonProperty(PropertyName = "types")]
         public List<TypeValidationRule> Types
         {
             get; set;

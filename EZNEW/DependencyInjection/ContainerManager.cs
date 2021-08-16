@@ -7,10 +7,10 @@ using System.Runtime.Versioning;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using EZNEW.Logging;
-using EZNEW.Upload.Configuration;
-using EZNEW.FileAccess.Configuration;
 using EZNEW.Data.Cache;
-using EZNEW.Configuration;
+using EZNEW.Upload;
+using EZNEW.FileAccess;
+using EZNEW.Application;
 
 namespace EZNEW.DependencyInjection
 {
@@ -289,18 +289,10 @@ namespace EZNEW.DependencyInjection
         /// </summary>
         static void RegisterDefaultProjectService()
         {
-            var files = ConfigurationManager.GetMatchedFiles();
-            IEnumerable<Type> allTypes = Array.Empty<Type>();
-            foreach (var file in files)
+            var allTypes = ApplicationInitializer.GetAllConventionTypes();
+            if (allTypes.IsNullOrEmpty())
             {
-                try
-                {
-                    allTypes = allTypes.Union(Assembly.LoadFrom(file.FullName).GetTypes());
-                }
-                catch (Exception ex)
-                {
-                    LogManager.LogError(ex, ex.Message);
-                }
+                return;
             }
             foreach (Type serviceType in allTypes)
             {
@@ -309,7 +301,8 @@ namespace EZNEW.DependencyInjection
                     continue;
                 }
                 string typeName = serviceType.Name;
-                if (typeName.EndsWith("Service") || typeName.EndsWith("Business") || typeName.EndsWith("DbAccess") || typeName.EndsWith("Repository"))
+                StringComparison ignoreCaseComparison = StringComparison.OrdinalIgnoreCase;
+                if (typeName.EndsWith("Service", ignoreCaseComparison) || typeName.EndsWith("Business", ignoreCaseComparison) || typeName.EndsWith("DbAccess", ignoreCaseComparison) || typeName.EndsWith("Repository", ignoreCaseComparison))
                 {
                     Type implementType = allTypes.FirstOrDefault(t => t.Name != serviceType.Name && !t.IsInterface && serviceType.IsAssignableFrom(t));
                     if (implementType != null)
@@ -317,12 +310,12 @@ namespace EZNEW.DependencyInjection
                         Register(serviceType, implementType);
                     }
                 }
-                if (typeName.EndsWith("DataAccess"))
+                if (typeName.EndsWith("DataAccess", ignoreCaseComparison))
                 {
-                    List<Type> relateTypes = allTypes.Where(t => t.Name != serviceType.Name && !t.IsInterface && serviceType.IsAssignableFrom(t)).ToList();
-                    if (relateTypes != null && relateTypes.Count > 0)
+                    var relateTypes = allTypes.Where(t => t.Name != serviceType.Name && !t.IsInterface && serviceType.IsAssignableFrom(t));
+                    if (relateTypes.Any())
                     {
-                        Type providerType = relateTypes.FirstOrDefault(c => c.Name.EndsWith("CacheDataAccess"));
+                        Type providerType = relateTypes.FirstOrDefault(c => c.Name.EndsWith("CacheDataAccess", ignoreCaseComparison));
                         providerType ??= relateTypes.First();
                         Register(serviceType, providerType);
                     }

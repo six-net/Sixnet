@@ -4,7 +4,7 @@ using System.Text;
 using EZNEW.Cache;
 using EZNEW.Data.Cache.Policy;
 using EZNEW.DataValidation;
-using EZNEW.Develop.CQuery;
+using EZNEW.Development.Query;
 using EZNEW.Queue;
 
 namespace EZNEW.Data.Cache

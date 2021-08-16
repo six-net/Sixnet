@@ -2,13 +2,11 @@
 using System.Linq;
 using System.Threading.Tasks;
 using System.Data;
-using EZNEW.Paging;
-using EZNEW.Develop.Entity;
-using EZNEW.Fault;
-using EZNEW.Develop.Command;
 using System;
-using System.Security;
-using System.Runtime.CompilerServices;
+using EZNEW.Paging;
+using EZNEW.Development.Entity;
+using EZNEW.Exceptions;
+using EZNEW.Development.Command;
 
 namespace EZNEW.Data
 {
@@ -35,32 +33,32 @@ namespace EZNEW.Data
         /// <summary>
         /// Execute command
         /// </summary>
-        /// <param name="executeOption">Execute option</param>
+        /// <param name="executionOptions">Execution options</param>
         /// <param name="commands">Commands</param>
         /// <returns>Return effect data numbers</returns>
-        public int Execute(CommandExecuteOptions executeOption, IEnumerable<ICommand> commands)
+        public int Execute(CommandExecutionOptions executionOptions, IEnumerable<ICommand> commands)
         {
-            return ExecuteAsync(executeOption, commands).Result;
+            return ExecuteAsync(executionOptions, commands).Result;
         }
 
         /// <summary>
         /// Execute command
         /// </summary>
-        /// <param name="executeOption">Execute option</param>
+        /// <param name="executionOptions">Execution options</param>
         /// <param name="commands">Commands</param>
         /// <returns>Return effect data numbers</returns>
-        public int Execute(CommandExecuteOptions executeOption, params ICommand[] commands)
+        public int Execute(CommandExecutionOptions executionOptions, params ICommand[] commands)
         {
-            return ExecuteAsync(executeOption, commands).Result;
+            return ExecuteAsync(executionOptions, commands).Result;
         }
 
         /// <summary>
         /// Execute command
         /// </summary>
-        /// <param name="executeOption">Execute option</param>
+        /// <param name="executionOptions">Execution options</param>
         /// <param name="commands">Commands</param>
         /// <returns>Return effect data numbers</returns>
-        public async Task<int> ExecuteAsync(CommandExecuteOptions executeOption, IEnumerable<ICommand> commands)
+        public async Task<int> ExecuteAsync(CommandExecutionOptions executionOptions, IEnumerable<ICommand> commands)
         {
             if (commands.IsNullOrEmpty())
             {
@@ -106,7 +104,7 @@ namespace EZNEW.Data
                 var firstGroup = commandGroup.First();
                 var databaseServer = serverInfos[firstGroup.Key];
                 var provider = DataManager.GetDatabaseProvider(databaseServer.ServerType);
-                return await provider.ExecuteAsync(databaseServer, executeOption, firstGroup.Value).ConfigureAwait(false);
+                return await provider.ExecuteAsync(databaseServer, executionOptions, firstGroup.Value).ConfigureAwait(false);
             }
 
             //Multiple database server
@@ -116,7 +114,7 @@ namespace EZNEW.Data
             {
                 var databaseServer = serverInfos[cmdGroup.Key];
                 var provider = DataManager.GetDatabaseProvider(databaseServer.ServerType);
-                executeTasks[groupIndex] = provider.ExecuteAsync(databaseServer, executeOption, cmdGroup.Value.Select(c => c.Clone()));
+                executeTasks[groupIndex] = provider.ExecuteAsync(databaseServer, executionOptions, cmdGroup.Value.Select(c => c.Clone()));
                 groupIndex++;
             }
             return (await Task.WhenAll(executeTasks).ConfigureAwait(false)).Sum();
@@ -127,13 +125,13 @@ namespace EZNEW.Data
         /// <summary>
         /// Execute command
         /// </summary>
-        /// <param name="executeOption">Execute option</param>
+        /// <param name="executionOptions">Execution options</param>
         /// <param name="commands">Commands</param>
         /// <returns>Return effect data numbers</returns>
-        public async Task<int> ExecuteAsync(CommandExecuteOptions executeOption, params ICommand[] commands)
+        public async Task<int> ExecuteAsync(CommandExecutionOptions executionOptions, params ICommand[] commands)
         {
             IEnumerable<ICommand> cmdCollection = commands;
-            return await ExecuteAsync(executeOption, cmdCollection).ConfigureAwait(false);
+            return await ExecuteAsync(executionOptions, cmdCollection).ConfigureAwait(false);
         }
 
         #endregion
@@ -362,17 +360,17 @@ namespace EZNEW.Data
             dynamic result = default(T);
             switch (command.OperateType)
             {
-                case OperateType.Max:
+                case CommandOperationType.Max:
                     result = datas.Max();
                     break;
-                case OperateType.Min:
+                case CommandOperationType.Min:
                     result = datas.Min();
                     break;
-                case OperateType.Sum:
-                case OperateType.Count:
+                case CommandOperationType.Sum:
+                case CommandOperationType.Count:
                     result = Sum(datas);
                     break;
-                case OperateType.Avg:
+                case CommandOperationType.Avg:
                     result = Average(datas);
                     break;
             }

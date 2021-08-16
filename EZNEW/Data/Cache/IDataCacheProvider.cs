@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using EZNEW.Develop.Command;
-using EZNEW.Develop.Entity;
+using EZNEW.Development.Command;
+using EZNEW.Development.Entity;
 using EZNEW.Paging;
 using EZNEW.Data.Cache.Command;
 

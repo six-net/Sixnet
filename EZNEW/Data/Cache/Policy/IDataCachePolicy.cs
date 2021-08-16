@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using EZNEW.Develop.Entity;
+using EZNEW.Development.Entity;
 
 namespace EZNEW.Data.Cache.Policy
 {

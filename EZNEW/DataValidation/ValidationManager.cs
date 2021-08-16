@@ -5,9 +5,9 @@ using System.Linq;
 using System.Linq.Expressions;
 using EZNEW.DataValidation.Configuration;
 using EZNEW.DataValidation.Validators;
-using EZNEW.ExpressionUtil;
+using EZNEW.Expressions;
 using EZNEW.RegularExpression;
-using EZNEW.Serialize;
+using EZNEW.Serialization;
 
 namespace EZNEW.DataValidation
 {
@@ -69,7 +69,7 @@ namespace EZNEW.DataValidation
             }
             foreach (var data in jsonDatas)
             {
-                var ruleCollection = JsonSerializeHelper.JsonToObject<ValidationRuleCollection>(data);
+                var ruleCollection = JsonSerializer.Deserialize<ValidationRuleCollection>(data);
                 Configure(ruleCollection);
             }
         }

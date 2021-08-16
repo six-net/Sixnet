@@ -5,9 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using EZNEW.Http;
-using EZNEW.Serialize;
-using EZNEW.Upload.Configuration;
-using Microsoft.Win32.SafeHandles;
+using EZNEW.Serialization;
 
 namespace EZNEW.Upload
 {
@@ -74,10 +72,10 @@ namespace EZNEW.Upload
         /// <summary>
         /// Configure default upload option
         /// </summary>
-        /// <param name="uploadOption">Upload option</param>
-        public static void ConfigureDefault(UploadOptions uploadOption)
+        /// <param name="uploadOptions">Upload options</param>
+        public static void ConfigureDefault(UploadOptions uploadOptions)
         {
-            Default = uploadOption;
+            Default = uploadOptions;
         }
 
         #endregion
@@ -102,14 +100,14 @@ namespace EZNEW.Upload
 
         #endregion
 
-        #region Gets upload option
+        #region Gets upload options
 
         /// <summary>
         /// Gets upload option
         /// </summary>
         /// <param name="uploadObjectName">Upload object name</param>
         /// <returns>Return the upload option</returns>
-        static UploadOptions GetUploadOption(string uploadObjectName)
+        static UploadOptions GetUploadOptions(string uploadObjectName)
         {
             var currentOption = Default;
             if (UploadObjectConfigurations.TryGetValue(uploadObjectName ?? string.Empty, out var uploadObject) || uploadObject?.UploadOption != null)
@@ -150,8 +148,8 @@ namespace EZNEW.Upload
             {
                 var groupFileOptions = fileOptions.Where(c => c.UploadObjectName == uploadObjectName).ToList();
                 var groupFiles = files.Where(c => groupFileOptions.Exists(fc => fc.FileName == c.Key)).ToDictionary(c => c.Key, c => c.Value);
-                var uploadOption = GetUploadOption(uploadObjectName);
-                var groupResult = await UploadByOptionAsync(uploadOption, groupFileOptions, groupFiles, parameters).ConfigureAwait(false);
+                var uploadOptions = GetUploadOptions(uploadObjectName);
+                var groupResult = await UploadByOptionsAsync(uploadOptions, groupFileOptions, groupFiles, parameters).ConfigureAwait(false);
                 if (groupResult == null)
                 {
                     continue;
@@ -182,34 +180,34 @@ namespace EZNEW.Upload
 
         #endregion
 
-        #region Upload by upload option
+        #region Upload by upload options
 
         /// <summary>
-        /// Upload by upload option
+        /// Upload by upload options
         /// </summary>
-        /// <param name="uploadOption">Upload option</param>
+        /// <param name="uploadOptions">Upload options</param>
         /// <param name="fileOptions">File options</param>
         /// <param name="files">Files</param>
         /// <param name="parameters">Parameters</param>
         /// <returns>Return the upload result</returns>
-        public static async Task<UploadResult> UploadByOptionAsync(UploadOptions uploadOption, IEnumerable<UploadFile> fileOptions, Dictionary<string, byte[]> files, Dictionary<string, string> parameters = null)
+        public static async Task<UploadResult> UploadByOptionsAsync(UploadOptions uploadOptions, IEnumerable<UploadFile> fileOptions, Dictionary<string, byte[]> files, Dictionary<string, string> parameters = null)
         {
             if (files == null || files.Count <= 0)
             {
                 throw new ArgumentNullException(nameof(files));
             }
-            if (uploadOption == null)
+            if (uploadOptions == null)
             {
-                throw new ArgumentNullException(nameof(uploadOption));
+                throw new ArgumentNullException(nameof(uploadOptions));
             }
-            UploadResult uploadResult = null;
-            if (uploadOption.Remote)
+            UploadResult uploadResult;
+            if (uploadOptions.Remote)
             {
-                uploadResult = await RemoteUploadAsync(uploadOption.GetRemoteOption(), fileOptions.ToList(), files, parameters).ConfigureAwait(false);
+                uploadResult = await RemoteUploadAsync(uploadOptions.GetRemoteOption(), fileOptions.ToList(), files, parameters).ConfigureAwait(false);
             }
             else
             {
-                uploadResult = await LocalUploadAsync(uploadOption, fileOptions.ToList(), files).ConfigureAwait(false);
+                uploadResult = await LocalUploadAsync(uploadOptions, fileOptions.ToList(), files).ConfigureAwait(false);
             }
             return uploadResult;
         }
@@ -224,7 +222,7 @@ namespace EZNEW.Upload
         /// <returns>Return the upload result</returns>
         public static UploadResult UploadByOption(UploadOptions uploadOption, IEnumerable<UploadFile> fileOptions, Dictionary<string, byte[]> files, Dictionary<string, string> parameters = null)
         {
-            return UploadByOptionAsync(uploadOption, fileOptions, files, parameters).Result;
+            return UploadByOptionsAsync(uploadOption, fileOptions, files, parameters).Result;
         }
 
         #endregion
@@ -254,7 +252,7 @@ namespace EZNEW.Upload
                 Files = fileOptions
             };
             parameters ??= new Dictionary<string, string>();
-            parameters[RemoteParameter.RequestParameterName] = JsonSerializeHelper.ObjectToJson(uploadParameter);
+            parameters[RemoteParameter.RequestParameterName] = JsonSerializer.Serialize(uploadParameter);
             string url = remoteOption.GetUploadUrl();
             return await HttpHelper.PostUploadAsync(url, files, parameters).ConfigureAwait(false);
         }

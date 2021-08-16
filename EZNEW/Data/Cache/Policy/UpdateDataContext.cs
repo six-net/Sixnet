@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using EZNEW.Develop.Command;
+using EZNEW.Development.Command;
 
 namespace EZNEW.Data.Cache.Policy
 {

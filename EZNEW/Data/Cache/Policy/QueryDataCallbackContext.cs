@@ -1,5 +1,5 @@
 ﻿using EZNEW.Cache;
-using EZNEW.Develop.CQuery;
+using EZNEW.Development.Query;
 using System;
 using System.Collections.Generic;
 using System.Text;

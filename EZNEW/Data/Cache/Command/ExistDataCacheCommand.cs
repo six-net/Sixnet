@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using EZNEW.Develop.CQuery;
+using EZNEW.Development.Query;
 
 namespace EZNEW.Data.Cache.Command
 {

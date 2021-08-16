@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using EZNEW.DependencyInjection;
 using EZNEW.Diagnostics;
-using EZNEW.Fault;
+using EZNEW.Exceptions;
 using EZNEW.Queue;
 
 namespace EZNEW.Sms

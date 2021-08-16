@@ -1,4 +1,4 @@
-﻿using EZNEW.Develop.CQuery.CriteriaConverter;
+﻿using EZNEW.Development.Query.CriteriaConverter;
 
 namespace EZNEW.Data.CriteriaConverter
 {

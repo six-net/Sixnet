@@ -2,12 +2,11 @@
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Net.Http.Headers;
-using System.Runtime.CompilerServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using EZNEW.DependencyInjection;
 using EZNEW.Mapper;
-using EZNEW.Serialize;
+using EZNEW.Serialization;
+using EZNEW.Serialization.Json;
 
 namespace System
 {
@@ -160,8 +159,8 @@ namespace System
             {
                 return default(T);
             }
-            var objectString = JsonSerializeHelper.ObjectToJson(sourceObject, true);
-            return JsonSerializeHelper.JsonToObject<T>(objectString, new JsonSerializeSetting()
+            var objectString = JsonSerializer.Serialize(sourceObject, true);
+            return JsonSerializer.Deserialize<T>(objectString, new JsonSerializationOptions()
             {
                 ResolveNonPublic = true,
                 DeserializeType = sourceObject.GetType()
@@ -174,8 +173,8 @@ namespace System
             {
                 return default(T);
             }
-            var objectString = JsonSerializeHelper.ObjectToJson(sourceObject, false);
-            return JsonSerializeHelper.JsonToObject<T>(objectString, new JsonSerializeSetting()
+            var objectString = JsonSerializer.Serialize(sourceObject, false);
+            return JsonSerializer.Deserialize<T>(objectString, new JsonSerializationOptions()
             {
                 ResolveNonPublic = false,
                 DeserializeType = sourceObject.GetType()

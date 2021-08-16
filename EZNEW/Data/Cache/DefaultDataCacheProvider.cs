@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using EZNEW.Develop.Entity;
-using EZNEW.Develop.CQuery;
+using EZNEW.Development.Entity;
+using EZNEW.Development.Query;
 using EZNEW.Paging;
-using EZNEW.Develop.Command;
+using EZNEW.Development.Command;
 using EZNEW.Data.Cache.Command;
 using EZNEW.Data.Cache.Policy;
 

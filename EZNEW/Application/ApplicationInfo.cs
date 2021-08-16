@@ -3,34 +3,39 @@
 namespace EZNEW.Application
 {
     /// <summary>
-    /// Provides properties of application
+    /// Defines application info
     /// </summary>
     [Serializable]
     public class ApplicationInfo
     {
         /// <summary>
-        /// Gets or sets application code
+        /// Gets or sets the application code
         /// </summary>
         public string Code { get; set; }
 
         /// <summary>
-        /// Gets or sets application secret
+        /// Gets or sets the application secret
         /// </summary>
         public string Secret { get; set; }
 
         /// <summary>
-        /// Gets or sets application name
+        /// Gets or sets the application name
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// Gets or sets application type
+        /// Gets or sets the application type
         /// </summary>
         public ApplicationType Type { get; set; }
 
         /// <summary>
-        /// Gets or sets application status
+        /// Gets or sets the application version
         /// </summary>
-        public ApplicationStatus Status { get; set; }
+        public string Version { get; set; }
+
+        /// <summary>
+        /// Gets or sets the application status
+        /// </summary>
+        public ApplicationStatus Status { get; set; } = ApplicationStatus.Running;
     }
 }

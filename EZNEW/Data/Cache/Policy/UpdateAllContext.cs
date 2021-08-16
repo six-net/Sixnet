@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using EZNEW.Develop.Command;
-using EZNEW.Develop.CQuery;
+using EZNEW.Development.Command;
+using EZNEW.Development.Query;
 
 namespace EZNEW.Data.Cache.Policy
 {

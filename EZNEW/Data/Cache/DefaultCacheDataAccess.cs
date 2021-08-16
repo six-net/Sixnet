@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using EZNEW.Develop.Command;
-using EZNEW.Develop.Command.Modify;
-using EZNEW.Develop.CQuery;
-using EZNEW.Develop.DataAccess;
-using EZNEW.Develop.Entity;
+using EZNEW.Development.Command;
+using EZNEW.Development.Command.Modification;
+using EZNEW.Development.Query;
+using EZNEW.Development.DataAccess;
+using EZNEW.Development.Entity;
 using EZNEW.Paging;
 using EZNEW.Data.Cache.Command;
 using EZNEW.DependencyInjection;
@@ -101,7 +101,7 @@ namespace EZNEW.Data.Cache
         /// <param name="modifyExpression">Modify expression</param>
         /// <param name="query">Query condition</param>
         /// <returns>Return a ICommand object</returns>
-        public virtual ICommand Modify(IModify modifyExpression, IQuery query)
+        public virtual ICommand Modify(IModification modifyExpression, IQuery query)
         {
             return dataCacheProvider.Modify<TEntity>(new ModifyByConditionCacheCommand<TEntity>()
             {

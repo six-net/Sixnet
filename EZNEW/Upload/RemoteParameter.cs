@@ -16,8 +16,8 @@ namespace EZNEW.Upload
 
         /// <summary>
         /// Gets or sets upload file parameter name
-        /// Default value is 'eznew_upload_file_option'
+        /// Default value is 'eznew_upload_file_options'
         /// </summary>
-        public const string RequestParameterName = "eznew_upload_file_option";
+        public const string RequestParameterName = "eznew_upload_file_options";
     }
 }

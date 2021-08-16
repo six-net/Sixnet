@@ -2,21 +2,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Data;
-using System.Collections.Concurrent;
 using System.IO;
 using EZNEW.Dapper;
-using EZNEW.Develop.DataAccess;
+using EZNEW.Development.DataAccess;
 using EZNEW.Data.CriteriaConverter;
-using EZNEW.Develop.Entity;
-using EZNEW.Develop.CQuery.Translator;
-using EZNEW.Serialize;
+using EZNEW.Development.Entity;
+using EZNEW.Development.Query.Translator;
+using EZNEW.Serialization;
 using EZNEW.Data.Configuration;
-using EZNEW.Fault;
 using EZNEW.DependencyInjection;
-using EZNEW.Develop.Command;
-using EZNEW.Develop.CQuery;
-using EZNEW.Cache;
-using EZNEW.Configuration;
+using EZNEW.Development.Command;
+using EZNEW.Development.Query;
+using EZNEW.Application;
+using EZNEW.Exceptions;
+using EZNEW.Data.ParameterHandler;
 
 namespace EZNEW.Data
 {
@@ -27,16 +26,111 @@ namespace EZNEW.Data
     {
         static DataManager()
         {
+            ApplicationInitializer.Init();
             ContainerManager.Container?.Register(typeof(ICommandExecutor), typeof(DatabaseCommandExecutor));
             SqlMapper.Settings.ApplyNullValues = true;
+            ConfigureDefaultParameterHandler();
         }
 
         #region Properties
 
         /// <summary>
+        /// Gets database servers delegate
+        /// </summary>
+        static Func<ICommand, List<DatabaseServer>> GetDatabaseServerDelegate { get; set; }
+
+        /// <summary>
+        /// Gets or sets get connection delegate
+        /// </summary>
+        static Func<DatabaseServer, IDbConnection> GetDatabaseConnectionDelegate { get; set; }
+
+        /// <summary>
+        /// Database server query translators
+        /// </summary>
+        static readonly Dictionary<DatabaseServerType, IQueryTranslator> DatabaseServerQueryTranslators = new Dictionary<DatabaseServerType, IQueryTranslator>();
+
+        /// <summary>
+        /// Gets the database providers
+        /// </summary>
+        static Dictionary<DatabaseServerType, IDatabaseProvider> DatabaseProviders { get; } = new Dictionary<DatabaseServerType, IDatabaseProvider>();
+
+        /// <summary>
+        /// servertype&entity object name
+        /// key:{database server type}_{entity type id}
+        /// value:object name
+        /// </summary>
+        static readonly Dictionary<string, string> DatabaseServerEntityObjectNames = new Dictionary<string, string>();
+
+        /// <summary>
+        /// servertype&entity fields
+        /// key:{database server type}_{entity type id}
+        /// value:fields
+        /// </summary>
+        static readonly Dictionary<string, Dictionary<string, EntityField>> DatabaseServerEntityFields = new Dictionary<string, Dictionary<string, EntityField>>();
+
+        /// <summary>
+        /// Database server type&entity edit fields
+        /// Key:{database server type}_{entity type id}
+        /// Value:fields
+        /// </summary>
+        static readonly Dictionary<string, List<EntityField>> DatabaseServerEntityEditFields = new Dictionary<string, List<EntityField>>();
+
+        /// <summary>
+        /// Database server type&entity query fields
+        /// Key:{database server type}_{entity type id}
+        /// Value:fields
+        /// </summary>
+        static readonly Dictionary<string, List<EntityField>> DatabaseServerEntityQueryFields = new Dictionary<string, List<EntityField>>();
+
+        /// <summary>
+        /// Server type & entity format keys
+        /// </summary>
+        static readonly Dictionary<DatabaseServerType, Dictionary<Guid, string>> DatabaseServerEntityFormatKeys = new Dictionary<DatabaseServerType, Dictionary<Guid, string>>();
+
+        /// <summary>
+        /// Database server batch execute config
+        /// </summary>
+        static readonly Dictionary<DatabaseServerType, BatchExecuteConfiguration> DatabaseServerExecuteConfigurations = new Dictionary<DatabaseServerType, BatchExecuteConfiguration>();
+
+        /// <summary>
+        /// Database server data isolation level collection
+        /// </summary>
+        static readonly Dictionary<DatabaseServerType, DataIsolationLevel> DatabaseServerDataIsolationLevels = new Dictionary<DatabaseServerType, DataIsolationLevel>()
+            {
+                { DatabaseServerType.MySQL,DataIsolationLevel.RepeatableRead },
+                { DatabaseServerType.SQLServer,DataIsolationLevel.ReadCommitted },
+                { DatabaseServerType.Oracle,DataIsolationLevel.ReadCommitted }
+            };
+
+        /// <summary>
+        /// System data isolation level map
+        /// </summary>
+        static readonly Dictionary<DataIsolationLevel, IsolationLevel> SystemDataIsolationLevelMaps = new Dictionary<DataIsolationLevel, IsolationLevel>()
+            {
+                { DataIsolationLevel.Chaos,IsolationLevel.Chaos },
+                { DataIsolationLevel.ReadCommitted,IsolationLevel.ReadCommitted },
+                { DataIsolationLevel.ReadUncommitted,IsolationLevel.ReadUncommitted },
+                { DataIsolationLevel.RepeatableRead,IsolationLevel.RepeatableRead },
+                { DataIsolationLevel.Serializable,IsolationLevel.Serializable },
+                { DataIsolationLevel.Snapshot,IsolationLevel.Snapshot },
+                { DataIsolationLevel.Unspecified,IsolationLevel.Unspecified }
+            };
+
+        /// <summary>
+        /// criteria convert parse config
+        /// </summary>
+        static readonly Dictionary<string, Func<CriteriaConverterParseOptions, string>> CriteriaConverterParsers = new Dictionary<string, Func<CriteriaConverterParseOptions, string>>();
+
+        /// <summary>
         /// Gets or sets the default page size
         /// </summary>
         public static int DefaultPageSize { get; set; } = 20;
+
+        /// <summary>
+        /// Key=>DatabaseServerType+DbType
+        /// Value=>IParameterHandler
+        /// </summary>
+        private static readonly Dictionary<string, IParameterHandler> ParameterHandlers = new Dictionary<string, IParameterHandler>();
 
         #endregion
 
@@ -87,7 +181,7 @@ namespace EZNEW.Data
             {
                 return;
             }
-            var dataConfig = JsonSerializeHelper.JsonToObject<DataConfiguration>(jsonConfiguration);
+            var dataConfig = JsonSerializer.Deserialize<DataConfiguration>(jsonConfiguration);
             if (dataConfig == null)
             {
                 return;
@@ -166,7 +260,7 @@ namespace EZNEW.Data
         /// <param name="getDatabaseServerOperation">Get database server operation</param>
         public static void ConfigureDatabaseServer(Func<ICommand, List<DatabaseServer>> getDatabaseServerOperation)
         {
-            ConfigurationManager.Data.ConfigureDatabaseServer(getDatabaseServerOperation);
+            GetDatabaseServerDelegate = getDatabaseServerOperation;
         }
 
         /// <summary>
@@ -176,7 +270,7 @@ namespace EZNEW.Data
         /// <returns>Return database servers</returns>
         public static List<DatabaseServer> GetDatabaseServers(ICommand command)
         {
-            return ConfigurationManager.Data.GetDatabaseServers(command);
+            return GetDatabaseServerDelegate?.Invoke(command) ?? new List<DatabaseServer>(0);
         }
 
         #endregion
@@ -190,7 +284,7 @@ namespace EZNEW.Data
         /// <param name="queryTranslator"></param>
         public static void ConfigureQueryTranslator(DatabaseServerType serverType, IQueryTranslator queryTranslator)
         {
-            ConfigurationManager.Data.ConfigureQueryTranslator(serverType, queryTranslator);
+            DatabaseServerQueryTranslators[serverType] = queryTranslator;
         }
 
         /// <summary>
@@ -200,7 +294,8 @@ namespace EZNEW.Data
         /// <returns>Return query translator</returns>
         public static IQueryTranslator GetQueryTranslator(DatabaseServerType serverType)
         {
-            return ConfigurationManager.Data.GetQueryTranslator(serverType);
+            DatabaseServerQueryTranslators.TryGetValue(serverType, out var queryTranslator);
+            return queryTranslator;
         }
 
         #endregion
@@ -213,7 +308,7 @@ namespace EZNEW.Data
         /// <param name="getDatabaseConnectionOperation">Get database connection operation</param>
         public static void ConfigureDatabaseConnection(Func<DatabaseServer, IDbConnection> getDatabaseConnectionOperation)
         {
-            ConfigurationManager.Data.ConfigureDatabaseConnection(getDatabaseConnectionOperation);
+            GetDatabaseConnectionDelegate = getDatabaseConnectionOperation;
         }
 
         /// <summary>
@@ -223,7 +318,7 @@ namespace EZNEW.Data
         /// <returns></returns>
         public static IDbConnection GetDatabaseConnection(DatabaseServer databaseServer)
         {
-            return ConfigurationManager.Data.GetDatabaseConnection(databaseServer);
+            return GetDatabaseConnectionDelegate?.Invoke(databaseServer);
         }
 
         #endregion
@@ -237,7 +332,12 @@ namespace EZNEW.Data
         /// <param name="databaseProvider">Database provider</param>
         public static void ConfigureDatabaseProvider(DatabaseServerType serverType, IDatabaseProvider databaseProvider)
         {
-            ConfigurationManager.Data.ConfigureDatabaseProvider(serverType, databaseProvider);
+            if (databaseProvider == null)
+            {
+                return;
+            }
+            DatabaseProviders[serverType] = databaseProvider;
+            InitDatabaseAllEntityConfiguration(serverType);
         }
 
         /// <summary>
@@ -247,7 +347,79 @@ namespace EZNEW.Data
         /// <returns>Return database provider</returns>
         public static IDatabaseProvider GetDatabaseProvider(DatabaseServerType serverType)
         {
-            return ConfigurationManager.Data.GetDatabaseProvider(serverType);
+            DatabaseProviders.TryGetValue(serverType, out var databaseProvider);
+            return databaseProvider;
+        }
+
+        /// <summary>
+        /// Init database entity configuration
+        /// </summary>
+        /// <param name="serverType">Server type</param>
+        /// <param name="entityTypeId">Entity type</param>
+        static void InitDatabaseEntityConfiguration(DatabaseServerType serverType, Guid entityTypeId)
+        {
+            var entityConfig = EntityManager.GetEntityConfiguration(entityTypeId);
+            if (entityConfig == null)
+            {
+                return;
+            }
+            var formatKey = GetDatabaseServerEntityFormatKey(serverType, entityTypeId);
+            if (!DatabaseServerEntityFields.TryGetValue(formatKey, out var serverEntityFields) || serverEntityFields.IsNullOrEmpty())
+            {
+                return;
+            }
+            //Query fields
+            var queryFields = new List<EntityField>(entityConfig.QueryFields.Count);
+            foreach (var field in entityConfig.QueryFields)
+            {
+                if (serverEntityFields.TryGetValue(field, out var serverField) && serverField != null)
+                {
+                    if (serverField.IsDisableQuery)
+                    {
+                        continue;
+                    }
+                    queryFields.Add(serverField);
+                }
+                else
+                {
+                    queryFields.Add(field);
+                }
+            }
+            DatabaseServerEntityQueryFields[formatKey] = queryFields;
+            //Edit fields
+            var editFields = new List<EntityField>(entityConfig.EditFields.Count);
+            foreach (var field in entityConfig.EditFields)
+            {
+                if (serverEntityFields.TryGetValue(field.PropertyName, out var serverField) && serverField != null)
+                {
+                    if (serverField.IsDisableEdit)
+                    {
+                        continue;
+                    }
+                    editFields.Add(serverField);
+                }
+                else
+                {
+                    editFields.Add(field);
+                }
+            }
+            DatabaseServerEntityEditFields[formatKey] = editFields;
+        }
+
+        /// <summary>
+        /// Init database all entity configuration
+        /// </summary>
+        /// <param name="serverType">Server type</param>
+        static void InitDatabaseAllEntityConfiguration(DatabaseServerType serverType)
+        {
+            if (DatabaseServerEntityQueryFields.Any(c => c.Key.StartsWith(((int)serverType).ToString())))
+            {
+                return;
+            }
+            foreach (var configItem in EntityManager.EntityConfigurations)
+            {
+                InitDatabaseEntityConfiguration(serverType, configItem.Key);
+            }
         }
 
         #endregion
@@ -262,7 +434,11 @@ namespace EZNEW.Data
         /// <param name="objectName">Object name</param>
         public static void ConfigureEntityObjectName(DatabaseServerType serverType, Type entityType, string objectName)
         {
-            ConfigurationManager.Data.ConfigureEntityObjectName(serverType, entityType, objectName);
+            if (entityType == null || string.IsNullOrWhiteSpace(objectName))
+            {
+                return;
+            }
+            DatabaseServerEntityObjectNames[GetDatabaseServerEntityFormatKey(serverType, entityType)] = objectName;
         }
 
         /// <summary>
@@ -274,18 +450,13 @@ namespace EZNEW.Data
         /// <returns>Return Entity object name</returns>
         public static string GetEntityObjectName(DatabaseServerType serverType, Type entityType, string defaultName = "")
         {
-            return ConfigurationManager.Data.GetEntityObjectName(serverType, entityType, defaultName);
-        }
-
-        /// <summary>
-        /// Get entity object name
-        /// </summary>
-        /// <param name="serverType">Database server type</param>
-        /// <param name="defaultName">Default name</param>
-        /// <returns>Return entity object name</returns>
-        public static string GetEntityObjectName<T>(DatabaseServerType serverType, string defaultName = "")
-        {
-            return GetEntityObjectName(serverType, typeof(T), defaultName);
+            DatabaseServerEntityObjectNames.TryGetValue(GetDatabaseServerEntityFormatKey(serverType, entityType), out var objectName);
+            if (!string.IsNullOrWhiteSpace(objectName))
+            {
+                return objectName;
+            }
+            objectName = EntityManager.GetEntityObjectName(entityType);
+            return string.IsNullOrWhiteSpace(objectName) ? defaultName : objectName;
         }
 
         /// <summary>
@@ -316,7 +487,23 @@ namespace EZNEW.Data
         /// <param name="fields">Fields</param>
         public static void ConfigureEntityFields(DatabaseServerType serverType, Type entityType, IEnumerable<EntityField> fields)
         {
-            ConfigurationManager.Data.ConfigureEntityFields(serverType, entityType, fields);
+            if (entityType == null || fields.IsNullOrEmpty())
+            {
+                return;
+            }
+            var key = GetDatabaseServerEntityFormatKey(serverType, entityType);
+            DatabaseServerEntityFields.TryGetValue(key, out var nowFields);
+            nowFields ??= new Dictionary<string, EntityField>();
+            foreach (var field in fields)
+            {
+                if (field == null)
+                {
+                    continue;
+                }
+                nowFields[field.PropertyName] = field;
+            }
+            DatabaseServerEntityFields[key] = nowFields;
+            InitDatabaseEntityConfiguration(serverType, entityType.GUID);
         }
 
         /// <summary>
@@ -328,7 +515,18 @@ namespace EZNEW.Data
         /// <returns>Return property relation entity field</returns>
         public static EntityField GetField(DatabaseServerType serverType, Type entityType, string propertyName)
         {
-            return ConfigurationManager.Data.GetField(serverType, entityType, propertyName);
+            if (string.IsNullOrWhiteSpace(propertyName))
+            {
+                return null;
+            }
+            EntityField field = null;
+            DatabaseServerEntityFields.TryGetValue(GetDatabaseServerEntityFormatKey(serverType, entityType), out var entityServerFields);
+            entityServerFields?.TryGetValue(propertyName, out field);
+            if (field == null)
+            {
+                EntityManager.GetEntityField(entityType, propertyName);
+            }
+            return field ?? propertyName;
         }
 
         /// <summary>
@@ -357,7 +555,35 @@ namespace EZNEW.Data
         /// <returns>Return properties relation entity fields</returns>
         public static IEnumerable<EntityField> GetFields(DatabaseServerType serverType, Type entityType, IEnumerable<string> propertyNames)
         {
-            return ConfigurationManager.Data.GetFields(serverType, entityType, propertyNames);
+            if (propertyNames.IsNullOrEmpty())
+            {
+                return Array.Empty<EntityField>();
+            }
+            var allFields = EntityManager.GetEntityConfiguration(entityType)?.AllFields;
+            if (allFields.IsNullOrEmpty())
+            {
+                return Array.Empty<EntityField>();
+            }
+            DatabaseServerEntityFields.TryGetValue(GetDatabaseServerEntityFormatKey(serverType, entityType), out var entityServerFields);
+            List<EntityField> resultFields = new List<EntityField>();
+            foreach (var propertyName in propertyNames)
+            {
+                if (string.IsNullOrWhiteSpace(propertyName))
+                {
+                    continue;
+                }
+                EntityField propertyField = null;
+                entityServerFields?.TryGetValue(propertyName, out propertyField);
+                if (propertyField == null)
+                {
+                    allFields.TryGetValue(propertyName, out propertyField);
+                }
+                if (propertyField != null)
+                {
+                    resultFields.Add(propertyField);
+                }
+            }
+            return resultFields;
         }
 
         /// <summary>
@@ -368,7 +594,12 @@ namespace EZNEW.Data
         /// <returns>Return entity edit fields</returns>
         public static IEnumerable<EntityField> GetEditFields(DatabaseServerType serverType, Type entityType)
         {
-            return ConfigurationManager.Data.GetEditFields(serverType, entityType);
+            string formatKey = GetDatabaseServerEntityFormatKey(serverType, entityType);
+            if (DatabaseServerEntityEditFields.TryGetValue(formatKey, out var editFields))
+            {
+                return editFields;
+            }
+            return EntityManager.GetEntityConfiguration(entityType)?.EditFields ?? new List<EntityField>(0);
         }
 
         /// <summary>
@@ -381,7 +612,28 @@ namespace EZNEW.Data
         /// <returns>Return entity fields</returns>
         public static IEnumerable<EntityField> GetQueryFields(DatabaseServerType serverType, Type entityType, IQuery query, bool forceMustFields)
         {
-            return ConfigurationManager.Data.GetQueryFields(serverType, entityType, query, forceMustFields);
+            var queryFieldsWithSign = query.GetActuallyQueryFieldsWithSign(entityType, forceMustFields);
+            if (queryFieldsWithSign.Item1)
+            {
+                return GetAllQueryFields(serverType, entityType);
+            }
+            return GetFields(serverType, entityType, queryFieldsWithSign.Item2);
+        }
+
+        /// <summary>
+        /// Get all query fields
+        /// </summary>
+        /// <param name="serverType">Database server type</param>
+        /// <param name="entityType">Entity type</param>
+        /// <returns>Return all query fields</returns>
+        public static IEnumerable<EntityField> GetAllQueryFields(DatabaseServerType serverType, Type entityType)
+        {
+            var formatKey = GetDatabaseServerEntityFormatKey(serverType, entityType);
+            if (!DatabaseServerEntityQueryFields.TryGetValue(formatKey, out var queryFields) || queryFields.IsNullOrEmpty())
+            {
+                queryFields = EntityManager.GetEntityConfiguration(entityType)?.QueryEntityFields;
+            }
+            return queryFields;
         }
 
         /// <summary>
@@ -392,7 +644,18 @@ namespace EZNEW.Data
         /// <returns>Return default field</returns>
         public static EntityField GetDefaultField(DatabaseServerType serverType, Type entityType)
         {
-            return ConfigurationManager.Data.GetDefaultField(serverType, entityType);
+            var entityConfig = EntityManager.GetEntityConfiguration(entityType);
+            var primaryKeys = entityConfig?.PrimaryKeys;
+            if (primaryKeys.IsNullOrEmpty())
+            {
+                primaryKeys = entityConfig?.QueryFields;
+            }
+            if (primaryKeys.IsNullOrEmpty())
+            {
+                return null;
+            }
+            var defaultField = primaryKeys[0];
+            return GetField(serverType, entityType, defaultField);
         }
 
         #endregion
@@ -408,7 +671,11 @@ namespace EZNEW.Data
         /// <param name="batchExecuteConfig">Batch execute configuration</param>
         public static void ConfigureBatchExecute(DatabaseServerType serverType, BatchExecuteConfiguration batchExecuteConfig)
         {
-            ConfigurationManager.Data.ConfigureBatchExecute(serverType, batchExecuteConfig);
+            if (batchExecuteConfig == null)
+            {
+                return;
+            }
+            DatabaseServerExecuteConfigurations[serverType] = batchExecuteConfig;
         }
 
         #endregion
@@ -422,7 +689,8 @@ namespace EZNEW.Data
         /// <returns>Return batch execute configuration</returns>
         public static BatchExecuteConfiguration GetBatchExecuteConfiguration(DatabaseServerType serverType)
         {
-            return ConfigurationManager.Data.GetBatchExecuteConfiguration(serverType);
+            DatabaseServerExecuteConfigurations.TryGetValue(serverType, out var config);
+            return config;
         }
 
         #endregion
@@ -440,7 +708,7 @@ namespace EZNEW.Data
         /// <param name="dataIsolationLevel">Data isolation level</param>
         public static void ConfigureDataIsolationLevel(DatabaseServerType serverType, DataIsolationLevel dataIsolationLevel)
         {
-            ConfigurationManager.Data.ConfigureDataIsolationLevel(serverType, dataIsolationLevel);
+            DatabaseServerDataIsolationLevels[serverType] = dataIsolationLevel;
         }
 
         #endregion
@@ -454,7 +722,11 @@ namespace EZNEW.Data
         /// <returns>Return data isolation level</returns>
         public static DataIsolationLevel? GetDataIsolationLevel(DatabaseServerType serverType)
         {
-            return ConfigurationManager.Data.GetDataIsolationLevel(serverType);
+            if (DatabaseServerDataIsolationLevels.ContainsKey(serverType))
+            {
+                return DatabaseServerDataIsolationLevels[serverType];
+            }
+            return null;
         }
 
         #endregion
@@ -468,7 +740,12 @@ namespace EZNEW.Data
         /// <returns>Return system data isolation level</returns>
         public static IsolationLevel? GetSystemIsolationLevel(DataIsolationLevel? dataIsolationLevel)
         {
-            return ConfigurationManager.Data.GetSystemIsolationLevel(dataIsolationLevel);
+            IsolationLevel? isolationLevel = null;
+            if (dataIsolationLevel.HasValue && SystemDataIsolationLevelMaps.ContainsKey(dataIsolationLevel.Value))
+            {
+                isolationLevel = SystemDataIsolationLevelMaps[dataIsolationLevel.Value];
+            }
+            return isolationLevel;
         }
 
         #endregion
@@ -484,7 +761,11 @@ namespace EZNEW.Data
         /// <param name="converterParseOperation">Converter parse operation</param>
         public static void ConfigureCriteriaConverterParser(string converterConfigName, Func<CriteriaConverterParseOptions, string> converterParseOperation)
         {
-            ConfigurationManager.Data.ConfigureCriteriaConverterParser(converterConfigName, converterParseOperation);
+            if (string.IsNullOrWhiteSpace(converterConfigName) || converterParseOperation == null)
+            {
+                return;
+            }
+            CriteriaConverterParsers[converterConfigName] = converterParseOperation;
         }
 
         /// <summary>
@@ -494,7 +775,147 @@ namespace EZNEW.Data
         /// <returns>Return convert parse operation</returns>
         public static Func<CriteriaConverterParseOptions, string> GetCriteriaConverterParser(string converterConfigName)
         {
-            return ConfigurationManager.Data.GetCriteriaConverterParser(converterConfigName);
+            CriteriaConverterParsers.TryGetValue(converterConfigName, out var parse);
+            return parse;
+        }
+
+        #endregion
+
+        #region Parameter handler
+
+        /// <summary>
+        /// Add parameter handler
+        /// </summary>
+        /// <param name="databaseServerType">Database server type</param>
+        /// <param name="dbType">Database type</param>
+        /// <param name="parameterHandler">Parameter handler</param>
+        public static void AddParameterHandler(DatabaseServerType databaseServerType, DbType dbType, IParameterHandler parameterHandler)
+        {
+            var databaseTypeKey = GetDatabaseTypeFormatKey(databaseServerType, dbType);
+            if (ParameterHandlers.ContainsKey(databaseTypeKey) && parameterHandler == null)
+            {
+                ParameterHandlers.Remove(databaseTypeKey);
+            }
+            else if (parameterHandler != null)
+            {
+                ParameterHandlers[databaseTypeKey] = parameterHandler;
+            }
+        }
+
+        /// <summary>
+        /// Add parameter handler
+        /// </summary>
+        /// <param name="databaseServerType">Database server type</param>
+        /// <param name="dbType">Database data type</param>
+        /// <param name="parameterHandleDelegate">Parameter handle delegate</param>
+        public static void AddParameterHandler(DatabaseServerType databaseServerType, DbType dbType, Func<ParameterItem, ParameterItem> parameterHandleDelegate)
+        {
+            IParameterHandler parameterHandler = null;
+            if (parameterHandleDelegate != null)
+            {
+                parameterHandler = new DefaultParameterHandler(parameterHandleDelegate);
+            }
+            AddParameterHandler(databaseServerType, dbType, parameterHandler);
+        }
+
+        /// <summary>
+        /// Remove parameter handler
+        /// </summary>
+        /// <param name="databaseServerType">Database server type</param>
+        /// <param name="dbType">Database data type</param>
+        public static void RemoveParameterHandler(DatabaseServerType databaseServerType, DbType dbType)
+        {
+            var databaseTypeKey = GetDatabaseTypeFormatKey(databaseServerType, dbType);
+            if (ParameterHandlers.ContainsKey(databaseTypeKey))
+            {
+                ParameterHandlers.Remove(databaseTypeKey);
+            }
+        }
+
+        /// <summary>
+        /// Get parameter handler
+        /// </summary>
+        /// <param name="databaseServerType">Database server type</param>
+        /// <param name="dbType">Database data type</param>
+        /// <returns>Return a parameter handler</returns>
+        public static IParameterHandler GetParameterHandler(DatabaseServerType databaseServerType, DbType dbType)
+        {
+            var databaseTypeKey = GetDatabaseTypeFormatKey(databaseServerType, dbType);
+            ParameterHandlers.TryGetValue(databaseTypeKey, out var handler);
+            return handler;
+        }
+
+        /// <summary>
+        /// Get parameter handler
+        /// </summary>
+        /// <param name="databaseServerType">Database server type</param>
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return a parameter handler</returns>
+        public static IParameterHandler GetParameterHandler(DatabaseServerType databaseServerType, ParameterItem parameter)
+        {
+            if (parameter != null)
+            {
+                DbType? dbType = parameter.DbType;
+                if (!dbType.HasValue && parameter.Value != null)
+                {
+                    dbType = SqlMapper.LookupDbType(parameter.Value.GetType(), parameter.Name, false, out _);
+                }
+                return GetParameterHandler(databaseServerType, dbType.GetValueOrDefault());
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Handle parameter
+        /// </summary>
+        /// <param name="databaseServerType">Database server type</param>
+        /// <param name="parameter">Parameter</param>
+        /// <returns></returns>
+        public static ParameterItem HandleParameter(DatabaseServerType databaseServerType, ParameterItem parameter)
+        {
+            var handler = GetParameterHandler(databaseServerType, parameter);
+            return handler?.Parse(parameter) ?? parameter;
+        }
+
+        /// <summary>
+        /// Get database type format key
+        /// </summary>
+        /// <param name="serverType">Database server type</param>
+        /// <param name="dbType">Database type</param>
+        /// <returns></returns>
+        internal static string GetDatabaseTypeFormatKey(DatabaseServerType serverType, DbType dbType)
+        {
+            return string.Format("{0}_{1}", (int)serverType, (int)dbType);
+        }
+
+        /// <summary>
+        /// Configure default parameter handler
+        /// </summary>
+        static void ConfigureDefaultParameterHandler()
+        {
+            var datetimeOffsetHandler = new DateTimeOffsetParameterHandler();
+            var boolToIntegerHandler = new BooleanToIntegerParameterHandler();
+
+            #region MySQL
+
+            //DateTimeOffset
+            AddParameterHandler(DatabaseServerType.MySQL, DbType.DateTimeOffset, datetimeOffsetHandler);
+
+            #endregion
+
+            #region Oracle
+
+            //boolean
+            AddParameterHandler(DatabaseServerType.Oracle, DbType.Boolean, boolToIntegerHandler);
+
+            #endregion
+
+            #region SQLite
+
+            //DateTimeOffset
+            AddParameterHandler(DatabaseServerType.SQLite, DbType.DateTimeOffset, datetimeOffsetHandler);
+
+            #endregion
         }
 
         #endregion
@@ -502,14 +923,68 @@ namespace EZNEW.Data
         #region Database server & Entity format key
 
         /// <summary>
+        /// Generate servertype&entit format key
+        /// </summary>
+        /// <param name="serverType">Database server type</param>
+        /// <param name="entityType">Entity type</param>
+        /// <returns>Return database server entity format key</returns>
+        static string GenerateDatabaseServerEntityFormatKey(DatabaseServerType serverType, Type entityType)
+        {
+            if (entityType == null)
+            {
+                throw new EZNEWException("EntityType is null");
+            }
+            return GenerateDatabaseServerEntityFormatKey(serverType, entityType.GUID);
+        }
+
+        /// <summary>
+        /// Generate servertype&entit format key
+        /// </summary>
+        /// <param name="serverType">Database server type</param>
+        /// <param name="entityTypeId">Entity type</param>
+        /// <returns>Return database server entity format key</returns>
+        static string GenerateDatabaseServerEntityFormatKey(DatabaseServerType serverType, Guid entityTypeId)
+        {
+            return string.Format("{0}_{1}", (int)serverType, entityTypeId);
+        }
+
+        /// <summary>
         /// Get servertype&entity format key
         /// </summary>
         /// <param name="serverType">Database server type</param>
         /// <param name="entityType">Entity type</param>
         /// <returns>Return database server entity format key</returns>
-        public static string GetDatabaseServerEntityFormatKey(this DatabaseServerType serverType, Type entityType)
+        public static string GetDatabaseServerEntityFormatKey(DatabaseServerType serverType, Type entityType)
         {
-            return ConfigurationManager.Data.GetDatabaseServerEntityFormatKey(serverType, entityType);
+            if (entityType == null)
+            {
+                return string.Empty;
+            }
+            return GetDatabaseServerEntityFormatKey(serverType, entityType.GUID);
+        }
+
+        /// <summary>
+        /// Get servertype&entity format key
+        /// </summary>
+        /// <param name="serverType">Database server type</param>
+        /// <param name="entityTypeId">Entity type id</param>
+        /// <returns></returns>
+        public static string GetDatabaseServerEntityFormatKey(DatabaseServerType serverType, Guid entityTypeId)
+        {
+            string key = string.Empty;
+            DatabaseServerEntityFormatKeys.TryGetValue(serverType, out var entityKeys);
+            entityKeys?.TryGetValue(entityTypeId, out key);
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                key = GenerateDatabaseServerEntityFormatKey(serverType, entityTypeId);
+                if (entityKeys == null)
+                {
+                    entityKeys = new Dictionary<Guid, string>();
+                }
+                entityKeys[entityTypeId] = key;
+                DatabaseServerEntityFormatKeys[serverType] = entityKeys;
+            }
+            return key ?? string.Empty;
         }
 
         #endregion

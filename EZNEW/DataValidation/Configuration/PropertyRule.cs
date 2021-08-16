@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Newtonsoft.Json;
 
 namespace EZNEW.DataValidation.Configuration
 {
@@ -11,13 +10,11 @@ namespace EZNEW.DataValidation.Configuration
         /// <summary>
         /// Gets or sets the property name
         /// </summary>
-        [JsonProperty(PropertyName = "name")]
         public string Name { get; set; }
 
         /// <summary>
         /// Gets or sets the rules
         /// </summary>
-        [JsonProperty(PropertyName = "rules")]
         public List<ValidatorRule> Rules { get; set; }
     }
 }

@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using EZNEW.Develop.Command;
-using EZNEW.Develop.Command.Modify;
-using EZNEW.Develop.CQuery;
+using EZNEW.Development.Command;
+using EZNEW.Development.Command.Modification;
+using EZNEW.Development.Query;
 
 namespace EZNEW.Data.Cache.Command
 {
@@ -21,12 +21,12 @@ namespace EZNEW.Data.Cache.Command
         /// <summary>
         /// Gets or sets the modify object
         /// </summary>
-        public IModify Modify { get; set; }
+        public IModification Modify { get; set; }
 
         /// <summary>
         /// Gets or sets the modify database data func
         /// </summary>
-        public Func<IModify, IQuery, ICommand> ModifyDatabaseDataProxy { get; set; }
+        public Func<IModification, IQuery, ICommand> ModifyDatabaseDataProxy { get; set; }
 
         /// <summary>
         /// Gets or sets the get database data list func

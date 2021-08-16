@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace EZNEW.Code
 {
@@ -21,7 +19,7 @@ namespace EZNEW.Code
         {
             if (numberLength < 1 || numberLength > 9)
             {
-                throw new ArgumentException("number length must be between 1 to 9");
+                throw new ArgumentException("Number length must be between 1 to 9");
             }
             if (numberLength == 9)
             {
@@ -45,7 +43,7 @@ namespace EZNEW.Code
         {
             if (numberLength < 1 || numberLength > 10)
             {
-                throw new ArgumentException("number length must be between 1 to 10");
+                throw new ArgumentException("Number length must be between 1 to 10");
             }
             if (numberLength == 1)
             {

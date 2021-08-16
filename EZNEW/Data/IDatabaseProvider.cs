@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
-using EZNEW.Develop.Command;
+using EZNEW.Development.Command;
 
 namespace EZNEW.Data
 {
@@ -19,7 +19,7 @@ namespace EZNEW.Data
         /// <param name="executeOptions">Execute options</param>
         /// <param name="commands">Commands</param>
         /// <returns>Return the affected data numbers</returns>
-        int Execute(DatabaseServer server, CommandExecuteOptions executeOptions, IEnumerable<ICommand> commands);
+        int Execute(DatabaseServer server, CommandExecutionOptions executeOptions, IEnumerable<ICommand> commands);
 
         /// <summary>
         /// Execute command
@@ -28,7 +28,7 @@ namespace EZNEW.Data
         /// <param name="executeOptions">Execute options</param>
         /// <param name="commands">Commands</param>
         /// <returns>Return the affected data numbers</returns>
-        int Execute(DatabaseServer server, CommandExecuteOptions executeOptions, params ICommand[] commands);
+        int Execute(DatabaseServer server, CommandExecutionOptions executeOptions, params ICommand[] commands);
 
         /// <summary>
         /// Execute command
@@ -37,7 +37,7 @@ namespace EZNEW.Data
         /// <param name="executeOptions">Execute options</param>
         /// <param name="commands">Commands</param>
         /// <returns>Return the affected data numbers</returns>
-        Task<int> ExecuteAsync(DatabaseServer server, CommandExecuteOptions executeOptions, IEnumerable<ICommand> commands);
+        Task<int> ExecuteAsync(DatabaseServer server, CommandExecutionOptions executeOptions, IEnumerable<ICommand> commands);
 
         /// <summary>
         /// Execute command
@@ -46,7 +46,7 @@ namespace EZNEW.Data
         /// <param name="executeOptions">Execute options</param>
         /// <param name="commands">Commands</param>
         /// <returns>Return the affected data numbers</returns>
-        Task<int> ExecuteAsync(DatabaseServer server, CommandExecuteOptions executeOptions, params ICommand[] commands);
+        Task<int> ExecuteAsync(DatabaseServer server, CommandExecutionOptions executeOptions, params ICommand[] commands);
 
         #endregion
 

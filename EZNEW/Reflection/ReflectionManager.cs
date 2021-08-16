@@ -1,4 +1,4 @@
-﻿using EZNEW.Fault;
+﻿using EZNEW.Exceptions;
 using System;
 using System.Collections;
 using System.Collections.Generic;

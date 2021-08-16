@@ -1,5 +1,5 @@
 ﻿using System;
-using EZNEW.Develop.CQuery;
+using EZNEW.Development.Query;
 
 namespace EZNEW.Paging
 {

@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using EZNEW.Data.Cache.Command;
 using EZNEW.DependencyInjection;
-using EZNEW.Develop.Command;
-using EZNEW.Develop.CQuery;
-using EZNEW.Develop.Entity;
+using EZNEW.Development.Command;
+using EZNEW.Development.Query;
+using EZNEW.Development.Entity;
 using EZNEW.Logging;
 
 namespace EZNEW.Data.Cache.Policy
@@ -401,11 +401,11 @@ namespace EZNEW.Data.Cache.Policy
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="parameter">Command starting event parameter</param>
         /// <returns>Return command starting event execute result</returns>
-        CommandStartingEventExecuteResult CommandStartingEventHandler<T>(CommandStartingEventParameter parameter) where T : BaseEntity<T>, new()
+        CommandStartingEventExecutionResult CommandStartingEventHandler<T>(CommandStartingEventParameter parameter) where T : BaseEntity<T>, new()
         {
             if (parameter == null || parameter.Command == null)
             {
-                return CommandStartingEventExecuteResult.DefaultSuccess;
+                return CommandStartingEventExecutionResult.DefaultSuccess;
             }
             StartingResult startingResult = null;
             switch (parameter.CommandBehavior)
@@ -466,7 +466,7 @@ namespace EZNEW.Data.Cache.Policy
                 default:
                     break;
             }
-            CommandStartingEventExecuteResult result = new CommandStartingEventExecuteResult
+            CommandStartingEventExecutionResult result = new CommandStartingEventExecutionResult
             {
                 BreakCommand = startingResult?.BreakDatabaseCommand ?? false,
                 Message = startingResult?.Message ?? string.Empty
@@ -483,11 +483,11 @@ namespace EZNEW.Data.Cache.Policy
         /// </summary>
         /// <param name="parameter">command</param>
         /// <returns></returns>
-        CommandCallbackEventExecuteResult CommandCallbackEventHandler<T>(CommandCallbackEventParameter parameter) where T : BaseEntity<T>, new()
+        CommandCallbackEventExecutionResult CommandCallbackEventHandler<T>(CommandCallbackEventParameter parameter) where T : BaseEntity<T>, new()
         {
             if (parameter?.Command == null)
             {
-                return CommandCallbackEventExecuteResult.Default;
+                return CommandCallbackEventExecutionResult.Default;
             }
             switch (parameter.CommandBehavior)
             {
@@ -549,7 +549,7 @@ namespace EZNEW.Data.Cache.Policy
                     });
                     break;
             }
-            return CommandCallbackEventExecuteResult.Default;
+            return CommandCallbackEventExecutionResult.Default;
         }
 
         #endregion

@@ -5,9 +5,9 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using EZNEW.DependencyInjection;
-using EZNEW.Develop.UnitOfWork;
+using EZNEW.Development.UnitOfWork;
 using EZNEW.Diagnostics;
-using EZNEW.Fault;
+using EZNEW.Exceptions;
 using EZNEW.Queue;
 
 namespace EZNEW.Email

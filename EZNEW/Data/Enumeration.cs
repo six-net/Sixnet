@@ -3,7 +3,7 @@
 namespace EZNEW.Data
 {
     /// <summary>
-    /// Defines server type
+    /// Defines database server type
     /// </summary>
     [Serializable]
     public enum DatabaseServerType

@@ -1,32 +1,53 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Versioning;
+using System.Text.RegularExpressions;
 
 namespace EZNEW.Application
 {
     /// <summary>
-    /// Provides access to and management of application information
+    /// Defines application manager
     /// </summary>
     public static class ApplicationManager
     {
+        static ApplicationManager()
+        {
+            Current = GetCurrentApplicationInfo();
+        }
+
         /// <summary>
         /// Gets or sets the information about the currently running application
         /// </summary>
-        public static ApplicationInfo Current { get; set; }
+        public static ApplicationInfo Current { get; private set; }
 
         /// <summary>
-        /// Gets the application executable direc
+        /// Application options
         /// </summary>
-        public static readonly string ApplicationExecutableDirectory = GetApplicationExecutableDirectory();
+        internal static ApplicationOptions Options = new ApplicationOptions();
 
         /// <summary>
-        /// Get the current application executable directory
+        /// Gets the current application root path
+        /// </summary>
+        public static readonly string RootPath = GetRootPath();
+
+        /// <summary>
+        /// Configure application
+        /// </summary>
+        /// <param name="configureApplicationDelegate">Configure application delegate</param>
+        public static void Configure(Action<ApplicationOptions> configureApplicationDelegate = null)
+        {
+            configureApplicationDelegate?.Invoke(Options);
+            ApplicationInitializer.Init();
+        }
+
+        /// <summary>
+        /// Get the current application root path
         /// </summary>
         /// <returns>Return directory path</returns>
-        internal static string GetApplicationExecutableDirectory()
+        internal static string GetRootPath()
         {
             string appPath = Directory.GetCurrentDirectory();
             string binPath = Path.Combine(appPath, "bin");
@@ -62,6 +83,22 @@ namespace EZNEW.Application
                 }
             }
             return appPath;
+        }
+
+        /// <summary>
+        /// Get current application info
+        /// </summary>
+        /// <returns></returns>
+        internal static ApplicationInfo GetCurrentApplicationInfo()
+        {
+            var entryAssembly = Assembly.GetEntryAssembly();
+            return new ApplicationInfo()
+            {
+                Code = "",
+                Name = entryAssembly.GetName().Name,
+                Type = ApplicationType.Unknown,
+                Version = FileVersionInfo.GetVersionInfo(entryAssembly.Location).FileVersion
+            };
         }
     }
 }

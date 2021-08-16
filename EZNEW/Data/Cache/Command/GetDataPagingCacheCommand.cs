@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using EZNEW.Develop.CQuery;
+using EZNEW.Development.Query;
 using EZNEW.Paging;
 
 namespace EZNEW.Data.Cache.Command

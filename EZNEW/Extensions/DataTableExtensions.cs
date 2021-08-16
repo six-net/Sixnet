@@ -28,11 +28,11 @@ namespace System.Data
             }
             if (string.IsNullOrWhiteSpace(fileName))
             {
-                fileName = GuidCodeHelper.GetGuidUniqueCode().ToLower();
+                fileName = GuidHelper.GetGuidUniqueCode().ToLower();
             }
             if (string.IsNullOrWhiteSpace(savePath))
             {
-                savePath = ApplicationManager.GetApplicationExecutableDirectory();
+                savePath = ApplicationManager.GetRootPath();
             }
             if (!Directory.Exists(savePath))
             {

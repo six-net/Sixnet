@@ -12,7 +12,7 @@ using EZNEW.Cache.Server;
 using EZNEW.Cache.Set;
 using EZNEW.Cache.SortedSet;
 using EZNEW.Cache.String;
-using EZNEW.Serialize;
+using EZNEW.Serialization;
 
 namespace EZNEW.Cache
 {
@@ -37,7 +37,7 @@ namespace EZNEW.Cache
         /// <returns>Return cache set result</returns>
         public static async Task<CacheResult<StringSetResponse>> SetDataAsync<T>(CacheKey key, T data, DateTimeOffset? absoluteExpiration = null, CacheSetWhen when = CacheSetWhen.Always, CacheObject cacheObject = null)
         {
-            var value = JsonSerializeHelper.ObjectToJson(data);
+            var value = JsonSerializer.Serialize(data);
             if (string.IsNullOrWhiteSpace(value))
             {
                 return CacheResult<StringSetResponse>.EmptyResult();
@@ -74,7 +74,7 @@ namespace EZNEW.Cache
         /// <returns>Return cache set result</returns>
         public static async Task<CacheResult<StringSetResponse>> SetDataByRelativeExpirationAsync<T>(CacheKey key, T data, TimeSpan? absoluteExpirationRelativeToNow = null, bool slidingExpiration = true, CacheSetWhen when = CacheSetWhen.Always, CacheObject cacheObject = null)
         {
-            var value = JsonSerializeHelper.ObjectToJson(data);
+            var value = JsonSerializer.Serialize(data);
             if (string.IsNullOrWhiteSpace(value))
             {
                 return CacheResult<StringSetResponse>.EmptyResult();
@@ -577,7 +577,7 @@ namespace EZNEW.Cache
                 {
                     return default;
                 }
-                return JsonSerializeHelper.JsonToObject<T>(cacheValue);
+                return JsonSerializer.Deserialize<T>(cacheValue);
             }
 
             /// <summary>
@@ -651,7 +651,7 @@ namespace EZNEW.Cache
                 var datas = new List<T>(values.Count);
                 foreach (var val in values)
                 {
-                    var data = JsonSerializeHelper.JsonToObject<T>(val);
+                    var data = JsonSerializer.Deserialize<T>(val);
                     datas.Add(data);
                 }
                 return datas;

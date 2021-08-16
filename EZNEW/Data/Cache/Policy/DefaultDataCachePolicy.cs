@@ -4,12 +4,12 @@ using System.Linq;
 using EZNEW.Cache;
 using EZNEW.Cache.Keys;
 using EZNEW.Cache.String;
-using EZNEW.Develop.CQuery;
-using EZNEW.Develop.Entity;
+using EZNEW.Development.Query;
+using EZNEW.Development.Entity;
 using EZNEW.Logging;
 using EZNEW.Queue;
 using EZNEW.Selection;
-using EZNEW.Serialize;
+using EZNEW.Serialization;
 
 namespace EZNEW.Data.Cache.Policy
 {
@@ -476,7 +476,7 @@ namespace EZNEW.Data.Cache.Policy
                     storeItems.Add(new CacheEntry()
                     {
                         Key = primaryFullCacheKey,
-                        Value = JsonSerializeHelper.ObjectToJson(data),
+                        Value = JsonSerializer.Serialize(data),
                         Expiration = dataExpiration
                     });
                     if (!cacheKeys.IsNullOrEmpty())
@@ -517,7 +517,7 @@ namespace EZNEW.Data.Cache.Policy
             {
                 IEnumerable<CacheKey> queryPrimaryKeys = queryDataCallbackContext.PrimaryCacheKeys;
                 IEnumerable<CacheKey> queryOtherKeys = queryDataCallbackContext.OtherCacheKeys;
-                string nullDataValue = JsonSerializeHelper.ObjectToJson<T>(null);
+                string nullDataValue = JsonSerializer.Serialize<T>(null);
                 TimeSpan? nullDataExpirationValue = DataCacheManager.Configuration.GetNullDataExpiration(entityType);
                 DateTimeOffset? nullDataExpiration = null;
                 if (nullDataExpirationValue != null)

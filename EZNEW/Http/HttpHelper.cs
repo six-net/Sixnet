@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using EZNEW.DependencyInjection;
-using EZNEW.Serialize;
+using EZNEW.Serialization;
 using EZNEW.Upload;
 
 namespace EZNEW.Http
@@ -774,7 +774,7 @@ namespace EZNEW.Http
             {
                 return default;
             }
-            return JsonSerializeHelper.JsonToObject<TResult>(valueAsString);
+            return JsonSerializer.Deserialize<TResult>(valueAsString);
         }
 
         /// <summary>
@@ -812,7 +812,7 @@ namespace EZNEW.Http
             string jsonData = string.Empty;
             if (data != null)
             {
-                jsonData = JsonSerializeHelper.ObjectToJson(data);
+                jsonData = JsonSerializer.Serialize(data);
             }
             return await PostJsonAsync(url, jsonData, token).ConfigureAwait(false);
         }
@@ -828,7 +828,7 @@ namespace EZNEW.Http
             string jsonData = string.Empty;
             if (data != null)
             {
-                jsonData = JsonSerializeHelper.ObjectToJson(data);
+                jsonData = JsonSerializer.Serialize(data);
             }
             return await PostJsonAsync<TResult>(url, jsonData, token).ConfigureAwait(false);
         }
@@ -847,7 +847,7 @@ namespace EZNEW.Http
         {
             var response = await PostAsync(httpClientConfigName, url, parameters, headers, token, files).ConfigureAwait(false);
             string valueAsString = await ReadResponseStringAsync(response).ConfigureAwait(false);
-            var result = JsonSerializeHelper.JsonToObject<UploadResult>(valueAsString);
+            var result = JsonSerializer.Deserialize<UploadResult>(valueAsString);
             result?.Files?.ForEach(file =>
             {
                 file.Target = UploadTarget.Remote;

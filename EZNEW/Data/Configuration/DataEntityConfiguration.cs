@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using EZNEW.Develop.Entity;
+using EZNEW.Development.Entity;
 
 namespace EZNEW.Data.Configuration
 {
