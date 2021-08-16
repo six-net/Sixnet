@@ -16,20 +16,20 @@
     <tags>.NET,EZNEW,DDD</tags>
     <dependencies>
       <group targetFramework=".NETStandard2.0">
-		<dependency id="Microsoft.Bcl.HashCode" Version="1.1.1" />
-	    <dependency id="Microsoft.CSharp" Version="4.7.0" />
-	    <dependency id="Microsoft.Extensions.DependencyInjection" Version="5.0.2" />
-		<dependency id="Microsoft.Extensions.Http" Version="5.0.0" />
-		<dependency id="Microsoft.Extensions.Logging" Version="5.0.0" />
-		<dependency id="Microsoft.Extensions.Options.ConfigurationExtensions" Version="5.0.0" />
-		<dependency id="Newtonsoft.Json" Version="13.0.1" />
-		<dependency id="System.ComponentModel.Annotations" Version="5.0.0" />
-		<dependency id="System.DirectoryServices.Protocols" Version="5.0.0" />
-		<dependency id="System.Reflection.Emit" Version="4.7.0" />
-		<dependency id="System.Reflection.Emit.Lightweight" Version="4.7.0" />
-		<dependency id="System.Text.Json" Version="5.0.2" />
-		<dependency id="System.Threading.Channels" Version="5.0.0" />
-		<dependency id="System.Threading.Tasks.Extensions" Version="4.5.4" />
+		<dependency id="Microsoft.Bcl.HashCode" version="1.1.1" />
+	    <dependency id="Microsoft.CSharp" version="4.7.0" />
+	    <dependency id="Microsoft.Extensions.DependencyInjection" version="5.0.2" />
+		<dependency id="Microsoft.Extensions.Http" version="5.0.0" />
+		<dependency id="Microsoft.Extensions.Logging" version="5.0.0" />
+		<dependency id="Microsoft.Extensions.Options.ConfigurationExtensions" version="5.0.0" />
+		<dependency id="Newtonsoft.Json" version="13.0.1" />
+		<dependency id="System.ComponentModel.Annotations" version="5.0.0" />
+		<dependency id="System.DirectoryServices.Protocols" version="5.0.0" />
+		<dependency id="System.Reflection.Emit" version="4.7.0" />
+		<dependency id="System.Reflection.Emit.Lightweight" version="4.7.0" />
+		<dependency id="System.Text.Json" version="5.0.2" />
+		<dependency id="System.Threading.Channels" version="5.0.0" />
+		<dependency id="System.Threading.Tasks.Extensions" version="4.5.4" />
       </group>
     </dependencies>
   </metadata>
