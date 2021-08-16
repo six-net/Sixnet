@@ -14,12 +14,6 @@ namespace EZNEW.Serialization.Json
     public class JsonSerializationOptions
     {
         /// <summary>
-        /// Specifies a condition to determine when properties with default values are ignored
-        /// during serialization or deserialization. The default value is System.Text.Json.Serialization.JsonIgnoreCondition.Never.
-        /// </summary>
-        public JsonIgnoreCondition DefaultIgnoreCondition { get; set; } = JsonIgnoreCondition.Never;
-
-        /// <summary>
         /// Gets or sets a value that defines how comments are handled during deserialization.
         /// </summary>
         public JsonCommentHandling ReadCommentHandling { get; set; } = JsonCommentHandling.Skip;
@@ -63,11 +57,6 @@ namespace EZNEW.Serialization.Json
         public bool IgnoreReadOnlyProperties { get; set; }
 
         /// <summary>
-        /// Configures how object references are handled when reading and writing JSON.
-        /// </summary>
-        public ReferenceHandler ReferenceHandler { get; set; }
-
-        /// <summary>
         /// Gets or sets a value that defines whether JSON should use pretty printing. By
         /// default, JSON is serialized without any extra white space.
         /// </summary>
@@ -108,11 +97,6 @@ namespace EZNEW.Serialization.Json
         /// Gets or sets the list of user-defined converters that were registered.
         /// </summary>
         public IList<JsonConverter> Converters { get; set; }
-
-        /// <summary>
-        /// Specifies how number types should be handled when serializing or deserializing.
-        /// </summary>
-        public JsonNumberHandling NumberHandling { get; set; } = JsonNumberHandling.Strict;
 
         /// <summary>
         /// Indecates whether non-public properties and fields are parsed
