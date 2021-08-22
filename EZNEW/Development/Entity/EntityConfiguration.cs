@@ -79,14 +79,14 @@ namespace EZNEW.Development.Entity
         public string VersionField { get; set; }
 
         /// <summary>
-        /// Gets or sets the update datetime field name
+        /// Gets or sets the update time field name
         /// </summary>
-        public string UpdateDateTimeField { get; set; }
+        public string UpdateTimeField { get; set; }
 
         /// <summary>
-        /// Gets or sets the creation datatime field name
+        /// Gets or sets the creation time field name
         /// </summary>
-        public string CreationDateTimeField { get; set; }
+        public string CreationTimeField { get; set; }
 
         /// <summary>
         /// Gets or sets the obsolete field

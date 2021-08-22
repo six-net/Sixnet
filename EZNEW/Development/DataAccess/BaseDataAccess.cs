@@ -110,7 +110,7 @@ namespace EZNEW.Development.DataAccess
 
             #region update date
 
-            string updateDateTimeFieldName = EntityManager.GetUpdateDateTimeField(entityType);
+            string updateDateTimeFieldName = EntityManager.GetUpdateTimeField(entityType);
             if (!string.IsNullOrWhiteSpace(updateDateTimeFieldName) && !modifyValues.ContainsKey(updateDateTimeFieldName))
             {
                 var nowDate = DateTimeOffset.Now;
@@ -155,7 +155,7 @@ namespace EZNEW.Development.DataAccess
 
             #region update date
 
-            string updateFieldName = EntityManager.GetUpdateDateTimeField(typeof(TEntity));
+            string updateFieldName = EntityManager.GetUpdateTimeField(typeof(TEntity));
             if (!string.IsNullOrWhiteSpace(updateFieldName) && !modifyValues.ContainsKey(updateFieldName))
             {
                 modifyValues.Add(updateFieldName, new FixedModificationValue(DateTimeOffset.Now));
@@ -609,14 +609,14 @@ namespace EZNEW.Development.DataAccess
             DateTimeOffset nowDate = DateTimeOffset.Now;
 
             //Creation datetime
-            string creationDateTimeField = EntityManager.GetCreationDateTimeField(typeof(TEntity));
+            string creationDateTimeField = EntityManager.GetCreationTimeField(typeof(TEntity));
             if (!string.IsNullOrWhiteSpace(creationDateTimeField))
             {
                 data.SetValue(creationDateTimeField, nowDate);
             }
 
             //update datetime
-            string updateDateTimeField = EntityManager.GetUpdateDateTimeField(typeof(TEntity));
+            string updateDateTimeField = EntityManager.GetUpdateTimeField(typeof(TEntity));
             if (!string.IsNullOrWhiteSpace(updateDateTimeField))
             {
                 data.SetValue(updateDateTimeField, nowDate);

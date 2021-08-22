@@ -9,18 +9,18 @@ namespace EZNEW.Development.Entity
     /// </summary>
     /// <typeparam name="TEntity">Entity type</typeparam>
 
-    public abstract class RecordEntity<TEntity> : BaseEntity<TEntity>, ICreationDateTimeEntity, IUpdateDateTimeEntity where TEntity : BaseEntity<TEntity>, new()
+    public abstract class RecordEntity<TEntity> : BaseEntity<TEntity>, ICreationTimeEntity, IUpdateTimeEntity where TEntity : BaseEntity<TEntity>, new()
     {
         /// <summary>
-        /// Gets or sets the creation datetime
+        /// Gets or sets the creation time
         /// </summary>
-        [EntityField(Description = "CreationDatetime", Role = FieldRole.CreationDateTime)]
-        public DateTimeOffset CreationDateTime { get; set; }
+        [EntityField(Description = "CreationTime", Role = FieldRole.CreationTime)]
+        public DateTimeOffset CreationTime { get; set; }
 
         /// <summary>
-        /// Gets or sets the update datetime
+        /// Gets or sets the update time
         /// </summary>
-        [EntityField(Description = "UpdateDatetime", Role = FieldRole.UpdateDateTime)]
-        public DateTimeOffset UpdateDateTime { get; set; }
+        [EntityField(Description = "UpdateTime", Role = FieldRole.UpdateTime)]
+        public DateTimeOffset UpdateTime { get; set; }
     }
 }

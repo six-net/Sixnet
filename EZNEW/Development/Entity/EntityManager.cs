@@ -87,8 +87,8 @@ namespace EZNEW.Development.Entity
             List<EntityField> editFields = new List<EntityField>();
             List<EntityField> queryEntityFields = new List<EntityField>();
             string versionField = null;
-            string updateDateTimeField = null;
-            string creationDateTimeField = null;
+            string updateTimeField = null;
+            string creationTimeField = null;
             string obsoleteField = null;
             foreach (var member in memberInfos)
             {
@@ -161,13 +161,13 @@ namespace EZNEW.Development.Entity
                 {
                     versionField = propertyName;
                 }
-                if (propertyField.InRole(FieldRole.UpdateDateTime))
+                if (propertyField.InRole(FieldRole.UpdateTime))
                 {
-                    updateDateTimeField = propertyName;
+                    updateTimeField = propertyName;
                 }
-                if (propertyField.InRole(FieldRole.CreationDateTime))
+                if (propertyField.InRole(FieldRole.CreationTime))
                 {
-                    creationDateTimeField = propertyName;
+                    creationTimeField = propertyName;
                 }
                 if (propertyField.InRole(FieldRole.ObsoleteTag))
                 {
@@ -224,8 +224,8 @@ namespace EZNEW.Development.Entity
             entityConfig.PrimaryKeys = primaryKeys;
             entityConfig.AllFields = allFieldDict;
             entityConfig.VersionField = versionField;
-            entityConfig.UpdateDateTimeField = updateDateTimeField;
-            entityConfig.CreationDateTimeField = creationDateTimeField;
+            entityConfig.UpdateTimeField = updateTimeField;
+            entityConfig.CreationTimeField = creationTimeField;
             entityConfig.ObsoleteField = obsoleteField;
             entityConfig.CacheKeys = cacheKeys;
             entityConfig.CachePrefixKeys = cachePrefixKeys;
@@ -614,76 +614,76 @@ namespace EZNEW.Development.Entity
 
         #endregion
 
-        #region Update datetime field
+        #region Update time field
 
-        #region Set update datetime field
+        #region Set update time field
 
         /// <summary>
-        /// Set update datetime field
+        /// Set update time field
         /// </summary>
         /// <param name="entityType">Entity type</param>
-        /// <param name="fieldName">Update datetime field name</param>
-        public static void SetUpdateDateTimeField(Type entityType, string fieldName)
+        /// <param name="fieldName">Update time field name</param>
+        public static void SetUpdateTimeField(Type entityType, string fieldName)
         {
             var entityConfig = GetEntityConfiguration(entityType);
             if (entityConfig != null)
             {
-                entityConfig.UpdateDateTimeField = fieldName;
-                SetFieldRole(entityType, fieldName, FieldRole.UpdateDateTime);
+                entityConfig.UpdateTimeField = fieldName;
+                SetFieldRole(entityType, fieldName, FieldRole.UpdateTime);
             }
         }
 
         #endregion
 
-        #region Get update datetime field
+        #region Get update time field
 
         /// <summary>
-        /// Get update datetime field
+        /// Get update time field
         /// </summary>
         /// <param name="entityType">Entity type</param>
-        /// <returns>Return the update datetime field name</returns>
-        public static string GetUpdateDateTimeField(Type entityType)
+        /// <returns>Return the update time field name</returns>
+        public static string GetUpdateTimeField(Type entityType)
         {
             var entityConfig = GetEntityConfiguration(entityType);
-            return entityConfig?.UpdateDateTimeField ?? string.Empty;
+            return entityConfig?.UpdateTimeField ?? string.Empty;
         }
 
         #endregion
 
         #endregion
 
-        #region Creation datetime field
+        #region Creation time field
 
-        #region Set creation datetime field
+        #region Set creation time field
 
         /// <summary>
-        /// Set creation datetime field
+        /// Set creation time field
         /// </summary>
         /// <param name="entityType">Entity type</param>
-        /// <param name="fieldName">Creation datetime field name</param>
-        public static void SetCreationDateTimeField(Type entityType, string fieldName)
+        /// <param name="fieldName">Creation time field name</param>
+        public static void SetCreationTimeField(Type entityType, string fieldName)
         {
             var entityConfig = GetEntityConfiguration(entityType);
             if (entityConfig != null)
             {
-                entityConfig.CreationDateTimeField = fieldName;
-                SetFieldRole(entityType, fieldName, FieldRole.CreationDateTime);
+                entityConfig.CreationTimeField = fieldName;
+                SetFieldRole(entityType, fieldName, FieldRole.CreationTime);
             }
         }
 
         #endregion
 
-        #region Get creation datetime field
+        #region Get creation time field
 
         /// <summary>
-        /// Get creation datetime field
+        /// Get creation time field
         /// </summary>
         /// <param name="entityType">Entity type</param>
-        /// <returns>Return the creation datetime field name</returns>
-        public static string GetCreationDateTimeField(Type entityType)
+        /// <returns>Return the creation time field name</returns>
+        public static string GetCreationTimeField(Type entityType)
         {
             var entityConfig = GetEntityConfiguration(entityType);
-            return entityConfig?.CreationDateTimeField ?? string.Empty;
+            return entityConfig?.CreationTimeField ?? string.Empty;
         }
 
         #endregion

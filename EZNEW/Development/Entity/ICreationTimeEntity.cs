@@ -7,11 +7,11 @@ namespace EZNEW.Development.Entity
     /// <summary>
     /// Defines creation time entity contract
     /// </summary>
-    public interface ICreationDateTimeEntity
+    public interface ICreationTimeEntity
     {
         /// <summary>
-        /// Gets or sets the creation datetime
+        /// Gets or sets the creation time
         /// </summary>
-        DateTimeOffset CreationDateTime { get; set; }
+        DateTimeOffset CreationTime { get; set; }
     }
 }
