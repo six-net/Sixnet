@@ -7,7 +7,7 @@ namespace EZNEW.Development.Domain.Event
     /// Domain event result
     /// </summary>
     [Serializable]
-    public class DomainEventExecuteResult
+    public class DomainEventResult
     {
         #region Properties
 
@@ -35,7 +35,7 @@ namespace EZNEW.Development.Domain.Event
         /// </summary>
         /// <param name="message">Message</param>
         /// <returns>Return domain event result</returns>
-        public static DomainEventExecuteResult EmptyResult(string message = "")
+        public static DomainEventResult EmptyResult(string message = "")
         {
             return CodeResult(DomainEventExecuteResultCode.Empty, message);
         }
@@ -46,14 +46,14 @@ namespace EZNEW.Development.Domain.Event
         /// <param name="code">Result code</param>
         /// <param name="message">Message</param>
         /// <returns>Return domain event result</returns>
-        public static DomainEventExecuteResult CodeResult(DomainEventExecuteResultCode code, string message = "")
+        public static DomainEventResult CodeResult(DomainEventExecuteResultCode code, string message = "")
         {
             if (string.IsNullOrWhiteSpace(message))
             {
                 message = code.ToString();
             }
             var success = GetSuccessByCode(code);
-            return new DomainEventExecuteResult()
+            return new DomainEventResult()
             {
                 Code = ((int)code).ToString(),
                 Message = message,

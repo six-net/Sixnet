@@ -1,22 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using System.Text;
-using EZNEW.Development.Domain.Aggregation;
+using System.Threading.Tasks;
 using EZNEW.Development.Domain.Repository;
+using EZNEW.Development.Domain.Repository.Warehouse;
+using EZNEW.Development.Domain.Event;
+using EZNEW.Exceptions;
+using EZNEW.DataValidation;
 using EZNEW.Expressions;
 using EZNEW.Model;
 
-namespace EZNEW.Development.Entity
+namespace EZNEW.Development.Domain.Model
 {
     /// <summary>
-    /// Defines aggregation entity
+    /// Defines model root
     /// </summary>
-    public class AggregationEntity<T> : BaseEntity<T>, IAggregationRoot<T> where T : BaseEntity<T>, IAggregationRoot<T>, new()
+    [Serializable]
+    public abstract class ModelRoot<T> : IModel<T> where T : ModelRoot<T>
     {
-        static AggregationEntity()
+        static ModelRoot()
         {
-            AggregationManager.ConfigureAggregationModel<T>();
+            ModelManager.ConfigureModel<T>();
         }
 
         #region Fields
@@ -24,8 +28,12 @@ namespace EZNEW.Development.Entity
         /// <summary>
         /// The repository object
         /// </summary>
-        [NonData]
         protected IRepository<T> repository = null;
+
+        /// <summary>
+        /// The default identity
+        /// </summary>
+        private Guid defaultIdentity = Guid.NewGuid();
 
         #endregion
 
@@ -46,13 +54,11 @@ namespace EZNEW.Development.Entity
         /// <summary>
         /// Gets whether allow lazy data load
         /// </summary>
-        [NonData]
         protected bool LoadLazyMember { get; set; } = true;
 
         /// <summary>
         /// Gets all of the properties allow to load data
         /// </summary>
-        [NonData]
         protected Dictionary<string, bool> LoadProperties = new Dictionary<string, bool>();
 
         /// <summary>
@@ -65,7 +71,7 @@ namespace EZNEW.Development.Entity
         /// Gets whether the object is new
         /// </summary>
         [NonData]
-        public bool IsNew => AggregationDataManager<T>.IsNew(repository, GetType(), this);
+        public bool IsNew => ModelDataManager<T>.IsNew(repository, GetType(), this);
 
         #endregion
 
@@ -77,7 +83,7 @@ namespace EZNEW.Development.Entity
         /// <returns>Return whether allow to save</returns>
         protected virtual bool SaveValidation()
         {
-            return AggregationDataManager<T>.SaveValidation(this as T);
+            return ModelDataManager<T>.SaveValidation(this as T);
         }
 
         /// <summary>
@@ -95,7 +101,7 @@ namespace EZNEW.Development.Entity
         /// <returns>Return whether is successful</returns>
         public virtual bool MarkNew()
         {
-            return AggregationDataManager<T>.MarkNew(repository, this);
+            return ModelDataManager<T>.MarkNew(repository, this);
         }
 
         /// <summary>
@@ -104,7 +110,7 @@ namespace EZNEW.Development.Entity
         /// <returns>Return whether is successful</returns>
         public virtual bool MarkStored()
         {
-            return AggregationDataManager<T>.MarkStored(repository, this);
+            return ModelDataManager<T>.MarkStored(repository, this);
         }
 
         /// <summary>
@@ -114,7 +120,7 @@ namespace EZNEW.Development.Entity
         /// <returns></returns>
         public virtual void SetLoadProperties(IEnumerable<KeyValuePair<string, bool>> loadProperties)
         {
-            AggregationDataManager<T>.SetLoadProperties(loadProperties, ref LoadProperties);
+            ModelDataManager<T>.SetLoadProperties(loadProperties, ref LoadProperties);
         }
 
         /// <summary>
@@ -124,7 +130,7 @@ namespace EZNEW.Development.Entity
         /// <param name="allowLoad">Whether allow load</param>
         public virtual void SetLoadProperty(Expression<Func<T, dynamic>> property, bool allowLoad = true)
         {
-            AggregationDataManager<T>.SetLoadProperty(property, allowLoad, ref LoadProperties);
+            ModelDataManager<T>.SetLoadProperty(property, allowLoad, ref LoadProperties);
         }
 
         /// <summary>
@@ -178,7 +184,7 @@ namespace EZNEW.Development.Entity
         /// <param name="property">Property</param>
         /// <param name="lazyMember">Lazy member</param>
         /// <returns>Return whether allow load data</returns>
-        protected virtual bool AllowLoad<TModel>(Expression<Func<T, dynamic>> property, LazyMember<TModel> lazyMember) where TModel : IAggregationRoot<TModel>
+        protected virtual bool AllowLoad<TModel>(Expression<Func<T, dynamic>> property, LazyMember<TModel> lazyMember) where TModel : IModel<TModel>
         {
             return AllowLazyLoad(property) && !(lazyMember.CurrentValue?.IdentityValueIsNone() ?? true);
         }
@@ -188,7 +194,7 @@ namespace EZNEW.Development.Entity
         /// </summary>
         public virtual Result<T> Save()
         {
-            return AggregationDataManager<T>.Save(repository, this as T);
+            return ModelDataManager<T>.Save(repository, this as T);
         }
 
         /// <summary>
@@ -196,7 +202,7 @@ namespace EZNEW.Development.Entity
         /// </summary>
         public virtual Result Remove()
         {
-            return AggregationDataManager<T>.Remove(repository, this as T);
+            return ModelDataManager<T>.Remove(repository, this as T);
         }
 
         /// <summary>
@@ -210,7 +216,7 @@ namespace EZNEW.Development.Entity
         /// <returns>Return identity value whether has value</returns>
         public virtual bool IdentityValueIsNone()
         {
-            return string.IsNullOrWhiteSpace(GetIdentityValue());
+            return true;
         }
 
         /// <summary>
@@ -243,6 +249,34 @@ namespace EZNEW.Development.Entity
         }
 
         /// <summary>
+        /// Get identity value
+        /// </summary>
+        /// <returns>Return model identity value</returns>
+        protected virtual string GetIdentityValue()
+        {
+            return defaultIdentity.ToString();
+        }
+
+        /// <summary>
+        /// Update data
+        /// </summary>
+        /// <param name="newData">New data</param>
+        /// <returns></returns>
+        public IModel OnDataUpdating(T newData)
+        {
+            return OnUpdating(newData);
+        }
+
+        /// <summary>
+        /// Add data
+        /// </summary>
+        /// <returns>Return data</returns>
+        public IModel OnDataAdding()
+        {
+            return OnAdding();
+        }
+
+        /// <summary>
         /// Update data
         /// </summary>
         /// <param name="newData">New data</param>
@@ -263,25 +297,6 @@ namespace EZNEW.Development.Entity
                 InitIdentityValue();
             }
             return this as T;
-        }
-
-        /// <summary>
-        /// Update data
-        /// </summary>
-        /// <param name="newData">New data</param>
-        /// <returns></returns>
-        public IAggregationRoot OnDataUpdating(T newData)
-        {
-            return OnUpdating(newData);
-        }
-
-        /// <summary>
-        /// Add data
-        /// </summary>
-        /// <returns>Return data</returns>
-        public IAggregationRoot OnDataAdding()
-        {
-            return OnAdding();
         }
 
         #endregion

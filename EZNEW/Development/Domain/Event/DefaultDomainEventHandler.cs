@@ -10,27 +10,27 @@ namespace EZNEW.Development.Domain.Event
     public class DefaultDomainEventHandler<TEvent> where TEvent : class, IDomainEvent
     {
         /// <summary>
-        /// Gets or sets the execute event operation
+        /// Gets or sets the event execution operation
         /// </summary>
-        public Func<TEvent, DomainEventExecuteResult> ExecuteEventOperation { get; set; }
+        public Func<TEvent, DomainEventResult> EventExecutionOperation { get; set; }
 
         /// <summary>
         /// Execute domain event
         /// </summary>
         /// <param name="domainEvent">Domain event</param>
         /// <returns>Return domain event execute result</returns>
-        public DomainEventExecuteResult Execute(IDomainEvent domainEvent)
+        public DomainEventResult Execute(IDomainEvent domainEvent)
         {
-            if (ExecuteEventOperation == null)
+            if (EventExecutionOperation == null)
             {
-                return DomainEventExecuteResult.EmptyResult("Did't set any event operation");
+                return DomainEventResult.EmptyResult("Did't set any event execution operation");
             }
             TEvent eventData = domainEvent as TEvent;
             if (eventData == null)
             {
-                return DomainEventExecuteResult.EmptyResult("Event data is null");
+                return DomainEventResult.EmptyResult("Event data is null");
             }
-            return ExecuteEventOperation(eventData);
+            return EventExecutionOperation(eventData);
         }
     }
 }

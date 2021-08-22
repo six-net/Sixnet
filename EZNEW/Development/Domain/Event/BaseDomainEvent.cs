@@ -16,6 +16,6 @@ namespace EZNEW.Development.Domain.Event
         /// <summary>
         /// Gets or set sthe event created date
         /// </summary>
-        public DateTimeOffset CreatedDate { get; set; } = DateTimeOffset.Now;
+        public DateTimeOffset CreationTime { get; set; } = DateTimeOffset.Now;
     }
 }

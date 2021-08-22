@@ -6,7 +6,7 @@ namespace EZNEW.Development.Entity
     /// Entity relation
     /// </summary>
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = true)]
-    public class EntityRelationAttribute : Attribute
+    public class EntityFieldRelationAttribute : Attribute
     {
         /// <summary>
         /// Gets or sets the relation type
@@ -23,7 +23,7 @@ namespace EZNEW.Development.Entity
         /// </summary>
         /// <param name="relationType">relation type</param>
         /// <param name="relationField">relation field</param>
-        public EntityRelationAttribute(Type relationType, string relationField)
+        public EntityFieldRelationAttribute(Type relationType, string relationField)
         {
             RelationType = relationType;
             RelationField = relationField;

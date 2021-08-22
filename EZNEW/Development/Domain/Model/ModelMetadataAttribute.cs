@@ -3,10 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace EZNEW.Development.Domain.Aggregation
+namespace EZNEW.Development.Domain.Model
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-    public class AggregationModelAttribute : Attribute
+    public class ModelMetadataAttribute : Attribute
     {
         /// <summary>
         /// Gets or sets the feature

@@ -1,4 +1,4 @@
-﻿using EZNEW.Development.Domain.Aggregation;
+﻿using EZNEW.Development.Domain.Model;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -6,11 +6,11 @@ using System.Text;
 namespace EZNEW.Development.Entity
 {
     /// <summary>
-    /// Defines aggregation permanent version entity
+    /// Defines model permanent version entity
     /// </summary>
-    public class AggregationPermanentVersionEntity<TEntity>
-        : AggregationVerionEntity<TEntity>, IObsoleteEntity
-        where TEntity : BaseEntity<TEntity>, IAggregationRoot<TEntity>, new()
+    public class ModelPermanentVersionEntity<TEntity>
+        : ModelVerionEntity<TEntity>, IObsoleteEntity
+        where TEntity : BaseEntity<TEntity>, IModel<TEntity>, new()
     {
         /// <summary>
         /// Indecates whether is obsolete

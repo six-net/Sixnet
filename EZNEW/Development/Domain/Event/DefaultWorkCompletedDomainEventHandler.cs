@@ -9,6 +9,6 @@
         /// <summary>
         /// Gets or sets the event execute time
         /// </summary>
-        public EventTriggerTime ExecuteTime { get; } = EventTriggerTime.WorkCompleted;
+        public EventTriggerTime TriggerTime { get; } = EventTriggerTime.WorkCompleted;
     }
 }

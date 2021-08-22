@@ -2,12 +2,12 @@
 using System.Threading.Tasks;
 using EZNEW.Development.Query;
 
-namespace EZNEW.Development.Domain.Aggregation
+namespace EZNEW.Development.Domain.Model
 {
     /// <summary>
-    /// Aggregation root contract
+    /// Defines model contract
     /// </summary>
-    public interface IAggregationRoot
+    public interface IModel
     {
         #region Properties
 
@@ -50,9 +50,9 @@ namespace EZNEW.Development.Domain.Aggregation
     }
 
     /// <summary>
-    /// Aggregation root contract
+    /// Defines model generic contract
     /// </summary>
-    public interface IAggregationRoot<in T> : IAggregationRoot, IQueryModel<T> where T : IAggregationRoot<T>
+    public interface IModel<in T> : IModel, IQueryModel<T> where T : IModel<T>
     {
         /// <summary>
         /// Compare two objects
@@ -89,12 +89,12 @@ namespace EZNEW.Development.Domain.Aggregation
         /// </summary>
         /// <param name="newData">New data</param>
         /// <returns></returns>
-        IAggregationRoot OnDataUpdating(T newData);
+        IModel OnDataUpdating(T newData);
 
         /// <summary>
         /// Add data
         /// </summary>
         /// <returns>Return data</returns>
-        IAggregationRoot OnDataAdding();
+        IModel OnDataAdding();
     }
 }

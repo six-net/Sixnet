@@ -1,66 +1,74 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using EZNEW.Development.Query;
+using EZNEW.Development.DataAccess;
+using EZNEW.Development.Domain.Model;
+using EZNEW.Development.Entity;
 using EZNEW.Development.UnitOfWork;
-using EZNEW.Paging;
 
 namespace EZNEW.Development.Domain.Repository
 {
     /// <summary>
-    /// Base relation repository
+    /// Defines base relation repository
     /// </summary>
-    /// <typeparam name="TFirstModel">The first relation model</typeparam>
-    /// <typeparam name="TSecondModel">The second relation model</typeparam>
-    public abstract class BaseRelationRepository<TFirstModel, TSecondModel>
+    /// <typeparam name="TModel">Model type</typeparam>
+    /// <typeparam name="TFirstRelationModel">The first relation model type</typeparam>
+    /// <typeparam name="TSecondRelationModel">The second relation model type</typeparam>
+    /// <typeparam name="TEntity">The entity type</typeparam>
+    /// <typeparam name="TDataAccess">The data access</typeparam>
+    public abstract class BaseRelationRepository<TModel, TFirstRelationModel, TSecondRelationModel, TEntity, TDataAccess>
+        : DefaultRepository<TModel, TEntity, TDataAccess>
+        where TModel : class, IModel<TModel>
+        where TEntity : BaseEntity<TEntity>, new()
+        where TDataAccess : IDataAccess<TEntity>
     {
-        #region Save
+        #region Query
 
         /// <summary>
-        /// Save
+        /// Get list by first
         /// </summary>
         /// <param name="datas">Datas</param>
-        /// <param name="activationOptions">Activation options</param>
-        public abstract void Save(IEnumerable<Tuple<TFirstModel, TSecondModel>> datas, ActivationOptions activationOptions = null);
+        /// <returns>Return datas</returns>
+        public abstract List<TModel> GetListByFirst(IEnumerable<TFirstRelationModel> datas);
 
         /// <summary>
-        /// Save by first type datas
+        /// Get list by first
         /// </summary>
         /// <param name="datas">Datas</param>
-        /// <param name="activationOptions">Activation options</param>
-        public abstract void SaveByFirst(IEnumerable<TFirstModel> datas, ActivationOptions activationOptions = null);
+        /// <returns>Return datas</returns>
+        public abstract Task<List<TModel>> GetListByFirstAsync(IEnumerable<TFirstRelationModel> datas);
 
         /// <summary>
-        /// Save by second type datas
+        /// Get list by second
         /// </summary>
         /// <param name="datas">Datas</param>
-        /// <param name="activationOptions">Activation options</param>
-        public abstract void SaveBySecond(IEnumerable<TSecondModel> datas, ActivationOptions activationOptions = null);
+        /// <returns>Return datas</returns>
+        public abstract List<TModel> GetListBySecond(IEnumerable<TSecondRelationModel> datas);
+
+        /// <summary>
+        /// Get list by second
+        /// </summary>
+        /// <param name="datas">Datas</param>
+        /// <returns>Return datas</returns>
+        public abstract Task<List<TModel>> GetListBySecondAsync(IEnumerable<TSecondRelationModel> datas);
 
         #endregion
 
         #region Remove
 
         /// <summary>
-        /// Remove datas
-        /// </summary>
-        /// <param name="datas">Datas</param>
-        /// <param name="activationOptions">Activation options</param>
-        public abstract void Remove(IEnumerable<Tuple<TFirstModel, TSecondModel>> datas, ActivationOptions activationOptions = null);
-
-        /// <summary>
-        /// Remove by condition
-        /// </summary>
-        /// <param name="query">Query object</param>
-        /// <param name="activationOptions">Activation options</param>
-        public abstract void Remove(IQuery query, ActivationOptions activationOptions = null);
-
-        /// <summary>
         /// Remove by first datas
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="activationOptions">Activation options</param>
-        public abstract void RemoveByFirst(IEnumerable<TFirstModel> datas, ActivationOptions activationOptions = null);
+        public abstract void RemoveByFirst(IEnumerable<TFirstRelationModel> datas, ActivationOptions activationOptions = null);
+
+        /// <summary>
+        /// Remove by second datas
+        /// </summary>
+        /// <param name="datas">Datas</param>
+        /// <param name="activationOptions">Activation options</param>
+        public abstract void RemoveBySecond(IEnumerable<TSecondRelationModel> datas, ActivationOptions activationOptions = null);
 
         /// <summary>
         /// Remove by first
@@ -70,92 +78,11 @@ namespace EZNEW.Development.Domain.Repository
         public abstract void RemoveByFirst(IQuery query, ActivationOptions activationOptions = null);
 
         /// <summary>
-        /// Remove by second datas
-        /// </summary>
-        /// <param name="datas">Datas</param>
-        /// <param name="activationOptions">Activation options</param>
-        public abstract void RemoveBySecond(IEnumerable<TSecondModel> datas, ActivationOptions activationOptions = null);
-
-        /// <summary>
         /// Remove by second
         /// </summary>
         /// <param name="query">Query object</param>
         /// <param name="activationOptions">Activation options</param>
         public abstract void RemoveBySecond(IQuery query, ActivationOptions activationOptions = null);
-
-        #endregion
-
-        #region Query
-
-        /// <summary>
-        /// Get relation data
-        /// </summary>
-        /// <param name="query">Query object</param>
-        /// <returns>Return data</returns>
-        public abstract Tuple<TFirstModel, TSecondModel> Get(IQuery query);
-
-        /// <summary>
-        /// Get relation data
-        /// </summary>
-        /// <param name="query">Query object</param>
-        /// <returns>Return data</returns>
-        public abstract Task<Tuple<TFirstModel, TSecondModel>> GetAsync(IQuery query);
-
-        /// <summary>
-        /// Get relation data list
-        /// </summary>
-        /// <param name="query">Query object</param>
-        /// <returns>Return data</returns>
-        public abstract List<Tuple<TFirstModel, TSecondModel>> GetList(IQuery query);
-
-        /// <summary>
-        /// Get relation data list
-        /// </summary>
-        /// <param name="query">Query object</param>
-        /// <returns>Return datas</returns>
-        public abstract Task<List<Tuple<TFirstModel, TSecondModel>>> GetListAsync(IQuery query);
-
-        /// <summary>
-        /// Get relation paging
-        /// </summary>
-        /// <param name="query">Query object</param>
-        /// <returns>Return data paging</returns>
-        public abstract PagingInfo<Tuple<TFirstModel, TSecondModel>> GetPaging(IQuery query);
-
-        /// <summary>
-        /// Get relation paging
-        /// </summary>
-        /// <param name="query">Query object</param>
-        /// <returns>Return data paging</returns>
-        public abstract Task<PagingInfo<Tuple<TFirstModel, TSecondModel>>> GetPagingAsync(IQuery query);
-
-        /// <summary>
-        /// Get First by Second
-        /// </summary>
-        /// <param name="datas">second datas</param>
-        /// <returns>Return datas</returns>
-        public abstract List<TFirstModel> GetFirstListBySecond(IEnumerable<TSecondModel> datas);
-
-        /// <summary>
-        /// Get First by Second
-        /// </summary>
-        /// <param name="datas">Datas</param>
-        /// <returns>Return datas</returns>
-        public abstract Task<List<TFirstModel>> GetFirstListBySecondAsync(IEnumerable<TSecondModel> datas);
-
-        /// <summary>
-        /// Get Second by First
-        /// </summary>
-        /// <param name="datas">Datas</param>
-        /// <returns>Return datas</returns>
-        public abstract List<TSecondModel> GetSecondListByFirst(IEnumerable<TFirstModel> datas);
-
-        /// <summary>
-        /// Get Second by First
-        /// </summary>
-        /// <param name="datas">Datas</param>
-        /// <returns>Return datas</returns>
-        public abstract Task<List<TSecondModel>> GetSecondListByFirstAsync(IEnumerable<TFirstModel> datas);
 
         #endregion
     }

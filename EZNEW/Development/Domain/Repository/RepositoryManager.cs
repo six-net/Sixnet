@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using EZNEW.DependencyInjection;
 using EZNEW.Development.DataAccess;
-using EZNEW.Development.Domain.Aggregation;
+using EZNEW.Development.Domain.Model;
 using EZNEW.Development.Entity;
 using EZNEW.Development.Query;
 using EZNEW.Exceptions;
@@ -86,7 +86,7 @@ namespace EZNEW.Development.Domain.Repository
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         public static IRepository<TModel> GetRepository<TModel>()
-            where TModel : IAggregationRoot<TModel>
+            where TModel : IModel<TModel>
         {
             return ContainerManager.Resolve<IRepository<TModel>>();
         }

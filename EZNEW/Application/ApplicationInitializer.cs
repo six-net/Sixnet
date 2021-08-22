@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using EZNEW.Development.DataAccess;
-using EZNEW.Development.Domain.Aggregation;
+using EZNEW.Development.Domain.Model;
 using EZNEW.Development.Domain.Repository;
 using EZNEW.Development.Entity;
 using EZNEW.Development.Query;
@@ -38,7 +38,7 @@ namespace EZNEW.Application
         /// <summary>
         /// Aggregation contract type
         /// </summary>
-        static readonly Type aggreagtionContractType = typeof(IAggregationRoot);
+        static readonly Type aggreagtionContractType = typeof(IModel);
 
         /// <summary>
         /// Entity contract type
@@ -124,11 +124,11 @@ namespace EZNEW.Application
 
                     #endregion
 
-                    #region Aggregation model
+                    #region Model
 
                     if (isAggreagtion && !isEntity)
                     {
-                        var entityType = AggregationManager.GetAggregationModelRelationEntityType(type);
+                        var entityType = ModelManager.GetModelRelationEntityType(type);
                         if (entityType == null)
                         {
                             var namespaceArray = type.Assembly.FullName.LSplit(",")[0].LSplit(".");

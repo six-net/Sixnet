@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using EZNEW.Development.Query;
 using EZNEW.Paging;
-using EZNEW.Development.Domain.Aggregation;
+using EZNEW.Development.Domain.Model;
 using EZNEW.Development.Entity;
 using EZNEW.DependencyInjection;
 using EZNEW.Development.DataAccess;
@@ -15,14 +15,14 @@ using EZNEW.Development.Command.Modification;
 namespace EZNEW.Development.Domain.Repository
 {
     /// <summary>
-    /// Default repository
+    /// Defines default repository
     /// </summary>
-    /// <typeparam name="TModel">Aggregation model</typeparam>
+    /// <typeparam name="TModel">Model</typeparam>
     /// <typeparam name="TEntity">Entity</typeparam>
     /// <typeparam name="TDataAccess">Data access</typeparam>
     public class DefaultRepository<TModel, TEntity, TDataAccess>
-        : DefaultAggregationRootRepository<TModel>
-        where TModel : class, IAggregationRoot<TModel>
+        : DefaultRootRepository<TModel>
+        where TModel : class, IModel<TModel>
         where TEntity : BaseEntity<TEntity>, new()
         where TDataAccess : IDataAccess<TEntity>
     {
@@ -42,7 +42,7 @@ namespace EZNEW.Development.Domain.Repository
         /// </summary>
         /// <param name="data">Data</param>
         /// <returns>Return the data life source</returns>
-        public sealed override DataLifeSource GetLifeSource(IAggregationRoot data)
+        public sealed override DataLifeSource GetLifeSource(IModel data)
         {
             if (data == null)
             {
@@ -56,7 +56,7 @@ namespace EZNEW.Development.Domain.Repository
         /// </summary>
         /// <param name="data">Data</param>
         /// <param name="lifeSource">Life source</param>
-        public sealed override void ModifyLifeSource(IAggregationRoot data, DataLifeSource lifeSource)
+        public sealed override void ModifyLifeSource(IModel data, DataLifeSource lifeSource)
         {
             if (data == null)
             {

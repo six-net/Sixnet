@@ -3,13 +3,13 @@
 namespace EZNEW.Development.Domain.Event
 {
     /// <summary>
-    /// Default aggregation data remove domain event
+    /// Default data save domain event
     /// </summary>
     [Serializable]
-    public class DefaultAggregationRemoveDomainEvent<T> : BaseDomainEvent
+    public class DefaultSaveDomainEvent<T> : BaseDomainEvent
     {
         /// <summary>
-        /// Gets or sets the remove object
+        /// Gets or sets the save object
         /// </summary>
         public T Object { get; set; }
     }

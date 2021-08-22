@@ -11,13 +11,13 @@ namespace EZNEW.Development.Domain.Event
     public static class DomainEventBus
     {
         /// <summary>
-        /// Global domain event manager
+        /// Domain event manager
         /// </summary>
-        internal static DomainEventManager GlobalDomainEventManager = null;
+        internal static DomainEventManager DomainEventManager = null;
 
         static DomainEventBus()
         {
-            GlobalDomainEventManager = new DomainEventManager();
+            DomainEventManager = new DomainEventManager();
         }
 
         #region Publish
@@ -32,7 +32,7 @@ namespace EZNEW.Development.Domain.Event
             {
                 return;
             }
-            GlobalDomainEventManager.Publish(domainEvents);
+            DomainEventManager.Publish(domainEvents);
             if (WorkManager.Current != null)
             {
                 WorkManager.Current.PublishDomainEvent(domainEvents);
@@ -46,24 +46,24 @@ namespace EZNEW.Development.Domain.Event
         #region Global event
 
         /// <summary>
-        /// Subscribe domain event in global area
+        /// Subscribe domain event
         /// </summary>
         /// <typeparam name="TEvent">Domain event</typeparam>
         /// <param name="eventHandleOperation">Event handle operation</param>
-        /// <param name="executeTime">Execute time</param>
-        public static void GlobalSubscribe<TEvent>(Func<TEvent, DomainEventExecuteResult> eventHandleOperation, EventTriggerTime executeTime = EventTriggerTime.Immediately) where TEvent : class, IDomainEvent
+        /// <param name="executeTime">Trigger time</param>
+        public static void Subscribe<TEvent>(Func<TEvent, DomainEventResult> eventHandleOperation, EventTriggerTime executeTime = EventTriggerTime.Immediately) where TEvent : class, IDomainEvent
         {
-            GlobalDomainEventManager?.Subscribe(eventHandleOperation, executeTime);
+            DomainEventManager?.Subscribe(eventHandleOperation, executeTime);
         }
 
         /// <summary>
-        /// Subscribe domain event in global area
+        /// Subscribe domain event
         /// </summary>
         /// <typeparam name="TEvent">Domain event</typeparam>
         /// <param name="eventHandler">Event handler</param>
-        public static void GlobalSubscribe<TEvent>(IDomainEventHandler eventHandler) where TEvent : class, IDomainEvent
+        public static void Subscribe<TEvent>(IDomainEventHandler eventHandler) where TEvent : class, IDomainEvent
         {
-            GlobalDomainEventManager?.Subscribe<TEvent>(eventHandler);
+            DomainEventManager?.Subscribe<TEvent>(eventHandler);
         }
 
         #endregion
@@ -71,22 +71,22 @@ namespace EZNEW.Development.Domain.Event
         #region Global all event
 
         /// <summary>
-        /// Subscribe domain event in global area
+        /// Subscribe domain event
         /// </summary>
         /// <param name="eventHandleOperation">Event handle operation</param>
-        /// <param name="executeTime">Execute time</param>
-        public static void GlobalSubscribeAll(Func<IDomainEvent, DomainEventExecuteResult> eventHandleOperation, EventTriggerTime executeTime = EventTriggerTime.Immediately)
+        /// <param name="executeTime">Trigger time</param>
+        public static void SubscribeAll(Func<IDomainEvent, DomainEventResult> eventHandleOperation, EventTriggerTime executeTime = EventTriggerTime.Immediately)
         {
-            GlobalDomainEventManager?.SubscribeAll(eventHandleOperation, executeTime);
+            DomainEventManager?.SubscribeAll(eventHandleOperation, executeTime);
         }
 
         /// <summary>
-        /// Subscribe domain event in global area
+        /// Subscribe domain event
         /// </summary>
         /// <param name="eventHandler">Event handler</param>
-        public static void GlobalSubscribeAll(IDomainEventHandler eventHandler)
+        public static void SubscribeAll(IDomainEventHandler eventHandler)
         {
-            GlobalDomainEventManager?.SubscribeAll(eventHandler);
+            DomainEventManager?.SubscribeAll(eventHandler);
         }
 
         #endregion
@@ -94,18 +94,18 @@ namespace EZNEW.Development.Domain.Event
         #region Work event
 
         /// <summary>
-        /// Subscribe domain event in global area
+        /// Subscribe domain event in work area
         /// </summary>
         /// <typeparam name="TEvent">Domain event</typeparam>
         /// <param name="eventHandleOperation">Event handle operation</param>
-        /// <param name="executeTime">Execute time</param>
-        public static void WorkSubscribe<TEvent>(Func<TEvent, DomainEventExecuteResult> eventHandleOperation, EventTriggerTime executeTime = EventTriggerTime.Immediately) where TEvent : class, IDomainEvent
+        /// <param name="executeTime">Trigger time</param>
+        public static void WorkSubscribe<TEvent>(Func<TEvent, DomainEventResult> eventHandleOperation, EventTriggerTime executeTime = EventTriggerTime.Immediately) where TEvent : class, IDomainEvent
         {
             WorkManager.Current?.DomainEventManager?.Subscribe(eventHandleOperation, executeTime);
         }
 
         /// <summary>
-        /// Subscribe domain event in global area
+        /// Subscribe domain event
         /// </summary>
         /// <typeparam name="TEvent">Domain event</typeparam>
         /// <param name="eventHandler">Event handler</param>
@@ -119,17 +119,17 @@ namespace EZNEW.Development.Domain.Event
         #region Work all event
 
         /// <summary>
-        /// Subscribe domain event in global area
+        /// Subscribe domain event in work area
         /// </summary>
         /// <param name="eventHandleOperation">Event handle operation</param>
-        /// <param name="executeTime">Execute time</param>
-        public static void WorkSubscribeAll(Func<IDomainEvent, DomainEventExecuteResult> eventHandleOperation, EventTriggerTime executeTime = EventTriggerTime.Immediately)
+        /// <param name="executeTime">Trigger time</param>
+        public static void WorkSubscribeAll(Func<IDomainEvent, DomainEventResult> eventHandleOperation, EventTriggerTime executeTime = EventTriggerTime.Immediately)
         {
             WorkManager.Current?.DomainEventManager?.SubscribeAll(eventHandleOperation, executeTime);
         }
 
         /// <summary>
-        /// Subscribe domain event in global area
+        /// Subscribe domain event in work area
         /// </summary>
         /// <param name="eventHandler">Event handler</param>
         public static void WorkSubscribeAll(IDomainEventHandler eventHandler)

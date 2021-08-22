@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using EZNEW.Development.Domain.Aggregation;
+using EZNEW.Development.Domain.Model;
 
 namespace EZNEW.Development.Entity
 {
     /// <summary>
-    /// Defines aggregation record entity
+    /// Defines model record entity
     /// </summary>
-    public class AggregationRecordEntity<TEntity>
-        : AggregationEntity<TEntity>, ICreationDateTimeEntity, IUpdateDateTimeEntity
-        where TEntity : BaseEntity<TEntity>, IAggregationRoot<TEntity>, new()
+    public class ModelRecordEntity<TEntity>
+        : ModelEntity<TEntity>, ICreationDateTimeEntity, IUpdateDateTimeEntity
+        where TEntity : BaseEntity<TEntity>, IModel<TEntity>, new()
     {
         /// <summary>
         /// Gets or sets the creation datetime

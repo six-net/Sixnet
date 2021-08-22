@@ -5,15 +5,15 @@ using EZNEW.Development.Domain.Repository.Warehouse;
 using EZNEW.Development.UnitOfWork;
 using EZNEW.Development.Query;
 using EZNEW.Paging;
-using EZNEW.Development.Domain.Aggregation;
+using EZNEW.Development.Domain.Model;
 
 namespace EZNEW.Development.Domain.Repository
 {
     /// <summary>
-    /// Repository contract
+    /// Defines repository contract
     /// </summary>
-    /// <typeparam name="TModel">Aggregation model</typeparam>
-    public interface IRepository<TModel> where TModel : IAggregationRoot<TModel>
+    /// <typeparam name="TModel">Model</typeparam>
+    public interface IRepository<TModel> where TModel : IModel<TModel>
     {
         #region Save data
 
@@ -265,7 +265,7 @@ namespace EZNEW.Development.Domain.Repository
         /// </summary>
         /// <param name="data">Data</param>
         /// <returns>Return the data life source</returns>
-        DataLifeSource GetLifeSource(IAggregationRoot data);
+        DataLifeSource GetLifeSource(IModel data);
 
         #endregion
 
@@ -276,7 +276,7 @@ namespace EZNEW.Development.Domain.Repository
         /// </summary>
         /// <param name="data">Data</param>
         /// <param name="lifeSource">Life source</param>
-        void ModifyLifeSource(IAggregationRoot data, DataLifeSource lifeSource);
+        void ModifyLifeSource(IModel data, DataLifeSource lifeSource);
 
         #endregion
     }

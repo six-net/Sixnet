@@ -7,7 +7,7 @@ using EZNEW.Expressions;
 using EZNEW.Application;
 using EZNEW.Reflection;
 using EZNEW.Development.DataAccess;
-using EZNEW.Development.Domain.Aggregation;
+using EZNEW.Development.Domain.Model;
 
 namespace EZNEW.Development.Entity
 {
@@ -175,7 +175,7 @@ namespace EZNEW.Development.Entity
                 }
 
                 //relation config
-                var relationAttributes = member.GetCustomAttributes(typeof(EntityRelationAttribute), false);
+                var relationAttributes = member.GetCustomAttributes(typeof(EntityFieldRelationAttribute), false);
                 if (relationAttributes.IsNullOrEmpty())
                 {
                     continue;
@@ -186,7 +186,7 @@ namespace EZNEW.Development.Entity
                 }
                 foreach (var attrObj in relationAttributes)
                 {
-                    if (!(attrObj is EntityRelationAttribute relationAttr) || relationAttr.RelationType == null || string.IsNullOrWhiteSpace(relationAttr.RelationField))
+                    if (!(attrObj is EntityFieldRelationAttribute relationAttr) || relationAttr.RelationType == null || string.IsNullOrWhiteSpace(relationAttr.RelationField))
                     {
                         continue;
                     }

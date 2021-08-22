@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using EZNEW.Development.Domain.Aggregation;
+using EZNEW.Development.Domain.Model;
 
 namespace EZNEW.Development.Entity
 {
     /// <summary>
-    /// Defines aggregation version entity
+    /// Defines model version entity
     /// </summary>
-    public class AggregationVerionEntity<TEntity>
-        : AggregationRecordEntity<TEntity>, IVersionEntity
-        where TEntity : BaseEntity<TEntity>, IAggregationRoot<TEntity>, new()
+    public class ModelVerionEntity<TEntity>
+        : ModelRecordEntity<TEntity>, IVersionEntity
+        where TEntity : BaseEntity<TEntity>, IModel<TEntity>, new()
     {
         /// <summary>
         /// Gets or sets the version value

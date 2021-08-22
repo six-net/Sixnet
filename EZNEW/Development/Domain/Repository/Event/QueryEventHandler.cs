@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using EZNEW.Development.Domain.Aggregation;
+using EZNEW.Development.Domain.Model;
 
 namespace EZNEW.Development.Domain.Repository.Event
 {

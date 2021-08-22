@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace EZNEW.Development.Domain.Aggregation
+namespace EZNEW.Development.Domain.Model
 {
     /// <summary>
-    /// Defines aggregation model feature
+    /// Defines model feature
     /// </summary>
     public enum AggregationFeature
     {

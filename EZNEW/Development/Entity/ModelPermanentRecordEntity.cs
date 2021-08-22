@@ -1,4 +1,4 @@
-﻿using EZNEW.Development.Domain.Aggregation;
+﻿using EZNEW.Development.Domain.Model;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -6,11 +6,11 @@ using System.Text;
 namespace EZNEW.Development.Entity
 {
     /// <summary>
-    /// Defines aggregation permanent record
+    /// Defines model permanent record entity
     /// </summary>
-    public class AggregationPermanentRecordEntity<TEntity>
-        : AggregationRecordEntity<TEntity>, IObsoleteEntity
-        where TEntity : BaseEntity<TEntity>, IAggregationRoot<TEntity>, new()
+    public class ModelPermanentRecordEntity<TEntity>
+        : ModelRecordEntity<TEntity>, IObsoleteEntity
+        where TEntity : BaseEntity<TEntity>, IModel<TEntity>, new()
     {
         /// <summary>
         /// Indecates whether is obsolete

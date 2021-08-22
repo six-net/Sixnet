@@ -10,17 +10,21 @@ using EZNEW.Exceptions;
 using EZNEW.Expressions;
 using EZNEW.Model;
 
-namespace EZNEW.Development.Domain.Aggregation
+namespace EZNEW.Development.Domain.Model
 {
-    internal class AggregationDataManager<T> where T : IAggregationRoot<T>
+    /// <summary>
+    /// Defines model data manager
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    internal class ModelDataManager<T> where T : IModel<T>
     {
-        internal static bool IsNew(IRepository<T> repository, Type dataType, IAggregationRoot data)
+        internal static bool IsNew(IRepository<T> repository, Type dataType, IModel data)
         {
-            var isVirtual = AggregationManager.IsVirtualAggregation(dataType);
+            var isVirtual = ModelManager.IsVirtualModel(dataType);
             return isVirtual || repository.GetLifeSource(data) == DataLifeSource.New;
         }
 
-        internal static bool MarkNew(IRepository<T> repository, IAggregationRoot data)
+        internal static bool MarkNew(IRepository<T> repository, IModel data)
         {
             if (repository == null)
             {
@@ -30,7 +34,7 @@ namespace EZNEW.Development.Domain.Aggregation
             return true;
         }
 
-        internal static bool MarkStored(IRepository<T> repository, IAggregationRoot data)
+        internal static bool MarkStored(IRepository<T> repository, IModel data)
         {
             if (repository == null)
             {
@@ -73,7 +77,7 @@ namespace EZNEW.Development.Domain.Aggregation
             {
                 return Result<T>.FailedResult("Data saved failed");
             }
-            DomainEventBus.Publish(new DefaultAggregationSaveDomainEvent<T>()
+            DomainEventBus.Publish(new DefaultSaveDomainEvent<T>()
             {
                 Object = saveData
             });
@@ -83,7 +87,7 @@ namespace EZNEW.Development.Domain.Aggregation
         internal static Result Remove(IRepository<T> repository, T data)
         {
             repository.Remove(data);
-            DomainEventBus.Publish(new DefaultAggregationRemoveDomainEvent<T>()
+            DomainEventBus.Publish(new DefaultRemoveDomainEvent<T>()
             {
                 Object = data
             });

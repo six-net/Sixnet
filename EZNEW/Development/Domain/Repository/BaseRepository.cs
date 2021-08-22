@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using EZNEW.Development.Command.Modification;
 using EZNEW.Development.Query;
-using EZNEW.Development.Domain.Aggregation;
+using EZNEW.Development.Domain.Model;
 using EZNEW.Development.Domain.Repository.Warehouse;
 using EZNEW.Development.UnitOfWork;
 using EZNEW.Paging;
@@ -10,9 +10,9 @@ using EZNEW.Paging;
 namespace EZNEW.Development.Domain.Repository
 {
     /// <summary>
-    /// Base aggregation repository
+    /// Defines base repository
     /// </summary>
-    public abstract class BaseAggregationRepository<TModel> : IRepository<TModel> where TModel : IAggregationRoot<TModel>
+    public abstract class BaseRepository<TModel> : IRepository<TModel> where TModel : IModel<TModel>
     {
         #region Save data
 
@@ -264,7 +264,7 @@ namespace EZNEW.Development.Domain.Repository
         /// </summary>
         /// <param name="data">Data</param>
         /// <returns>Return the data life source</returns>
-        public abstract DataLifeSource GetLifeSource(IAggregationRoot data);
+        public abstract DataLifeSource GetLifeSource(IModel data);
 
         #endregion
 
@@ -275,7 +275,7 @@ namespace EZNEW.Development.Domain.Repository
         /// </summary>
         /// <param name="data">Data</param>
         /// <param name="lifeSource">Life source</param>
-        public abstract void ModifyLifeSource(IAggregationRoot data, DataLifeSource lifeSource);
+        public abstract void ModifyLifeSource(IModel data, DataLifeSource lifeSource);
 
         #endregion
     }

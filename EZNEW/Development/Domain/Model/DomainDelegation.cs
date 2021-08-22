@@ -3,7 +3,7 @@ using EZNEW.Development.Command.Modification;
 using EZNEW.Development.Query;
 using EZNEW.Development.UnitOfWork;
 
-namespace EZNEW.Development.Domain.Aggregation
+namespace EZNEW.Development.Domain.Model
 {
     /// <summary>
     /// Data operation

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using EZNEW.Development.Command;
-using EZNEW.Development.Domain.Aggregation;
+using EZNEW.Development.Domain.Model;
 using EZNEW.Development.Query;
 using EZNEW.Exceptions;
 using EZNEW.Model;

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using EZNEW.Development.Command.Modification;
 using EZNEW.Development.Query;
-using EZNEW.Development.Domain.Aggregation;
+using EZNEW.Development.Domain.Model;
 using EZNEW.Development.Domain.Repository.Event;
 using EZNEW.Development.UnitOfWork;
 using EZNEW.Exceptions;
@@ -13,10 +13,10 @@ using EZNEW.Paging;
 namespace EZNEW.Development.Domain.Repository
 {
     /// <summary>
-    /// Default aggregation root repository
+    /// Defines default root repository
     /// </summary>
-    /// <typeparam name="TModel">Aggregation model</typeparam>
-    public abstract class DefaultAggregationRootRepository<TModel> : BaseAggregationRepository<TModel> where TModel : class, IAggregationRoot<TModel>
+    /// <typeparam name="TModel">Model</typeparam>
+    public abstract class DefaultRootRepository<TModel> : BaseRepository<TModel> where TModel : class, IModel<TModel>
     {
         #region Impl methods
 

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using EZNEW.Development.Command.Modification;
 using EZNEW.Development.Query;
-using EZNEW.Development.Domain.Aggregation;
+using EZNEW.Development.Domain.Model;
 using EZNEW.Development.UnitOfWork;
 using EZNEW.DependencyInjection;
 using EZNEW.Expressions;

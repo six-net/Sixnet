@@ -10,9 +10,9 @@ namespace EZNEW.Development.Domain.Event
         #region Properties
 
         /// <summary>
-        /// Gets or sets the handler execute time
+        /// Gets or sets the handler execution time
         /// </summary>
-        EventTriggerTime ExecuteTime { get; }
+        EventTriggerTime TriggerTime { get; }
 
         #endregion
 
@@ -21,6 +21,6 @@ namespace EZNEW.Development.Domain.Event
         /// </summary>
         /// <param name="domainEvent">Domain event</param>
         /// <returns>Return event result</returns>
-        DomainEventExecuteResult Execute(IDomainEvent domainEvent);
+        DomainEventResult Execute(IDomainEvent domainEvent);
     }
 }

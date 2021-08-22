@@ -569,7 +569,7 @@ namespace EZNEW.Development.UnitOfWork
             DomainEventManager?.TriggerDomainEvent(EventTriggerTime.WorkCompleted, DomainEvents);
 
             //Global event handler
-            DomainEventBus.GlobalDomainEventManager?.TriggerDomainEvent(EventTriggerTime.WorkCompleted, DomainEvents);
+            DomainEventBus.DomainEventManager?.TriggerDomainEvent(EventTriggerTime.WorkCompleted, DomainEvents);
         }
 
         #endregion

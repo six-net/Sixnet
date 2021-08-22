@@ -6,8 +6,8 @@
     public class DefaultImmediatelyDomainEventHandler<TEvent> : DefaultDomainEventHandler<TEvent>, IDomainEventHandler where TEvent : class, IDomainEvent
     {
         /// <summary>
-        /// Gets or sets the event execute time
+        /// Gets or sets the event trigger time
         /// </summary>
-        public EventTriggerTime ExecuteTime { get; } = EventTriggerTime.Immediately;
+        public EventTriggerTime TriggerTime { get; } = EventTriggerTime.Immediately;
     }
 }

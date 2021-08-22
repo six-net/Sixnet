@@ -13,8 +13,8 @@ namespace EZNEW.Development.Domain.Event
         string Id { get; set; }
 
         /// <summary>
-        /// Gets or sets the event created date
+        /// Gets or sets the event creation time
         /// </summary>
-        DateTimeOffset CreatedDate { get; set; }
+        DateTimeOffset CreationTime { get; set; }
     }
 }

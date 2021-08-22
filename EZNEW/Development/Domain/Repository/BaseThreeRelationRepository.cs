@@ -1,74 +1,96 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using EZNEW.Development.Query;
+using EZNEW.Development.DataAccess;
+using EZNEW.Development.Domain.Model;
+using EZNEW.Development.Entity;
 using EZNEW.Development.UnitOfWork;
-using EZNEW.Paging;
 
 namespace EZNEW.Development.Domain.Repository
 {
     /// <summary>
-    /// Base three relation repository
+    /// Defines base three relation repository
     /// </summary>
-    /// <typeparam name="TFirstModel">The first relation model</typeparam>
-    /// <typeparam name="TSecondModel">The second relation model</typeparam>
-    /// <typeparam name="TThirdModel">The third relation model</typeparam>
-    public abstract class BaseThreeRelationRepository<TFirstModel, TSecondModel, TThirdModel>
+    /// <typeparam name="TModel">Model</typeparam>
+    /// <typeparam name="TFirstRelationModel">The first relation model</typeparam>
+    /// <typeparam name="TSecondRelationModel">The second relation model</typeparam>
+    /// <typeparam name="TThirdRelationModel">The third relation model</typeparam>
+    /// <typeparam name="TEntity">Entity type</typeparam>
+    /// <typeparam name="TDataAccess">Data access</typeparam>
+    public abstract class BaseThreeRelationRepository<TModel, TFirstRelationModel, TSecondRelationModel, TThirdRelationModel, TEntity, TDataAccess>
+        : DefaultRepository<TModel, TEntity, TDataAccess>
+        where TModel : class, IModel<TModel>
+        where TEntity : BaseEntity<TEntity>, new()
+        where TDataAccess : IDataAccess<TEntity>
     {
-        #region Save
+        #region Query
 
         /// <summary>
-        /// Save
+        /// Get list by first
         /// </summary>
         /// <param name="datas">Datas</param>
-        /// <param name="activationOptions">Activation options</param>
-        public abstract void Save(IEnumerable<Tuple<TFirstModel, TSecondModel, TThirdModel>> datas, ActivationOptions activationOptions = null);
+        /// <returns>Return data list</returns>
+        public abstract List<TModel> GetListByFirst(IEnumerable<TFirstRelationModel> datas);
 
         /// <summary>
-        /// Save by first type datas
+        /// Get list by first
         /// </summary>
         /// <param name="datas">Datas</param>
-        /// <param name="activationOptions">Activation options</param>
-        public abstract void SaveByFirst(IEnumerable<TFirstModel> datas, ActivationOptions activationOptions = null);
+        /// <returns>Return data list</returns>
+        public abstract Task<List<TModel>> GetListByFirstAsync(IEnumerable<TFirstRelationModel> datas);
 
         /// <summary>
-        /// Save by second type datas
+        /// Get list by second
         /// </summary>
         /// <param name="datas">Datas</param>
-        /// <param name="activationOptions">Activation options</param>
-        public abstract void SaveBySecond(IEnumerable<TSecondModel> datas, ActivationOptions activationOptions = null);
+        /// <returns>Return data list</returns>
+        public abstract List<TModel> GetListBySecond(IEnumerable<TSecondRelationModel> datas);
 
         /// <summary>
-        /// Save by third type datas
+        /// Get list by second
         /// </summary>
         /// <param name="datas">Datas</param>
-        /// <param name="activationOptions">Activation options</param>
-        public abstract void SaveByThird(IEnumerable<TThirdModel> datas, ActivationOptions activationOptions = null);
+        /// <returns>Return data list</returns>
+        public abstract Task<List<TModel>> GetListBySecondAsync(IEnumerable<TSecondRelationModel> datas);
+
+        /// <summary>
+        /// Get list by third
+        /// </summary>
+        /// <param name="datas">Datas</param>
+        /// <returns>Return data list</returns>
+        public abstract List<TModel> GetListByThird(IEnumerable<TThirdRelationModel> datas);
+
+        /// <summary>
+        /// Get list by third
+        /// </summary>
+        /// <param name="datas">Datas</param>
+        /// <returns>Return data list</returns>
+        public abstract Task<List<TModel>> GetListByThirdAsync(IEnumerable<TThirdRelationModel> datas);
 
         #endregion
 
         #region Remove
 
         /// <summary>
-        /// Remove datas
-        /// </summary>
-        /// <param name="datas">Datas</param>
-        /// <param name="activationOptions">Activation options</param>
-        public abstract void Remove(IEnumerable<Tuple<TFirstModel, TSecondModel, TThirdModel>> datas, ActivationOptions activationOptions = null);
-
-        /// <summary>
-        /// Remove by condition
-        /// </summary>
-        /// <param name="query">Query object</param>
-        /// <param name="activationOptions">Activation options</param>
-        public abstract void Remove(IQuery query, ActivationOptions activationOptions = null);
-
-        /// <summary>
         /// Remove by first datas
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="activationOptions">Activation options</param>
-        public abstract void RemoveByFirst(IEnumerable<TFirstModel> datas, ActivationOptions activationOptions = null);
+        public abstract void RemoveByFirst(IEnumerable<TFirstRelationModel> datas, ActivationOptions activationOptions = null);
+
+        /// <summary>
+        /// Remove by second datas
+        /// </summary>
+        /// <param name="datas">Datas</param>
+        /// <<param name="activationOptions">Activation options</param>
+        public abstract void RemoveBySecond(IEnumerable<TSecondRelationModel> datas, ActivationOptions activationOptions = null);
+
+        /// <summary>
+        /// Remove by third datas
+        /// </summary>
+        /// <param name="datas">Datas</param>
+        /// <param name="activationOptions">Activation options</param>
+        public abstract void RemoveByThird(IEnumerable<TThirdRelationModel> datas, ActivationOptions activationOptions = null);
 
         /// <summary>
         /// Remove by first
@@ -78,13 +100,6 @@ namespace EZNEW.Development.Domain.Repository
         public abstract void RemoveByFirst(IQuery query, ActivationOptions activationOptions = null);
 
         /// <summary>
-        /// Remove by second datas
-        /// </summary>
-        /// <param name="datas">Datas</param>
-        /// <param name="activationOptions">Activation options</param>
-        public abstract void RemoveBySecond(IEnumerable<TSecondModel> datas, ActivationOptions activationOptions = null);
-
-        /// <summary>
         /// Remove by second
         /// </summary>
         /// <param name="query">Query object</param>
@@ -92,148 +107,11 @@ namespace EZNEW.Development.Domain.Repository
         public abstract void RemoveBySecond(IQuery query, ActivationOptions activationOptions = null);
 
         /// <summary>
-        /// Remove by third datas
-        /// </summary>
-        /// <param name="datas">Datas</param>
-        /// <param name="activationOptions">Activation options</param>
-        public abstract void RemoveByThird(IEnumerable<TThirdModel> datas, ActivationOptions activationOptions = null);
-
-        /// <summary>
         /// Remove by third
         /// </summary>
         /// <param name="query">Query object</param>
         /// <param name="activationOptions">Activation options</param>
         public abstract void RemoveByThird(IQuery query, ActivationOptions activationOptions = null);
-
-        #endregion
-
-        #region Query
-
-        /// <summary>
-        /// Get relation data
-        /// </summary>
-        /// <param name="query">Query object</param>
-        /// <returns>Return data</returns>
-        public abstract Tuple<TFirstModel, TSecondModel, TThirdModel> Get(IQuery query);
-
-        /// <summary>
-        /// Get relation data
-        /// </summary>
-        /// <param name="query">Query object</param>
-        /// <returns>Return data</returns>
-        public abstract Task<Tuple<TFirstModel, TSecondModel, TThirdModel>> GetAsync(IQuery query);
-
-        /// <summary>
-        /// Get relation data list
-        /// </summary>
-        /// <param name="query">Query object</param>
-        /// <returns>Return datas</returns>
-        public abstract List<Tuple<TFirstModel, TSecondModel, TThirdModel>> GetList(IQuery query);
-
-        /// <summary>
-        /// Get relation data list
-        /// </summary>
-        /// <param name="query">Query object</param>
-        /// <returns>Return datas</returns>
-        public abstract Task<List<Tuple<TFirstModel, TSecondModel, TThirdModel>>> GetListAsync(IQuery query);
-
-        /// <summary>
-        /// Get relation paging
-        /// </summary>
-        /// <param name="query">Query object</param>
-        /// <returns>Return data paging</returns>
-        public abstract PagingInfo<Tuple<TFirstModel, TSecondModel, TThirdModel>> GetPaging(IQuery query);
-
-        /// <summary>
-        /// Get relation paging
-        /// </summary>
-        /// <param name="query">Query object</param>
-        /// <returns>Return data paging</returns>
-        public abstract Task<PagingInfo<Tuple<TFirstModel, TSecondModel, TThirdModel>>> GetPagingAsync(IQuery query);
-
-        /// <summary>
-        /// Get First by Second
-        /// </summary>
-        /// <param name="datas">second datas</param>
-        /// <returns></returns>
-        public abstract List<TFirstModel> GetFirstListBySecond(IEnumerable<TSecondModel> datas);
-
-        /// <summary>
-        /// Get First by Second
-        /// </summary>
-        /// <param name="datas">Datas</param>
-        /// <returns>Return data paging</returns>
-        public abstract Task<List<TFirstModel>> GetFirstListBySecondAsync(IEnumerable<TSecondModel> datas);
-
-        /// <summary>
-        /// Get first by third
-        /// </summary>
-        /// <param name="datas">Datas</param>
-        /// <returns>Return data paging</returns>
-        public abstract List<TFirstModel> GetFirstListByThird(IEnumerable<TThirdModel> datas);
-
-        /// <summary>
-        /// Get first by third
-        /// </summary>
-        /// <param name="datas">Datas</param>
-        /// <returns>Return datas</returns>
-        public abstract Task<List<TFirstModel>> GetFirstListByThirdAsync(IEnumerable<TThirdModel> datas);
-
-        /// <summary>
-        /// Get Second by First
-        /// </summary>
-        /// <param name="datas">Datas</param>
-        /// <returns>Return datas</returns>
-        public abstract List<TSecondModel> GetSecondListByFirst(IEnumerable<TFirstModel> datas);
-
-        /// <summary>
-        /// Get Second by First
-        /// </summary>
-        /// <param name="datas">Datas</param>
-        /// <returns>Return datas</returns>
-        public abstract Task<List<TSecondModel>> GetSecondListByFirstAsync(IEnumerable<TFirstModel> datas);
-
-        /// <summary>
-        /// Get Second by Third
-        /// </summary>
-        /// <param name="datas">Datas</param>
-        /// <returns>Return datas</returns>
-        public abstract List<TSecondModel> GetSecondListByThird(IEnumerable<TThirdModel> datas);
-
-        /// <summary>
-        /// Get Second by Third
-        /// </summary>
-        /// <param name="datas">Datas</param>
-        /// <returns>Return datas</returns>
-        public abstract Task<List<TSecondModel>> GetSecondListByThirdAsync(IEnumerable<TThirdModel> datas);
-
-        /// <summary>
-        /// Get Third by First
-        /// </summary>
-        /// <param name="datas">Datas</param>
-        /// <returns>Return datas</returns>
-        public abstract List<TThirdModel> GetThirdListByFirst(IEnumerable<TFirstModel> datas);
-
-        /// <summary>
-        /// Get Third by First
-        /// </summary>
-        /// <param name="datas">Datas</param>
-        /// <returns>Return datas</returns>
-        public abstract Task<List<TThirdModel>> GetThirdListByFirstAsync(IEnumerable<TFirstModel> datas);
-
-        /// <summary>
-        /// Get Third by Second
-        /// </summary>
-        /// <param name="datas">Datas</param>
-        /// <returns>Return datas</returns>
-        public abstract List<TThirdModel> GetThirdListBySecond(IEnumerable<TSecondModel> datas);
-
-        /// <summary>
-        /// Get Second by Third
-        /// </summary>
-        /// <param name="datas">Datas</param>
-        /// <returns>Return datas</returns>
-        public abstract Task<List<TThirdModel>> GetThirdListBySecondAsync(IEnumerable<TSecondModel> datas);
 
         #endregion
     }

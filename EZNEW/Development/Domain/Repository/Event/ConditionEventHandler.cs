@@ -1,6 +1,6 @@
 ﻿using System;
 using EZNEW.Development.Query;
-using EZNEW.Development.Domain.Aggregation;
+using EZNEW.Development.Domain.Model;
 using EZNEW.Development.UnitOfWork;
 
 namespace EZNEW.Development.Domain.Repository.Event
