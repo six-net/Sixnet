@@ -30,11 +30,6 @@ namespace EZNEW.Development.Domain.Model
         /// </summary>
         protected IRepository<T> repository = null;
 
-        /// <summary>
-        /// The default identity
-        /// </summary>
-        private Guid defaultIdentity = Guid.NewGuid();
-
         #endregion
 
         #region Properties
@@ -214,10 +209,7 @@ namespace EZNEW.Development.Domain.Model
         /// Check identity value is none
         /// </summary>
         /// <returns>Return identity value whether has value</returns>
-        public virtual bool IdentityValueIsNone()
-        {
-            return true;
-        }
+        public abstract bool IdentityValueIsNone();
 
         /// <summary>
         /// Compare two objects
@@ -252,10 +244,7 @@ namespace EZNEW.Development.Domain.Model
         /// Get identity value
         /// </summary>
         /// <returns>Return model identity value</returns>
-        protected virtual string GetIdentityValue()
-        {
-            return defaultIdentity.ToString();
-        }
+        protected abstract string GetIdentityValue();
 
         /// <summary>
         /// Update data

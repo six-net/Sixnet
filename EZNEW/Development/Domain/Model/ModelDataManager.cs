@@ -20,26 +20,21 @@ namespace EZNEW.Development.Domain.Model
     {
         internal static bool IsNew(IRepository<T> repository, Type dataType, IModel data)
         {
+            CheckRepository(repository);
             var isVirtual = ModelManager.IsVirtualModel(dataType);
             return isVirtual || repository.GetLifeSource(data) == DataLifeSource.New;
         }
 
         internal static bool MarkNew(IRepository<T> repository, IModel data)
         {
-            if (repository == null)
-            {
-                throw new ArgumentNullException(nameof(repository));
-            }
+            CheckRepository(repository);
             repository?.ModifyLifeSource(data, DataLifeSource.New);
             return true;
         }
 
         internal static bool MarkStored(IRepository<T> repository, IModel data)
         {
-            if (repository == null)
-            {
-                throw new ArgumentNullException(nameof(repository));
-            }
+            CheckRepository(repository);
             repository.ModifyLifeSource(data, DataLifeSource.DataSource);
             return true;
         }
@@ -72,6 +67,7 @@ namespace EZNEW.Development.Domain.Model
 
         internal static Result<T> Save(IRepository<T> repository, T data)
         {
+            CheckRepository(repository);
             var saveData = repository.Save(data);
             if (saveData == null)
             {
@@ -86,6 +82,7 @@ namespace EZNEW.Development.Domain.Model
 
         internal static Result Remove(IRepository<T> repository, T data)
         {
+            CheckRepository(repository);
             repository.Remove(data);
             DomainEventBus.Publish(new DefaultRemoveDomainEvent<T>()
             {
@@ -103,6 +100,14 @@ namespace EZNEW.Development.Domain.Model
                 throw new EZNEWException(string.Join("\n", errorMessages));
             }
             return true;
+        }
+
+        internal static void CheckRepository(IRepository<T> repository)
+        {
+            if (repository == null)
+            {
+                throw new EZNEWException($"{typeof(T)}'s repository is null");
+            }
         }
     }
 }
