@@ -5,6 +5,7 @@ using EZNEW.Exceptions;
 using EZNEW.Development.Query;
 using EZNEW.Development.Entity;
 using EZNEW.Development.Command.Modification;
+using EZNEW.Development.UnitOfWork;
 
 namespace EZNEW.Development.Domain.Repository.Warehouse
 {
@@ -304,7 +305,7 @@ namespace EZNEW.Development.Domain.Repository.Warehouse
         /// Remove datas
         /// </summary>
         /// <param name="datas">Datas</param>
-        public void Remove(IEnumerable<TEntity> datas)
+        public void Remove(IEnumerable<TEntity> datas, ActivationOptions activationOptions = null)
         {
             if (datas == null || !datas.Any())
             {
@@ -312,7 +313,7 @@ namespace EZNEW.Development.Domain.Repository.Warehouse
             }
             foreach (var data in datas)
             {
-                Remove(data);
+                Remove(data, activationOptions);
             }
         }
 
@@ -320,14 +321,21 @@ namespace EZNEW.Development.Domain.Repository.Warehouse
         /// Remove data
         /// </summary>
         /// <param name="data">Data</param>
-        public void Remove(TEntity data)
+        public void Remove(TEntity data, ActivationOptions activationOptions = null)
         {
             var dataPackage = GetDataPackage(data);
             if (dataPackage == null)
             {
                 dataPackage = InitNew(data);
             }
-            dataPackage?.Remove();
+            if (activationOptions?.ForceExecute ?? false)
+            {
+                dataPackage?.RealRemove();
+            }
+            else
+            {
+                dataPackage?.Remove();
+            }
         }
 
         /// <summary>

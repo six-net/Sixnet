@@ -89,7 +89,7 @@ namespace EZNEW.Development.Domain.Repository.Warehouse
         /// <returns>Return the activation record</returns>
         public IActivationRecord Remove(TEntity data, ActivationOptions activationOptions = null)
         {
-            WarehouseManager.Remove(data);
+            WarehouseManager.Remove(activationOptions, data);
             var identityValue = data.GetIdentityValue();
             return DefaultActivationRecord<TEntity, TDataAccess>.CreateRemoveObjectRecord(identityValue, activationOptions);
         }

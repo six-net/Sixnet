@@ -171,7 +171,7 @@ namespace EZNEW.Development.Domain.Repository.Warehouse
         /// <typeparam name="TEntity">Entity type</typeparam>
         /// <param name="datas">Datas</param>
         /// <returns></returns>
-        public static void Remove<TEntity>(params TEntity[] datas) where TEntity : BaseEntity<TEntity>, new()
+        public static void Remove<TEntity>(ActivationOptions activationOptions, params TEntity[] datas) where TEntity : BaseEntity<TEntity>, new()
         {
             if (datas == null)
             {
@@ -184,7 +184,7 @@ namespace EZNEW.Development.Domain.Repository.Warehouse
             }
             foreach (var data in datas)
             {
-                warehouse.Remove(data);
+                warehouse.Remove(data, activationOptions);
             }
         }
 
