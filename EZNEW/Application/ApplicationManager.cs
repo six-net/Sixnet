@@ -26,7 +26,7 @@ namespace EZNEW.Application
         /// <summary>
         /// Application options
         /// </summary>
-        internal static ApplicationOptions Options = new ApplicationOptions();
+        internal static ApplicationOptions Options = new();
 
         /// <summary>
         /// Gets the current application root path

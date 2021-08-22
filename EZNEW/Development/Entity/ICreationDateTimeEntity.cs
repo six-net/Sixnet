@@ -12,6 +12,6 @@ namespace EZNEW.Development.Entity
         /// <summary>
         /// Gets or sets the creation datetime
         /// </summary>
-        public DateTimeOffset CreationDateTime { get; set; }
+        DateTimeOffset CreationDateTime { get; set; }
     }
 }

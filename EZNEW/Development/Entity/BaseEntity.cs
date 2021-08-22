@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using EZNEW.Development.Command;
+using EZNEW.Development.Domain.Aggregation;
 using EZNEW.Development.Query;
 using EZNEW.Exceptions;
 using EZNEW.Model;
@@ -12,10 +13,10 @@ namespace EZNEW.Development.Entity
     /// <summary>
     /// Base entity
     /// </summary>
-    public abstract class BaseEntity<T> : IQueryModel<T> where T : BaseEntity<T>, new()
+    public abstract class BaseEntity<T> : IEntity, IQueryModel<T> where T : BaseEntity<T>, new()
     {
-        string identityValue = string.Empty;
-        bool loadedIdentityValue = false;
+        protected string identityRealValue = string.Empty;
+        protected bool loadedIdentityValue = false;
         protected static Type entityType = typeof(T);
 
         #region Properties
@@ -112,12 +113,12 @@ namespace EZNEW.Development.Entity
         {
             if (loadedIdentityValue)
             {
-                return identityValue;
+                return identityRealValue;
             }
             var primaryValues = GetPrimaryKeyValues();
-            identityValue = primaryValues.IsNullOrEmpty() ? Guid.NewGuid().ToString() : string.Join("_", primaryValues.Values.OrderBy(c => c?.ToString() ?? string.Empty));
+            identityRealValue = primaryValues.IsNullOrEmpty() ? Guid.NewGuid().ToString() : string.Join("_", primaryValues.Values.OrderBy(c => c?.ToString() ?? string.Empty));
             loadedIdentityValue = true;
-            return identityValue;
+            return identityRealValue;
         }
 
         /// <summary>
@@ -254,7 +255,7 @@ namespace EZNEW.Development.Entity
             {
                 QueryDataTotalCount = QueryDataTotalCount,
                 loadedIdentityValue = loadedIdentityValue,
-                identityValue = identityValue
+                identityRealValue = identityRealValue
             };
             var allValues = GetAllValues();
             foreach (var item in allValues)

@@ -12,6 +12,6 @@ namespace EZNEW.Development.Entity
         /// <summary>
         /// Indecates whether is obsolete
         /// </summary>
-        public bool IsObsolete { get; set; }
+        bool IsObsolete { get; set; }
     }
 }

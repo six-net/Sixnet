@@ -1,24 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using System.Threading.Tasks;
+using System.Text;
+using EZNEW.Development.Domain.Aggregation;
 using EZNEW.Development.Domain.Repository;
-using EZNEW.Development.Domain.Repository.Warehouse;
-using EZNEW.Development.Domain.Event;
-using EZNEW.Exceptions;
-using EZNEW.DataValidation;
 using EZNEW.Expressions;
 using EZNEW.Model;
 
-namespace EZNEW.Development.Domain.Aggregation
+namespace EZNEW.Development.Entity
 {
     /// <summary>
-    /// Aggregation root
+    /// Defines aggregation entity
     /// </summary>
-    [Serializable]
-    public abstract class AggregationRoot<T> : IAggregationRoot<T> where T : AggregationRoot<T>
+    public class AggregationEntity<T> : BaseEntity<T>, IAggregationRoot<T> where T : BaseEntity<T>, IAggregationRoot<T>, new()
     {
-        static AggregationRoot()
+        static AggregationEntity()
         {
             AggregationManager.ConfigureAggregationModel<T>();
         }
@@ -28,12 +24,8 @@ namespace EZNEW.Development.Domain.Aggregation
         /// <summary>
         /// The repository object
         /// </summary>
+        [NonData]
         protected IRepository<T> repository = null;
-
-        /// <summary>
-        /// The default identity
-        /// </summary>
-        private Guid defaultIdentity = Guid.NewGuid();
 
         #endregion
 
@@ -54,11 +46,13 @@ namespace EZNEW.Development.Domain.Aggregation
         /// <summary>
         /// Gets whether allow lazy data load
         /// </summary>
+        [NonData]
         protected bool LoadLazyMember { get; set; } = true;
 
         /// <summary>
         /// Gets all of the properties allow to load data
         /// </summary>
+        [NonData]
         protected Dictionary<string, bool> LoadProperties = new Dictionary<string, bool>();
 
         /// <summary>
@@ -216,7 +210,7 @@ namespace EZNEW.Development.Domain.Aggregation
         /// <returns>Return identity value whether has value</returns>
         public virtual bool IdentityValueIsNone()
         {
-            return true;
+            return string.IsNullOrWhiteSpace(GetIdentityValue());
         }
 
         /// <summary>
@@ -249,34 +243,6 @@ namespace EZNEW.Development.Domain.Aggregation
         }
 
         /// <summary>
-        /// Get identity value
-        /// </summary>
-        /// <returns>Return model identity value</returns>
-        protected virtual string GetIdentityValue()
-        {
-            return defaultIdentity.ToString();
-        }
-
-        /// <summary>
-        /// Update data
-        /// </summary>
-        /// <param name="newData">New data</param>
-        /// <returns></returns>
-        public IAggregationRoot OnDataUpdating(T newData)
-        {
-            return OnUpdating(newData);
-        }
-
-        /// <summary>
-        /// Add data
-        /// </summary>
-        /// <returns>Return data</returns>
-        public IAggregationRoot OnDataAdding()
-        {
-            return OnAdding();
-        }
-
-        /// <summary>
         /// Update data
         /// </summary>
         /// <param name="newData">New data</param>
@@ -297,6 +263,25 @@ namespace EZNEW.Development.Domain.Aggregation
                 InitIdentityValue();
             }
             return this as T;
+        }
+
+        /// <summary>
+        /// Update data
+        /// </summary>
+        /// <param name="newData">New data</param>
+        /// <returns></returns>
+        public IAggregationRoot OnDataUpdating(T newData)
+        {
+            return OnUpdating(newData);
+        }
+
+        /// <summary>
+        /// Add data
+        /// </summary>
+        /// <returns>Return data</returns>
+        public IAggregationRoot OnDataAdding()
+        {
+            return OnAdding();
         }
 
         #endregion

@@ -1,15 +1,16 @@
-﻿using System;
+﻿using EZNEW.Development.Domain.Aggregation;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace EZNEW.Development.Entity
 {
     /// <summary>
-    /// Defines permanent version record entity
+    /// Defines aggregation permanent record
     /// </summary>
-    public class PermanentVersionRecordEntity<TEntity> 
-        : VersionEntity<TEntity>, IObsoleteEntity 
-        where TEntity : BaseEntity<TEntity>, new()
+    public class AggregationPermanentRecordEntity<TEntity>
+        : AggregationRecordEntity<TEntity>, IObsoleteEntity
+        where TEntity : BaseEntity<TEntity>, IAggregationRoot<TEntity>, new()
     {
         /// <summary>
         /// Indecates whether is obsolete

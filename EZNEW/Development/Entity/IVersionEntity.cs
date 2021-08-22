@@ -12,6 +12,6 @@ namespace EZNEW.Development.Entity
         /// <summary>
         /// Gets or sets the version value
         /// </summary>
-        public long Version { get; set; }
+        long Version { get; set; }
     }
 }

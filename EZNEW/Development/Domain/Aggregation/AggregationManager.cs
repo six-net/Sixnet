@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
 
 namespace EZNEW.Development.Domain.Aggregation
 {
@@ -18,7 +20,7 @@ namespace EZNEW.Development.Domain.Aggregation
         /// Configure aggregation model
         /// </summary>
         /// <typeparam name="TAggregationModel">Aggregation model</typeparam>
-        internal static void ConfigureAggregationModel<TAggregationModel>() where TAggregationModel : AggregationRoot<TAggregationModel>
+        internal static void ConfigureAggregationModel<TAggregationModel>() where TAggregationModel : IAggregationRoot<TAggregationModel>
         {
             var type = typeof(TAggregationModel);
             ConfigureAggregationModel(type);
@@ -34,8 +36,8 @@ namespace EZNEW.Development.Domain.Aggregation
             {
                 return;
             }
-            var virtualAttributes = modelType.GetCustomAttributes(typeof(VirtualAggregationAttribute), true);
-            if (!virtualAttributes.IsNullOrEmpty())
+            var modelAttributes = modelType.GetCustomAttributes(typeof(AggregationModelAttribute), true);
+            if (modelAttributes?.Any(c => (((AggregationModelAttribute)c).Feature & AggregationFeature.Virtual) == AggregationFeature.Virtual) ?? false)
             {
                 VirtualAggregations[modelType.GUID] = true;
             }
@@ -75,6 +77,35 @@ namespace EZNEW.Development.Domain.Aggregation
             }
             VirtualAggregations.TryGetValue(modelType.GUID, out var virtualModel);
             return virtualModel;
+        }
+
+        /// <summary>
+        /// Determines whether is a entity model
+        /// </summary>
+        /// <param name="modelType">Model type</param>
+        /// <returns></returns>
+        internal static bool IsEntityAggregation(Type modelType)
+        {
+            if (modelType != null)
+            {
+                var modelAttributes = modelType.GetCustomAttributes(typeof(AggregationModelAttribute), false);
+                return modelAttributes?.Any(c => (((AggregationModelAttribute)c).Feature & AggregationFeature.Virtual) == AggregationFeature.Virtual) ?? false;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Get model relation entity
+        /// </summary>
+        /// <param name="modelType">Model type</param>
+        /// <returns></returns>
+        internal static Type GetAggregationModelRelationEntityType(Type modelType)
+        {
+            if (modelType == null)
+            {
+                return null;
+            }
+            return modelType.GetCustomAttribute<AggregationModelAttribute>()?.EntityType;
         }
     }
 }

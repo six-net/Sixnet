@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Linq.Expressions;
-using System.Collections.Concurrent;
 using EZNEW.Expressions;
-using EZNEW.Configuration;
 using EZNEW.Application;
 using EZNEW.Reflection;
+using EZNEW.Development.DataAccess;
+using EZNEW.Development.Domain.Aggregation;
 
 namespace EZNEW.Development.Entity
 {
@@ -26,6 +26,11 @@ namespace EZNEW.Development.Entity
         /// Key:Entity type guid
         /// </summary>
         internal static readonly Dictionary<Guid, EntityConfiguration> EntityConfigurations = new Dictionary<Guid, EntityConfiguration>();
+
+        /// <summary>
+        /// Key:Entity type guid
+        /// </summary>
+        internal static readonly Dictionary<Guid, object> EntityDefaultDataAccessInstances = new Dictionary<Guid, object>();
 
         /// <summary>
         /// Defines boolean type
@@ -47,10 +52,11 @@ namespace EZNEW.Development.Entity
                 return;
             }
             var typeGuid = entityType.GUID;
-            if (EntityConfigurations.ContainsKey(typeGuid) || !((entityType.GetCustomAttributes(typeof(EntityAttribute), false)?.FirstOrDefault()) is EntityAttribute entityAttribute))
+            if (EntityConfigurations.ContainsKey(typeGuid))
             {
                 return;
             }
+            EntityAttribute entityAttribute = entityType.GetCustomAttribute<EntityAttribute>() ?? EntityAttribute.Default;
             IEnumerable<MemberInfo> memberInfos = new List<MemberInfo>(0);
             memberInfos = memberInfos.Union(entityType.GetProperties(BindingFlags.Public | BindingFlags.Instance));
             memberInfos = memberInfos.Union(entityType.GetFields(BindingFlags.Public | BindingFlags.Instance));
@@ -86,6 +92,11 @@ namespace EZNEW.Development.Entity
             string obsoleteField = null;
             foreach (var member in memberInfos)
             {
+                var nonDataAttribute = member.GetCustomAttribute<NonDataAttribute>();
+                if (nonDataAttribute != null)
+                {
+                    continue;
+                }
                 var fieldName = member.Name;
                 var fieldRole = FieldRole.None;
                 var propertyName = fieldName;
@@ -225,6 +236,7 @@ namespace EZNEW.Development.Entity
             entityConfig.MustQueryFields = mustQueryFields;
             entityConfig.PredicateType = typeof(Func<,>).MakeGenericType(entityType, booleanType);
             entityConfig.EntityType = entityType;
+            entityConfig.EnableCache = entityAttribute.EnableCache;
             EntityConfigurations[typeGuid] = entityConfig;
         }
 
@@ -855,6 +867,23 @@ namespace EZNEW.Development.Entity
             }
 
             return propertyProvider as IEntityPropertyValueProvider;
+        }
+
+        #endregion
+
+        #region Entity data access
+
+        /// <summary>
+        /// Set entity data access
+        /// </summary>
+        /// <param name="entityType">Entity type</param>
+        /// <param name="dataAccess">Data access instance</param>
+        internal static void SetEntityDataAccess(Type entityType, object dataAccess)
+        {
+            if (entityType == null || dataAccess == null)
+            {
+                return;
+            }
         }
 
         #endregion

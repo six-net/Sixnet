@@ -21,7 +21,12 @@ namespace EZNEW.Development.Domain.Repository
     /// <typeparam name="TSecondModel">The second model</typeparam>
     /// <typeparam name="TEntity">Entity</typeparam>
     /// <typeparam name="TDataAccess">Data access</typeparam>
-    public abstract class DefaultRelationRepository<TFirstModel, TSecondModel, TEntity, TDataAccess> : BaseRelationRepository<TFirstModel, TSecondModel> where TSecondModel : IAggregationRoot<TSecondModel> where TFirstModel : IAggregationRoot<TFirstModel> where TEntity : BaseEntity<TEntity>, new() where TDataAccess : IDataAccess<TEntity>
+    public abstract class DefaultRelationRepository<TFirstModel, TSecondModel, TEntity, TDataAccess> 
+        : BaseRelationRepository<TFirstModel, TSecondModel> 
+        where TSecondModel : IAggregationRoot<TSecondModel> 
+        where TFirstModel : IAggregationRoot<TFirstModel> 
+        where TEntity : BaseEntity<TEntity>, new() 
+        where TDataAccess : IDataAccess<TEntity>
     {
         readonly IRepositoryWarehouse<TEntity, TDataAccess> repositoryWarehouse = ContainerManager.Resolve<IRepositoryWarehouse<TEntity, TDataAccess>>();
 

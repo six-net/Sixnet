@@ -20,6 +20,11 @@ namespace EZNEW.DependencyInjection
     public static class ContainerManager
     {
         /// <summary>
+        /// Internal services
+        /// </summary>
+        internal readonly static Dictionary<Type, Type> InternalServices = new Dictionary<Type, Type>();
+
+        /// <summary>
         /// Default services
         /// </summary>
         static IServiceCollection defaultServices = null;
@@ -150,6 +155,7 @@ namespace EZNEW.DependencyInjection
             {
                 RegisterDefaultProjectService();
             }
+            RegisterInternalService();
             configureServiceAction?.Invoke(container);
             SetDefaultServiceCollection(defaultServices);
             Container = container;
@@ -304,7 +310,7 @@ namespace EZNEW.DependencyInjection
                 StringComparison ignoreCaseComparison = StringComparison.OrdinalIgnoreCase;
                 if (typeName.EndsWith("Service", ignoreCaseComparison) || typeName.EndsWith("Business", ignoreCaseComparison) || typeName.EndsWith("DbAccess", ignoreCaseComparison) || typeName.EndsWith("Repository", ignoreCaseComparison))
                 {
-                    Type implementType = allTypes.FirstOrDefault(t => t.Name != serviceType.Name && !t.IsInterface && serviceType.IsAssignableFrom(t));
+                    Type implementType = allTypes.FirstOrDefault(t => t.Name != serviceType.Name && !t.IsInterface && !t.IsAbstract && serviceType.IsAssignableFrom(t));
                     if (implementType != null)
                     {
                         Register(serviceType, implementType);
@@ -312,7 +318,7 @@ namespace EZNEW.DependencyInjection
                 }
                 if (typeName.EndsWith("DataAccess", ignoreCaseComparison))
                 {
-                    var relateTypes = allTypes.Where(t => t.Name != serviceType.Name && !t.IsInterface && serviceType.IsAssignableFrom(t));
+                    var relateTypes = allTypes.Where(t => t.Name != serviceType.Name && !t.IsInterface && !t.IsAbstract && serviceType.IsAssignableFrom(t));
                     if (relateTypes.Any())
                     {
                         Type providerType = relateTypes.FirstOrDefault(c => c.Name.EndsWith("CacheDataAccess", ignoreCaseComparison));
@@ -340,6 +346,31 @@ namespace EZNEW.DependencyInjection
             ServiceCollection.Configure<UploadConfiguration>(configuration.GetSection(UploadConfiguration.UploadConfigurationName));
             //Configure file access
             ServiceCollection?.Configure<FileAccessConfiguration>(configuration.GetSection(FileAccessConfiguration.FileAccessConfigurationName));
+        }
+
+        /// <summary>
+        /// Add internal service
+        /// </summary>
+        /// <param name="serviceType">Service type</param>
+        /// <param name="serviceInstance">Service instance</param>
+        internal static void AddInternalService(Type serviceType, Type implementationType)
+        {
+            if (serviceType == null || implementationType == null)
+            {
+                return;
+            }
+            InternalServices[serviceType] = implementationType;
+        }
+
+        /// <summary>
+        /// Register internal service
+        /// </summary>
+        internal static void RegisterInternalService()
+        {
+            foreach (var item in InternalServices)
+            {
+                Register(ServiceDescriptor.Singleton(item.Key,item.Value));
+            }
         }
     }
 }

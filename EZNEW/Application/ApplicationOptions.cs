@@ -19,7 +19,7 @@ namespace EZNEW.Application
         /// <summary>
         /// Gets or sets the file match options
         /// </summary>
-        public FileMatchOptions FileMatchOptions { get; private set; } = new FileMatchOptions();
+        public FileMatchOptions FileMatchOptions { get; private set; } = new();
 
         public ApplicationInfo Current { get; internal set; } = ApplicationManager.Current;
     }

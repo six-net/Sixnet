@@ -182,7 +182,7 @@ namespace EZNEW.Development.Query
             {
                 return originalQuery;
             }
-            originalQuery = originalQuery ?? CreateByEntity<T>();
+            originalQuery ??= CreateByEntity<T>();
             var entityType = typeof(T);
             var keys = EntityManager.GetPrimaryKeys(entityType);
             if (keys.IsNullOrEmpty())
@@ -604,12 +604,12 @@ namespace EZNEW.Development.Query
             {
                 return;
             }
-            var attributes = queryModelType.GetCustomAttributes(typeof(QueryEntityAttribute), true);
-            if (attributes.IsNullOrEmpty())
-            {
-                return;
-            }
-            QueryEntityAttribute configAttribute = attributes[0] as QueryEntityAttribute;
+            //var attributes = queryModelType.GetCustomAttributes(typeof(QueryEntityAttribute), true);
+            //if (attributes.IsNullOrEmpty())
+            //{
+            //    return;
+            //}
+            QueryEntityAttribute configAttribute = queryModelType.GetCustomAttribute<QueryEntityAttribute>(false);
             if (configAttribute == null)
             {
                 return;

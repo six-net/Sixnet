@@ -16,7 +16,7 @@ namespace EZNEW.Data.Cache
     /// </summary>
     /// <typeparam name="TDatabaseAccess"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class DefaultCacheDataAccess<TDatabaseAccess, TEntity> where TDatabaseAccess : IDataAccess<TEntity> where TEntity : BaseEntity<TEntity>, new()
+    public class DefaultCacheDataAccess<TDatabaseAccess, TEntity> : ICacheDataAccess<TEntity> where TDatabaseAccess : IDataAccess<TEntity> where TEntity : BaseEntity<TEntity>, new()
     {
         readonly TDatabaseAccess databaseAccess = ContainerManager.Resolve<TDatabaseAccess>();
         readonly IDataCacheProvider dataCacheProvider = ContainerManager.Resolve<IDataCacheProvider>();

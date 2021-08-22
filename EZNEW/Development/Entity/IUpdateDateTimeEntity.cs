@@ -12,6 +12,6 @@ namespace EZNEW.Development.Entity
         /// <summary>
         /// Gets or sets the update datetime
         /// </summary>
-        public DateTimeOffset UpdateDateTime { get; set; }
+        DateTimeOffset UpdateDateTime { get; set; }
     }
 }

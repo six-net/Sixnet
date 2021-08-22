@@ -10,10 +10,10 @@ using EZNEW.Development.Domain.Aggregation;
 namespace EZNEW.Development.Domain.Repository
 {
     /// <summary>
-    /// Aggregation repository contract
+    /// Repository contract
     /// </summary>
     /// <typeparam name="TModel">Aggregation model</typeparam>
-    public interface IAggregationRepository<TModel> where TModel : IAggregationRoot<TModel>
+    public interface IRepository<TModel> where TModel : IAggregationRoot<TModel>
     {
         #region Save data
 

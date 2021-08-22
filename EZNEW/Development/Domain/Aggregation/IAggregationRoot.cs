@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using EZNEW.Development.Query;
 
 namespace EZNEW.Development.Domain.Aggregation
 {
@@ -51,7 +52,7 @@ namespace EZNEW.Development.Domain.Aggregation
     /// <summary>
     /// Aggregation root contract
     /// </summary>
-    public interface IAggregationRoot<in T> : IAggregationRoot where T : IAggregationRoot<T>
+    public interface IAggregationRoot<in T> : IAggregationRoot, IQueryModel<T> where T : IAggregationRoot<T>
     {
         /// <summary>
         /// Compare two objects
@@ -82,5 +83,18 @@ namespace EZNEW.Development.Domain.Aggregation
         /// </summary>
         /// <returns>Return identity value whether is none</returns>
         bool IdentityValueIsNone();
+
+        /// <summary>
+        /// Update data
+        /// </summary>
+        /// <param name="newData">New data</param>
+        /// <returns></returns>
+        IAggregationRoot OnDataUpdating(T newData);
+
+        /// <summary>
+        /// Add data
+        /// </summary>
+        /// <returns>Return data</returns>
+        IAggregationRoot OnDataAdding();
     }
 }

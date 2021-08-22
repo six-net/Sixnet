@@ -30,9 +30,9 @@ namespace EZNEW.Application
         public string RegexExpression { get; set; }
 
         /// <summary>
-        /// Additional convention file patterns
+        /// File regex patterns
         /// </summary>
-        internal List<string> AdditionalConventionFilePatterns = new List<string>();
+        internal List<string> FileRegexPatterns = new();
 
         /// <summary>
         /// Add additional convention file match patterns
@@ -44,7 +44,7 @@ namespace EZNEW.Application
             {
                 return;
             }
-            AdditionalConventionFilePatterns.AddRange(patterns);
+            FileRegexPatterns.AddRange(patterns);
         }
     }
 }

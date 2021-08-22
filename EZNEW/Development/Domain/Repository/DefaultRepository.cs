@@ -15,18 +15,22 @@ using EZNEW.Development.Command.Modification;
 namespace EZNEW.Development.Domain.Repository
 {
     /// <summary>
-    /// Default aggregation repository
+    /// Default repository
     /// </summary>
     /// <typeparam name="TModel">Aggregation model</typeparam>
     /// <typeparam name="TEntity">Entity</typeparam>
     /// <typeparam name="TDataAccess">Data access</typeparam>
-    public abstract class DefaultAggregationRepository<TModel, TEntity, TDataAccess> : DefaultAggregationRootRepository<TModel> where TModel : AggregationRoot<TModel> where TEntity : BaseEntity<TEntity>, new() where TDataAccess : IDataAccess<TEntity>
+    public class DefaultRepository<TModel, TEntity, TDataAccess>
+        : DefaultAggregationRootRepository<TModel>
+        where TModel : class, IAggregationRoot<TModel>
+        where TEntity : BaseEntity<TEntity>, new()
+        where TDataAccess : IDataAccess<TEntity>
     {
         protected IRepositoryWarehouse<TEntity, TDataAccess> repositoryWarehouse = ContainerManager.Resolve<IRepositoryWarehouse<TEntity, TDataAccess>>();
 
         static readonly Type entityType = typeof(TEntity);
 
-        static DefaultAggregationRepository()
+        static DefaultRepository()
         {
             WarehouseManager.RegisterDefaultWarehouse<TEntity, TDataAccess>();
         }

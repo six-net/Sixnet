@@ -16,7 +16,7 @@ namespace EZNEW.Development.Domain.Repository
     /// Default aggregation root repository
     /// </summary>
     /// <typeparam name="TModel">Aggregation model</typeparam>
-    public abstract class DefaultAggregationRootRepository<TModel> : BaseAggregationRepository<TModel> where TModel : AggregationRoot<TModel>
+    public abstract class DefaultAggregationRootRepository<TModel> : BaseAggregationRepository<TModel> where TModel : class, IAggregationRoot<TModel>
     {
         #region Impl methods
 
@@ -57,12 +57,12 @@ namespace EZNEW.Development.Domain.Repository
                     var nowData = Get(saveData);
                     if (nowData != null)
                     {
-                        saveData = nowData.OnUpdating(saveData);
+                        saveData = nowData.OnDataUpdating(saveData) as TModel;
                     }
                 }
                 if (saveData.IsNew)
                 {
-                    saveData = saveData.OnAdding();
+                    saveData = saveData.OnDataAdding() as TModel;
                 }
                 if (!saveData.CanBeSave)
                 {

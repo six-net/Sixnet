@@ -30,19 +30,13 @@ namespace EZNEW.Development.Entity
         /// </summary>
         public EntityStructure Structure { get; set; } = EntityStructure.Normal;
 
+        /// <summary>
+        /// Indecates whether enable cache
+        /// </summary>
+        public bool EnableCache { get; set; } = false;
+
         #endregion
 
-        /// <summary>
-        /// Initialize entity description
-        /// </summary>
-        /// <param name="objectName">Object name</param>
-        /// <param name="group">Entity group</param>
-        /// <param name="desc">Description</param>
-        public EntityAttribute(string objectName, string group = "", string desc = "")
-        {
-            ObjectName = objectName;
-            Group = group;
-            Description = desc;
-        }
+        static internal EntityAttribute Default = new EntityAttribute();
     }
 }

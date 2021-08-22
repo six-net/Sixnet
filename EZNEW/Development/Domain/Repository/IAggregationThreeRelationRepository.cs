@@ -13,7 +13,7 @@ namespace EZNEW.Development.Domain.Repository
     /// <typeparam name="TFirstRelationModel">The first relation model</typeparam>
     /// <typeparam name="TSecondRelationModel">The second relation model</typeparam>
     /// <typeparam name="TThirdRelationModel">The third relation model</typeparam>
-    public interface IAggregationThreeRelationRepository<TModel, TFirstRelationModel, TSecondRelationModel, TThirdRelationModel> : IAggregationRepository<TModel> where TModel : IAggregationRoot<TModel> where TFirstRelationModel : IAggregationRoot<TFirstRelationModel> where TSecondRelationModel : IAggregationRoot<TSecondRelationModel> where TThirdRelationModel : IAggregationRoot<TThirdRelationModel>
+    public interface IAggregationThreeRelationRepository<TModel, TFirstRelationModel, TSecondRelationModel, TThirdRelationModel> : IRepository<TModel> where TModel : IAggregationRoot<TModel> where TFirstRelationModel : IAggregationRoot<TFirstRelationModel> where TSecondRelationModel : IAggregationRoot<TSecondRelationModel> where TThirdRelationModel : IAggregationRoot<TThirdRelationModel>
     {
         #region Query
 

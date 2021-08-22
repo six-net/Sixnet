@@ -12,7 +12,7 @@ namespace EZNEW.Development.Domain.Repository
     /// <summary>
     /// Base aggregation repository
     /// </summary>
-    public abstract class BaseAggregationRepository<TModel>
+    public abstract class BaseAggregationRepository<TModel> : IRepository<TModel> where TModel : IAggregationRoot<TModel>
     {
         #region Save data
 

@@ -14,7 +14,7 @@ namespace EZNEW.Development.DataAccess
     /// Imeplements IDataaccess
     /// </summary>
     /// <typeparam name="TEntity">entity type</typeparam>
-    public abstract class DefaultDataAccess<TEntity> : BaseDataAccess<TEntity> where TEntity : BaseEntity<TEntity>, new()
+    public class DefaultDataAccess<TEntity> : BaseDataAccess<TEntity> where TEntity : BaseEntity<TEntity>, new()
     {
         #region Function
 

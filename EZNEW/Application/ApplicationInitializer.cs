@@ -5,12 +5,16 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using EZNEW.Development.DataAccess;
+using EZNEW.Development.Domain.Aggregation;
+using EZNEW.Development.Domain.Repository;
 using EZNEW.Development.Entity;
 using EZNEW.Development.Query;
 using EZNEW.Diagnostics;
 using EZNEW.Logging;
 using EZNEW.Mapper;
 using EZNEW.Module;
+using EZNEW.Reflection;
 
 namespace EZNEW.Application
 {
@@ -32,6 +36,16 @@ namespace EZNEW.Application
         static readonly Type queryModelGenericType = typeof(IQueryModel<>);
 
         /// <summary>
+        /// Aggregation contract type
+        /// </summary>
+        static readonly Type aggreagtionContractType = typeof(IAggregationRoot);
+
+        /// <summary>
+        /// Entity contract type
+        /// </summary>
+        static readonly Type entityContractType = typeof(IEntity);
+
+        /// <summary>
         /// Module configuration contract
         /// </summary>
         static readonly Type moduleConfigurationType = typeof(IModuleConfiguration);
@@ -39,7 +53,7 @@ namespace EZNEW.Application
         /// <summary>
         /// Convention file name patterns
         /// </summary>
-        internal static readonly List<string> ConventionFileNamePatterns = new List<string>()
+        internal static readonly List<string> ConventionFileNamePatterns = new()
         {
             @"\.Entity\.",
             @"\.QueryModel\.",
@@ -79,35 +93,75 @@ namespace EZNEW.Application
         {
             try
             {
-                IEnumerable<Type> allTypes = GetAllConventionTypes();
-                if (allTypes.IsNullOrEmpty())
+                var allTypeDict = GetAllConventionTypes()?.ToDictionary(c => c.FullName, c => c);
+                if (allTypeDict.IsNullOrEmpty())
                 {
                     return;
                 }
-                foreach (var type in allTypes)
+                foreach (var type in allTypeDict.Values)
                 {
-                    if (type.IsInterface)
+                    if (type.IsInterface || type.IsAbstract)
                     {
                         continue;
                     }
-                    //entity
-                    bool isEntity = (type.GetCustomAttributes(typeof(EntityAttribute), false)?.FirstOrDefault()) is EntityAttribute entityAttribute;
+
+                    bool isEntity = entityContractType.IsAssignableFrom(type);
+                    var isAggreagtion = aggreagtionContractType.IsAssignableFrom(type);
+
+                    #region Entity
+
                     if (isEntity)
                     {
                         EntityManager.ConfigureEntity(type);
+                        if (isAggreagtion)
+                        {
+                            //default data access
+                            DataAccessManager.RegisterEntityDefaultDataAccess(type);
+                            //default repository
+                            RepositoryManager.RegisterDefaultRepository(type);
+                        }
                     }
-                    //query model
+
+                    #endregion
+
+                    #region Aggregation model
+
+                    if (isAggreagtion && !isEntity)
+                    {
+                        var entityType = AggregationManager.GetAggregationModelRelationEntityType(type);
+                        if (entityType == null)
+                        {
+                            var namespaceArray = type.Assembly.FullName.LSplit(",")[0].LSplit(".");
+                            string conventionEntityName = $"{namespaceArray[0]}.Entity.{namespaceArray[namespaceArray.Length - 1]}.{type.Name}Entity";
+                            allTypeDict.TryGetValue(conventionEntityName, out entityType);
+                        }
+                        if (entityType != null)
+                        {
+                            QueryManager.ConfigureQueryModelRelationEntity(type, entityType);
+                        }
+                    }
+
+                    #endregion
+
+                    #region Query model
+
                     var queryModelInterface = type.GetInterface(queryModelGenericType.Name);
-                    if (queryModelInterface != null && !isEntity)
+                    if (queryModelInterface != null && !isEntity && !isAggreagtion)
                     {
                         QueryManager.ConfigureQueryModelRelationEntity(type);
                     }
-                    //module configuration
+
+                    #endregion
+
+                    #region Module configuration
+
                     if (moduleConfigurationType.IsAssignableFrom(type))
                     {
                         IModuleConfiguration moduleConfiguration = Activator.CreateInstance(type) as IModuleConfiguration;
                         moduleConfiguration?.Init();
                     }
+
+                    #endregion
                 }
 
                 //object mapper
@@ -180,7 +234,7 @@ namespace EZNEW.Application
                     FileMatchPattern.ExcludeFileName => !(fileOptions.FileNameKeywords?.Any(kw => c.Name.Contains(kw)) ?? false),
                     FileMatchPattern.IncludeByRegex => new Regex(fileOptions.RegexExpression, RegexOptions.IgnoreCase).IsMatch(c.FullName),
                     FileMatchPattern.ExcludeByRegex => !new Regex(fileOptions.RegexExpression, RegexOptions.IgnoreCase).IsMatch(c.FullName),
-                    FileMatchPattern.Convention => new Regex($@"^{ApplicationManager.RootPath.Replace(@"\", @"\\")}.*({string.Join("|", ConventionFileNamePatterns.Union(ApplicationManager.Options.FileMatchOptions.AdditionalConventionFilePatterns ?? new List<string>(0)))}).*$", RegexOptions.IgnoreCase).IsMatch(c.FullName),
+                    FileMatchPattern.Convention => new Regex($@"^{ApplicationManager.RootPath.Replace(@"\", @"\\")}.*({string.Join("|", ConventionFileNamePatterns.Union(ApplicationManager.Options.FileMatchOptions.FileRegexPatterns ?? new List<string>(0)))}).*$", RegexOptions.IgnoreCase).IsMatch(c.FullName),
                     _ => true
                 };
                 return matched;

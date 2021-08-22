@@ -23,7 +23,8 @@ namespace EZNEW.Development.Entity
     {
         Normal = 2,
         Tree = 4,
-        Relation = 8
+        Relation = 8,
+        ThreeRelation = 16
     }
 
     /// <summary>
