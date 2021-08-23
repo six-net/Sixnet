@@ -294,7 +294,7 @@ namespace EZNEW.Development.Query
         {
             if (string.IsNullOrWhiteSpace(fieldName))
             {
-                return this;
+                throw new EZNEWException($"Field name for [{value}] is null or empty.");
             }
             Criteria newCriteria = Criteria.CreateNewCriteria(fieldName, criteriaOperator, value);
             newCriteria.Converter = converter;
