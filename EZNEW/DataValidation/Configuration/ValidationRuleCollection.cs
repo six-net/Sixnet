@@ -50,11 +50,11 @@ namespace EZNEW.DataValidation.Configuration
             }
             foreach (var typeRule in Types)
             {
-                if (typeRule == null || string.IsNullOrWhiteSpace(typeRule.TypeFullName) || typeRule.Properties == null)
+                if (typeRule == null || string.IsNullOrWhiteSpace(typeRule.TypeAssemblyQualifiedName) || typeRule.Properties == null)
                 {
                     continue;
                 }
-                Type modelType = Type.GetType(typeRule.TypeFullName);
+                Type modelType = Type.GetType(typeRule.TypeAssemblyQualifiedName);
                 if (modelType == null)
                 {
                     continue;
@@ -323,15 +323,14 @@ namespace EZNEW.DataValidation.Configuration
         void BuildCompareValidation(Type modelType, object compareValue, CompareObject compareType, ParameterExpression parameterExpression, Type funcType, Array parameterArray, CompareOperator compareOperator, object fieldInstance)
         {
             MethodInfo compareMethod = ValidationMethods.FirstOrDefault(c => c.Name == "SetCompareValidation");
-            if (compareMethod == null)
+            if (compareValue == null || compareMethod == null)
             {
                 return;
             }
-            //object compareValue = rule.Value;
             switch (compareType)
             {
                 case CompareObject.Field:
-                    string[] comparePropertyNameArray = compareValue.ToString().LSplit(".");
+                    string[] comparePropertyNameArray = compareValue?.ToString().LSplit(".");
                     Expression comparePropertyExpress = null;
                     foreach (string pname in comparePropertyNameArray)
                     {

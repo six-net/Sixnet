@@ -10,7 +10,7 @@ namespace EZNEW.DataValidation.Configuration
         /// <summary>
         /// Gets or sets the type full name
         /// </summary>
-        public string TypeFullName { get; set; }
+        public string TypeAssemblyQualifiedName { get; set; }
 
         /// <summary>
         /// Gets or set the property rules

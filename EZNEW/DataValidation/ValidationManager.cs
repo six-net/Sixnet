@@ -78,23 +78,18 @@ namespace EZNEW.DataValidation
         /// Configure validation by config file
         /// </summary>
         /// <param name="configDirectoryPath">Config directory path</param>
-        /// <param name="fileExtension">Config file extension</param>
-        public static void ConfigureByConfigFile(string configDirectoryPath, string fileExtension = "dvconfig")
+        /// <param name="searchPattern">Config file extension</param>
+        public static void ConfigureByConfigFile(string configDirectoryPath, string searchPattern = "*.dvconfig")
         {
-            if (string.IsNullOrWhiteSpace(configDirectoryPath) || string.IsNullOrWhiteSpace(fileExtension) || !Directory.Exists(configDirectoryPath))
+            if (string.IsNullOrWhiteSpace(configDirectoryPath) || string.IsNullOrWhiteSpace(searchPattern) || !Directory.Exists(configDirectoryPath))
             {
                 return;
             }
-            var files = Directory.GetFiles(configDirectoryPath).Where(c => string.Equals(Path.GetExtension(c).Trim('.'), fileExtension, StringComparison.OrdinalIgnoreCase));
+            var files = Directory.GetFiles(configDirectoryPath, searchPattern, SearchOption.AllDirectories);
             foreach (var file in files)
             {
                 var json = File.ReadAllText(file);
                 ConfigureByJson(json);
-            }
-            var childDirectorys = new DirectoryInfo(configDirectoryPath).GetDirectories();
-            foreach (var directory in childDirectorys)
-            {
-                ConfigureByConfigFile(directory.FullName, fileExtension);
             }
         }
 
