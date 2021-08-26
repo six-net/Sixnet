@@ -19,7 +19,7 @@ namespace EZNEW.DataValidation.Validators
         /// <param name="length">Value length</param>
         public MaxLengthValidator(int length)
         {
-            defaultErrorMessage = "The value exceeds the maximum length";
+            defaultErrorMessageValue = "The value exceeds the maximum length";
             Length = length;
         }
 

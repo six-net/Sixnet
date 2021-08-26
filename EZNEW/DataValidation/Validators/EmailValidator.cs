@@ -13,7 +13,7 @@ namespace EZNEW.DataValidation.Validators
         /// </summary>
         public EmailValidator()
         {
-            defaultErrorMessage = "Incorrect email format";
+            defaultErrorMessageValue = "Incorrect email format";
         }
 
         /// <summary>

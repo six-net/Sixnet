@@ -41,39 +41,39 @@ namespace EZNEW.DataValidation.Validators
             {
                 case CompareOperator.Equal:
                 default:
-                    isValid = compareOperatorValue.SourceValue == compareOperatorValue.CompareValue;
+                    isValidValue = compareOperatorValue.SourceValue == compareOperatorValue.CompareValue;
                     break;
                 case CompareOperator.GreaterThan:
-                    isValid = compareOperatorValue.SourceValue > compareOperatorValue.CompareValue;
+                    isValidValue = compareOperatorValue.SourceValue > compareOperatorValue.CompareValue;
                     break;
                 case CompareOperator.GreaterThanOrEqual:
-                    isValid = compareOperatorValue.SourceValue >= compareOperatorValue.CompareValue;
+                    isValidValue = compareOperatorValue.SourceValue >= compareOperatorValue.CompareValue;
                     break;
                 case CompareOperator.LessThan:
-                    isValid = compareOperatorValue.SourceValue < compareOperatorValue.CompareValue;
+                    isValidValue = compareOperatorValue.SourceValue < compareOperatorValue.CompareValue;
                     break;
                 case CompareOperator.LessThanOrEqual:
-                    isValid = compareOperatorValue.SourceValue <= compareOperatorValue.CompareValue;
+                    isValidValue = compareOperatorValue.SourceValue <= compareOperatorValue.CompareValue;
                     break;
                 case CompareOperator.NotEqual:
-                    isValid = compareOperatorValue.SourceValue != compareOperatorValue.CompareValue;
+                    isValidValue = compareOperatorValue.SourceValue != compareOperatorValue.CompareValue;
                     break;
                 case CompareOperator.In:
                     IEnumerable<string> hasCompareValueArray = (compareOperatorValue.CompareValue as IEnumerable<dynamic>).Select<dynamic, string>(c => c.ToString()).ToList();
                     if (hasCompareValueArray != null)
                     {
-                        isValid = hasCompareValueArray.Any(c => c == compareOperatorValue.SourceValue.ToString());
+                        isValidValue = hasCompareValueArray.Any(c => c == compareOperatorValue.SourceValue.ToString());
                     }
                     break;
                 case CompareOperator.NotIn:
                     IEnumerable<string> notCompareValueArray = (compareOperatorValue.CompareValue as IEnumerable<dynamic>).Select<dynamic, string>(c => c.ToString()).ToList();
                     if (notCompareValueArray != null)
                     {
-                        isValid = !notCompareValueArray.Any(c => c == compareOperatorValue.SourceValue.ToString());
+                        isValidValue = !notCompareValueArray.Any(c => c == compareOperatorValue.SourceValue.ToString());
                     }
                     break;
             }
-            SetVerifyResult(isValid, errorMessage);
+            SetVerifyResult(isValidValue, errorMessage);
         }
 
         /// <summary>

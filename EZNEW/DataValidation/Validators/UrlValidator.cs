@@ -14,7 +14,7 @@ namespace EZNEW.DataValidation.Validators
         /// </summary>
         public UrlValidator()
         {
-            defaultErrorMessage = "Url format error";
+            defaultErrorMessageValue = "Url format error";
         }
 
         /// <summary>

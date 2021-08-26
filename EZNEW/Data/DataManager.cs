@@ -869,7 +869,9 @@ namespace EZNEW.Data
                 DbType? dbType = parameter.DbType;
                 if (!dbType.HasValue && parameter.Value != null)
                 {
+#pragma warning disable CS0618 // 类型或成员已过时
                     dbType = SqlMapper.LookupDbType(parameter.Value.GetType(), parameter.Name, false, out _);
+#pragma warning restore CS0618 // 类型或成员已过时
                 }
                 return GetParameterHandler(databaseServerType, dbType.GetValueOrDefault());
             }

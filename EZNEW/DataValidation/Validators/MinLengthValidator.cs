@@ -24,7 +24,7 @@ namespace EZNEW.DataValidation.Validators
         public MinLengthValidator(int length)
         {
             Length = length;
-            defaultErrorMessage = "The value is less than the minimum length";
+            defaultErrorMessageValue = "The value is less than the minimum length";
         }
 
         /// <summary>

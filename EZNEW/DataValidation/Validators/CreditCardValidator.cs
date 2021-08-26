@@ -13,7 +13,7 @@ namespace EZNEW.DataValidation.Validators
         /// </summary>
         public CreditCardValidator()
         {
-            defaultErrorMessage = "Incorrect credit card format";
+            defaultErrorMessageValue = "Incorrect credit card format";
         }
 
         /// <summary>

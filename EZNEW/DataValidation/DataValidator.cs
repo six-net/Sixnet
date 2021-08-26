@@ -12,7 +12,7 @@ namespace EZNEW.DataValidation
         /// <summary>
         /// Wheather pass validation
         /// </summary>
-        protected bool isValid = false;
+        protected bool isValidValue = false;
 
         /// <summary>
         /// Verify result
@@ -22,7 +22,7 @@ namespace EZNEW.DataValidation
         /// <summary>
         /// Default error message
         /// </summary>
-        protected string defaultErrorMessage = string.Empty;
+        protected string defaultErrorMessageValue = string.Empty;
 
         #endregion
 
@@ -35,7 +35,7 @@ namespace EZNEW.DataValidation
         {
             get
             {
-                return isValid;
+                return isValidValue;
             }
         }
 
@@ -57,7 +57,7 @@ namespace EZNEW.DataValidation
         {
             get
             {
-                return defaultErrorMessage;
+                return defaultErrorMessageValue;
             }
         }
 
@@ -86,7 +86,7 @@ namespace EZNEW.DataValidation
         /// <returns>Return the formated message</returns>
         protected string FormatMessage(string errorMessage)
         {
-            return string.IsNullOrWhiteSpace(errorMessage) ? defaultErrorMessage : errorMessage;
+            return string.IsNullOrWhiteSpace(errorMessage) ? defaultErrorMessageValue : errorMessage;
         }
 
         /// <summary>
@@ -96,8 +96,8 @@ namespace EZNEW.DataValidation
         /// <param name="message">Message</param>
         protected void SetVerifyResult(bool isValid, string message = "")
         {
-            this.isValid = isValid;
-            verifyResult = this.isValid ? VerifyResult.SuccessResult() : VerifyResult.ErrorResult(FormatMessage(message));
+            this.isValidValue = isValid;
+            verifyResult = this.isValidValue ? VerifyResult.SuccessResult() : VerifyResult.ErrorResult(FormatMessage(message));
         }
 
         #endregion

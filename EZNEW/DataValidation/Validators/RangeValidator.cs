@@ -38,7 +38,7 @@ namespace EZNEW.DataValidation.Validators
             DataType = dataType;
             Minimum = minimum;
             Maximum = maximum;
-            defaultErrorMessage = "Value out of range";
+            defaultErrorMessageValue = "Value out of range";
         }
 
         /// <summary>

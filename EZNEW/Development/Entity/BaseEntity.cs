@@ -219,7 +219,9 @@ namespace EZNEW.Development.Entity
             foreach (var fieldItem in entityConfig.AllFields)
             {
                 var value = GetValue(fieldItem.Key);
+#pragma warning disable CS0618 // 类型或成员已过时
                 var dbType = LookupDbType(fieldItem.Value.DataType, fieldItem.Key, false, out ITypeHandler handler);
+#pragma warning restore CS0618 // 类型或成员已过时
                 parameters.Add(fieldItem.Key, value, dbType: dbType);
             }
             return parameters;

@@ -1,4 +1,5 @@
 ﻿using System;
+using EZNEW.Data;
 using EZNEW.Development.Query;
 
 namespace EZNEW.Paging
@@ -14,12 +15,12 @@ namespace EZNEW.Paging
         /// <summary>
         /// page index
         /// </summary>
-        protected int page = 1;
+        protected int pageValue = 1;
 
         /// <summary>
         /// page size
         /// </summary>
-        protected int pageSize = 20;
+        protected int pageSizeValue = 20;
 
         #endregion
 
@@ -32,15 +33,15 @@ namespace EZNEW.Paging
         {
             get
             {
-                if (page <= 0)
+                if (pageValue < 1)
                 {
-                    page = 1;
+                    pageValue = 1;
                 }
-                return page;
+                return pageValue;
             }
             set
             {
-                page = value;
+                pageValue = value;
             }
         }
 
@@ -51,15 +52,15 @@ namespace EZNEW.Paging
         {
             get
             {
-                if (pageSize <= 0)
+                if (pageSizeValue < 1)
                 {
-                    pageSize = 20;
+                    pageSizeValue = DataManager.DataOptions.DefaultPageSize;
                 }
-                return pageSize;
+                return pageSizeValue;
             }
             set
             {
-                pageSize = value;
+                pageSizeValue = value;
             }
         }
 

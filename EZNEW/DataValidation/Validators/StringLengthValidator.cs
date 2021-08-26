@@ -17,7 +17,7 @@ namespace EZNEW.DataValidation.Validators
         {
             MaximumLength = maxLength;
             MinimumLength = minLength;
-            defaultErrorMessage = string.Format("The character length is between {0} and {1}", minLength, maxLength);
+            defaultErrorMessageValue = string.Format("The character length is between {0} and {1}", minLength, maxLength);
         }
 
         #region Properties

@@ -5,8 +5,8 @@
     /// </summary>
     public class CacheQuery
     {
-        protected int page = 1;//page index
-        protected int pageSize = 20;//page size
+        protected int pageValue = 1;//page index
+        protected int pageSizeValue = 20;//page size
 
         /// <summary>
         /// Gets or sets the page index
@@ -15,15 +15,15 @@
         {
             get
             {
-                if (page < 1)
+                if (pageValue < 1)
                 {
-                    page = 1;
+                    pageValue = 1;
                 }
-                return page;
+                return pageValue;
             }
             set
             {
-                page = value;
+                pageValue = value;
             }
         }
 
@@ -34,15 +34,15 @@
         {
             get
             {
-                if (pageSize < 1)
+                if (pageSizeValue < 1)
                 {
-                    pageSize = 20;
+                    pageSizeValue = 20;
                 }
-                return pageSize;
+                return pageSizeValue;
             }
             set
             {
-                pageSize = value;
+                pageSizeValue = value;
             }
         }
     }

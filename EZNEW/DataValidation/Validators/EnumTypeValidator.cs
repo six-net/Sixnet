@@ -19,7 +19,7 @@ namespace EZNEW.DataValidation.Validators
         /// <param name="enumType">enum type</param>
         public EnumTypeValidator(Type enumType)
         {
-            defaultErrorMessage = "Value is no longer specified within the enumeration type";
+            defaultErrorMessageValue = "Value is no longer specified within the enumeration type";
             this.enumType = enumType;
         }
 
