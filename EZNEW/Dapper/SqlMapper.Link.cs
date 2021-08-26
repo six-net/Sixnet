@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 
-namespace EZNEW.Dapper
+namespace Dapper
 {
     public static partial class SqlMapper
     {
@@ -24,7 +24,7 @@ namespace EZNEW.Dapper
                     }
                     link = link.Tail;
                 }
-                value = default(TValue);
+                value = default;
                 return false;
             }
 

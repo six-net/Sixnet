@@ -2,7 +2,7 @@
 using System.Data;
 using System.Threading;
 
-namespace EZNEW.Dapper
+namespace Dapper
 {
     public static partial class SqlMapper
     {

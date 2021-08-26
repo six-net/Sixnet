@@ -1,6 +1,6 @@
 ﻿using System.Data;
 
-namespace EZNEW.Dapper
+namespace Dapper
 {
     /// <summary>
     /// Used to pass a DataTable as a TableValuedParameter

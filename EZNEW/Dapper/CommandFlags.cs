@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace EZNEW.Dapper
+namespace Dapper
 {
     /// <summary>
     /// Additional state flags that control command behaviour

@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
-namespace EZNEW.Dapper
+namespace Dapper
 {
     public static partial class SqlMapper
     {
@@ -111,9 +111,7 @@ namespace EZNEW.Dapper
                 }
 
                 public override bool Equals(object obj)
-                {
-                    return obj is DeserializerKey && Equals((DeserializerKey)obj);
-                }
+                    => obj is DeserializerKey key && Equals(key);
 
                 public bool Equals(DeserializerKey other)
                 {

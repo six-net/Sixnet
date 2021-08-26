@@ -154,7 +154,7 @@ namespace EZNEW.Development.Query
         /// <summary>
         /// Indecates whether query obsolete data
         /// </summary>
-        bool IncludeObsolete { get; set; }
+        bool IncludeObsoleteData { get; set; }
 
         #endregion
 

@@ -307,6 +307,10 @@ namespace EZNEW.Expressions
                     {
                         name = (constantExpression.Value as MethodInfo).Name;
                     }
+                    else
+                    {
+                        name = constantExpression.Value?.ToString();
+                    }
                     break;
                 case ExpressionType.ArrayLength:
                 case ExpressionType.Convert:

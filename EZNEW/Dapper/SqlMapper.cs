@@ -1,6 +1,6 @@
 ﻿/*
  License: http://www.apache.org/licenses/LICENSE-2.0
- Home page: https://github.com/StackExchange/dapper-dot-net
+ Home page: https://github.com/DapperLib/Dapper-dot-net
  */
 
 using System;
@@ -12,13 +12,15 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml;
 using System.Xml.Linq;
 
-namespace EZNEW.Dapper
+namespace Dapper
 {
     /// <summary>
     /// Dapper, a light weight object mapper for ADO.NET
@@ -72,7 +74,7 @@ namespace EZNEW.Dapper
                 {
                     if (pair.Value.GetHitCount() <= COLLECT_HIT_COUNT_MIN)
                     {
-                        _queryCache.TryRemove(pair.Key, out CacheInfo cache);
+                        _queryCache.TryRemove(pair.Key, out CacheInfo _);
                     }
                 }
             }
@@ -111,7 +113,7 @@ namespace EZNEW.Dapper
             foreach (var entry in _queryCache)
             {
                 if (entry.Key.type == type)
-                    _queryCache.TryRemove(entry.Key, out CacheInfo cache);
+                    _queryCache.TryRemove(entry.Key, out CacheInfo _);
             }
             TypeDeserializerCache.Purge(type);
         }
@@ -165,7 +167,7 @@ namespace EZNEW.Dapper
 
         static SqlMapper()
         {
-            typeMap = new Dictionary<Type, DbType>
+            typeMap = new Dictionary<Type, DbType>(37)
             {
                 [typeof(byte)] = DbType.Byte,
                 [typeof(sbyte)] = DbType.SByte,
@@ -260,8 +262,12 @@ namespace EZNEW.Dapper
         /// <param name="type">The type to handle.</param>
         /// <param name="handler">The handler to process the <paramref name="type"/>.</param>
         public static void AddTypeHandler(Type type, ITypeHandler handler) => AddTypeHandlerImpl(type, handler, true);
-
-        internal static bool HasTypeHandler(Type type) => typeHandlers.ContainsKey(type);
+        /// <summary>
+        /// Determine if the specified type will be processed by a custom handler.
+        /// </summary>
+        /// <param name="type">The type to handle.</param>
+        /// <returns>Boolean value specifying whether the type will be processed by a custom handler.</returns>
+        public static bool HasTypeHandler(Type type) => typeHandlers.ContainsKey(type);
 
         /// <summary>
         /// Configure the specified type to be processed by a custom handler.
@@ -338,7 +344,7 @@ namespace EZNEW.Dapper
         {
             if (value == null || value is DBNull) return DbType.Object;
 
-            return LookupDbType(value.GetType(), "n/a", false, out ITypeHandler handler);
+            return LookupDbType(value.GetType(), "n/a", false, out ITypeHandler _);
         }
 
         /// <summary>
@@ -348,7 +354,7 @@ namespace EZNEW.Dapper
         /// <param name="name">The name (for error messages).</param>
         /// <param name="demand">Whether to demand a value (throw if missing).</param>
         /// <param name="handler">The handler for <paramref name="type"/>.</param>
-        //[Obsolete(ObsoleteInternalUsageOnly, false)]
+        [Obsolete(ObsoleteInternalUsageOnly, false)]
         [Browsable(false)]
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static DbType LookupDbType(Type type, string name, bool demand, out ITypeHandler handler)
@@ -380,7 +386,7 @@ namespace EZNEW.Dapper
                     && typeof(IEnumerable<IDataRecord>).IsAssignableFrom(type))
                 {
                     var argTypes = type.GetGenericArguments();
-                    if(typeof(IDataRecord).IsAssignableFrom(argTypes[0]))
+                    if (typeof(IDataRecord).IsAssignableFrom(argTypes[0]))
                     {
                         try
                         {
@@ -503,7 +509,9 @@ namespace EZNEW.Dapper
 
         private static IEnumerable GetMultiExec(object param)
         {
+#pragma warning disable IDE0038 // Use pattern matching - complicated enough!
             return (param is IEnumerable
+#pragma warning restore IDE0038 // Use pattern matching
                     && !(param is string
                       || param is IEnumerable<KeyValuePair<string, object>>
                       || param is IDynamicParameters)
@@ -645,7 +653,7 @@ namespace EZNEW.Dapper
         /// <param name="commandType">The type of command to execute.</param>
         /// <remarks>Note: each row can be accessed via "dynamic", or by casting to an IDictionary&lt;string,object&gt;</remarks>
         public static IEnumerable<dynamic> Query(this IDbConnection cnn, string sql, object param = null, IDbTransaction transaction = null, bool buffered = true, int? commandTimeout = null, CommandType? commandType = null) =>
-            Query<DapperRow>(cnn, sql, param as object, transaction, buffered, commandTimeout, commandType);
+            Query<DapperRow>(cnn, sql, param, transaction, buffered, commandTimeout, commandType);
 
         /// <summary>
         /// Return a dynamic object with properties matching the columns.
@@ -658,7 +666,7 @@ namespace EZNEW.Dapper
         /// <param name="commandType">The type of command to execute.</param>
         /// <remarks>Note: the row can be accessed via "dynamic", or by casting to an IDictionary&lt;string,object&gt;</remarks>
         public static dynamic QueryFirst(this IDbConnection cnn, string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null) =>
-            QueryFirst<DapperRow>(cnn, sql, param as object, transaction, commandTimeout, commandType);
+            QueryFirst<DapperRow>(cnn, sql, param, transaction, commandTimeout, commandType);
 
         /// <summary>
         /// Return a dynamic object with properties matching the columns.
@@ -671,7 +679,7 @@ namespace EZNEW.Dapper
         /// <param name="commandType">The type of command to execute.</param>
         /// <remarks>Note: the row can be accessed via "dynamic", or by casting to an IDictionary&lt;string,object&gt;</remarks>
         public static dynamic QueryFirstOrDefault(this IDbConnection cnn, string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null) =>
-            QueryFirstOrDefault<DapperRow>(cnn, sql, param as object, transaction, commandTimeout, commandType);
+            QueryFirstOrDefault<DapperRow>(cnn, sql, param, transaction, commandTimeout, commandType);
 
         /// <summary>
         /// Return a dynamic object with properties matching the columns.
@@ -684,7 +692,7 @@ namespace EZNEW.Dapper
         /// <param name="commandType">The type of command to execute.</param>
         /// <remarks>Note: the row can be accessed via "dynamic", or by casting to an IDictionary&lt;string,object&gt;</remarks>
         public static dynamic QuerySingle(this IDbConnection cnn, string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null) =>
-            QuerySingle<DapperRow>(cnn, sql, param as object, transaction, commandTimeout, commandType);
+            QuerySingle<DapperRow>(cnn, sql, param, transaction, commandTimeout, commandType);
 
         /// <summary>
         /// Return a dynamic object with properties matching the columns.
@@ -697,7 +705,7 @@ namespace EZNEW.Dapper
         /// <param name="commandType">The type of command to execute.</param>
         /// <remarks>Note: the row can be accessed via "dynamic", or by casting to an IDictionary&lt;string,object&gt;</remarks>
         public static dynamic QuerySingleOrDefault(this IDbConnection cnn, string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null) =>
-            QuerySingleOrDefault<DapperRow>(cnn, sql, param as object, transaction, commandTimeout, commandType);
+            QuerySingleOrDefault<DapperRow>(cnn, sql, param, transaction, commandTimeout, commandType);
 
         /// <summary>
         /// Executes a query, returning the data typed as <typeparamref name="T"/>.
@@ -711,7 +719,7 @@ namespace EZNEW.Dapper
         /// <param name="commandTimeout">The command timeout (in seconds).</param>
         /// <param name="commandType">The type of command to execute.</param>
         /// <returns>
-        /// A sequence of data of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column in assumed, otherwise an instance is
+        /// A sequence of data of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column is assumed, otherwise an instance is
         /// created per row, and a direct column-name===member-name mapping is assumed (case insensitive).
         /// </returns>
         public static IEnumerable<T> Query<T>(this IDbConnection cnn, string sql, object param = null, IDbTransaction transaction = null, bool buffered = true, int? commandTimeout = null, CommandType? commandType = null)
@@ -732,7 +740,7 @@ namespace EZNEW.Dapper
         /// <param name="commandTimeout">The command timeout (in seconds).</param>
         /// <param name="commandType">The type of command to execute.</param>
         /// <returns>
-        /// A sequence of data of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column in assumed, otherwise an instance is
+        /// A sequence of data of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column is assumed, otherwise an instance is
         /// created per row, and a direct column-name===member-name mapping is assumed (case insensitive).
         /// </returns>
         public static T QueryFirst<T>(this IDbConnection cnn, string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
@@ -752,7 +760,7 @@ namespace EZNEW.Dapper
         /// <param name="commandTimeout">The command timeout (in seconds).</param>
         /// <param name="commandType">The type of command to execute.</param>
         /// <returns>
-        /// A sequence of data of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column in assumed, otherwise an instance is
+        /// A sequence of data of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column is assumed, otherwise an instance is
         /// created per row, and a direct column-name===member-name mapping is assumed (case insensitive).
         /// </returns>
         public static T QueryFirstOrDefault<T>(this IDbConnection cnn, string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
@@ -772,7 +780,7 @@ namespace EZNEW.Dapper
         /// <param name="commandTimeout">The command timeout (in seconds).</param>
         /// <param name="commandType">The type of command to execute.</param>
         /// <returns>
-        /// A sequence of data of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column in assumed, otherwise an instance is
+        /// A sequence of data of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column is assumed, otherwise an instance is
         /// created per row, and a direct column-name===member-name mapping is assumed (case insensitive).
         /// </returns>
         public static T QuerySingle<T>(this IDbConnection cnn, string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
@@ -792,7 +800,7 @@ namespace EZNEW.Dapper
         /// <param name="commandTimeout">The command timeout (in seconds).</param>
         /// <param name="commandType">The type of command to execute.</param>
         /// <returns>
-        /// A sequence of data of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column in assumed, otherwise an instance is
+        /// A sequence of data of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column is assumed, otherwise an instance is
         /// created per row, and a direct column-name===member-name mapping is assumed (case insensitive).
         /// </returns>
         public static T QuerySingleOrDefault<T>(this IDbConnection cnn, string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
@@ -814,7 +822,7 @@ namespace EZNEW.Dapper
         /// <param name="commandType">The type of command to execute.</param>
         /// <exception cref="ArgumentNullException"><paramref name="type"/> is <c>null</c>.</exception>
         /// <returns>
-        /// A sequence of data of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column in assumed, otherwise an instance is
+        /// A sequence of data of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column is assumed, otherwise an instance is
         /// created per row, and a direct column-name===member-name mapping is assumed (case insensitive).
         /// </returns>
         public static IEnumerable<object> Query(this IDbConnection cnn, Type type, string sql, object param = null, IDbTransaction transaction = null, bool buffered = true, int? commandTimeout = null, CommandType? commandType = null)
@@ -837,7 +845,7 @@ namespace EZNEW.Dapper
         /// <param name="commandType">The type of command to execute.</param>
         /// <exception cref="ArgumentNullException"><paramref name="type"/> is <c>null</c>.</exception>
         /// <returns>
-        /// A sequence of data of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column in assumed, otherwise an instance is
+        /// A sequence of data of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column is assumed, otherwise an instance is
         /// created per row, and a direct column-name===member-name mapping is assumed (case insensitive).
         /// </returns>
         public static object QueryFirst(this IDbConnection cnn, Type type, string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
@@ -859,7 +867,7 @@ namespace EZNEW.Dapper
         /// <param name="commandType">The type of command to execute.</param>
         /// <exception cref="ArgumentNullException"><paramref name="type"/> is <c>null</c>.</exception>
         /// <returns>
-        /// A sequence of data of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column in assumed, otherwise an instance is
+        /// A sequence of data of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column is assumed, otherwise an instance is
         /// created per row, and a direct column-name===member-name mapping is assumed (case insensitive).
         /// </returns>
         public static object QueryFirstOrDefault(this IDbConnection cnn, Type type, string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
@@ -881,7 +889,7 @@ namespace EZNEW.Dapper
         /// <param name="commandType">The type of command to execute.</param>
         /// <exception cref="ArgumentNullException"><paramref name="type"/> is <c>null</c>.</exception>
         /// <returns>
-        /// A sequence of data of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column in assumed, otherwise an instance is
+        /// A sequence of data of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column is assumed, otherwise an instance is
         /// created per row, and a direct column-name===member-name mapping is assumed (case insensitive).
         /// </returns>
         public static object QuerySingle(this IDbConnection cnn, Type type, string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
@@ -903,7 +911,7 @@ namespace EZNEW.Dapper
         /// <param name="commandType">The type of command to execute.</param>
         /// <exception cref="ArgumentNullException"><paramref name="type"/> is <c>null</c>.</exception>
         /// <returns>
-        /// A sequence of data of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column in assumed, otherwise an instance is
+        /// A sequence of data of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column is assumed, otherwise an instance is
         /// created per row, and a direct column-name===member-name mapping is assumed (case insensitive).
         /// </returns>
         public static object QuerySingleOrDefault(this IDbConnection cnn, Type type, string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
@@ -920,7 +928,7 @@ namespace EZNEW.Dapper
         /// <param name="cnn">The connection to query on.</param>
         /// <param name="command">The command used to query on this connection.</param>
         /// <returns>
-        /// A sequence of data of <typeparamref name="T"/>; if a basic type (int, string, etc) is queried then the data from the first column in assumed, otherwise an instance is
+        /// A sequence of data of <typeparamref name="T"/>; if a basic type (int, string, etc) is queried then the data from the first column is assumed, otherwise an instance is
         /// created per row, and a direct column-name===member-name mapping is assumed (case insensitive).
         /// </returns>
         public static IEnumerable<T> Query<T>(this IDbConnection cnn, CommandDefinition command)
@@ -936,7 +944,7 @@ namespace EZNEW.Dapper
         /// <param name="cnn">The connection to query on.</param>
         /// <param name="command">The command used to query on this connection.</param>
         /// <returns>
-        /// A single instance or null of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column in assumed, otherwise an instance is
+        /// A single instance or null of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column is assumed, otherwise an instance is
         /// created per row, and a direct column-name===member-name mapping is assumed (case insensitive).
         /// </returns>
         public static T QueryFirst<T>(this IDbConnection cnn, CommandDefinition command) =>
@@ -949,7 +957,7 @@ namespace EZNEW.Dapper
         /// <param name="cnn">The connection to query on.</param>
         /// <param name="command">The command used to query on this connection.</param>
         /// <returns>
-        /// A single or null instance of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column in assumed, otherwise an instance is
+        /// A single or null instance of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column is assumed, otherwise an instance is
         /// created per row, and a direct column-name===member-name mapping is assumed (case insensitive).
         /// </returns>
         public static T QueryFirstOrDefault<T>(this IDbConnection cnn, CommandDefinition command) =>
@@ -962,7 +970,7 @@ namespace EZNEW.Dapper
         /// <param name="cnn">The connection to query on.</param>
         /// <param name="command">The command used to query on this connection.</param>
         /// <returns>
-        /// A single instance of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column in assumed, otherwise an instance is
+        /// A single instance of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column is assumed, otherwise an instance is
         /// created per row, and a direct column-name===member-name mapping is assumed (case insensitive).
         /// </returns>
         public static T QuerySingle<T>(this IDbConnection cnn, CommandDefinition command) =>
@@ -975,7 +983,7 @@ namespace EZNEW.Dapper
         /// <param name="cnn">The connection to query on.</param>
         /// <param name="command">The command used to query on this connection.</param>
         /// <returns>
-        /// A single instance of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column in assumed, otherwise an instance is
+        /// A single instance of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column is assumed, otherwise an instance is
         /// created per row, and a direct column-name===member-name mapping is assumed (case insensitive).
         /// </returns>
         public static T QuerySingleOrDefault<T>(this IDbConnection cnn, CommandDefinition command) =>
@@ -1038,6 +1046,8 @@ namespace EZNEW.Dapper
                     }
                     reader.Dispose();
                 }
+
+                cmd?.Parameters.Clear();
                 cmd?.Dispose();
                 if (wasClosed) cnn.Close();
                 throw;
@@ -1096,14 +1106,7 @@ namespace EZNEW.Dapper
                 while (reader.Read())
                 {
                     object val = func(reader);
-                    if (val == null || val is T)
-                    {
-                        yield return (T)val;
-                    }
-                    else
-                    {
-                        yield return (T)Convert.ChangeType(val, convertToType, CultureInfo.InvariantCulture);
-                    }
+                    yield return GetValue<T>(reader, effectiveType, val);
                 }
                 while (reader.NextResult()) { /* ignore subsequent result sets */ }
                 // happy path; close the reader cleanly - no
@@ -1125,6 +1128,8 @@ namespace EZNEW.Dapper
                     reader.Dispose();
                 }
                 if (wasClosed) cnn.Close();
+                
+                cmd?.Parameters.Clear();
                 cmd?.Dispose();
             }
         }
@@ -1138,25 +1143,25 @@ namespace EZNEW.Dapper
             SingleOrDefault = 3
         }
 
-        private static readonly int[] ErrTwoRows = new int[2], ErrZeroRows = new int[0];
+        private static readonly int[] ErrTwoRows = new int[2], ErrZeroRows = Array.Empty<int>();
         private static void ThrowMultipleRows(Row row)
         {
-            switch (row)
-            {  // get the standard exception from the runtime
-                case Row.Single: ErrTwoRows.Single(); break;
-                case Row.SingleOrDefault: ErrTwoRows.SingleOrDefault(); break;
-                default: throw new InvalidOperationException();
-            }
+            _ = row switch
+            {
+                Row.Single => ErrTwoRows.Single(),
+                Row.SingleOrDefault => ErrTwoRows.SingleOrDefault(),
+                _ => throw new InvalidOperationException(),
+            };
         }
 
         private static void ThrowZeroRows(Row row)
         {
-            switch (row)
-            { // get the standard exception from the runtime
-                case Row.First: ErrZeroRows.First(); break;
-                case Row.Single: ErrZeroRows.Single(); break;
-                default: throw new InvalidOperationException();
-            }
+            _ = row switch
+            {   // get the standard exception from the runtime
+                Row.First => ErrZeroRows.First(),
+                Row.Single => ErrZeroRows.Single(),
+                _ => throw new InvalidOperationException(),
+            };
         }
 
         private static T QueryRowImpl<T>(IDbConnection cnn, Row row, ref CommandDefinition command, Type effectiveType)
@@ -1179,31 +1184,14 @@ namespace EZNEW.Dapper
                     : CommandBehavior.SequentialAccess | CommandBehavior.SingleResult | CommandBehavior.SingleRow);
                 wasClosed = false; // *if* the connection was closed and we got this far, then we now have a reader
 
-                T result = default(T);
+                T result = default;
                 if (reader.Read() && reader.FieldCount != 0)
                 {
                     // with the CloseConnection flag, so the reader will deal with the connection; we
                     // still need something in the "finally" to ensure that broken SQL still results
                     // in the connection closing itself
-                    var tuple = info.Deserializer;
-                    int hash = GetColumnHash(reader);
-                    if (tuple.Func == null || tuple.Hash != hash)
-                    {
-                        tuple = info.Deserializer = new DeserializerState(hash, GetDeserializer(effectiveType, reader, 0, -1, false));
-                        if (command.AddToCache) SetQueryCache(identity, info);
-                    }
+                    result = ReadRow<T>(info, identity, ref command, effectiveType, reader);
 
-                    var func = tuple.Func;
-                    object val = func(reader);
-                    if (val == null || val is T)
-                    {
-                        result = (T)val;
-                    }
-                    else
-                    {
-                        var convertToType = Nullable.GetUnderlyingType(effectiveType) ?? effectiveType;
-                        result = (T)Convert.ChangeType(val, convertToType, CultureInfo.InvariantCulture);
-                    }
                     if ((row & Row.Single) != 0 && reader.Read()) ThrowMultipleRows(row);
                     while (reader.Read()) { /* ignore subsequent rows */ }
                 }
@@ -1232,7 +1220,63 @@ namespace EZNEW.Dapper
                     reader.Dispose();
                 }
                 if (wasClosed) cnn.Close();
+                cmd?.Parameters.Clear();
                 cmd?.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// Shared value deserialization path for QueryRowImpl and QueryRowAsync
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static T ReadRow<T>(CacheInfo info, Identity identity, ref CommandDefinition command, Type effectiveType, IDataReader reader)
+        {
+            var tuple = info.Deserializer;
+            int hash = GetColumnHash(reader);
+            if (tuple.Func == null || tuple.Hash != hash)
+            {
+                tuple = info.Deserializer = new DeserializerState(hash, GetDeserializer(effectiveType, reader, 0, -1, false));
+                if (command.AddToCache) SetQueryCache(identity, info);
+            }
+
+            var func = tuple.Func;
+            object val = func(reader);
+            return GetValue<T>(reader, effectiveType, val);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static T GetValue<T>(IDataReader reader, Type effectiveType, object val)
+        {
+            if (val is T tVal)
+            {
+                return tVal;
+            }
+            else if (val == null && (!effectiveType.IsValueType || Nullable.GetUnderlyingType(effectiveType) != null))
+            {
+                return default;
+            }
+            else if (val is Array array && typeof(T).IsArray)
+            {
+                var elementType = typeof(T).GetElementType();
+                var result = Array.CreateInstance(elementType, array.Length);
+                for (int i = 0; i < array.Length; i++)
+                    result.SetValue(Convert.ChangeType(array.GetValue(i), elementType, CultureInfo.InvariantCulture), i);
+                return (T)(object)result;
+            }
+            else
+            {
+                try
+                {
+                    var convertToType = Nullable.GetUnderlyingType(effectiveType) ?? effectiveType;
+                    return (T)Convert.ChangeType(val, convertToType, CultureInfo.InvariantCulture);
+                }
+                catch (Exception ex)
+                {
+#pragma warning disable CS0618 // Type or member is obsolete
+                    ThrowDataException(ex, 0, reader, val);
+#pragma warning restore CS0618 // Type or member is obsolete
+                    return default; // For the compiler - we've already thrown
+                }
             }
         }
 
@@ -1405,7 +1449,7 @@ namespace EZNEW.Dapper
         private static IEnumerable<TReturn> MultiMapImpl<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(this IDbConnection cnn, CommandDefinition command, Delegate map, string splitOn, IDataReader reader, Identity identity, bool finalize)
         {
             object param = command.Parameters;
-            identity = identity ?? new Identity<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(command.CommandText, command.CommandType, cnn, typeof(TFirst), param?.GetType());
+            identity ??= new Identity<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(command.CommandText, command.CommandType, cnn, typeof(TFirst), param?.GetType());
             CacheInfo cinfo = GetCacheInfo(identity, param, command.AddToCache);
 
             IDbCommand ownedCommand = null;
@@ -1456,6 +1500,7 @@ namespace EZNEW.Dapper
                 }
                 finally
                 {
+                    ownedCommand?.Parameters.Clear();
                     ownedCommand?.Dispose();
                     if (wasClosed) cnn.Close();
                 }
@@ -1475,7 +1520,7 @@ namespace EZNEW.Dapper
             }
 
             object param = command.Parameters;
-            identity = identity ?? new IdentityWithTypes(command.CommandText, command.CommandType, cnn, types[0], param?.GetType(), types);
+            identity ??= new IdentityWithTypes(command.CommandText, command.CommandType, cnn, types[0], param?.GetType(), types);
             CacheInfo cinfo = GetCacheInfo(identity, param, command.AddToCache);
 
             IDbCommand ownedCommand = null;
@@ -1526,6 +1571,7 @@ namespace EZNEW.Dapper
                 }
                 finally
                 {
+                    ownedCommand?.Parameters.Clear();
                     ownedCommand?.Dispose();
                     if (wasClosed) cnn.Close();
                 }
@@ -1533,25 +1579,16 @@ namespace EZNEW.Dapper
         }
 
         private static Func<IDataReader, TReturn> GenerateMapper<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(Func<IDataReader, object> deserializer, Func<IDataReader, object>[] otherDeserializers, object map)
+            => otherDeserializers.Length switch
         {
-            switch (otherDeserializers.Length)
-            {
-                case 1:
-                    return r => ((Func<TFirst, TSecond, TReturn>)map)((TFirst)deserializer(r), (TSecond)otherDeserializers[0](r));
-                case 2:
-                    return r => ((Func<TFirst, TSecond, TThird, TReturn>)map)((TFirst)deserializer(r), (TSecond)otherDeserializers[0](r), (TThird)otherDeserializers[1](r));
-                case 3:
-                    return r => ((Func<TFirst, TSecond, TThird, TFourth, TReturn>)map)((TFirst)deserializer(r), (TSecond)otherDeserializers[0](r), (TThird)otherDeserializers[1](r), (TFourth)otherDeserializers[2](r));
-                case 4:
-                    return r => ((Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>)map)((TFirst)deserializer(r), (TSecond)otherDeserializers[0](r), (TThird)otherDeserializers[1](r), (TFourth)otherDeserializers[2](r), (TFifth)otherDeserializers[3](r));
-                case 5:
-                    return r => ((Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>)map)((TFirst)deserializer(r), (TSecond)otherDeserializers[0](r), (TThird)otherDeserializers[1](r), (TFourth)otherDeserializers[2](r), (TFifth)otherDeserializers[3](r), (TSixth)otherDeserializers[4](r));
-                case 6:
-                    return r => ((Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>)map)((TFirst)deserializer(r), (TSecond)otherDeserializers[0](r), (TThird)otherDeserializers[1](r), (TFourth)otherDeserializers[2](r), (TFifth)otherDeserializers[3](r), (TSixth)otherDeserializers[4](r), (TSeventh)otherDeserializers[5](r));
-                default:
-                    throw new NotSupportedException();
-            }
-        }
+            1 => r => ((Func<TFirst, TSecond, TReturn>)map)((TFirst)deserializer(r), (TSecond)otherDeserializers[0](r)),
+            2 => r => ((Func<TFirst, TSecond, TThird, TReturn>)map)((TFirst)deserializer(r), (TSecond)otherDeserializers[0](r), (TThird)otherDeserializers[1](r)),
+            3 => r => ((Func<TFirst, TSecond, TThird, TFourth, TReturn>)map)((TFirst)deserializer(r), (TSecond)otherDeserializers[0](r), (TThird)otherDeserializers[1](r), (TFourth)otherDeserializers[2](r)),
+            4 => r => ((Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>)map)((TFirst)deserializer(r), (TSecond)otherDeserializers[0](r), (TThird)otherDeserializers[1](r), (TFourth)otherDeserializers[2](r), (TFifth)otherDeserializers[3](r)),
+            5 => r => ((Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>)map)((TFirst)deserializer(r), (TSecond)otherDeserializers[0](r), (TThird)otherDeserializers[1](r), (TFourth)otherDeserializers[2](r), (TFifth)otherDeserializers[3](r), (TSixth)otherDeserializers[4](r)),
+            6 => r => ((Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>)map)((TFirst)deserializer(r), (TSecond)otherDeserializers[0](r), (TThird)otherDeserializers[1](r), (TFourth)otherDeserializers[2](r), (TFifth)otherDeserializers[3](r), (TSixth)otherDeserializers[4](r), (TSeventh)otherDeserializers[5](r)),
+            _ => throw new NotSupportedException(),
+        };
 
         private static Func<IDataReader, TReturn> GenerateMapper<TReturn>(int length, Func<IDataReader, object> deserializer, Func<IDataReader, object>[] otherDeserializers, Func<object[], TReturn> map)
         {
@@ -1642,7 +1679,7 @@ namespace EZNEW.Dapper
         {
             if (startIdx == reader.FieldCount)
             {
-                throw MultiMapException(reader);
+                throw MultiMapException(reader, splitOn);
             }
 
             if (splitOn == "*")
@@ -1676,7 +1713,7 @@ namespace EZNEW.Dapper
                 }
             }
 
-            throw MultiMapException(reader);
+            throw MultiMapException(reader, splitOn);
         }
 
         private static CacheInfo GetCacheInfo(Identity identity, object exampleParameters, bool addToCache)
@@ -1741,6 +1778,8 @@ namespace EZNEW.Dapper
             }
             HashSet<string> consumed = new HashSet<string>(StringComparer.Ordinal);
             bool firstMatch = true;
+            int index = 0; // use this to spoof names; in most pseudo-positional cases, the name is ignored, however:
+                           // for "snowflake", the name needs to be incremental i.e. "1", "2", "3"
             cmd.CommandText = pseudoPositional.Replace(cmd.CommandText, match =>
             {
                 string key = match.Groups[1].Value;
@@ -1756,6 +1795,10 @@ namespace EZNEW.Dapper
                         cmd.Parameters.Clear(); // only clear if we are pretty positive that we've found this pattern successfully
                     }
                     // if found, return the anonymous token "?"
+                    if (Settings.UseIncrementalPseudoPositionalParameterNames)
+                    {
+                        param.ParameterName = (++index).ToString();
+                    }
                     cmd.Parameters.Add(param);
                     parameters.Remove(key);
                     consumed.Add(key);
@@ -1777,7 +1820,7 @@ namespace EZNEW.Dapper
                 return GetDapperRowDeserializer(reader, startBound, length, returnNullIfFirstMissing);
             }
             Type underlyingType = null;
-            if (!(typeMap.ContainsKey(type) || type.IsEnum || type.FullName == LinqBinary
+            if (!(typeMap.ContainsKey(type) || type.IsEnum || type.IsArray || type.FullName == LinqBinary
                 || (type.IsValueType && (underlyingType = Nullable.GetUnderlyingType(type)) != null && underlyingType.IsEnum)))
             {
                 if (typeHandlers.TryGetValue(type, out ITypeHandler handler))
@@ -1794,15 +1837,23 @@ namespace EZNEW.Dapper
             return reader => handler.Parse(type, reader.GetValue(startBound));
         }
 
-        private static Exception MultiMapException(IDataRecord reader)
+        private static Exception MultiMapException(IDataRecord reader, string splitOnColumnName = null)
         {
             bool hasFields = false;
             try { hasFields = reader != null && reader.FieldCount != 0; }
             catch { /* don't throw when trying to throw */ }
             if (hasFields)
-                return new ArgumentException("When using the multi-mapping APIs ensure you set the splitOn param if you have keys other than Id", "splitOn");
+            {
+                return new ArgumentException(
+                    string.IsNullOrEmpty(splitOnColumnName)
+                    ? "When using the multi-mapping APIs ensure you set the splitOn param if you have keys other than Id"
+                    : $"Multi-map error: splitOn column '{splitOnColumnName}' was not found - please ensure your splitOn parameter is set and in the correct order", 
+                    "splitOn");
+            }
             else
+            {
                 return new InvalidOperationException("No columns were selected");
+            }
         }
 
         internal static Func<IDataReader, object> GetDapperRowDeserializer(IDataRecord reader, int startBound, int length, bool returnNullIfFirstMissing)
@@ -2090,7 +2141,7 @@ namespace EZNEW.Dapper
                                 {
                                     sb.Append(',').Append(variableName).Append(i).Append(suffix);
                                 }
-                                return sb.__ToStringRecycle();
+                                return sb.ToStringRecycle();
                             }
                             else
                             {
@@ -2101,7 +2152,7 @@ namespace EZNEW.Dapper
                                     sb.Append(',').Append(variableName);
                                     if (!byPosition) sb.Append(i); else sb.Append(namePrefix).Append(i).Append(variableName);
                                 }
-                                return sb.Append(')').__ToStringRecycle();
+                                return sb.Append(')').ToStringRecycle();
                             }
                         }, RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.CultureInvariant);
                     }
@@ -2112,25 +2163,20 @@ namespace EZNEW.Dapper
         private static bool TryStringSplit(ref IEnumerable list, int splitAt, string namePrefix, IDbCommand command, bool byPosition)
         {
             if (list == null || splitAt < 0) return false;
-            switch (list)
+            return list switch
             {
-                case IEnumerable<int> l:
-                    return TryStringSplit(ref l, splitAt, namePrefix, command, "int", byPosition, (sb, i) => sb.Append(i.ToString(CultureInfo.InvariantCulture)));
-                case IEnumerable<long> l:
-                    return TryStringSplit(ref l, splitAt, namePrefix, command, "bigint", byPosition, (sb, i) => sb.Append(i.ToString(CultureInfo.InvariantCulture)));
-                case IEnumerable<short> l:
-                    return TryStringSplit(ref l, splitAt, namePrefix, command, "smallint", byPosition, (sb, i) => sb.Append(i.ToString(CultureInfo.InvariantCulture)));
-                case IEnumerable<byte> l:
-                    return TryStringSplit(ref l, splitAt, namePrefix, command, "tinyint", byPosition, (sb, i) => sb.Append(i.ToString(CultureInfo.InvariantCulture)));
-            }
-            return false;
+                IEnumerable<int> l => TryStringSplit(ref l, splitAt, namePrefix, command, "int", byPosition, (sb, i) => sb.Append(i.ToString(CultureInfo.InvariantCulture))),
+                IEnumerable<long> l => TryStringSplit(ref l, splitAt, namePrefix, command, "bigint", byPosition, (sb, i) => sb.Append(i.ToString(CultureInfo.InvariantCulture))),
+                IEnumerable<short> l => TryStringSplit(ref l, splitAt, namePrefix, command, "smallint", byPosition, (sb, i) => sb.Append(i.ToString(CultureInfo.InvariantCulture))),
+                IEnumerable<byte> l => TryStringSplit(ref l, splitAt, namePrefix, command, "tinyint", byPosition, (sb, i) => sb.Append(i.ToString(CultureInfo.InvariantCulture))),
+                _ => false,
+            };
         }
 
         private static bool TryStringSplit<T>(ref IEnumerable<T> list, int splitAt, string namePrefix, IDbCommand command, string colType, bool byPosition,
             Action<StringBuilder, T> append)
         {
-            var typed = list as ICollection<T>;
-            if (typed == null)
+            if (!(list is ICollection<T> typed))
             {
                 typed = list.ToList();
                 list = typed; // because we still need to be able to iterate it, even if we fail here
@@ -2184,7 +2230,7 @@ namespace EZNEW.Dapper
         }
 
         /// <summary>
-        /// OBSOLETE: For internal usage only. Sanitizes the paramter value with proper type casting.
+        /// OBSOLETE: For internal usage only. Sanitizes the parameter value with proper type casting.
         /// </summary>
         /// <param name="value">The value to sanitize.</param>
         [Obsolete(ObsoleteInternalUsageOnly, false)]
@@ -2193,15 +2239,10 @@ namespace EZNEW.Dapper
             if (value == null) return DBNull.Value;
             if (value is Enum)
             {
-                TypeCode typeCode;
-                if (value is IConvertible)
-                {
-                    typeCode = ((IConvertible)value).GetTypeCode();
-                }
-                else
-                {
-                    typeCode = Type.GetTypeCode(Enum.GetUnderlyingType(value.GetType()));
-                }
+                TypeCode typeCode = value is IConvertible convertible
+                    ? convertible.GetTypeCode()
+                    : Type.GetTypeCode(Enum.GetUnderlyingType(value.GetType()));
+
                 switch (typeCode)
                 {
                     case TypeCode.Byte: return (byte)value;
@@ -2237,7 +2278,7 @@ namespace EZNEW.Dapper
         /// Replace all literal tokens with their text form.
         /// </summary>
         /// <param name="parameters">The parameter lookup to do replacements with.</param>
-        /// <param name="command">The command to repalce parameters in.</param>
+        /// <param name="command">The command to replace parameters in.</param>
         public static void ReplaceLiterals(this IParameterLookup parameters, IDbCommand command)
         {
             var tokens = GetLiteralTokens(command.CommandText);
@@ -2312,7 +2353,7 @@ namespace EZNEW.Dapper
                             }
                             else
                             {
-                                return sb.Append(')').__ToStringRecycle();
+                                return sb.Append(')').ToStringRecycle();
                             }
                         }
                         throw new NotSupportedException($"The type '{value.GetType().Name}' is not supported for SQL literals.");
@@ -2362,7 +2403,9 @@ namespace EZNEW.Dapper
         public static Action<IDbCommand, object> CreateParamInfoGenerator(Identity identity, bool checkForDuplicates, bool removeUnused) =>
             CreateParamInfoGenerator(identity, checkForDuplicates, removeUnused, GetLiteralTokens(identity.sql));
 
-        private static bool IsValueTuple(Type type) => type?.IsValueType == true && type.FullName.StartsWith("System.ValueTuple`", StringComparison.Ordinal);
+        private static bool IsValueTuple(Type type) => (type?.IsValueType == true
+                                                       && type.FullName.StartsWith("System.ValueTuple`", StringComparison.Ordinal))
+                                                       || (type != null && IsValueTuple(Nullable.GetUnderlyingType(type)));
 
         internal static Action<IDbCommand, object> CreateParamInfoGenerator(Identity identity, bool checkForDuplicates, bool removeUnused, IList<LiteralToken> literals)
         {
@@ -2384,7 +2427,7 @@ namespace EZNEW.Dapper
 
             bool isStruct = type.IsValueType;
             var _sizeLocal = (LocalBuilder)null;
-            LocalBuilder GetSizeLocal() => _sizeLocal ?? (_sizeLocal = il.DeclareLocal(typeof(int)));
+            LocalBuilder GetSizeLocal() => _sizeLocal ??= il.DeclareLocal(typeof(int));
             il.Emit(OpCodes.Ldarg_1); // stack is now [untyped-param]
 
             LocalBuilder typedParameterLocal;
@@ -2436,7 +2479,7 @@ namespace EZNEW.Dapper
                 }
                 else
                 { // might still all be accounted for; check the hard way
-                    var positionByName = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+                    var positionByName = new Dictionary<string, int>(ctorParams.Length, StringComparer.OrdinalIgnoreCase);
                     foreach (var param in ctorParams)
                     {
                         positionByName[param.Name] = param.Position;
@@ -2801,6 +2844,7 @@ namespace EZNEW.Dapper
             finally
             {
                 if (wasClosed) cnn.Close();
+                cmd?.Parameters.Clear();
                 cmd?.Dispose();
             }
         }
@@ -2828,6 +2872,7 @@ namespace EZNEW.Dapper
             finally
             {
                 if (wasClosed) cnn.Close();
+                cmd?.Parameters.Clear();
                 cmd?.Dispose();
             }
             return Parse<T>(result);
@@ -2851,7 +2896,11 @@ namespace EZNEW.Dapper
             finally
             {
                 if (wasClosed) cnn.Close();
-                if (cmd != null && disposeCommand) cmd.Dispose();
+                if (cmd != null && disposeCommand)
+                {
+                    cmd.Parameters.Clear();
+                    cmd.Dispose();
+                }
             }
         }
 
@@ -2922,8 +2971,8 @@ namespace EZNEW.Dapper
 
         private static T Parse<T>(object value)
         {
-            if (value == null || value is DBNull) return default(T);
-            if (value is T) return (T)value;
+            if (value is null || value is DBNull) return default;
+            if (value is T t) return t;
             var type = typeof(T);
             type = Nullable.GetUnderlyingType(type) ?? type;
             if (type.IsEnum)
@@ -2951,7 +3000,9 @@ namespace EZNEW.Dapper
         /// Gets type-map for the given type
         /// </summary>
         /// <returns>Type map instance, default is to create new instance of DefaultTypeMap</returns>
+#pragma warning disable CA2211 // Non-constant fields should not be visible - I agree with you, but we can't do that until we break the API
         public static Func<Type, ITypeMap> TypeMapProvider = (Type type) => new DefaultTypeMap(type);
+#pragma warning restore CA2211 // Non-constant fields should not be visible
 
         /// <summary>
         /// Gets type-map for the given <see cref="Type"/>.
@@ -2986,7 +3037,7 @@ namespace EZNEW.Dapper
         /// Set custom mapping for type deserializers
         /// </summary>
         /// <param name="type">Entity type to override</param>
-        /// <param name="map">Mapping rules impementation, null to remove custom map</param>
+        /// <param name="map">Mapping rules implementation, null to remove custom map</param>
         public static void SetTypeMap(Type type, ITypeMap map)
         {
             if (type == null)
@@ -3029,7 +3080,7 @@ namespace EZNEW.Dapper
         private static LocalBuilder GetTempLocal(ILGenerator il, ref Dictionary<Type, LocalBuilder> locals, Type type, bool initAndLoad)
         {
             if (type == null) throw new ArgumentNullException(nameof(type));
-            locals = locals ?? new Dictionary<Type, LocalBuilder>();
+            locals ??= new Dictionary<Type, LocalBuilder>();
             if (!locals.TryGetValue(type, out LocalBuilder found))
             {
                 found = il.DeclareLocal(type);
@@ -3078,7 +3129,8 @@ namespace EZNEW.Dapper
 
         private static void GenerateValueTupleDeserializer(Type valueTupleType, IDataReader reader, int startBound, int length, ILGenerator il)
         {
-            var currentValueTupleType = valueTupleType;
+            var nullableUnderlyingType = Nullable.GetUnderlyingType(valueTupleType);
+            var currentValueTupleType = nullableUnderlyingType ?? valueTupleType;
 
             var constructors = new List<ConstructorInfo>();
             var languageTupleElementTypes = new List<Type>();
@@ -3161,6 +3213,13 @@ namespace EZNEW.Dapper
             for (var i = constructors.Count - 1; i >= 0; i--)
             {
                 il.Emit(OpCodes.Newobj, constructors[i]);
+            }
+
+            if (nullableUnderlyingType != null)
+            {
+                var nullableTupleConstructor = valueTupleType.GetConstructor(new[] { nullableUnderlyingType });
+
+                il.Emit(OpCodes.Newobj, nullableTupleConstructor);
             }
 
             il.Emit(OpCodes.Box, valueTupleType);
@@ -3503,7 +3562,7 @@ namespace EZNEW.Dapper
             else
             {
                 bool handled = false;
-                OpCode opCode = default(OpCode);
+                OpCode opCode = default;
                 switch (Type.GetTypeCode(from))
                 {
                     case TypeCode.Boolean:
@@ -3596,8 +3655,8 @@ namespace EZNEW.Dapper
         /// Throws a data exception, only used internally
         /// </summary>
         /// <param name="ex">The exception to throw.</param>
-        /// <param name="index">The index the exception occured at.</param>
-        /// <param name="reader">The reader the exception occured in.</param>
+        /// <param name="index">The index the exception occurred at.</param>
+        /// <param name="reader">The reader the exception occurred in.</param>
         /// <param name="value">The value that caused the exception.</param>
         [Obsolete(ObsoleteInternalUsageOnly, false)]
         public static void ThrowDataException(Exception ex, int index, IDataReader reader, object value)
@@ -3609,6 +3668,11 @@ namespace EZNEW.Dapper
                 if (reader != null && index >= 0 && index < reader.FieldCount)
                 {
                     name = reader.GetName(index);
+                    if (name == string.Empty)
+                    {
+                        // Otherwise we throw (=value) below, which isn't intuitive
+                        name = "(Unnamed Column)";
+                    }
                     try
                     {
                         if (value == null || value is DBNull)
@@ -3734,11 +3798,11 @@ namespace EZNEW.Dapper
             return new StringBuilder();
         }
 
-        private static string __ToStringRecycle(this StringBuilder obj)
+        private static string ToStringRecycle(this StringBuilder obj)
         {
             if (obj == null) return "";
             var s = obj.ToString();
-            perThreadStringBuilderCache = perThreadStringBuilderCache ?? obj;
+            perThreadStringBuilderCache ??= obj;
             return s;
         }
     }

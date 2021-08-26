@@ -22,6 +22,6 @@ namespace EZNEW.Data.Configuration
         /// <summary>
         /// Gets or sets the batch execute configuration
         /// </summary>
-        public BatchExecuteConfiguration BatchExecuteConfiguration { get; set; }
+        public BatchExecutionConfiguration BatchExecuteConfiguration { get; set; }
     }
 }

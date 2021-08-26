@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace EZNEW.Dapper
+namespace Dapper
 {
     public static partial class SqlMapper
     {

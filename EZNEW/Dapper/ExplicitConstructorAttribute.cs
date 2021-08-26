@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace EZNEW.Dapper
+namespace Dapper
 {
     /// <summary>
     /// Tell Dapper to use an explicit constructor, passing nulls or 0s for all parameters

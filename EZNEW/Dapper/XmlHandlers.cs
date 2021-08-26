@@ -2,7 +2,7 @@
 using System.Xml;
 using System.Xml.Linq;
 
-namespace EZNEW.Dapper
+namespace Dapper
 {
     internal abstract class XmlTypeHandler<T> : SqlMapper.StringTypeHandler<T>
     {

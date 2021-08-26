@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Data;
 using System.IO;
-using EZNEW.Dapper;
+using Dapper;
 using EZNEW.Development.DataAccess;
 using EZNEW.Data.CriteriaConverter;
 using EZNEW.Development.Entity;
@@ -16,6 +16,7 @@ using EZNEW.Development.Query;
 using EZNEW.Application;
 using EZNEW.Exceptions;
 using EZNEW.Data.ParameterHandler;
+using EZNEW.Data.TypeHandler;
 
 namespace EZNEW.Data
 {
@@ -29,6 +30,7 @@ namespace EZNEW.Data
             ApplicationInitializer.Init();
             ContainerManager.Container?.Register(typeof(ICommandExecutor), typeof(DatabaseCommandExecutor));
             SqlMapper.Settings.ApplyNullValues = true;
+            SqlMapper.AddTypeHandler(new DateTimeOffsetHandler());
             ConfigureDefaultParameterHandler();
         }
 
@@ -90,7 +92,7 @@ namespace EZNEW.Data
         /// <summary>
         /// Database server batch execute config
         /// </summary>
-        static readonly Dictionary<DatabaseServerType, BatchExecuteConfiguration> DatabaseServerExecuteConfigurations = new Dictionary<DatabaseServerType, BatchExecuteConfiguration>();
+        static readonly Dictionary<DatabaseServerType, BatchExecutionConfiguration> DatabaseServerExecuteConfigurations = new Dictionary<DatabaseServerType, BatchExecutionConfiguration>();
 
         /// <summary>
         /// Database server data isolation level collection
@@ -122,15 +124,20 @@ namespace EZNEW.Data
         static readonly Dictionary<string, Func<CriteriaConverterParseOptions, string>> CriteriaConverterParsers = new Dictionary<string, Func<CriteriaConverterParseOptions, string>>();
 
         /// <summary>
-        /// Gets or sets the default page size
-        /// </summary>
-        public static int DefaultPageSize { get; set; } = 20;
-
-        /// <summary>
         /// Key=>DatabaseServerType+DbType
         /// Value=>IParameterHandler
         /// </summary>
         private static readonly Dictionary<string, IParameterHandler> ParameterHandlers = new Dictionary<string, IParameterHandler>();
+
+        /// <summary>
+        /// Gets the Paging total conut field name
+        /// </summary>
+        public const string PagingTotalCountFieldName = "QueryDataTotalCount";
+
+        /// <summary>
+        /// Data options
+        /// </summary>
+        public static DataOptions DataOptions { get; private set; } = new DataOptions();
 
         #endregion
 
@@ -139,10 +146,23 @@ namespace EZNEW.Data
         #region Configure
 
         /// <summary>
-        /// Configure data access
+        /// Configure
         /// </summary>
-        /// <param name="configuration">Data configuration</param>
-        public static void Configure(DataConfiguration configuration)
+        /// <param name="configureDelegate">Configure delegate</param>
+        public static void Configure(Action<DataOptions> configureDelegate)
+        {
+            configureDelegate?.Invoke(DataOptions);
+        }
+
+        #endregion
+
+        #region Configure database
+
+        /// <summary>
+        /// Configure database
+        /// </summary>
+        /// <param name="configuration">Database configuration</param>
+        public static void ConfigureDatabase(DatabaseConfiguration configuration)
         {
             if (configuration == null || configuration.Servers == null || configuration.Servers.Count <= 0)
             {
@@ -174,36 +194,32 @@ namespace EZNEW.Data
         /// <summary>
         /// Configure data access through json data
         /// </summary>
-        /// <param name="jsonConfiguration">Json value</param>
-        public static void Configure(string jsonConfiguration)
+        /// <param name="json">Json data</param>
+        public static void ConfigureDatabase(string json)
         {
-            if (string.IsNullOrWhiteSpace(jsonConfiguration))
+            if (string.IsNullOrWhiteSpace(json))
             {
                 return;
             }
-            var dataConfig = JsonSerializer.Deserialize<DataConfiguration>(jsonConfiguration);
+            var dataConfig = JsonSerializer.Deserialize<DatabaseConfiguration>(json);
             if (dataConfig == null)
             {
                 return;
             }
-            Configure(dataConfig);
+            ConfigureDatabase(dataConfig);
         }
 
         /// <summary>
         /// Configure data access through default configuration file
         /// </summary>
-        /// <param name="configRootPath">Data access configuration root path</param>
-        public static void ConfigureByFile(string configRootPath = "")
+        /// <param name="configPath">Data access configuration root path</param>
+        public static void ConfigureDatabaseByConfigFile(string configPath = "")
         {
-            if (string.IsNullOrWhiteSpace(configRootPath))
+            if (string.IsNullOrWhiteSpace(configPath))
             {
-                configRootPath = Path.Combine(Directory.GetCurrentDirectory(), "Configuration", "DataAccess");
+                configPath = ApplicationManager.RootPath;
             }
-            if (!Directory.Exists(configRootPath))
-            {
-                return;
-            }
-            InitFolderConfiguration(configRootPath);
+            InitFolderConfiguration(configPath);
         }
 
         /// <summary>
@@ -216,19 +232,14 @@ namespace EZNEW.Data
             {
                 return;
             }
-            var files = Directory.GetFiles(path).Where(c => Path.GetExtension(c).Trim('.').ToLower() == "daconfig").ToArray();
+            var files = Directory.GetFiles(path, "*.daconfig", SearchOption.AllDirectories);
             if (!files.IsNullOrEmpty())
             {
                 foreach (var file in files)
                 {
                     var fileData = File.ReadAllText(file);
-                    Configure(fileData);
+                    ConfigureDatabase(fileData);
                 }
-            }
-            var childFolders = new DirectoryInfo(path).GetDirectories();
-            foreach (var folder in childFolders)
-            {
-                InitFolderConfiguration(folder.FullName);
             }
         }
 
@@ -660,16 +671,16 @@ namespace EZNEW.Data
 
         #endregion
 
-        #region Batch execute configuration
+        #region Batch execution configuration
 
         #region Configure batch execute
 
         /// <summary>
-        /// Configure batch execute
+        /// Configure batch execution
         /// </summary>
         /// <param name="serverType">Database server type</param>
-        /// <param name="batchExecuteConfig">Batch execute configuration</param>
-        public static void ConfigureBatchExecute(DatabaseServerType serverType, BatchExecuteConfiguration batchExecuteConfig)
+        /// <param name="batchExecuteConfig">Batch execution configuration</param>
+        public static void ConfigureBatchExecution(DatabaseServerType serverType, BatchExecutionConfiguration batchExecuteConfig)
         {
             if (batchExecuteConfig == null)
             {
@@ -683,11 +694,11 @@ namespace EZNEW.Data
         #region Get batch execute configuration
 
         /// <summary>
-        /// Get batch execute configuration
+        /// Get batch execution configuration
         /// </summary>
         /// <param name="serverType">Database server type</param>
-        /// <returns>Return batch execute configuration</returns>
-        public static BatchExecuteConfiguration GetBatchExecuteConfiguration(DatabaseServerType serverType)
+        /// <returns>Return batch execution configuration</returns>
+        public static BatchExecutionConfiguration GetBatchExecutionConfiguration(DatabaseServerType serverType)
         {
             DatabaseServerExecuteConfigurations.TryGetValue(serverType, out var config);
             return config;

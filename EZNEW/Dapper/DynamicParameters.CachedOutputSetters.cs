@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 
-namespace EZNEW.Dapper
+namespace Dapper
 {
     public partial class DynamicParameters
     {

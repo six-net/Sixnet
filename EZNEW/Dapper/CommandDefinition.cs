@@ -4,7 +4,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
 
-namespace EZNEW.Dapper
+namespace Dapper
 {
     /// <summary>
     /// Represents the key aspects of a sql operation
@@ -19,7 +19,7 @@ namespace EZNEW.Dapper
             }
             else
             {
-                return default(CommandDefinition);
+                return default;
             }
         }
 
@@ -85,7 +85,7 @@ namespace EZNEW.Dapper
         /// <param name="cancellationToken">The cancellation token for this command.</param>
         public CommandDefinition(string commandText, object parameters = null, IDbTransaction transaction = null, int? commandTimeout = null,
                                  CommandType? commandType = null, CommandFlags flags = CommandFlags.Buffered
-                                 , CancellationToken cancellationToken = default(CancellationToken)
+                                 , CancellationToken cancellationToken = default
             )
         {
             CommandText = commandText;

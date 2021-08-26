@@ -3,7 +3,7 @@
     /// <summary>
     /// Batch execute configuration
     /// </summary>
-    public class BatchExecuteConfiguration
+    public class BatchExecutionConfiguration
     {
         /// <summary>
         /// Gets or sets the group statements count
@@ -18,6 +18,6 @@
         /// <summary>
         /// Gets the default batch execute configuration
         /// </summary>
-        public static readonly BatchExecuteConfiguration Default = new BatchExecuteConfiguration();
+        public static readonly BatchExecutionConfiguration Default = new BatchExecutionConfiguration();
     }
 }

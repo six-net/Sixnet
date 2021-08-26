@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Data;
 
-namespace EZNEW.Dapper
+namespace Dapper
 {
     public partial class DynamicParameters
     {

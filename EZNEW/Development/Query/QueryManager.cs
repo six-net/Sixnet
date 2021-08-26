@@ -413,7 +413,7 @@ namespace EZNEW.Development.Query
             if (FilterObsoleteData)
             {
                 var obsoleteField = EntityManager.GetObsoleteField(conditionFilter.EntityType);
-                if (!string.IsNullOrWhiteSpace(obsoleteField) && !conditionFilter.OriginalQuery.IncludeObsolete)
+                if (!string.IsNullOrWhiteSpace(obsoleteField) && !conditionFilter.OriginalQuery.IncludeObsoleteData)
                 {
                     globalCondition ??= new GlobalCondition();
                     if (globalCondition.Value == null)
@@ -468,9 +468,6 @@ namespace EZNEW.Development.Query
                 //global condition
                 var conditionFilterResult = GetGlobalCondition(conditionFilter);
                 conditionFilterResult?.AppendTo(query);
-
-                //filter oboslete data
-                query = query.ExcludeObsoleteData();
 
                 //subqueries
                 if (!query.Subqueries.IsNullOrEmpty())

@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Data;
 
-namespace EZNEW.Dapper
+namespace Dapper
 {
     public static partial class SqlMapper
     {

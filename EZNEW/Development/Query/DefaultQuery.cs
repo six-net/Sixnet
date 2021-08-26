@@ -273,7 +273,7 @@ namespace EZNEW.Development.Query
         /// <summary>
         /// Indecates whether query obsolete data
         /// </summary>
-        public bool IncludeObsolete { get; set; }
+        public bool IncludeObsoleteData { get; set; }
 
         #endregion
 
@@ -1070,7 +1070,8 @@ namespace EZNEW.Development.Query
                 RecurveCriteria = RecurveCriteria,
                 MustReturnValueOnSuccess = MustReturnValueOnSuccess,
                 IsObsolete = IsObsolete,
-                IsolationLevel = IsolationLevel
+                IsolationLevel = IsolationLevel,
+                IncludeObsoleteData = IncludeObsoleteData
             };
             return newQuery;
         }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-namespace EZNEW.Dapper
+namespace Dapper
 {
     /// <summary>
     /// Represents simple member map for one of target parameter or property or field to source DataReader column

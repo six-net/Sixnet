@@ -3,9 +3,9 @@
 namespace EZNEW.Data.Configuration
 {
     /// <summary>
-    /// Data configuration
+    /// Database configuration
     /// </summary>
-    public class DataConfiguration
+    public class DatabaseConfiguration
     {
         /// <summary>
         /// Gets or sets the server type configuration

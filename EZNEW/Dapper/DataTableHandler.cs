@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Data;
-namespace EZNEW.Dapper
+namespace Dapper
 {
     internal sealed class DataTableHandler : SqlMapper.ITypeHandler
     {

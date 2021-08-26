@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-namespace EZNEW.Dapper
+namespace Dapper
 {
     public static partial class SqlMapper
     {
@@ -89,11 +89,10 @@ namespace EZNEW.Dapper
                 return callMethod;
             }
 
-            static readonly string[] s_nixKeys = new string[0];
             public override IEnumerable<string> GetDynamicMemberNames()
             {
                 if(HasValue && Value is IDictionary<string, object> lookup) return lookup.Keys;
-                return s_nixKeys;
+                return Array.Empty<string>();
             }
         }
     }

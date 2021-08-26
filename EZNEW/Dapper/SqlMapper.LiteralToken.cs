@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
-namespace EZNEW.Dapper
+namespace Dapper
 {
     public static partial class SqlMapper
     {
@@ -25,7 +26,7 @@ namespace EZNEW.Dapper
                 Member = member;
             }
 
-            internal static readonly IList<LiteralToken> None = new LiteralToken[0];
+            internal static IList<LiteralToken> None => Array.Empty<LiteralToken>();
         }
     }
 }

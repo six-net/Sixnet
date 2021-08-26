@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace EZNEW.Dapper
+namespace Dapper
 {
     public static partial class SqlMapper
     {
@@ -76,7 +76,7 @@ namespace EZNEW.Dapper
                     }
                 }
 
-                return sb.Append('}').__ToStringRecycle();
+                return sb.Append('}').ToStringRecycle();
             }
 
             public IEnumerator<KeyValuePair<string, object>> GetEnumerator()

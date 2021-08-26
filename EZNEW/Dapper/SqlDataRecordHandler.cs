@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 
-namespace EZNEW.Dapper
+namespace Dapper
 {
     internal sealed class SqlDataRecordHandler<T> : SqlMapper.ITypeHandler
         where T : IDataRecord

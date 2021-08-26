@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Data;
 
-namespace EZNEW.Dapper
+namespace Dapper
 {
     /// <summary>
     /// Handles variances in features per DBMS
@@ -10,7 +10,8 @@ namespace EZNEW.Dapper
     {
         private static readonly FeatureSupport
             Default = new FeatureSupport(false),
-            Postgres = new FeatureSupport(true);
+            Postgres = new FeatureSupport(true),
+            ClickHouse = new FeatureSupport(true);
 
         /// <summary>
         /// Gets the feature set based on the passed connection
@@ -20,6 +21,7 @@ namespace EZNEW.Dapper
         {
             string name = connection?.GetType().Name;
             if (string.Equals(name, "npgsqlconnection", StringComparison.OrdinalIgnoreCase)) return Postgres;
+            if (string.Equals(name, "clickhouseconnection", StringComparison.OrdinalIgnoreCase)) return ClickHouse;
             return Default;
         }
 

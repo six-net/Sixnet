@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Data;
 
-namespace EZNEW.Dapper
+namespace Dapper
 {
     /// <summary>
     /// This class represents a SQL string, it can be used if you need to denote your parameter is a Char vs VarChar vs nVarChar vs nChar
@@ -44,6 +44,13 @@ namespace EZNEW.Dapper
         /// The value of the string
         /// </summary>
         public string Value { get; set; }
+        
+        /// <summary>
+        /// Gets a string representation of this DbString.
+        /// </summary>
+        public override string ToString() =>
+            $"Dapper.DbString (Value: '{Value}', Length: {Length}, IsAnsi: {IsAnsi}, IsFixedLength: {IsFixedLength})";
+
         /// <summary>
         /// Add the parameter to the command... internal use only
         /// </summary>

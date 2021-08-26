@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Data;
 
-namespace EZNEW.Dapper
+namespace Dapper
 {
     public static partial class SqlMapper
     {
@@ -44,7 +44,7 @@ namespace EZNEW.Dapper
                 {
                     if (ex.Message.Contains(nameof(CommandBehavior.SingleResult))
                         || ex.Message.Contains(nameof(CommandBehavior.SingleRow)))
-                    { // some providers just just allow these, so: try again without them and stop issuing them
+                    { // some providers just allow these, so: try again without them and stop issuing them
                         SetAllowedCommandBehaviors(CommandBehavior.SingleResult | CommandBehavior.SingleRow, false);
                         return true;
                     }
@@ -90,9 +90,15 @@ namespace EZNEW.Dapper
             public static bool PadListExpansions { get; set; }
             /// <summary>
             /// If set (non-negative), when performing in-list expansions of integer types ("where id in @ids", etc), switch to a string_split based
-            /// operation if there are more than this many elements. Note that this feautre requires SQL Server 2016 / compatibility level 130 (or above).
+            /// operation if there are this many elements or more. Note that this feature requires SQL Server 2016 / compatibility level 130 (or above).
             /// </summary>
             public static int InListStringSplitCount { get; set; } = -1;
+
+            /// <summary>
+            /// If set, pseudo-positional parameters (i.e. ?foo?) are passed using auto-generated incremental names, i.e. "1", "2", "3"
+            /// instead of the original name; for most scenarios, this is ignored since the name is redundant, but "snowflake" requires this.
+            /// </summary>
+            public static bool UseIncrementalPseudoPositionalParameterNames { get; set; }
         }
     }
 }

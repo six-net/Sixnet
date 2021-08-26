@@ -28,7 +28,7 @@ namespace EZNEW.Development.Query
             if (QueryManager.FilterObsoleteData)
             {
                 var obsoleteField = EntityManager.GetObsoleteField(entityType);
-                if (!string.IsNullOrWhiteSpace(obsoleteField) && !originalQuery.IncludeObsolete)
+                if (!string.IsNullOrWhiteSpace(obsoleteField) && !originalQuery.IncludeObsoleteData)
                 {
                     originalQuery = originalQuery.Equal(obsoleteField, false);
                 }

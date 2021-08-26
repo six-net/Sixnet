@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-namespace EZNEW.Dapper
+namespace Dapper
 {
     internal static class TypeExtensions
     {

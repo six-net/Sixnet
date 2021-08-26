@@ -202,7 +202,6 @@ namespace EZNEW.Data
             {
                 bool notOrder = command.Query == null || command.Query.Orders.IsNullOrEmpty();
                 int dataSize = command.Query?.QuerySize ?? 0;
-                var entityCompare = new EntityCompare<T>();
                 Task<IEnumerable<T>>[] queryTasks = new Task<IEnumerable<T>>[servers.Count];
                 int serverIndex = 0;
                 foreach (var server in servers)
@@ -211,7 +210,12 @@ namespace EZNEW.Data
                     queryTasks[serverIndex] = provider.QueryAsync<T>(server, command);
                     serverIndex++;
                 }
-                datas = (await Task.WhenAll(queryTasks).ConfigureAwait(false)).SelectMany(c => c).Distinct(entityCompare);
+                datas = (await Task.WhenAll(queryTasks).ConfigureAwait(false)).SelectMany(c => c);
+                if (DataManager.DataOptions.ListDataMergeForDeduplication)
+                {
+                    var entityCompare = new EntityCompare<T>();
+                    datas = datas.Distinct(entityCompare);
+                }
                 if (!notOrder)
                 {
                     datas = command.Query.Sort(datas);
@@ -273,6 +277,7 @@ namespace EZNEW.Data
 
             IEnumerable<T> datas = Array.Empty<T>();
             long totalCount = 0;
+            EntityCompare<T> entityCompare = DataManager.DataOptions.PagingDataMergeForDeduplication ? new EntityCompare<T>() : null;
             foreach (var paging in allPagings)
             {
                 if (paging == null)
@@ -282,7 +287,7 @@ namespace EZNEW.Data
                 totalCount += paging.TotalCount;
                 if (!paging.Items.IsNullOrEmpty())
                 {
-                    datas = datas.Union(paging.Items);
+                    datas = datas.Union(paging.Items, entityCompare);
                 }
             }
             if (command.Query != null)

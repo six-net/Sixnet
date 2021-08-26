@@ -29,7 +29,7 @@ namespace EZNEW.Paging
                 Items = datas;
                 if (PageSize < 1)
                 {
-                    PageSize = DataManager.DefaultPageSize;
+                    PageSize = DataManager.DataOptions.DefaultPageSize;
                 }
                 PageCount = totalCount / PageSize;
                 if (totalCount % PageSize > 0)
@@ -51,7 +51,7 @@ namespace EZNEW.Paging
         /// <summary>
         /// Gets the page size
         /// </summary>
-        public int PageSize { get; set; } = DataManager.DefaultPageSize;
+        public int PageSize { get; set; } = DataManager.DataOptions.DefaultPageSize;
 
         /// <summary>
         /// Gets the page count

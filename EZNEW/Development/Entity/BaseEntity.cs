@@ -6,7 +6,7 @@ using EZNEW.Development.Domain.Model;
 using EZNEW.Development.Query;
 using EZNEW.Exceptions;
 using EZNEW.Model;
-using static EZNEW.Dapper.SqlMapper;
+using static Dapper.SqlMapper;
 
 namespace EZNEW.Development.Entity
 {

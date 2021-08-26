@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace EZNEW.Dapper
+namespace Dapper
 {
     internal static class Extensions
     {

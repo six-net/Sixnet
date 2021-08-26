@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-namespace EZNEW.Dapper
+namespace Dapper
 {
     /// <summary>
     /// Implements custom property mapping by user provided criteria (usually presence of some custom attribute with column to member mapping)
@@ -29,7 +29,7 @@ namespace EZNEW.Dapper
         /// <param name="types">DataReader column types</param>
         /// <returns>Default constructor</returns>
         public ConstructorInfo FindConstructor(string[] names, Type[] types) =>
-            _type.GetConstructor(new Type[0]);
+            _type.GetConstructor(Array.Empty<Type>());
 
         /// <summary>
         /// Always returns null
@@ -52,7 +52,7 @@ namespace EZNEW.Dapper
         /// Returns property based on selector strategy
         /// </summary>
         /// <param name="columnName">DataReader column name</param>
-        /// <returns>Poperty member map</returns>
+        /// <returns>Property member map</returns>
         public SqlMapper.IMemberMap GetMember(string columnName)
         {
             var prop = _propertySelector(_type, columnName);
