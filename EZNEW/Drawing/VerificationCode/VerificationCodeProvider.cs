@@ -80,9 +80,9 @@ namespace EZNEW.Drawing.VerificationCode
         public Color? InterfereColor { get; set; } = null;
 
         /// <summary>
-        /// Gets or sets the front family name
+        /// Gets or sets the font family name
         /// </summary>
-        public string FrontFamilyName { get; set; } = string.Empty;
+        public string FontFamilyName { get; set; } = string.Empty;
 
         #endregion
 
