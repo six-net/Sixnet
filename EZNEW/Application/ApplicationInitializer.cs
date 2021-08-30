@@ -10,11 +10,9 @@ using EZNEW.Development.Domain.Model;
 using EZNEW.Development.Domain.Repository;
 using EZNEW.Development.Entity;
 using EZNEW.Development.Query;
-using EZNEW.Diagnostics;
 using EZNEW.Logging;
 using EZNEW.Mapper;
 using EZNEW.Module;
-using EZNEW.Reflection;
 
 namespace EZNEW.Application
 {
@@ -50,33 +48,6 @@ namespace EZNEW.Application
         /// </summary>
         static readonly Type moduleConfigurationType = typeof(IModuleConfiguration);
 
-        /// <summary>
-        /// Convention file name patterns
-        /// </summary>
-        internal static readonly List<string> ConventionFileNamePatterns = new()
-        {
-            @"\.Entity\.",
-            @"\.QueryModel\.",
-            @"\.ModuleConfig\.",
-            @"\.Domain\.",
-            @"\.DataAccess",
-            @"\.CacheDataAccess\.",
-            @"\.Business",
-            @"\.Repository\.",
-            @"\.Service\.",
-            @"\.AppService",
-            @"\.Domain\.",
-            @"\.DTO\.",
-            @"\.ViewModel\.",
-            @"\.Module\.",
-            @"\.ApiModel\."
-        };
-
-        /// <summary>
-        /// Convention file match regex
-        /// </summary>
-        internal static Regex ConventionFileMatchRegex = null;
-
         #endregion
 
         #region Methods
@@ -93,7 +64,7 @@ namespace EZNEW.Application
         {
             try
             {
-                var allTypeDict = GetAllConventionTypes()?.ToDictionary(c => c.FullName, c => c);
+                var allTypeDict = ApplicationManager.GetAllConventionTypes()?.ToDictionary(c => c.FullName, c => c);
                 if (allTypeDict.IsNullOrEmpty())
                 {
                     return;
@@ -171,74 +142,6 @@ namespace EZNEW.Application
             {
                 LogManager.LogError(ex, ex.Message);
             }
-        }
-
-        /// <summary>
-        /// Get the matched files
-        /// </summary>
-        /// <returns></returns>
-        internal static IEnumerable<FileInfo> GetMatchedFiles()
-        {
-            return FilterFiles(new DirectoryInfo(ApplicationManager.RootPath).GetFiles("*.dll", ApplicationManager.Options.FileMatchOptions.FileSearchOption));
-        }
-
-        /// <summary>
-        /// Get all convention types
-        /// </summary>
-        /// <returns></returns>
-        internal static IEnumerable<Type> GetAllConventionTypes()
-        {
-            var files = GetMatchedFiles();
-            if (files.IsNullOrEmpty())
-            {
-                return Array.Empty<Type>();
-            }
-            IEnumerable<Type> allTypes = Array.Empty<Type>();
-            foreach (var file in files)
-            {
-                try
-                {
-                    var types = Assembly.LoadFrom(file.FullName).GetTypes();
-                    allTypes = allTypes.Union(types);
-                }
-                catch (Exception ex)
-                {
-                    LogManager.LogError(ex, ex.Message);
-                }
-            }
-            return allTypes;
-        }
-
-        /// <summary>
-        /// Filter files
-        /// </summary>
-        /// <param name="originalFiles">Original files</param>
-        /// <param name="options">Configuration setting</param>
-        /// <returns></returns>
-        internal static IEnumerable<FileInfo> FilterFiles(IEnumerable<FileInfo> originalFiles, ApplicationOptions options = null)
-        {
-            if (originalFiles.IsNullOrEmpty())
-            {
-                return Array.Empty<FileInfo>();
-            }
-            options ??= ApplicationManager.Options;
-            var fileOptions = options.FileMatchOptions;
-            return originalFiles.Where(c =>
-            {
-                var matched = fileOptions.FileMatchPattern switch
-                {
-                    FileMatchPattern.None => true,
-                    FileMatchPattern.FileNamePrefix => fileOptions.FileNameKeywords?.Any(rn => c.Name.StartsWith(rn, StringComparison.OrdinalIgnoreCase)) ?? false,
-                    FileMatchPattern.FileNameSuffix => fileOptions.FileNameKeywords?.Any(rn => c.Name.EndsWith(rn, StringComparison.OrdinalIgnoreCase)) ?? false,
-                    FileMatchPattern.IncludeFileName => fileOptions.FileNameKeywords?.Any(kw => c.Name.Contains(kw)) ?? false,
-                    FileMatchPattern.ExcludeFileName => !(fileOptions.FileNameKeywords?.Any(kw => c.Name.Contains(kw)) ?? false),
-                    FileMatchPattern.IncludeByRegex => new Regex(fileOptions.RegexExpression, RegexOptions.IgnoreCase).IsMatch(c.FullName),
-                    FileMatchPattern.ExcludeByRegex => !new Regex(fileOptions.RegexExpression, RegexOptions.IgnoreCase).IsMatch(c.FullName),
-                    FileMatchPattern.Convention => new Regex($@"^{ApplicationManager.RootPath.Replace(@"\", @"\\")}.*({string.Join("|", ConventionFileNamePatterns.Union(ApplicationManager.Options.FileMatchOptions.FileRegexPatterns ?? new List<string>(0)))}).*$", RegexOptions.IgnoreCase).IsMatch(c.FullName),
-                    _ => true
-                };
-                return matched;
-            });
         }
 
         #endregion

@@ -295,7 +295,7 @@ namespace EZNEW.DependencyInjection
         /// </summary>
         static void RegisterDefaultProjectService()
         {
-            var allTypes = ApplicationInitializer.GetAllConventionTypes();
+            var allTypes = ApplicationManager.GetAllConventionTypes();
             if (allTypes.IsNullOrEmpty())
             {
                 return;

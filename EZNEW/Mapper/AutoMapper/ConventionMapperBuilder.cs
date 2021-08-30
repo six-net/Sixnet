@@ -49,7 +49,7 @@ namespace AutoMapper
         /// <param name="mapperConfigurationExpression"></param>
         void ConfigureConventionMap(IMapperConfigurationExpression mapperConfigurationExpression)
         {
-            var conventionTypes = ApplicationInitializer.GetAllConventionTypes();
+            var conventionTypes = ApplicationManager.GetAllConventionTypes();
             if (conventionTypes.IsNullOrEmpty())
             {
                 return;
