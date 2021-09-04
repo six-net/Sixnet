@@ -8,6 +8,7 @@ using EZNEW.Development.Domain.Model;
 using EZNEW.Development.UnitOfWork;
 using EZNEW.DependencyInjection;
 using EZNEW.Expressions;
+using EZNEW.Development.Entity;
 
 namespace EZNEW.Development.Domain.Repository.Event
 {
@@ -22,6 +23,57 @@ namespace EZNEW.Development.Domain.Repository.Event
         static readonly Dictionary<Guid, Dictionary<Guid, Dictionary<EventType, List<IRepositoryEventHandler>>>> EventWarehouses = new Dictionary<Guid, Dictionary<Guid, Dictionary<EventType, List<IRepositoryEventHandler>>>>();
 
         #region Subscribe
+
+        #region Init default event
+
+        /// <summary>
+        /// Init default evnet
+        /// </summary>
+        internal static void InitDefaultEvent()
+        {
+            if (ModelManager.ModelMetadatas.IsNullOrEmpty())
+            {
+                return;
+            }
+            foreach (var modelItem in ModelManager.ModelMetadatas.Values)
+            {
+                if (modelItem.ModelType == null || modelItem.EntityType == null)
+                {
+                    continue;
+                }
+                var entityConfig = EntityManager.GetEntityConfiguration(modelItem.EntityType);
+                if (entityConfig == null || entityConfig.RelationModelType == null || entityConfig.RelationFields.IsNullOrEmpty())
+                {
+                    continue;
+                }
+                foreach (var relationItem in entityConfig.RelationFields)
+                {
+                    //Remove repository event
+                    if (relationItem.Value.Any(c => (c.Value.Behavior & RelationBehavior.CascadingRemove) == RelationBehavior.CascadingRemove))
+                    {
+                        var relationEntityType = relationItem.Key;
+                        var relationEntityConfig = EntityManager.GetEntityConfiguration(relationEntityType);
+                        if (relationEntityConfig?.RelationModelType == null)
+                        {
+                            continue;
+                        }
+
+                        Type sourceRepositoryType = RepositoryManager.GetDefaultRepository(relationEntityConfig.RelationModelType);
+                        Type handlerRepositoryType = RepositoryManager.GetDefaultRepository(modelItem.ModelType);
+                        if (sourceRepositoryType == null || handlerRepositoryType == null)
+                        {
+                            continue;
+                        }
+                        SubscribeDataOperation(EventType.RemoveObject, sourceRepositoryType, relationEntityConfig.RelationModelType, handlerRepositoryType, nameof(IRepository.RemoveByRelationData));
+                        SubscribeConditionOperation(EventType.RemoveByCondition, sourceRepositoryType, relationEntityConfig.RelationModelType, handlerRepositoryType, nameof(IRepository.RemoveByRelationData));
+                    }
+                }
+            }
+        }
+
+        #endregion
+
+        #region Subscribe event
 
         /// <summary>
         /// Subscribe event
@@ -57,6 +109,8 @@ namespace EZNEW.Development.Domain.Repository.Event
             }
         }
 
+        #endregion
+
         #region Data operation
 
         /// <summary>
@@ -81,11 +135,12 @@ namespace EZNEW.Development.Domain.Repository.Event
             }
             var parameterType = typeof(IEnumerable<>).MakeGenericType(objectType);
             var activationOptionType = typeof(ActivationOptions);
-            var actionMember = eventHandler.GetType().GetMethod(actionName, new Type[] { parameterType, activationOptionType });
+            var actionMember = eventHandler.GetType().GetMethods().FirstOrDefault(c => c.Name == actionName && c.IsGenericMethod);
             if (actionMember == null)
             {
                 return;
             }
+            actionMember = actionMember.MakeGenericMethod(new Type[] { objectType });
             var handlerAction = Delegate.CreateDelegate(typeof(DataOperation<>).MakeGenericType(objectType), eventHandler, actionMember);
             if (handlerAction == null)
             {

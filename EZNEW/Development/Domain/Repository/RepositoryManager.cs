@@ -5,7 +5,6 @@ using EZNEW.Development.DataAccess;
 using EZNEW.Development.Domain.Model;
 using EZNEW.Development.Entity;
 using EZNEW.Development.Query;
-using EZNEW.Exceptions;
 
 namespace EZNEW.Development.Domain.Repository
 {
@@ -14,11 +13,6 @@ namespace EZNEW.Development.Domain.Repository
     /// </summary>
     public static class RepositoryManager
     {
-        /// <summary>
-        /// Default repositories
-        /// </summary>
-        readonly static Dictionary<Guid, Type> DefaultRepositories = new Dictionary<Guid, Type>();
-
         #region IQuery handler
 
         /// <summary>
@@ -53,12 +47,17 @@ namespace EZNEW.Development.Domain.Repository
 
         #region Default repository
 
-        internal static void RegisterDefaultRepository(Type entityType)
+        /// <summary>
+        /// Register default repository
+        /// </summary>
+        /// <param name="modelType">Model type</param>
+        internal static void RegisterDefaultRepository(Type modelType)
         {
-            if (entityType == null)
+            if (modelType == null)
             {
                 return;
             }
+            var entityType = ModelManager.GetModelRelationEntityType(modelType);
             var entityConfig = EntityManager.GetEntityConfiguration(entityType);
             if (entityConfig == null)
             {
@@ -69,15 +68,27 @@ namespace EZNEW.Development.Domain.Repository
             {
                 return;
             }
-            Type entityRepositoryInterfaceType = typeof(IRepository<>).MakeGenericType(entityType); ;
-            Type entityReposirotyType = typeof(DefaultRepository<,,>).MakeGenericType(entityType, entityType, entityDataAccessType);
-
-            if (entityRepositoryInterfaceType != null && entityReposirotyType != null)
+            Type modelRepositoryInterfaceType = typeof(IRepository<>).MakeGenericType(modelType);
+            Type modelReposirotyType = typeof(DefaultRepository<,,>).MakeGenericType(modelType, entityType, entityDataAccessType);
+            if (modelRepositoryInterfaceType != null && modelReposirotyType != null)
             {
-                ContainerManager.AddInternalService(entityRepositoryInterfaceType, entityReposirotyType);
-                DefaultRepositories[entityType.GUID] = entityRepositoryInterfaceType;
+                ContainerManager.AddInternalService(modelRepositoryInterfaceType, modelReposirotyType);
             }
 
+        }
+
+        /// <summary>
+        /// Get model default repository
+        /// </summary>
+        /// <param name="modelType"></param>
+        /// <returns>Return model default repository</returns>
+        internal static Type GetDefaultRepository(Type modelType)
+        {
+            if (modelType == null)
+            {
+                return null;
+            }
+            return typeof(IRepository<>).MakeGenericType(modelType);
         }
 
         /// <summary>

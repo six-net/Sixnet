@@ -48,6 +48,13 @@ namespace EZNEW.Development.Domain.Repository
         /// <param name="activationOptions">Activation options</param>
         public abstract void Remove(IEnumerable<TModel> datas, ActivationOptions activationOptions = null);
 
+        /// <summary>
+        /// Remove by relation data
+        /// </summary>
+        /// <param name="relationDatas">Relation datas</param>
+        /// <param name="activationOptions">Activation options</param>
+        public abstract void RemoveByRelationData<TRelationModel>(IEnumerable<TRelationModel> relationDatas, ActivationOptions activationOptions = null);
+
         #endregion
 
         #region Remove by condition
@@ -58,6 +65,13 @@ namespace EZNEW.Development.Domain.Repository
         /// <param name="query">Query object</param>
         /// <param name="activationOptions">Activation options</param>
         public abstract void Remove(IQuery query, ActivationOptions activationOptions = null);
+
+        /// <summary>
+        /// Remove by relation data
+        /// </summary>
+        /// <param name="query">Relation query object</param>
+        /// <param name="activationOptions">Activation options</param>
+        public abstract void RemoveByRelationData(IQuery query, ActivationOptions activationOptions = null);
 
         #endregion
 
@@ -121,6 +135,34 @@ namespace EZNEW.Development.Domain.Repository
         /// <returns>Return data list</returns>
         public abstract Task<List<TModel>> GetListAsync(IQuery query);
 
+        /// <summary>
+        /// Gets data list by current data
+        /// </summary>
+        /// <param name="currentDatas">Current datas</param>
+        /// <returns>Return data list</returns>
+        public abstract List<TModel> GetList(IEnumerable<TModel> currentDatas);
+
+        /// <summary>
+        /// Gets data list by current data
+        /// </summary>
+        /// <param name="currentDatas">Current datas</param>
+        /// <returns>Return data list</returns>
+        public abstract Task<List<TModel>> GetListAsync(IEnumerable<TModel> currentDatas);
+
+        /// <summary>
+        /// Get list by relation datas
+        /// </summary>
+        /// <param name="relationDatas">Relation datas</param>
+        /// <returns>Return datas</returns>
+        public abstract List<TModel> GetListByRelationData<TRelationModel>(IEnumerable<TRelationModel> relationDatas);
+
+        /// <summary>
+        /// Get list by relation datas
+        /// </summary>
+        /// <param name="relationDatas">Relation datas</param>
+        /// <returns>Return datas</returns>
+        public abstract Task<List<TModel>> GetListByRelationDataAsync<TRelationModel>(IEnumerable<TRelationModel> relationDatas);
+
         #endregion
 
         #region Get data paging
@@ -138,6 +180,20 @@ namespace EZNEW.Development.Domain.Repository
         /// <param name="query">Query object</param>
         /// <returns>Return data paging</returns>
         public abstract Task<PagingInfo<TModel>> GetPagingAsync(IQuery query);
+
+        /// <summary>
+        /// Get list by relation datas
+        /// </summary>
+        /// <param name="relationDatas">Relation datas</param>
+        /// <returns>Return datas</returns>
+        public abstract PagingInfo<TModel> GetPagingByRelationData<TRelationModel>(IEnumerable<TRelationModel> relationDatas);
+
+        /// <summary>
+        /// Get list by relation datas
+        /// </summary>
+        /// <param name="relationDatas">Relation datas</param>
+        /// <returns>Return datas</returns>
+        public abstract Task<PagingInfo<TModel>> GetPagingByRelationDataAsync<TRelationModel>(IEnumerable<TRelationModel> relationDatas);
 
         #endregion
 

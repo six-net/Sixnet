@@ -95,10 +95,10 @@ namespace EZNEW.Development.Entity
 
         /// <summary>
         /// Gets or sets the relation fields
-        /// key:relation type id
-        /// value: key->field,value:relation field
+        /// key:relation entity type id
+        /// value: key->field,value->relation options
         /// </summary>
-        public Dictionary<Guid, Dictionary<string, string>> RelationFields { get; set; }
+        public Dictionary<Guid, Dictionary<string, EntityRelationFieldAttribute>> RelationFields { get; set; }
 
         /// <summary>
         /// Gets or sets the predicate type
@@ -114,5 +114,10 @@ namespace EZNEW.Development.Entity
         /// Indecates whether enable data cache
         /// </summary>
         public bool EnableCache { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets the relation model type
+        /// </summary>
+        public Type RelationModelType { get; set; } = null;
     }
 }

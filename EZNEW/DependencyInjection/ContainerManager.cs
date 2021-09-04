@@ -6,11 +6,13 @@ using System.Reflection;
 using System.Runtime.Versioning;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
-using EZNEW.Logging;
-using EZNEW.Data.Cache;
 using EZNEW.Upload;
 using EZNEW.FileAccess;
 using EZNEW.Application;
+using EZNEW.Module;
+using EZNEW.Development.Domain.Repository.Event;
+using EZNEW.Mapper;
+using EZNEW.Data.Cache;
 
 namespace EZNEW.DependencyInjection
 {
@@ -19,10 +21,20 @@ namespace EZNEW.DependencyInjection
     /// </summary>
     public static class ContainerManager
     {
+        static ContainerManager()
+        {
+            ApplicationInitializer.Init();
+        }
+
         /// <summary>
         /// Internal services
         /// </summary>
-        internal readonly static Dictionary<Type, Type> InternalServices = new Dictionary<Type, Type>();
+        internal static Dictionary<Type, Type> InternalServices = null;
+
+        /// <summary>
+        /// Default project services
+        /// </summary>
+        internal static Dictionary<Type, Type> DefaultProjectServices = null;
 
         /// <summary>
         /// Default services
@@ -139,10 +151,11 @@ namespace EZNEW.DependencyInjection
         /// </summary>
         /// <param name="defaultServices">Default services</param>
         /// <param name="container">Dependency injection container</param>
-        /// <param name="configureServiceAction">Configure service action</param>
+        /// <param name="configureServiceDelegate">Configure service delegate</param>
         /// <param name="registerDefaultProjectService">Whether register default project service</param>
-        public static void Init(IServiceCollection defaultServices = null, IDIContainer container = null, Action<IDIContainer> configureServiceAction = null, bool registerDefaultProjectService = true)
+        public static void Init(IServiceCollection defaultServices = null, IDIContainer container = null, Action<IDIContainer> configureServiceDelegate = null, bool registerDefaultProjectService = true)
         {
+            //Init default container
             defaultServices ??= new ServiceCollection();
             container ??= new ServiceProviderContainer();
             SetDefaultServiceCollection(defaultServices);
@@ -150,15 +163,33 @@ namespace EZNEW.DependencyInjection
             {
                 container.Register(defaultServices.ToArray());
             }
+
+            //Register component
             RegisterComponentConfiguration();
+
+            //Register internal service
+            RegisterInternalService(defaultServices);
+
+            //Register default project service
             if (registerDefaultProjectService)
             {
-                RegisterDefaultProjectService();
+                RegisterDefaultProjectService(defaultServices);
             }
-            RegisterInternalService();
-            configureServiceAction?.Invoke(container);
+
+            configureServiceDelegate?.Invoke(container);
             SetDefaultServiceCollection(defaultServices);
             Container = container;
+
+            //Configure module
+            ModuleManager.ConfigureModule();
+
+            //Default repository event
+            RepositoryEventBus.InitDefaultEvent();
+
+            //Object mapper
+            ObjectMapper.BuildMapper();
+
+            GC.Collect();
         }
 
         /// <summary>
@@ -291,48 +322,6 @@ namespace EZNEW.DependencyInjection
         }
 
         /// <summary>
-        /// Register default project service
-        /// </summary>
-        static void RegisterDefaultProjectService()
-        {
-            var allTypes = ApplicationManager.GetAllConventionTypes();
-            if (allTypes.IsNullOrEmpty())
-            {
-                return;
-            }
-            foreach (Type serviceType in allTypes)
-            {
-                if (!serviceType.IsInterface)
-                {
-                    continue;
-                }
-                string typeName = serviceType.Name;
-                StringComparison ignoreCaseComparison = StringComparison.OrdinalIgnoreCase;
-                if (typeName.EndsWith("Service", ignoreCaseComparison) || typeName.EndsWith("Business", ignoreCaseComparison) || typeName.EndsWith("DbAccess", ignoreCaseComparison) || typeName.EndsWith("Repository", ignoreCaseComparison))
-                {
-                    Type implementType = allTypes.FirstOrDefault(t => t.Name != serviceType.Name && !t.IsInterface && !t.IsAbstract && serviceType.IsAssignableFrom(t));
-                    if (implementType != null)
-                    {
-                        Register(serviceType, implementType);
-                    }
-                }
-                if (typeName.EndsWith("DataAccess", ignoreCaseComparison))
-                {
-                    var relateTypes = allTypes.Where(t => t.Name != serviceType.Name && !t.IsInterface && !t.IsAbstract && serviceType.IsAssignableFrom(t));
-                    if (relateTypes.Any())
-                    {
-                        Type providerType = relateTypes.FirstOrDefault(c => c.Name.EndsWith("CacheDataAccess", ignoreCaseComparison));
-                        providerType ??= relateTypes.First();
-                        Register(serviceType, providerType);
-                    }
-                }
-            }
-
-            //Data cache provider
-            Register<IDataCacheProvider, DefaultDataCacheProvider>();
-        }
-
-        /// <summary>
         /// Register component configuration
         /// </summary>
         static void RegisterComponentConfiguration()
@@ -359,17 +348,54 @@ namespace EZNEW.DependencyInjection
             {
                 return;
             }
+            InternalServices ??= new Dictionary<Type, Type>();
             InternalServices[serviceType] = implementationType;
         }
 
         /// <summary>
         /// Register internal service
         /// </summary>
-        internal static void RegisterInternalService()
+        internal static void RegisterInternalService(IServiceCollection services)
         {
-            foreach (var item in InternalServices)
+            if (!InternalServices.IsNullOrEmpty())
             {
-                Register(ServiceDescriptor.Singleton(item.Key,item.Value));
+                foreach (var serviceItem in InternalServices)
+                {
+                    services.AddSingleton(serviceItem.Key, serviceItem.Value);
+                }
+                InternalServices = null;
+            }
+            services.AddSingleton(typeof(IDataCacheProvider), typeof(DefaultDataCacheProvider));
+        }
+
+        /// <summary>
+        /// Add default project service
+        /// </summary>
+        /// <param name="serviceType"></param>
+        /// <param name="implementationType"></param>
+        internal static void AddDefaultProjectService(Type serviceType, Type implementationType)
+        {
+            if (serviceType == null || implementationType == null)
+            {
+                return;
+            }
+            DefaultProjectServices ??= new Dictionary<Type, Type>();
+            DefaultProjectServices[serviceType] = implementationType;
+        }
+
+        /// <summary>
+        /// Register ddefault project service
+        /// </summary>
+        /// <param name="services">Service collection</param>
+        internal static void RegisterDefaultProjectService(IServiceCollection services)
+        {
+            if (!DefaultProjectServices.IsNullOrEmpty())
+            {
+                foreach (var serverItem in DefaultProjectServices)
+                {
+                    services.AddSingleton(serverItem.Key, serverItem.Value);
+                }
+                DefaultProjectServices = null;
             }
         }
     }

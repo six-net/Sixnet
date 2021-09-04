@@ -46,4 +46,15 @@ namespace EZNEW.Development.Entity
         CreationTime = 512,
         ObsoleteTag = 1024
     }
+
+    /// <summary>
+    /// Defines relation field options
+    /// </summary>
+    [Flags]
+    [Serializable]
+    public enum RelationBehavior
+    {
+        None = 0,
+        CascadingRemove = 2
+    }
 }

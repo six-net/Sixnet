@@ -11,6 +11,7 @@ using EZNEW.Development.DataAccess;
 using EZNEW.Development.Domain.Repository.Warehouse;
 using EZNEW.Development.UnitOfWork;
 using EZNEW.Development.Command.Modification;
+using EZNEW.Mapper;
 
 namespace EZNEW.Development.Domain.Repository
 {
@@ -155,17 +156,17 @@ namespace EZNEW.Development.Domain.Repository
         /// <summary>
         /// Get data by current data
         /// </summary>
-        /// <param name="currentData">Current data</param>
+        /// <param name="currentDatas">Current data</param>
         /// <returns>Return data</returns>
-        protected override async Task<TModel> GetDataByCurrentDataAsync(TModel currentData)
+        protected override async Task<List<TModel>> GetDatasByCurrentDataAsync(IEnumerable<TModel> currentDatas)
         {
-            if (currentData == null)
+            if (currentDatas.IsNullOrEmpty())
             {
-                return default;
+                return new List<TModel>(0);
             }
-            var entity = currentData.MapTo<TEntity>();
-            var query = QueryManager.AppendEntityIdentityCondition(new TEntity[] { entity });
-            return await GetAsync(query).ConfigureAwait(false);
+            var entitys = currentDatas.Select(c => c.MapTo<TEntity>());
+            var query = QueryManager.AppendEntityIdentityCondition(entitys);
+            return await GetListAsync(query).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -242,6 +243,36 @@ namespace EZNEW.Development.Domain.Repository
         protected override IActivationRecord ExecuteModify(IModification expression, IQuery query, ActivationOptions activationOptions = null)
         {
             return repositoryWarehouse.Modify(expression, query, activationOptions);
+        }
+
+        /// <summary>
+        /// Get query by relation data
+        /// </summary>
+        /// <typeparam name="TRelationModel">Relation data types</typeparam>
+        /// <param name="relationDatas">Relation datas</param>
+        /// <returns>Return a IQuery object</returns>
+        protected override IQuery GetQueryByRelationData<TRelationModel>(IEnumerable<TRelationModel> relationDatas)
+        {
+            if (relationDatas.IsNullOrEmpty())
+            {
+                return null;
+            }
+            var relationEntityType = ModelManager.GetModelRelationEntityType(typeof(TRelationModel));
+            return GetQueryByRelationDataQuery(QueryManager.AppendEntityIdentityCore(relationEntityType, relationDatas.Select(c => ObjectMapper.MapTo(relationEntityType, c))));
+        }
+
+        /// <summary>
+        /// Get query by relation data query
+        /// </summary>
+        /// <param name="relationDataQuery">Relation data query</param>
+        /// <returns>Return a IQuery object</returns>
+        protected override IQuery GetQueryByRelationDataQuery(IQuery relationDataQuery)
+        {
+            if (relationDataQuery == null)
+            {
+                return null;
+            }
+            return QueryManager.Create<TEntity>().EqualInnerJoin(relationDataQuery);
         }
 
         /// <summary>

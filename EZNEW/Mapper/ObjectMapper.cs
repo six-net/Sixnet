@@ -68,25 +68,49 @@ namespace EZNEW.Mapper
         /// <summary>
         /// Convert object
         /// </summary>
-        /// <typeparam name="TTarget">Target data type</typeparam>
+        /// <typeparam name="TDestination">Target data type</typeparam>
         /// <param name="sourceObject">Source object</param>
         /// <returns>Return the target data object</returns>
-        public static TTarget MapTo<TTarget>(object sourceObject)
+        public static TDestination MapTo<TDestination>(object sourceObject)
         {
             if (sourceObject == null)
             {
                 return default;
             }
-            var targetType = typeof(TTarget);
+            var targetType = typeof(TDestination);
             if (targetType.IsAssignableFrom(sourceObject.GetType()))
             {
-                return (TTarget)sourceObject;
+                return (TDestination)sourceObject;
             }
             if (Current == null)
             {
                 throw new EZNEWException($"{nameof(Current)} mapper is not initialized");
             }
-            return Current.MapTo<TTarget>(sourceObject);
+            return Current.MapTo<TDestination>(sourceObject);
+        }
+
+        /// <summary>
+        /// Convert object
+        /// </summary>
+        /// <param name="destinationType">Destionation type</param>
+        /// <param name="source">Souce object</param>
+        /// <returns>Return a destionation object</returns>
+        public static object MapTo(Type destinationType, object source)
+        {
+            var sourceType = source?.GetType();
+            if (sourceType == null)
+            {
+                return null;
+            }
+            if (destinationType.IsAssignableFrom(sourceType))
+            {
+                return source;
+            }
+            if (Current == null)
+            {
+                throw new EZNEWException($"{nameof(Current)} mapper is not initialized");
+            }
+            return Current.MapTo(destinationType, source);
         }
     }
 }

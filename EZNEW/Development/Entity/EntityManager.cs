@@ -28,9 +28,9 @@ namespace EZNEW.Development.Entity
         internal static readonly Dictionary<Guid, EntityConfiguration> EntityConfigurations = new Dictionary<Guid, EntityConfiguration>();
 
         /// <summary>
-        /// Key:Entity type guid
+        /// model contract type
         /// </summary>
-        internal static readonly Dictionary<Guid, object> EntityDefaultDataAccessInstances = new Dictionary<Guid, object>();
+        static readonly Type modelContractType = typeof(IModel);
 
         /// <summary>
         /// Defines boolean type
@@ -175,29 +175,29 @@ namespace EZNEW.Development.Entity
                 }
 
                 //relation config
-                var relationAttributes = member.GetCustomAttributes(typeof(EntityFieldRelationAttribute), false);
+                var relationAttributes = member.GetCustomAttributes<EntityRelationFieldAttribute>(false);
                 if (relationAttributes.IsNullOrEmpty())
                 {
                     continue;
                 }
                 if (entityConfig.RelationFields.IsNullOrEmpty())
                 {
-                    entityConfig.RelationFields = new Dictionary<Guid, Dictionary<string, string>>();
+                    entityConfig.RelationFields = new Dictionary<Guid, Dictionary<string, EntityRelationFieldAttribute>>();
                 }
                 foreach (var attrObj in relationAttributes)
                 {
-                    if (!(attrObj is EntityFieldRelationAttribute relationAttr) || relationAttr.RelationType == null || string.IsNullOrWhiteSpace(relationAttr.RelationField))
+                    if (!(attrObj is EntityRelationFieldAttribute relationAttr) || relationAttr.RelationType == null || string.IsNullOrWhiteSpace(relationAttr.RelationField))
                     {
                         continue;
                     }
                     var relationTypeId = relationAttr.RelationType.GUID;
                     entityConfig.RelationFields.TryGetValue(relationTypeId, out var values);
-                    values ??= new Dictionary<string, string>();
+                    values ??= new Dictionary<string, EntityRelationFieldAttribute>();
                     if (values.ContainsKey(propertyName))
                     {
                         continue;
                     }
-                    values.Add(propertyName, relationAttr.RelationField);
+                    values.Add(propertyName, relationAttr);
                     entityConfig.RelationFields[relationTypeId] = values;
                 }
             }
@@ -220,6 +220,7 @@ namespace EZNEW.Development.Entity
                     editFields.Add(field);
                 }
             }
+            entityConfig.RelationModelType = modelContractType.IsAssignableFrom(entityType) ? entityType : null;
             entityConfig.Comment = entityAttribute.Description ?? string.Empty;
             entityConfig.PrimaryKeys = primaryKeys;
             entityConfig.AllFields = allFieldDict;
@@ -238,6 +239,9 @@ namespace EZNEW.Development.Entity
             entityConfig.EntityType = entityType;
             entityConfig.EnableCache = entityAttribute.EnableCache;
             EntityConfigurations[typeGuid] = entityConfig;
+
+            //Default data access
+            DataAccessManager.RegisterEntityDefaultDataAccess(entityType);
         }
 
         #endregion
@@ -743,9 +747,9 @@ namespace EZNEW.Development.Entity
                 return new Dictionary<string, string>(0);
             }
             var entityConfig = GetEntityConfiguration(sourceEntityType);
-            Dictionary<string, string> relationFields = null;
+            Dictionary<string, EntityRelationFieldAttribute> relationFields = null;
             entityConfig?.RelationFields?.TryGetValue(relationEntityType.GUID, out relationFields);
-            return relationFields ?? new Dictionary<string, string>(0);
+            return relationFields?.ToDictionary(c => c.Key, c => c.Value.RelationField) ?? new Dictionary<string, string>(0);
         }
 
         #endregion
@@ -884,6 +888,25 @@ namespace EZNEW.Development.Entity
             {
                 return;
             }
+        }
+
+        #endregion
+
+        #region Relation model
+
+        /// <summary>
+        /// Set entity relation model
+        /// </summary>
+        /// <param name="entityType">Entity type</param>
+        /// <param name="relationModelType">Relation model type</param>
+        internal static void SetRelationModel(Type entityType, Type relationModelType)
+        {
+            var entityConfig = GetEntityConfiguration(entityType);
+            if (entityConfig == null)
+            {
+                return;
+            }
+            entityConfig.RelationModelType = relationModelType;
         }
 
         #endregion

@@ -14,11 +14,6 @@ namespace EZNEW.Development.Entity
     /// </summary>
     public class ModelEntity<T> : BaseEntity<T>, IModel<T> where T : BaseEntity<T>, IModel<T>, new()
     {
-        static ModelEntity()
-        {
-            ModelManager.ConfigureModel<T>();
-        }
-
         #region Fields
 
         /// <summary>

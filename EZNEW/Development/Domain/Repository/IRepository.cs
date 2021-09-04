@@ -9,11 +9,28 @@ using EZNEW.Development.Domain.Model;
 
 namespace EZNEW.Development.Domain.Repository
 {
+    public interface IRepository
+    {
+        /// <summary>
+        /// Remove by relation data
+        /// </summary>
+        /// <param name="relationDatas">Relation datas</param>
+        /// <param name="activationOptions">Activation options</param>
+        void RemoveByRelationData<TRelationModel>(IEnumerable<TRelationModel> relationDatas, ActivationOptions activationOptions = null);
+
+        /// <summary>
+        /// Remove by relation data
+        /// </summary>
+        /// <param name="query">Relation query object</param>
+        /// <param name="activationOptions">Activation options</param>
+        void RemoveByRelationData(IQuery query, ActivationOptions activationOptions = null);
+    }
+
     /// <summary>
     /// Defines repository contract
     /// </summary>
     /// <typeparam name="TModel">Model</typeparam>
-    public interface IRepository<TModel> where TModel : IModel<TModel>
+    public interface IRepository<TModel> : IRepository where TModel : IModel<TModel>
     {
         #region Save data
 
@@ -122,6 +139,20 @@ namespace EZNEW.Development.Domain.Repository
         /// <returns>Return data list</returns>
         Task<List<TModel>> GetListAsync(IQuery query);
 
+        /// <summary>
+        /// Get list by relation datas
+        /// </summary>
+        /// <param name="relationDatas">Relation datas</param>
+        /// <returns>Return datas</returns>
+        List<TModel> GetListByRelationData<TRelationModel>(IEnumerable<TRelationModel> relationDatas);
+
+        /// <summary>
+        /// Get list by relation datas
+        /// </summary>
+        /// <param name="relationDatas">Relation datas</param>
+        /// <returns>Return datas</returns>
+        Task<List<TModel>> GetListByRelationDataAsync<TRelationModel>(IEnumerable<TRelationModel> relationDatas);
+
         #endregion
 
         #region Get data paging
@@ -139,6 +170,20 @@ namespace EZNEW.Development.Domain.Repository
         /// <param name="query">Query object</param>
         /// <returns>Return data paging</returns>
         Task<PagingInfo<TModel>> GetPagingAsync(IQuery query);
+
+        /// <summary>
+        /// Get list by relation datas
+        /// </summary>
+        /// <param name="relationDatas">Relation datas</param>
+        /// <returns>Return datas</returns>
+        PagingInfo<TModel> GetPagingByRelationData<TRelationModel>(IEnumerable<TRelationModel> relationDatas);
+
+        /// <summary>
+        /// Get list by relation datas
+        /// </summary>
+        /// <param name="relationDatas">Relation datas</param>
+        /// <returns>Return datas</returns>
+        Task<PagingInfo<TModel>> GetPagingByRelationDataAsync<TRelationModel>(IEnumerable<TRelationModel> relationDatas);
 
         #endregion
 

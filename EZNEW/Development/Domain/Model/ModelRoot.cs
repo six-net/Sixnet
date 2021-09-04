@@ -18,17 +18,12 @@ namespace EZNEW.Development.Domain.Model
     [Serializable]
     public abstract class ModelRoot<T> : IModel<T> where T : ModelRoot<T>
     {
-        static ModelRoot()
-        {
-            ModelManager.ConfigureModel<T>();
-        }
-
         #region Fields
 
         /// <summary>
         /// The repository object
         /// </summary>
-        protected IRepository<T> repository = null;
+        protected IRepository<T> repository = RepositoryManager.GetRepository<T>();
 
         #endregion
 

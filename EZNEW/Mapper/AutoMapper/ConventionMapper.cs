@@ -19,6 +19,17 @@ namespace AutoMapper
             return Mapper.Map<T>(sourceObj);
         }
 
+        /// <summary>
+        /// Convert an object
+        /// </summary>
+        /// <param name="destinationType">Destination data type</param>
+        /// <param name="source">Source object</param>
+        /// <returns>Return ta destionation object</returns>
+        public object MapTo(Type destinationType, object source)
+        {
+            return Mapper.Map(source, source?.GetType(), destinationType);
+        }
+
         public ConventionMapper(Action<IMapperConfigurationExpression> configuration)
         {
             var mapperConfiguration = new MapperConfiguration(configuration);

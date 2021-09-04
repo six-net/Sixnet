@@ -178,49 +178,7 @@ namespace EZNEW.Development.Query
         /// <returns>Return the newest IQuery object</returns>
         public static IQuery AppendEntityIdentityCondition<T>(IEnumerable<T> datas, IQuery originalQuery = null, bool exclude = false) where T : BaseEntity<T>, new()
         {
-            if (datas == null || !datas.Any())
-            {
-                return originalQuery;
-            }
-            originalQuery ??= CreateByEntity<T>();
-            var entityType = typeof(T);
-            var keys = EntityManager.GetPrimaryKeys(entityType);
-            if (keys.IsNullOrEmpty())
-            {
-                throw new EZNEWException(string.Format("Type:{0} isn't set primary keys", entityType.FullName));
-            }
-            var firstData = datas.ElementAt(0).GetValue(keys.ElementAt(0));
-            var dataType = firstData.GetType();
-            dynamic keyValueList = Activator.CreateInstance(typeof(List<>).MakeGenericType(dataType));
-            var keyCount = keys.GetCount();
-            foreach (T entity in datas)
-            {
-                if (keyCount == 1)
-                {
-                    keyValueList.Add(entity.GetValue(keys.ElementAt(0)));
-                }
-                else
-                {
-                    IQuery entityQuery = Create();
-                    foreach (var key in keys)
-                    {
-                        entityQuery = AndExtensions.And(entityQuery, key, exclude ? CriteriaOperator.NotEqual : CriteriaOperator.Equal, entity.GetValue(key));
-                    }
-                    originalQuery.Or(entityQuery);
-                }
-            }
-            if (keyCount == 1)
-            {
-                if (exclude)
-                {
-                    originalQuery = NotInExtensions.NotIn(originalQuery, keys.ElementAt(0), keyValueList);
-                }
-                else
-                {
-                    originalQuery = InExtensions.In(originalQuery, keys.ElementAt(0), keyValueList);
-                }
-            }
-            return originalQuery;
+            return AppendEntityIdentityCore(typeof(T), datas, originalQuery, exclude);
         }
 
         /// <summary>
@@ -249,6 +207,66 @@ namespace EZNEW.Development.Query
             {
                 var criteriaOperator = exclude ? CriteriaOperator.NotEqual : CriteriaOperator.Equal;
                 originalQuery = AndExtensions.And(originalQuery, key, criteriaOperator, data.GetValue(key), null);
+            }
+            return originalQuery;
+        }
+
+        /// <summary>
+        /// Append entity identity condition to original IQuery object
+        /// it will create new IQuery object if the original is null
+        /// </summary>
+        /// <param name="entityType">Entity type</param>
+        /// <param name="datas">Datas</param>
+        /// <param name="originalQuery">Original query</param>
+        /// <param name="exclude">Exclude</param>
+        /// <returns></returns>
+        internal static IQuery AppendEntityIdentityCore(Type entityType, IEnumerable<object> datas, IQuery originalQuery = null, bool exclude = false)
+        {
+            if (datas == null || !datas.Any())
+            {
+                return originalQuery;
+            }
+            originalQuery ??= Create().SetEntityType(entityType);
+            var keys = EntityManager.GetPrimaryKeys(entityType);
+            if (keys.IsNullOrEmpty())
+            {
+                throw new EZNEWException(string.Format("Type:{0} isn't set primary keys", entityType.FullName));
+            }
+            if (datas.ElementAt(0) is not IEntity entityData)
+            {
+                throw new EZNEWException("Data must inherit from IEntity");
+            }
+            var firstData = entityData.GetValue(keys.ElementAt(0));
+            var dataType = firstData.GetType();
+            dynamic keyValueList = Activator.CreateInstance(typeof(List<>).MakeGenericType(dataType));
+            var keyCount = keys.GetCount();
+            foreach (var data in datas)
+            {
+                IEntity entity = data as IEntity;
+                if (keyCount == 1)
+                {
+                    keyValueList.Add(entity.GetValue(keys.ElementAt(0)));
+                }
+                else
+                {
+                    IQuery entityQuery = Create();
+                    foreach (var key in keys)
+                    {
+                        entityQuery = AndExtensions.And(entityQuery, key, exclude ? CriteriaOperator.NotEqual : CriteriaOperator.Equal, entity.GetValue(key));
+                    }
+                    originalQuery.Or(entityQuery);
+                }
+            }
+            if (keyCount == 1)
+            {
+                if (exclude)
+                {
+                    originalQuery = NotInExtensions.NotIn(originalQuery, keys.ElementAt(0), keyValueList);
+                }
+                else
+                {
+                    originalQuery = InExtensions.In(originalQuery, keys.ElementAt(0), keyValueList);
+                }
             }
             return originalQuery;
         }

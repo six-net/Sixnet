@@ -45,6 +45,11 @@ namespace EZNEW.Development.Domain.Repository
             }
             var records = new List<IActivationRecord>();
             var resultDatas = new List<TModel>();
+            var currentDatas = datas.Where(c => !c.IdentityValueIsNone() && c.IsNew);
+            if (!currentDatas.IsNullOrEmpty())
+            {
+                currentDatas = GetList(currentDatas);
+            }
             foreach (var data in datas)
             {
                 if (data == null)
@@ -54,7 +59,7 @@ namespace EZNEW.Development.Domain.Repository
                 var saveData = data;
                 if (!saveData.IdentityValueIsNone() && saveData.IsNew)
                 {
-                    var nowData = Get(saveData);
+                    var nowData = currentDatas?.FirstOrDefault(c => c.IdentityValue == saveData.IdentityValue);
                     if (nowData != null)
                     {
                         saveData = nowData.OnDataUpdating(saveData) as TModel;
@@ -126,6 +131,21 @@ namespace EZNEW.Development.Domain.Repository
             WorkManager.RegisterActivationRecord(records);
         }
 
+        /// <summary>
+        /// Remove by relation data
+        /// </summary>
+        /// <param name="relationDatas">Relation datas</param>
+        /// <param name="activationOptions">Activation options</param>
+        public sealed override void RemoveByRelationData<TRelationModel>(IEnumerable<TRelationModel> relationDatas, ActivationOptions activationOptions = null)
+        {
+            if (relationDatas.IsNullOrEmpty())
+            {
+                return;
+            }
+            var removeQuery = GetQueryByRelationData(relationDatas);
+            Remove(removeQuery, activationOptions);
+        }
+
         #endregion
 
         #region Remove by condition
@@ -145,6 +165,21 @@ namespace EZNEW.Development.Domain.Repository
                 WorkManager.RegisterActivationRecord(record);
                 RepositoryManager.HandleQueryObjectAfterExecute(query, newQuery, QueryUsageScene.Remove);
             }
+        }
+
+        /// <summary>
+        /// Remove by relation data
+        /// </summary>
+        /// <param name="query">Relation query object</param>
+        /// <param name="activationOptions">Activation options</param>
+        public sealed override void RemoveByRelationData(IQuery query, ActivationOptions activationOptions = null)
+        {
+            if (query == null)
+            {
+                return;
+            }
+            var removeQuery = GetQueryByRelationDataQuery(query);
+            Remove(removeQuery, activationOptions);
         }
 
         #endregion
@@ -190,7 +225,7 @@ namespace EZNEW.Development.Domain.Repository
         /// <returns>Return data</returns>
         public sealed override TModel Get(TModel currentData)
         {
-            return GetDataByCurrentDataAsync(currentData).Result;
+            return GetAsync(currentData).Result;
         }
 
         /// <summary>
@@ -200,7 +235,7 @@ namespace EZNEW.Development.Domain.Repository
         /// <returns>Return data</returns>
         public sealed override async Task<TModel> GetAsync(TModel currentData)
         {
-            return await GetDataByCurrentDataAsync(currentData).ConfigureAwait(false);
+            return (await GetListAsync(new TModel[1] { currentData }).ConfigureAwait(false))?.FirstOrDefault();
         }
 
         /// <summary>
@@ -262,6 +297,51 @@ namespace EZNEW.Development.Domain.Repository
             return datas ?? new List<TModel>(0);
         }
 
+        /// <summary>
+        /// Gets data list by current data
+        /// </summary>
+        /// <param name="currentDatas">Current datas</param>
+        /// <returns>Return data list</returns>
+        public sealed override List<TModel> GetList(IEnumerable<TModel> currentDatas)
+        {
+            return GetListAsync(currentDatas).Result;
+        }
+
+        /// <summary>
+        /// Gets data list by current data
+        /// </summary>
+        /// <param name="currentDatas">Current datas</param>
+        /// <returns>Return data list</returns>
+        public sealed override async Task<List<TModel>> GetListAsync(IEnumerable<TModel> currentDatas)
+        {
+            return await GetDatasByCurrentDataAsync(currentDatas).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Get list by relation datas
+        /// </summary>
+        /// <param name="relationDatas">Relation datas</param>
+        /// <returns>Return datas</returns>
+        public sealed override List<TModel> GetListByRelationData<TRelationModel>(IEnumerable<TRelationModel> relationDatas)
+        {
+            return GetListByRelationDataAsync(relationDatas).Result;
+        }
+
+        /// <summary>
+        /// Get list by relation datas
+        /// </summary>
+        /// <param name="relationDatas">Relation datas</param>
+        /// <returns>Return datas</returns>
+        public sealed override async Task<List<TModel>> GetListByRelationDataAsync<TRelationModel>(IEnumerable<TRelationModel> relationDatas)
+        {
+            if (relationDatas.IsNullOrEmpty())
+            {
+                return new List<TModel>(0);
+            }
+            var query = GetQueryByRelationData(relationDatas);
+            return await GetListAsync(query).ConfigureAwait(false);
+        }
+
         #endregion
 
         #region Get data paging
@@ -297,6 +377,31 @@ namespace EZNEW.Development.Domain.Repository
             });
             RepositoryManager.HandleQueryObjectAfterExecute(query, newQuery, QueryUsageScene.Query);
             return Pager.Create(paging.Page, paging.PageSize, paging.TotalCount, datas);
+        }
+
+        /// <summary>
+        /// Get list by relation datas
+        /// </summary>
+        /// <param name="relationDatas">Relation datas</param>
+        /// <returns>Return datas</returns>
+        public sealed override PagingInfo<TModel> GetPagingByRelationData<TRelationModel>(IEnumerable<TRelationModel> relationDatas)
+        {
+            return GetPagingByRelationDataAsync(relationDatas).Result;
+        }
+
+        /// <summary>
+        /// Get list by relation datas
+        /// </summary>
+        /// <param name="relationDatas">Relation datas</param>
+        /// <returns>Return datas</returns>
+        public sealed override async Task<PagingInfo<TModel>> GetPagingByRelationDataAsync<TRelationModel>(IEnumerable<TRelationModel> relationDatas)
+        {
+            if (relationDatas.IsNullOrEmpty())
+            {
+                return PagingInfo<TModel>.Empty();
+            }
+            var query = GetQueryByRelationData(relationDatas);
+            return await GetPagingAsync(query).ConfigureAwait(false);
         }
 
         #endregion
@@ -525,7 +630,7 @@ namespace EZNEW.Development.Domain.Repository
         /// </summary>
         /// <param name="currentData">Current data</param>
         /// <returns>Return data</returns>
-        protected abstract Task<TModel> GetDataByCurrentDataAsync(TModel currentData);
+        protected abstract Task<List<TModel>> GetDatasByCurrentDataAsync(IEnumerable<TModel> currentDatas);
 
         /// <summary>
         /// Check data
@@ -610,6 +715,21 @@ namespace EZNEW.Development.Domain.Repository
                 }
             }
         }
+
+        /// <summary>
+        /// Get query by relation data
+        /// </summary>
+        /// <typeparam name="TRelationData">Relation data types</typeparam>
+        /// <param name="relationDatas">Relation datas</param>
+        /// <returns>Return a IQuery object</returns>
+        protected abstract IQuery GetQueryByRelationData<TRelationData>(IEnumerable<TRelationData> relationDatas);
+
+        /// <summary>
+        /// Get query by relation data query
+        /// </summary>
+        /// <param name="relationDataQuery">Relation data query</param>
+        /// <returns>Return a IQuery object</returns>
+        protected abstract IQuery GetQueryByRelationDataQuery(IQuery relationDataQuery);
 
         #endregion
 

@@ -9,9 +9,14 @@ namespace EZNEW.Development.Domain.Model
     public class ModelMetadataAttribute : Attribute
     {
         /// <summary>
+        /// Gets or sets the model type
+        /// </summary>
+        internal Type ModelType { get; set; }
+
+        /// <summary>
         /// Gets or sets the feature
         /// </summary>
-        public AggregationFeature Feature { get; set; } = AggregationFeature.Default;
+        public ModelFeature Feature { get; set; } = ModelFeature.Default;
 
         /// <summary>
         /// Gets or sets the relation type
