@@ -20,6 +20,10 @@ namespace EZNEW.Development.Domain.Model
     {
         internal static bool IsNew(IRepository<T> repository, Type dataType, IModel data)
         {
+            if (data?.IdentityValueIsNone() ?? true)
+            {
+                return true;
+            }
             CheckRepository(repository);
             var isVirtual = ModelManager.IsVirtualModel(dataType);
             return isVirtual || repository.GetLifeSource(data) == DataLifeSource.New;

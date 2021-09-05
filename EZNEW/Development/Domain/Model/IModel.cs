@@ -9,31 +9,29 @@ namespace EZNEW.Development.Domain.Model
     /// </summary>
     public interface IModel
     {
-        #region Properties
+        /// <summary>
+        /// Indecates whether allow to save
+        /// </summary>
+        /// <returns></returns>
+        bool AllowToSave();
 
         /// <summary>
-        /// Gets whether allow to save
+        /// Indecates whether allow to remove
         /// </summary>
-        bool CanBeSave { get; }
-
-        /// <summary>
-        /// Gets whether allow to remove
-        /// </summary>
-        bool CanBeRemove { get; }
+        /// <returns></returns>
+        bool AllowToRemove();
 
         /// <summary>
         /// Gets the identity value
         /// </summary>
-        string IdentityValue { get; }
+        /// <returns></returns>
+        string GetIdentityValue();
 
         /// <summary>
-        /// Gets whether the object is new
+        /// Indecates whether is a new object
         /// </summary>
-        bool IsNew { get; }
-
-        #endregion
-
-        #region Methods
+        /// <returns></returns>
+        bool IsNew();
 
         /// <summary>
         /// Mark data is new
@@ -46,7 +44,11 @@ namespace EZNEW.Development.Domain.Model
         /// <returns></returns>
         bool MarkStored();
 
-        #endregion
+        /// <summary>
+        /// Check identity value is none
+        /// </summary>
+        /// <returns>Return identity value whether is none</returns>
+        bool IdentityValueIsNone();
     }
 
     /// <summary>
@@ -62,27 +64,23 @@ namespace EZNEW.Development.Domain.Model
         bool Equals(T targetObj);
 
         /// <summary>
-        /// Close lazy data load
+        /// Close load lazy member
         /// </summary>
-        void CloseLazyMemberLoad();
+        void CloseLazyMember();
 
         /// <summary>
-        /// Open lazy data load
+        /// Open load lazy member
         /// </summary>
-        void OpenLazyMemberLoad();
+        void OpenLazyMember();
 
         /// <summary>
         /// Set load properties
+        /// Key=> Property name
+        /// Value=> Whether allow to load
         /// </summary>
         /// <param name="loadProperties">Properties</param>
         /// <returns></returns>
         void SetLoadProperties(IEnumerable<KeyValuePair<string, bool>> loadProperties);
-
-        /// <summary>
-        /// Check identity value is none
-        /// </summary>
-        /// <returns>Return identity value whether is none</returns>
-        bool IdentityValueIsNone();
 
         /// <summary>
         /// Update data

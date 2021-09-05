@@ -21,51 +21,43 @@ namespace EZNEW.Development.Domain.Model
         #region Fields
 
         /// <summary>
-        /// The repository object
+        /// The _repository object
         /// </summary>
-        protected IRepository<T> repository = RepositoryManager.GetRepository<T>();
+        private IRepository<T> _repository = RepositoryManager.GetRepository<T>();
+
+        /// <summary>
+        /// Indecates whether to load lazy member
+        /// </summary>
+        bool _allowLoadLazyMember = false;
+
+        /// <summary>
+        /// Lazy properties
+        /// </summary>
+        private Dictionary<string, bool> _loadProperties = new();
 
         #endregion
 
         #region Properties
 
         /// <summary>
-        /// Gets whether allow to save
+        /// Gets the repository
         /// </summary>
-        [NonData]
-        public bool CanBeSave => SaveValidation();
-
-        /// <summary>
-        /// Gets whether allow to remove
-        /// </summary>
-        [NonData]
-        public bool CanBeRemove => RemoveValidation();
-
-        /// <summary>
-        /// Gets whether allow lazy data load
-        /// </summary>
-        protected bool LoadLazyMember { get; set; } = true;
-
-        /// <summary>
-        /// Gets all of the properties allow to load data
-        /// </summary>
-        protected Dictionary<string, bool> LoadProperties = new Dictionary<string, bool>();
-
-        /// <summary>
-        /// Gets the identity value
-        /// </summary>
-        [NonData]
-        public string IdentityValue => GetIdentityValue();
-
-        /// <summary>
-        /// Gets whether the object is new
-        /// </summary>
-        [NonData]
-        public bool IsNew => ModelDataManager<T>.IsNew(repository, GetType(), this);
+        protected IRepository<T> Repository => _repository;
 
         #endregion
 
         #region Methods
+
+        #region Save
+
+        /// <summary>
+        /// Indecates whether allow to save
+        /// </summary>
+        /// <returns></returns>
+        public bool AllowToSave()
+        {
+            return SaveValidation();
+        }
 
         /// <summary>
         /// Save validation
@@ -74,6 +66,27 @@ namespace EZNEW.Development.Domain.Model
         protected virtual bool SaveValidation()
         {
             return ModelDataManager<T>.SaveValidation(this as T);
+        }
+
+        /// <summary>
+        /// Save
+        /// </summary>
+        public virtual Result<T> Save()
+        {
+            return ModelDataManager<T>.Save(_repository, this as T);
+        }
+
+        #endregion
+
+        #region Remove
+
+        /// <summary>
+        /// Indecates whether allow to remove
+        /// </summary>
+        /// <returns></returns>
+        public bool AllowToRemove()
+        {
+            return RemoveValidation();
         }
 
         /// <summary>
@@ -86,12 +99,33 @@ namespace EZNEW.Development.Domain.Model
         }
 
         /// <summary>
+        /// Remove
+        /// </summary>
+        public virtual Result Remove()
+        {
+            return ModelDataManager<T>.Remove(_repository, this as T);
+        }
+
+        #endregion
+
+        #region LifeSource
+
+        /// <summary>
+        /// Indecates whether is a new object
+        /// </summary>
+        /// <returns></returns>
+        public bool IsNew()
+        {
+            return ModelDataManager<T>.IsNew(_repository, GetType(), this);
+        }
+
+        /// <summary>
         /// Mark object is new status
         /// </summary>
         /// <returns>Return whether is successful</returns>
         public virtual bool MarkNew()
         {
-            return ModelDataManager<T>.MarkNew(repository, this);
+            return ModelDataManager<T>.MarkNew(_repository, this);
         }
 
         /// <summary>
@@ -100,8 +134,12 @@ namespace EZNEW.Development.Domain.Model
         /// <returns>Return whether is successful</returns>
         public virtual bool MarkStored()
         {
-            return ModelDataManager<T>.MarkStored(repository, this);
+            return ModelDataManager<T>.MarkStored(_repository, this);
         }
+
+        #endregion
+
+        #region Lazy member
 
         /// <summary>
         /// Set load properties
@@ -110,7 +148,7 @@ namespace EZNEW.Development.Domain.Model
         /// <returns></returns>
         public virtual void SetLoadProperties(IEnumerable<KeyValuePair<string, bool>> loadProperties)
         {
-            ModelDataManager<T>.SetLoadProperties(loadProperties, ref LoadProperties);
+            ModelDataManager<T>.SetLoadProperties(loadProperties, ref _loadProperties);
         }
 
         /// <summary>
@@ -120,23 +158,23 @@ namespace EZNEW.Development.Domain.Model
         /// <param name="allowLoad">Whether allow load</param>
         public virtual void SetLoadProperty(Expression<Func<T, dynamic>> property, bool allowLoad = true)
         {
-            ModelDataManager<T>.SetLoadProperty(property, allowLoad, ref LoadProperties);
+            ModelDataManager<T>.SetLoadProperty(property, allowLoad, ref _loadProperties);
         }
 
         /// <summary>
-        /// Close lazy data load
+        /// Close load lazy member
         /// </summary>
-        public virtual void CloseLazyMemberLoad()
+        public virtual void CloseLazyMember()
         {
-            LoadLazyMember = false;
+            _allowLoadLazyMember = false;
         }
 
         /// <summary>
-        /// Open lazy data load
+        /// Open load lazy member
         /// </summary>
-        public virtual void OpenLazyMemberLoad()
+        public virtual void OpenLazyMember()
         {
-            LoadLazyMember = true;
+            _allowLoadLazyMember = true;
         }
 
         /// <summary>
@@ -144,13 +182,13 @@ namespace EZNEW.Development.Domain.Model
         /// </summary>
         /// <param name="property">Property</param>
         /// <returns>Return wheather property allow load data</returns>
-        protected virtual bool AllowLazyLoad(string property)
+        protected virtual bool AllowLoad(string property)
         {
-            if (!LoadLazyMember || LoadProperties == null || !LoadProperties.ContainsKey(property))
+            if (!_allowLoadLazyMember || _loadProperties.IsNullOrEmpty() || !_loadProperties.ContainsKey(property))
             {
                 return false;
             }
-            return LoadProperties[property];
+            return _loadProperties[property];
         }
 
         /// <summary>
@@ -158,13 +196,13 @@ namespace EZNEW.Development.Domain.Model
         /// </summary>
         /// <param name="property">Property</param>
         /// <returns>Return wheather property allow load data</returns>
-        protected virtual bool AllowLazyLoad(Expression<Func<T, dynamic>> property)
+        protected virtual bool AllowLoad(Expression<Func<T, dynamic>> property)
         {
             if (property == null)
             {
                 return false;
             }
-            return AllowLazyLoad(ExpressionHelper.GetExpressionPropertyName(property.Body));
+            return AllowLoad(ExpressionHelper.GetExpressionPropertyName(property.Body));
         }
 
         /// <summary>
@@ -176,24 +214,12 @@ namespace EZNEW.Development.Domain.Model
         /// <returns>Return whether allow load data</returns>
         protected virtual bool AllowLoad<TModel>(Expression<Func<T, dynamic>> property, LazyMember<TModel> lazyMember) where TModel : IModel<TModel>
         {
-            return AllowLazyLoad(property) && !(lazyMember.CurrentValue?.IdentityValueIsNone() ?? true);
+            return AllowLoad(property) && !(lazyMember.CurrentValue?.IdentityValueIsNone() ?? true);
         }
 
-        /// <summary>
-        /// Save
-        /// </summary>
-        public virtual Result<T> Save()
-        {
-            return ModelDataManager<T>.Save(repository, this as T);
-        }
+        #endregion
 
-        /// <summary>
-        /// Remove
-        /// </summary>
-        public virtual Result Remove()
-        {
-            return ModelDataManager<T>.Remove(repository, this as T);
-        }
+        #region Identity value
 
         /// <summary>
         /// Init primary value
@@ -207,13 +233,73 @@ namespace EZNEW.Development.Domain.Model
         public abstract bool IdentityValueIsNone();
 
         /// <summary>
+        /// Get identity value
+        /// </summary>
+        /// <returns>Return model identity value</returns>
+        public abstract string GetIdentityValue();
+
+        #endregion
+
+        #region Updating
+
+        /// <summary>
+        /// Update data
+        /// </summary>
+        /// <param name="newData">New data</param>
+        /// <returns></returns>
+        public IModel OnDataUpdating(T newData)
+        {
+            return OnUpdating(newData);
+        }
+
+        /// <summary>
+        /// Update data
+        /// </summary>
+        /// <param name="newData">New data</param>
+        /// <returns></returns>
+        internal protected virtual T OnUpdating(T newData)
+        {
+            return newData;
+        }
+
+        #endregion
+
+        #region Adding
+
+        /// <summary>
+        /// Add data
+        /// </summary>
+        /// <returns>Return data</returns>
+        public IModel OnDataAdding()
+        {
+            return OnAdding();
+        }
+
+        /// <summary>
+        /// Add data
+        /// </summary>
+        /// <returns>Return data</returns>
+        internal protected virtual T OnAdding()
+        {
+            if (IdentityValueIsNone())
+            {
+                InitIdentityValue();
+            }
+            return this as T;
+        }
+
+        #endregion
+
+        #region Equal
+
+        /// <summary>
         /// Compare two objects
         /// </summary>
         /// <param name="data">Data</param>
         /// <returns></returns>
         public virtual bool Equals(T data)
         {
-            return data?.IdentityValue == IdentityValue;
+            return data?.GetIdentityValue() == GetIdentityValue();
         }
 
         /// <summary>
@@ -232,56 +318,35 @@ namespace EZNEW.Development.Domain.Model
         /// <returns>Return model hash code</returns>
         public override int GetHashCode()
         {
-            return IdentityValue.GetHashCode();
+            return GetIdentityValue()?.GetHashCode() ?? 0;
         }
 
-        /// <summary>
-        /// Get identity value
-        /// </summary>
-        /// <returns>Return model identity value</returns>
-        protected abstract string GetIdentityValue();
+        #endregion
+
+        #region Repository
 
         /// <summary>
-        /// Update data
+        /// Set _repository
         /// </summary>
-        /// <param name="newData">New data</param>
-        /// <returns></returns>
-        public IModel OnDataUpdating(T newData)
+        /// <param name="_repository">Repository</param>
+        protected void SetRepository(IRepository<T> _repository)
         {
-            return OnUpdating(newData);
-        }
-
-        /// <summary>
-        /// Add data
-        /// </summary>
-        /// <returns>Return data</returns>
-        public IModel OnDataAdding()
-        {
-            return OnAdding();
-        }
-
-        /// <summary>
-        /// Update data
-        /// </summary>
-        /// <param name="newData">New data</param>
-        /// <returns></returns>
-        internal protected virtual T OnUpdating(T newData)
-        {
-            return newData;
-        }
-
-        /// <summary>
-        /// Add data
-        /// </summary>
-        /// <returns>Return data</returns>
-        internal protected virtual T OnAdding()
-        {
-            if (IdentityValueIsNone())
+            if (_repository != null)
             {
-                InitIdentityValue();
+                _repository = _repository;
             }
-            return this as T;
         }
+
+        /// <summary>
+        /// Get _repository
+        /// </summary>
+        /// <returns></returns>
+        protected IRepository<T> GetRepository()
+        {
+            return _repository;
+        }
+
+        #endregion
 
         #endregion
     }

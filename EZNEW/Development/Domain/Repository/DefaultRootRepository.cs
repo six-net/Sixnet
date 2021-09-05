@@ -45,7 +45,7 @@ namespace EZNEW.Development.Domain.Repository
             }
             var records = new List<IActivationRecord>();
             var resultDatas = new List<TModel>();
-            var currentDatas = datas.Where(c => !c.IdentityValueIsNone() && c.IsNew);
+            var currentDatas = datas.Where(c => !c.IdentityValueIsNone() && c.IsNew());
             if (!currentDatas.IsNullOrEmpty())
             {
                 currentDatas = GetList(currentDatas);
@@ -57,21 +57,22 @@ namespace EZNEW.Development.Domain.Repository
                     continue;
                 }
                 var saveData = data;
-                if (!saveData.IdentityValueIsNone() && saveData.IsNew)
+                string saveDataIdentityValue = saveData.GetIdentityValue();
+                if (!saveData.IdentityValueIsNone())
                 {
-                    var nowData = currentDatas?.FirstOrDefault(c => c.IdentityValue == saveData.IdentityValue);
+                    var nowData = currentDatas?.FirstOrDefault(c => c.GetIdentityValue() == saveDataIdentityValue);
                     if (nowData != null)
                     {
                         saveData = nowData.OnDataUpdating(saveData) as TModel;
                     }
                 }
-                if (saveData.IsNew)
+                if (saveData.IsNew())
                 {
                     saveData = saveData.OnDataAdding() as TModel;
                 }
-                if (!saveData.CanBeSave)
+                if (!saveData.AllowToSave())
                 {
-                    throw new EZNEWException($"Data:{saveData.IdentityValue} cann't to be save");
+                    throw new EZNEWException($"Data:{saveDataIdentityValue} cann't to be save");
                 }
                 var record = ExecuteSave(saveData, activationOptions);
                 if (record != null)
@@ -117,9 +118,9 @@ namespace EZNEW.Development.Domain.Repository
                 {
                     throw new EZNEWException("remove object data is null");
                 }
-                if (!data.CanBeRemove)
+                if (!data.AllowToRemove())
                 {
-                    throw new EZNEWException($"Data:{data.IdentityValue} cann't to be remove");
+                    throw new EZNEWException($"Data:{data.GetIdentityValue()} cann't to be remove");
                 }
                 var record = ExecuteRemove(data, activationOptions);//Execute remove
                 if (record != null)
@@ -707,7 +708,7 @@ namespace EZNEW.Development.Domain.Repository
                 }
                 if (batchReturn)
                 {
-                    data.CloseLazyMemberLoad();
+                    data.CloseLazyMember();
                 }
                 if (!(query?.LoadPropertys.IsNullOrEmpty() ?? true))
                 {
