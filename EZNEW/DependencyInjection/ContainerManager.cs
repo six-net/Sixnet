@@ -21,11 +21,6 @@ namespace EZNEW.DependencyInjection
     /// </summary>
     public static class ContainerManager
     {
-        static ContainerManager()
-        {
-            ApplicationInitializer.Init();
-        }
-
         /// <summary>
         /// Internal services
         /// </summary>
@@ -151,14 +146,19 @@ namespace EZNEW.DependencyInjection
         /// </summary>
         /// <param name="defaultServices">Default services</param>
         /// <param name="container">Dependency injection container</param>
-        /// <param name="configureServiceDelegate">Configure service delegate</param>
+        /// <param name="configureApplicationDelegate">Configure service delegate</param>
         /// <param name="registerDefaultProjectService">Whether register default project service</param>
-        public static void Init(IServiceCollection defaultServices = null, IDIContainer container = null, Action<IDIContainer> configureServiceDelegate = null, bool registerDefaultProjectService = true)
+        public static void Init(IServiceCollection services,Action<ApplicationOptions> configureApplicationDelegate = null)
         {
+            //Configure application
+            ApplicationManager.Configure(configureApplicationDelegate);
+            var applicationOptions = ApplicationManager.Options;
+
             //Init default container
-            defaultServices ??= new ServiceCollection();
-            container ??= new ServiceProviderContainer();
-            SetDefaultServiceCollection(defaultServices);
+            services ??= new ServiceCollection();
+            var container = ApplicationManager.Options.DIContainer ?? new ServiceProviderContainer();
+            SetDefaultServiceCollection(services);
+
             if (defaultServices != null && !(container is ServiceProviderContainer))
             {
                 container.Register(defaultServices.ToArray());
@@ -171,12 +171,10 @@ namespace EZNEW.DependencyInjection
             RegisterInternalService(defaultServices);
 
             //Register default project service
-            if (registerDefaultProjectService)
+            if (applicationOptions.RegisterProjectDefaultService)
             {
                 RegisterDefaultProjectService(defaultServices);
             }
-
-            configureServiceDelegate?.Invoke(container);
             SetDefaultServiceCollection(defaultServices);
             Container = container;
 

@@ -33,7 +33,7 @@ namespace EZNEW.Module
             {
                 foreach (var configration in ModuleConfigurations)
                 {
-                    configration?.Init();
+                    configration?.Configure();
                 }
                 ModuleConfigurations = null;
             }

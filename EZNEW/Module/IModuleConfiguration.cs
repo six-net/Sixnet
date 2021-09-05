@@ -10,8 +10,8 @@ namespace EZNEW.Module
     public interface IModuleConfiguration
     {
         /// <summary>
-        /// Init configuration
+        /// Configure
         /// </summary>
-        void Init();
+        void Configure();
     }
 }

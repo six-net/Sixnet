@@ -18,7 +18,7 @@ namespace EZNEW.Mapper
         /// <summary>
         /// Default mapper builder
         /// </summary>
-        static readonly ConventionMapperBuilder DefaultMapperBuilder = new ConventionMapperBuilder();
+        static readonly ConventionMapperBuilder DefaultMapperBuilder = new();
 
         /// <summary>
         /// Get or set current object mapper
@@ -47,7 +47,14 @@ namespace EZNEW.Mapper
         {
             if (Current == null || Current is ConventionMapper)
             {
-                Current = DefaultMapperBuilder.CreateMapper();
+                if (ApplicationManager.Options.MapperBuilder == null)
+                {
+                    Current = DefaultMapperBuilder.CreateMapper();
+                }
+                else
+                {
+                    Current = ApplicationManager.Options.MapperBuilder.CreateMapper();
+                }
             }
             return Current;
         }

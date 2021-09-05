@@ -41,7 +41,8 @@ namespace EZNEW.Application
             @"\.DTO\.",
             @"\.ViewModel\.",
             @"\.Module\.",
-            @"\.ApiModel\."
+            @"\.ApiModel\.",
+            @"AppConfig\."
         };
 
         /// <summary>
@@ -76,7 +77,7 @@ namespace EZNEW.Application
         /// Configure application
         /// </summary>
         /// <param name="configureApplicationDelegate">Configure application delegate</param>
-        public static void Configure(Action<ApplicationOptions> configureApplicationDelegate = null)
+        internal static void Configure(Action<ApplicationOptions> configureApplicationDelegate = null)
         {
             configureApplicationDelegate?.Invoke(Options);
             ApplicationInitializer.Init();
@@ -146,7 +147,7 @@ namespace EZNEW.Application
         /// <returns></returns>
         internal static IEnumerable<FileInfo> GetMatchedFiles()
         {
-            return FilterFiles(new DirectoryInfo(ApplicationManager.RootPath).GetFiles("*.dll", Options.FileMatchOptions.FileSearchOption));
+            return FilterFiles(new DirectoryInfo(RootPath).GetFiles("*.dll", Options.FileMatchOptions.FileSearchOption));
         }
 
         /// <summary>
@@ -160,13 +161,18 @@ namespace EZNEW.Application
             {
                 return Array.Empty<Type>();
             }
-            IEnumerable<Type> allTypes = Array.Empty<Type>();
+            var entryAssembly = Assembly.GetEntryAssembly();
+            IEnumerable<Type> allTypes = entryAssembly.GetTypes();
             foreach (var file in files)
             {
                 try
                 {
-                    var types = Assembly.LoadFrom(file.FullName).GetTypes();
-                    allTypes = allTypes.Union(types);
+                    var fileAssembly = Assembly.LoadFrom(file.FullName);
+                    if (fileAssembly == null || fileAssembly.FullName == entryAssembly.FullName)
+                    {
+                        continue;
+                    }
+                    allTypes = allTypes.Union(fileAssembly.GetTypes());
                 }
                 catch (Exception ex)
                 {
@@ -188,7 +194,7 @@ namespace EZNEW.Application
             {
                 return Array.Empty<FileInfo>();
             }
-            options ??= ApplicationManager.Options;
+            options ??= Options;
             var fileOptions = options.FileMatchOptions;
             return originalFiles.Where(c =>
             {
@@ -206,7 +212,7 @@ namespace EZNEW.Application
                 };
                 return matched;
             });
-        } 
+        }
 
         #endregion
     }
