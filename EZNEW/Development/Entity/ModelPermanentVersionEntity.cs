@@ -8,7 +8,7 @@ namespace EZNEW.Development.Entity
     /// <summary>
     /// Defines model permanent version entity
     /// </summary>
-    public class ModelPermanentVersionEntity<TEntity>
+    public abstract class ModelPermanentVersionEntity<TEntity>
         : ModelVerionEntity<TEntity>, IObsoleteEntity
         where TEntity : BaseEntity<TEntity>, IModel<TEntity>, new()
     {

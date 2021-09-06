@@ -95,7 +95,7 @@ namespace EZNEW.Development.Domain.Model
         /// <returns>Return whether allow to remove</returns>
         protected virtual bool RemoveValidation()
         {
-            return !IdentityValueIsNone();
+            return !IdentityValueIsNull();
         }
 
         /// <summary>
@@ -214,7 +214,7 @@ namespace EZNEW.Development.Domain.Model
         /// <returns>Return whether allow load data</returns>
         protected virtual bool AllowLoad<TModel>(Expression<Func<T, dynamic>> property, LazyMember<TModel> lazyMember) where TModel : IModel<TModel>
         {
-            return AllowLoad(property) && !(lazyMember.CurrentValue?.IdentityValueIsNone() ?? true);
+            return AllowLoad(property) && !(lazyMember.CurrentValue?.IdentityValueIsNull() ?? true);
         }
 
         #endregion
@@ -224,13 +224,13 @@ namespace EZNEW.Development.Domain.Model
         /// <summary>
         /// Init primary value
         /// </summary>
-        public virtual void InitIdentityValue() { }
+        public abstract void InitIdentityValue();
 
         /// <summary>
-        /// Check identity value is none
+        /// Check identity value is null
         /// </summary>
         /// <returns>Return identity value whether has value</returns>
-        public abstract bool IdentityValueIsNone();
+        public abstract bool IdentityValueIsNull();
 
         /// <summary>
         /// Get identity value
@@ -281,7 +281,7 @@ namespace EZNEW.Development.Domain.Model
         /// <returns>Return data</returns>
         protected virtual T OnAdding()
         {
-            if (IdentityValueIsNone())
+            if (IdentityValueIsNull())
             {
                 InitIdentityValue();
             }

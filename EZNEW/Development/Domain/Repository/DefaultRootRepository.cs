@@ -45,7 +45,7 @@ namespace EZNEW.Development.Domain.Repository
             }
             var records = new List<IActivationRecord>();
             var resultDatas = new List<TModel>();
-            var currentDatas = datas.Where(c => !c.IdentityValueIsNone() && c.IsNew());
+            var currentDatas = datas.Where(c => !c.IdentityValueIsNull() && c.IsNew());
             if (!currentDatas.IsNullOrEmpty())
             {
                 currentDatas = GetList(currentDatas);
@@ -58,7 +58,7 @@ namespace EZNEW.Development.Domain.Repository
                 }
                 var saveData = data;
                 string saveDataIdentityValue = saveData.GetIdentityValue();
-                if (!saveData.IdentityValueIsNone())
+                if (!saveData.IdentityValueIsNull())
                 {
                     var nowData = currentDatas?.FirstOrDefault(c => c.GetIdentityValue() == saveDataIdentityValue);
                     if (nowData != null)

@@ -45,10 +45,10 @@ namespace EZNEW.Development.Domain.Model
         bool MarkStored();
 
         /// <summary>
-        /// Check identity value is none
+        /// Check identity value is null
         /// </summary>
-        /// <returns>Return identity value whether is none</returns>
-        bool IdentityValueIsNone();
+        /// <returns>Return identity value whether is null</returns>
+        bool IdentityValueIsNull();
     }
 
     /// <summary>

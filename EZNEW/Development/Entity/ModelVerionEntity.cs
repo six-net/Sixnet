@@ -8,7 +8,7 @@ namespace EZNEW.Development.Entity
     /// <summary>
     /// Defines model version entity
     /// </summary>
-    public class ModelVerionEntity<TEntity>
+    public abstract class ModelVerionEntity<TEntity>
         : ModelRecordEntity<TEntity>, IVersionEntity
         where TEntity : BaseEntity<TEntity>, IModel<TEntity>, new()
     {

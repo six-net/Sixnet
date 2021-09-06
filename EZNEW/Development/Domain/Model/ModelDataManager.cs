@@ -20,7 +20,7 @@ namespace EZNEW.Development.Domain.Model
     {
         internal static bool IsNew(IRepository<T> repository, Type dataType, IModel data)
         {
-            if (data?.IdentityValueIsNone() ?? true)
+            if (data?.IdentityValueIsNull() ?? true)
             {
                 return true;
             }

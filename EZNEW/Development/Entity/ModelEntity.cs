@@ -12,7 +12,7 @@ namespace EZNEW.Development.Entity
     /// <summary>
     /// Defines model entity
     /// </summary>
-    public class ModelEntity<T> : BaseEntity<T>, IModel<T> where T : BaseEntity<T>, IModel<T>, new()
+    public abstract class ModelEntity<T> : BaseEntity<T>, IModel<T> where T : BaseEntity<T>, IModel<T>, new()
     {
         #region Fields
 
@@ -83,7 +83,7 @@ namespace EZNEW.Development.Entity
         /// <returns>Return whether allow to remove</returns>
         protected virtual bool RemoveValidation()
         {
-            return !IdentityValueIsNone();
+            return !IdentityValueIsNull();
         }
 
         /// <summary>
@@ -202,7 +202,7 @@ namespace EZNEW.Development.Entity
         /// <returns>Return whether allow load data</returns>
         protected virtual bool AllowLoad<TModel>(Expression<Func<T, dynamic>> property, LazyMember<TModel> lazyMember) where TModel : IModel<TModel>
         {
-            return AllowLoad(property) && !(lazyMember.CurrentValue?.IdentityValueIsNone() ?? true);
+            return AllowLoad(property) && !(lazyMember.CurrentValue?.IdentityValueIsNull() ?? true);
         }
 
         #endregion
@@ -212,16 +212,13 @@ namespace EZNEW.Development.Entity
         /// <summary>
         /// Init primary value
         /// </summary>
-        public virtual void InitIdentityValue() { }
+        public abstract void InitIdentityValue();
 
         /// <summary>
-        /// Check identity value is none
+        /// Check identity value is null
         /// </summary>
         /// <returns>Return identity value whether has value</returns>
-        public virtual bool IdentityValueIsNone()
-        {
-            return string.IsNullOrWhiteSpace(GetIdentityValue());
-        }
+        public abstract bool IdentityValueIsNull();
 
         #endregion
 
@@ -266,7 +263,7 @@ namespace EZNEW.Development.Entity
         /// <returns>Return data</returns>
         internal protected virtual T OnAdding()
         {
-            if (IdentityValueIsNone())
+            if (IdentityValueIsNull())
             {
                 InitIdentityValue();
             }
