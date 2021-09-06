@@ -120,16 +120,6 @@ namespace EZNEW.Development.DataAccess
 
             #endregion
 
-            #region creation time
-
-            string creationTimeFieldName = EntityManager.GetCreationTimeField(typeof(TEntity));
-            if (!string.IsNullOrWhiteSpace(creationTimeFieldName) && modifyValues.ContainsKey(creationTimeFieldName))
-            {
-                modifyValues.Remove(creationTimeFieldName);
-            }
-
-            #endregion
-
             var originValues = oldData.GetAllValues();
             var command = ExecuteModifyData(originValues, modifyValues, query);
 
@@ -169,16 +159,6 @@ namespace EZNEW.Development.DataAccess
             if (!string.IsNullOrWhiteSpace(updateFieldName) && !modifyValues.ContainsKey(updateFieldName))
             {
                 modifyValues.Add(updateFieldName, new FixedModificationValue(DateTimeOffset.Now));
-            }
-
-            #endregion
-
-            #region creation time
-
-            string creationTimeFieldName = EntityManager.GetCreationTimeField(typeof(TEntity));
-            if (!string.IsNullOrWhiteSpace(creationTimeFieldName) && modifyValues.ContainsKey(creationTimeFieldName))
-            {
-                modifyValues.Remove(creationTimeFieldName);
             }
 
             #endregion
