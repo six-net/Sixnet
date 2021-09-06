@@ -328,12 +328,12 @@ namespace EZNEW.Development.Domain.Model
         /// <summary>
         /// Set _repository
         /// </summary>
-        /// <param name="_repository">Repository</param>
-        protected void SetRepository(IRepository<T> _repository)
+        /// <param name="repository">Repository</param>
+        protected void SetRepository(IRepository<T> repository)
         {
             if (_repository != null)
             {
-                _repository = _repository;
+                _repository = repository;
             }
         }
 

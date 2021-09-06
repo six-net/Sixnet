@@ -301,46 +301,46 @@ namespace EZNEW.Development.Entity
                     switch (typeCode)
                     {
                         case TypeCode.Byte:
-                            identityValueIsNull = !byte.TryParse(fieldValue?.ToString(), out var byteValue) && byteValue < 1;
+                            identityValueIsNull = !byte.TryParse(fieldValue?.ToString(), out var byteValue) || byteValue < 1;
                             break;
                         case TypeCode.SByte:
-                            identityValueIsNull = !sbyte.TryParse(fieldValue?.ToString(), out var sbyteValue) && sbyteValue < 1;
+                            identityValueIsNull = !sbyte.TryParse(fieldValue?.ToString(), out var sbyteValue) || sbyteValue < 1;
                             break;
                         case TypeCode.Int16:
-                            identityValueIsNull = !short.TryParse(fieldValue?.ToString(), out var shortValue) && shortValue < 1;
+                            identityValueIsNull = !short.TryParse(fieldValue?.ToString(), out var shortValue) || shortValue < 1;
                             break;
                         case TypeCode.UInt16:
-                            identityValueIsNull = !ushort.TryParse(fieldValue?.ToString(), out var ushortValue) && ushortValue < 1;
+                            identityValueIsNull = !ushort.TryParse(fieldValue?.ToString(), out var ushortValue) || ushortValue < 1;
                             break;
                         case TypeCode.Int32:
-                            identityValueIsNull = !int.TryParse(fieldValue?.ToString(), out var intValue) && intValue < 1;
+                            identityValueIsNull = !int.TryParse(fieldValue?.ToString(), out var intValue) || intValue < 1;
                             break;
                         case TypeCode.UInt32:
-                            identityValueIsNull = !uint.TryParse(fieldValue?.ToString(), out var uintValue) && uintValue < 1;
+                            identityValueIsNull = !uint.TryParse(fieldValue?.ToString(), out var uintValue) || uintValue < 1;
                             break;
                         case TypeCode.Int64:
-                            identityValueIsNull = !long.TryParse(fieldValue?.ToString(), out var longValue) && longValue < 1;
+                            identityValueIsNull = !long.TryParse(fieldValue?.ToString(), out var longValue) || longValue < 1;
                             break;
                         case TypeCode.UInt64:
-                            identityValueIsNull = !ulong.TryParse(fieldValue?.ToString(), out var ulongValue) && ulongValue < 1;
+                            identityValueIsNull = !ulong.TryParse(fieldValue?.ToString(), out var ulongValue) || ulongValue < 1;
                             break;
                         case TypeCode.Double:
                         case TypeCode.Single:
-                            identityValueIsNull = !double.TryParse(fieldValue?.ToString(), out var doubleValue) && doubleValue < 1;
+                            identityValueIsNull = !double.TryParse(fieldValue?.ToString(), out var doubleValue) || doubleValue < 1;
                             break;
                         case TypeCode.Decimal:
-                            identityValueIsNull = !decimal.TryParse(fieldValue?.ToString(), out var decimalValue) && decimalValue < 1;
+                            identityValueIsNull = !decimal.TryParse(fieldValue?.ToString(), out var decimalValue) || decimalValue < 1;
                             break;
                         case TypeCode.String:
                             identityValueIsNull = string.IsNullOrWhiteSpace(fieldValue?.ToString());
                             break;
                         case TypeCode.DateTime:
-                            identityValueIsNull = !DateTime.TryParse(fieldValue?.ToString(), out var dateTimeValue) && dateTimeValue <= DateTime.MinValue;
+                            identityValueIsNull = !DateTime.TryParse(fieldValue?.ToString(), out var dateTimeValue) || dateTimeValue <= DateTime.MinValue;
                             break;
                         default:
                             if (valueType == typeof(Guid))
                             {
-                                identityValueIsNull = !Guid.TryParse(fieldValue?.ToString(), out var guidValue) && guidValue.Equals(Guid.Empty);
+                                identityValueIsNull = !Guid.TryParse(fieldValue?.ToString(), out var guidValue) || guidValue.Equals(Guid.Empty);
                             }
                             else if (valueType == typeof(DateTimeOffset))
                             {
@@ -452,11 +452,11 @@ namespace EZNEW.Development.Entity
         /// Set _repository
         /// </summary>
         /// <param name="_repository">Repository</param>
-        protected void SetRepository(IRepository<T> _repository)
+        protected void SetRepository(IRepository<T> repository)
         {
-            if (_repository != null)
+            if (repository != null)
             {
-                _repository = _repository;
+                _repository = repository;
             }
         }
 
