@@ -122,7 +122,7 @@ namespace EZNEW.Development.DataAccess
 
             #region creation time
 
-            string creationTimeFieldName = EntityManager.GetUpdateTimeField(typeof(TEntity));
+            string creationTimeFieldName = EntityManager.GetCreationTimeField(typeof(TEntity));
             if (!string.IsNullOrWhiteSpace(creationTimeFieldName) && modifyValues.ContainsKey(creationTimeFieldName))
             {
                 modifyValues.Remove(creationTimeFieldName);
@@ -175,7 +175,7 @@ namespace EZNEW.Development.DataAccess
 
             #region creation time
 
-            string creationTimeFieldName = EntityManager.GetUpdateTimeField(typeof(TEntity));
+            string creationTimeFieldName = EntityManager.GetCreationTimeField(typeof(TEntity));
             if (!string.IsNullOrWhiteSpace(creationTimeFieldName) && modifyValues.ContainsKey(creationTimeFieldName))
             {
                 modifyValues.Remove(creationTimeFieldName);
