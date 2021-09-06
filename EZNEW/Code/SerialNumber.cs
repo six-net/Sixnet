@@ -22,7 +22,7 @@ namespace EZNEW.Code
         #region Registers a serial number generator for the specified groups
 
         /// <summary>
-        /// Registers a serial number generator for the specified groups
+        /// Register a serial number generator for the specified groups
         /// </summary>
         /// param name="groups">Groups</param>
         /// <param name="dataCenterId">Data center id(1-31)</param>
@@ -45,6 +45,19 @@ namespace EZNEW.Code
             }
         }
 
+        /// <summary>
+        /// Register a serial number generator for the specified type
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="dataCenterId">Data center id</param>
+        /// <param name="workerId">Worker id</param>
+        /// <param name="sequence">Sequece</param>
+        /// <param name="startDate">Start date</param>
+        public static void RegisterGenerator<T>(long dataCenterId, long workerId, long sequence = 0L, DateTime? startDate = null)
+        {
+            RegisterGenerator(new string[1] { typeof(T).FullName }, dataCenterId, workerId, sequence, startDate);
+        }
+
         #endregion
 
         #region Generates a serial number by group
@@ -62,6 +75,17 @@ namespace EZNEW.Code
                 return DefaultGenerator.GenerateId();
             }
             return GeneratorGroups[group].GenerateId();
+        }
+
+        /// <summary>
+        /// Generates a serial number by data type
+        /// Use the default generator to create number if the type didn't register
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static long GenerateSerialNumber<T>()
+        {
+            return GenerateSerialNumber(typeof(T).FullName);
         }
 
         #endregion
