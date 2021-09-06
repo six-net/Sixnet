@@ -108,7 +108,7 @@ namespace EZNEW.Development.DataAccess
 
             #endregion
 
-            #region update date
+            #region update time
 
             string updateDateTimeFieldName = EntityManager.GetUpdateTimeField(entityType);
             if (!string.IsNullOrWhiteSpace(updateDateTimeFieldName) && !modifyValues.ContainsKey(updateDateTimeFieldName))
@@ -116,6 +116,16 @@ namespace EZNEW.Development.DataAccess
                 var nowDate = DateTimeOffset.Now;
                 newData.SetValue(updateDateTimeFieldName, nowDate);
                 modifyValues.Add(updateDateTimeFieldName, nowDate);
+            }
+
+            #endregion
+
+            #region creation time
+
+            string creationTimeFieldName = EntityManager.GetUpdateTimeField(typeof(TEntity));
+            if (!string.IsNullOrWhiteSpace(creationTimeFieldName) && modifyValues.ContainsKey(creationTimeFieldName))
+            {
+                modifyValues.Remove(creationTimeFieldName);
             }
 
             #endregion
@@ -153,12 +163,22 @@ namespace EZNEW.Development.DataAccess
 
             #endregion
 
-            #region update date
+            #region update time
 
             string updateFieldName = EntityManager.GetUpdateTimeField(typeof(TEntity));
             if (!string.IsNullOrWhiteSpace(updateFieldName) && !modifyValues.ContainsKey(updateFieldName))
             {
                 modifyValues.Add(updateFieldName, new FixedModificationValue(DateTimeOffset.Now));
+            }
+
+            #endregion
+
+            #region creation time
+
+            string creationTimeFieldName = EntityManager.GetUpdateTimeField(typeof(TEntity));
+            if (!string.IsNullOrWhiteSpace(creationTimeFieldName) && modifyValues.ContainsKey(creationTimeFieldName))
+            {
+                modifyValues.Remove(creationTimeFieldName);
             }
 
             #endregion

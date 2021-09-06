@@ -257,7 +257,7 @@ namespace EZNEW.Development.Domain.Model
         /// </summary>
         /// <param name="newData">New data</param>
         /// <returns></returns>
-        internal protected virtual T OnUpdating(T newData)
+        protected virtual T OnUpdating(T newData)
         {
             return newData;
         }
@@ -279,7 +279,7 @@ namespace EZNEW.Development.Domain.Model
         /// Add data
         /// </summary>
         /// <returns>Return data</returns>
-        internal protected virtual T OnAdding()
+        protected virtual T OnAdding()
         {
             if (IdentityValueIsNone())
             {
