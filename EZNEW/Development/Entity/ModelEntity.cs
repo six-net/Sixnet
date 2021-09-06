@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Text;
+using EZNEW.Code;
 using EZNEW.Development.Domain.Model;
 using EZNEW.Development.Domain.Repository;
 using EZNEW.Expressions;
@@ -212,13 +213,153 @@ namespace EZNEW.Development.Entity
         /// <summary>
         /// Init primary value
         /// </summary>
-        public abstract void InitIdentityValue();
+        public virtual void InitIdentityValue()
+        {
+            var primaryKeys = EntityManager.GetPrimaryKeys<T>();
+            if (primaryKeys.IsNullOrEmpty())
+            {
+                return;
+            }
+            foreach (var pk in primaryKeys)
+            {
+                var field = EntityManager.GetEntityField(typeof(T), pk);
+                if (field != null)
+                {
+                    var valueType = field.DataType?.GetRealValueType();
+                    var typeCode = Type.GetTypeCode(valueType);
+                    switch (typeCode)
+                    {
+                        case TypeCode.Byte:
+                            field.ValueProvider.Set(this, RandomNumberHelper.GetRandomNumber(byte.MaxValue, 1));
+                            break;
+                        case TypeCode.SByte:
+                            field.ValueProvider.Set(this, RandomNumberHelper.GetRandomNumber(sbyte.MaxValue, 1));
+                            break;
+                        case TypeCode.Int16:
+                            field.ValueProvider.Set(this, RandomNumberHelper.GetRandomNumber(short.MaxValue, 1));
+                            break;
+                        case TypeCode.UInt16:
+                            field.ValueProvider.Set(this, RandomNumberHelper.GetRandomNumber(ushort.MaxValue, 1));
+                            break;
+                        case TypeCode.Int32:
+                        case TypeCode.UInt32:
+                            field.ValueProvider.Set(this, RandomNumberHelper.GetRandomNumber(int.MaxValue, 1));
+                            break;
+                        case TypeCode.Int64:
+                        case TypeCode.UInt64:
+                        case TypeCode.Double:
+                        case TypeCode.Single:
+                        case TypeCode.Decimal:
+                            field.ValueProvider.Set(this, SerialNumber.GenerateSerialNumber<T>());
+                            break;
+                        case TypeCode.String:
+                            field.ValueProvider.Set(this, SerialNumber.GenerateSerialNumber<T>().ToString());
+                            break;
+                        case TypeCode.DateTime:
+                            field.ValueProvider.Set(this, DateTime.Now);
+                            break;
+                        default:
+                            if (valueType == typeof(Guid))
+                            {
+                                field.ValueProvider.Set(this, Guid.NewGuid());
+                            }
+                            else if (valueType == typeof(DateTimeOffset))
+                            {
+                                field.ValueProvider.Set(this, DateTimeOffset.Now);
+                            }
+                            else
+                            {
+                                throw new InvalidOperationException($"Initialization values are not supported for {field.DataType}.");
+                            }
+                            break;
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Check identity value is null
         /// </summary>
         /// <returns>Return identity value whether has value</returns>
-        public abstract bool IdentityValueIsNull();
+        public virtual bool IdentityValueIsNull()
+        {
+            var primaryKeys = EntityManager.GetPrimaryKeys<T>();
+            if (primaryKeys.IsNullOrEmpty())
+            {
+                return true;
+            }
+            bool identityValueIsNull = false;
+            foreach (var pk in primaryKeys)
+            {
+                var field = EntityManager.GetEntityField(typeof(T), pk);
+                identityValueIsNull = field == null;
+                if (!identityValueIsNull)
+                {
+                    var valueType = field.DataType?.GetRealValueType();
+                    var typeCode = Type.GetTypeCode(valueType);
+                    var fieldValue = field.ValueProvider.Get(this);
+                    switch (typeCode)
+                    {
+                        case TypeCode.Byte:
+                            identityValueIsNull = !byte.TryParse(fieldValue?.ToString(), out var byteValue) && byteValue < 1;
+                            break;
+                        case TypeCode.SByte:
+                            identityValueIsNull = !sbyte.TryParse(fieldValue?.ToString(), out var sbyteValue) && sbyteValue < 1;
+                            break;
+                        case TypeCode.Int16:
+                            identityValueIsNull = !short.TryParse(fieldValue?.ToString(), out var shortValue) && shortValue < 1;
+                            break;
+                        case TypeCode.UInt16:
+                            identityValueIsNull = !ushort.TryParse(fieldValue?.ToString(), out var ushortValue) && ushortValue < 1;
+                            break;
+                        case TypeCode.Int32:
+                            identityValueIsNull = !int.TryParse(fieldValue?.ToString(), out var intValue) && intValue < 1;
+                            break;
+                        case TypeCode.UInt32:
+                            identityValueIsNull = !uint.TryParse(fieldValue?.ToString(), out var uintValue) && uintValue < 1;
+                            break;
+                        case TypeCode.Int64:
+                            identityValueIsNull = !long.TryParse(fieldValue?.ToString(), out var longValue) && longValue < 1;
+                            break;
+                        case TypeCode.UInt64:
+                            identityValueIsNull = !ulong.TryParse(fieldValue?.ToString(), out var ulongValue) && ulongValue < 1;
+                            break;
+                        case TypeCode.Double:
+                        case TypeCode.Single:
+                            identityValueIsNull = !double.TryParse(fieldValue?.ToString(), out var doubleValue) && doubleValue < 1;
+                            break;
+                        case TypeCode.Decimal:
+                            identityValueIsNull = !decimal.TryParse(fieldValue?.ToString(), out var decimalValue) && decimalValue < 1;
+                            break;
+                        case TypeCode.String:
+                            identityValueIsNull = string.IsNullOrWhiteSpace(fieldValue?.ToString());
+                            break;
+                        case TypeCode.DateTime:
+                            identityValueIsNull = !DateTime.TryParse(fieldValue?.ToString(), out var dateTimeValue) && dateTimeValue <= DateTime.MinValue;
+                            break;
+                        default:
+                            if (valueType == typeof(Guid))
+                            {
+                                identityValueIsNull = !Guid.TryParse(fieldValue?.ToString(), out var guidValue) && guidValue.Equals(Guid.Empty);
+                            }
+                            else if (valueType == typeof(DateTimeOffset))
+                            {
+                                identityValueIsNull = !DateTimeOffset.TryParse(fieldValue?.ToString(), out var dateTimeOffsetValue) && dateTimeOffsetValue <= DateTimeOffset.MinValue;
+                            }
+                            else
+                            {
+                                throw new InvalidOperationException($"Not supported check value for {field.DataType}.");
+                            }
+                            break;
+                    }
+                }
+                if (identityValueIsNull)
+                {
+                    break;
+                }
+            }
+            return identityValueIsNull;
+        }
 
         #endregion
 
