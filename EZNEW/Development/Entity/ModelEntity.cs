@@ -395,6 +395,10 @@ namespace EZNEW.Development.Entity
         /// <returns>Return data</returns>
         public IModel OnDataAdding()
         {
+            if (IdentityValueIsNull())
+            {
+                InitIdentityValue();
+            }
             return OnAdding();
         }
 
@@ -404,10 +408,6 @@ namespace EZNEW.Development.Entity
         /// <returns>Return data</returns>
         internal protected virtual T OnAdding()
         {
-            if (IdentityValueIsNull())
-            {
-                InitIdentityValue();
-            }
             return this as T;
         }
 

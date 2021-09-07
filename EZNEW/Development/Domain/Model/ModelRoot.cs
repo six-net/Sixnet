@@ -272,6 +272,10 @@ namespace EZNEW.Development.Domain.Model
         /// <returns>Return data</returns>
         public IModel OnDataAdding()
         {
+            if (IdentityValueIsNull())
+            {
+                InitIdentityValue();
+            }
             return OnAdding();
         }
 
@@ -281,10 +285,6 @@ namespace EZNEW.Development.Domain.Model
         /// <returns>Return data</returns>
         protected virtual T OnAdding()
         {
-            if (IdentityValueIsNull())
-            {
-                InitIdentityValue();
-            }
             return this as T;
         }
 
