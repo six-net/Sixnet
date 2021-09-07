@@ -397,7 +397,8 @@ namespace EZNEW.Development.Entity
                 {
                     if (fieldItem.Value.InRole(FieldRole.CreationTime)
                         || fieldItem.Value.InRole(FieldRole.UpdateTime)
-                        || fieldItem.Value.InRole(FieldRole.Version))
+                        || fieldItem.Value.InRole(FieldRole.Version)
+                        || fieldItem.Value.InRole(FieldRole.PrimaryKey))
                     {
                         continue;
                     }
