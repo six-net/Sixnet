@@ -81,7 +81,7 @@ namespace EZNEW.Development.Domain.Repository
                     resultDatas.Add(saveData);
                 }
             }
-            RepositoryEventBus.PublishSave(GetType(), datas, activationOptions);
+            RepositoryEventBus.PublishSave(GetType(), resultDatas, activationOptions);
             WorkManager.RegisterActivationRecord(records);
             return resultDatas;
         }
