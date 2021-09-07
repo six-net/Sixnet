@@ -34,6 +34,15 @@ namespace EZNEW.Development.Entity
 
         #endregion
 
+        #region Properties
+
+        /// <summary>
+        /// Gets the repository
+        /// </summary>
+        protected IRepository<T> Repository => _repository;
+
+        #endregion
+
         #region Methods
 
         #region Save
