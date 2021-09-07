@@ -390,7 +390,21 @@ namespace EZNEW.Development.Entity
         /// <returns></returns>
         internal protected virtual T OnUpdating(T newData)
         {
-            return newData;
+            var entityConfig = EntityManager.GetEntityConfiguration<T>();
+            if (!(entityConfig?.AllFields.IsNullOrEmpty() ?? true))
+            {
+                foreach (var fieldItem in entityConfig.AllFields)
+                {
+                    if (fieldItem.Value.InRole(FieldRole.CreationTime)
+                        || fieldItem.Value.InRole(FieldRole.UpdateTime)
+                        || fieldItem.Value.InRole(FieldRole.Version))
+                    {
+                        continue;
+                    }
+                    SetValue(fieldItem.Key, newData.GetValue(fieldItem.Key));
+                }
+            }
+            return this as T;
         }
 
         #endregion
