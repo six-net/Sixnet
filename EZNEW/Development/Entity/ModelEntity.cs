@@ -32,7 +32,6 @@ namespace EZNEW.Development.Entity
         /// </summary>
         private Dictionary<string, bool> _loadProperties = new();
 
-
         #endregion
 
         #region Methods
@@ -230,42 +229,42 @@ namespace EZNEW.Development.Entity
                     switch (typeCode)
                     {
                         case TypeCode.Byte:
-                            field.ValueProvider.Set(this, RandomNumberHelper.GetRandomNumber(byte.MaxValue, 1));
+                            SetValue(pk, RandomNumberHelper.GetRandomNumber(byte.MaxValue, 1));
                             break;
                         case TypeCode.SByte:
-                            field.ValueProvider.Set(this, RandomNumberHelper.GetRandomNumber(sbyte.MaxValue, 1));
+                            SetValue(pk, RandomNumberHelper.GetRandomNumber(sbyte.MaxValue, 1));
                             break;
                         case TypeCode.Int16:
-                            field.ValueProvider.Set(this, RandomNumberHelper.GetRandomNumber(short.MaxValue, 1));
+                            SetValue(pk, RandomNumberHelper.GetRandomNumber(short.MaxValue, 1));
                             break;
                         case TypeCode.UInt16:
-                            field.ValueProvider.Set(this, RandomNumberHelper.GetRandomNumber(ushort.MaxValue, 1));
+                            SetValue(pk, RandomNumberHelper.GetRandomNumber(ushort.MaxValue, 1));
                             break;
                         case TypeCode.Int32:
                         case TypeCode.UInt32:
-                            field.ValueProvider.Set(this, RandomNumberHelper.GetRandomNumber(int.MaxValue, 1));
+                            SetValue(pk, RandomNumberHelper.GetRandomNumber(int.MaxValue, 1));
                             break;
                         case TypeCode.Int64:
                         case TypeCode.UInt64:
                         case TypeCode.Double:
                         case TypeCode.Single:
                         case TypeCode.Decimal:
-                            field.ValueProvider.Set(this, SerialNumber.GenerateSerialNumber<T>());
+                            SetValue(pk, SerialNumber.GenerateSerialNumber<T>());
                             break;
                         case TypeCode.String:
-                            field.ValueProvider.Set(this, SerialNumber.GenerateSerialNumber<T>().ToString());
+                            SetValue(pk, SerialNumber.GenerateSerialNumber<T>().ToString());
                             break;
                         case TypeCode.DateTime:
-                            field.ValueProvider.Set(this, DateTime.Now);
+                            SetValue(pk, DateTime.Now);
                             break;
                         default:
                             if (valueType == typeof(Guid))
                             {
-                                field.ValueProvider.Set(this, Guid.NewGuid());
+                                SetValue(pk, Guid.NewGuid());
                             }
                             else if (valueType == typeof(DateTimeOffset))
                             {
-                                field.ValueProvider.Set(this, DateTimeOffset.Now);
+                                SetValue(pk, DateTimeOffset.Now);
                             }
                             else
                             {
