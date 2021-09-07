@@ -83,7 +83,7 @@ namespace EZNEW.Logging
             if (EnableTraceLog && work != null && commitResult != null)
             {
                 string title = GetTitle($"【{work.WorkId}】Work submit successful");
-                string content = $"Total command count：{commitResult.CommitCommandCount},Affected data count：{commitResult.ExecutedDataCount},Allow empty result command count：{commitResult.AllowEmptyResultCommandCount}";
+                string content = $"Total command count：{commitResult.CommittedCommandCount},Affected data count：{commitResult.AffectedDataCount},Allow empty result command count：{commitResult.AllowEmptyCommandCount}";
                 Log(string.Empty, GetMultilineMessage(title, content));
             }
         }
@@ -97,7 +97,7 @@ namespace EZNEW.Logging
             if (EnableTraceLog && work != null)
             {
                 string title = GetTitle($"【{work.WorkId}】Work submit Failed");
-                string content = $"Total command count：{commitResult.CommitCommandCount},Affected data count：{commitResult.ExecutedDataCount},Allow empty result command count：{commitResult.AllowEmptyResultCommandCount}";
+                string content = $"Total command count：{commitResult.CommittedCommandCount},Affected data count：{commitResult.AffectedDataCount},Allow empty result command count：{commitResult.AllowEmptyCommandCount}";
                 Log(string.Empty, GetMultilineMessage(title, content));
             }
         }

@@ -6,40 +6,40 @@
     public class WorkCommitResult
     {
         /// <summary>
-        /// Gets or sets the commit command count
+        /// Gets or sets the committed command count
         /// </summary>
-        public int CommitCommandCount
+        public int CommittedCommandCount
         {
             get; set;
         }
 
         /// <summary>
-        /// Gets or sets the executed data count
+        /// Gets or sets the affected data count
         /// </summary>
-        public int ExecutedDataCount
+        public int AffectedDataCount
         {
             get; set;
         }
 
         /// <summary>
-        /// Gets whether was executed successful or empty command
+        /// Indecates whether has command or commit success
         /// </summary>
-        public bool EmptyResultOrSuccess
+        public bool EmptyOrSuccess
         {
             get
             {
-                return CommitCommandCount - AllowEmptyResultCommandCount < 1 || ExecutedSuccess;
+                return Success || CommittedCommandCount - AllowEmptyCommandCount < 1;
             }
         }
 
         /// <summary>
-        /// Gets whether was executed successful
+        /// Indecates whether commit success
         /// </summary>
-        public bool ExecutedSuccess
+        public bool Success
         {
             get
             {
-                return ExecutedDataCount > 0;
+                return AffectedDataCount > 0;
             }
         }
 
@@ -47,7 +47,7 @@
         /// Gets or sets the allow none result command count
         /// </summary>
         /// <returns></returns>
-        public int AllowEmptyResultCommandCount
+        public int AllowEmptyCommandCount
         {
             get; set;
         }
@@ -60,8 +60,8 @@
         {
             return new WorkCommitResult()
             {
-                CommitCommandCount = 0,
-                ExecutedDataCount = 0
+                CommittedCommandCount = 0,
+                AffectedDataCount = 0
             };
         }
     }

@@ -373,15 +373,15 @@ namespace EZNEW.Development.UnitOfWork
                     int returnValue = await CommandExecutionManager.ExecuteAsync(executeOptions, commandEngineGroups.Values).ConfigureAwait(false);
                     commitResult = new WorkCommitResult()
                     {
-                        CommitCommandCount = commandCollection.Count,
-                        ExecutedDataCount = returnValue,
-                        AllowEmptyResultCommandCount = allowEmptyResultCommandCount
+                        CommittedCommandCount = commandCollection.Count,
+                        AffectedDataCount = returnValue,
+                        AllowEmptyCommandCount = allowEmptyResultCommandCount
                     };
                 }
 
                 // trigger command callback event
-                TriggerCommandCallbackEvent(commitResult.EmptyResultOrSuccess);
-                if (commitResult.EmptyResultOrSuccess)
+                TriggerCommandCallbackEvent(commitResult.EmptyOrSuccess);
+                if (commitResult.EmptyOrSuccess)
                 {
                     //Trigger commit success event
                     TriggerCommitSuccessEvent(commitResult);
