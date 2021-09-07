@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 
 namespace EZNEW.DataValidation
@@ -27,5 +28,10 @@ namespace EZNEW.DataValidation
         /// Gets or sets the tip message
         /// </summary>
         public bool TipMessage { get; set; }
+
+        /// <summary>
+        /// Ignore use scenarios
+        /// </summary>
+        public IEnumerable<string> IgnoreUseScenarios { get; set; }
     }
 }

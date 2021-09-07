@@ -59,7 +59,7 @@ namespace EZNEW.DataValidation.Configuration
                 {
                     continue;
                 }
-                //load propertys and fields
+                //load properties and fields
                 List<MemberInfo> memberInfoList = new List<MemberInfo>();
                 memberInfoList.AddRange(modelType.GetFields(BindingFlags.Public | BindingFlags.Instance));
                 memberInfoList.AddRange(modelType.GetProperties(BindingFlags.Public | BindingFlags.Instance));
@@ -104,6 +104,7 @@ namespace EZNEW.DataValidation.Configuration
                         valFieldType.GetProperty("Field").SetValue(fieldInstance, lambdaExpression);
                         valFieldType.GetProperty("ErrorMessage").SetValue(fieldInstance, rule.ErrorMessage);
                         valFieldType.GetProperty("TipMessage").SetValue(fieldInstance, rule.TipMessage);
+                        valFieldType.GetProperty("IgnoreUseScenarios").SetValue(fieldInstance, rule.IgnoreUseScenarios);
                         Array valueFieldArray = Array.CreateInstance(valFieldType, 1);
                         valueFieldArray.SetValue(fieldInstance, 0);
                         switch (rule.ValidatorType)

@@ -97,7 +97,7 @@ namespace EZNEW.Development.Domain.Model
 
         internal static bool SaveValidation(T data)
         {
-            var verifyResults = ValidationManager.Validate(data);
+            var verifyResults = ValidationManager.Validate(data, ValidationConstants.UseCaseNames.Domain);
             var errorMessages = verifyResults.GetErrorMessages();
             if (!errorMessages.IsNullOrEmpty())
             {
