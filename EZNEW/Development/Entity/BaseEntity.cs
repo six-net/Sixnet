@@ -24,6 +24,7 @@ namespace EZNEW.Development.Entity
         /// <summary>
         /// Gets or sets the query data total count
         /// </summary>
+        [NonData]
         protected int QueryDataTotalCount { get; set; }
 
         #endregion

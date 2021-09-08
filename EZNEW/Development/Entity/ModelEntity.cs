@@ -20,16 +20,19 @@ namespace EZNEW.Development.Entity
         /// <summary>
         /// The _repository object
         /// </summary>
+        [NonData]
         private IRepository<T> _repository = RepositoryManager.GetRepository<T>();
 
         /// <summary>
         /// Indecates whether to load lazy member
         /// </summary>
+        [NonData]
         bool _allowLoadLazyMember = false;
 
         /// <summary>
         /// Lazy properties
         /// </summary>
+        [NonData]
         private Dictionary<string, bool> _loadProperties = new();
 
         #endregion
@@ -39,6 +42,7 @@ namespace EZNEW.Development.Entity
         /// <summary>
         /// Gets the repository
         /// </summary>
+        [NonData]
         protected IRepository<T> Repository => _repository;
 
         #endregion
@@ -397,8 +401,7 @@ namespace EZNEW.Development.Entity
                 {
                     if (fieldItem.Value.InRole(FieldRole.CreationTime)
                         || fieldItem.Value.InRole(FieldRole.UpdateTime)
-                        || fieldItem.Value.InRole(FieldRole.Version)
-                        || fieldItem.Value.InRole(FieldRole.PrimaryKey))
+                        || fieldItem.Value.InRole(FieldRole.Version))
                     {
                         continue;
                     }
