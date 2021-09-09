@@ -68,7 +68,6 @@ namespace EZNEW.Development.Entity
                     Group = entityAttribute?.Group ?? string.Empty
                 };
             }
-            entityConfig.Structure = entityAttribute.Structure;
             //table name
             if (string.IsNullOrWhiteSpace(entityConfig.TableName))
             {
