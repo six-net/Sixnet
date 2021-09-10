@@ -9,6 +9,7 @@ using EZNEW.Development.UnitOfWork;
 using EZNEW.Exceptions;
 using EZNEW.DependencyInjection;
 using EZNEW.Paging;
+using EZNEW.Application;
 
 namespace EZNEW.Development.Domain.Repository.Warehouse
 {
@@ -17,50 +18,6 @@ namespace EZNEW.Development.Domain.Repository.Warehouse
     /// </summary>
     public static class WarehouseManager
     {
-        #region Properties
-
-        /// <summary>
-        /// Whether enable dev debug
-        /// </summary>
-        static bool devDebug = false;
-
-        #endregion
-
-        #region Enable warehouse
-
-        /// <summary>
-        /// Enable debug warehouse
-        /// </summary>
-        public static void EnableDebugWarehouse()
-        {
-            devDebug = true;
-        }
-
-        #endregion
-
-        #region Register default warehouse
-
-        /// <summary>
-        /// Register default warehouse
-        /// </summary>
-        internal static void RegisterDefaultWarehouse<TEntity, TDataAccess>() where TEntity : BaseEntity<TEntity>, new() where TDataAccess : IDataAccess<TEntity>
-        {
-            if (ContainerManager.IsRegister<IRepositoryWarehouse<TEntity, TDataAccess>>())
-            {
-                return;
-            }
-            if (devDebug)
-            {
-                ContainerManager.Register<IRepositoryWarehouse<TEntity, TDataAccess>, DebugRepositoryWarehouse<TEntity, TDataAccess>>();
-            }
-            else
-            {
-                ContainerManager.Register<IRepositoryWarehouse<TEntity, TDataAccess>, DefaultRepositoryWarehouse<TEntity, TDataAccess>>();
-            }
-        }
-
-        #endregion
-
         #region Merge
 
         /// <summary>

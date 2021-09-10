@@ -72,7 +72,7 @@ namespace EZNEW.Development.Domain.Repository
             Type modelReposirotyType = typeof(DefaultRepository<,,>).MakeGenericType(modelType, entityType, entityDataAccessType);
             if (modelRepositoryInterfaceType != null && modelReposirotyType != null)
             {
-                ContainerManager.AddInternalService(modelRepositoryInterfaceType, modelReposirotyType);
+                ContainerManager.AddDefaultProjectService(modelRepositoryInterfaceType, modelReposirotyType);
             }
 
         }

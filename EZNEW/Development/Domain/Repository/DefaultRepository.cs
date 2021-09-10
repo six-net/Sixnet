@@ -31,11 +31,6 @@ namespace EZNEW.Development.Domain.Repository
 
         static readonly Type entityType = typeof(TEntity);
 
-        static DefaultRepository()
-        {
-            WarehouseManager.RegisterDefaultWarehouse<TEntity, TDataAccess>();
-        }
-
         #region Impl
 
         /// <summary>

@@ -76,10 +76,6 @@ namespace EZNEW.Development.Message
 
         static MessageManager()
         {
-            if (!ContainerManager.IsRegister<IMessageProvider>())
-            {
-                ContainerManager.Register<IMessageProvider, DefaultMessageProvider>();
-            }
             InitKeywordMatchRegex();
         }
 

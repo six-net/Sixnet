@@ -13,6 +13,10 @@ using EZNEW.Module;
 using EZNEW.Development.Domain.Repository.Event;
 using EZNEW.Mapper;
 using EZNEW.Data.Cache;
+using EZNEW.Development.Command;
+using EZNEW.Data;
+using EZNEW.Development.Domain.Repository.Warehouse;
+using EZNEW.Development.Message;
 
 namespace EZNEW.DependencyInjection
 {
@@ -21,40 +25,46 @@ namespace EZNEW.DependencyInjection
     /// </summary>
     public static class ContainerManager
     {
-        /// <summary>
-        /// Internal services
-        /// </summary>
-        internal static Dictionary<Type, Type> InternalServices = null;
+        #region Fields
+
+        ///// <summary>
+        ///// Internal services
+        ///// </summary>
+        //static List<ServiceDescriptor> internalServices = null;
 
         /// <summary>
         /// Default project services
         /// </summary>
-        internal static Dictionary<Type, Type> DefaultProjectServices = null;
+        static List<ServiceDescriptor> defaultProjectServices = null;
 
         /// <summary>
-        /// Default services
+        /// Default service collection
         /// </summary>
-        static IServiceCollection defaultServices = null;
+        static IServiceCollection serviceCollection = null;
+
+        #endregion
+
+        #region Properties
 
         /// <summary>
         /// Gets the current DI container
         /// </summary>
         public static IDIContainer Container { get; private set; } = null;
 
-        /// <summary>
-        /// Gets or sets the default services
-        /// </summary>
-        public static IServiceCollection ServiceCollection
-        {
-            get
-            {
-                return defaultServices;
-            }
-            set
-            {
-                SetDefaultServiceCollection(value);
-            }
-        }
+        ///// <summary>
+        ///// Gets or sets the default services
+        ///// </summary>
+        //public static IServiceCollection ServiceCollection
+        //{
+        //    get
+        //    {
+        //        return defaultServices;
+        //    }
+        //    set
+        //    {
+        //        SetDefaultServiceCollection(value);
+        //    }
+        //}
 
         /// <summary>
         /// Gets the current service provider
@@ -62,28 +72,21 @@ namespace EZNEW.DependencyInjection
         public static IServiceProvider ServiceProvider { get; private set; } = null;
 
         /// <summary>
-        /// Sets the default services   
+        /// Gets the service collection
         /// </summary>
-        /// <param name="services">Services</param>
-        static void SetDefaultServiceCollection(IServiceCollection services)
-        {
-            if (services == null)
-            {
-                defaultServices?.Clear();
-                ServiceProvider = null;
-            }
-            else
-            {
-                defaultServices = services;
-                ServiceProvider = defaultServices.BuildServiceProvider();
-            }
-        }
+        public static IServiceCollection ServiceCollection => serviceCollection;
+
+        #endregion
+
+        #region Methods
+
+        #region Default services
 
         /// <summary>
         /// Register service to default service collection
         /// </summary>
         /// <param name="serviceDescriptors">Service descriptors</param>
-        internal static void RegisterToServiceCollection(params ServiceDescriptor[] serviceDescriptors)
+        internal static void RegisterToDefaultServices(params ServiceDescriptor[] serviceDescriptors)
         {
             if (serviceDescriptors == null || serviceDescriptors.Length <= 0)
             {
@@ -91,9 +94,9 @@ namespace EZNEW.DependencyInjection
             }
             foreach (var sd in serviceDescriptors)
             {
-                defaultServices.Add(sd);
+                serviceCollection.Add(sd);
             }
-            ServiceProvider = defaultServices.BuildServiceProvider();
+            ServiceProvider = serviceCollection.BuildServiceProvider();
         }
 
         /// <summary>
@@ -101,9 +104,9 @@ namespace EZNEW.DependencyInjection
         /// </summary>
         /// <typeparam name="TService">Service type</typeparam>
         /// <returns>Return whether the service is registered</returns>
-        internal static bool ServiceCollectionIsRegister<TService>()
+        internal static bool CheckDefaultServicesIsRegister<TService>()
         {
-            return defaultServices?.Any(c => c.ServiceType == typeof(TService)) ?? false;
+            return serviceCollection?.Any(c => c.ServiceType == typeof(TService)) ?? false;
         }
 
         /// <summary>
@@ -111,9 +114,9 @@ namespace EZNEW.DependencyInjection
         /// </summary>
         /// <typeparam name="TService">Service type</typeparam>
         /// <returns>Return the service instance</returns>
-        internal static TService ResolveFromServiceCollection<TService>()
+        internal static TService ResolveFromDefaultServices<TService>()
         {
-            var service = ResolveFromServiceCollection(typeof(TService));
+            var service = ResolveFromDefaultServices(typeof(TService));
             return service == null ? default : (TService)service;
         }
 
@@ -122,7 +125,7 @@ namespace EZNEW.DependencyInjection
         /// </summary>
         /// <param name="serviceType">Service type</param>
         /// <returns>Return the service instance</returns>
-        internal static object ResolveFromServiceCollection(Type serviceType)
+        internal static object ResolveFromDefaultServices(Type serviceType)
         {
             if (ServiceProvider != null && serviceType != null)
             {
@@ -135,48 +138,54 @@ namespace EZNEW.DependencyInjection
         /// Build service provider from serrvice collection
         /// </summary>
         /// <returns>Return the service provider</returns>
-        internal static IServiceProvider BuildServiceProviderFromServiceCollection()
+        internal static IServiceProvider BuildServiceProviderFromDefaultServices()
         {
-            ServiceProvider = defaultServices?.BuildServiceProvider();
+            ServiceProvider = serviceCollection?.BuildServiceProvider();
             return ServiceProvider;
         }
 
+        #endregion
+
+        #region Configure
+
         /// <summary>
-        /// Init dependency injection container
+        /// Configure dependency injection container
         /// </summary>
-        /// <param name="defaultServices">Default services</param>
-        /// <param name="container">Dependency injection container</param>
+        /// <param name="services">Default services</param>
+        /// <param name="configureServiceDelegae">Configure service delegate</param>
         /// <param name="configureApplicationDelegate">Configure service delegate</param>
-        /// <param name="registerDefaultProjectService">Whether register default project service</param>
-        public static void Init(IServiceCollection services,Action<ApplicationOptions> configureApplicationDelegate = null)
+        public static IServiceCollection Configure(IServiceCollection services, Action<IServiceCollection> configureServiceDelegae = null, Action<ApplicationOptions> configureApplicationDelegate = null)
         {
+            //Init default service collection
+            serviceCollection = services ?? new ServiceCollection();
+            BuildServiceProviderFromDefaultServices();
+
             //Configure application
             ApplicationManager.Configure(configureApplicationDelegate);
             var applicationOptions = ApplicationManager.Options;
 
-            //Init default container
-            services ??= new ServiceCollection();
-            var container = ApplicationManager.Options.DIContainer ?? new ServiceProviderContainer();
-            SetDefaultServiceCollection(services);
+            //Add component
+            AddComponentService();
 
-            if (defaultServices != null && !(container is ServiceProviderContainer))
-            {
-                container.Register(defaultServices.ToArray());
-            }
-
-            //Register component
-            RegisterComponentConfiguration();
-
-            //Register internal service
-            RegisterInternalService(defaultServices);
-
-            //Register default project service
+            //Add default project service
             if (applicationOptions.RegisterProjectDefaultService)
             {
-                RegisterDefaultProjectService(defaultServices);
+                RegisterDefaultProjectService(serviceCollection);
             }
-            SetDefaultServiceCollection(defaultServices);
+
+            //Custom configure service
+            configureServiceDelegae?.Invoke(serviceCollection);
+
+            //Container
+            var container = ApplicationManager.Options.DIContainer ?? new ServiceProviderContainer();
+            if (serviceCollection != null && !(container is ServiceProviderContainer))
+            {
+                container.Register(serviceCollection.ToArray());
+            }
             Container = container;
+
+            //Build service provider
+            BuildServiceProviderFromDefaultServices();
 
             //Configure module
             ModuleManager.ConfigureModule();
@@ -187,18 +196,17 @@ namespace EZNEW.DependencyInjection
             //Object mapper
             ObjectMapper.BuildMapper();
 
+            //Build service provider
+            BuildServiceProviderFromDefaultServices();
+
             GC.Collect();
+
+            return serviceCollection;
         }
 
-        /// <summary>
-        /// Determine whether register the specified type
-        /// </summary>
-        /// <typeparam name="TService">Service type</typeparam>
-        /// <returns>Return whether service has registered</returns>
-        public static bool IsRegister<TService>()
-        {
-            return Container?.IsRegister<TService>() ?? ServiceCollectionIsRegister<TService>();
-        }
+        #endregion
+
+        #region Resolve
 
         /// <summary>
         /// Resolve the specified type
@@ -214,7 +222,7 @@ namespace EZNEW.DependencyInjection
             }
             else
             {
-                data = ResolveFromServiceCollection<TService>();
+                data = ResolveFromDefaultServices<TService>();
             }
             return data;
         }
@@ -233,7 +241,7 @@ namespace EZNEW.DependencyInjection
             }
             else
             {
-                data = ResolveFromServiceCollection(serviceType);
+                data = ResolveFromDefaultServices(serviceType);
             }
             return data;
         }
@@ -254,52 +262,23 @@ namespace EZNEW.DependencyInjection
             return service;
         }
 
+        #endregion
+
+        #region Register
+
         /// <summary>
-        /// Register service,use singleton lifetime by default
+        /// Determine whether register the specified type
         /// </summary>
         /// <typeparam name="TService">Service type</typeparam>
-        /// <typeparam name="TImplementation">Service implementation</typeparam>
-        /// <param name="behaviors">Behaviors</param>
-        public static void Register<TService, TImplementation>(ServiceLifetime lifetime = ServiceLifetime.Singleton, IEnumerable<Type> behaviors = null)
+        /// <returns>Return whether service has registered</returns>
+        public static bool IsRegister<TService>()
         {
-            Register(typeof(TService), typeof(TImplementation), lifetime, behaviors);
+            return Container?.IsRegister<TService>() ?? CheckDefaultServicesIsRegister<TService>();
         }
 
-        /// <summary>
-        /// Register service,use singleton lifetime by default
-        /// </summary>
-        /// <param name="serviceType">Service type</param>
-        /// <param name="implementationType">Service implementation type</param>
-        /// <param name="lifetime">Life time(default:singleton)</param>
-        /// <param name="behaviors">Behaviors</param>
-        public static void Register(Type serviceType, Type implementationType, ServiceLifetime lifetime = ServiceLifetime.Singleton, IEnumerable<Type> behaviors = null)
-        {
-            Register(new MServiceDescriptor(serviceType, implementationType, lifetime)
-            {
-                Behaviors = behaviors
-            });
-        }
+        #endregion
 
-        /// <summary>
-        /// Register service
-        /// </summary>
-        /// <param name="serviceDescriptor">Service descriptor</param>
-        public static void Register(ServiceDescriptor serviceDescriptor)
-        {
-            if (serviceDescriptor == null)
-            {
-                return;
-            }
-            if (defaultServices != null)
-            {
-                defaultServices.Add(serviceDescriptor);
-                ServiceProvider = defaultServices.BuildServiceProvider();
-            }
-            if (Container != null && !(Container is ServiceProviderContainer))
-            {
-                Container.Register(serviceDescriptor);
-            }
-        }
+        #region Service provider
 
         /// <summary>
         /// Build service provider
@@ -314,57 +293,110 @@ namespace EZNEW.DependencyInjection
             }
             if (provider == null)
             {
-                provider = BuildServiceProviderFromServiceCollection();
+                provider = BuildServiceProviderFromDefaultServices();
             }
             return provider;
         }
 
+        #endregion
+
+        #region Component
+
         /// <summary>
-        /// Register component configuration
+        /// Add component Service
         /// </summary>
-        static void RegisterComponentConfiguration()
+        static void AddComponentService()
         {
             var configuration = Resolve<IConfiguration>();
-            if (configuration == null || ServiceCollection == null)
+            if (configuration != null)
             {
-                return;
+                //Configure upload
+                serviceCollection.Configure<UploadConfiguration>(configuration.GetSection(UploadConfiguration.UploadConfigurationName));
+                //Configure file access
+                serviceCollection.Configure<FileAccessConfiguration>(configuration.GetSection(FileAccessConfiguration.FileAccessConfigurationName));
             }
-            //Configure upload
-            ServiceCollection.Configure<UploadConfiguration>(configuration.GetSection(UploadConfiguration.UploadConfigurationName));
-            //Configure file access
-            ServiceCollection?.Configure<FileAccessConfiguration>(configuration.GetSection(FileAccessConfiguration.FileAccessConfigurationName));
+
+            //Data cache provider
+            serviceCollection.AddSingleton<IDataCacheProvider, DefaultDataCacheProvider>();
+            //Command executor
+            serviceCollection.AddSingleton<ICommandExecutor, DatabaseCommandExecutor>();
+            //Message provider
+            serviceCollection.AddSingleton<IMessageProvider, DefaultMessageProvider>();
         }
 
         /// <summary>
-        /// Add internal service
+        /// Add warehouse
+        /// </summary>
+        /// <param name="entityType">Entity type</param>
+        /// <param name="dataAccessService">Data access service</param>
+        internal static void AddWarehouseService(Type entityType, Type dataAccessService)
+        {
+            if (entityType == null || dataAccessService == null)
+            {
+                return;
+            }
+
+            var repositoryWarehouseInterface = typeof(IRepositoryWarehouse<,>).MakeGenericType(entityType, dataAccessService);
+            if (ApplicationManager.Options.UseDebugWarehouse)
+            {
+                var debugWarehouseType = typeof(DebugRepositoryWarehouse<,>).MakeGenericType(entityType, dataAccessService);
+                AddDefaultProjectService(repositoryWarehouseInterface, debugWarehouseType);
+            }
+            else
+            {
+                var defaultWarehouseType = typeof(DefaultRepositoryWarehouse<,>).MakeGenericType(entityType, dataAccessService);
+                AddDefaultProjectService(repositoryWarehouseInterface, defaultWarehouseType);
+            }
+        }
+
+        #endregion
+
+        #region Add service
+
+        /// <summary>
+        /// Add service.
+        /// Use singleton lifetime by default
+        /// </summary>
+        /// <typeparam name="TService">Service type</typeparam>
+        /// <typeparam name="TImplementation">Service implementation</typeparam>
+        /// <param name="behaviors">Behaviors</param>
+        public static void AddService<TService, TImplementation>(ServiceLifetime lifetime = ServiceLifetime.Singleton, IEnumerable<Type> behaviors = null)
+        {
+            AddService(typeof(TService), typeof(TImplementation), lifetime, behaviors);
+        }
+
+        /// <summary>
+        /// Add service.
+        /// Use singleton lifetime by default
         /// </summary>
         /// <param name="serviceType">Service type</param>
-        /// <param name="serviceInstance">Service instance</param>
-        internal static void AddInternalService(Type serviceType, Type implementationType)
+        /// <param name="implementationType">Service implementation type</param>
+        /// <param name="lifetime">Life time(default:singleton)</param>
+        /// <param name="behaviors">Behaviors</param>
+        public static void AddService(Type serviceType, Type implementationType, ServiceLifetime lifetime = ServiceLifetime.Singleton, IEnumerable<Type> behaviors = null)
         {
-            if (serviceType == null || implementationType == null)
+            AddService(new MServiceDescriptor(serviceType, implementationType, lifetime)
             {
-                return;
-            }
-            InternalServices ??= new Dictionary<Type, Type>();
-            InternalServices[serviceType] = implementationType;
+                Behaviors = behaviors
+            });
         }
 
         /// <summary>
-        /// Register internal service
+        /// Add service
         /// </summary>
-        internal static void RegisterInternalService(IServiceCollection services)
+        /// <param name="serviceDescriptor">Service descriptor</param>
+        public static void AddService(ServiceDescriptor serviceDescriptor)
         {
-            if (!InternalServices.IsNullOrEmpty())
+            if (serviceDescriptor == null)
             {
-                foreach (var serviceItem in InternalServices)
-                {
-                    services.AddSingleton(serviceItem.Key, serviceItem.Value);
-                }
-                InternalServices = null;
+                return;
             }
-            services.AddSingleton(typeof(IDataCacheProvider), typeof(DefaultDataCacheProvider));
+            serviceCollection.Add(serviceDescriptor);
         }
+
+        #endregion
+
+        #region Default project service
 
         /// <summary>
         /// Add default project service
@@ -377,8 +409,8 @@ namespace EZNEW.DependencyInjection
             {
                 return;
             }
-            DefaultProjectServices ??= new Dictionary<Type, Type>();
-            DefaultProjectServices[serviceType] = implementationType;
+            defaultProjectServices ??= new List<ServiceDescriptor>();
+            defaultProjectServices.Add(new MServiceDescriptor(serviceType, implementationType, ServiceLifetime.Singleton));
         }
 
         /// <summary>
@@ -387,14 +419,18 @@ namespace EZNEW.DependencyInjection
         /// <param name="services">Service collection</param>
         internal static void RegisterDefaultProjectService(IServiceCollection services)
         {
-            if (!DefaultProjectServices.IsNullOrEmpty())
+            if (!defaultProjectServices.IsNullOrEmpty())
             {
-                foreach (var serverItem in DefaultProjectServices)
+                foreach (var serverItem in defaultProjectServices)
                 {
-                    services.AddSingleton(serverItem.Key, serverItem.Value);
+                    services.Add(serverItem);
                 }
-                DefaultProjectServices = null;
+                defaultProjectServices = null;
             }
         }
+
+        #endregion
+
+        #endregion
     }
 }

@@ -10,8 +10,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddEZNEW(this IServiceCollection services, Action<ApplicationOptions> configureApplicationDelegate = null)
         {
-            ContainerManager.Init(services, configureApplicationDelegate);
-            return services;
+            return ContainerManager.Configure(services, null, configureApplicationDelegate);
         }
     }
 }

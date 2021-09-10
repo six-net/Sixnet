@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using EZNEW.Application;
 using EZNEW.Data.Cache;
 using EZNEW.DependencyInjection;
+using EZNEW.Development.Domain.Repository.Warehouse;
 using EZNEW.Development.Entity;
 
 namespace EZNEW.Development.DataAccess
@@ -33,16 +35,19 @@ namespace EZNEW.Development.DataAccess
             }
             Type dataAccessInterface = typeof(IDataAccess<>).MakeGenericType(entityType);
             Type dataAccessType = typeof(DefaultDataAccess<>).MakeGenericType(entityType);
-            ContainerManager.AddInternalService(dataAccessInterface, dataAccessType);
+            ContainerManager.AddDefaultProjectService(dataAccessInterface, dataAccessType);
             Type entityDataAccessInterface = dataAccessInterface;
             if (entityConfig.EnableCache)
             {
                 var cacheAccessInterface = typeof(ICacheDataAccess<>).MakeGenericType(entityType);
                 var cacheAccessType = typeof(DefaultCacheDataAccess<,>).MakeGenericType(dataAccessInterface, entityType);
-                ContainerManager.AddInternalService(cacheAccessInterface, cacheAccessType);
+                ContainerManager.AddDefaultProjectService(cacheAccessInterface, cacheAccessType);
                 entityDataAccessInterface = cacheAccessInterface;
             }
             EntityDataAccessCollection[entityType.GUID] = entityDataAccessInterface;
+
+            //warehouse
+            ContainerManager.AddWarehouseService(entityType, entityDataAccessInterface);
         }
 
         #endregion

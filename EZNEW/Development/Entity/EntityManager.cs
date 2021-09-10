@@ -8,6 +8,7 @@ using EZNEW.Application;
 using EZNEW.Reflection;
 using EZNEW.Development.DataAccess;
 using EZNEW.Development.Domain.Model;
+using EZNEW.Development.Domain.Repository.Warehouse;
 
 namespace EZNEW.Development.Entity
 {
@@ -16,11 +17,6 @@ namespace EZNEW.Development.Entity
     /// </summary>
     public static class EntityManager
     {
-        static EntityManager()
-        {
-            ApplicationInitializer.Init();
-        }
-
         /// <summary>
         /// Value:Entity configuration
         /// Key:Entity type guid

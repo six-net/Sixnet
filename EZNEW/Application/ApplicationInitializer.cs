@@ -6,9 +6,11 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using EZNEW.DependencyInjection;
+using EZNEW.Development.DataAccess;
 using EZNEW.Development.Domain.Model;
 using EZNEW.Development.Domain.Repository;
 using EZNEW.Development.Domain.Repository.Event;
+using EZNEW.Development.Domain.Repository.Warehouse;
 using EZNEW.Development.Entity;
 using EZNEW.Development.Query;
 using EZNEW.Logging;
@@ -127,6 +129,15 @@ namespace EZNEW.Application
                                 Type providerType = relateTypes.FirstOrDefault(c => c.Name.EndsWith("CacheDataAccess", ignoreCaseComparison));
                                 providerType ??= relateTypes.First();
                                 ContainerManager.AddDefaultProjectService(type, providerType);
+                            }
+
+                            //Default warehouse
+                            var interfaces = type.GetInterfaces();
+                            var baseDataAccessInterface = interfaces.FirstOrDefault(c => c.IsGenericType && c.GetGenericTypeDefinition() == typeof(IDataAccess<>));
+                            if (baseDataAccessInterface != null)
+                            {
+                                var entityType = baseDataAccessInterface.GenericTypeArguments[0];
+                                ContainerManager.AddWarehouseService(entityType, type);
                             }
                         }
 

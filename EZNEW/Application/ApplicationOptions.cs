@@ -37,5 +37,10 @@ namespace EZNEW.Application
         /// Indecates whether register project default service
         /// </summary>
         public bool RegisterProjectDefaultService { get; set; } = true;
+
+        /// <summary>
+        /// Indecates whether use debug warehouse
+        /// </summary>
+        public bool UseDebugWarehouse { get; set; } = false;
     }
 }

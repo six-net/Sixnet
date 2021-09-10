@@ -22,7 +22,6 @@ namespace EZNEW.Development.Query
 
         static QueryManager()
         {
-            ApplicationInitializer.Init();
             AddQueryItemHandlers = new Dictionary<Guid, Func<DefaultQuery, IQueryItem, QueryParameterOptions, IQueryItem>>(2)
             {
                 { typeof(Criteria).GUID,AddCriteriaQueryItemHandler},

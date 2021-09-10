@@ -27,8 +27,6 @@ namespace EZNEW.Data
     {
         static DataManager()
         {
-            ApplicationInitializer.Init();
-            ContainerManager.Container?.Register(typeof(ICommandExecutor), typeof(DatabaseCommandExecutor));
             SqlMapper.Settings.ApplyNullValues = true;
             SqlMapper.AddTypeHandler(new DateTimeOffsetHandler());
             ConfigureDefaultParameterHandler();
