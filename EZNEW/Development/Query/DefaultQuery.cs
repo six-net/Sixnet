@@ -281,7 +281,7 @@ namespace EZNEW.Development.Query
         /// <summary>
         /// Gets or sets the connection operator
         /// </summary>
-        public ConditionConnectionOperator ConnectionOperator { get; set; } = ConditionConnectionOperator.AND;
+        public CriterionConnectionOperator ConnectionOperator { get; set; } = CriterionConnectionOperator.And;
 
         #endregion
 
@@ -297,7 +297,7 @@ namespace EZNEW.Development.Query
         /// <param name="criterionOperator">Criterion operator</param>
         /// <param name="value">Value</param>
         /// <param name="criterionOptions">Criterion options</param>
-        public IQuery AddCriterion(ConditionConnectionOperator connectionOperator, string fieldName, CriterionOperator criterionOperator, dynamic value, CriterionOptions criterionOptions = null)
+        public IQuery AddCriterion(CriterionConnectionOperator connectionOperator, string fieldName, CriterionOperator criterionOperator, dynamic value, CriterionOptions criterionOptions = null)
         {
             if (string.IsNullOrWhiteSpace(fieldName))
             {
@@ -804,7 +804,7 @@ namespace EZNEW.Development.Query
                     conditionExpression = childExpression;
                     continue;
                 }
-                if (conditionEntry.ConnectionOperator == ConditionConnectionOperator.AND)
+                if (conditionEntry.ConnectionOperator == CriterionConnectionOperator.And)
                 {
                     conditionExpression = Expression.AndAlso(conditionExpression, childExpression);
                 }
@@ -859,7 +859,7 @@ namespace EZNEW.Development.Query
                     conditionExpression = childExpression;
                     continue;
                 }
-                if (conditionEntry.ConnectionOperator == ConditionConnectionOperator.AND)
+                if (conditionEntry.ConnectionOperator == CriterionConnectionOperator.And)
                 {
                     conditionExpression = Expression.AndAlso(conditionExpression, childExpression);
                 }

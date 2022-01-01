@@ -19,7 +19,7 @@ namespace EZNEW.Development.Query
         /// <returns>Return the newest IQuery object</returns>
         public static IQuery BeginLike(this IQuery sourceQuery, string fieldName, string value, bool or = false, CriterionOptions criterionOptions = null)
         {
-            return sourceQuery.AddCriterion(or ? ConditionConnectionOperator.OR : ConditionConnectionOperator.AND, fieldName, CriterionOperator.BeginLike, value, criterionOptions);
+            return sourceQuery.AddCriterion(or ? CriterionConnectionOperator.Or : CriterionConnectionOperator.And, fieldName, CriterionOperator.BeginLike, value, criterionOptions);
         }
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace EZNEW.Development.Query
         /// <returns>Return the newest IQuery object</returns>
         public static IQuery BeginLike<TQueryModel>(this IQuery sourceQuery, Expression<Func<TQueryModel, dynamic>> field, string value, bool or = false, CriterionOptions criterionOptions = null) where TQueryModel : IQueryModel<TQueryModel>
         {
-            return sourceQuery.AddCriterion(or ? ConditionConnectionOperator.OR : ConditionConnectionOperator.AND, ExpressionHelper.GetExpressionPropertyName(field.Body), CriterionOperator.BeginLike, value, criterionOptions);
+            return sourceQuery.AddCriterion(or ? CriterionConnectionOperator.Or : CriterionConnectionOperator.And, ExpressionHelper.GetExpressionPropertyName(field.Body), CriterionOperator.BeginLike, value, criterionOptions);
         }
     }
 }

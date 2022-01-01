@@ -20,10 +20,10 @@ namespace EZNEW.Development.Query
         /// <param name="connectionOperator">Connection operator</param>
         /// <param name="conditionExpression">Condition expression</param>
         /// <returns>Return a condition</returns>
-        internal static ICondition GetExpressionCondition(ConditionConnectionOperator connectionOperator, Expression conditionExpression)
+        internal static ICondition GetExpressionCondition(CriterionConnectionOperator connectionOperator, Expression conditionExpression)
         {
             var nodeType = conditionExpression.NodeType;
-            ExpressionType queryNodeType = connectionOperator == ConditionConnectionOperator.OR ? ExpressionType.OrElse : ExpressionType.AndAlso;
+            ExpressionType queryNodeType = connectionOperator == CriterionConnectionOperator.Or ? ExpressionType.OrElse : ExpressionType.AndAlso;
             if (ExpressionHelper.IsCompareNodeType(nodeType))
             {
                 return GetExpressionCriterion(queryNodeType, conditionExpression);
@@ -38,7 +38,7 @@ namespace EZNEW.Development.Query
                     {
                         query.AddCondition(leftQuery);
                     }
-                    ConditionConnectionOperator rightQueryConnectionOperator = nodeType == ExpressionType.OrElse ? ConditionConnectionOperator.OR : ConditionConnectionOperator.AND;
+                    CriterionConnectionOperator rightQueryConnectionOperator = nodeType == ExpressionType.OrElse ? CriterionConnectionOperator.Or : CriterionConnectionOperator.And;
                     var rightQuery = GetExpressionCondition(rightQueryConnectionOperator, binaryExpression.Right);
                     if (rightQuery != null)
                     {
@@ -81,7 +81,7 @@ namespace EZNEW.Development.Query
         {
             if (conditionExpression is BinaryExpression binaryExpression)
             {
-                ConditionConnectionOperator connectionOperator = conditionExpressionType == ExpressionType.OrElse ? ConditionConnectionOperator.OR : ConditionConnectionOperator.AND;
+                CriterionConnectionOperator connectionOperator = conditionExpressionType == ExpressionType.OrElse ? CriterionConnectionOperator.Or : CriterionConnectionOperator.And;
                 Tuple<Expression, Expression> nameAndValue = GetNameAndValueExpression(binaryExpression.Left, binaryExpression.Right);
                 if (nameAndValue == null)
                 {
@@ -235,7 +235,7 @@ namespace EZNEW.Development.Query
         /// <param name="conditionExpression">Connection expression</param>
         /// <param name="negation">Whether is negation</param>
         /// <returns></returns>
-        internal static Criterion GetMethodCallExpressionCriterion(ConditionConnectionOperator connectionOperator, Expression conditionExpression, bool negation = false)
+        internal static Criterion GetMethodCallExpressionCriterion(CriterionConnectionOperator connectionOperator, Expression conditionExpression, bool negation = false)
         {
             MethodCallExpression callExpression = conditionExpression as MethodCallExpression;
             Expression memberArg = null;

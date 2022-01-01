@@ -20,7 +20,7 @@ namespace EZNEW.Development.Query
         /// <returns>Return the newest IQuery object</returns>
         internal static IQuery Add(IQuery sourceQuery, CriterionOperator @operator, string fieldName, dynamic value, bool or = false, CriterionOptions criterionOptions = null)
         {
-            return sourceQuery.AddCriterion(or ? ConditionConnectionOperator.OR : ConditionConnectionOperator.AND, fieldName, @operator, value, criterionOptions);
+            return sourceQuery.AddCriterion(or ? CriterionConnectionOperator.Or : CriterionConnectionOperator.And, fieldName, @operator, value, criterionOptions);
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace EZNEW.Development.Query
         {
             if (subquery != null)
             {
-                sourceQuery = sourceQuery.AddCriterion(or ? ConditionConnectionOperator.OR : ConditionConnectionOperator.AND, fieldName, @operator, subquery, new CriterionOptions()
+                sourceQuery = sourceQuery.AddCriterion(or ? CriterionConnectionOperator.Or : CriterionConnectionOperator.And, fieldName, @operator, subquery, new CriterionOptions()
                 {
                     SubqueryValueFieldName = subqueryFieldName
                 });
@@ -58,7 +58,7 @@ namespace EZNEW.Development.Query
         /// <returns>Return the newest IQuery object</returns>
         internal static IQuery Add<TQueryModel>(IQuery sourceQuery, CriterionOperator @operator, Expression<Func<TQueryModel, dynamic>> field, dynamic value, bool or = false, CriterionOptions criterionOptions = null) where TQueryModel : IQueryModel<TQueryModel>
         {
-            return sourceQuery.AddCriterion(or ? ConditionConnectionOperator.OR : ConditionConnectionOperator.AND, ExpressionHelper.GetExpressionPropertyName(field.Body), @operator, value, criterionOptions);
+            return sourceQuery.AddCriterion(or ? CriterionConnectionOperator.Or : CriterionConnectionOperator.And, ExpressionHelper.GetExpressionPropertyName(field.Body), @operator, value, criterionOptions);
         }
 
         /// <summary>

@@ -511,7 +511,7 @@ namespace EZNEW.Development.Query
         /// <param name="criterionOperator">Condition operator</param>
         /// <param name="value">Value</param>
         /// <param name="criterionOptions">Criterion options</param>
-        IQuery AddCriterion(ConditionConnectionOperator connectionOperator, string fieldName, CriterionOperator criterionOperator, dynamic value, CriterionOptions criterionOptions = null);
+        IQuery AddCriterion(CriterionConnectionOperator connectionOperator, string fieldName, CriterionOperator criterionOperator, dynamic value, CriterionOptions criterionOptions = null);
 
         #endregion
 

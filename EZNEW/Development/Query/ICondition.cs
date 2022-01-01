@@ -12,6 +12,6 @@ namespace EZNEW.Development.Query
         /// <summary>
         /// Gets or sets the connection operator
         /// </summary>
-        ConditionConnectionOperator ConnectionOperator { get; set; }
+        CriterionConnectionOperator ConnectionOperator { get; set; }
     }
 }

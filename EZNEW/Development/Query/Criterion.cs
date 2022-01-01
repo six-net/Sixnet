@@ -52,7 +52,7 @@ namespace EZNEW.Development.Query
         /// <summary>
         /// Gets or sets the connection operator
         /// </summary>
-        public ConditionConnectionOperator ConnectionOperator { get; set; } = ConditionConnectionOperator.AND;
+        public CriterionConnectionOperator ConnectionOperator { get; set; } = CriterionConnectionOperator.And;
 
         /// <summary>
         /// Indicates whether is an equal criterion
@@ -199,7 +199,7 @@ namespace EZNEW.Development.Query
         /// <param name="operator">Condition operator</param>
         /// <param name="value">Value</param>
         /// <returns>Return a new criterion</returns>
-        public static Criterion Create(string fieldName, CriterionOperator @operator, dynamic value, ConditionConnectionOperator connectionOperator = ConditionConnectionOperator.AND, CriterionOptions criterionOptions = null)
+        public static Criterion Create(string fieldName, CriterionOperator @operator, dynamic value, CriterionConnectionOperator connectionOperator = CriterionConnectionOperator.And, CriterionOptions criterionOptions = null)
         {
             return new Criterion(fieldName, @operator, value)
             {
