@@ -29,13 +29,13 @@ namespace EZNEW.Development.Query
     }
 
     /// <summary>
-    /// Defines condition connection operator
+    /// Defines criterion connection operator
     /// </summary>
     [Serializable]
-    public enum ConditionConnectionOperator
+    public enum CriterionConnectionOperator
     {
-        AND,
-        OR
+        And,
+        Or
     }
 
     /// <summary>
