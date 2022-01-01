@@ -8,13 +8,10 @@ namespace EZNEW.Email
     [Serializable]
     public class SendEmailResult
     {
-        /// <summary>
-        /// Empty email result
-        /// </summary>
-        public static readonly SendEmailResult Empty = new SendEmailResult() { Message = "Empty email send result" };
+        #region Properties
 
         /// <summary>
-        /// Gets or sets whether the email send successful
+        /// Indicates whether the email send successful
         /// </summary>
         public bool Success { get; set; }
 
@@ -38,6 +35,10 @@ namespace EZNEW.Email
         /// </summary>
         public EmailAccount EmailAccount { get; set; }
 
+        #endregion
+
+        #region Methods
+
         /// <summary>
         /// Get a fail result
         /// </summary>
@@ -60,16 +61,31 @@ namespace EZNEW.Email
         /// Get a success result
         /// </summary>
         /// <param name="sendInfo">Email send info</param>
+        /// <param name="message">Message</param>
         /// <returns>Return the email send result</returns>
-        public static SendEmailResult SuccessResult(SendEmailOptions sendInfo)
+        public static SendEmailResult SuccessResult(SendEmailOptions sendInfo, string message = "")
         {
             return new SendEmailResult()
             {
                 Success = true,
-                SendInfo = sendInfo
+                SendInfo = sendInfo,
+                Message = message,
             };
         }
 
+        /// <summary>
+        /// Get an empty result
+        /// </summary>
+        /// <returns></returns>
+        public static SendEmailResult Empty()
+        {
+            return SuccessResult(null, "Empty email send result");
+        }
+
+        /// <summary>
+        /// Clone
+        /// </summary>
+        /// <returns></returns>
         internal SendEmailResult Clone()
         {
             return new SendEmailResult()
@@ -81,5 +97,7 @@ namespace EZNEW.Email
                 EmailAccount = EmailAccount?.Clone()
             };
         }
+
+        #endregion
     }
 }

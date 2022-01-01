@@ -18,7 +18,22 @@ namespace EZNEW.Serialization
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="data">Data</param>
         /// <returns>Return the string value</returns>
-        public static string SerializeToString<T>(T data)
+        public static string SerializeDataToString<T>(T data)
+        {
+            byte[] buffer = SerializeToByte(data);
+            if (buffer == null)
+            {
+                return string.Empty;
+            }
+            return Convert.ToBase64String(buffer);
+        }
+
+        /// <summary>
+        /// Serialization an object to a string
+        /// </summary>
+        /// <param name="data">Data</param>
+        /// <returns>Return the string value</returns>
+        public static string SerializeObjectToString(object data)
         {
             byte[] buffer = SerializeToByte(data);
             if (buffer == null)

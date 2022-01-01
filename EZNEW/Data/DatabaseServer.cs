@@ -22,9 +22,14 @@
         #region Properties
 
         /// <summary>
-        /// Gets the server key
+        /// Gets or sets the database server name
         /// </summary>
-        public string Key { get; private set; } = string.Empty;
+        public string Name { get; set; }
+
+        /// <summary>
+        /// Gets the server identity value
+        /// </summary>
+        public string IdentityValue { get; private set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets connection string
@@ -38,7 +43,7 @@
             set
             {
                 connectionString = value;
-                InitKey();
+                InitIdentityValue();
             }
         }
 
@@ -54,7 +59,7 @@
             set
             {
                 serverType = value;
-                InitKey();
+                InitIdentityValue();
             }
         }
 
@@ -63,11 +68,11 @@
         #region Methods
 
         /// <summary>
-        /// Init server key
+        /// Init identity value
         /// </summary>
-        void InitKey()
+        void InitIdentityValue()
         {
-            Key = string.Format("{0}_{1}", (int)serverType, connectionString);
+            IdentityValue = string.Format("{0}_{1}", (int)serverType, connectionString);
         }
 
         public override bool Equals(object otherServer)
@@ -81,12 +86,12 @@
             {
                 return false;
             }
-            return Key == otherServerInfo.Key;
+            return IdentityValue == otherServerInfo.IdentityValue;
         }
 
         public override int GetHashCode()
         {
-            return Key.GetHashCode();
+            return IdentityValue.GetHashCode();
         }
 
         #endregion

@@ -1,5 +1,5 @@
 ﻿using System;
-using EZNEW.Development.Command.Modification;
+using EZNEW.Data.Modification;
 using EZNEW.Development.Query;
 using EZNEW.Development.Domain.Model;
 using EZNEW.Development.UnitOfWork;

@@ -1,4 +1,5 @@
 ﻿using EZNEW.Logging;
+using EZNEW.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -25,7 +26,7 @@ namespace EZNEW.Queue
         public string Name { get; private set; }
 
         /// <summary>
-        /// Whether is start consume
+        /// Indicates whether is start consume
         /// </summary>
         private bool StartConsume = false;
 
@@ -77,11 +78,18 @@ namespace EZNEW.Queue
             {
                 try
                 {
-                    Writer.TryWrite(item);
+                    if (item == null)
+                    {
+                        return;
+                    }
+                    if (!Writer.TryWrite(item))
+                    {
+                        LogManager.LogError<InternalQueue>(FrameworkLogEvents.Framework.InternalQueueEnqueueError, $"Internal queue failure: {JsonSerializer.Serialize(item)}");
+                    }
                 }
                 catch (Exception ex)
                 {
-                    LogManager.LogError(ex, ex.Message);
+                    LogManager.LogError<InternalQueue>(FrameworkLogEvents.Framework.InternalQueueEnqueueError, ex, ex.Message);
                 }
             }
         }
@@ -115,7 +123,7 @@ namespace EZNEW.Queue
                         StartConsume = ThreadPool.QueueUserWorkItem(async s => await ConsumeAction(consumeTokenSource.Token));
                         if (StartConsume)
                         {
-                            LogManager.LogInformation(typeof(InternalQueue), $"[Internal Queue {Name}] Opened a new consumer at {DateTimeOffset.Now:yyyy-MM-dd HH:mm:ss}");
+                            LogManager.LogDebug<InternalQueue>(FrameworkLogEvents.Framework.InternalQueueStartConsumer, $"[Internal Queue {Name}] Opened a new consumer at {DateTimeOffset.Now:yyyy-MM-dd HH:mm:ss}");
                         }
                     }
                 }
@@ -139,11 +147,11 @@ namespace EZNEW.Queue
                 }
                 catch (Exception ex)
                 {
-                    LogManager.LogError(itemType, ex, ex.Message);
+                    LogManager.LogError<InternalQueue>(FrameworkLogEvents.Framework.InternalQueueConsumeError, ex, ex.Message);
                 }
             }
             StartConsume = false;
-            LogManager.LogInformation(typeof(InternalQueue), $"[Internal Queue {Name}] Closed a consumer at {DateTimeOffset.Now:yyyy-MM-dd HH:mm:ss}");
+            LogManager.LogDebug<InternalQueue>(FrameworkLogEvents.Framework.InternalQueueCloseConsumer, $"[Internal Queue {Name}] Closed a consumer at {DateTimeOffset.Now:yyyy-MM-dd HH:mm:ss}");
         }
 
         #endregion

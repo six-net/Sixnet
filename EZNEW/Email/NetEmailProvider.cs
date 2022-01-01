@@ -52,7 +52,7 @@ namespace EZNEW.Email
                 var toEmailAddress = sendInfo.Emails.Where(email => email.IsEmail());//clear out irregular email addresses
                 if (toEmailAddress.IsNullOrEmpty())
                 {
-                    return SendEmailResult.Empty;
+                    return SendEmailResult.Empty();
                 }
                 MailAddress fromMailAddress = new MailAddress(account.SendEmailAddress, account.SendPersonName);//sender
                 MailMessage nowMessage = new MailMessage
@@ -84,7 +84,7 @@ namespace EZNEW.Email
             }
             catch (Exception ex)
             {
-                LogManager.LogError<NetEmailProvider>(ex.Message, ex);
+                LogManager.LogError<NetEmailProvider>(FrameworkLogEvents.Framework.Email, ex, ex.Message);
                 result = SendEmailResult.FailResult(ex.Message, ex, sendInfo);
             }
             if (result != null)

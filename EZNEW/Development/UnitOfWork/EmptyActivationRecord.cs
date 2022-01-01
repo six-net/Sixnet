@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using EZNEW.Development.Command;
-using EZNEW.Development.Command.Modification;
+using EZNEW.Data.Modification;
 using EZNEW.Development.Query;
 
 namespace EZNEW.Development.UnitOfWork
@@ -17,18 +17,18 @@ namespace EZNEW.Development.UnitOfWork
         public string IdentityValue { get; set; }
         public string RecordIdentity { get { return string.Empty; } }
         public IQuery Query { get; set; }
-        public IModification ModifyExpression { get; set; }
+        public IModification ModificationExpression { get; set; }
         public bool IsObsolete => true;
-        public void AddFollowRecords(params IActivationRecord[] records)
+        public void AddFollowRecord(params IActivationRecord[] records)
         {
             IEnumerable<IActivationRecord> collection = records;
-            AddFollowRecords(collection);
+            AddFollowRecord(collection);
         }
-        public void AddFollowRecords(IEnumerable<IActivationRecord> records)
+        public void AddFollowRecord(IEnumerable<IActivationRecord> records)
         {
             throw new InvalidOperationException($"{nameof(EmptyActivationRecord)} cannot perform this operation");
         }
-        public ICommand GetExecuteCommand()
+        public ICommand GetExecutionCommand()
         {
             return null;
         }

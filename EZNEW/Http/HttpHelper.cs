@@ -64,7 +64,7 @@ namespace EZNEW.Http
         /// Get http client
         /// </summary>
         /// <param name="clientConfigName">Client configuration name</param>
-        /// <returns>Return the http client</returns>
+        /// <returns>Return a http client</returns>
         static HttpClient GetHttpClient(string clientConfigName = "")
         {
             var httpClientFactory = ContainerManager.Resolve<IHttpClientFactory>();

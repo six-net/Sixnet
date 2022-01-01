@@ -1,8 +1,11 @@
-﻿using EZNEW.DataValidation.Validators;
-using EZNEW.Expressions;
-using System;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using EZNEW.DataValidation.Validators;
+using EZNEW.Expressions;
 
 namespace EZNEW.DataValidation
 {
@@ -43,6 +46,11 @@ namespace EZNEW.DataValidation
         /// </summary>
         string comparePropertyName = string.Empty;
 
+        /// <summary>
+        /// Ignore use cases
+        /// </summary>
+        IEnumerable<string> ignoreUseScenarios = Array.Empty<string>();
+
         #endregion
 
         #region Constructor
@@ -59,6 +67,7 @@ namespace EZNEW.DataValidation
             this.validator = validator;
             this.fieldName = fieldName;
             errorMessage = field.ErrorMessage;
+            ignoreUseScenarios = field.IgnoreUseScenarios;
             if (field.CompareValue is Expression<Func<T, dynamic>> compareExpress)
             {
                 comparePropertyName = ExpressionHelper.GetExpressionText(compareExpress);
@@ -78,9 +87,9 @@ namespace EZNEW.DataValidation
         /// Validate data
         /// </summary>
         /// <returns>Return the verify result</returns>
-        public VerifyResult Validate(dynamic data)
+        public VerifyResult Validate(dynamic data, string useScenario = "")
         {
-            if (valueMethod == null || validator == null)
+            if (valueMethod == null || validator == null || IgnoreValidate(useScenario))
             {
                 return VerifyResult.SuccessResult();
             }
@@ -115,6 +124,10 @@ namespace EZNEW.DataValidation
         /// <returns>Return the validation attribute</returns>
         public ValidationAttribute CreateValidationAttribute()
         {
+            if (IgnoreValidate(ValidationConstants.UseCaseNames.Mvc))
+            {
+                return null;
+            }
             if (validator is CompareValidator)
             {
                 if (compareValue is Func<T, dynamic>)
@@ -134,6 +147,20 @@ namespace EZNEW.DataValidation
                     ErrorMessage = errorMessage
                 });
             }
+        }
+
+        /// <summary>
+        /// Indicates whether innore validate
+        /// </summary>
+        /// <param name="useScenario">Use scenario</param>
+        /// <returns></returns>
+        public bool IgnoreValidate(string useScenario)
+        {
+            if (ignoreUseScenarios.IsNullOrEmpty() || string.IsNullOrWhiteSpace(useScenario))
+            {
+                return false;
+            }
+            return ignoreUseScenarios.Any(c => c.Equals(useScenario, StringComparison.OrdinalIgnoreCase));
         }
 
         #endregion

@@ -835,8 +835,9 @@ namespace EZNEW.DataValidation
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="obj">Object</param>
+        /// <param name="useScenario">Use scenario</param>
         /// <returns>Return verify result</returns>
-        public static List<VerifyResult> Validate<T>(T obj)
+        public static List<VerifyResult> Validate<T>(T obj, string useScenario = "")
         {
             string typeName = obj?.GetType().FullName;
             if (!TypeValidations.ContainsKey(typeName))
@@ -849,7 +850,7 @@ namespace EZNEW.DataValidation
             {
                 foreach (var verifyItem in validation.Value)
                 {
-                    resultList.Add(verifyItem.Validate(obj));
+                    resultList.Add(verifyItem.Validate(obj, useScenario));
                 }
             }
             return resultList;

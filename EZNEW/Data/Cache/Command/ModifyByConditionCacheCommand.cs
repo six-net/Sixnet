@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using EZNEW.Development.Command;
-using EZNEW.Development.Command.Modification;
+using EZNEW.Data.Modification;
 using EZNEW.Development.Query;
 
 namespace EZNEW.Data.Cache.Command

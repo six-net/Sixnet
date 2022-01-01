@@ -16,7 +16,7 @@ namespace EZNEW.Logging
         /// Gets or sets the default logger catgory name.
         /// Default value is empty
         /// </summary>
-        public static string DefaultLoggerCategoryName { get; set; } = "eznew";
+        public static string DefaultLoggerCategoryName { get; set; } = "EZNEW";
 
         /// <summary>
         /// Log provider

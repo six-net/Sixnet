@@ -62,7 +62,7 @@ namespace EZNEW.Upload
         /// Gets or sets upload server choice pattern
         /// default value is 'Random' pattern
         /// </summary>
-        public SelectMatchMode RemoteServerChoicePattern { get; set; } = SelectMatchMode.EquiprobableRandom;
+        public SelectionMatchPattern RemoteServerChoicePattern { get; set; } = SelectionMatchPattern.EquiprobableRandom;
 
         /// <summary>
         /// Gets remote option

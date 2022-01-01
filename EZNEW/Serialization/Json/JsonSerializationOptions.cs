@@ -115,7 +115,7 @@ namespace EZNEW.Serialization.Json
         public JsonNumberHandling NumberHandling { get; set; } = JsonNumberHandling.Strict;
 
         /// <summary>
-        /// Indecates whether non-public properties and fields are parsed
+        /// Indicates whether non-public properties and fields are parsed
         /// </summary>
         public bool ResolveNonPublic { get; set; }
 
@@ -130,7 +130,7 @@ namespace EZNEW.Serialization.Json
         public Type DeserializeType { get; set; }
 
         /// <summary>
-        /// Indecates whether use custom json converter
+        /// Indicates whether use custom json converter
         /// Default value is true
         /// </summary>
         public bool UseCustomizedBigNumberConverter { get; set; } = true;

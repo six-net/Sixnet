@@ -7,7 +7,5 @@ namespace EZNEW.Development.Domain
     /// <summary>
     /// Domain parameter contract
     /// </summary>
-    public interface IDomainParameter
-    {
-    }
+    public interface IDomainParameter { }
 }

@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using EZNEW.Diagnostics;
+using EZNEW.Configuration;
 
 namespace EZNEW.Sms
 {
     /// <summary>
     /// Sms options
     /// </summary>
-    public abstract class SmsOptions : IAdditionalOption
+    public abstract class SmsOptions : IParameterOptions
     {
         /// <summary>
         /// Gets or sets the tag
@@ -16,9 +16,9 @@ namespace EZNEW.Sms
         public string Tag { get; set; } = SmsManager.DefaultTag;
 
         /// <summary>
-        /// Gets or sets the additional info
+        /// Gets or sets the parameters
         /// </summary>
-        public Dictionary<string, string> Additionals { get; set; }
+        public Dictionary<string, string> Parameters { get; set; }
 
         public abstract SmsOptions Clone();
     }

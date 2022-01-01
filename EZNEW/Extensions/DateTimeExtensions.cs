@@ -15,7 +15,7 @@ namespace System
         /// <summary>
         /// Formatting DateTime to like (yyyy-MM-dd)
         /// </summary>
-        /// <param name="dateTime">Datetime value</param>
+        /// <param name="dateTime">DateTime value</param>
         /// <returns>Return formatted value</returns>
         public static string ToDate(this DateTime? dateTime)
         {

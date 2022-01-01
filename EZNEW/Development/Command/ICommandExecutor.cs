@@ -17,7 +17,7 @@ namespace EZNEW.Development.Command
         /// <summary>
         /// Gets the command executor identity key
         /// </summary>
-        string IdentityKey { get; }
+        string IdentityValue { get; }
 
         #endregion
 
@@ -65,7 +65,7 @@ namespace EZNEW.Development.Command
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="command">Command</param>
         /// <returns>Return datas</returns>
-        IEnumerable<T> Query<T>(ICommand command);
+        IEnumerable<T> Query<T>(ICommand command) where T : BaseEntity<T>, new();
 
         /// <summary>
         /// Query datas
@@ -73,7 +73,7 @@ namespace EZNEW.Development.Command
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="command">Command</param>
         /// <returns>Return datas</returns>
-        Task<IEnumerable<T>> QueryAsync<T>(ICommand command);
+        Task<IEnumerable<T>> QueryAsync<T>(ICommand command) where T : BaseEntity<T>, new();
 
         /// <summary>
         /// Query data paging
@@ -92,33 +92,33 @@ namespace EZNEW.Development.Command
         Task<PagingInfo<T>> QueryPagingAsync<T>(ICommand command) where T : BaseEntity<T>, new();
 
         /// <summary>
-        /// Determine whether does the data exist
+        /// Determines whether exists data
         /// </summary>
         /// <param name="command">Command</param>
         /// <returns>Return whether does the data exist</returns>
-        bool Query(ICommand command);
+        bool Exists(ICommand command);
 
         /// <summary>
-        /// Determine whether does the data exist
+        /// Determines whether exists data
         /// </summary>
         /// <param name="command">Command</param>
-        /// <returns>Return whether does the data exist</returns>
-        Task<bool> QueryAsync(ICommand command);
+        /// <returns>Return whether exists data</returns>
+        Task<bool> ExistsAsync(ICommand command);
 
         /// <summary>
-        /// Gets aggregate data
+        /// Gets aggregation data
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="command">Command</param>
-        /// <returns>Return data</returns>
+        /// <returns>Return value</returns>
         T AggregateValue<T>(ICommand command);
 
         /// <summary>
-        /// Gets aggregate value
+        /// Gets aggregation value
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="command">Command</param>
-        /// <returns>Return data</returns>
+        /// <returns>Return value</returns>
         Task<T> AggregateValueAsync<T>(ICommand command);
 
         /// <summary>
@@ -138,7 +138,7 @@ namespace EZNEW.Development.Command
         /// <param name="server">Database server</param>
         /// <param name="dataTable">Data table</param>
         /// <param name="bulkInsertOptions">Bulk insert options</param>
-        Task BulkInsertAsync(DatabaseServer server, DataTable dataTable, IBulkInsertOptions bulkInsertOptions = null);
+        Task BulkInsertAsync(DatabaseServer server, DataTable dataTable, IBulkInsertionOptions bulkInsertOptions = null);
 
         #endregion
     }

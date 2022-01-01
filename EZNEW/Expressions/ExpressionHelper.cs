@@ -456,18 +456,18 @@ namespace EZNEW.Expressions
             {
                 if (propertyExpress == null)
                 {
-                    propertyExpress = System.Linq.Expressions.Expression.PropertyOrField(parExp, pname);
+                    propertyExpress = Expression.PropertyOrField(parExp, pname);
                 }
                 else
                 {
-                    propertyExpress = System.Linq.Expressions.Expression.PropertyOrField(propertyExpress, pname);
+                    propertyExpress = Expression.PropertyOrField(propertyExpress, pname);
                 }
             }
             Type funcType = typeof(Func<,>).MakeGenericType(type, typeof(object));// make method
             var genericLambdaMethod = LambdaMethod.MakeGenericMethod(funcType);
             var lambdaExpression = genericLambdaMethod.Invoke(null, new object[]
             {
-                System.Linq.Expressions.Expression.Convert(propertyExpress,typeof(object)), parameterArray
+                Expression.Convert(propertyExpress,typeof(object)), parameterArray
             }) as Expression<Func<T, object>>;
             if (lambdaExpression == null)
             {

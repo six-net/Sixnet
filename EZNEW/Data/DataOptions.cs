@@ -10,16 +10,16 @@ namespace EZNEW.Data
     public class DataOptions
     {
         /// <summary>
-        /// Indecates whether deduplication paging data.
+        /// Indicates whether deduplication paging data.
         /// The default is false
         /// </summary>
-        public bool PagingDataMergeForDeduplication { get; set; } = false;
+        public bool DeduplicationPagingData { get; set; } = false;
 
         /// <summary>
-        /// Indecates whether deduplication list data.
+        /// Indicates whether deduplication list data.
         /// The default is true.
         /// </summary>
-        public bool ListDataMergeForDeduplication { get; set; } = true;
+        public bool DeduplicationListData { get; set; } = true;
 
         /// <summary>
         /// Gets or sets the default page size.

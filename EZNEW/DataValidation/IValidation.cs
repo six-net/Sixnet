@@ -11,8 +11,9 @@ namespace EZNEW.DataValidation
         /// Validate data
         /// </summary>
         /// <param name="data">Data</param>
+        /// <param name="useScenario">Use scenario</param>
         /// <returns>Return the verify result</returns>
-        VerifyResult Validate(dynamic data);
+        VerifyResult Validate(dynamic data, string useScenario = "");
 
         /// <summary>
         /// Create validation attribute

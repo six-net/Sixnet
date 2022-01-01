@@ -106,12 +106,7 @@ namespace EZNEW.Development.Entity
         public Type PredicateType { get; set; }
 
         /// <summary>
-        /// Gets or sets the entity structure
-        /// </summary>
-        public EntityStructure Structure { get; set; } = EntityStructure.Normal;
-
-        /// <summary>
-        /// Indecates whether enable data cache
+        /// Indicates whether enable data cache
         /// </summary>
         public bool EnableCache { get; set; } = false;
 

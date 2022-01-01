@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Text;
-using EZNEW.Development.Query.CriteriaConverter;
 using EZNEW.Expressions;
 
 namespace EZNEW.Development.Query
@@ -16,11 +15,11 @@ namespace EZNEW.Development.Query
         /// </summary>
         /// <param name="sourceQuery">Source query</param>
         /// <param name="field">Field</param>
-        /// <param name="converter">Field converter</param>
+        /// <param name="sortOptions">Sort options</param>
         /// <returns>Return the newest IQuery object</returns>
-        public static IQuery Asc(this IQuery sourceQuery, string field, ICriteriaConverter converter = null)
+        public static IQuery Asc(this IQuery sourceQuery, string field, SortOptions sortOptions = null)
         {
-            return sourceQuery.AddOrder(field, false, converter);
+            return sourceQuery.AddSort(field, false, sortOptions);
         }
 
         /// <summary>
@@ -29,11 +28,11 @@ namespace EZNEW.Development.Query
         /// <typeparam name="TQueryModel">Query model</typeparam>
         /// <param name="sourceQuery">Source query</param>
         /// <param name="fieldName">Field name</param>
-        /// <param name="converter">Field converter</param>
+        /// <param name="sortOptions">Sort options</param>
         /// <returns>Return the newest IQuery object</returns>
-        public static IQuery Asc<TQueryModel>(this IQuery sourceQuery, Expression<Func<TQueryModel, dynamic>> field, ICriteriaConverter converter = null) where TQueryModel : IQueryModel<TQueryModel>
+        public static IQuery Asc<TQueryModel>(this IQuery sourceQuery, Expression<Func<TQueryModel, dynamic>> field, SortOptions sortOptions = null) where TQueryModel : IQueryModel<TQueryModel>
         {
-            return sourceQuery.AddOrder(ExpressionHelper.GetExpressionPropertyName(field.Body), false, converter);
+            return sourceQuery.AddSort(ExpressionHelper.GetExpressionPropertyName(field.Body), false, sortOptions);
         }
 
         #endregion
@@ -45,11 +44,11 @@ namespace EZNEW.Development.Query
         /// </summary>
         /// <param name="sourceQuery">Source query</param>
         /// <param name="field">Field</param>
-        /// <param name="converter">Field converter</param>
+        /// <param name="sortOptions">Sort options</param>
         /// <returns>Return the newest IQuery object</returns>
-        public static IQuery Desc(this IQuery sourceQuery, string field, ICriteriaConverter converter = null)
+        public static IQuery Desc(this IQuery sourceQuery, string field, SortOptions sortOptions = null)
         {
-            return sourceQuery.AddOrder(field, true, converter);
+            return sourceQuery.AddSort(field, true, sortOptions);
         }
 
         /// <summary>
@@ -58,11 +57,11 @@ namespace EZNEW.Development.Query
         /// <typeparam name="TQueryModel">Query model</typeparam>
         /// <param name="sourceQuery">Source query</param>
         /// <param name="field">Field</param>
-        /// <param name="converter">Field converter</param>
+        /// <param name="sortOptions">Sort options</param>
         /// <returns>Return the newest IQuery object</returns>
-        public static IQuery Desc<TQueryModel>(this IQuery sourceQuery, Expression<Func<TQueryModel, dynamic>> field, ICriteriaConverter converter = null) where TQueryModel : IQueryModel<TQueryModel>
+        public static IQuery Desc<TQueryModel>(this IQuery sourceQuery, Expression<Func<TQueryModel, dynamic>> field, SortOptions sortOptions = null) where TQueryModel : IQueryModel<TQueryModel>
         {
-            return sourceQuery.AddOrder(ExpressionHelper.GetExpressionPropertyName(field.Body), true, converter);
+            return sourceQuery.AddSort(ExpressionHelper.GetExpressionPropertyName(field.Body), true, sortOptions);
         }
 
         #endregion 

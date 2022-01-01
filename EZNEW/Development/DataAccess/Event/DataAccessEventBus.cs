@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using EZNEW.Development.Command;
-using EZNEW.Development.Command.Modification;
+using EZNEW.Data.Modification;
 using EZNEW.Development.Query;
 using EZNEW.Development.UnitOfWork;
 

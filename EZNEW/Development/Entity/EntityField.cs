@@ -102,7 +102,7 @@ namespace EZNEW.Development.Entity
         }
 
         /// <summary>
-        /// Indecates field has the specified role
+        /// Indicates field has the specified role
         /// </summary>
         /// <param name="role">Field role</param>
         /// <returns></returns>
@@ -112,7 +112,7 @@ namespace EZNEW.Development.Entity
         }
 
         /// <summary>
-        /// Indecates field has the specified cache role
+        /// Indicates field has the specified cache role
         /// </summary>
         /// <param name="cacheRole">Cache role</param>
         /// <returns></returns>
@@ -122,7 +122,7 @@ namespace EZNEW.Development.Entity
         }
 
         /// <summary>
-        /// Indecates field must query
+        /// Indicates field must query
         /// </summary>
         /// <returns></returns>
         public bool ShouldMustQuery()

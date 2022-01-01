@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using EZNEW.Development.Command.Modification;
+using EZNEW.Data.Modification;
 using EZNEW.Development.Query;
 
 namespace EZNEW.Development.DataAccess.Event

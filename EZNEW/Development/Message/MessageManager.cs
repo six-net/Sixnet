@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using EZNEW.DependencyInjection;
 using EZNEW.Development.UnitOfWork;
-using EZNEW.Diagnostics;
+using EZNEW.Configuration;
 using EZNEW.Email;
 using EZNEW.Queue;
 using EZNEW.Sms;
@@ -76,10 +76,6 @@ namespace EZNEW.Development.Message
 
         static MessageManager()
         {
-            if (!ContainerManager.IsRegister<IMessageProvider>())
-            {
-                ContainerManager.Register<IMessageProvider, DefaultMessageProvider>();
-            }
             InitKeywordMatchRegex();
         }
 

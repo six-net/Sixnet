@@ -73,7 +73,7 @@ namespace EZNEW.Data.Cache
             {
                 var primaryKeys = EntityManager.GetPrimaryKeys(dataType);
                 checkQuery = command.Query.LightClone();
-                checkQuery.ClearOrder();
+                checkQuery.ClearSort();
                 checkQuery.ClearQueryFields();
                 checkQuery.ClearNotQueryFields();
                 checkQuery.AddQueryFields(primaryKeys.ToArray());
@@ -250,7 +250,7 @@ namespace EZNEW.Data.Cache
 
             if (query != null)
             {
-                dataList = query.Sort(dataList).ToList();//data sort
+                dataList = query.SortData(dataList, true).ToList();//data sort
             }
             return Pager.Create(dataPaging.Page, dataPaging.PageSize, dataPaging.TotalCount, dataList);
         }

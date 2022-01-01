@@ -9,6 +9,10 @@ namespace EZNEW.Data.TypeHandler
     {
         public override DateTimeOffset Parse(object value)
         {
+            if (value is DateTimeOffset dateTimeOffsetValue)
+            {
+                return dateTimeOffsetValue;
+            }
             DateTimeOffset.TryParse(value?.ToString(), out var dateTimeOffset);
             return dateTimeOffset;
         }

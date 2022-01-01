@@ -12,7 +12,7 @@ namespace EZNEW.Development.UnitOfWork
         Package = 0,
         SaveObject = 2,
         ModifyByExpression = 4,
-        RemoveByObject = 8,
+        RemoveObject = 8,
         RemoveByCondition = 16
     }
 }

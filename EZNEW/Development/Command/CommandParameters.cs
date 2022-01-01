@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using EZNEW.Development.Command.Modification;
+using Dapper;
+using EZNEW.Data;
+using EZNEW.Data.Modification;
 
 namespace EZNEW.Development.Command
 {
@@ -13,9 +15,9 @@ namespace EZNEW.Development.Command
     public class CommandParameters
     {
         /// <summary>
-        /// Parameters
+        /// Items
         /// </summary>
-        public Dictionary<string, ParameterItem> Parameters { get; private set; } = new Dictionary<string, ParameterItem>();
+        public Dictionary<string, ParameterItem> Items { get; private set; } = new Dictionary<string, ParameterItem>();
 
         /// <summary>
         /// Add parameter
@@ -52,14 +54,7 @@ namespace EZNEW.Development.Command
             {
                 return;
             }
-            if (Parameters.ContainsKey(parameter.Name))
-            {
-                Parameters[parameter.Name] = parameter;
-            }
-            else
-            {
-                Parameters.Add(parameter.Name, parameter);
-            }
+            Items[parameter.Name] = parameter;
         }
 
         /// <summary>
@@ -122,11 +117,11 @@ namespace EZNEW.Development.Command
             }
             foreach (var cmdParameter in parameters)
             {
-                if (cmdParameter == null || cmdParameter.Parameters.IsNullOrEmpty())
+                if (cmdParameter == null || cmdParameter.Items.IsNullOrEmpty())
                 {
                     continue;
                 }
-                foreach (var para in cmdParameter.Parameters)
+                foreach (var para in cmdParameter.Items)
                 {
                     Add(para.Value);
                 }
@@ -145,7 +140,7 @@ namespace EZNEW.Development.Command
             {
                 return null;
             }
-            Parameters.TryGetValue(parameterName, out var item);
+            Items.TryGetValue(parameterName, out var item);
             return item?.Value;
         }
 
@@ -160,11 +155,11 @@ namespace EZNEW.Development.Command
             {
                 return;
             }
-            if (Parameters.TryGetValue(originalParameterName, out var parameter) && parameter != null)
+            if (Items.TryGetValue(originalParameterName, out var parameter) && parameter != null)
             {
-                Parameters.Remove(originalParameterName);
+                Items.Remove(originalParameterName);
                 parameter.Name = newParameterName;
-                Parameters.Add(newParameterName, parameter);
+                Items.Add(newParameterName, parameter);
             }
         }
 
@@ -175,7 +170,7 @@ namespace EZNEW.Development.Command
         /// <param name="newValue">New value</param>
         public void ModifyValue(string parameterName, object newValue)
         {
-            if (Parameters.TryGetValue(parameterName, out var item) && item != null)
+            if (Items.TryGetValue(parameterName, out var item) && item != null)
             {
                 item.Value = newValue;
             }
@@ -189,8 +184,71 @@ namespace EZNEW.Development.Command
         {
             return new CommandParameters()
             {
-                Parameters = Parameters.ToDictionary(c => c.Key, c => c.Value.Clone())
+                Items = Items.ToDictionary(c => c.Key, c => c.Value.Clone())
             };
+        }
+
+        /// <summary>
+        /// Parse an object to command parameters
+        /// </summary>
+        /// <param name="originalParameters">Original parameters</param>
+        /// <returns>Return a command parameters</returns>
+        public static CommandParameters Parse(object originalParameters)
+        {
+            if (originalParameters == null)
+            {
+                return null;
+            }
+            if (originalParameters is CommandParameters commandParameters)
+            {
+                return commandParameters;
+            }
+            commandParameters = new CommandParameters();
+            if (originalParameters is IEnumerable<KeyValuePair<string, string>> stringParametersDict)
+            {
+                commandParameters.Add(stringParametersDict);
+            }
+            else if (originalParameters is IEnumerable<KeyValuePair<string, dynamic>> dynamicParametersDict)
+            {
+                commandParameters.Add(dynamicParametersDict);
+            }
+            else if (originalParameters is IEnumerable<KeyValuePair<string, object>> objectParametersDict)
+            {
+                commandParameters.Add(objectParametersDict);
+            }
+            else if (originalParameters is IEnumerable<KeyValuePair<string, IModificationValue>> modifyParametersDict)
+            {
+                commandParameters.Add(modifyParametersDict);
+            }
+            else
+            {
+                objectParametersDict = originalParameters.ObjectToDcitionary();
+                commandParameters.Add(objectParametersDict);
+            }
+            return commandParameters;
+        }
+
+        /// <summary>
+        /// Convert to dynamic parameters
+        /// </summary>
+        /// <param name="databaseServerType">Database server type</param>
+        /// <returns></returns>
+        public DynamicParameters ConvertToDynamicParameters(DatabaseServerType databaseServerType)
+        {
+            if (Items.IsNullOrEmpty())
+            {
+                return null;
+            }
+            DynamicParameters dynamicParameters = new DynamicParameters();
+            foreach (var item in Items)
+            {
+                var parameter = DataManager.HandleParameter(databaseServerType, item.Value);
+                dynamicParameters.Add(parameter.Name, parameter.Value
+                                    , parameter.DbType, parameter.ParameterDirection
+                                    , parameter.Size, parameter.Precision
+                                    , parameter.Scale);
+            }
+            return dynamicParameters;
         }
     }
 }

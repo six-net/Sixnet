@@ -57,7 +57,7 @@ namespace EZNEW.Data.Cache.Policy
                 }, !cacheOperationConfig.Synchronous);
             }
 
-            //save data to cache after command execute
+            //save data to cache after command execution
             if ((cacheOperationConfig.TriggerTime & DataCacheOperationTriggerTime.After) != 0)
             {
                 databaseCommand.ListenCallback(CommandCallbackEventHandler<T>, new CommandCallbackEventParameter()
@@ -565,7 +565,7 @@ namespace EZNEW.Data.Cache.Policy
             var entityConfiguration = EntityManager.GetEntityConfiguration<T>();
             if (entityConfiguration == null)
             {
-                LogManager.LogError<DataCachePolicyService>($"Entity : {typeof(T).FullName} configuration is null");
+                LogManager.LogWarning<DataCachePolicyService>(FrameworkLogEvents.Configuration.EntityConfigurationIsNull, $"{typeof(T).FullName} configuration is null");
                 return new List<T>(0);
             }
             var copyQuery = query.LightClone();

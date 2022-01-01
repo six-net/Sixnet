@@ -38,14 +38,6 @@ namespace EZNEW.Data.Cache.Policy
 
         public static QueryDataResult<T> Default(string message = "", Exception exception = null)
         {
-            if (!string.IsNullOrWhiteSpace(message))
-            {
-                LogManager.LogInformation<QueryDataResult<T>>(message);
-            }
-            if (exception != null)
-            {
-                LogManager.LogError<QueryDataResult<T>>(exception, exception.Message);
-            }
             return new QueryDataResult<T>()
             {
                 QueryDatabase = true,
@@ -55,10 +47,7 @@ namespace EZNEW.Data.Cache.Policy
 
         public static QueryDataResult<T> Break(string message = "", Exception ex = null)
         {
-            if (!string.IsNullOrWhiteSpace(message))
-            {
-                LogManager.LogError<QueryDataResult<T>>(ex, message);
-            }
+            LogManager.LogDebug<StartingResult>(FrameworkLogEvents.Cache.CacheOperationError, $"Interrupt database access,{message}");
             return new QueryDataResult<T>()
             {
                 QueryDatabase = false

@@ -11,6 +11,8 @@ namespace EZNEW.FileAccess
     [Serializable]
     public class FileAccessOptions
     {
+        #region Fields
+
         /// <summary>
         /// Root paths
         /// </summary>
@@ -19,7 +21,11 @@ namespace EZNEW.FileAccess
         /// <summary>
         /// Data selection provider
         /// </summary>
-        DataSelectionProvider<string> dataSelectionProvider = null;
+        DataSelectionProvider<string> dataSelectionProvider = null; 
+
+        #endregion
+
+        #region Properties
 
         /// <summary>
         /// Gets or sets file root paths
@@ -39,10 +45,14 @@ namespace EZNEW.FileAccess
         /// <summary>
         /// Gets or sets the path select mode
         /// </summary>
-        public SelectMatchMode PathSelectMode
+        public SelectionMatchPattern PathSelectMode
         {
             get; set;
-        } = SelectMatchMode.EquiprobableRandom;
+        } = SelectionMatchPattern.EquiprobableRandom;
+
+        #endregion
+
+        #region Methods
 
         /// <summary>
         /// Set root paths
@@ -76,6 +86,8 @@ namespace EZNEW.FileAccess
             var rootPath = dataSelectionProvider.Get(PathSelectMode);
             string fullPath = Path.Combine(rootPath, relativePath);
             return fullPath.Replace("\\", "/");
-        }
+        } 
+
+        #endregion
     }
 }

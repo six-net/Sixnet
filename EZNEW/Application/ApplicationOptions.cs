@@ -34,8 +34,13 @@ namespace EZNEW.Application
         public ApplicationInfo Current { get; internal set; } = ApplicationManager.Current;
 
         /// <summary>
-        /// Indecates whether register project default service
+        /// Indicates whether register project default service
         /// </summary>
         public bool RegisterProjectDefaultService { get; set; } = true;
+
+        /// <summary>
+        /// Indicates whether use debug warehouse
+        /// </summary>
+        public bool UseDebugWarehouse { get; set; } = false;
     }
 }

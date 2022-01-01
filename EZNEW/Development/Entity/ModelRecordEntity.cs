@@ -8,7 +8,7 @@ namespace EZNEW.Development.Entity
     /// <summary>
     /// Defines model record entity
     /// </summary>
-    public class ModelRecordEntity<TEntity>
+    public abstract class ModelRecordEntity<TEntity>
         : ModelEntity<TEntity>, ICreationTimeEntity, IUpdateTimeEntity
         where TEntity : BaseEntity<TEntity>, IModel<TEntity>, new()
     {

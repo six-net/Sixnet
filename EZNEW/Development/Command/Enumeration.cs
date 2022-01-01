@@ -3,7 +3,7 @@
 namespace EZNEW.Development.Command
 {
     /// <summary>
-    /// Defines command operate type
+    /// Defines command operation type
     /// </summary>
     [Serializable]
     public enum CommandOperationType

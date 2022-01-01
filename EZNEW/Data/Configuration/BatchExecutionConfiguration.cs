@@ -1,7 +1,7 @@
 ﻿namespace EZNEW.Data.Configuration
 {
     /// <summary>
-    /// Batch execute configuration
+    /// Batch execution configuration
     /// </summary>
     public class BatchExecutionConfiguration
     {

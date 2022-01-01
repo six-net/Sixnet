@@ -47,14 +47,14 @@ namespace System
 
         #endregion
 
-        #region Return the string value first char
+        #region Return the string value first letter
 
         /// <summary>
-        /// return the string value first char
+        /// Get the string value first letter
         /// </summary>
         /// <param name="value">String value</param>
-        /// <returns>Return the first char</returns>
-        public static string GetFirstChar(this string value)
+        /// <returns>Return the first letter</returns>
+        public static string GetFirstLetter(this string value)
         {
             #region verify args
 
@@ -65,26 +65,26 @@ namespace System
 
             #endregion
 
-            char firstCode = value[0];
-            if (firstCode.IsChineseLetter())
+            char firstChar = value[0];
+            if (firstChar.IsChineseLetter())
             {
-                return firstCode.GetChineseCharFirtLetter();
+                return firstChar.GetChineseFirstLetter();
             }
-            return firstCode.ToString();
+            return firstChar.ToString();
         }
 
         #endregion
 
-        #region Return the chinese char first letter
+        #region Return the chinese first letter
 
         /// <summary>
         /// Return the chinese char first letter
         /// </summary>
         /// <param name="value">Chinese char</param>
         /// <returns>Return the first letter</returns>
-        public static string GetChineseCharFirtLetter(this char value)
+        public static string GetChineseFirstLetter(this char value)
         {
-            string firstCode = string.Empty;
+            string firstLetter = string.Empty;
             byte[] valueBytes = Encoding.Default.GetBytes(value.ToString());
             if (valueBytes != null && valueBytes.Length == 2)
             {
@@ -102,99 +102,98 @@ namespace System
                 }
                 if (chineseValue <= 45252)
                 {
-                    firstCode = "A";
+                    firstLetter = "A";
                 }
                 else if (chineseValue <= 45760)
                 {
-                    firstCode = "B";
+                    firstLetter = "B";
                 }
                 else if (chineseValue <= 46317)
                 {
-                    firstCode = "C";
+                    firstLetter = "C";
                 }
                 else if (chineseValue <= 46825)
                 {
-                    firstCode = "D";
+                    firstLetter = "D";
                 }
                 else if (chineseValue <= 47009)
                 {
-                    firstCode = "E";
+                    firstLetter = "E";
                 }
                 else if (chineseValue <= 47296)
                 {
-                    firstCode = "F";
+                    firstLetter = "F";
                 }
                 else if (chineseValue <= 47613)
                 {
-                    firstCode = "G";
+                    firstLetter = "G";
                 }
                 else if (chineseValue <= 48118)
                 {
-                    firstCode = "H";
+                    firstLetter = "H";
                 }
                 else if (chineseValue <= 49061)
                 {
-                    firstCode = "J";
+                    firstLetter = "J";
                 }
                 else if (chineseValue <= 49323)
                 {
-                    firstCode = "K";
+                    firstLetter = "K";
                 }
                 else if (chineseValue <= 49895)
                 {
-                    firstCode = "L";
+                    firstLetter = "L";
                 }
                 else if (chineseValue <= 50370)
                 {
-                    firstCode = "M";
+                    firstLetter = "M";
                 }
                 else if (chineseValue <= 50613)
                 {
-                    firstCode = "N";
+                    firstLetter = "N";
                 }
                 else if (chineseValue <= 50621)
                 {
-                    firstCode = "O";
+                    firstLetter = "O";
                 }
                 else if (chineseValue <= 50905)
                 {
-                    firstCode = "P";
+                    firstLetter = "P";
                 }
                 else if (chineseValue <= 51386)
                 {
-                    firstCode = "Q";
+                    firstLetter = "Q";
                 }
                 else if (chineseValue <= 51445)
                 {
-                    firstCode = "R";
+                    firstLetter = "R";
                 }
                 else if (chineseValue <= 52217)
                 {
-                    firstCode = "S";
+                    firstLetter = "S";
                 }
                 else if (chineseValue <= 52697)
                 {
-                    firstCode = "T";
+                    firstLetter = "T";
                 }
                 else if (chineseValue <= 52979)
                 {
-                    firstCode = "W";
+                    firstLetter = "W";
                 }
                 else if (chineseValue <= 53640)
                 {
-                    firstCode = "X";
+                    firstLetter = "X";
                 }
                 else if (chineseValue <= 54480)
                 {
-                    firstCode = "Y";
+                    firstLetter = "Y";
                 }
                 else if (chineseValue <= 55289)
                 {
-                    firstCode = "Z";
+                    firstLetter = "Z";
                 }
             }
-
-            return firstCode;
+            return firstLetter;
         }
 
         #endregion
@@ -204,31 +203,31 @@ namespace System
         /// <summary>
         /// Remove all of the html tags in the string value
         /// </summary>
-        /// <param name="value">String value</param>
+        /// <param name="htmlString">Html string</param>
         /// <returns>Return the removed string</returns>
-        public static string RemoveHtmlTags(this string value)
+        public static string RemoveHtmlTags(this string htmlString)
         {
             //remove scripts
-            value = Regex.Replace(value, @"<script[^>]*?>.*?</script>", "", RegexOptions.IgnoreCase);
+            htmlString = Regex.Replace(htmlString, @"<script[^>]*?>.*?</script>", "", RegexOptions.IgnoreCase);
             //remove html
-            value = Regex.Replace(value, @"<(.[^>]*)>", "", RegexOptions.IgnoreCase);
-            value = Regex.Replace(value, @"([\r\n])[\s]+", "", RegexOptions.IgnoreCase);
-            value = Regex.Replace(value, @"-->", "", RegexOptions.IgnoreCase);
-            value = Regex.Replace(value, @"<!--.*", "", RegexOptions.IgnoreCase);
-            value = Regex.Replace(value, @"&(quot|#34);", "\"", RegexOptions.IgnoreCase);
-            value = Regex.Replace(value, @"&(amp|#38);", "&", RegexOptions.IgnoreCase);
-            value = Regex.Replace(value, @"&(lt|#60);", "<", RegexOptions.IgnoreCase);
-            value = Regex.Replace(value, @"&(gt|#62);", ">", RegexOptions.IgnoreCase);
-            value = Regex.Replace(value, @"&(nbsp|#160);", " ", RegexOptions.IgnoreCase);
-            value = Regex.Replace(value, @"&(iexcl|#161);", "\xa1", RegexOptions.IgnoreCase);
-            value = Regex.Replace(value, @"&(cent|#162);", "\xa2", RegexOptions.IgnoreCase);
-            value = Regex.Replace(value, @"&(pound|#163);", "\xa3", RegexOptions.IgnoreCase);
-            value = Regex.Replace(value, @"&(copy|#169);", "\xa9", RegexOptions.IgnoreCase);
-            value = Regex.Replace(value, @"&#(\d+);", "", RegexOptions.IgnoreCase);
-            value.Replace("<", "");
-            value.Replace(">", "");
-            value.Replace("\r\n", "");
-            return value;
+            htmlString = Regex.Replace(htmlString, @"<(.[^>]*)>", "", RegexOptions.IgnoreCase);
+            htmlString = Regex.Replace(htmlString, @"([\r\n])[\s]+", "", RegexOptions.IgnoreCase);
+            htmlString = Regex.Replace(htmlString, @"-->", "", RegexOptions.IgnoreCase);
+            htmlString = Regex.Replace(htmlString, @"<!--.*", "", RegexOptions.IgnoreCase);
+            htmlString = Regex.Replace(htmlString, @"&(quot|#34);", "\"", RegexOptions.IgnoreCase);
+            htmlString = Regex.Replace(htmlString, @"&(amp|#38);", "&", RegexOptions.IgnoreCase);
+            htmlString = Regex.Replace(htmlString, @"&(lt|#60);", "<", RegexOptions.IgnoreCase);
+            htmlString = Regex.Replace(htmlString, @"&(gt|#62);", ">", RegexOptions.IgnoreCase);
+            htmlString = Regex.Replace(htmlString, @"&(nbsp|#160);", " ", RegexOptions.IgnoreCase);
+            htmlString = Regex.Replace(htmlString, @"&(iexcl|#161);", "\xa1", RegexOptions.IgnoreCase);
+            htmlString = Regex.Replace(htmlString, @"&(cent|#162);", "\xa2", RegexOptions.IgnoreCase);
+            htmlString = Regex.Replace(htmlString, @"&(pound|#163);", "\xa3", RegexOptions.IgnoreCase);
+            htmlString = Regex.Replace(htmlString, @"&(copy|#169);", "\xa9", RegexOptions.IgnoreCase);
+            htmlString = Regex.Replace(htmlString, @"&#(\d+);", "", RegexOptions.IgnoreCase);
+            htmlString.Replace("<", "");
+            htmlString.Replace(">", "");
+            htmlString.Replace("\r\n", "");
+            return htmlString;
         }
 
         #endregion

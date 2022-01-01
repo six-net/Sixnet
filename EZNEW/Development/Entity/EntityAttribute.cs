@@ -26,12 +26,7 @@ namespace EZNEW.Development.Entity
         public string Group { get; set; }
 
         /// <summary>
-        /// Gets or sets the entity structure
-        /// </summary>
-        public EntityStructure Structure { get; set; } = EntityStructure.Normal;
-
-        /// <summary>
-        /// Indecates whether enable cache
+        /// Indicates whether enable cache
         /// </summary>
         public bool EnableCache { get; set; } = false;
 

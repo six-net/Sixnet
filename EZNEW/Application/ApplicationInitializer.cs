@@ -6,13 +6,12 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using EZNEW.DependencyInjection;
+using EZNEW.Development.DataAccess;
 using EZNEW.Development.Domain.Model;
 using EZNEW.Development.Domain.Repository;
-using EZNEW.Development.Domain.Repository.Event;
 using EZNEW.Development.Entity;
 using EZNEW.Development.Query;
 using EZNEW.Logging;
-using EZNEW.Mapper;
 using EZNEW.Module;
 
 namespace EZNEW.Application
@@ -35,7 +34,7 @@ namespace EZNEW.Application
         static readonly Type queryModelGenericType = typeof(IQueryModel<>);
 
         /// <summary>
-        /// model contract type
+        /// Model contract type
         /// </summary>
         static readonly Type modelContractType = typeof(IModel);
 
@@ -76,6 +75,8 @@ namespace EZNEW.Application
         {
             try
             {
+                LogManager.LogDebug<ApplicationInitializer>(FrameworkLogEvents.Application.Initialization, $"Initialize the application");
+
                 var allTypeDict = ApplicationManager.GetAllConventionTypes()?.ToDictionary(c => c.FullName, c => c);
                 if (allTypeDict.IsNullOrEmpty())
                 {
@@ -128,11 +129,20 @@ namespace EZNEW.Application
                                 providerType ??= relateTypes.First();
                                 ContainerManager.AddDefaultProjectService(type, providerType);
                             }
+
+                            //Default warehouse
+                            var interfaces = type.GetInterfaces();
+                            var baseDataAccessInterface = interfaces.FirstOrDefault(c => c.IsGenericType && c.GetGenericTypeDefinition() == typeof(IDataAccess<>));
+                            if (baseDataAccessInterface != null)
+                            {
+                                var entityType = baseDataAccessInterface.GenericTypeArguments[0];
+                                ContainerManager.AddWarehouseService(entityType, type);
+                            }
                         }
 
                         #endregion
                     }
-                    else if(!type.IsAbstract)
+                    else if (!type.IsAbstract)
                     {
                         bool isEntity = entityContractType.IsAssignableFrom(type);
                         var isModel = modelContractType.IsAssignableFrom(type);
@@ -177,7 +187,7 @@ namespace EZNEW.Application
             }
             catch (Exception ex)
             {
-                LogManager.LogError(ex, ex.Message);
+                LogManager.LogError<ApplicationInitializer>(FrameworkLogEvents.Application.InitializationFailure, ex, ex.Message);
             }
         }
 

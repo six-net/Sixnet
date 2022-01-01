@@ -9,7 +9,7 @@ namespace EZNEW.Development.Command
     public class CommandStartingEventExecutionResult
     {
         /// <summary>
-        /// Indecates whether break this command
+        /// Indicates whether break this command
         /// </summary>
         public bool BreakCommand { get; set; }
 

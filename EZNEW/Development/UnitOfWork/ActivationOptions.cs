@@ -5,19 +5,19 @@
     /// </summary>
     public class ActivationOptions
     {
+        public ActivationOptions(bool forceExecution = false)
+        {
+            ForceExecution = forceExecution;
+        }
+
         /// <summary>
         /// Default activation options
         /// </summary>
-        public static readonly ActivationOptions Default = new ActivationOptions();
-
-        public static readonly ActivationOptions ForceExecuteActivation = new ActivationOptions()
-        {
-            ForceExecute = true
-        };
+        public static ActivationOptions Default => new ActivationOptions();
 
         /// <summary>
-        /// Gets or sets whether force execute the activation record
+        /// Indicates whether force execution the activation record
         /// </summary>
-        public bool ForceExecute { get; set; }
+        public bool ForceExecution { get; set; }
     }
 }

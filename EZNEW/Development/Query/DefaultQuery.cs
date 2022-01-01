@@ -5,18 +5,16 @@ using System.Threading;
 using System.Linq.Expressions;
 using EZNEW.Expressions;
 using EZNEW.Reflection;
-using EZNEW.Development.Query.CriteriaConverter;
 using EZNEW.Exceptions;
 using EZNEW.Development.DataAccess;
 using EZNEW.Paging;
 using EZNEW.Development.Entity;
-using EZNEW.Cache;
-using EZNEW.Data.Cache;
+using System.Collections;
 
 namespace EZNEW.Development.Query
 {
     /// <summary>
-    /// IQuery default implement
+    /// Defines default implement for IQuery
     /// </summary>
     [Serializable]
     internal class DefaultQuery : IQuery
@@ -24,14 +22,19 @@ namespace EZNEW.Development.Query
         #region Fields
 
         /// <summary>
-        /// All criterias
+        /// All condition
         /// </summary>
-        internal List<Tuple<QueryOperator, IQueryItem>> criteriaCollection = new List<Tuple<QueryOperator, IQueryItem>>();
+        internal List<ICondition> conditionCollection = new List<ICondition>();
 
         /// <summary>
-        /// Orders
+        /// Criteria
         /// </summary>
-        internal List<SortCriteria> sortCollection = new List<SortCriteria>();
+        internal List<Criterion> criteria = new List<Criterion>();
+
+        /// <summary>
+        /// Sorts
+        /// </summary>
+        internal List<SortEntry> sortCollection = new List<SortEntry>();
 
         /// <summary>
         /// Query fields
@@ -44,24 +47,19 @@ namespace EZNEW.Development.Query
         internal List<string> notQueryFieldCollection = new List<string>();
 
         /// <summary>
-        /// Load data property
+        /// Load data properties
         /// </summary>
         internal Dictionary<string, bool> loadProperties = new Dictionary<string, bool>();
 
         /// <summary>
-        /// Equal criterias
+        /// Join collection
         /// </summary>
-        internal List<Criteria> equalCriteriaCollection = new List<Criteria>();
+        internal List<JoinEntry> joinCollection = new List<JoinEntry>();
 
         /// <summary>
-        /// Join items
+        /// Combine collection
         /// </summary>
-        internal List<JoinItem> joinItemCollection = new List<JoinItem>();
-
-        /// <summary>
-        /// Combine items
-        /// </summary>
-        internal List<CombineItem> combineItemCollection = new List<CombineItem>();
+        internal List<CombineEntry> combineCollection = new List<CombineEntry>();
 
         /// <summary>
         /// Subqueries
@@ -91,7 +89,7 @@ namespace EZNEW.Development.Query
         /// <summary>
         /// Has recurve
         /// </summary>
-        internal bool hasRecurveCriteria = false;
+        internal bool hasRecurve = false;
 
         /// <summary>
         /// Has combine
@@ -99,19 +97,19 @@ namespace EZNEW.Development.Query
         internal bool hasCombine = false;
 
         /// <summary>
-        /// Has converter
+        /// Has field converter
         /// </summary>
-        internal bool hasConverter = false;
+        internal bool hasFieldConverter = false;
 
-        /// <summary>
-        /// Atomic condition count
-        /// </summary>
-        internal int atomicConditionCount = 0;
+        ///// <summary>
+        ///// Atomic condition count
+        ///// </summary>
+        //internal int atomicConditionCount = 0;
 
-        /// <summary>
-        /// All condition field names
-        /// </summary>
-        internal List<string> allConditionFieldNameCollection = new List<string>();
+        ///// <summary>
+        ///// All condition field names
+        ///// </summary>
+        //internal List<string> allConditionFieldNameCollection = new List<string>();
 
         /// <summary>
         /// Actually query fields
@@ -123,7 +121,7 @@ namespace EZNEW.Development.Query
         /// </summary>
         internal string entityTypeAssemblyQualifiedName = string.Empty;
         [NonSerialized]
-        internal Dictionary<Guid, dynamic> queryExpressionCaches = new Dictionary<Guid, dynamic>();
+        internal Dictionary<Guid, dynamic> validationFuncDict = new Dictionary<Guid, dynamic>();
         [NonSerialized]
         internal CancellationToken? cancellationToken = default;
         [NonSerialized]
@@ -140,14 +138,19 @@ namespace EZNEW.Development.Query
         #region Properties
 
         /// <summary>
-        /// Gets all criterias or other IQuery items
+        /// Gets all condition
         /// </summary>
-        public IEnumerable<Tuple<QueryOperator, IQueryItem>> Criterias => criteriaCollection;
+        public IEnumerable<ICondition> Conditions => conditionCollection;
 
         /// <summary>
-        /// Gets the order items
+        /// Gets all criterion
         /// </summary>
-        public IEnumerable<SortCriteria> Orders => sortCollection;
+        public IEnumerable<Criterion> Criteria => criteria;
+
+        /// <summary>
+        /// Gets all sort
+        /// </summary>
+        public IEnumerable<SortEntry> Sorts => sortCollection;
 
         /// <summary>
         /// Gets the specific query fields(it's priority greater than NoQueryFields)
@@ -165,19 +168,19 @@ namespace EZNEW.Development.Query
         public PagingFilter PagingInfo { get; private set; } = null;
 
         /// <summary>
-        /// Gets the query text
+        /// Gets the text
         /// </summary>
-        public string QueryText { get; internal set; } = string.Empty;
+        public string Text { get; internal set; } = string.Empty;
 
         /// <summary>
-        /// Gets the query text parameter
+        /// Gets the text parameters
         /// </summary>
-        public IEnumerable<KeyValuePair<string, object>> QueryTextParameters { get; internal set; } = null;
+        public IEnumerable<KeyValuePair<string, object>> TextParameters { get; internal set; } = null;
 
         /// <summary>
-        /// Gets the query command type
+        /// Gets the query execution mode
         /// </summary>
-        public QueryCommandType QueryType { get; internal set; } = QueryCommandType.QueryObject;
+        public QueryExecutionMode ExecutionMode { get; internal set; } = QueryExecutionMode.QueryObject;
 
         /// <summary>
         /// Gets or sets query data size
@@ -187,78 +190,78 @@ namespace EZNEW.Development.Query
         /// <summary>
         /// Gets all of data properties allow to lazy load
         /// </summary>
-        public IEnumerable<KeyValuePair<string, bool>> LoadPropertys => loadProperties;
+        public IEnumerable<KeyValuePair<string, bool>> LoadProperties => loadProperties;
 
         /// <summary>
-        /// Gets whether has subquery
+        /// Indicates whether has subquery
         /// </summary>
         public bool HasSubquery => hasSubquery;
 
         /// <summary>
-        /// Gets whether has recurve criteria
+        /// Indicates whether has recurve
         /// </summary>
-        public bool HasRecurveCriteria => hasRecurveCriteria;
+        public bool HasRecurve => hasRecurve;
 
         /// <summary>
-        /// Gets whether has join item
+        /// Indicates whether has join
         /// </summary>
         public bool HasJoin => hasJoin;
 
         /// <summary>
-        /// Gets whether has combine items
+        /// Indicates whether has combine
         /// </summary>
         public bool HasCombine => hasCombine;
 
         /// <summary>
-        /// Gets whether has criteria converter
+        /// Indicates whether has field converter
         /// </summary>
-        public bool HasConverter => hasConverter;
+        public bool HasFieldConverter => hasFieldConverter;
 
         /// <summary>
-        /// Gets whether is a complex query
-        /// Include subquery,recurve criteria,join item
+        /// Indicates whether is a complex query
+        /// Include subquery,recurve,join
         /// </summary>
-        public bool IsComplexQuery => GetIsComplexQuery();
+        public bool IsComplex => GetIsComplexQuery();
 
         /// <summary>
-        /// Gets the recurve criteria
+        /// Gets the recurve
         /// </summary>
-        public RecurveCriteria RecurveCriteria { get; private set; }
+        public Recurve Recurve { get; private set; }
 
         /// <summary>
-        /// Gets or sets whether must return value for success
+        /// Indicates whether must affect data
         /// </summary>
-        public bool MustReturnValueOnSuccess { get; set; }
+        public bool MustAffectData { get; set; }
 
         /// <summary>
-        /// Gets whether the query object is obsolete
+        /// Indicates whether is obsolete
         /// </summary>
         public bool IsObsolete { get; internal set; } = false;
 
         /// <summary>
-        /// Gets the join items
+        /// Gets the joins
         /// </summary>
-        public IEnumerable<JoinItem> JoinItems => joinItemCollection;
+        public IEnumerable<JoinEntry> Joins => joinCollection;
 
         /// <summary>
-        /// Gets the combine items
+        /// Gets the combines
         /// </summary>
-        public IEnumerable<CombineItem> CombineItems => combineItemCollection;
+        public IEnumerable<CombineEntry> Combines => combineCollection;
 
         /// <summary>
-        /// Gets whether is a none condition object
+        /// Indecats whether are no conditions included
         /// </summary>
-        public bool NoneCondition => criteriaCollection.IsNullOrEmpty() && JoinItems.IsNullOrEmpty() && combineItemCollection.IsNullOrEmpty();
+        public bool NoneCondition => conditionCollection.IsNullOrEmpty() && Joins.IsNullOrEmpty() && combineCollection.IsNullOrEmpty();
 
-        /// <summary>
-        /// Gets the atomic condition count
-        /// </summary>
-        public int AtomicConditionCount => atomicConditionCount;
+        ///// <summary>
+        ///// Gets the atomic condition count
+        ///// </summary>
+        //public int AtomicConditionCount => atomicConditionCount;
 
-        /// <summary>
-        /// Gets all condition field names
-        /// </summary>
-        public IEnumerable<string> AllConditionFieldNames => allConditionFieldNameCollection;
+        ///// <summary>
+        ///// Gets all condition field names
+        ///// </summary>
+        //public IEnumerable<string> AllConditionFieldNames => allConditionFieldNameCollection;
 
         /// <summary>
         /// Gets all subqueries
@@ -271,61 +274,64 @@ namespace EZNEW.Development.Query
         public DataIsolationLevel? IsolationLevel { get; set; }
 
         /// <summary>
-        /// Indecates whether query obsolete data
+        /// Indicates whether query obsolete data
         /// </summary>
         public bool IncludeObsoleteData { get; set; }
 
+        /// <summary>
+        /// Gets or sets the connection operator
+        /// </summary>
+        public ConditionConnectionOperator ConnectionOperator { get; set; } = ConditionConnectionOperator.AND;
+
         #endregion
 
-        #region Functions
+        #region Methods
 
         #region Condition
 
         /// <summary>
-        /// Add a criteria
+        /// Add criterion
         /// </summary>
-        /// <param name="queryOperator">Connect operator</param>
+        /// <param name="connectionOperator">Connection operator</param>
         /// <param name="fieldName">Field name</param>
-        /// <param name="criteriaOperator">Condition operator</param>
+        /// <param name="criterionOperator">Criterion operator</param>
         /// <param name="value">Value</param>
-        /// <param name="converter">Converter</param>
-        /// <param name="queryOption">query parameter option</param>
-        public IQuery AddCriteria(QueryOperator queryOperator, string fieldName, CriteriaOperator criteriaOperator, dynamic value, ICriteriaConverter converter = null, QueryParameterOptions queryOption = null)
+        /// <param name="criterionOptions">Criterion options</param>
+        public IQuery AddCriterion(ConditionConnectionOperator connectionOperator, string fieldName, CriterionOperator criterionOperator, dynamic value, CriterionOptions criterionOptions = null)
         {
             if (string.IsNullOrWhiteSpace(fieldName))
             {
                 throw new EZNEWException($"Field name for [{value}] is null or empty.");
             }
-            Criteria newCriteria = Criteria.CreateNewCriteria(fieldName, criteriaOperator, value);
-            newCriteria.Converter = converter;
-            return AddQueryItem(queryOperator, newCriteria, queryOption);
+            Criterion newCriterion = Criterion.Create(fieldName, criterionOperator, value);
+            newCriterion.Options = criterionOptions;
+            newCriterion.ConnectionOperator = connectionOperator;
+            return AddCondition(newCriterion);
         }
 
         /// <summary>
-        /// Add a IQueryItem
+        /// Add condition
         /// </summary>
-        /// <param name="queryOperator">Connect operator</param>
-        /// <param name="queryItem">query item</param>
-        /// <param name="queryOption">query parameter option</param>
-        public IQuery AddQueryItem(QueryOperator queryOperator, IQueryItem queryItem, QueryParameterOptions queryOption = null)
+        /// <param name="condition">Condition</param>
+        public IQuery AddCondition(ICondition condition)
         {
             #region invoke handler
 
-            var queryItemTypeId = queryItem?.GetType().GUID ?? Guid.Empty;
-            Func<DefaultQuery, IQueryItem, QueryParameterOptions, IQueryItem> handler = null;
-            QueryManager.AddQueryItemHandlers?.TryGetValue(queryItemTypeId, out handler);
+            var queryItemTypeId = condition?.GetType().GUID ?? Guid.Empty;
+            Func<DefaultQuery, ICondition, ICondition> handler = null;
+            QueryManager.AddConditionHandlers?.TryGetValue(queryItemTypeId, out handler);
             if (handler != null)
             {
-                queryItem = handler(this, queryItem, queryOption);
+                condition = handler(this, condition);
             }
 
             #endregion
 
-            if (queryItem != null)
+            if (condition != null)
             {
                 //clear data
-                queryExpressionCaches?.Clear();
-                criteriaCollection.Add(new Tuple<QueryOperator, IQueryItem>(queryOperator, queryItem));
+                validationFuncDict?.Clear();
+                conditionCollection.Add(condition);
             }
             return this;
         }
@@ -340,7 +346,7 @@ namespace EZNEW.Development.Query
         /// Clear sort condition
         /// </summary>
         /// <returns>Return the newest IQuery object</returns>
-        public IQuery ClearOrder()
+        public IQuery ClearSort()
         {
             sortCollection.Clear();
             return this;
@@ -348,26 +354,85 @@ namespace EZNEW.Development.Query
 
         #endregion
 
-        #region Add order
+        #region Add sort
 
         /// <summary>
-        /// Add order
+        /// Add sort
         /// </summary>
         /// <param name="fieldName">Field name</param>
         /// <param name="desc">Sort by desc</param>
-        /// <param name="converter">Field converter</param>
-        public IQuery AddOrder(string fieldName, bool desc = false, ICriteriaConverter converter = null)
+        /// <param name="sortOptions">Sort options</param>
+        public IQuery AddSort(string fieldName, bool desc = false, SortOptions sortOptions = null)
         {
             if (!string.IsNullOrWhiteSpace(fieldName))
             {
-                sortCollection.Add(new SortCriteria()
+                sortCollection.Add(new SortEntry()
                 {
                     Name = fieldName,
                     Desc = desc,
-                    Converter = converter
+                    Options = sortOptions
                 });
             }
             return this;
+        }
+
+        #endregion
+
+        #region Sort data
+
+        /// <summary>
+        /// Sort data
+        /// </summary>
+        /// <typeparam name="TEntity">Data type</typeparam>
+        /// <param name="datas">Datas</param>
+        /// <param name="useDefaultFieldToSort">Whether use default field to sort</param>
+        /// <returns>Return the sorted data set</returns>
+        public IEnumerable<TEntity> SortData<TEntity>(IEnumerable<TEntity> datas, bool useDefaultFieldToSort = false) where TEntity : BaseEntity<TEntity>, new()
+        {
+            if (datas.IsNullOrEmpty())
+            {
+                return datas;
+            }
+            IOrderedEnumerable<TEntity> sortedDatas = null;
+            var entityType = typeof(TEntity);
+            if (!sortCollection.IsNullOrEmpty())
+            {
+                foreach (var sortEntry in sortCollection)
+                {
+                    if (sortEntry == null)
+                    {
+                        continue;
+                    }
+                    var field = EntityManager.GetEntityField(entityType, sortEntry.Name);
+                    if (field == null)
+                    {
+                        throw new EZNEWException($"{entityType.FullName}=>{sortEntry.Name}:Entity field config not find.");
+                    }
+                    Func<TEntity, object> getDataFunc = field.ValueProvider.Get;//ExpressionHelper.GetPropertyOrFieldFunction<TEntity>(sortEntry.Name);
+                    if (getDataFunc == null)
+                    {
+                        continue;
+                    }
+                    if (sortedDatas == null)
+                    {
+                        sortedDatas = sortEntry.Desc ? datas.OrderByDescending(getDataFunc) : datas.OrderBy(getDataFunc);
+                    }
+                    else
+                    {
+                        sortedDatas = sortEntry.Desc ? sortedDatas.ThenByDescending(getDataFunc) : sortedDatas.ThenBy(getDataFunc);
+                    }
+                }
+            }
+            else if (useDefaultFieldToSort)
+            {
+                var defaultField = EntityManager.GetDefaultField(typeof(TEntity));
+                if (defaultField?.ValueProvider == null)
+                {
+                    return datas;
+                }
+                sortedDatas = datas.OrderByDescending(defaultField.ValueProvider.Get);
+            }
+            return sortedDatas ?? datas;
         }
 
         #endregion
@@ -383,7 +448,7 @@ namespace EZNEW.Development.Query
         /// <returns>Return the newest IQuery object</returns>
         public IQuery AddQueryFields(params string[] fields)
         {
-            if (fields?.Length > 0)
+            if (!fields.IsNullOrEmpty())
             {
                 queryFieldCollection.AddRange(fields);
                 ClearFieldsCache();
@@ -428,7 +493,7 @@ namespace EZNEW.Development.Query
         /// <returns>Return the newest IQuery object</returns>
         public IQuery AddNotQueryFields(params string[] fields)
         {
-            if (fields?.Length > 0)
+            if (!fields.IsNullOrEmpty())
             {
                 notQueryFieldCollection.AddRange(fields);
                 ClearFieldsCache();
@@ -493,9 +558,9 @@ namespace EZNEW.Development.Query
         /// Item1: whether return entity full query fields
         /// </summary>
         /// <param name="entityType">Entity type</param>
-        /// <param name="forceMustFields">Whether return the must query fields</param>
+        /// <param name="forceNecessaryFields">Whether include necessary fields</param>
         /// <returns>Return actually query fields</returns>
-        public Tuple<bool, IEnumerable<string>> GetActuallyQueryFieldsWithSign(Type entityType, bool forceMustFields)
+        public Tuple<bool, IEnumerable<string>> GetActuallyQueryFieldsWithSign(Type entityType, bool forceNecessaryFields)
         {
             if (actuallyQueryFields == null)
             {
@@ -505,7 +570,7 @@ namespace EZNEW.Development.Query
                 {
                     fullQuery = false;
                     var mustQueryFields = EntityManager.GetMustQueryFields(entityType);
-                    if (forceMustFields && !mustQueryFields.IsNullOrEmpty())
+                    if (forceNecessaryFields && !mustQueryFields.IsNullOrEmpty())
                     {
                         allowQueryFields = mustQueryFields.Union(allowQueryFields);
                     }
@@ -518,7 +583,7 @@ namespace EZNEW.Development.Query
                     fullQuery = false;
                     allFields = allFields.Except(notQueryFields);
                     var mustQueryFields = EntityManager.GetMustQueryFields(entityType);
-                    if (forceMustFields && !mustQueryFields.IsNullOrEmpty())
+                    if (forceNecessaryFields && !mustQueryFields.IsNullOrEmpty())
                     {
                         allFields = mustQueryFields.Union(allFields);
                     }
@@ -538,25 +603,25 @@ namespace EZNEW.Development.Query
 
         #endregion
 
-        #region QueryText
+        #region Text
 
         /// <summary>
-        /// Set query text
+        /// Set text
         /// </summary>
-        /// <param name="queryText">Query text</param>
+        /// <param name="text">Text</param>
         /// <param name="parameters">Parameters</param>
         /// <returns>Return the newest IQuery object</returns>
-        public IQuery SetQueryText(string queryText, object parameters = null)
+        public IQuery SetText(string text, object parameters = null)
         {
-            QueryText = queryText;
-            QueryTextParameters = parameters?.ObjectToDcitionary();
-            QueryType = QueryCommandType.Text;
+            Text = text;
+            TextParameters = parameters?.ObjectToDcitionary();
+            ExecutionMode = QueryExecutionMode.Text;
             return this;
         }
 
         #endregion
 
-        #region Load Propertys
+        #region Load Property
 
         /// <summary>
         /// Set load data propertys
@@ -622,94 +687,114 @@ namespace EZNEW.Development.Query
 
         #endregion
 
-        #region Get Special Keys Equal Values
+        #region Get parameters
 
         /// <summary>
-        /// Get special keys equal values
+        /// Get equal parameters
         /// </summary>
-        /// <param name="keys">Keys</param>
-        /// <returns>Return key and values</returns>
-        public Dictionary<string, List<dynamic>> GetKeysEqualValue(IEnumerable<string> keys)
+        /// <param name="parameterNames">Parameter names</param>
+        /// <returns>Return parameter values</returns>
+        public Dictionary<string, List<dynamic>> GetEqualParameters(IEnumerable<string> parameterNames = null)
         {
-            if (QueryType == QueryCommandType.Text || keys.IsNullOrEmpty() || equalCriteriaCollection.IsNullOrEmpty())
+            if (ExecutionMode == QueryExecutionMode.Text || criteria.IsNullOrEmpty())
             {
                 return new Dictionary<string, List<dynamic>>();
             }
-            var equalCriteriaDict = equalCriteriaCollection.GroupBy(c => c.Name).ToDictionary(c => c.Key, c => c.ToList());
-            var values = new Dictionary<string, List<dynamic>>(equalCriteriaDict.Count);
-            foreach (var key in keys)
+            var equalCriteria = criteria.Where(c => c.IsEqual);
+            return GetCriteriaValues(equalCriteria, parameterNames);
+        }
+
+        /// <summary>
+        /// Get criteria values
+        /// </summary>
+        /// <param name="criteria">Criteria</param>
+        /// <param name="names">Names</param>
+        /// <returns>Return parameter values</returns>
+        Dictionary<string, List<dynamic>> GetCriteriaValues(IEnumerable<Criterion> criteria, IEnumerable<string> names = null)
+        {
+            if (criteria.IsNullOrEmpty())
             {
-                equalCriteriaDict.TryGetValue(key, out var keyCriterias);
-                if (keyCriterias.IsNullOrEmpty())
+                return new Dictionary<string, List<dynamic>>(0);
+            }
+            var criteriaGroup = criteria.GroupBy(c => c.Name);
+            if (names != null && !names.IsNullOrEmpty())
+            {
+                criteriaGroup = criteriaGroup.Where(c => names.Contains(c.Key));
+            }
+            var criteriaDict = criteriaGroup.ToDictionary(c => c.Key, c => c.ToList());
+            var parameters = new Dictionary<string, List<dynamic>>(criteriaDict.Count);
+            foreach (var criteriaItem in criteriaDict)
+            {
+                if (criteriaItem.Value.IsNullOrEmpty())
                 {
                     continue;
                 }
-                List<dynamic> criteriaValues = new List<dynamic>();
-                foreach (var criteria in keyCriterias)
+                List<dynamic> values = new List<dynamic>();
+                foreach (var criterion in criteriaItem.Value)
                 {
-                    var criteriaValue = criteria.GetCriteriaRealValue();
-                    if (criteriaValue == null)
+                    var criterionValue = criterion.Value;
+                    if (criterionValue == null)
                     {
                         continue;
                     }
-                    if (criteria.Operator == CriteriaOperator.In)
+                    if (criterionValue is IEnumerable)
                     {
-                        foreach (var cvalue in criteriaValue)
+                        foreach (var valueEntry in criterionValue)
                         {
-                            criteriaValues.Add(cvalue);
+                            values.Add(valueEntry);
                         }
                     }
                     else
                     {
-                        criteriaValues.Add(criteriaValue);
+                        values.Add(criterionValue);
                     }
                 }
-                if (criteriaValues.IsNullOrEmpty())
+                if (values.IsNullOrEmpty())
                 {
                     continue;
                 }
-                values[key] = criteriaValues;
+                parameters[criteriaItem.Key] = values;
             }
-            return values;
+            return parameters;
         }
 
         #endregion
 
-        #region Get Expression
+        #region Get validation function
 
         /// <summary>
-        /// Get query expression
+        /// Get validation function
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
-        /// <returns>Return query expression</returns>
-        public Func<T, bool> GetQueryExpression<T>()
+        /// <returns>Return a validation function</returns>
+        public Func<T, bool> GetValidationFunction<T>()
         {
             Type modelType = typeof(T);
-            queryExpressionCaches ??= new Dictionary<Guid, dynamic>();
-            if (queryExpressionCaches.ContainsKey(modelType.GUID))
+            validationFuncDict ??= new Dictionary<Guid, dynamic>();
+            if (validationFuncDict.ContainsKey(modelType.GUID))
             {
-                return queryExpressionCaches[modelType.GUID];
+                return validationFuncDict[modelType.GUID];
             }
-            if (IsComplexQuery)
+            if (IsComplex)
             {
                 Func<T, bool> falseFunc = (data) => false;
-                queryExpressionCaches.Add(modelType.GUID, falseFunc);
+                validationFuncDict.Add(modelType.GUID, falseFunc);
                 return falseFunc;
             }
-            if (criteriaCollection.IsNullOrEmpty())
+            if (conditionCollection.IsNullOrEmpty())
             {
                 Func<T, bool> trueFunc = (data) => true;
-                queryExpressionCaches.Add(modelType.GUID, trueFunc);
+                validationFuncDict.Add(modelType.GUID, trueFunc);
                 return trueFunc;
             }
-            Type funcType = QueryManager.GetEntityPredicateType(modelType);//typeof(Func<,>).MakeGenericType(modelType, typeof(bool));
-            ParameterExpression parExp = Expression.Parameter(modelType);//parameter model type
+            Type funcType = QueryManager.GetEntityPredicateType(modelType);
+            ParameterExpression parExp = Expression.Parameter(modelType);
             Array parameterArray = Array.CreateInstance(typeof(ParameterExpression), 1);
             parameterArray.SetValue(parExp, 0);
             Expression conditionExpression = null;
-            foreach (var queryItem in criteriaCollection)
+            foreach (var conditionEntry in conditionCollection)
             {
-                Expression childExpression = GenerateExpression(parExp, queryItem.Item2);
+                Expression childExpression = GenerateExpression(parExp, conditionEntry);
                 if (childExpression == null)
                 {
                     continue;
@@ -719,7 +804,7 @@ namespace EZNEW.Development.Query
                     conditionExpression = childExpression;
                     continue;
                 }
-                if (queryItem.Item1 == QueryOperator.AND)
+                if (conditionEntry.ConnectionOperator == ConditionConnectionOperator.AND)
                 {
                     conditionExpression = Expression.AndAlso(conditionExpression, childExpression);
                 }
@@ -738,7 +823,7 @@ namespace EZNEW.Development.Query
                 conditionExpression,parameterArray
             });
             Func<T, bool> func = ((Expression<Func<T, bool>>)lambdaExpression).Compile();
-            queryExpressionCaches.Add(modelType.GUID, func);
+            validationFuncDict.Add(modelType.GUID, func);
             return func;
         }
 
@@ -746,35 +831,35 @@ namespace EZNEW.Development.Query
         /// Generate expressionn
         /// </summary>
         /// <param name="parameter">Parameter expression</param>
-        /// <param name="queryItem">Query item</param>
+        /// <param name="condition">Condition</param>
         /// <returns>Return query expression</returns>
-        Expression GenerateExpression(Expression parameter, IQueryItem queryItem)
+        Expression GenerateExpression(Expression parameter, ICondition condition)
         {
-            if (queryItem is Criteria)
+            if (condition is Criterion)
             {
-                return GenerateSingleExpression(parameter, queryItem as Criteria);
+                return GenerateSingleExpression(parameter, condition as Criterion);
             }
-            IQuery query = queryItem as IQuery;
-            if (query?.Criterias.IsNullOrEmpty() ?? true)
+            IQuery query = condition as IQuery;
+            if (query?.Conditions.IsNullOrEmpty() ?? true)
             {
                 return null;
             }
-            var criteriasCount = query.Criterias.Count();
-            var firstCriteria = query.Criterias.First();
-            if (criteriasCount == 1 && firstCriteria.Item2 is Criteria)
+            var conditionCount = query.Conditions.Count();
+            var firstCondition = query.Conditions.First();
+            if (conditionCount == 1 && firstCondition is Criterion firstCriterion)
             {
-                return GenerateSingleExpression(parameter, firstCriteria.Item2 as Criteria);
+                return GenerateSingleExpression(parameter, firstCriterion);
             }
             Expression conditionExpression = null;
-            foreach (var criteriaItem in query.Criterias)
+            foreach (var conditionEntry in query.Conditions)
             {
-                var childExpression = GenerateExpression(parameter, criteriaItem.Item2);
+                var childExpression = GenerateExpression(parameter, conditionEntry);
                 if (conditionExpression == null)
                 {
                     conditionExpression = childExpression;
                     continue;
                 }
-                if (criteriaItem.Item1 == QueryOperator.AND)
+                if (conditionEntry.ConnectionOperator == ConditionConnectionOperator.AND)
                 {
                     conditionExpression = Expression.AndAlso(conditionExpression, childExpression);
                 }
@@ -790,17 +875,23 @@ namespace EZNEW.Development.Query
         /// Generate a single expression
         /// </summary>
         /// <param name="parameter">Parameter expression</param>
-        /// <param name="criteria">Criteria</param>
+        /// <param name="criterion">Criterion</param>
         /// <returns>Return query expression</returns>
-        Expression GenerateSingleExpression(Expression parameter, Criteria criteria)
+        Expression GenerateSingleExpression(Expression parameter, Criterion criterion)
         {
-            object criteriaValue = criteria.GetCriteriaRealValue();
+            object criteriaValue = criterion.Value;
             Expression valueExpression = Expression.Constant(criteriaValue, criteriaValue?.GetType() ?? typeof(object));
-            Expression property = Expression.PropertyOrField(parameter, criteria.Name);
-            switch (criteria.Operator)
+            Expression property = string.IsNullOrWhiteSpace(criterion.Name) ? null : Expression.PropertyOrField(parameter, criterion.Name);
+            switch (criterion.Operator)
             {
-                case CriteriaOperator.Equal:
-                case CriteriaOperator.IsNull:
+                case CriterionOperator.False:
+                    property = Expression.Constant(false, typeof(bool));
+                    break;
+                case CriterionOperator.True:
+                    property = Expression.Constant(true, typeof(bool));
+                    break;
+                case CriterionOperator.Equal:
+                case CriterionOperator.IsNull:
                     if (criteriaValue == null && !property.Type.AllowNull())
                     {
                         property = Expression.Constant(false, typeof(bool));
@@ -810,8 +901,8 @@ namespace EZNEW.Development.Query
                         property = Expression.Equal(property, valueExpression);
                     }
                     break;
-                case CriteriaOperator.NotEqual:
-                case CriteriaOperator.NotNull:
+                case CriterionOperator.NotEqual:
+                case CriterionOperator.NotNull:
                     if (criteriaValue == null && !property.Type.AllowNull())
                     {
                         property = Expression.Constant(true, typeof(bool));
@@ -821,30 +912,30 @@ namespace EZNEW.Development.Query
                         property = Expression.NotEqual(property, valueExpression);
                     }
                     break;
-                case CriteriaOperator.GreaterThan:
+                case CriterionOperator.GreaterThan:
                     property = Expression.GreaterThan(property, valueExpression);
                     break;
-                case CriteriaOperator.GreaterThanOrEqual:
+                case CriterionOperator.GreaterThanOrEqual:
                     property = Expression.GreaterThanOrEqual(property, valueExpression);
                     break;
-                case CriteriaOperator.LessThan:
+                case CriterionOperator.LessThan:
                     property = Expression.LessThan(property, valueExpression);
                     break;
-                case CriteriaOperator.LessThanOrEqual:
+                case CriterionOperator.LessThanOrEqual:
                     property = Expression.LessThanOrEqual(property, valueExpression);
                     break;
-                case CriteriaOperator.BeginLike:
+                case CriterionOperator.BeginLike:
                     Expression beginLikeExpression = Expression.Call(property, ReflectionManager.String.StringIndexOfMethod, valueExpression);
                     property = Expression.Equal(beginLikeExpression, Expression.Constant(0));
                     break;
-                case CriteriaOperator.Like:
+                case CriterionOperator.Like:
                     Expression likeExpression = Expression.Call(property, ReflectionManager.String.StringIndexOfMethod, valueExpression);
                     property = Expression.GreaterThanOrEqual(likeExpression, Expression.Constant(0));
                     break;
-                case CriteriaOperator.EndLike:
+                case CriterionOperator.EndLike:
                     property = Expression.Call(property, ReflectionManager.String.EndWithMethod, valueExpression);
                     break;
-                case CriteriaOperator.In:
+                case CriterionOperator.In:
                     Type valueType = criteriaValue.GetType();
                     if (valueType != null && valueType.GenericTypeArguments != null && valueType.GenericTypeArguments.Length > 0)
                     {
@@ -869,7 +960,7 @@ namespace EZNEW.Development.Query
                     var inMethod = ReflectionManager.Collections.GetCollectionContainsMethod(valueType);
                     property = Expression.Call(inMethod, valueExpression, property);
                     break;
-                case CriteriaOperator.NotIn:
+                case CriterionOperator.NotIn:
                     Type notInValueType = criteriaValue.GetType();
                     if (notInValueType != null && notInValueType.GenericTypeArguments != null)
                     {
@@ -886,47 +977,7 @@ namespace EZNEW.Development.Query
                     property = null;
                     break;
             }
-            if (property == null)
-            {
-                return null;
-            }
             return property;
-        }
-
-        #endregion
-
-        #region Order Datas
-
-        /// <summary>
-        /// Order datas
-        /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
-        /// <param name="datas">Datas</param>
-        /// <returns>Return the sorted data set</returns>
-        public IEnumerable<T> Sort<T>(IEnumerable<T> datas)
-        {
-            if (sortCollection.IsNullOrEmpty() || datas.IsNullOrEmpty())
-            {
-                return datas;
-            }
-            IOrderedEnumerable<T> orderedDatas = null;
-            foreach (var orderItem in sortCollection)
-            {
-                var orderFun = ExpressionHelper.GetPropertyOrFieldFunction<T>(orderItem.Name);
-                if (orderFun == null)
-                {
-                    continue;
-                }
-                if (orderedDatas == null)
-                {
-                    orderedDatas = orderItem.Desc ? datas.OrderByDescending(orderFun) : datas.OrderBy(orderFun);
-                }
-                else
-                {
-                    orderedDatas = orderItem.Desc ? orderedDatas.ThenByDescending(orderFun) : orderedDatas.ThenBy(orderFun);
-                }
-            }
-            return orderedDatas ?? datas;
         }
 
         #endregion
@@ -934,43 +985,43 @@ namespace EZNEW.Development.Query
         #region Recurve
 
         /// <summary>
-        /// Set recurve criteria
+        /// Set recurve
         /// </summary>
-        /// <param name="key">Key</param>
-        /// <param name="relationKey">Relation key</param>
+        /// <param name="dataField">Data field</param>
+        /// <param name="relationField">Relation field</param>
         /// <param name="direction">Recurve direction</param>
         /// <returns>Return the newest IQuery object</returns>
-        public IQuery SetRecurve(string key, string relationKey, RecurveDirection direction = RecurveDirection.Down)
+        public IQuery SetRecurve(string dataField, string relationField, RecurveDirection direction = RecurveDirection.Down)
         {
-            if (string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(relationKey))
+            if (string.IsNullOrWhiteSpace(dataField) || string.IsNullOrWhiteSpace(relationField))
             {
-                throw new EZNEWException($"{nameof(key)} or {nameof(relationKey)} is null or empty");
+                throw new EZNEWException($"{nameof(dataField)} or {nameof(relationField)} is null or empty");
             }
-            if (key == relationKey)
+            if (dataField == relationField)
             {
-                throw new EZNEWException($"{nameof(key)} and {nameof(relationKey)} can not be the same value");
+                throw new EZNEWException($"{nameof(dataField)} and {nameof(relationField)} can not be the same value");
             }
-            RecurveCriteria = new RecurveCriteria()
+            Recurve = new Recurve()
             {
-                Key = key,
-                RelationKey = relationKey,
+                DataField = dataField,
+                RelationField = relationField,
                 Direction = direction
             };
-            hasRecurveCriteria = true;
+            hasRecurve = true;
             return this;
         }
 
         /// <summary>
         /// Set recurve criteria
         /// </summary>
-        /// <typeparam name="TQueryModel">Query model</typeparam>
-        /// <param name="key">Key</param>
-        /// <param name="relationKey">Relation key</param>
+        /// <typeparam name="TQueryModel">Query model type</typeparam>
+        /// <param name="dataField">Data field</param>
+        /// <param name="relationField">Relation field</param>
         /// <param name="direction">Recurve direction</param>
         /// <returns>Return the newest IQuery object</returns>
-        public IQuery SetRecurve<TQueryModel>(Expression<Func<TQueryModel, dynamic>> key, Expression<Func<TQueryModel, dynamic>> relationKey, RecurveDirection direction = RecurveDirection.Down) where TQueryModel : IQueryModel<TQueryModel>
+        public IQuery SetRecurve<TQueryModel>(Expression<Func<TQueryModel, dynamic>> dataField, Expression<Func<TQueryModel, dynamic>> relationField, RecurveDirection direction = RecurveDirection.Down) where TQueryModel : IQueryModel<TQueryModel>
         {
-            return SetRecurve(ExpressionHelper.GetExpressionPropertyName(key), ExpressionHelper.GetExpressionPropertyName(relationKey), direction);
+            return SetRecurve(ExpressionHelper.GetExpressionPropertyName(dataField), ExpressionHelper.GetExpressionPropertyName(relationField), direction);
         }
 
         #endregion
@@ -978,7 +1029,7 @@ namespace EZNEW.Development.Query
         #region Obsolete
 
         /// <summary>
-        /// Bbsolete query
+        /// Obsolete
         /// </summary>
         public void Obsolete()
         {
@@ -986,7 +1037,7 @@ namespace EZNEW.Development.Query
         }
 
         /// <summary>
-        /// Cancel obsolete
+        /// Activate
         /// </summary>
         public void Activate()
         {
@@ -998,26 +1049,26 @@ namespace EZNEW.Development.Query
         #region Clone
 
         /// <summary>
-        /// Light clone a IQuery object
+        /// Light clone an IQuery object
         /// </summary>
         /// <returns>Return the replicated Query object</returns>
         public IQuery LightClone()
         {
             var newQuery = CloneValueMember();
-            newQuery.criteriaCollection = new List<Tuple<QueryOperator, IQueryItem>>(criteriaCollection);
-            newQuery.sortCollection = new List<SortCriteria>(sortCollection);
+            newQuery.Recurve = Recurve;
+            newQuery.conditionCollection = new List<ICondition>(conditionCollection);
+            newQuery.criteria = new List<Criterion>(criteria);
+            newQuery.sortCollection = new List<SortEntry>(sortCollection);
             newQuery.queryFieldCollection = new List<string>(queryFieldCollection);
             newQuery.notQueryFieldCollection = new List<string>(notQueryFieldCollection);
             newQuery.loadProperties = new Dictionary<string, bool>(loadProperties);
-            newQuery.equalCriteriaCollection = new List<Criteria>(equalCriteriaCollection);
-            newQuery.joinItemCollection = new List<JoinItem>(joinItemCollection);
-            newQuery.combineItemCollection = new List<CombineItem>(combineItemCollection);
+            newQuery.joinCollection = new List<JoinEntry>(joinCollection);
+            newQuery.combineCollection = new List<CombineEntry>(combineCollection);
             newQuery.subqueryCollection = new List<IQuery>(subqueryCollection);
-            newQuery.allConditionFieldNameCollection = new List<string>(allConditionFieldNameCollection);
             newQuery.actuallyQueryFields = actuallyQueryFields == null ? null : new Tuple<bool, IEnumerable<string>>(actuallyQueryFields.Item1, actuallyQueryFields.Item2);
             newQuery.PagingInfo = PagingInfo == null ? null : new PagingFilter() { Page = PagingInfo.Page, PageSize = PagingInfo.PageSize, QuerySize = PagingInfo.QuerySize };
-            newQuery.queryExpressionCaches = new Dictionary<Guid, dynamic>(queryExpressionCaches);
-            newQuery.QueryTextParameters = QueryTextParameters?.ToDictionary(c => c.Key, c => c.Value);
+            newQuery.validationFuncDict = new Dictionary<Guid, dynamic>(validationFuncDict);
+            newQuery.TextParameters = TextParameters?.ToDictionary(c => c.Key, c => c.Value);
             return newQuery;
         }
 
@@ -1028,20 +1079,21 @@ namespace EZNEW.Development.Query
         public IQuery Clone()
         {
             var newQuery = CloneValueMember();
-            newQuery.criteriaCollection = criteriaCollection.Select(c => new Tuple<QueryOperator, IQueryItem>(c.Item1, QueryManager.Clone(c.Item2))).ToList();
+            newQuery.conditionCollection = conditionCollection.Select(c => c?.Clone()).ToList();
             newQuery.sortCollection = sortCollection.Select(c => c?.Clone()).ToList();
             newQuery.queryFieldCollection = new List<string>(queryFieldCollection);
             newQuery.notQueryFieldCollection = new List<string>(notQueryFieldCollection);
             newQuery.loadProperties = new Dictionary<string, bool>(loadProperties);
-            newQuery.equalCriteriaCollection = equalCriteriaCollection.Select(c => c.Clone()).ToList();
-            newQuery.joinItemCollection = joinItemCollection.Select(c => c.Clone()).ToList();
-            newQuery.combineItemCollection = combineItemCollection.Select(c => c.Clone()).ToList();
+            newQuery.criteria = criteria.Select(c => c.Clone()).ToList();
+            newQuery.joinCollection = joinCollection.Select(c => c.Clone()).ToList();
+            newQuery.combineCollection = combineCollection.Select(c => c.Clone()).ToList();
             newQuery.subqueryCollection = subqueryCollection.Select(c => c.Clone()).ToList();
-            newQuery.allConditionFieldNameCollection = new List<string>(allConditionFieldNameCollection);
+            //newQuery.allConditionFieldNameCollection = new List<string>(allConditionFieldNameCollection);
             newQuery.actuallyQueryFields = actuallyQueryFields == null ? null : new Tuple<bool, IEnumerable<string>>(actuallyQueryFields.Item1, actuallyQueryFields.Item2?.Select(c => c));
             newQuery.PagingInfo = PagingInfo == null ? null : new PagingFilter() { Page = PagingInfo.Page, PageSize = PagingInfo.PageSize, QuerySize = PagingInfo.QuerySize };
-            newQuery.queryExpressionCaches = new Dictionary<Guid, dynamic>(queryExpressionCaches);
-            newQuery.QueryTextParameters = QueryTextParameters?.ToDictionary(c => c.Key, c => c.Value);
+            newQuery.validationFuncDict = new Dictionary<Guid, dynamic>(validationFuncDict);
+            newQuery.TextParameters = TextParameters?.ToDictionary(c => c.Key, c => c.Value);
+            newQuery.Recurve = Recurve?.Clone();
             return newQuery;
         }
 
@@ -1057,21 +1109,21 @@ namespace EZNEW.Development.Query
                 alreadySetGlobalCondition = alreadySetGlobalCondition,
                 hasSubquery = hasSubquery,
                 hasJoin = hasJoin,
-                hasRecurveCriteria = hasRecurveCriteria,
+                hasRecurve = hasRecurve,
                 hasCombine = hasCombine,
-                hasConverter = hasConverter,
-                atomicConditionCount = atomicConditionCount,
+                hasFieldConverter = hasFieldConverter,
+                //atomicConditionCount = atomicConditionCount,
                 entityTypeAssemblyQualifiedName = entityTypeAssemblyQualifiedName,
                 cancellationToken = cancellationToken,
                 entityType = entityType,
-                QueryText = QueryText,
-                QueryType = QueryType,
+                Text = Text,
+                ExecutionMode = ExecutionMode,
                 QuerySize = QuerySize,
-                RecurveCriteria = RecurveCriteria,
-                MustReturnValueOnSuccess = MustReturnValueOnSuccess,
+                MustAffectData = MustAffectData,
                 IsObsolete = IsObsolete,
                 IsolationLevel = IsolationLevel,
-                IncludeObsoleteData = IncludeObsoleteData
+                IncludeObsoleteData = IncludeObsoleteData,
+                ConnectionOperator = ConnectionOperator
             };
             return newQuery;
         }
@@ -1081,7 +1133,7 @@ namespace EZNEW.Development.Query
         #region Join
 
         /// <summary>
-        /// Add a join query
+        /// Add join
         /// </summary>
         /// <param name="joinFields">Join fields</param>
         /// <param name="joinType">Join type</param>
@@ -1094,7 +1146,7 @@ namespace EZNEW.Development.Query
             {
                 throw new EZNEWException("the IQuery object used for the join operation must set the property EntityType");
             }
-            return Join(new JoinItem()
+            return Join(new JoinEntry()
             {
                 JoinType = joinType,
                 Operator = joinOperator,
@@ -1105,24 +1157,24 @@ namespace EZNEW.Development.Query
         }
 
         /// <summary>
-        /// Add a join item
+        /// Add join
         /// </summary>
-        /// <param name="joinItem">Join item</param>
+        /// <param name="joinEntry">Join item</param>
         /// <returns>Return the newest IQuery object</returns>
-        public IQuery Join(JoinItem joinItem)
+        public IQuery Join(JoinEntry joinEntry)
         {
-            if (joinItem?.JoinQuery == null)
+            if (joinEntry?.JoinQuery == null)
             {
                 return this;
             }
-            joinItem.JoinQuery = QueryManager.HandleParameterQueryBeforeUse(joinItem.JoinQuery, null);
-            if (joinItem.ExtraQuery != null)
+            joinEntry.JoinQuery = QueryManager.HandleParameterQueryBeforeUse(joinEntry.JoinQuery);
+            if (joinEntry.ExtraQuery != null)
             {
-                joinItem.ExtraQuery = QueryManager.HandleParameterQueryBeforeUse(joinItem.ExtraQuery, null);
+                joinEntry.ExtraQuery = QueryManager.HandleParameterQueryBeforeUse(joinEntry.ExtraQuery);
             }
-            joinItemCollection.Add(joinItem);
+            joinCollection.Add(joinEntry);
             hasJoin = true;
-            hasConverter |= joinItem.JoinQuery.HasConverter;
+            hasFieldConverter |= joinEntry.JoinQuery.HasFieldConverter;
             return this;
         }
 
@@ -1131,18 +1183,18 @@ namespace EZNEW.Development.Query
         #region Combine
 
         /// <summary>
-        /// Add a combine item
+        /// Add combine
         /// </summary>
-        /// <param name="combineItem">Combine item</param>
+        /// <param name="combineEntry">Combine entry</param>
         /// <returns>Return the newest IQuery object</returns>
-        public IQuery Combine(CombineItem combineItem)
+        public IQuery Combine(CombineEntry combineEntry)
         {
-            if (combineItem == null)
+            if (combineEntry == null)
             {
                 return this;
             }
-            combineItem.CombineQuery = QueryManager.HandleParameterQueryBeforeUse(combineItem.CombineQuery, null);
-            combineItemCollection.Add(combineItem);
+            combineEntry.Query = QueryManager.HandleParameterQueryBeforeUse(combineEntry.Query);
+            combineCollection.Add(combineEntry);
             hasCombine = true;
             return this;
         }
@@ -1155,16 +1207,15 @@ namespace EZNEW.Development.Query
         /// Set global condition
         /// </summary>
         /// <param name="globalCondition">Global condition</param>
-        /// <param name="queryOperator">Query operator</param>
         /// <returns>Return the newest IQuery object</returns>
-        public IQuery SetGlobalCondition(IQuery globalCondition, QueryOperator queryOperator)
+        public IQuery SetGlobalCondition(IQuery globalCondition)
         {
             if (alreadySetGlobalCondition || globalCondition == null || globalCondition.NoneCondition)
             {
                 return this;
             }
             alreadySetGlobalCondition = true;
-            return AddQueryItem(queryOperator, globalCondition);
+            return AddCondition(globalCondition);
         }
 
         /// <summary>
@@ -1190,7 +1241,7 @@ namespace EZNEW.Development.Query
 
         #endregion
 
-        #region CancellationToken
+        #region Cancellation token
 
         /// <summary>
         /// Set cancellation token
@@ -1267,6 +1318,21 @@ namespace EZNEW.Development.Query
             return this;
         }
 
+        /// <summary>
+        /// Set paging info
+        /// </summary>
+        /// <param name="pageIndex">Page index</param>
+        /// <param name="pageSize">Page size</param>
+        /// <returns></returns>
+        public IQuery SetPaging(int pageIndex, int pageSize = 20)
+        {
+            return SetPaging(new PagingFilter()
+            {
+                Page = pageIndex,
+                PageSize = pageSize
+            });
+        }
+
         #endregion
 
         #endregion
@@ -1277,7 +1343,7 @@ namespace EZNEW.Development.Query
         /// Set has subquery
         /// </summary>
         /// <param name="hasSubquery">Has subquery</param>
-        internal void SetHasSubQuery(bool hasSubquery)
+        internal void SetHasSubquery(bool hasSubquery)
         {
             this.hasSubquery = hasSubquery;
         }
@@ -1292,12 +1358,12 @@ namespace EZNEW.Development.Query
         }
 
         /// <summary>
-        /// Set has recurve criteria
+        /// Set has recurve
         /// </summary>
-        /// <param name="hasRecurveCriteria">Has recurve criteria</param>
-        internal void SetHasRecurveCriteria(bool hasRecurveCriteria)
+        /// <param name="hasRecurve">Has recurve</param>
+        internal void SetHasRecurve(bool hasRecurve)
         {
-            this.hasRecurveCriteria = hasRecurveCriteria;
+            this.hasRecurve = hasRecurve;
         }
 
         /// <summary>
@@ -1312,10 +1378,48 @@ namespace EZNEW.Development.Query
         /// <summary>
         /// Set has converter
         /// </summary>
-        /// <param name="hasConverter">Has converter</param>
-        internal void SetHasConverter(bool hasConverter)
+        /// <param name="hasFieldConverter">Has converter</param>
+        internal void SetHasFieldConverter(bool hasFieldConverter)
         {
-            this.hasConverter = hasConverter;
+            this.hasFieldConverter = hasFieldConverter;
+        }
+
+        /// <summary>
+        /// Add subquery
+        /// </summary>
+        /// <param name="subquery">Subquery</param>
+        /// <returns></returns>
+        internal DefaultQuery AddSubquery(IQuery subquery)
+        {
+            if (subquery != null)
+            {
+                subqueryCollection.Add(subquery);
+                SetHasSubquery(true);
+                SetHasJoin(HasJoin || subquery.HasJoin);
+                SetHasRecurve(HasRecurve || subquery.HasRecurve);
+                SetHasFieldConverter(HasFieldConverter || subquery.HasFieldConverter);
+            }
+            return this;
+        }
+
+        /// <summary>
+        /// Add group query
+        /// </summary>
+        /// <param name="groupQuery">Group query</param>
+        /// <returns></returns>
+        internal DefaultQuery AddGroupQuery(DefaultQuery groupQuery)
+        {
+            if (groupQuery != null)
+            {
+                groupQuery.SetEntityType(entityType);
+                SetHasSubquery(HasSubquery || groupQuery.HasSubquery);
+                SetHasJoin(HasJoin || groupQuery.HasJoin);
+                SetHasRecurve(HasRecurve || groupQuery.HasRecurve);
+                criteria.AddRange(groupQuery.criteria);
+                alreadySetGlobalCondition |= groupQuery.alreadySetGlobalCondition;
+                SetHasFieldConverter(HasFieldConverter || groupQuery.HasFieldConverter);
+            }
+            return this;
         }
 
         /// <summary>
@@ -1324,7 +1428,7 @@ namespace EZNEW.Development.Query
         /// <returns>Return whether query object is a complex query object</returns>
         bool GetIsComplexQuery()
         {
-            return hasSubquery || hasRecurveCriteria || hasJoin || hasCombine || hasConverter;
+            return hasSubquery || hasRecurve || hasJoin || hasCombine || hasFieldConverter;
         }
 
         #endregion

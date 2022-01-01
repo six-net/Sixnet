@@ -1,12 +1,14 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using EZNEW.Development.Command;
 using EZNEW.Development.Domain.Model;
 using EZNEW.Development.Query;
 using EZNEW.Exceptions;
 using EZNEW.Model;
-using static Dapper.SqlMapper;
+using EZNEW.Serialization;
 
 namespace EZNEW.Development.Entity
 {
@@ -24,6 +26,7 @@ namespace EZNEW.Development.Entity
         /// <summary>
         /// Gets or sets the query data total count
         /// </summary>
+        [NonData]
         protected int QueryDataTotalCount { get; set; }
 
         #endregion
@@ -44,28 +47,41 @@ namespace EZNEW.Development.Entity
         /// Gets the modifed values
         /// </summary>
         /// <returns>Return the modify values</returns>
-        internal Dictionary<string, dynamic> GetModifyValues(T oldValue)
+        internal Dictionary<string, dynamic> GetModifyValues(T oldData)
         {
             var valueDict = GetAllValues();
-            if (oldValue == null)
+            if (oldData == null)
             {
                 return valueDict;
             }
-            var oldValues = oldValue.GetAllValues();
+            var oldValues = oldData.GetAllValues();
             if (oldValues.IsNullOrEmpty())
             {
                 return valueDict;
             }
-            Dictionary<string, dynamic> modifyValues = new Dictionary<string, dynamic>(valueDict.Count);
+            Dictionary<string, dynamic> modificationValues = new Dictionary<string, dynamic>(valueDict.Count);
             var versionField = EntityManager.GetVersionField(typeof(T));
             foreach (var valueItem in valueDict)
             {
-                if (valueItem.Key != versionField && (!oldValues.ContainsKey(valueItem.Key) || oldValues[valueItem.Key] != valueItem.Value))
+                var field = EntityManager.GetEntityField(entityType, valueItem.Key);
+                if (field?.DataType == null)
                 {
-                    modifyValues.Add(valueItem.Key, valueItem.Value);
+                    continue;
+                }
+                if (valueItem.Key != versionField)
+                {
+                    var oldValue = oldValues[valueItem.Key];
+                    var newValue = valueItem.Value;
+                    bool modification = !oldValues.ContainsKey(valueItem.Key)
+                        || ((field.DataType.IsValueType || typeof(string).IsAssignableFrom(field.DataType)) && oldValue != newValue)
+                        || (!field.DataType.IsValueType && (field.DataType.IsSerializable ? BinarySerializer.SerializeObjectToString(oldValue) != BinarySerializer.SerializeObjectToString(newValue) : oldValue != newValue));
+                    if (modification)
+                    {
+                        modificationValues.Add(valueItem.Key, valueItem.Value);
+                    }
                 }
             }
-            return modifyValues;
+            return modificationValues;
         }
 
         /// <summary>
@@ -95,6 +111,10 @@ namespace EZNEW.Development.Entity
         /// <returns></returns>
         public override bool Equals(object obj)
         {
+            if (this == obj)
+            {
+                return true;
+            }
             BaseEntity<T> targetObj = obj as BaseEntity<T>;
             if (targetObj == null)
             {
@@ -219,19 +239,16 @@ namespace EZNEW.Development.Entity
             foreach (var fieldItem in entityConfig.AllFields)
             {
                 var value = GetValue(fieldItem.Key);
-#pragma warning disable CS0618 // 类型或成员已过时
-                var dbType = LookupDbType(fieldItem.Value.DataType, fieldItem.Key, false, out ITypeHandler handler);
-#pragma warning restore CS0618 // 类型或成员已过时
-                parameters.Add(fieldItem.Key, value, dbType: dbType);
+                parameters.Add(fieldItem.Key, value);
             }
             return parameters;
         }
 
         /// <summary>
-        /// Copy new object by identity
+        /// Clone new object by identity
         /// </summary>
         /// <returns>Return a new entity object</returns>
-        public T CopyOnlyWithIdentity()
+        public T CloneOnlyWithIdentity()
         {
             var newData = new T();
             var primaryKeys = EntityManager.GetPrimaryKeys<T>();
@@ -248,10 +265,10 @@ namespace EZNEW.Development.Entity
         }
 
         /// <summary>
-        /// Copy a new object
+        /// Clone a new object
         /// </summary>
         /// <returns>Return a new entity object</returns>
-        public T Copy()
+        public T Clone()
         {
             var newData = new T
             {

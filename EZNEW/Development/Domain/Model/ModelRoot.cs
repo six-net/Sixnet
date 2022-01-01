@@ -9,6 +9,7 @@ using EZNEW.Exceptions;
 using EZNEW.DataValidation;
 using EZNEW.Expressions;
 using EZNEW.Model;
+using EZNEW.Development.UnitOfWork;
 
 namespace EZNEW.Development.Domain.Model
 {
@@ -26,7 +27,7 @@ namespace EZNEW.Development.Domain.Model
         private IRepository<T> _repository = RepositoryManager.GetRepository<T>();
 
         /// <summary>
-        /// Indecates whether to load lazy member
+        /// Indicates whether to load lazy member
         /// </summary>
         bool _allowLoadLazyMember = false;
 
@@ -51,7 +52,7 @@ namespace EZNEW.Development.Domain.Model
         #region Save
 
         /// <summary>
-        /// Indecates whether allow to save
+        /// Indicates whether allow to save
         /// </summary>
         /// <returns></returns>
         public bool AllowToSave()
@@ -69,11 +70,23 @@ namespace EZNEW.Development.Domain.Model
         }
 
         /// <summary>
-        /// Save
+        /// Save model
         /// </summary>
-        public virtual Result<T> Save()
+        /// <param name="force">Indicates whether to enforce</param>
+        /// <returns></returns>
+        public virtual Result<T> Save(bool force = false)
         {
-            return ModelDataManager<T>.Save(_repository, this as T);
+            return Save(new ActivationOptions(force));
+        }
+
+        /// <summary>
+        /// Save model
+        /// </summary>
+        /// <param name="activationOptions">Activation options</param>
+        /// <returns></returns>
+        public virtual Result<T> Save(ActivationOptions activationOptions)
+        {
+            return ModelDataManager<T>.Save(_repository, this as T, activationOptions);
         }
 
         #endregion
@@ -81,7 +94,7 @@ namespace EZNEW.Development.Domain.Model
         #region Remove
 
         /// <summary>
-        /// Indecates whether allow to remove
+        /// Indicates whether allow to remove
         /// </summary>
         /// <returns></returns>
         public bool AllowToRemove()
@@ -95,15 +108,27 @@ namespace EZNEW.Development.Domain.Model
         /// <returns>Return whether allow to remove</returns>
         protected virtual bool RemoveValidation()
         {
-            return !IdentityValueIsNone();
+            return !IdentityValueIsNull();
         }
 
         /// <summary>
-        /// Remove
+        /// Remove model
         /// </summary>
-        public virtual Result Remove()
+        /// <param name="force">Indicates whether to enforce</param>
+        /// <returns></returns>
+        public virtual Result Remove(bool force = false)
         {
-            return ModelDataManager<T>.Remove(_repository, this as T);
+            return Remove(new ActivationOptions(force));
+        }
+
+        /// <summary>
+        /// Remove model
+        /// </summary>
+        /// <param name="activationOptions">Activation options</param>
+        /// <returns></returns>
+        public virtual Result Remove(ActivationOptions activationOptions)
+        {
+            return ModelDataManager<T>.Remove(_repository, this as T, activationOptions);
         }
 
         #endregion
@@ -111,7 +136,7 @@ namespace EZNEW.Development.Domain.Model
         #region LifeSource
 
         /// <summary>
-        /// Indecates whether is a new object
+        /// Indicates whether is a new object
         /// </summary>
         /// <returns></returns>
         public bool IsNew()
@@ -214,7 +239,7 @@ namespace EZNEW.Development.Domain.Model
         /// <returns>Return whether allow load data</returns>
         protected virtual bool AllowLoad<TModel>(Expression<Func<T, dynamic>> property, LazyMember<TModel> lazyMember) where TModel : IModel<TModel>
         {
-            return AllowLoad(property) && !(lazyMember.CurrentValue?.IdentityValueIsNone() ?? true);
+            return AllowLoad(property) && !(lazyMember.CurrentValue?.IdentityValueIsNull() ?? true);
         }
 
         #endregion
@@ -224,13 +249,13 @@ namespace EZNEW.Development.Domain.Model
         /// <summary>
         /// Init primary value
         /// </summary>
-        public virtual void InitIdentityValue() { }
+        public abstract void InitIdentityValue();
 
         /// <summary>
-        /// Check identity value is none
+        /// Check identity value is null
         /// </summary>
         /// <returns>Return identity value whether has value</returns>
-        public abstract bool IdentityValueIsNone();
+        public abstract bool IdentityValueIsNull();
 
         /// <summary>
         /// Get identity value
@@ -257,7 +282,7 @@ namespace EZNEW.Development.Domain.Model
         /// </summary>
         /// <param name="newData">New data</param>
         /// <returns></returns>
-        internal protected virtual T OnUpdating(T newData)
+        protected virtual T OnUpdating(T newData)
         {
             return newData;
         }
@@ -272,6 +297,10 @@ namespace EZNEW.Development.Domain.Model
         /// <returns>Return data</returns>
         public IModel OnDataAdding()
         {
+            if (IdentityValueIsNull())
+            {
+                InitIdentityValue();
+            }
             return OnAdding();
         }
 
@@ -279,12 +308,8 @@ namespace EZNEW.Development.Domain.Model
         /// Add data
         /// </summary>
         /// <returns>Return data</returns>
-        internal protected virtual T OnAdding()
+        protected virtual T OnAdding()
         {
-            if (IdentityValueIsNone())
-            {
-                InitIdentityValue();
-            }
             return this as T;
         }
 
@@ -328,12 +353,12 @@ namespace EZNEW.Development.Domain.Model
         /// <summary>
         /// Set _repository
         /// </summary>
-        /// <param name="_repository">Repository</param>
-        protected void SetRepository(IRepository<T> _repository)
+        /// <param name="repository">Repository</param>
+        protected void SetRepository(IRepository<T> repository)
         {
             if (_repository != null)
             {
-                _repository = _repository;
+                _repository = repository;
             }
         }
 

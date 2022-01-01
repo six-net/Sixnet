@@ -104,11 +104,21 @@ namespace EZNEW.Application
                 {
                     hasDebug = true;
                     debugLastWriteTime = Directory.GetLastWriteTime(debugPath);
+                    var lastDebugChildDirectory = new DirectoryInfo(debugPath).GetDirectories()?.OrderByDescending(c => c.LastWriteTime).FirstOrDefault();
+                    if (lastDebugChildDirectory != null && lastDebugChildDirectory.LastWriteTime > debugLastWriteTime)
+                    {
+                        debugLastWriteTime = lastDebugChildDirectory.LastWriteTime;
+                    }
                 }
                 if (Directory.Exists(releasePath))
                 {
                     hasRelease = false;
                     releaseLastWriteTime = Directory.GetLastWriteTime(releasePath);
+                    var lastReleaseChildDirectory = new DirectoryInfo(releasePath).GetDirectories()?.OrderByDescending(c => c.LastWriteTime).FirstOrDefault();
+                    if (lastReleaseChildDirectory != null && lastReleaseChildDirectory.LastWriteTime > releaseLastWriteTime)
+                    {
+                        releaseLastWriteTime = lastReleaseChildDirectory.LastWriteTime;
+                    }
                 }
                 appPath = hasDebug || hasRelease ? debugLastWriteTime >= releaseLastWriteTime ? debugPath : releasePath : appPath;
 
@@ -122,6 +132,9 @@ namespace EZNEW.Application
                     appPath = targetFolder.FullName;
                 }
             }
+
+            LogManager.LogInformation(typeof(ApplicationManager).FullName, FrameworkLogEvents.Application.GetApplicationRootPath, $"Application root path:{appPath}");
+
             return appPath;
         }
 
@@ -176,7 +189,7 @@ namespace EZNEW.Application
                 }
                 catch (Exception ex)
                 {
-                    LogManager.LogError(ex, ex.Message);
+                    LogManager.LogError(typeof(ApplicationManager).FullName, FrameworkLogEvents.Application.LoadAssemblyFailure, ex, ex.Message);
                 }
             }
             return allTypes;
@@ -186,7 +199,7 @@ namespace EZNEW.Application
         /// Filter files
         /// </summary>
         /// <param name="originalFiles">Original files</param>
-        /// <param name="options">Configuration setting</param>
+        /// <param name="options">Application options</param>
         /// <returns></returns>
         internal static IEnumerable<FileInfo> FilterFiles(IEnumerable<FileInfo> originalFiles, ApplicationOptions options = null)
         {
@@ -195,18 +208,18 @@ namespace EZNEW.Application
                 return Array.Empty<FileInfo>();
             }
             options ??= Options;
-            var fileOptions = options.FileMatchOptions;
+            var fileMatchOptions = options.FileMatchOptions;
             return originalFiles.Where(c =>
             {
-                var matched = fileOptions.FileMatchPattern switch
+                var matched = fileMatchOptions.FileMatchPattern switch
                 {
                     FileMatchPattern.None => true,
-                    FileMatchPattern.FileNamePrefix => fileOptions.FileNameKeywords?.Any(rn => c.Name.StartsWith(rn, StringComparison.OrdinalIgnoreCase)) ?? false,
-                    FileMatchPattern.FileNameSuffix => fileOptions.FileNameKeywords?.Any(rn => c.Name.EndsWith(rn, StringComparison.OrdinalIgnoreCase)) ?? false,
-                    FileMatchPattern.IncludeFileName => fileOptions.FileNameKeywords?.Any(kw => c.Name.Contains(kw)) ?? false,
-                    FileMatchPattern.ExcludeFileName => !(fileOptions.FileNameKeywords?.Any(kw => c.Name.Contains(kw)) ?? false),
-                    FileMatchPattern.IncludeByRegex => new Regex(fileOptions.RegexExpression, RegexOptions.IgnoreCase).IsMatch(c.FullName),
-                    FileMatchPattern.ExcludeByRegex => !new Regex(fileOptions.RegexExpression, RegexOptions.IgnoreCase).IsMatch(c.FullName),
+                    FileMatchPattern.FileNamePrefix => fileMatchOptions.FileNameKeywords?.Any(rn => c.Name.StartsWith(rn, StringComparison.OrdinalIgnoreCase)) ?? false,
+                    FileMatchPattern.FileNameSuffix => fileMatchOptions.FileNameKeywords?.Any(rn => c.Name.EndsWith(rn, StringComparison.OrdinalIgnoreCase)) ?? false,
+                    FileMatchPattern.IncludeFileName => fileMatchOptions.FileNameKeywords?.Any(kw => c.Name.Contains(kw)) ?? false,
+                    FileMatchPattern.ExcludeFileName => !(fileMatchOptions.FileNameKeywords?.Any(kw => c.Name.Contains(kw)) ?? false),
+                    FileMatchPattern.IncludeByRegex => new Regex(fileMatchOptions.RegexExpression, RegexOptions.IgnoreCase).IsMatch(c.FullName),
+                    FileMatchPattern.ExcludeByRegex => !new Regex(fileMatchOptions.RegexExpression, RegexOptions.IgnoreCase).IsMatch(c.FullName),
                     FileMatchPattern.Convention => new Regex($@"^{RootPath.Replace(@"\", @"\\")}.*({string.Join("|", ConventionFileNamePatterns.Union(Options.FileMatchOptions.FileRegexPatterns ?? new List<string>(0)))}).*$", RegexOptions.IgnoreCase).IsMatch(c.FullName),
                     _ => true
                 };

@@ -16,41 +16,58 @@ namespace EZNEW.Development.Command
     /// </summary>
     public static class CommandExecutionManager
     {
-        /// <summary>
-        /// Gets or sets the command executors
-        /// </summary>
-        public static Func<ICommand, List<ICommandExecutor>> GetCommandExecutorProxy { get; set; }
+        #region Fields
 
         /// <summary>
-        /// Gets or sets whether allow none command executor
+        /// Gets command executor delegate
+        /// </summary>
+        private static Func<ICommand, IEnumerable<ICommandExecutor>> GetCommandExecutorDelegate { get; set; } = null;
+
+        /// <summary>
+        /// Indicates whether allow none command executor
         /// </summary>
         public static bool AllowNoneCommandExecutor { get; set; } = false;
+
+        #endregion
+
+        #region Configure executor
+
+        /// <summary>
+        /// Configure executor
+        /// </summary>
+        /// <param name="getCommandExecutorDelegate">Get command executor delegate</param>
+        public static void ConfigureExecutor(Func<ICommand, IEnumerable<ICommandExecutor>> getCommandExecutorDelegate)
+        {
+            GetCommandExecutorDelegate = getCommandExecutorDelegate;
+        }
+
+        #endregion
 
         #region Execute command
 
         /// <summary>
         /// Execute command
         /// </summary>
-        /// <param name="executeOptions">Execute options</param>
+        /// <param name="executionOptions">Execution options</param>
         /// <param name="commands">Commands</param>
-        /// <returns>Return the execute data effect numbers</returns>
-        internal static async Task<int> ExecuteAsync(CommandExecutionOptions executeOptions, IEnumerable<ICommand> commands)
+        /// <returns>Return affected data number</returns>
+        internal static async Task<int> ExecuteAsync(CommandExecutionOptions executionOptions, IEnumerable<ICommand> commands)
         {
             if (commands.IsNullOrEmpty())
             {
                 return 0;
             }
             var cmdExecutorGroupDictionary = GroupCommandByExecutor(commands);
-            return await ExecuteAsync(executeOptions, cmdExecutorGroupDictionary.Values).ConfigureAwait(false);
+            return await ExecuteAsync(executionOptions, cmdExecutorGroupDictionary.Values).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Execute command
         /// </summary>
-        /// <param name="executeOptions">Execute options</param>
+        /// <param name="executionOptions">Execution options</param>
         /// <param name="commandExecutorGroup">Command executor group</param>
-        /// <returns>Return the execute data effect numbers</returns>
-        internal static async Task<int> ExecuteAsync(CommandExecutionOptions executeOptions, IEnumerable<Tuple<ICommandExecutor, List<ICommand>>> commandExecutorGroup)
+        /// <returns>Return affected data number</returns>
+        internal static async Task<int> ExecuteAsync(CommandExecutionOptions executionOptions, IEnumerable<Tuple<ICommandExecutor, List<ICommand>>> commandExecutorGroup)
         {
             if (commandExecutorGroup.IsNullOrEmpty())
             {
@@ -62,18 +79,18 @@ namespace EZNEW.Development.Command
             if (groupCount == 1)
             {
                 var firstGroup = commandExecutorGroup.First();
-                return await firstGroup.Item1.ExecuteAsync(executeOptions, firstGroup.Item2).ConfigureAwait(false);
+                return await firstGroup.Item1.ExecuteAsync(executionOptions, firstGroup.Item2).ConfigureAwait(false);
             }
 
             //Multiple executor
-            Task<int>[] valueTasks = new Task<int>[groupCount];
+            Task<int>[] resultTasks = new Task<int>[groupCount];
             var groupIndex = 0;
             foreach (var executorGroupItem in commandExecutorGroup)
             {
-                valueTasks[groupIndex] = executorGroupItem.Item1.ExecuteAsync(executeOptions, executorGroupItem.Item2);
+                resultTasks[groupIndex] = executorGroupItem.Item1.ExecuteAsync(executionOptions, executorGroupItem.Item2?.Select(c => c.Clone()));
                 groupIndex++;
             }
-            return (await Task.WhenAll(valueTasks).ConfigureAwait(false)).Sum();
+            return (await Task.WhenAll(resultTasks).ConfigureAwait(false)).Sum();
         }
 
         #endregion
@@ -86,7 +103,7 @@ namespace EZNEW.Development.Command
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="command">Command</param>
         /// <returns>Return datas</returns>
-        internal static async Task<IEnumerable<T>> QueryAsync<T>(ICommand command)
+        internal static async Task<IEnumerable<T>> QueryAsync<T>(ICommand command) where T : BaseEntity<T>, new()
         {
             var groupExecutors = GroupCommandByExecutor(new List<ICommand>(1) { command });
             if (groupExecutors == null || groupExecutors.Count <= 0)
@@ -113,11 +130,11 @@ namespace EZNEW.Development.Command
                 groupIndex++;
             }
             var datas = (await Task.WhenAll(queryTasks).ConfigureAwait(false)).SelectMany(c => c);
-            bool notOrder = command.Query?.Orders.IsNullOrEmpty() ?? true;
+            bool notSort = command.Query?.Sorts.IsNullOrEmpty() ?? true;
             int dataSize = command.Query?.QuerySize ?? 0;
-            if (!notOrder)
+            if (!notSort)
             {
-                datas = command.Query.Sort(datas);
+                datas = command.Query.SortData(datas);
             }
             if (dataSize > 0 && datas.Count() > dataSize)
             {
@@ -188,7 +205,7 @@ namespace EZNEW.Development.Command
             }
             if (command.Query != null)
             {
-                datas = command.Query.Sort(datas);
+                datas = command.Query.SortData(datas);
             }
             if (datas.Count() > pageSize)
             {
@@ -202,11 +219,11 @@ namespace EZNEW.Development.Command
         }
 
         /// <summary>
-        /// Determine whether does the data exist
+        /// Determines whether exists data
         /// </summary>
         /// <param name="command">Command</param>
-        /// <returns>Return whether does the data exist</returns>
-        internal static async Task<bool> QueryAsync(ICommand command)
+        /// <returns>Return whether exists data</returns>
+        internal static async Task<bool> ExistsAsync(ICommand command)
         {
             var groupExecutors = GroupCommandByExecutor(new List<ICommand>(1) { command });
             if (groupExecutors == null || groupExecutors.Count <= 0)
@@ -215,7 +232,7 @@ namespace EZNEW.Development.Command
             }
             foreach (var groupExecutor in groupExecutors)
             {
-                var result = await groupExecutor.Value.Item1.QueryAsync(command).ConfigureAwait(false);
+                var result = await groupExecutor.Value.Item1.ExistsAsync(command).ConfigureAwait(false);
                 if (result)
                 {
                     return result;
@@ -225,11 +242,11 @@ namespace EZNEW.Development.Command
         }
 
         /// <summary>
-        /// Get Aggregate value
+        /// Get Aggregation value
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="command">Command</param>
-        /// <returns>Return data</returns>
+        /// <returns>Return value</returns>
         internal static async Task<T> AggregateValueAsync<T>(ICommand command)
         {
             var groupExecutors = GroupCommandByExecutor(new List<ICommand>(1) { command });
@@ -246,16 +263,16 @@ namespace EZNEW.Development.Command
             }
 
             //Multiple executor
-            var aggregateTasks = new Task<T>[groupExecutors.Count];
+            var aggregationTasks = new Task<T>[groupExecutors.Count];
             var groupIndex = 0;
             foreach (var groupExecutor in groupExecutors)
             {
-                aggregateTasks[groupIndex] = groupExecutor.Value.Item1.AggregateValueAsync<T>(command);
+                aggregationTasks[groupIndex] = groupExecutor.Value.Item1.AggregateValueAsync<T>(command);
                 groupIndex++;
             }
-            var datas = await Task.WhenAll(aggregateTasks).ConfigureAwait(false);
+            var datas = await Task.WhenAll(aggregationTasks).ConfigureAwait(false);
             dynamic result = default(T);
-            switch (command.OperateType)
+            switch (command.OperationType)
             {
                 case CommandOperationType.Max:
                     result = datas.Max();
@@ -334,7 +351,7 @@ namespace EZNEW.Development.Command
             {
                 return new Dictionary<string, Tuple<ICommandExecutor, List<ICommand>>>(0);
             }
-            if (GetCommandExecutorProxy == null)
+            if (GetCommandExecutorDelegate == null)
             {
                 var defaultCmdExecutor = ContainerManager.Resolve<ICommandExecutor>();
                 if (defaultCmdExecutor != null)
@@ -342,12 +359,12 @@ namespace EZNEW.Development.Command
                     return new Dictionary<string, Tuple<ICommandExecutor, List<ICommand>>>()
                     {
                         {
-                            defaultCmdExecutor.IdentityKey,
+                            defaultCmdExecutor.IdentityValue,
                             new Tuple<ICommandExecutor, List<ICommand>>(defaultCmdExecutor,commands.ToList())
                         }
                     };
                 }
-                throw new EZNEWException($"{nameof(GetCommandExecutorProxy)} didn't set any value");
+                throw new EZNEWException($"Not set {nameof(GetCommandExecutorDelegate)}");
             }
             var cmdExecutorDict = new Dictionary<string, Tuple<ICommandExecutor, List<ICommand>>>();
             foreach (var command in commands)
@@ -356,7 +373,7 @@ namespace EZNEW.Development.Command
                 {
                     continue;
                 }
-                var cmdExecutors = GetCommandExecutorProxy(command);
+                var cmdExecutors = GetCommandExecutorDelegate(command);
                 if (cmdExecutors.IsNullOrEmpty())
                 {
                     continue;
@@ -367,7 +384,7 @@ namespace EZNEW.Development.Command
                     {
                         continue;
                     }
-                    var executorKey = executor.IdentityKey;
+                    var executorKey = executor.IdentityValue;
                     cmdExecutorDict.TryGetValue(executorKey, out Tuple<ICommandExecutor, List<ICommand>> executorValues);
                     if (executorValues == null)
                     {
@@ -392,7 +409,7 @@ namespace EZNEW.Development.Command
                 return new List<ICommandExecutor>(0);
             }
             List<ICommandExecutor> commandExecutors = null;
-            if (GetCommandExecutorProxy == null)
+            if (GetCommandExecutorDelegate == null)
             {
                 var defaultCmdExecutor = ContainerManager.Resolve<ICommandExecutor>();
                 if (defaultCmdExecutor != null)
@@ -402,11 +419,11 @@ namespace EZNEW.Development.Command
             }
             else
             {
-                commandExecutors = GetCommandExecutorProxy(command);
+                commandExecutors = GetCommandExecutorDelegate(command)?.ToList() ?? new List<ICommandExecutor>(0);
             }
             if (!AllowNoneCommandExecutor && commandExecutors.IsNullOrEmpty())
             {
-                throw new EZNEWException("Didn't set any command executors");
+                throw new EZNEWException("Not set command executor");
             }
             return commandExecutors ?? new List<ICommandExecutor>(0);
         }
@@ -463,7 +480,7 @@ namespace EZNEW.Development.Command
         /// <param name="server">Database server</param>
         /// <param name="dataTable">Data table</param>
         /// <param name="bulkInsertOptions">Bulk insert options</param>
-        internal static async Task BulkInsertAsync(DatabaseServer server, DataTable dataTable, IBulkInsertOptions bulkInsertOptions = null)
+        internal static async Task BulkInsertAsync(DatabaseServer server, DataTable dataTable, IBulkInsertionOptions bulkInsertOptions = null)
         {
             var defaultCmdExecutor = ContainerManager.Resolve<ICommandExecutor>();
             if (defaultCmdExecutor != null)

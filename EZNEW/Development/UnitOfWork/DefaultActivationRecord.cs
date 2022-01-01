@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using EZNEW.Development.Command;
-using EZNEW.Development.Command.Modification;
+using EZNEW.Data.Modification;
 using EZNEW.Development.Query;
 using EZNEW.Development.DataAccess;
 using EZNEW.Development.Domain.Repository.Warehouse;
 using EZNEW.Development.Entity;
 using EZNEW.Exceptions;
 using EZNEW.DependencyInjection;
+using EZNEW.Development.Domain.Repository.Warehouse.Storage;
 
 namespace EZNEW.Development.UnitOfWork
 {
@@ -44,9 +45,9 @@ namespace EZNEW.Development.UnitOfWork
         public IQuery Query { get; set; }
 
         /// <summary>
-        /// Gets or sets the modify expression
+        /// Gets or sets the modification expression
         /// </summary>
-        public IModification ModifyExpression { get; set; }
+        public IModification ModificationExpression { get; set; }
 
         /// <summary>
         /// Gets or sets follow records
@@ -98,7 +99,7 @@ namespace EZNEW.Development.UnitOfWork
             };
             activationOptions ??= ActivationOptions.Default;
             record.ActivationOptions = activationOptions;
-            if (activationOptions.ForceExecute)
+            if (activationOptions.ForceExecution)
             {
                 record.RecordIdentity = Guid.NewGuid().ToString();
             }
@@ -107,7 +108,7 @@ namespace EZNEW.Development.UnitOfWork
                 switch (operation)
                 {
                     case ActivationOperation.SaveObject:
-                    case ActivationOperation.RemoveByObject:
+                    case ActivationOperation.RemoveObject:
                         record.RecordIdentity = string.Format("{0}_{1}", typeof(TEntity).GUID, identityValue);
                         break;
                     default:
@@ -119,12 +120,12 @@ namespace EZNEW.Development.UnitOfWork
         }
 
         /// <summary>
-        /// Create a save record
+        /// Create a saving record
         /// </summary>
         /// <param name="identityValue">Identity values</param>
         /// <param name="activationOptions">Activation options</param>
         /// <returns>Return a new default activation record</returns>
-        public static DefaultActivationRecord<TEntity, TDataAccess> CreateSaveRecord(string identityValue, ActivationOptions activationOptions)
+        public static DefaultActivationRecord<TEntity, TDataAccess> CreateSavingRecord(string identityValue, ActivationOptions activationOptions)
         {
             if (string.IsNullOrWhiteSpace(identityValue))
             {
@@ -134,27 +135,27 @@ namespace EZNEW.Development.UnitOfWork
         }
 
         /// <summary>
-        /// Create remove object record
+        /// Create removing object record
         /// </summary>
         /// <param name="identityValue">Identity value</param>
         /// <param name="activationOptions">Activation options</param>
         /// <returns>Return a new default activation record</returns>
-        public static DefaultActivationRecord<TEntity, TDataAccess> CreateRemoveObjectRecord(string identityValue, ActivationOptions activationOptions)
+        public static DefaultActivationRecord<TEntity, TDataAccess> CreateRemovingObjectRecord(string identityValue, ActivationOptions activationOptions)
         {
             if (string.IsNullOrWhiteSpace(identityValue))
             {
                 throw new EZNEWException("identityValue is null or empty");
             }
-            return CreateRecord(ActivationOperation.RemoveByObject, identityValue, activationOptions);
+            return CreateRecord(ActivationOperation.RemoveObject, identityValue, activationOptions);
         }
 
         /// <summary>
-        /// Create remove by condition record
+        /// Create removing by condition record
         /// </summary>
         /// <param name="query">Query object</param>
         /// <param name="activationOptions">Activation options</param>
         /// <returns>Return a new default activation record</returns>
-        public static DefaultActivationRecord<TEntity, TDataAccess> CreateRemoveByConditionRecord(IQuery query, ActivationOptions activationOptions)
+        public static DefaultActivationRecord<TEntity, TDataAccess> CreateRemovingByConditionRecord(IQuery query, ActivationOptions activationOptions)
         {
             var record = CreateRecord(ActivationOperation.RemoveByCondition, null, activationOptions);
             record.Query = query;
@@ -162,16 +163,16 @@ namespace EZNEW.Development.UnitOfWork
         }
 
         /// <summary>
-        /// Create modify record
+        /// Create modification record
         /// </summary>
-        /// <param name="modify">Modify expression</param>
+        /// <param name="modificationExpression">Modify expression</param>
         /// <param name="query">Query object</param>
         /// <param name="activationOptions">Activation options</param>
         /// <returns>Return a new default activation record</returns>
-        public static DefaultActivationRecord<TEntity, TDataAccess> CreateModifyRecord(IModification modify, IQuery query, ActivationOptions activationOptions)
+        public static DefaultActivationRecord<TEntity, TDataAccess> CreateModificationRecord(IModification modificationExpression, IQuery query, ActivationOptions activationOptions)
         {
             var record = CreateRecord(ActivationOperation.ModifyByExpression, null, activationOptions);
-            record.ModifyExpression = modify;
+            record.ModificationExpression = modificationExpression;
             record.Query = query;
             return record;
         }
@@ -189,17 +190,17 @@ namespace EZNEW.Development.UnitOfWork
         /// Add follow records
         /// </summary>
         /// <param name="records">Follow records</param>
-        public void AddFollowRecords(params IActivationRecord[] records)
+        public void AddFollowRecord(params IActivationRecord[] records)
         {
             IEnumerable<IActivationRecord> recordCollection = records;
-            AddFollowRecords(recordCollection);
+            AddFollowRecord(recordCollection);
         }
 
         /// <summary>
         /// Add follow records
         /// </summary>
         /// <param name="records">Follow records</param>
-        public void AddFollowRecords(IEnumerable<IActivationRecord> records)
+        public void AddFollowRecord(IEnumerable<IActivationRecord> records)
         {
             if (records.IsNullOrEmpty())
             {
@@ -222,96 +223,96 @@ namespace EZNEW.Development.UnitOfWork
         }
 
         /// <summary>
-        /// Get execute commands
+        /// Get execution command
         /// </summary>
         /// <returns>Return the record command</returns>
-        public ICommand GetExecuteCommand()
+        public ICommand GetExecutionCommand()
         {
             ICommand command = null;
             switch (Operation)
             {
                 case ActivationOperation.SaveObject:
-                    command = GetSaveObjectCommand();
+                    command = GetSavingObjectCommand();
                     break;
-                case ActivationOperation.RemoveByObject:
-                    command = GetRemoveObjectCommand();
+                case ActivationOperation.RemoveObject:
+                    command = GetRemovingObjectCommand();
                     break;
                 case ActivationOperation.RemoveByCondition:
-                    command = GetRemoveConditionCommand();
+                    command = GetRemovingByConditionCommand();
                     break;
                 case ActivationOperation.ModifyByExpression:
-                    command = GetModifyExpressionCommand();
+                    command = GetModificationExpressionCommand();
                     break;
             }
             return command;
         }
 
         /// <summary>
-        /// Get save commands
+        /// Get saving object command
         /// </summary>
         /// <returns>Return the record command</returns>
-        ICommand GetSaveObjectCommand()
+        ICommand GetSavingObjectCommand()
         {
             if (string.IsNullOrWhiteSpace(IdentityValue))
             {
                 return null;
             }
-            var dataPackage = WarehouseManager.GetDataPackage<TEntity>(IdentityValue);
-            if (dataPackage == null || (!ActivationOptions.ForceExecute && dataPackage.Operate != WarehouseDataOperate.Save))
+            var dataPackage = EntityStorage<TEntity>.GetCurrentEntityStorage(true).GetDataPackage(IdentityValue);
+            if (dataPackage == null || (!ActivationOptions.ForceExecution && dataPackage.Operation != DataRecordOperation.Save))
             {
                 return null;
             }
             var dataAccessService = ContainerManager.Resolve<TDataAccess>();
-            if (dataPackage.LifeSource == DataLifeSource.New) //new add value
+            if (dataPackage.Source == DataSource.New) //new add value
             {
-                return dataAccessService.Add(dataPackage.WarehouseData);
+                return dataAccessService.Add(dataPackage.LatestData);
             }
             else if (dataPackage.HasValueChanged) // update value
             {
-                var data = dataPackage.WarehouseData;
-                return dataAccessService.Modify(data, dataPackage.PersistentData);
+                var data = dataPackage.LatestData;
+                return dataAccessService.Modify(data, dataPackage.OriginalData);
             }
             return null;
         }
 
         /// <summary>
-        /// Get remove command
+        /// Get removing object command
         /// </summary>
         /// <returns>Return the record command</returns>
-        ICommand GetRemoveObjectCommand()
+        ICommand GetRemovingObjectCommand()
         {
             if (string.IsNullOrWhiteSpace(IdentityValue))
             {
                 return null;
             }
-            var dataPackage = WarehouseManager.GetDataPackage<TEntity>(IdentityValue);
-            if (dataPackage == null || (!ActivationOptions.ForceExecute && (dataPackage.Operate != WarehouseDataOperate.Remove || dataPackage.IsRealRemove)))
+            var dataPackage = EntityStorage<TEntity>.GetCurrentEntityStorage(true).GetDataPackage(IdentityValue);
+            if (dataPackage == null || (!ActivationOptions.ForceExecution && (dataPackage.Operation != DataRecordOperation.Remove || dataPackage.IsRealRemove)))
             {
                 return null;
             }
             var dataAccessService = ContainerManager.Resolve<TDataAccess>();
-            var data = dataPackage.WarehouseData;
+            var data = dataPackage.LatestData;
             return dataAccessService.Delete(data);
         }
 
         /// <summary>
-        /// Get remove conditon command
+        /// Get removint by conditon command
         /// </summary>
         /// <returns>Return the record command</returns>
-        ICommand GetRemoveConditionCommand()
+        ICommand GetRemovingByConditionCommand()
         {
             var dataAccessService = ContainerManager.Resolve<TDataAccess>();
             return dataAccessService.Delete(Query);
         }
 
         /// <summary>
-        /// Get modify expression command
+        /// Get modification expression command
         /// </summary>
         /// <returns>Return the record command</returns>
-        ICommand GetModifyExpressionCommand()
+        ICommand GetModificationExpressionCommand()
         {
             var dataAccessService = ContainerManager.Resolve<TDataAccess>();
-            return dataAccessService.Modify(ModifyExpression, Query);
+            return dataAccessService.Modify(ModificationExpression, Query);
         }
 
         /// <summary>

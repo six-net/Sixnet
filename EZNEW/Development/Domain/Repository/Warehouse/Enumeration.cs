@@ -3,10 +3,10 @@
 namespace EZNEW.Development.Domain.Repository.Warehouse
 {
     /// <summary>
-    /// Defines data operate
+    /// Defines data record operation
     /// </summary>
     [Serializable]
-    public enum WarehouseDataOperate
+    public enum DataRecordOperation
     {
         None = 2,
         Save = 4,
@@ -14,12 +14,21 @@ namespace EZNEW.Development.Domain.Repository.Warehouse
     }
 
     /// <summary>
-    /// Defines warehouse life source
+    /// Defines data source
     /// </summary>
     [Serializable]
-    public enum DataLifeSource
+    public enum DataSource
     {
-        DataSource = 2,
+        Storage = 2,
         New = 4
+    }
+
+    /// <summary>
+    /// Defines conditional operation type
+    /// </summary>
+    internal enum ConditionalOperationType
+    {
+        Remove = 2,
+        Update = 4
     }
 }

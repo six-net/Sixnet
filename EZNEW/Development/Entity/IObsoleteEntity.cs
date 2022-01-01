@@ -10,7 +10,7 @@ namespace EZNEW.Development.Entity
     public interface IObsoleteEntity
     {
         /// <summary>
-        /// Indecates whether is obsolete
+        /// Indicates whether is obsolete
         /// </summary>
         bool IsObsolete { get; set; }
     }

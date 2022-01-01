@@ -27,11 +27,6 @@ namespace EZNEW.Sms
         public string Content { get; set; }
 
         /// <summary>
-        /// Gets or sets parameters
-        /// </summary>
-        public Dictionary<string, string> Parameters { get; set; }
-
-        /// <summary>
         /// Gets or sets the callback data
         /// </summary>
         public string CallbackData { get; set; }
@@ -63,14 +58,13 @@ namespace EZNEW.Sms
             {
                 Tag = Tag,
                 SendTime = SendTime,
-                Additionals = Additionals?.ToDictionary(c => c.Key, c => c.Value) ?? new Dictionary<string, string>(0),
+                Parameters = Parameters?.ToDictionary(c => c.Key, c => c.Value) ?? new Dictionary<string, string>(0),
                 Asynchronously = Asynchronously,
                 CallbackData = CallbackData,
                 Content = Content,
                 ContentFormat = ContentFormat,
                 Id = Id,
                 Mobiles = Mobiles?.Select(c => c).ToList() ?? new List<string>(0),
-                Parameters = Parameters?.ToDictionary(c => c.Key, c => c.Value) ?? new Dictionary<string, string>(0),
                 Subcode = Subcode
             };
         }

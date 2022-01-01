@@ -1,11 +1,11 @@
-﻿using EZNEW.Development.Command;
-using EZNEW.Development.Command.Modification;
-using EZNEW.Development.Query;
-using EZNEW.Paging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using EZNEW.Development.Command;
+using EZNEW.Data.Modification;
+using EZNEW.Development.Query;
+using EZNEW.Paging;
 
 namespace EZNEW.Development.DataAccess
 {
@@ -32,7 +32,7 @@ namespace EZNEW.Development.DataAccess
 
         #endregion
 
-        #region Modify data
+        #region Modify
 
         /// <summary>
         /// Modify data
@@ -61,7 +61,7 @@ namespace EZNEW.Development.DataAccess
 
         #endregion
 
-        #region Delete data
+        #region Delete
 
         /// <summary>
         /// Delete data
@@ -71,7 +71,7 @@ namespace EZNEW.Development.DataAccess
         ICommand Delete(T data);
 
         /// <summary>
-        /// Delete data
+        /// Delete by condition
         /// </summary>
         /// <param name="query">Query object</param>
         /// <returns>Return delete command</returns>
@@ -124,18 +124,18 @@ namespace EZNEW.Development.DataAccess
         Task<PagingInfo<T>> GetPagingAsync(IQuery query);
 
         /// <summary>
-        /// Determine whether data is exist
+        /// Determines whether exists data
         /// </summary>
         /// <param name="query">Query object</param>
-        /// <returns>Return whether data is exist</returns>
-        bool Exist(IQuery query);
+        /// <returns>Return whether exists data</returns>
+        bool Exists(IQuery query);
 
         /// <summary>
-        /// Determine whether data is exist
+        /// Determines whether exists data
         /// </summary>
         /// <param name="query">Query object</param>
-        /// <returns>Return whether data is exist</returns>
-        Task<bool> ExistAsync(IQuery query);
+        /// <returns>Return whether exists data</returns>
+        Task<bool> ExistsAsync(IQuery query);
 
         /// <summary>
         /// Get max value

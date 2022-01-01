@@ -21,9 +21,9 @@ namespace EZNEW
         }
 
         /// <summary>
-        /// Defines additional parameter names
+        /// Defines internal parameter names
         /// </summary>
-        public static class AdditionalParameterNames
+        public static class InternalParameterNames
         {
             /// <summary>
             /// UnitOfWork id

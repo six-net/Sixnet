@@ -16,9 +16,9 @@ namespace EZNEW.Development.Command
         public DataIsolationLevel? IsolationLevel { get; set; }
 
         /// <summary>
-        /// Gets or sets whether execute by transaction
+        /// Indicates whether execution by transaction
         /// </summary>
-        public bool ExecuteByTransaction { get; set; } = true;
+        public bool ExecutionByTransaction { get; set; } = true;
 
         /// <summary>
         /// Gets or sets the cancellation token

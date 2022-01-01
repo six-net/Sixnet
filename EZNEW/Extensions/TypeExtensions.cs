@@ -10,6 +10,8 @@ namespace System
     /// </summary>
     public static class TypeExtensions
     {
+        #region Fields
+
         /// <summary>
         /// Allow null type
         /// </summary>
@@ -18,7 +20,9 @@ namespace System
         /// <summary>
         /// Enum value and names
         /// </summary>
-        static readonly ConcurrentDictionary<string, Dictionary<int, string>> CacheEnumValueAndNames = new ConcurrentDictionary<string, Dictionary<int, string>>();
+        static readonly ConcurrentDictionary<string, Dictionary<int, string>> CacheEnumValueAndNames = new ConcurrentDictionary<string, Dictionary<int, string>>(); 
+
+        #endregion
 
         #region Generate dictionary by enum
 

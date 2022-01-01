@@ -16,7 +16,7 @@ namespace EZNEW.DependencyInjection
         /// <returns>Return whether is register service</returns>
         public bool IsRegister<TService>()
         {
-            return ContainerManager.ServiceCollectionIsRegister<TService>();
+            return ContainerManager.CheckDefaultServicesIsRegister<TService>();
         }
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace EZNEW.DependencyInjection
         /// <param name="serviceDescriptors">Service descriptor</param>
         public void Register(params ServiceDescriptor[] serviceDescriptors)
         {
-            ContainerManager.RegisterToServiceCollection(serviceDescriptors);
+            ContainerManager.RegisterToDefaultServices(serviceDescriptors);
         }
 
         /// <summary>
@@ -62,7 +62,7 @@ namespace EZNEW.DependencyInjection
         /// <returns>Return a service instance</returns>
         public TService Resolve<TService>()
         {
-            return ContainerManager.ResolveFromServiceCollection<TService>();
+            return ContainerManager.ResolveFromDefaultServices<TService>();
         }
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace EZNEW.DependencyInjection
         /// <returns>Return a service instance</returns>
         public object Resolve(Type serviceType)
         {
-            return ContainerManager.ResolveFromServiceCollection(serviceType);
+            return ContainerManager.ResolveFromDefaultServices(serviceType);
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace EZNEW.DependencyInjection
         /// <returns>Return a service provider</returns>
         public IServiceProvider BuildServiceProvider()
         {
-            return ContainerManager.BuildServiceProviderFromServiceCollection();
+            return ContainerManager.BuildServiceProviderFromDefaultServices();
         }
     }
 }

@@ -96,25 +96,6 @@ namespace System
 
         #endregion
 
-        #region Get an register type instance by ContainerManager
-
-        /// <summary>
-        /// Get an register service instance by ContainerManager
-        /// </summary>
-        /// <typeparam name="TService">Service type</typeparam>
-        /// <param name="sourceObject">Source object</param>
-        /// <returns>Return the service instance</returns>
-        public static TService Instance<TService>(this object sourceObject)
-        {
-            if (sourceObject is null)
-            {
-                throw new ArgumentNullException(nameof(sourceObject));
-            }
-            return ContainerManager.Resolve<TService>();
-        }
-
-        #endregion
-
         #region Object deep clone
 
         /// <summary>
@@ -212,7 +193,7 @@ namespace System
         /// </summary>
         /// <param name="value">Object value</param>
         /// <returns>Return the int32 value</returns>
-        public static int ObjToInt32(this object value)
+        public static int ObjectToInt32(this object value)
         {
             if (value == null)
             {
@@ -231,8 +212,8 @@ namespace System
         /// convert object to int64
         /// </summary>
         /// <param name="value">Object value</param>
-        /// <returns>Return tthe int64 value</returns>
-        public static long ObjToInt64(this object value)
+        /// <returns>Return the int64 value</returns>
+        public static long ObjectToInt64(this object value)
         {
             if (value == null)
             {

@@ -6,6 +6,7 @@ using EZNEW.Development.DataAccess;
 using EZNEW.Development.DataAccess.Event;
 using EZNEW.Development.Domain.Event;
 using EZNEW.Development.Domain.Repository.Warehouse;
+using EZNEW.Development.Domain.Repository.Warehouse.Storage;
 using EZNEW.Development.Entity;
 
 namespace EZNEW.Development.UnitOfWork
@@ -106,10 +107,10 @@ namespace EZNEW.Development.UnitOfWork
         #region Warehouse
 
         /// <summary>
-        /// Get data warehouse by entity type
+        /// Get entity storage
         /// </summary>
-        /// <returns>Return entity data warehouse</returns>
-        DataWarehouse<TEntity> GetWarehouse<TEntity>() where TEntity : BaseEntity<TEntity>, new();
+        /// <returns>Entity storage</returns>
+        EntityStorage<TEntity> GetEntityStorage<TEntity>() where TEntity : BaseEntity<TEntity>, new();
 
         #endregion
 

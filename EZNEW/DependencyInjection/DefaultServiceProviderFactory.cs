@@ -22,8 +22,8 @@ namespace EZNEW.DependencyInjection
 
         public IDIContainer CreateBuilder(IServiceCollection services)
         {
+            ContainerManager.Configure(services, _configureServicesDelegate, _configureApplicationDelegate);
             _configureServicesDelegate?.Invoke(services);
-            services?.AddEZNEW(_configureApplicationDelegate);
             return ContainerManager.Container;
         }
 

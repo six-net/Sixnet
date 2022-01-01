@@ -25,11 +25,6 @@ namespace EZNEW.Cache.Provider.Memory
     /// </summary>
     public class MemoryProvider : ICacheProvider
     {
-        ///// <summary>
-        ///// Memory cache
-        ///// </summary>
-        //static readonly MemoryCache MemoryCache = null;
-
         /// <summary>
         /// Default memory cache name
         /// </summary>

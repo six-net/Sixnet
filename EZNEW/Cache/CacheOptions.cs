@@ -76,7 +76,7 @@ namespace EZNEW.Cache
                 var provider = CacheManager.Configuration.GetCacheProvider(firstServer.ServerType);
                 if (provider == null)
                 {
-                    LogManager.LogError<CacheOptions<TResponse>>($"Cache server :{firstServer.ServerType} no provider");
+                    LogManager.LogError<CacheOptions<TResponse>>(FrameworkLogEvents.Cache.NotSetCacheProvider, $"【{firstServer.ServerType}】Not set provider");
                     return result;
                 }
                 result.AddResponse(await ExecuteCacheOperationAsync(provider, firstServer).ConfigureAwait(false));

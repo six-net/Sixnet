@@ -64,5 +64,15 @@ namespace EZNEW.DataValidation
                 Extensions = FileExtensions.CompressFile
             };
         }
+
+        /// <summary>
+        /// Defines default use case names
+        /// </summary>
+        public static class UseCaseNames
+        {
+            public const string Domain = nameof(Domain);
+
+            public const string Mvc = nameof(Mvc);
+        }
     }
 }

@@ -7,6 +7,8 @@ namespace EZNEW.Development.Entity
     /// </summary>
     public class EntityCompare<T> : IEqualityComparer<T>
     {
+        internal static EntityCompare<T> Default = new EntityCompare<T>();
+
         public bool Equals(T x, T y)
         {
             return x.Equals(y);

@@ -24,23 +24,23 @@ namespace EZNEW.Data
         public CommandParameters Parameters { get; set; }
 
         /// <summary>
-        /// Gets or sets whether force return value
+        /// Indicates whether must arrected data
         /// </summary>
-        public bool ForceReturnValue { get; set; }
+        public bool MustAffectedData { get; set; }
 
         /// <summary>
-        /// Gets or sets whether has pre script
+        /// Indicates whether has pre script
         /// </summary>
         public bool HasPreScript { get; set; }
 
         /// <summary>
-        /// Gets or sets whether perform alone
+        /// Indicates whether perform alone
         /// </summary>
         public bool PerformAlone
         {
             get
             {
-                return HasPreScript || CommandType == CommandType.StoredProcedure || ForceReturnValue;
+                return HasPreScript || CommandType == CommandType.StoredProcedure || MustAffectedData;
             }
         }
     }

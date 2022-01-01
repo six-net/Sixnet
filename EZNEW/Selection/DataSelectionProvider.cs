@@ -98,24 +98,24 @@ namespace EZNEW.Selection
         /// </summary>
         /// <param name="selectMatchMode">Select match mode</param>
         /// <returns>Return thhe selected data</returns>
-        public T Get(SelectMatchMode selectMatchMode)
+        public T Get(SelectionMatchPattern selectMatchMode)
         {
             T data = default;
             switch (selectMatchMode)
             {
-                case SelectMatchMode.First:
+                case SelectionMatchPattern.First:
                     data = GetFirst();
                     break;
-                case SelectMatchMode.Latest:
+                case SelectionMatchPattern.Latest:
                     data = GetLatest();
                     break;
-                case SelectMatchMode.Random:
+                case SelectionMatchPattern.Random:
                     data = GetByRandom();
                     break;
-                case SelectMatchMode.EquiprobableRandom:
+                case SelectionMatchPattern.EquiprobableRandom:
                     data = GetByEquiprobableRandom();
                     break;
-                case SelectMatchMode.Polling:
+                case SelectionMatchPattern.Polling:
                     data = GetByPolling();
                     break;
             }

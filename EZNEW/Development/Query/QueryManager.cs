@@ -3,13 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Collections.Concurrent;
 using EZNEW.Development.Entity;
 using EZNEW.Exceptions;
 using EZNEW.Paging;
-using EZNEW.Configuration;
-using EZNEW.Expressions;
-using EZNEW.Application;
 
 namespace EZNEW.Development.Query
 {
@@ -22,11 +18,10 @@ namespace EZNEW.Development.Query
 
         static QueryManager()
         {
-            ApplicationInitializer.Init();
-            AddQueryItemHandlers = new Dictionary<Guid, Func<DefaultQuery, IQueryItem, QueryParameterOptions, IQueryItem>>(2)
+            AddConditionHandlers = new Dictionary<Guid, Func<DefaultQuery, ICondition, ICondition>>(2)
             {
-                { typeof(Criteria).GUID,AddCriteriaQueryItemHandler},
-                { typeof(DefaultQuery).GUID,AddQueryInfoQueryItemHandler}
+                { typeof(Criterion).GUID,AddCriterionHandler},
+                { typeof(DefaultQuery).GUID,AddGroupQueryHandler}
             };
         }
 
@@ -35,9 +30,9 @@ namespace EZNEW.Development.Query
         #region Fields
 
         /// <summary>
-        /// Add query item handlers
+        /// Add condition handlers
         /// </summary>
-        internal static readonly Dictionary<Guid, Func<DefaultQuery, IQueryItem, QueryParameterOptions, IQueryItem>> AddQueryItemHandlers = null;
+        internal static readonly Dictionary<Guid, Func<DefaultQuery, ICondition, ICondition>> AddConditionHandlers = null;
 
         /// <summary>
         /// Boolean type
@@ -62,16 +57,15 @@ namespace EZNEW.Development.Query
         /// <summary>
         /// Gets or sets a method to generate global condition
         /// </summary>
-        private static readonly List<Func<GlobalConditionFilter, GlobalCondition>> GetGlobalConditionDelegates = new List<Func<GlobalConditionFilter, GlobalCondition>>();
+        private static readonly List<Func<GlobalConditionContext, IQuery>> GetGlobalConditionDelegates = new List<Func<GlobalConditionContext, IQuery>>();
 
         /// <summary>
-        /// Gets or sets a value to determine whether copy parameter IQuery object,default is true
-        /// parameter IQuery:subquery,join item
+        /// Indicates whether enable query object cloning,default is true
         /// </summary>
-        public static bool EnableCopyParameterQueryObject = true;
+        public static bool EnableQueryCloning = true;
 
         /// <summary>
-        /// Indecates whether filter obsolete data
+        /// Indicates whether filter obsolete data
         /// </summary>
         public static bool FilterObsoleteData { get; set; } = true;
 
@@ -139,14 +133,14 @@ namespace EZNEW.Development.Query
         /// Create a new query instance
         /// </summary>
         /// <typeparam name="T">Query model</typeparam>
-        /// <param name="criteria">Condition expression</param>
+        /// <param name="conditionExpression">Condition expression</param>
         /// <returns>Return query object</returns>
-        public static IQuery Create<T>(Expression<Func<T, bool>> criteria) where T : IQueryModel<T>
+        public static IQuery Create<T>(Expression<Func<T, bool>> conditionExpression) where T : IQueryModel<T>
         {
             IQuery query = Create<T>();
-            if (criteria != null)
+            if (conditionExpression != null)
             {
-                query.And(criteria);
+                query.And(conditionExpression);
             }
             return query;
         }
@@ -205,8 +199,8 @@ namespace EZNEW.Development.Query
             }
             foreach (var key in keys)
             {
-                var criteriaOperator = exclude ? CriteriaOperator.NotEqual : CriteriaOperator.Equal;
-                originalQuery = AndExtensions.And(originalQuery, key, criteriaOperator, data.GetValue(key), null);
+                var criteriaOperator = exclude ? CriterionOperator.NotEqual : CriterionOperator.Equal;
+                originalQuery = ConnectionExtensions.And(originalQuery, key, criteriaOperator, data.GetValue(key), null);
             }
             return originalQuery;
         }
@@ -252,7 +246,7 @@ namespace EZNEW.Development.Query
                     IQuery entityQuery = Create();
                     foreach (var key in keys)
                     {
-                        entityQuery = AndExtensions.And(entityQuery, key, exclude ? CriteriaOperator.NotEqual : CriteriaOperator.Equal, entity.GetValue(key));
+                        entityQuery = ConnectionExtensions.And(entityQuery, key, exclude ? CriterionOperator.NotEqual : CriterionOperator.Equal, entity.GetValue(key));
                     }
                     originalQuery.Or(entityQuery);
                 }
@@ -273,95 +267,76 @@ namespace EZNEW.Development.Query
 
         #endregion
 
-        #region Add criteria handler
+        #region Add condition handler
 
         /// <summary>
-        /// Add criteria query item handler
+        /// Add criterion handler
         /// </summary>
         /// <param name="originalQuery">Original query</param>
-        /// <param name="queryItem">Parameter query item</param>
-        /// <param name="parameterQueryOption">Parameter query option</param>
-        static IQueryItem AddCriteriaQueryItemHandler(DefaultQuery originalQuery, IQueryItem queryItem, QueryParameterOptions parameterQueryOption)
+        /// <param name="condition">Condition</param>
+        static ICondition AddCriterionHandler(DefaultQuery originalQuery, ICondition condition)
         {
-            if (originalQuery == null || queryItem == null)
+            if (originalQuery == null || condition == null)
             {
                 return null;
             }
-            Criteria criteria = queryItem as Criteria;
-            var queryValue = criteria.Value as IQuery;
-            originalQuery.SetHasConverter(originalQuery.HasConverter || criteria.Converter != null);
-            if (queryValue != null)
+            Criterion criterion = condition as Criterion;
+            var valueQuery = criterion.Value as IQuery;
+            originalQuery.SetHasFieldConverter(originalQuery.HasFieldConverter || criterion.HasFieldConversion());
+            if (valueQuery != null)
             {
-                if (queryValue.GetEntityType() == null)
+                if (valueQuery.GetEntityType() == null)
                 {
-                    throw new EZNEWException("the IQuery object used for the subquery must set the property EntityType");
+                    throw new EZNEWException("the IQuery object used for the subquery must set EntityType");
                 }
-                queryValue = HandleParameterQueryBeforeUse(queryValue, parameterQueryOption);
-                criteria.SetValue(queryValue);
-                originalQuery.subqueryCollection.Add(queryValue);
-                originalQuery.SetHasSubQuery(true);
-                originalQuery.SetHasJoin(originalQuery.HasJoin || queryValue.HasJoin);
-                originalQuery.SetHasRecurveCriteria(originalQuery.HasRecurveCriteria || queryValue.HasRecurveCriteria);
-                originalQuery.SetHasConverter(originalQuery.HasConverter || queryValue.HasConverter);
+                valueQuery = HandleParameterQueryBeforeUse(valueQuery);
+                if (!string.IsNullOrWhiteSpace(criterion.Options?.SubqueryValueFieldName))
+                {
+                    valueQuery.ClearQueryFields();
+                    valueQuery.AddQueryFields(criterion.Options.SubqueryValueFieldName);
+                }
+                criterion.SetValue(valueQuery);
+                originalQuery.AddSubquery(valueQuery);
             }
             else
             {
-                bool equalCriterial = false;
                 bool verifyValueNull = false;
-                CriteriaOperator verifyValueNullOperator = CriteriaOperator.IsNull;
-                switch (criteria.Operator)
+                CriterionOperator verifyValueNullOperator = CriterionOperator.IsNull;
+                switch (criterion.Operator)
                 {
-                    case CriteriaOperator.Equal:
-                        equalCriterial = true;
+                    case CriterionOperator.Equal:
                         verifyValueNull = true;
                         break;
-                    case CriteriaOperator.NotEqual:
+                    case CriterionOperator.NotEqual:
                         verifyValueNull = true;
-                        verifyValueNullOperator = CriteriaOperator.NotNull;
-                        break;
-                    case CriteriaOperator.In:
-                        equalCriterial = true;
+                        verifyValueNullOperator = CriterionOperator.NotNull;
                         break;
                 }
-                if (criteria.GetCriteriaRealValue() == null && verifyValueNull)
+                if (criterion.Value == null && verifyValueNull)
                 {
-                    equalCriterial = false;
-                    criteria.Operator = verifyValueNullOperator;
-                }
-                if (equalCriterial)
-                {
-                    originalQuery.equalCriteriaCollection.Add(criteria);
+                    criterion.Operator = verifyValueNullOperator;
                 }
             }
-            originalQuery.atomicConditionCount++;
-            originalQuery.allConditionFieldNameCollection.Add(criteria.Name);
-            return criteria;
+            originalQuery.criteria.Add(criterion);
+            //originalQuery.atomicConditionCount++;
+            //originalQuery.allConditionFieldNameCollection.Add(criterion.Name);
+            return criterion;
         }
 
         /// <summary>
-        /// Add queryInfo query item handler
+        /// Add group query handler
         /// </summary>
         /// <param name="originalQuery">Original query</param>
-        /// <param name="queryItem">Parameter query item</param>
-        /// <param name="parameterQueryOption">Parameter query option</param>
-        static IQueryItem AddQueryInfoQueryItemHandler(DefaultQuery originalQuery, IQueryItem queryItem, QueryParameterOptions parameterQueryOption)
+        /// <param name="condition">Condition</param>
+        static ICondition AddGroupQueryHandler(DefaultQuery originalQuery, ICondition condition)
         {
-            if (originalQuery == null || queryItem == null)
+            if (originalQuery != null && condition is DefaultQuery groupQuery)
             {
-                return null;
+                groupQuery = HandleParameterQueryBeforeUse(groupQuery);
+                originalQuery.AddGroupQuery(groupQuery);
+                return groupQuery;
             }
-            DefaultQuery valueQuery = queryItem as DefaultQuery;
-            valueQuery = HandleParameterQueryBeforeUse(valueQuery, parameterQueryOption);
-            valueQuery.SetEntityType(originalQuery.entityType);
-            originalQuery.SetHasSubQuery(originalQuery.HasSubquery || valueQuery.HasSubquery);
-            originalQuery.SetHasJoin(originalQuery.HasJoin || valueQuery.HasJoin);
-            originalQuery.SetHasRecurveCriteria(originalQuery.HasRecurveCriteria || valueQuery.HasRecurveCriteria);
-            originalQuery.equalCriteriaCollection.AddRange(valueQuery.equalCriteriaCollection);
-            originalQuery.atomicConditionCount += valueQuery.AtomicConditionCount;
-            originalQuery.allConditionFieldNameCollection.AddRange(valueQuery.AllConditionFieldNames);
-            originalQuery.alreadySetGlobalCondition |= valueQuery.alreadySetGlobalCondition;
-            originalQuery.SetHasConverter(originalQuery.HasConverter || valueQuery.HasConverter);
-            return valueQuery;
+            return null;
         }
 
         #endregion
@@ -374,7 +349,7 @@ namespace EZNEW.Development.Query
         /// Configure global condition
         /// </summary>
         /// <param name="getGlobalConditionDelegate">Get global condition delegate</param>
-        public static void ConfigureGlobalCondition(Func<GlobalConditionFilter, GlobalCondition> getGlobalConditionDelegate)
+        public static void ConfigureGlobalCondition(Func<GlobalConditionContext, IQuery> getGlobalConditionDelegate)
         {
             if (getGlobalConditionDelegate != null)
             {
@@ -389,40 +364,40 @@ namespace EZNEW.Development.Query
         /// <summary>
         /// Get global condition
         /// </summary>
-        /// <param name="conditionFilter">Condition filter</param>
+        /// <param name="conditionContext">Global condition context</param>
         /// <returns>Return global condition</returns>
-        internal static GlobalCondition GetGlobalCondition(GlobalConditionFilter conditionFilter)
+        internal static IQuery GetGlobalCondition(GlobalConditionContext conditionContext)
         {
-            if (conditionFilter == null)
+            if (conditionContext == null)
             {
-                throw new EZNEWException("GlobalConditionFilter is null");
+                throw new EZNEWException($"{nameof(conditionContext)} is null");
             }
-            if (conditionFilter.EntityType == null)
+            if (conditionContext.EntityType == null)
             {
-                throw new EZNEWException("GlobalConditionFilter.EntityType is null");
+                throw new EZNEWException($"{nameof(GlobalConditionContext.EntityType)} is null");
             }
-            if (conditionFilter.OriginalQuery == null)
+            if (conditionContext.OriginalQuery == null)
             {
-                conditionFilter.OriginalQuery = Create();
-                conditionFilter.OriginalQuery.SetEntityType(conditionFilter.EntityType);
+                conditionContext.OriginalQuery = Create();
+                conditionContext.OriginalQuery.SetEntityType(conditionContext.EntityType);
             }
-            GlobalCondition globalCondition = null;
-            if (!GetGlobalConditionDelegates.IsNullOrEmpty() && conditionFilter.OriginalQuery.AllowSetGlobalCondition())
+            IQuery globalCondition = null;
+            if (!GetGlobalConditionDelegates.IsNullOrEmpty() && conditionContext.OriginalQuery.AllowSetGlobalCondition())
             {
                 foreach (var globalConditionDelegate in GetGlobalConditionDelegates)
                 {
-                    var nowGlobalCondition = globalConditionDelegate(conditionFilter);
-                    if (nowGlobalCondition?.Value == null)
+                    var globalConditionEntry = globalConditionDelegate?.Invoke(conditionContext);
+                    if (globalConditionEntry == null)
                     {
                         continue;
                     }
                     if (globalCondition == null)
                     {
-                        globalCondition = nowGlobalCondition;
+                        globalCondition = globalConditionEntry;
                     }
                     else
                     {
-                        globalCondition.Value = globalCondition.Value.AddQueryItem(nowGlobalCondition.AppendMethod, nowGlobalCondition.Value);
+                        globalCondition = globalCondition.AddCondition(globalConditionEntry);
                     }
                 }
             }
@@ -430,15 +405,11 @@ namespace EZNEW.Development.Query
             //filter obsolete data
             if (FilterObsoleteData)
             {
-                var obsoleteField = EntityManager.GetObsoleteField(conditionFilter.EntityType);
-                if (!string.IsNullOrWhiteSpace(obsoleteField) && !conditionFilter.OriginalQuery.IncludeObsoleteData)
+                var obsoleteField = EntityManager.GetObsoleteField(conditionContext.EntityType);
+                if (!string.IsNullOrWhiteSpace(obsoleteField) && !conditionContext.OriginalQuery.IncludeObsoleteData)
                 {
-                    globalCondition ??= new GlobalCondition();
-                    if (globalCondition.Value == null)
-                    {
-                        globalCondition.Value = Create().SetEntityType(conditionFilter.EntityType);
-                    }
-                    globalCondition.Value = globalCondition.Value.Equal(obsoleteField, false);
+                    globalCondition ??= Create().SetEntityType(conditionContext.EntityType);
+                    globalCondition = globalCondition.Equal(obsoleteField, false);
                 }
             }
 
@@ -462,57 +433,85 @@ namespace EZNEW.Development.Query
             originalQuery ??= Create();
             originalQuery.SetEntityType(entityType);
 
-            //Condition filter
-            GlobalConditionFilter conditionFilter = new GlobalConditionFilter()
+            //Global condition context
+            GlobalConditionContext globalConditionContext = new GlobalConditionContext()
             {
                 UsageSceneEntityType = entityType,
-                UsageScene = usageScene
+                UsageScene = usageScene,
+                Location = QueryLocation.Top,
+                EntityType = entityType,
+                OriginalQuery = originalQuery
             };
-            return SetQueryObjectGlobalCondition(originalQuery, conditionFilter, QuerySourceType.Repository);
+            return SetQueryObjectGlobalCondition(globalConditionContext);
         }
 
         #endregion
 
         #region Set query global condition
 
-        static IQuery SetQueryObjectGlobalCondition(IQuery query, GlobalConditionFilter conditionFilter, QuerySourceType querySourceType)
+        static IQuery SetQueryObjectGlobalCondition(GlobalConditionContext globalConditionContext)
         {
-            if (query != null)
+            if (globalConditionContext?.OriginalQuery is null)
             {
-                conditionFilter.SourceType = querySourceType;
-                conditionFilter.EntityType = query.GetEntityType();
-                conditionFilter.OriginalQuery = query;
+                throw new ArgumentNullException(nameof(GlobalConditionContext.OriginalQuery));
+            }
+            if (globalConditionContext?.EntityType is null)
+            {
+                throw new ArgumentNullException(nameof(GlobalConditionContext.EntityType));
+            }
 
-                //global condition
-                var conditionFilterResult = GetGlobalCondition(conditionFilter);
-                conditionFilterResult?.AppendTo(query);
+            var originalQuery = globalConditionContext.OriginalQuery;
 
-                //subqueries
-                if (!query.Subqueries.IsNullOrEmpty())
+            //global condition
+            var globalCondition = GetGlobalCondition(globalConditionContext);
+            if (globalCondition != null && !globalCondition.NoneCondition)
+            {
+                originalQuery.AddCondition(globalCondition);
+            }
+
+            //subquery
+            if (!originalQuery.Subqueries.IsNullOrEmpty())
+            {
+                foreach (var subquery in originalQuery.Subqueries)
                 {
-                    foreach (var squery in query.Subqueries)
+                    if (subquery != null)
                     {
-                        SetQueryObjectGlobalCondition(squery, conditionFilter, QuerySourceType.Subuery);
-                    }
-                }
-                //join
-                if (!query.JoinItems.IsNullOrEmpty())
-                {
-                    foreach (var jitem in query.JoinItems)
-                    {
-                        SetQueryObjectGlobalCondition(jitem.JoinQuery, conditionFilter, QuerySourceType.JoinQuery);
-                    }
-                }
-                //combine
-                if (!query.CombineItems.IsNullOrEmpty())
-                {
-                    foreach (var citem in query.CombineItems)
-                    {
-                        SetQueryObjectGlobalCondition(citem.CombineQuery, conditionFilter, QuerySourceType.CombineQuery);
+                        globalConditionContext.OriginalQuery = subquery;
+                        globalConditionContext.Location = QueryLocation.Subuery;
+                        globalConditionContext.EntityType = subquery.GetEntityType();
+                        SetQueryObjectGlobalCondition(globalConditionContext);
                     }
                 }
             }
-            return query;
+            //join
+            if (!originalQuery.Joins.IsNullOrEmpty())
+            {
+                foreach (var join in originalQuery.Joins)
+                {
+                    if (join?.JoinQuery != null)
+                    {
+                        globalConditionContext.OriginalQuery = join.JoinQuery;
+                        globalConditionContext.Location = QueryLocation.Join;
+                        globalConditionContext.EntityType = join.JoinQuery.GetEntityType();
+                        SetQueryObjectGlobalCondition(globalConditionContext);
+                    }
+                }
+            }
+            //combine
+            if (!originalQuery.Combines.IsNullOrEmpty())
+            {
+                foreach (var combine in originalQuery.Combines)
+                {
+                    if (combine?.Query != null)
+                    {
+                        globalConditionContext.OriginalQuery = combine.Query;
+                        globalConditionContext.Location = QueryLocation.Combine;
+                        globalConditionContext.EntityType = combine.Query.GetEntityType();
+                        SetQueryObjectGlobalCondition(globalConditionContext);
+                    }
+                }
+            }
+            return originalQuery;
         }
 
         #endregion
@@ -662,47 +661,17 @@ namespace EZNEW.Development.Query
         /// <param name="parameterQuery">Parameter query</param>
         /// <param name="parameterQueryOption">Parameter query option</param>
         /// <returns>Return the newest query object</returns>
-        internal static TQuery HandleParameterQueryBeforeUse<TQuery>(TQuery parameterQuery, QueryParameterOptions parameterQueryOption) where TQuery : IQuery
+        internal static TQuery HandleParameterQueryBeforeUse<TQuery>(TQuery parameterQuery) where TQuery : IQuery
         {
             if (parameterQuery == null)
             {
                 return parameterQuery;
             }
-            if (EnableCopyParameterQueryObject)
+            if (EnableQueryCloning)
             {
                 parameterQuery = (TQuery)parameterQuery.Clone();
             }
-            if (parameterQueryOption != null)
-            {
-                if (!string.IsNullOrWhiteSpace(parameterQueryOption.QueryFieldName))
-                {
-                    parameterQuery.ClearQueryFields();
-                    parameterQuery.AddQueryFields(parameterQueryOption.QueryFieldName);
-                }
-            }
             return parameterQuery;
-        }
-
-        #endregion
-
-        #region Clone
-
-        /// <summary>
-        /// Clone a IQueryItem
-        /// </summary>
-        /// <param name="originalQueryItem">Originnal query item</param>
-        /// <returns></returns>
-        public static IQueryItem Clone(IQueryItem originalQueryItem)
-        {
-            if (originalQueryItem is Criteria criteria)
-            {
-                return criteria.Clone();
-            }
-            if (originalQueryItem is IQuery query)
-            {
-                return query.Clone();
-            }
-            return null;
         }
 
         #endregion

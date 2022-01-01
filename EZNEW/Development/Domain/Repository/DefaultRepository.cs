@@ -10,7 +10,7 @@ using EZNEW.DependencyInjection;
 using EZNEW.Development.DataAccess;
 using EZNEW.Development.Domain.Repository.Warehouse;
 using EZNEW.Development.UnitOfWork;
-using EZNEW.Development.Command.Modification;
+using EZNEW.Data.Modification;
 using EZNEW.Mapper;
 
 namespace EZNEW.Development.Domain.Repository
@@ -18,7 +18,7 @@ namespace EZNEW.Development.Domain.Repository
     /// <summary>
     /// Defines default repository
     /// </summary>
-    /// <typeparam name="TModel">Model</typeparam>
+    /// <typeparam name="TModel">Model object</typeparam>
     /// <typeparam name="TEntity">Entity</typeparam>
     /// <typeparam name="TDataAccess">Data access</typeparam>
     public class DefaultRepository<TModel, TEntity, TDataAccess>
@@ -27,43 +27,48 @@ namespace EZNEW.Development.Domain.Repository
         where TEntity : BaseEntity<TEntity>, new()
         where TDataAccess : IDataAccess<TEntity>
     {
-        protected IRepositoryWarehouse<TEntity, TDataAccess> repositoryWarehouse = ContainerManager.Resolve<IRepositoryWarehouse<TEntity, TDataAccess>>();
+        #region Fields
 
+        /// <summary>
+        /// Entity warehouse
+        /// </summary>
+        protected IEntityWarehouse<TEntity, TDataAccess> entityWarehouse = ContainerManager.Resolve<IEntityWarehouse<TEntity, TDataAccess>>();
+
+        /// <summary>
+        /// Entity type
+        /// </summary>
         static readonly Type entityType = typeof(TEntity);
 
-        static DefaultRepository()
-        {
-            WarehouseManager.RegisterDefaultWarehouse<TEntity, TDataAccess>();
-        }
+        #endregion
 
         #region Impl
 
         /// <summary>
-        /// Get life source
+        /// Get data source
         /// </summary>
-        /// <param name="data">Data</param>
-        /// <returns>Return the data life source</returns>
-        public sealed override DataLifeSource GetLifeSource(IModel data)
+        /// <param name="object">Model object</param>
+        /// <returns>Return the object data source</returns>
+        public sealed override DataSource GetDataSource(IModel @object)
         {
-            if (data == null)
+            if (@object == null)
             {
-                return DataLifeSource.New;
+                return DataSource.New;
             }
-            return repositoryWarehouse.GetLifeSource(data.MapTo<TEntity>());
+            return entityWarehouse.GetEntitySource(@object.MapTo<TEntity>());
         }
 
         /// <summary>
-        /// Modify life source
+        /// Modify object data source
         /// </summary>
-        /// <param name="data">Data</param>
-        /// <param name="lifeSource">Life source</param>
-        public sealed override void ModifyLifeSource(IModel data, DataLifeSource lifeSource)
+        /// <param name="object">Model object</param>
+        /// <param name="source">Source</param>
+        public sealed override void ModifyDataSource(IModel @object, DataSource source)
         {
-            if (data == null)
+            if (@object == null)
             {
                 return;
             }
-            repositoryWarehouse.ModifyLifeSource(data.MapTo<TEntity>(), lifeSource);
+            entityWarehouse.ModifyEntitySource(@object.MapTo<TEntity>(), source);
         }
 
         #endregion
@@ -71,68 +76,52 @@ namespace EZNEW.Development.Domain.Repository
         #region Function
 
         /// <summary>
-        /// Execute save
+        /// Execute saving
         /// </summary>
-        /// <param name="data">Data</param>
+        /// <param name="object">Model object</param>
         /// <param name="activationOptions">Activation options</param>
         /// <returns>Return activation record</returns>
-        protected override IActivationRecord ExecuteSave(TModel data, ActivationOptions activationOptions = null)
+        protected override IActivationRecord ExecuteSaving(TModel @object, ActivationOptions activationOptions = null)
         {
-            var entity = data?.MapTo<TEntity>();
-            return ExecuteSaveEntity(entity, activationOptions);
+            var entity = @object?.MapTo<TEntity>();
+            return ExecuteSavingEntity(entity, activationOptions);
         }
 
         /// <summary>
-        /// Execute Remove
+        /// Execute removing
         /// </summary>
-        /// <param name="data">Data</param>
+        /// <param name="object">Model object</param>
         /// <param name="activationOptions">Activation options</param>
         /// <returns>Return activation record</returns>
-        protected override IActivationRecord ExecuteRemove(TModel data, ActivationOptions activationOptions = null)
+        protected override IActivationRecord ExecuteRemoving(TModel @object, ActivationOptions activationOptions = null)
         {
-            if (data == null)
+            if (@object == null)
             {
                 return null;
             }
-            var entity = data.MapTo<TEntity>();
-            return ExecuteRemoveEntity(entity, activationOptions);
+            var entity = @object.MapTo<TEntity>();
+            return ExecuteRemovingEntity(entity, activationOptions);
         }
 
         /// <summary>
-        /// Execute Remove
+        /// Execute removing
         /// </summary>
         /// <param name="query">Query object</param>
         /// <param name="activationOptions">Activation options</param>
         /// <returns>Return actionvaton record</returns>
-        protected override IActivationRecord ExecuteRemove(IQuery query, ActivationOptions activationOptions = null)
+        protected override IActivationRecord ExecuteRemoving(IQuery query, ActivationOptions activationOptions = null)
         {
-            return repositoryWarehouse.Remove(query, activationOptions);
+            return entityWarehouse.Remove(query, activationOptions);
         }
 
         /// <summary>
-        /// Get data
+        /// Get object list
         /// </summary>
         /// <param name="query">Query object</param>
-        /// <returns>Return data</returns>
-        protected override async Task<TModel> GetDataAsync(IQuery query)
+        /// <returns>Return object list</returns>
+        protected override async Task<List<TModel>> GetObjectListAsync(IQuery query)
         {
-            var entityData = await repositoryWarehouse.GetAsync(query).ConfigureAwait(false);
-            TModel data = default;
-            if (entityData != null)
-            {
-                data = entityData.MapTo<TModel>();
-            }
-            return data;
-        }
-
-        /// <summary>
-        /// Get data list
-        /// </summary>
-        /// <param name="query">Query object</param>
-        /// <returns>Return data list</returns>
-        protected override async Task<List<TModel>> GetDataListAsync(IQuery query)
-        {
-            var entityDataList = await repositoryWarehouse.GetListAsync(query).ConfigureAwait(false);
+            var entityDataList = await entityWarehouse.GetListAsync(query).ConfigureAwait(false);
             if (entityDataList.IsNullOrEmpty())
             {
                 return new List<TModel>(0);
@@ -142,41 +131,58 @@ namespace EZNEW.Development.Domain.Repository
         }
 
         /// <summary>
-        /// Get data paging
+        /// Get object paging
         /// </summary>
         /// <param name="query">Query object</param>
-        /// <returns>Return data paging</returns>
-        protected override async Task<PagingInfo<TModel>> GetDataPagingAsync(IQuery query)
+        /// <returns>Return object paging</returns>
+        protected override async Task<PagingInfo<TModel>> GetObjectPagingAsync(IQuery query)
         {
-            var entityPaging = await repositoryWarehouse.GetPagingAsync(query).ConfigureAwait(false);
+            var entityPaging = await entityWarehouse.GetPagingAsync(query).ConfigureAwait(false);
             var dataPaging = entityPaging.ConvertTo<TModel>();
             return dataPaging;
         }
 
         /// <summary>
-        /// Get data by current data
+        /// Get list by current object
         /// </summary>
-        /// <param name="currentDatas">Current data</param>
-        /// <returns>Return data</returns>
-        protected override async Task<List<TModel>> GetDatasByCurrentDataAsync(IEnumerable<TModel> currentDatas)
+        /// <param name="currentObjects">Current objects</param>
+        /// <param name="includeRemove">Indicates whether include remove data</param>
+        /// <param name="onlyCompleteObject">Indicate whether only return complete object</param>
+        /// <returns>Return object list</returns>
+        protected override async Task<List<TModel>> GetObjectListByCurrentAsync(IEnumerable<TModel> currentObjects, bool includeRemove = false, bool onlyCompleteObject = false)
         {
-            if (currentDatas.IsNullOrEmpty())
+            if (currentObjects.IsNullOrEmpty())
             {
                 return new List<TModel>(0);
             }
-            var entitys = currentDatas.Select(c => c.MapTo<TEntity>());
-            var query = QueryManager.AppendEntityIdentityCondition(entitys);
-            return await GetListAsync(query).ConfigureAwait(false);
+            var entities = currentObjects.Select(c => c.MapTo<TEntity>());
+            var warehouseEntityPackages = await entityWarehouse.GetWarehouseEntityPackagesAsync(entities.Select(c => c.GetIdentityValue()), includeRemove, onlyCompleteObject).ConfigureAwait(false);
+            if (!warehouseEntityPackages.IsNullOrEmpty())
+            {
+                entities = entities.Except(warehouseEntityPackages.Select(c => c.LatestData), EntityCompare<TEntity>.Default);
+            }
+            IEnumerable<TModel> objects = null;
+            if (!entities.IsNullOrEmpty())
+            {
+                var query = QueryManager.AppendEntityIdentityCondition(entities);
+                objects = await GetListAsync(query).ConfigureAwait(false);
+            }
+            objects ??= Array.Empty<TModel>();
+            if (!warehouseEntityPackages.IsNullOrEmpty())
+            {
+                objects = objects.Union(warehouseEntityPackages.Where(c => c.Operation != DataRecordOperation.Remove).Select(c => c.LatestData.MapTo<TModel>()));
+            }
+            return objects.ToList();
         }
 
         /// <summary>
-        /// Check data
+        /// Indicates whether has data
         /// </summary>
         /// <param name="query">Query object</param>
-        /// <returns>Return whether data is exist</returns>
-        protected override async Task<bool> IsExistAsync(IQuery query)
+        /// <returns>Return whether has data</returns>
+        protected override async Task<bool> ExistsDataAsync(IQuery query)
         {
-            return await repositoryWarehouse.ExistAsync(query).ConfigureAwait(false);
+            return await entityWarehouse.ExistsAsync(query).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -186,7 +192,7 @@ namespace EZNEW.Development.Domain.Repository
         /// <returns>Return data count</returns>
         protected override async Task<long> CountValueAsync(IQuery query)
         {
-            return await repositoryWarehouse.CountAsync(query).ConfigureAwait(false);
+            return await entityWarehouse.CountAsync(query).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -197,7 +203,7 @@ namespace EZNEW.Development.Domain.Repository
         /// <returns>Return the max value</returns>
         protected override async Task<TValue> MaxValueAsync<TValue>(IQuery query)
         {
-            return await repositoryWarehouse.MaxAsync<TValue>(query).ConfigureAwait(false);
+            return await entityWarehouse.MaxAsync<TValue>(query).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -208,7 +214,7 @@ namespace EZNEW.Development.Domain.Repository
         /// <returns>Return the min value</returns>
         protected override async Task<TValue> MinValueAsync<TValue>(IQuery query)
         {
-            return await repositoryWarehouse.MinAsync<TValue>(query).ConfigureAwait(false);
+            return await entityWarehouse.MinAsync<TValue>(query).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -219,7 +225,7 @@ namespace EZNEW.Development.Domain.Repository
         /// <returns>Return the sum value</returns>
         protected override async Task<TValue> SumValueAsync<TValue>(IQuery query)
         {
-            return await repositoryWarehouse.SumAsync<TValue>(query).ConfigureAwait(false);
+            return await entityWarehouse.SumAsync<TValue>(query).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -230,82 +236,82 @@ namespace EZNEW.Development.Domain.Repository
         /// <returns>Return the average value</returns>
         protected override async Task<TValue> AvgValueAsync<TValue>(IQuery query)
         {
-            return await repositoryWarehouse.AvgAsync<TValue>(query).ConfigureAwait(false);
+            return await entityWarehouse.AvgAsync<TValue>(query).ConfigureAwait(false);
         }
 
         /// <summary>
-        /// Execute Modify
+        /// Execute modification
         /// </summary>
-        /// <param name="expression">Modify expression</param>
+        /// <param name="modificationExpression">Modification expression</param>
         /// <param name="query">Query object</param>
         /// <param name="activationOptions">Activation options</param>
         /// <returns>Return activation record</returns>
-        protected override IActivationRecord ExecuteModify(IModification expression, IQuery query, ActivationOptions activationOptions = null)
+        protected override IActivationRecord ExecuteModification(IModification modificationExpression, IQuery query, ActivationOptions activationOptions = null)
         {
-            return repositoryWarehouse.Modify(expression, query, activationOptions);
+            return entityWarehouse.Modify(modificationExpression, query, activationOptions);
         }
 
         /// <summary>
-        /// Get query by relation data
+        /// Get query by relation objects
         /// </summary>
-        /// <typeparam name="TRelationModel">Relation data types</typeparam>
-        /// <param name="relationDatas">Relation datas</param>
+        /// <typeparam name="TRelationModel">Relation object type</typeparam>
+        /// <param name="relationModels">Relation objects</param>
         /// <returns>Return a IQuery object</returns>
-        protected override IQuery GetQueryByRelationData<TRelationModel>(IEnumerable<TRelationModel> relationDatas)
+        protected override IQuery GetQueryByRelationData<TRelationModel>(IEnumerable<TRelationModel> relationModels)
         {
-            if (relationDatas.IsNullOrEmpty())
+            if (relationModels.IsNullOrEmpty())
             {
                 return null;
             }
             var relationEntityType = ModelManager.GetModelRelationEntityType(typeof(TRelationModel));
-            return GetQueryByRelationDataQuery(QueryManager.AppendEntityIdentityCore(relationEntityType, relationDatas.Select(c => ObjectMapper.MapTo(relationEntityType, c))));
+            return GetQueryByRelationDataQuery(QueryManager.AppendEntityIdentityCore(relationEntityType, relationModels.Select(c => ObjectMapper.MapTo(relationEntityType, c))));
         }
 
         /// <summary>
-        /// Get query by relation data query
+        /// Get query by relation object query
         /// </summary>
-        /// <param name="relationDataQuery">Relation data query</param>
+        /// <param name="relationModelQuery">Relation object query</param>
         /// <returns>Return a IQuery object</returns>
-        protected override IQuery GetQueryByRelationDataQuery(IQuery relationDataQuery)
+        protected override IQuery GetQueryByRelationDataQuery(IQuery relationModelQuery)
         {
-            if (relationDataQuery == null)
+            if (relationModelQuery == null)
             {
                 return null;
             }
-            return QueryManager.Create<TEntity>().EqualInnerJoin(relationDataQuery);
+            return QueryManager.Create<TEntity>().EqualInnerJoin(relationModelQuery);
         }
 
         /// <summary>
-        /// Execute save entity
+        /// Execute saving entity
         /// </summary>
-        /// <param name="datas">Datas</param>
+        /// <param name="entities">Entities</param>
         /// <param name="activationOptions">Activation options</param>
         /// <returns>Return activation record</returns>
-        protected virtual IActivationRecord ExecuteSaveEntity(IEnumerable<TEntity> datas, ActivationOptions activationOptions = null)
+        protected virtual IActivationRecord ExecuteSavingEntity(IEnumerable<TEntity> entities, ActivationOptions activationOptions = null)
         {
-            return repositoryWarehouse.Save(datas, activationOptions);
+            return entityWarehouse.Save(entities, activationOptions);
         }
 
         /// <summary>
-        /// Execute save entity
+        /// Execute saving entity
         /// </summary>
-        /// <param name="data">Data</param>
+        /// <param name="entity">Entity</param>
         /// <param name="activationOptions">Activation options</param>
         /// <returns>Return activation record</returns>
-        protected virtual IActivationRecord ExecuteSaveEntity(TEntity data, ActivationOptions activationOptions = null)
+        protected virtual IActivationRecord ExecuteSavingEntity(TEntity entity, ActivationOptions activationOptions = null)
         {
-            return repositoryWarehouse.Save(data, activationOptions);
+            return entityWarehouse.Save(entity, activationOptions);
         }
 
         /// <summary>
         /// Save entity
         /// </summary>
-        /// <param name="datas">Datas</param>
+        /// <param name="entities">Entities</param>
         /// <param name="activationOptions">Activation options</param>
         /// <returns></returns>
-        protected virtual void SaveEntity(IEnumerable<TEntity> datas, ActivationOptions activationOptions = null)
+        protected virtual void SaveEntity(IEnumerable<TEntity> entities, ActivationOptions activationOptions = null)
         {
-            var record = ExecuteSaveEntity(datas, activationOptions);
+            var record = ExecuteSavingEntity(entities, activationOptions);
             if (record != null)
             {
                 WorkManager.RegisterActivationRecord(record);
@@ -315,34 +321,34 @@ namespace EZNEW.Development.Domain.Repository
         /// <summary>
         /// Execute remove entitys
         /// </summary>
-        /// <param name="datas">Datas</param>
+        /// <param name="entities">Entities</param>
         /// <param name="activationOptions">Activation options</param>
         /// <returns>Return activation record</returns>
-        protected virtual IActivationRecord ExecuteRemoveEntity(IEnumerable<TEntity> datas, ActivationOptions activationOptions = null)
+        protected virtual IActivationRecord ExecuteRemovingEntity(IEnumerable<TEntity> entities, ActivationOptions activationOptions = null)
         {
-            return repositoryWarehouse.Remove(datas, activationOptions);
+            return entityWarehouse.Remove(entities, activationOptions);
         }
 
         /// <summary>
-        /// Execute remove entity
+        /// Execute removing entity
         /// </summary>
-        /// <param name="data">Data</param>
+        /// <param name="entity">Entity</param>
         /// <param name="activationOptions">Activation options</param>
         /// <returns>Return activation record</returns>
-        protected virtual IActivationRecord ExecuteRemoveEntity(TEntity data, ActivationOptions activationOptions = null)
+        protected virtual IActivationRecord ExecuteRemovingEntity(TEntity entity, ActivationOptions activationOptions = null)
         {
-            return repositoryWarehouse.Remove(data, activationOptions);
+            return entityWarehouse.Remove(entity, activationOptions);
         }
 
         /// <summary>
-        /// Remove entitys
+        /// Remove entity
         /// </summary>
-        /// <param name="datas">Datas</param>
+        /// <param name="entities">Entities</param>
         /// <param name="activationOptions">Activation options</param>
         /// <returns></returns>
-        protected virtual void RemoveEntity(IEnumerable<TEntity> datas, ActivationOptions activationOptions = null)
+        protected virtual void RemoveEntity(IEnumerable<TEntity> entities, ActivationOptions activationOptions = null)
         {
-            var record = ExecuteRemoveEntity(datas, activationOptions);
+            var record = ExecuteRemovingEntity(entities, activationOptions);
             if (record != null)
             {
                 WorkManager.RegisterActivationRecord(record);
@@ -353,28 +359,28 @@ namespace EZNEW.Development.Domain.Repository
 
         #region Global condition
 
-        #region Append Remove extra condition
+        #region Append Removing extra condition
 
         /// <summary>
-        /// Append Remove condition
+        /// Append removing condition
         /// </summary>
         /// <param name="originalQuery">Original query</param>
         /// <returns>Return the newest query object</returns>
-        protected override IQuery AppendRemoveCondition(IQuery originalQuery)
+        protected override IQuery AppendRemovingCondition(IQuery originalQuery)
         {
             return QueryManager.SetGlobalCondition(entityType, originalQuery, QueryUsageScene.Remove);
         }
 
         #endregion
 
-        #region Append Modify extra condition
+        #region Append modification extra condition
 
         /// <summary>
-        /// Append Modify condition
+        /// Append modification condition
         /// </summary>
         /// <param name="originalQuery">Original query</param>
         /// <returns>Return the newest query object</returns>
-        protected override IQuery AppendModifyCondition(IQuery originalQuery)
+        protected override IQuery AppendModificationCondition(IQuery originalQuery)
         {
             return QueryManager.SetGlobalCondition(entityType, originalQuery, QueryUsageScene.Modify);
         }
@@ -384,27 +390,27 @@ namespace EZNEW.Development.Domain.Repository
         #region Append query extra condition
 
         /// <summary>
-        /// Append query condition
+        /// Append querying condition
         /// </summary>
         /// <param name="originalQuery">Original query</param>
         /// <returns>Return the newest query object</returns>
-        protected override IQuery AppendQueryCondition(IQuery originalQuery)
+        protected override IQuery AppendQueryingCondition(IQuery originalQuery)
         {
             return QueryManager.SetGlobalCondition(entityType, originalQuery, QueryUsageScene.Query);
         }
 
         #endregion
 
-        #region Append exist extra condition
+        #region Append exists extra condition
 
         /// <summary>
-        /// Append exist condition
+        /// Append exists condition
         /// </summary>
         /// <param name="originalQuery">Original query</param>
         /// <returns>Return the newest query object</returns>
-        protected override IQuery AppendExistCondition(IQuery originalQuery)
+        protected override IQuery AppendExistsCondition(IQuery originalQuery)
         {
-            return QueryManager.SetGlobalCondition(entityType, originalQuery, QueryUsageScene.Exist);
+            return QueryManager.SetGlobalCondition(entityType, originalQuery, QueryUsageScene.Exists);
         }
 
         #endregion

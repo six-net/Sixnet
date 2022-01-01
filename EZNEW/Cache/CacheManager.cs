@@ -42,8 +42,7 @@ namespace EZNEW.Cache
             {
                 return CacheResult<StringSetResponse>.EmptyResult();
             }
-            var setResult = await String.SetAsync(key, value, absoluteExpiration, when, cacheObject).ConfigureAwait(false);
-            return setResult;
+            return await String.SetAsync(key, value, absoluteExpiration, when, cacheObject).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -79,8 +78,7 @@ namespace EZNEW.Cache
             {
                 return CacheResult<StringSetResponse>.EmptyResult();
             }
-            var setResult = await String.SetByRelativeExpirationAsync(key, value, absoluteExpirationRelativeToNow, slidingExpiration, when, cacheObject).ConfigureAwait(false);
-            return setResult;
+            return await String.SetByRelativeExpirationAsync(key, value, absoluteExpirationRelativeToNow, slidingExpiration, when, cacheObject).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -139,8 +137,7 @@ namespace EZNEW.Cache
         /// <returns>Return data list</returns>
         public static async Task<List<T>> GetDataListAsync<T>(IEnumerable<CacheKey> cacheKeys, CacheObject cacheObject = null)
         {
-            var dataList = await String.GetAsync<T>(cacheKeys, cacheObject).ConfigureAwait(false);
-            return dataList;
+            return await String.GetAsync<T>(cacheKeys, cacheObject).ConfigureAwait(false);
         }
 
         /// <summary>

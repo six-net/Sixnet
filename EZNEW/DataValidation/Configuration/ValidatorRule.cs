@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace EZNEW.DataValidation.Configuration
 {
@@ -61,6 +62,11 @@ namespace EZNEW.DataValidation.Configuration
         /// Gets or sets the compare type
         /// </summary>
         public CompareObject CompareType { get; set; }
+
+        /// <summary>
+        /// Ignore use scenarios
+        /// </summary>
+        public List<string> IgnoreUseScenarios { get; set; }
     }
 
     /// <summary>

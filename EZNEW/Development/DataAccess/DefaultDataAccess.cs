@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using EZNEW.Development.Command;
-using EZNEW.Development.Command.Modification;
+using EZNEW.Data.Modification;
 using EZNEW.Development.UnitOfWork;
 using EZNEW.Development.Entity;
 using EZNEW.Development.Query;
@@ -11,92 +11,94 @@ using EZNEW.Paging;
 namespace EZNEW.Development.DataAccess
 {
     /// <summary>
-    /// Imeplements IDataaccess
+    /// Defines default data access
     /// </summary>
-    /// <typeparam name="TEntity">entity type</typeparam>
+    /// <typeparam name="TEntity">Entity type</typeparam>
     public class DefaultDataAccess<TEntity> : BaseDataAccess<TEntity> where TEntity : BaseEntity<TEntity>, new()
     {
-        #region Function
+        #region Methods
 
-        #region  Execute add
+        #region  Execute adding
 
         /// <summary>
-        /// Execute add data
+        /// Execute adding data
         /// </summary>
         /// <param name="data">Data</param>
         /// <returns>Return add command</returns>
-        protected override ICommand ExecuteAdd(TEntity data)
+        protected override ICommand ExecuteAdding(TEntity data)
         {
-            var cmd = DefaultCommand.CreateNewCommand<TEntity>(CommandOperationType.Insert, data.GetCommandParameters());
-            SetCommand(cmd, data.GetAllValues());
-            cmd.MustReturnValueOnSuccess = true;
+            var commandParameters = data.GetCommandParameters();
+            var cmd = DefaultCommand.Create<TEntity>(CommandOperationType.Insert, commandParameters);
+            SetCommand(cmd, commandParameters);
+            cmd.MustAffectedData = true;
             return cmd;
         }
 
         #endregion
 
-        #region Execute Modify
+        #region Execute modification
 
         /// <summary>
-        /// Execute modify data
+        /// Execute data modification
         /// </summary>
         /// <param name="originalValues">Original values</param>
         /// <param name="newValues">New values</param>
         /// <param name="query">Query object</param>
-        /// <returns>Return modify command</returns>
-        protected override ICommand ExecuteModifyData(Dictionary<string, dynamic> originalValues, Dictionary<string, dynamic> newValues, IQuery query)
+        /// <returns>Return modification command</returns>
+        protected override ICommand ExecuteDataModification(Dictionary<string, dynamic> originalValues, Dictionary<string, dynamic> newValues, IQuery query)
         {
-            return Update(newValues.Keys, newValues, query);
+            return Update(newValues.Keys, CommandParameters.Parse(newValues), query);
         }
 
         /// <summary>
-        /// Execute modify expression
+        /// Execute modification
         /// </summary>
-        /// <param name="modifyValues">Modify values</param>
+        /// <param name="modificationValues">Modification values</param>
         /// <param name="query">Query object</param>
-        /// <returns>Return modify command</returns>
-        protected override ICommand ExecuteModifyExpression(Dictionary<string, IModificationValue> modifyValues, IQuery query)
+        /// <returns>Return modification command</returns>
+        protected override ICommand ExecuteModification(Dictionary<string, IModificationValue> modificationValues, IQuery query)
         {
-            return Update(modifyValues.Keys.ToList(), modifyValues, query);
+            return Update(modificationValues.Keys, CommandParameters.Parse(modificationValues), query);
         }
 
         /// <summary>
-        /// Modify value
+        /// Update value
         /// </summary>
-        /// <param name="fields">Fields</param>
+        /// <param name="fields">Modification fields</param>
         /// <param name="parameters">Parameters</param>
-        /// <returns>Return modify command</returns>
-        ICommand Update(IEnumerable<string> fields, object parameters, IQuery query)
+        /// <param name="query">Query object</param>
+        /// <returns>Return modification command</returns>
+        ICommand Update(IEnumerable<string> fields, CommandParameters parameters, IQuery query)
         {
-            var cmd = DefaultCommand.CreateNewCommand<TEntity>(CommandOperationType.Update);
-            SetCommand(cmd, parameters as Dictionary<string, dynamic>);
-            cmd.Fields = fields;
+            var cmd = DefaultCommand.Create<TEntity>(CommandOperationType.Update);
             cmd.Parameters = parameters;
-            cmd.MustReturnValueOnSuccess = query?.MustReturnValueOnSuccess ?? false;
+            cmd.Fields = fields;
+            SetCommand(cmd, parameters);
+            cmd.MustAffectedData = query?.MustAffectData ?? false;
             cmd.Query = query;
             return cmd;
         }
 
         #endregion
 
-        #region Execute delete
+        #region Execute deletion
 
         /// <summary>
         /// Execute delete data
         /// </summary>
         /// <param name="data">Data</param>
-        /// <returns>Return delete command</returns>
-        protected override ICommand ExecuteDeleteData(TEntity data)
+        /// <returns>Return deletion command</returns>
+        protected override ICommand ExecuteDataDeletion(TEntity data)
         {
-            return ExecuteDeleteByCondition(QueryManager.AppendEntityIdentityCondition(data));
+            return ExecuteDeletion(QueryManager.AppendEntityIdentityCondition(data));
         }
 
         /// <summary>
-        /// Execute delete by condition
+        /// Execute deletion
         /// </summary>
         /// <param name="query">Query object</param>
-        /// <returns>Return delete command</returns>
-        protected override ICommand ExecuteDeleteByCondition(IQuery query)
+        /// <returns>Return deletion command</returns>
+        protected override ICommand ExecuteDeletion(IQuery query)
         {
             //Whether is logic delete
             var obsoleteField = EntityManager.GetObsoleteField(entityType);
@@ -107,9 +109,9 @@ namespace EZNEW.Development.DataAccess
                 return Modify(modifyExp, query);
             }
 
-            var cmd = DefaultCommand.CreateNewCommand<TEntity>(CommandOperationType.Delete);
+            var cmd = DefaultCommand.Create<TEntity>(CommandOperationType.Delete);
             SetCommand(cmd, null);
-            cmd.MustReturnValueOnSuccess = query?.MustReturnValueOnSuccess ?? false;
+            cmd.MustAffectedData = query?.MustAffectData ?? false;
             cmd.Query = query;
             return cmd;
         }
@@ -125,7 +127,7 @@ namespace EZNEW.Development.DataAccess
         /// <returns>Return data</returns>
         protected override async Task<TEntity> ExecuteGetAsync(IQuery query)
         {
-            ICommand cmd = DefaultCommand.CreateNewCommand<TEntity>(CommandOperationType.Query);
+            ICommand cmd = DefaultCommand.Create<TEntity>(CommandOperationType.Query);
             SetCommand(cmd, null);
             cmd.Query = query;
             TEntity data = await WorkManager.QuerySingleAsync<TEntity>(cmd).ConfigureAwait(false);
@@ -139,7 +141,7 @@ namespace EZNEW.Development.DataAccess
         /// <returns>Return data list</returns>
         protected override async Task<List<TEntity>> ExecuteGetListAsync(IQuery query)
         {
-            ICommand cmd = DefaultCommand.CreateNewCommand<TEntity>(CommandOperationType.Query);
+            ICommand cmd = DefaultCommand.Create<TEntity>(CommandOperationType.Query);
             SetCommand(cmd, null);
             cmd.Query = query;
             var dataList = (await WorkManager.QueryAsync<TEntity>(cmd).ConfigureAwait(false)).ToList();
@@ -153,7 +155,7 @@ namespace EZNEW.Development.DataAccess
         /// <returns>Return data paging</returns>
         protected override async Task<PagingInfo<TEntity>> ExecuteGetPagingAsync(IQuery query)
         {
-            ICommand cmd = DefaultCommand.CreateNewCommand<TEntity>(CommandOperationType.Query);
+            ICommand cmd = DefaultCommand.Create<TEntity>(CommandOperationType.Query);
             SetCommand(cmd, null);
             cmd.Query = query;
             var dataPaging = await WorkManager.QueryPagingAsync<TEntity>(cmd).ConfigureAwait(false);
@@ -165,14 +167,14 @@ namespace EZNEW.Development.DataAccess
         /// </summary>
         /// <param name="query">Query object</param>
         /// <returns>Return whether data is exist</returns>
-        protected override async Task<bool> ExecuteExistAsync(IQuery query)
+        protected override async Task<bool> ExecuteExistsAsync(IQuery query)
         {
-            var cmd = DefaultCommand.CreateNewCommand<TEntity>(CommandOperationType.Exist);
+            var cmd = DefaultCommand.Create<TEntity>(CommandOperationType.Exist);
             SetCommand(cmd, null);
-            cmd.MustReturnValueOnSuccess = true;
+            cmd.MustAffectedData = true;
             cmd.Query = query;
             cmd.CommandResultType = CommandResultType.ScalarValue;
-            return await WorkManager.QueryAsync(cmd).ConfigureAwait(false);
+            return await WorkManager.ExistsAsync(cmd).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -237,7 +239,7 @@ namespace EZNEW.Development.DataAccess
         /// <returns>Return the value</returns>
         async Task<TValue> AggregateFunctionAsync<TValue>(CommandOperationType funcType, IQuery query)
         {
-            ICommand cmd = DefaultCommand.CreateNewCommand<TEntity>(funcType);
+            ICommand cmd = DefaultCommand.Create<TEntity>(funcType);
             SetCommand(cmd, null);
             cmd.Query = query;
             TValue data = await WorkManager.AggregateValueAsync<TValue>(cmd).ConfigureAwait(false);
@@ -256,8 +258,8 @@ namespace EZNEW.Development.DataAccess
         /// Set command values
         /// </summary>
         /// <param name="command">Command</param>
-        /// <param name="values">Values</param>
-        void SetCommand(ICommand command, Dictionary<string, dynamic> values = null)
+        /// <param name="commandParameters">Parameters</param>
+        void SetCommand(ICommand command, CommandParameters commandParameters)
         {
             if (command == null)
             {
@@ -266,7 +268,7 @@ namespace EZNEW.Development.DataAccess
             var type = typeof(TEntity);
 
             //set object name
-            command.ObjectName = EntityManager.GetEntityObjectName(type);
+            command.EntityObjectName = EntityManager.GetEntityObjectName(type);
 
             #region set primary key and values
 
@@ -280,14 +282,13 @@ namespace EZNEW.Development.DataAccess
             foreach (var field in primaryFields)
             {
                 primaryKeys.Add(field);
-                dynamic value = null;
-                if (values?.TryGetValue(field, out value) ?? false)
+                ParameterItem parameterItem = null;
+                if (commandParameters?.Items.TryGetValue(field, out parameterItem) ?? false)
                 {
-                    primaryValues.Add(field, value);
+                    primaryValues.Add(field, parameterItem?.Value);
                 }
             }
-            command.ObjectKeys = primaryKeys;
-            command.ObjectKeyValues = primaryValues;
+            command.EntityIdentityValues = primaryValues;
 
             #endregion
         }

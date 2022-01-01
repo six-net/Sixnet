@@ -8,6 +8,7 @@ using EZNEW.Development.DataAccess;
 using EZNEW.Development.DataAccess.Event;
 using EZNEW.Development.Domain.Event;
 using EZNEW.Development.Domain.Repository.Warehouse;
+using EZNEW.Development.Domain.Repository.Warehouse.Storage;
 using EZNEW.Development.Entity;
 using EZNEW.Diagnostics;
 using EZNEW.Logging;
@@ -39,10 +40,10 @@ namespace EZNEW.Development.UnitOfWork
         List<ICommand> commandCollection = null;
 
         /// <summary>
-        /// command execute engine
-        /// key:engine key
+        /// Command executor
+        /// Key:Executor key
         /// </summary>
-        Dictionary<string, Tuple<ICommandExecutor, List<ICommand>>> commandEngineGroups = null;
+        Dictionary<string, Tuple<ICommandExecutor, List<ICommand>>> commandExecutorGroups = null;
 
         /// <summary>
         /// allow empty result command count
@@ -77,9 +78,9 @@ namespace EZNEW.Development.UnitOfWork
         int recordCounter = 1;
 
         /// <summary>
-        /// data watehouse
+        /// entity storage
         /// </summary>
-        readonly Dictionary<Guid, IDataWarehouse> repositoryWarehouses = new Dictionary<Guid, IDataWarehouse>();
+        readonly Dictionary<Guid, object> entityStorageCollection = new Dictionary<Guid, object>();
 
         /// <summary>
         /// commit success event handler
@@ -255,14 +256,14 @@ namespace EZNEW.Development.UnitOfWork
             //resolve records
             ResolveActivationRecord();
             var recordIds = activationMaxRecordIds.Values.OrderBy(c => c);
-            commandEngineGroups = new Dictionary<string, Tuple<ICommandExecutor, List<ICommand>>>(activationMaxRecordIds.Count);
+            commandExecutorGroups = new Dictionary<string, Tuple<ICommandExecutor, List<ICommand>>>(activationMaxRecordIds.Count);
             commandCollection = new List<ICommand>(activationMaxRecordIds.Count);
             allowEmptyResultCommandCount = 0;
             foreach (var recordId in recordIds)
             {
                 if (activationRecordValues.TryGetValue(recordId, out var record) && record != null)
                 {
-                    var command = record.GetExecuteCommand();
+                    var command = record.GetExecutionCommand();
                     if (command?.IsObsolete ?? true)
                     {
                         FrameworkLogManager.ObsoleteActivationRecord(this, record, command);
@@ -278,7 +279,7 @@ namespace EZNEW.Development.UnitOfWork
                     }
 
                     commandCollection.Add(command);
-                    if (!command.MustReturnValueOnSuccess)
+                    if (!command.MustAffectedData)
                     {
                         allowEmptyResultCommandCount += 1;
                     }
@@ -287,19 +288,19 @@ namespace EZNEW.Development.UnitOfWork
                     {
                         continue;
                     }
-                    foreach (var engine in commandExecutors)
+                    foreach (var executor in commandExecutors)
                     {
-                        if (engine == null)
+                        if (executor == null)
                         {
                             continue;
                         }
-                        var engineKey = engine.IdentityKey;
-                        if (!commandEngineGroups.TryGetValue(engineKey, out Tuple<ICommandExecutor, List<ICommand>> engineValues))
+                        var executorKey = executor.IdentityValue;
+                        if (!commandExecutorGroups.TryGetValue(executorKey, out Tuple<ICommandExecutor, List<ICommand>> executorValues))
                         {
-                            engineValues = new Tuple<ICommandExecutor, List<ICommand>>(engine, new List<ICommand>(activationRecordValues.Count));
+                            executorValues = new Tuple<ICommandExecutor, List<ICommand>>(executor, new List<ICommand>(activationRecordValues.Count));
                         }
-                        engineValues.Item2.Add(command);
-                        commandEngineGroups[engineKey] = engineValues;
+                        executorValues.Item2.Add(command);
+                        commandExecutorGroups[executorKey] = executorValues;
                     }
                 }
             }
@@ -358,30 +359,31 @@ namespace EZNEW.Development.UnitOfWork
         {
             try
             {
+                FrameworkLogManager.LogWorkStartSubmitting(this);
                 //build commands
                 BuildCommand();
                 WorkCommitResult commitResult = null;
-                if (commandEngineGroups.IsNullOrEmpty())
+                if (commandExecutorGroups.IsNullOrEmpty())
                 {
                     commitResult = WorkCommitResult.Empty();
-                    FrameworkLogManager.LogWorkBegin(this);
                 }
                 else
                 {
-                    var executeOptions = GetCommandExecuteOptions();
-                    FrameworkLogManager.LogWorkBegin(this, executeOptions);
-                    int returnValue = await CommandExecutionManager.ExecuteAsync(executeOptions, commandEngineGroups.Values).ConfigureAwait(false);
+                    var executionOptions = GetCommandExecutionOptions();
+                    FrameworkLogManager.LogWorkOptions(this, executionOptions);
+
+                    int returnValue = await CommandExecutionManager.ExecuteAsync(executionOptions, commandExecutorGroups.Values).ConfigureAwait(false);
                     commitResult = new WorkCommitResult()
                     {
-                        CommitCommandCount = commandCollection.Count,
-                        ExecutedDataCount = returnValue,
-                        AllowEmptyResultCommandCount = allowEmptyResultCommandCount
+                        CommittedCommandCount = commandCollection.Count,
+                        AffectedDataCount = returnValue,
+                        AllowEmptyCommandCount = allowEmptyResultCommandCount
                     };
                 }
 
                 // trigger command callback event
-                TriggerCommandCallbackEvent(commitResult.EmptyResultOrSuccess);
-                if (commitResult.EmptyResultOrSuccess)
+                TriggerCommandCallbackEvent(commitResult.EmptyOrSuccess);
+                if (commitResult.EmptyOrSuccess)
                 {
                     //Trigger commit success event
                     TriggerCommitSuccessEvent(commitResult);
@@ -392,34 +394,34 @@ namespace EZNEW.Development.UnitOfWork
                     //Execute data access event
                     TriggerDataAccessEvent();
 
-                    FrameworkLogManager.LogWorkSuccessful(this, commitResult);
+                    FrameworkLogManager.LogWorkSubmittedSuccessfully(this, commitResult);
                 }
                 else
                 {
                     //Trigger work global commit fail event
                     WorkManager.TriggerWorkCommitFailEvent(this, commitResult, commandCollection);
 
-                    FrameworkLogManager.LogWorkFailed(this, commitResult);
+                    FrameworkLogManager.LogWorkSubmittedFailure(this, commitResult);
                 }
 
                 return commitResult;
             }
             catch (Exception ex)
             {
-                Reset();
-                FrameworkLogManager.LogWorkException(this, ex);
+                FrameworkLogManager.LogWorkSubmittedException(this, ex);
                 throw ex;
             }
             finally
             {
+                Reset();
             }
         }
 
         /// <summary>
-        /// Get command execute options
+        /// Get command execution options
         /// </summary>
-        /// <returns>Return the command execute options</returns>
-        CommandExecutionOptions GetCommandExecuteOptions()
+        /// <returns>Return the command execution options</returns>
+        CommandExecutionOptions GetCommandExecutionOptions()
         {
             if (!IsolationLevel.HasValue)
             {
@@ -440,6 +442,7 @@ namespace EZNEW.Development.UnitOfWork
         /// </summary>
         public void Rollback()
         {
+            FrameworkLogManager.LogWorkRollback(this);
             // unit work global rollback event handler
             WorkManager.TriggerWorkRollbackEvent(this);
             Reset();
@@ -450,14 +453,15 @@ namespace EZNEW.Development.UnitOfWork
         /// </summary>
         void Reset()
         {
+            FrameworkLogManager.LogWorkReset(this);
             commandCounter = 0;
             recordCounter = 0;
             allowEmptyResultCommandCount = 0;
             DomainEventManager.Reset();
             commandCollection?.Clear();
-            commandEngineGroups?.Clear();
+            commandExecutorGroups?.Clear();
             activationRecordCollection?.Clear();
-            repositoryWarehouses?.Clear();
+            entityStorageCollection?.Clear();
             domainEventCollection?.Clear();
             dataAccessEventCollection?.Clear();
             activationMaxRecordIds.Clear();
@@ -467,21 +471,21 @@ namespace EZNEW.Development.UnitOfWork
 
         #endregion
 
-        #region Warehouse
+        #region Entity storage
 
         /// <summary>
-        /// Get data warehouse by entity type
+        /// Get entity storage
         /// </summary>
-        /// <returns>Return entity data warehouse</returns>
-        public DataWarehouse<TEntity> GetWarehouse<TEntity>() where TEntity : BaseEntity<TEntity>, new()
+        /// <returns>Entity storage</returns>
+        public EntityStorage<TEntity> GetEntityStorage<TEntity>() where TEntity : BaseEntity<TEntity>, new()
         {
             var entityTypeId = typeof(TEntity).GUID;
-            if (!repositoryWarehouses.TryGetValue(entityTypeId, out var warehouse))
+            if (!entityStorageCollection.TryGetValue(entityTypeId, out var storage))
             {
-                warehouse = new DataWarehouse<TEntity>();
-                repositoryWarehouses.Add(entityTypeId, warehouse);
+                storage = new EntityStorage<TEntity>();
+                entityStorageCollection.Add(entityTypeId, storage);
             }
-            return warehouse as DataWarehouse<TEntity>;
+            return storage as EntityStorage<TEntity>;
         }
 
         #endregion
@@ -617,7 +621,10 @@ namespace EZNEW.Development.UnitOfWork
         /// </summary>
         public void Dispose()
         {
+            FrameworkLogManager.LogWorkDispose(this);
+            Reset();
             WorkManager.Current = null;
+
         }
 
         #endregion

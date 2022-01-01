@@ -16,37 +16,37 @@ namespace EZNEW.Data
         /// Execute command
         /// </summary>
         /// <param name="server">Database server</param>
-        /// <param name="executeOptions">Execute options</param>
+        /// <param name="executionOptions">Execution options</param>
         /// <param name="commands">Commands</param>
         /// <returns>Return the affected data numbers</returns>
-        int Execute(DatabaseServer server, CommandExecutionOptions executeOptions, IEnumerable<ICommand> commands);
+        int Execute(DatabaseServer server, CommandExecutionOptions executionOptions, IEnumerable<ICommand> commands);
 
         /// <summary>
         /// Execute command
         /// </summary>
         /// <param name="server">Database server</param>
-        /// <param name="executeOptions">Execute options</param>
+        /// <param name="executionOptions">Execution options</param>
         /// <param name="commands">Commands</param>
         /// <returns>Return the affected data numbers</returns>
-        int Execute(DatabaseServer server, CommandExecutionOptions executeOptions, params ICommand[] commands);
+        int Execute(DatabaseServer server, CommandExecutionOptions executionOptions, params ICommand[] commands);
 
         /// <summary>
         /// Execute command
         /// </summary>
         /// <param name="server">Database server</param>
-        /// <param name="executeOptions">Execute options</param>
+        /// <param name="executionOptions">Execution options</param>
         /// <param name="commands">Commands</param>
         /// <returns>Return the affected data numbers</returns>
-        Task<int> ExecuteAsync(DatabaseServer server, CommandExecutionOptions executeOptions, IEnumerable<ICommand> commands);
+        Task<int> ExecuteAsync(DatabaseServer server, CommandExecutionOptions executionOptions, IEnumerable<ICommand> commands);
 
         /// <summary>
         /// Execute command
         /// </summary>
         /// <param name="server">Database server</param>
-        /// <param name="executeOptions">Execute options</param>
+        /// <param name="executionOptions">Execution options</param>
         /// <param name="commands">Commands</param>
         /// <returns>Return the affected data numbers</returns>
-        Task<int> ExecuteAsync(DatabaseServer server, CommandExecutionOptions executeOptions, params ICommand[] commands);
+        Task<int> ExecuteAsync(DatabaseServer server, CommandExecutionOptions executionOptions, params ICommand[] commands);
 
         #endregion
 
@@ -116,7 +116,7 @@ namespace EZNEW.Data
         /// <param name="server">Database server</param>
         /// <param name="command">Command</param>
         /// <returns>Return whether the data exists or not</returns>
-        bool Query(DatabaseServer server, ICommand command);
+        bool Exists(DatabaseServer server, ICommand command);
 
         /// <summary>
         /// Query whether the data exists or not
@@ -124,7 +124,7 @@ namespace EZNEW.Data
         /// <param name="server">Database server</param>
         /// <param name="command">Command</param>
         /// <returns>Return whether the data exists or not</returns>
-        Task<bool> QueryAsync(DatabaseServer server, ICommand command);
+        Task<bool> ExistsAsync(DatabaseServer server, ICommand command);
 
         /// <summary>
         /// Aggregate value
@@ -162,7 +162,7 @@ namespace EZNEW.Data
         /// <param name="server">Database server</param>
         /// <param name="dataTable">Data table</param>
         /// <param name="bulkInsertOptions">Insert options</param>
-        void BulkInsert(DatabaseServer server, DataTable dataTable, IBulkInsertOptions bulkInsertOptions = null);
+        void BulkInsert(DatabaseServer server, DataTable dataTable, IBulkInsertionOptions bulkInsertOptions = null);
 
         /// <summary>
         /// Bulk insert datas
@@ -170,7 +170,7 @@ namespace EZNEW.Data
         /// <param name="server">Database server</param>
         /// <param name="dataTable">Data table</param>
         /// <param name="bulkInsertOptions">Insert options</param>
-        Task BulkInsertAsync(DatabaseServer server, DataTable dataTable, IBulkInsertOptions bulkInsertOptions = null);
+        Task BulkInsertAsync(DatabaseServer server, DataTable dataTable, IBulkInsertionOptions bulkInsertOptions = null);
 
         #endregion
     }

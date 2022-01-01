@@ -10,11 +10,6 @@ namespace EZNEW.Mapper
     /// </summary>
     public static class ObjectMapper
     {
-        static ObjectMapper()
-        {
-            ApplicationInitializer.Init();
-        }
-
         /// <summary>
         /// Default mapper builder
         /// </summary>

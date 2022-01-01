@@ -20,7 +20,7 @@ namespace EZNEW.Paging
         /// <summary>
         /// page size
         /// </summary>
-        protected int pageSizeValue = 20;
+        protected int pageSizeValue = DataManager.DataOptions.DefaultPageSize;
 
         #endregion
 

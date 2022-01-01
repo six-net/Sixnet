@@ -24,7 +24,7 @@ namespace EZNEW.Data.Cache.Policy
         #region Starting
 
         /// <summary>
-        /// Called before a database command execute
+        /// Called before a database command execution
         /// </summary>
         /// <param name="addDataContext">Add data context</param>
         /// <returns>Return the policy result</returns>
@@ -392,7 +392,7 @@ namespace EZNEW.Data.Cache.Policy
                 var entityConfiguration = EntityManager.GetEntityConfiguration(entityType);
                 if (entityConfiguration == null)
                 {
-                    LogManager.LogError<DefaultDataCachePolicy>($"Entity :{entityType.FullName} configuration is null");
+                    LogManager.LogError<DefaultDataCachePolicy>(FrameworkLogEvents.Configuration.EntityConfigurationIsNull, $"{entityType.FullName} configuration is null,unable to set cache data");
                     return;
                 }
 
@@ -400,7 +400,7 @@ namespace EZNEW.Data.Cache.Policy
                 var primaryKeys = entityConfiguration.PrimaryKeys;
                 if (primaryKeys.IsNullOrEmpty())
                 {
-                    LogManager.LogError<DefaultDataCachePolicy>($"Data type：{entityType.FullName} no primary key,unable to set cache data");
+                    LogManager.LogError<DefaultDataCachePolicy>(FrameworkLogEvents.Configuration.EntityNotSetPrimaryKey, $"{entityType.FullName} no primary key,unable to set cache data");
                     return;
                 }
 
@@ -439,7 +439,7 @@ namespace EZNEW.Data.Cache.Policy
                             var preKeyVal = data.GetValue(preKey)?.ToString() ?? string.Empty;
                             if (string.IsNullOrWhiteSpace(preKeyVal))
                             {
-                                LogManager.LogError<DefaultDataCachePolicy>($"Data type :{entityType.FullName},Identity value:{data.GetIdentityValue()},Cache prefix key:{preKey},value is null or empty,unable to set cache data");
+                                LogManager.LogError<DefaultDataCachePolicy>(FrameworkLogEvents.Cache.CacheKeyValueIsNullOrEmpty, $"{entityType.FullName},identity value:{data.GetIdentityValue()},cache prefix key:{preKey},value is null or empty,unable to set cache data");
                                 keyValueSuccess = false;
                                 break;
                             }
@@ -457,7 +457,7 @@ namespace EZNEW.Data.Cache.Policy
                         var pkValue = data.GetValue(pk)?.ToString() ?? string.Empty;
                         if (string.IsNullOrWhiteSpace(pkValue))
                         {
-                            LogManager.LogError<DefaultDataCachePolicy>($"Data type :{entityType.FullName},Identity value:{data.GetIdentityValue()},Primary key:{pk},value is null or empty,unable to set cache data");
+                            LogManager.LogError<DefaultDataCachePolicy>(FrameworkLogEvents.Cache.CacheKeyValueIsNullOrEmpty, $"{entityType.FullName},identity value:{data.GetIdentityValue()},primary key:{pk},value is null or empty,unable to set cache data");
                             keyValueSuccess = false;
                             break;
                         }
@@ -487,7 +487,7 @@ namespace EZNEW.Data.Cache.Policy
                             var cacheKeyValue = data.GetValue(key)?.ToString() ?? string.Empty;
                             if (string.IsNullOrWhiteSpace(cacheKeyValue))
                             {
-                                LogManager.LogError<DefaultDataCachePolicy>($"Data type :{entityType.FullName},Identity value:{data.GetIdentityValue()},Cache key:{key},value is null or empty,unable to set cache data");
+                                LogManager.LogError<DefaultDataCachePolicy>(FrameworkLogEvents.Cache.CacheKeyValueIsNullOrEmpty, $"{entityType.FullName},identity value:{data.GetIdentityValue()},cache key:{key},value is null or empty,unable to set cache data");
                                 keyValueSuccess = false;
                                 break;
                             }
@@ -587,7 +587,7 @@ namespace EZNEW.Data.Cache.Policy
                 {
                     if (!string.IsNullOrWhiteSpace(response?.Message))
                     {
-                        LogManager.LogInformation<DefaultDataCachePolicy>(response.Message);
+                        LogManager.LogDebug<DefaultDataCachePolicy>(FrameworkLogEvents.Cache.CacheOperationResponseMessage, response.Message);
                     }
                 }
             }
@@ -685,7 +685,7 @@ namespace EZNEW.Data.Cache.Policy
                 {
                     if (!string.IsNullOrWhiteSpace(response?.Message))
                     {
-                        LogManager.LogInformation<DefaultDataCachePolicy>(response.Message);
+                        LogManager.LogDebug<DefaultDataCachePolicy>(FrameworkLogEvents.Cache.CacheOperationResponseMessage, response.Message);
                     }
                 }
             }
@@ -756,7 +756,7 @@ namespace EZNEW.Data.Cache.Policy
                     {
                         if (!string.IsNullOrWhiteSpace(response?.Message))
                         {
-                            LogManager.LogInformation<DefaultDataCachePolicy>(response.Message);
+                            LogManager.LogDebug<DefaultDataCachePolicy>(FrameworkLogEvents.Cache.CacheOperationResponseMessage, response.Message);
                         }
                     }
                 }
@@ -773,10 +773,10 @@ namespace EZNEW.Data.Cache.Policy
         /// <param name="query">Query condition</param>
         /// <param name="size">Return data size</param>
         /// <returns></returns>
-        QueryDataResult<T> GetCacheDatas<T>(IQuery query, int size)
+        QueryDataResult<T> GetCacheDatas<T>(IQuery query, int size) where T : BaseEntity<T>, new()
         {
             //complex query force query database
-            if (query?.IsComplexQuery ?? false)
+            if (query?.IsComplex ?? false)
             {
                 return QueryDataResult<T>.Default("IQuery is a complex query object,not query cache data");
             }
@@ -812,7 +812,7 @@ namespace EZNEW.Data.Cache.Policy
         protected virtual List<T> GetCacheDatasByType<T>(IQuery query, int size)
         {
             var type = typeof(T);
-            var needSort = query != null && !query.Orders.IsNullOrEmpty();
+            var needSort = query != null && !query.Sorts.IsNullOrEmpty();
             if (needSort)
             {
                 return new List<T>(0);
@@ -896,26 +896,26 @@ namespace EZNEW.Data.Cache.Policy
         /// <param name="query">Query condition</param>
         /// <param name="size">Return data size</param>
         /// <returns></returns>
-        protected virtual QueryDataResult<T> GetCacheDatasByCondition<T>(IQuery query, int size)
+        protected virtual QueryDataResult<T> GetCacheDatasByCondition<T>(IQuery query, int size) where T : BaseEntity<T>, new()
         {
             Type entityType = typeof(T);
             var entityConfiguration = EntityManager.GetEntityConfiguration(entityType);
             if (entityConfiguration == null)
             {
-                LogManager.LogError<DefaultDataCachePolicy>($"Entity :{entityType.FullName} configuration is null");
+                LogManager.LogWarning<DefaultDataCachePolicy>(FrameworkLogEvents.Configuration.EntityConfigurationIsNull, $"Entity :{entityType.FullName} configuration is null");
                 return QueryDataResult<T>.Default();
             }
             var primaryKeys = entityConfiguration.PrimaryKeys;
             if (primaryKeys.IsNullOrEmpty())
             {
-                LogManager.LogError<T>($"Type：{entityType.FullName} no primary key is set,unable to get cache data");
+                LogManager.LogWarning<DefaultDataCachePolicy>(FrameworkLogEvents.Configuration.EntityNotSetPrimaryKey, $"Type：{entityType.FullName} not set primary key,unable to get cache data");
                 return new QueryDataResult<T>()
                 {
                     Datas = new List<T>(0),
                     QueryDatabase = true
                 };
             }
-            var otherKeys = query.AllConditionFieldNames;
+            var otherKeys = query?.Criteria?.Select(c => c.Name).Distinct() ?? Array.Empty<string>();
             var cacheObject = new CacheObject()
             {
                 ObjectName = entityType.Name
@@ -925,10 +925,10 @@ namespace EZNEW.Data.Cache.Policy
 
             List<CacheKey> prefixDataKeys = new List<CacheKey>();
             var cachePrefixKeys = entityConfiguration.CachePrefixKeys ?? new List<string>(0);
-            var prefixKeyValues = query.GetKeysEqualValue(cachePrefixKeys);
+            var prefixKeyValues = query.GetEqualParameters(cachePrefixKeys);
             if (prefixKeyValues.Count != cachePrefixKeys.Count)
             {
-                LogManager.LogError<T>($"Type：{entityType.FullName} miss cache prefix key values in IQuery");
+                LogManager.LogDebug<DefaultDataCachePolicy>(FrameworkLogEvents.Cache.CacheKeyValueIsNullOrEmpty, $"Type：{entityType.FullName} miss cache prefix key values in IQuery");
                 return new QueryDataResult<T>()
                 {
                     Datas = new List<T>(0),
@@ -971,7 +971,7 @@ namespace EZNEW.Data.Cache.Policy
 
             #region primary keys
 
-            var primaryKeyValues = query.GetKeysEqualValue(primaryKeys);
+            var primaryKeyValues = query.GetEqualParameters(primaryKeys);
             bool fullPrimaryKey = primaryKeyValues.Count == primaryKeys.Count;
             if (fullPrimaryKey)
             {
@@ -1013,7 +1013,7 @@ namespace EZNEW.Data.Cache.Policy
             List<CacheKey> cacheFieldCacheKeys = null;
             if (!cacheFields.IsNullOrEmpty())
             {
-                var dataCacheFieldValues = query.GetKeysEqualValue(cacheFields);
+                var dataCacheFieldValues = query.GetEqualParameters(cacheFields);
                 if (!dataCacheFieldValues.IsNullOrEmpty())
                 {
                     otherKeys = otherKeys.Except(dataCacheFieldValues.Keys).ToList();
@@ -1037,10 +1037,10 @@ namespace EZNEW.Data.Cache.Policy
 
             #endregion
 
-            bool needSort = query != null && !query.Orders.IsNullOrEmpty();
+            bool needSort = query != null && !query.Sorts.IsNullOrEmpty();
             if (dataCacheKeys.IsNullOrEmpty() || (!otherKeys.IsNullOrEmpty() && needSort))
             {
-                LogManager.LogInformation<DefaultDataCachePolicy>($"Type：{entityType.FullName},IQuery has any other criterias without cache keys and need sort");
+                LogManager.LogDebug<DefaultDataCachePolicy>(FrameworkLogEvents.Cache.NotUsingCache, $"Type：{entityType.FullName},IQuery has any other criteria without cache keys and need sort");
                 return new QueryDataResult<T>()
                 {
                     QueryDatabase = true,
@@ -1049,7 +1049,7 @@ namespace EZNEW.Data.Cache.Policy
             }
             dataCacheKeys = dataCacheKeys.Distinct().ToList();
             int removeCount = 0;
-            var queryConditionFunc = query.GetQueryExpression<T>();//query condition
+            var queryConditionFunc = query.GetValidationFunction<T>();//query condition
             List<T> dataList = new List<T>();
             size = size < 0 ? 0 : size;//return value count
             bool notQueryDb = false;
@@ -1070,7 +1070,7 @@ namespace EZNEW.Data.Cache.Policy
                 notQueryDb = dataList.Count >= size - removeCount;
                 if (notQueryDb && needSort)
                 {
-                    dataList = query.Sort(dataList).ToList();
+                    dataList = query.SortData(dataList).ToList();
                 }
             }
             else

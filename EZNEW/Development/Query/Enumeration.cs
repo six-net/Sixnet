@@ -3,10 +3,10 @@
 namespace EZNEW.Development.Query
 {
     /// <summary>
-    /// Defines condition operator
+    /// Defines criterion operator
     /// </summary>
     [Serializable]
-    public enum CriteriaOperator
+    public enum CriterionOperator
     {
         Equal,              //=  
         NotEqual,      //<>  
@@ -23,40 +23,29 @@ namespace EZNEW.Development.Query
         EndLike,
         NotEndLike,
         IsNull,
-        NotNull
+        NotNull,
+        True,
+        False
     }
 
     /// <summary>
-    /// Defines connect operator
+    /// Defines condition connection operator
     /// </summary>
     [Serializable]
-    public enum QueryOperator
+    public enum ConditionConnectionOperator
     {
         AND,
         OR
     }
 
     /// <summary>
-    /// Defines query command type
+    /// Defines query execution mode
     /// </summary>
     [Serializable]
-    public enum QueryCommandType
+    public enum QueryExecutionMode
     {
         QueryObject,
         Text
-    }
-
-
-    /// <summary>
-    /// Defines calculation operator
-    /// </summary>
-    [Serializable]
-    public enum CalculationOperator
-    {
-        Add,
-        Subtract,
-        Multiply,
-        Divide
     }
 
     /// <summary>
@@ -99,15 +88,15 @@ namespace EZNEW.Development.Query
     }
 
     /// <summary>
-    /// Defines condition source type
+    /// Defines query location
     /// </summary>
     [Serializable]
-    public enum QuerySourceType
+    public enum QueryLocation
     {
-        Repository = 2,
+        Top = 2,
         Subuery = 4,
-        JoinQuery = 8,
-        CombineQuery = 16
+        Join = 8,
+        Combine = 16
     }
 
     /// <summary>
@@ -119,7 +108,7 @@ namespace EZNEW.Development.Query
         Remove = 2001,
         Modify = 2005,
         Query = 2010,
-        Exist = 2015,
+        Exists = 2015,
         Count = 2020,
         Max = 2025,
         Min = 2030,

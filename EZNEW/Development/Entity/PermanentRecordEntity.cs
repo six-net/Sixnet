@@ -10,7 +10,7 @@ namespace EZNEW.Development.Entity
     public class PermanentRecordEntity<TEntity> : RecordEntity<TEntity>, IObsoleteEntity where TEntity : BaseEntity<TEntity>, new()
     {
         /// <summary>
-        /// Indecates whether is obsolete
+        /// Indicates whether is obsolete
         /// </summary>
         [EntityField(Description = "Obsolete", Role = FieldRole.ObsoleteTag)]
         public bool IsObsolete { get; set; }

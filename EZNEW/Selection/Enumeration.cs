@@ -6,7 +6,7 @@ namespace EZNEW.Selection
     /// Define a selection matching pattern
     /// </summary>
     [Serializable]
-    public enum SelectMatchMode
+    public enum SelectionMatchPattern
     {
         /// <summary>
         /// The first data

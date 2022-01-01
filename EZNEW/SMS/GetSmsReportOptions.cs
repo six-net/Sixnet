@@ -40,7 +40,7 @@ namespace EZNEW.Sms
             return new GetSmsReportOptions()
             {
                 Tag = Tag,
-                Additionals = Additionals?.ToDictionary(c => c.Key, c => c.Value) ?? new Dictionary<string, string>(0),
+                Parameters = Parameters?.ToDictionary(c => c.Key, c => c.Value) ?? new Dictionary<string, string>(0),
                 Mobile = Mobile,
                 SendDate = SendDate,
                 MessageId = MessageId,

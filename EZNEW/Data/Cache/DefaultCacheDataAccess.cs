@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using EZNEW.Development.Command;
-using EZNEW.Development.Command.Modification;
 using EZNEW.Development.Query;
 using EZNEW.Development.DataAccess;
 using EZNEW.Development.Entity;
 using EZNEW.Paging;
 using EZNEW.Data.Cache.Command;
 using EZNEW.DependencyInjection;
+using EZNEW.Data.Modification;
 
 namespace EZNEW.Data.Cache
 {
@@ -154,9 +154,9 @@ namespace EZNEW.Data.Cache
         /// </summary>
         /// <param name="query">Query condition</param>
         /// <returns></returns>
-        public bool Exist(IQuery query)
+        public bool Exists(IQuery query)
         {
-            return ExistAsync(query).Result;
+            return ExistsAsync(query).Result;
         }
 
         /// <summary>
@@ -164,12 +164,12 @@ namespace EZNEW.Data.Cache
         /// </summary>
         /// <param name="query">Query condition</param>
         /// <returns></returns>
-        public virtual async Task<bool> ExistAsync(IQuery query)
+        public virtual async Task<bool> ExistsAsync(IQuery query)
         {
             return await dataCacheProvider.ExistAsync<TEntity>(new ExistDataCacheCommand<TEntity>()
             {
                 Query = query,
-                CheckDatabaseDataProxyAsync = databaseAccess.ExistAsync,
+                CheckDatabaseDataProxyAsync = databaseAccess.ExistsAsync,
                 GetDatabaseDataProxyAsync = databaseAccess.GetAsync
             }).ConfigureAwait(false);
         }

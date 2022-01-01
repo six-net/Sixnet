@@ -20,8 +20,8 @@ namespace EZNEW.Data.Configuration
         public Dictionary<Type, DataEntityConfiguration> EntityConfigurations { get; set; }
 
         /// <summary>
-        /// Gets or sets the batch execute configuration
+        /// Gets or sets the batch execution configuration
         /// </summary>
-        public BatchExecutionConfiguration BatchExecuteConfiguration { get; set; }
+        public BatchExecutionConfiguration BatchExecutionConfiguration { get; set; }
     }
 }

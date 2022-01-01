@@ -118,7 +118,7 @@ namespace EZNEW.Serialization
         /// </summary>
         /// <typeparam name="T">data type</typeparam>
         /// <param name="data">data</param>
-        /// <param name="resolveNonPublic">Indecates whether resolve non public fields or properties</param>
+        /// <param name="resolveNonPublic">Indicates whether resolve non public fields or properties</param>
         /// <returns>Return a json string</returns>
         public static string Serialize<T>(T data, bool resolveNonPublic = false)
         {
@@ -140,7 +140,7 @@ namespace EZNEW.Serialization
         /// Deserialize a json string to an object
         /// </summary>
         /// <param name="json">Json string</param>
-        /// <param name="resolveNonPublic">Indecates whether resolve non public fields or properties</param>
+        /// <param name="resolveNonPublic">Indicates whether resolve non public fields or properties</param>
         /// <returns>Return a data object</returns>
         public static T Deserialize<T>(string json, bool resolveNonPublic = false)
         {

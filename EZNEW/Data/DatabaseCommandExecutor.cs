@@ -7,6 +7,7 @@ using EZNEW.Paging;
 using EZNEW.Development.Entity;
 using EZNEW.Exceptions;
 using EZNEW.Development.Command;
+using EZNEW.Logging;
 
 namespace EZNEW.Data
 {
@@ -15,16 +16,16 @@ namespace EZNEW.Data
     /// </summary>
     public class DatabaseCommandExecutor : ICommandExecutor
     {
-        const string identityKey = "eznew_data_defaultdatabasecommandexecutor";
+        const string identityValue = "eznew_data_defaultdatabasecommandexecutor";
 
         /// <summary>
-        /// Gets the command executor identity key
+        /// Gets the command executor identity value
         /// </summary>
-        public string IdentityKey
+        public string IdentityValue
         {
             get
             {
-                return identityKey;
+                return identityValue;
             }
         }
 
@@ -35,7 +36,7 @@ namespace EZNEW.Data
         /// </summary>
         /// <param name="executionOptions">Execution options</param>
         /// <param name="commands">Commands</param>
-        /// <returns>Return effect data numbers</returns>
+        /// <returns>Return affected data number</returns>
         public int Execute(CommandExecutionOptions executionOptions, IEnumerable<ICommand> commands)
         {
             return ExecuteAsync(executionOptions, commands).Result;
@@ -46,7 +47,7 @@ namespace EZNEW.Data
         /// </summary>
         /// <param name="executionOptions">Execution options</param>
         /// <param name="commands">Commands</param>
-        /// <returns>Return effect data numbers</returns>
+        /// <returns>Return affected data number</returns>
         public int Execute(CommandExecutionOptions executionOptions, params ICommand[] commands)
         {
             return ExecuteAsync(executionOptions, commands).Result;
@@ -57,7 +58,7 @@ namespace EZNEW.Data
         /// </summary>
         /// <param name="executionOptions">Execution options</param>
         /// <param name="commands">Commands</param>
-        /// <returns>Return effect data numbers</returns>
+        /// <returns>Return affected data number</returns>
         public async Task<int> ExecuteAsync(CommandExecutionOptions executionOptions, IEnumerable<ICommand> commands)
         {
             if (commands.IsNullOrEmpty())
@@ -72,9 +73,14 @@ namespace EZNEW.Data
             foreach (var cmd in commands)
             {
                 var servers = GetServers(cmd);
+                if (servers.IsNullOrEmpty())
+                {
+                    LogManager.LogWarning<DatabaseCommandExecutor>(FrameworkLogEvents.Database.NotSetDatabaseServer, $"Not set database server");
+                    continue;
+                }
                 foreach (var server in servers)
                 {
-                    string serverKey = server.Key;
+                    string serverKey = server.IdentityValue;
                     if (serverInfos.ContainsKey(serverKey))
                     {
                         commandGroup[serverKey].Add(cmd);
@@ -108,16 +114,16 @@ namespace EZNEW.Data
             }
 
             //Multiple database server
-            Task<int>[] executeTasks = new Task<int>[commandGroup.Count];
+            Task<int>[] executionTasks = new Task<int>[commandGroup.Count];
             int groupIndex = 0;
-            foreach (var cmdGroup in commandGroup)
+            foreach (var cmdGroupItem in commandGroup)
             {
-                var databaseServer = serverInfos[cmdGroup.Key];
+                var databaseServer = serverInfos[cmdGroupItem.Key];
                 var provider = DataManager.GetDatabaseProvider(databaseServer.ServerType);
-                executeTasks[groupIndex] = provider.ExecuteAsync(databaseServer, executionOptions, cmdGroup.Value.Select(c => c.Clone()));
+                executionTasks[groupIndex] = provider.ExecuteAsync(databaseServer, executionOptions, cmdGroupItem.Value.Select(c => c.Clone()));
                 groupIndex++;
             }
-            return (await Task.WhenAll(executeTasks).ConfigureAwait(false)).Sum();
+            return (await Task.WhenAll(executionTasks).ConfigureAwait(false)).Sum();
 
             #endregion
         }
@@ -127,7 +133,7 @@ namespace EZNEW.Data
         /// </summary>
         /// <param name="executionOptions">Execution options</param>
         /// <param name="commands">Commands</param>
-        /// <returns>Return effect data numbers</returns>
+        /// <returns>Return affected data number</returns>
         public async Task<int> ExecuteAsync(CommandExecutionOptions executionOptions, params ICommand[] commands)
         {
             IEnumerable<ICommand> cmdCollection = commands;
@@ -139,21 +145,21 @@ namespace EZNEW.Data
         #region Query datas
 
         /// <summary>
-        /// Determine whether data is exist
+        /// Determines whether exists data
         /// </summary>
         /// <param name="command">Command</param>
-        /// <returns>Return whether data is exist</returns>
-        public bool Query(ICommand command)
+        /// <returns>Return whether exists data</returns>
+        public bool Exists(ICommand command)
         {
-            return QueryAsync(command).Result;
+            return ExistsAsync(command).Result;
         }
 
         /// <summary>
-        /// Determine whether data is exist
+        /// Determines whether exists data
         /// </summary>
         /// <param name="command">Command</param>
-        /// <returns>Return whether data is exist</returns>
-        public async Task<bool> QueryAsync(ICommand command)
+        /// <returns>Return whether exists data</returns>
+        public async Task<bool> ExistsAsync(ICommand command)
         {
             var servers = GetServers(command);
             VerifyServerProvider(servers.Select(c => c.ServerType));
@@ -161,7 +167,7 @@ namespace EZNEW.Data
             foreach (var server in servers)
             {
                 var provider = DataManager.GetDatabaseProvider(server.ServerType);
-                result = result || await provider.QueryAsync(server, command).ConfigureAwait(false);
+                result = result || await provider.ExistsAsync(server, command).ConfigureAwait(false);
                 if (result)
                 {
                     break;
@@ -176,7 +182,7 @@ namespace EZNEW.Data
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="command">Command</param>
         /// <returns>Return datas</returns>
-        public IEnumerable<T> Query<T>(ICommand command)
+        public IEnumerable<T> Query<T>(ICommand command) where T : BaseEntity<T>, new()
         {
             return QueryAsync<T>(command).Result;
         }
@@ -187,7 +193,7 @@ namespace EZNEW.Data
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="command">Command</param>
         /// <returns>Return datas</returns>
-        public async Task<IEnumerable<T>> QueryAsync<T>(ICommand command)
+        public async Task<IEnumerable<T>> QueryAsync<T>(ICommand command) where T : BaseEntity<T>, new()
         {
             var servers = GetServers(command);
             VerifyServerProvider(servers.Select(c => c.ServerType));
@@ -200,7 +206,7 @@ namespace EZNEW.Data
             }
             else
             {
-                bool notOrder = command.Query == null || command.Query.Orders.IsNullOrEmpty();
+                bool notOrder = command.Query == null || command.Query.Sorts.IsNullOrEmpty();
                 int dataSize = command.Query?.QuerySize ?? 0;
                 Task<IEnumerable<T>>[] queryTasks = new Task<IEnumerable<T>>[servers.Count];
                 int serverIndex = 0;
@@ -211,14 +217,14 @@ namespace EZNEW.Data
                     serverIndex++;
                 }
                 datas = (await Task.WhenAll(queryTasks).ConfigureAwait(false)).SelectMany(c => c);
-                if (DataManager.DataOptions.ListDataMergeForDeduplication)
+                if (DataManager.DataOptions.DeduplicationListData)
                 {
                     var entityCompare = new EntityCompare<T>();
                     datas = datas.Distinct(entityCompare);
                 }
                 if (!notOrder)
                 {
-                    datas = command.Query.Sort(datas);
+                    datas = command.Query.SortData(datas);
                 }
                 if (dataSize > 0 && datas.Count() > dataSize)
                 {
@@ -277,7 +283,7 @@ namespace EZNEW.Data
 
             IEnumerable<T> datas = Array.Empty<T>();
             long totalCount = 0;
-            EntityCompare<T> entityCompare = DataManager.DataOptions.PagingDataMergeForDeduplication ? new EntityCompare<T>() : null;
+            EntityCompare<T> entityCompare = DataManager.DataOptions.DeduplicationPagingData ? EntityCompare<T>.Default : null;
             foreach (var paging in allPagings)
             {
                 if (paging == null)
@@ -292,7 +298,7 @@ namespace EZNEW.Data
             }
             if (command.Query != null)
             {
-                datas = command.Query.Sort(datas);
+                datas = command.Query.SortData(datas);
             }
             if (datas.Count() > pageSize)
             {
@@ -323,22 +329,22 @@ namespace EZNEW.Data
         }
 
         /// <summary>
-        /// Query a single data
+        /// Query aggregation value
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="command">Command</param>
-        /// <returns>Return data</returns>
+        /// <returns>Return value</returns>
         public T AggregateValue<T>(ICommand command)
         {
             return AggregateValueAsync<T>(command).Result;
         }
 
         /// <summary>
-        /// Query a single data
+        /// Query aggregation value
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="command">Command</param>
-        /// <returns>Return data</returns>
+        /// <returns>Return value</returns>
         public async Task<T> AggregateValueAsync<T>(ICommand command)
         {
             var servers = GetServers(command);
@@ -363,7 +369,7 @@ namespace EZNEW.Data
             }
             var datas = await Task.WhenAll(aggregateTasks).ConfigureAwait(false);
             dynamic result = default(T);
-            switch (command.OperateType)
+            switch (command.OperationType)
             {
                 case CommandOperationType.Max:
                     result = datas.Max();
@@ -435,7 +441,7 @@ namespace EZNEW.Data
         /// <param name="server">Database server</param>
         /// <param name="dataTable">Data table</param>
         /// <param name="bulkInsertOptions">Bulk insert options</param>
-        public async Task BulkInsertAsync(DatabaseServer server, DataTable dataTable, IBulkInsertOptions bulkInsertOptions = null)
+        public async Task BulkInsertAsync(DatabaseServer server, DataTable dataTable, IBulkInsertionOptions bulkInsertOptions = null)
         {
             if (server == null)
             {
@@ -460,12 +466,7 @@ namespace EZNEW.Data
             {
                 return new List<DatabaseServer>(0);
             }
-            var servers = DataManager.GetDatabaseServers(command);
-            if (servers.IsNullOrEmpty())
-            {
-                throw new EZNEWException("Database server information not obtained from ICommand");
-            }
-            return servers;
+            return DataManager.GetDatabaseServers(command);
         }
 
         /// <summary>
@@ -483,7 +484,7 @@ namespace EZNEW.Data
                 var databaseProvider = DataManager.GetDatabaseProvider(serverType);
                 if (databaseProvider == null)
                 {
-                    throw new EZNEWException($"No provider for configuring database type {serverType}");
+                    throw new EZNEWException($"Not set provider for database type:{serverType}");
                 }
             }
         }

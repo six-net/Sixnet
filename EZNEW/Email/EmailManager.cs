@@ -4,9 +4,8 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using EZNEW.Configuration;
 using EZNEW.DependencyInjection;
-using EZNEW.Development.UnitOfWork;
-using EZNEW.Diagnostics;
 using EZNEW.Exceptions;
 using EZNEW.Queue;
 
@@ -39,7 +38,7 @@ namespace EZNEW.Email
         static Func<SendEmailOptions, EmailAccount> GetEmailAccount;
 
         /// <summary>
-        /// Determines whether use the same email account
+        /// Indicates whether use the same email account
         /// </summary>
         static bool UseSameEmailAccount = false;
 
@@ -115,7 +114,7 @@ namespace EZNEW.Email
         /// <returns>Return send result</returns>
         public static async Task<SendEmailResult> SendAsync(SendEmailOptions sendEmailOptions)
         {
-            return (await SendAsync(new SendEmailOptions[1] { sendEmailOptions }).ConfigureAwait(false))?.FirstOrDefault() ?? SendEmailResult.Empty;
+            return (await SendAsync(new SendEmailOptions[1] { sendEmailOptions }).ConfigureAwait(false))?.FirstOrDefault() ?? SendEmailResult.Empty();
         }
 
         /// <summary>
@@ -141,7 +140,7 @@ namespace EZNEW.Email
         {
             if (string.IsNullOrWhiteSpace(subject) || string.IsNullOrWhiteSpace(content) || receiveAddresses.IsNullOrEmpty())
             {
-                return SendEmailResult.Empty;
+                return SendEmailResult.Empty();
             }
             return await SendAsync(new SendEmailOptions()
             {
@@ -279,7 +278,7 @@ namespace EZNEW.Email
         {
             if (string.IsNullOrWhiteSpace(subject) || string.IsNullOrWhiteSpace(content) || receiveAddresses.IsNullOrEmpty())
             {
-                return SendEmailResult.Empty;
+                return SendEmailResult.Empty();
             }
             var results = await SendAsync(emailAccount, new SendEmailOptions()
             {
@@ -289,7 +288,7 @@ namespace EZNEW.Email
                 Content = content,
                 Emails = receiveAddresses,
             }).ConfigureAwait(false);
-            return results?.FirstOrDefault() ?? SendEmailResult.Empty;
+            return results?.FirstOrDefault() ?? SendEmailResult.Empty();
         }
 
         /// <summary>

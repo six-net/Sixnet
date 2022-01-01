@@ -16,18 +16,6 @@ namespace EZNEW.Development.Entity
     }
 
     /// <summary>
-    /// Defines entity structure
-    /// </summary>
-    [Serializable]
-    public enum EntityStructure
-    {
-        Normal = 2,
-        Tree = 4,
-        Relation = 8,
-        ThreeRelation = 16
-    }
-
-    /// <summary>
     /// Defines entity field role
     /// </summary>
     [Flags]

@@ -11,7 +11,7 @@ namespace EZNEW.Data.Cache.Policy
     public class StartingResult
     {
         /// <summary>
-        /// Whether break database command
+        /// Indicates whether break database command
         /// </summary>
         public bool BreakDatabaseCommand { get; set; }
 
@@ -22,14 +22,7 @@ namespace EZNEW.Data.Cache.Policy
 
         public static StartingResult Success(string message = "", Exception exception = null)
         {
-            if (!string.IsNullOrWhiteSpace(message))
-            {
-                LogManager.LogInformation<StartingResult>(message);
-            }
-            if (exception != null)
-            {
-                LogManager.LogError<StartingResult>(exception, exception.Message);
-            }
+            LogManager.LogDebug<DataCacheBehavior>(FrameworkLogEvents.Cache.CacheOperationError, "Continue database access");
             return new StartingResult()
             {
                 BreakDatabaseCommand = false,
@@ -39,7 +32,7 @@ namespace EZNEW.Data.Cache.Policy
 
         public static StartingResult Break(string message = "", Exception ex = null)
         {
-            LogManager.LogError<StartingResult>(ex, message);
+            LogManager.LogDebug<StartingResult>(FrameworkLogEvents.Cache.CacheOperationError, $"Interrupt database access,{message}");
             return new StartingResult()
             {
                 BreakDatabaseCommand = true,

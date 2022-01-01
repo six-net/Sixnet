@@ -15,130 +15,87 @@ namespace EZNEW.Development.Query
     internal static class ExpressionQueryHelper
     {
         /// <summary>
-        /// Get a query item by expression
+        /// Get condtion by expression
         /// </summary>
-        /// <param name="queryOperator">Connect operator</param>
-        /// <param name="expression">Condition expression</param>
-        /// <returns>IQueryItem object</returns>
-        internal static Tuple<QueryOperator, IQueryItem> GetExpressionQuery(QueryOperator queryOperator, Expression expression)
+        /// <param name="connectionOperator">Connection operator</param>
+        /// <param name="conditionExpression">Condition expression</param>
+        /// <returns>Return a condition</returns>
+        internal static ICondition GetExpressionCondition(ConditionConnectionOperator connectionOperator, Expression conditionExpression)
         {
-            var nodeType = expression.NodeType;
-            ExpressionType queryNodeType = queryOperator == QueryOperator.OR ? ExpressionType.OrElse : ExpressionType.AndAlso;
+            var nodeType = conditionExpression.NodeType;
+            ExpressionType queryNodeType = connectionOperator == ConditionConnectionOperator.OR ? ExpressionType.OrElse : ExpressionType.AndAlso;
             if (ExpressionHelper.IsCompareNodeType(nodeType))
             {
-                return GetSingleExpressionQueryItem(queryNodeType, expression);
+                return GetExpressionCriterion(queryNodeType, conditionExpression);
             }
             else if (ExpressionHelper.IsBoolNodeType(nodeType))
             {
-                BinaryExpression binExpression = expression as BinaryExpression;
-                if (binExpression == null)
+                if (conditionExpression is BinaryExpression binaryExpression)
                 {
-                    throw new EZNEWException("Expression is error");
+                    IQuery query = QueryManager.Create();
+                    var leftQuery = GetExpressionCondition(connectionOperator, binaryExpression.Left);
+                    if (leftQuery != null)
+                    {
+                        query.AddCondition(leftQuery);
+                    }
+                    ConditionConnectionOperator rightQueryConnectionOperator = nodeType == ExpressionType.OrElse ? ConditionConnectionOperator.OR : ConditionConnectionOperator.AND;
+                    var rightQuery = GetExpressionCondition(rightQueryConnectionOperator, binaryExpression.Right);
+                    if (rightQuery != null)
+                    {
+                        query.AddCondition(rightQuery);
+                    }
+                    query.ConnectionOperator = connectionOperator;
+                    return query;
                 }
-                IQuery query = QueryManager.Create();
-                var leftQuery = GetExpressionQuery(queryOperator, binExpression.Left);
-                if (leftQuery != null)
-                {
-                    query.AddQueryItem(leftQuery.Item1, leftQuery.Item2);
-                }
-                QueryOperator rightQueryOperator = nodeType == ExpressionType.OrElse ? QueryOperator.OR : QueryOperator.AND;
-                var rightQuery = GetExpressionQuery(rightQueryOperator, binExpression.Right);
-                if (rightQuery != null)
-                {
-                    query.AddQueryItem(rightQuery.Item1, rightQuery.Item2);
-                }
-                return new Tuple<QueryOperator, IQueryItem>(queryOperator, query);
             }
             else if (nodeType == ExpressionType.Call)
             {
-                return GetCallExpressionQueryItem(queryOperator, expression);
+                return GetMethodCallExpressionCriterion(connectionOperator, conditionExpression);
             }
             else if (nodeType == ExpressionType.Not)
             {
-                UnaryExpression unaryExpress = expression as UnaryExpression;
+                UnaryExpression unaryExpress = conditionExpression as UnaryExpression;
                 if (unaryExpress != null && unaryExpress.Operand is MethodCallExpression)
                 {
-                    return GetCallExpressionQueryItem(queryOperator, unaryExpress.Operand, true);
+                    return GetMethodCallExpressionCriterion(connectionOperator, unaryExpress.Operand, true);
                 }
             }
-            return null;
+            if (conditionExpression is ConstantExpression constantExpression && constantExpression.Value is bool boolValue)
+            {
+                if (boolValue)
+                {
+                    return null;
+                }
+                return Criterion.Create(string.Empty, CriterionOperator.False, null);
+            }
+            throw new EZNEWException($"Expression type:{conditionExpression?.GetType()} are not supported");
         }
 
         /// <summary>
-        /// Get a query item by method call expression with string type
+        /// Get expression criterion
         /// </summary>
-        /// <param name="methodName">Method name</param>
-        /// <param name="memberArg">Expression</param>
-        /// <param name="negation">Whether is negation</param>
-        /// <returns>criteria</returns>
-        internal static Criteria GetStringCallExpressionQueryItem(string methodName, Expression memberArg, Expression parameter, bool negation = false)
+        /// <param name="conditionExpressionType">Expression type</param>
+        /// <param name="conditionExpression">Condition expression</param>
+        /// <returns>Return a criterion</returns>
+        internal static Criterion GetExpressionCriterion(ExpressionType conditionExpressionType, Expression conditionExpression)
         {
-            Criteria criteria = null;
-            CriteriaOperator criteriaOperator = CriteriaOperator.Like;
-            //parameter name
-            string parameterName = string.Empty;
-            if (memberArg is ParameterExpression)
+            if (conditionExpression is BinaryExpression binaryExpression)
             {
-                parameterName = (memberArg as ParameterExpression)?.Name;
+                ConditionConnectionOperator connectionOperator = conditionExpressionType == ExpressionType.OrElse ? ConditionConnectionOperator.OR : ConditionConnectionOperator.AND;
+                Tuple<Expression, Expression> nameAndValue = GetNameAndValueExpression(binaryExpression.Left, binaryExpression.Right);
+                if (nameAndValue == null)
+                {
+                    return null;
+                }
+                string name = ExpressionHelper.GetExpressionPropertyName(nameAndValue.Item1);
+                object value = nameAndValue.Item2;
+                if (string.IsNullOrEmpty(name) || value == null)
+                {
+                    return null;
+                }
+                return Criterion.Create(name, GetCriterionOperator(binaryExpression.NodeType), value, connectionOperator);
             }
-            else if (memberArg is MemberExpression)
-            {
-                parameterName = ExpressionHelper.GetExpressionPropertyName(memberArg as MemberExpression);
-            }
-            if (string.IsNullOrWhiteSpace(parameterName))
-            {
-                return null;
-            }
-            string value = Expression.Lambda(parameter)?.Compile().DynamicInvoke()?.ToString();
-            switch (methodName)
-            {
-                case "EndsWith":
-                    criteriaOperator = negation ? CriteriaOperator.NotEndLike : CriteriaOperator.EndLike;
-                    criteria = Criteria.CreateNewCriteria(parameterName, criteriaOperator, value);
-                    break;
-                case "StartsWith":
-                    criteriaOperator = negation ? CriteriaOperator.NotBeginLike : CriteriaOperator.BeginLike;
-                    criteria = Criteria.CreateNewCriteria(parameterName, criteriaOperator, value);
-                    break;
-                case "Contains":
-                    criteriaOperator = negation ? CriteriaOperator.NotLike : CriteriaOperator.Like;
-                    criteria = Criteria.CreateNewCriteria(parameterName, criteriaOperator, value);
-                    break;
-            }
-            return criteria;
-        }
-
-        /// <summary>
-        /// Get a query item
-        /// </summary>
-        /// <param name="expressionType">Expression node type</param>
-        /// <param name="expression">Expression</param>
-        /// <returns>IQueryItem object</returns>
-        internal static Tuple<QueryOperator, IQueryItem> GetSingleExpressionQueryItem(ExpressionType expressionType, Expression expression)
-        {
-            if (expression == null)
-            {
-                throw new EZNEWException("expression is null");
-            }
-            BinaryExpression binaryExpression = expression as BinaryExpression;
-            if (binaryExpression == null)
-            {
-                throw new EZNEWException("expression is error");
-            }
-            QueryOperator qOperator = expressionType == ExpressionType.OrElse ? QueryOperator.OR : QueryOperator.AND;
-            Tuple<Expression, Expression> nameAndValue = GetNameAndValueExpression(binaryExpression.Left, binaryExpression.Right);
-            if (nameAndValue == null)
-            {
-                return null;
-            }
-            string name = ExpressionHelper.GetExpressionPropertyName(nameAndValue.Item1);
-            object value = nameAndValue.Item2;
-            if (string.IsNullOrEmpty(name) || value == null)
-            {
-                return null;
-            }
-            CriteriaOperator cOperator = GetCriteriaOperator(binaryExpression.NodeType);
-            return new Tuple<QueryOperator, IQueryItem>(qOperator, Criteria.CreateNewCriteria(name, cOperator, value));
+            throw new EZNEWException($"Expression type:{conditionExpression?.GetType()} are not supported");
         }
 
         /// <summary>
@@ -168,9 +125,9 @@ namespace EZNEW.Development.Query
         }
 
         /// <summary>
-        /// Is field name expression
+        /// Check is field name expression
         /// </summary>
-        /// <param name="expression">expression</param>
+        /// <param name="expression">Expression</param>
         /// <returns></returns>
         internal static bool IsNameExpression(Expression expression)
         {
@@ -197,50 +154,50 @@ namespace EZNEW.Development.Query
         }
 
         /// <summary>
-        /// Get condition operator by expression type
+        /// Get criterion operator by expression type
         /// </summary>
         /// <param name="expressType">Expression type</param>
-        /// <returns>Return criteria operator</returns>
-        internal static CriteriaOperator GetCriteriaOperator(ExpressionType expressType)
+        /// <returns>Return criterion operator</returns>
+        internal static CriterionOperator GetCriterionOperator(ExpressionType expressType)
         {
-            CriteriaOperator cOperator = CriteriaOperator.Equal;
+            CriterionOperator criterionOperator = CriterionOperator.Equal;
             switch (expressType)
             {
                 case ExpressionType.Equal:
                 default:
-                    cOperator = CriteriaOperator.Equal;
+                    criterionOperator = CriterionOperator.Equal;
                     break;
                 case ExpressionType.NotEqual:
-                    cOperator = CriteriaOperator.NotEqual;
+                    criterionOperator = CriterionOperator.NotEqual;
                     break;
                 case ExpressionType.LessThanOrEqual:
-                    cOperator = CriteriaOperator.LessThanOrEqual;
+                    criterionOperator = CriterionOperator.LessThanOrEqual;
                     break;
                 case ExpressionType.LessThan:
-                    cOperator = CriteriaOperator.LessThan;
+                    criterionOperator = CriterionOperator.LessThan;
                     break;
                 case ExpressionType.GreaterThan:
-                    cOperator = CriteriaOperator.GreaterThan;
+                    criterionOperator = CriterionOperator.GreaterThan;
                     break;
                 case ExpressionType.GreaterThanOrEqual:
-                    cOperator = CriteriaOperator.GreaterThanOrEqual;
+                    criterionOperator = CriterionOperator.GreaterThanOrEqual;
                     break;
             }
-            return cOperator;
+            return criterionOperator;
         }
 
         /// <summary>
-        /// Get a query item by method call expression with IEnumerable
+        /// Get criterion by method call expression for IEnumerable
         /// </summary>
         /// <param name="methodName">Method name</param>
         /// <param name="memberArg">MemberArg</param>
         /// <param name="parameter">Parameter</param>
         /// <param name="negation">Whether is negation</param>
-        /// <returns>Return a criteria</returns>
-        internal static Criteria GetIEnumerableCallExpressionQueryItem(string methodName, Expression memberArg, Expression parameter, bool negation = false)
+        /// <returns>Return a criterion</returns>
+        internal static Criterion GetIEnumerableMethodCallExpressionCriterion(string methodName, Expression memberArg, Expression parameter, bool negation = false)
         {
-            Criteria criteria = null;
-            CriteriaOperator criteriaOperator = CriteriaOperator.In;
+            Criterion criterion = null;
+            CriterionOperator criterionOperator = CriterionOperator.In;
             IEnumerable values = null;
             string parameterName = string.Empty;
             if (memberArg is ParameterExpression)
@@ -264,54 +221,99 @@ namespace EZNEW.Development.Query
                         throw new EZNEWException($"The value of the collection type is null or empty");
                     }
                     values = ReflectionManager.Collections.ResolveCollection(values);
-                    criteriaOperator = negation ? CriteriaOperator.NotIn : CriteriaOperator.In;
-                    criteria = Criteria.CreateNewCriteria(parameterName, criteriaOperator, values);
+                    criterionOperator = negation ? CriterionOperator.NotIn : CriterionOperator.In;
+                    criterion = Criterion.Create(parameterName, criterionOperator, values);
                     break;
             }
-            return criteria;
+            return criterion;
         }
 
         /// <summary>
-        /// Get a query item by method call expression
+        /// Get method call expression criterion
         /// </summary>
-        /// <param name="expressionType">Expression node type</param>
-        /// <param name="expression">Expression</param>
+        /// <param name="connectionOperator">Connection connection operator</param>
+        /// <param name="conditionExpression">Connection expression</param>
         /// <param name="negation">Whether is negation</param>
         /// <returns></returns>
-        internal static Tuple<QueryOperator, IQueryItem> GetCallExpressionQueryItem(QueryOperator queryOperator, Expression expression, bool negation = false)
+        internal static Criterion GetMethodCallExpressionCriterion(ConditionConnectionOperator connectionOperator, Expression conditionExpression, bool negation = false)
         {
-            MethodCallExpression callExpression = expression as MethodCallExpression;
-            MemberExpression memberArg = null;
+            MethodCallExpression callExpression = conditionExpression as MethodCallExpression;
+            Expression memberArg = null;
             Expression parameterExpression = null;
             if (callExpression.Object != null)
             {
-                memberArg = callExpression.Object as MemberExpression;
+                memberArg = callExpression.Object;
                 parameterExpression = callExpression.Arguments[0];
             }
             else if (callExpression.Arguments.Count == 2)
             {
-                memberArg = callExpression.Arguments[0] as MemberExpression;
+                memberArg = callExpression.Arguments[0];
                 parameterExpression = callExpression.Arguments[1];
             }
             if (memberArg == null || parameterExpression == null)
             {
                 return null;
             }
-            Criteria criteria = null;
+            Criterion criterion = null;
             var dataType = memberArg.Type;
             if (dataType == typeof(string))
             {
-                criteria = GetStringCallExpressionQueryItem(callExpression.Method.Name, memberArg, parameterExpression, negation);
+                criterion = GetMethodExpressionCriterion(callExpression.Method.Name, memberArg, parameterExpression, negation);
             }
             else if (typeof(IEnumerable).IsAssignableFrom(memberArg.Type))
             {
-                criteria = GetIEnumerableCallExpressionQueryItem(callExpression.Method.Name, parameterExpression, memberArg, negation);
+                criterion = GetIEnumerableMethodCallExpressionCriterion(callExpression.Method.Name, parameterExpression, memberArg, negation);
             }
-            if (criteria != null)
+            if (criterion != null)
             {
-                return new Tuple<QueryOperator, IQueryItem>(queryOperator, criteria);
+                criterion.ConnectionOperator = connectionOperator;
+                return criterion;
             }
-            return null;
+            return criterion;
+        }
+
+        /// <summary>
+        /// Get a query item by method call expression with string type
+        /// </summary>
+        /// <param name="methodName">Method name</param>
+        /// <param name="memberArg">Expression</param>
+        /// <param name="negation">Whether is negation</param>
+        /// <returns>criterion</returns>
+        internal static Criterion GetMethodExpressionCriterion(string methodName, Expression memberArg, Expression parameter, bool negation = false)
+        {
+            Criterion criterion = null;
+            CriterionOperator criterionOperator = CriterionOperator.Like;
+            //parameter name
+            string parameterName = string.Empty;
+            if (memberArg is ParameterExpression)
+            {
+                parameterName = (memberArg as ParameterExpression)?.Name;
+            }
+            else if (memberArg is MemberExpression)
+            {
+                parameterName = ExpressionHelper.GetExpressionPropertyName(memberArg as MemberExpression);
+            }
+            if (string.IsNullOrWhiteSpace(parameterName))
+            {
+                return null;
+            }
+            string value = Expression.Lambda(parameter)?.Compile().DynamicInvoke()?.ToString();
+            switch (methodName)
+            {
+                case "EndsWith":
+                    criterionOperator = negation ? CriterionOperator.NotEndLike : CriterionOperator.EndLike;
+                    criterion = Criterion.Create(parameterName, criterionOperator, value);
+                    break;
+                case "StartsWith":
+                    criterionOperator = negation ? CriterionOperator.NotBeginLike : CriterionOperator.BeginLike;
+                    criterion = Criterion.Create(parameterName, criterionOperator, value);
+                    break;
+                case "Contains":
+                    criterionOperator = negation ? CriterionOperator.NotLike : CriterionOperator.Like;
+                    criterion = Criterion.Create(parameterName, criterionOperator, value);
+                    break;
+            }
+            return criterion;
         }
     }
 }

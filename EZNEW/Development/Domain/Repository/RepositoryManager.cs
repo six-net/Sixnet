@@ -16,13 +16,13 @@ namespace EZNEW.Development.Domain.Repository
         #region IQuery handler
 
         /// <summary>
-        /// Handle IQuery before execute
+        /// Handle IQuery before execution
         /// </summary>
         /// <param name="query">Query object</param>
         /// <param name="usageScene">Usage scene</param>
         /// <param name="queryHandler">Query handler</param>
         /// <returns>Return the real query object to use</returns>
-        internal static IQuery HandleQueryObjectBeforeExecute(IQuery query, QueryUsageScene usageScene, Func<IQuery, IQuery> queryHandler = null)
+        internal static IQuery HandleQueryObjectBeforeExecution(IQuery query, QueryUsageScene usageScene, Func<IQuery, IQuery> queryHandler = null)
         {
             var newQuery = query?.Clone();
             if (queryHandler != null)
@@ -33,12 +33,12 @@ namespace EZNEW.Development.Domain.Repository
         }
 
         /// <summary>
-        /// Handle IQuery after execute
+        /// Handle IQuery after execution
         /// </summary>
         /// <param name="originalQuery">Original query</param>
         /// <param name="executeQuery">Execute query</param>
         /// <param name="usageScene">Usage scene</param>
-        internal static void HandleQueryObjectAfterExecute(IQuery originalQuery, IQuery executeQuery, QueryUsageScene usageScene)
+        internal static void HandleQueryObjectAfterExecution(IQuery originalQuery, IQuery executeQuery, QueryUsageScene usageScene)
         {
             originalQuery?.Reset();
         }
@@ -72,7 +72,7 @@ namespace EZNEW.Development.Domain.Repository
             Type modelReposirotyType = typeof(DefaultRepository<,,>).MakeGenericType(modelType, entityType, entityDataAccessType);
             if (modelRepositoryInterfaceType != null && modelReposirotyType != null)
             {
-                ContainerManager.AddInternalService(modelRepositoryInterfaceType, modelReposirotyType);
+                ContainerManager.AddDefaultProjectService(modelRepositoryInterfaceType, modelReposirotyType);
             }
 
         }

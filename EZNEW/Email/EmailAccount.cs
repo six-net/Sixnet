@@ -41,7 +41,7 @@ namespace EZNEW.Email
         public string Port { get; set; }
 
         /// <summary>
-        /// Gets or sets whether enable ssl
+        /// Indicates whether enable ssl
         /// </summary>
         public bool EnableSsl { get; set; }
 

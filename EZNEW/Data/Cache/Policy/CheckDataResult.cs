@@ -12,26 +12,26 @@ namespace EZNEW.Data.Cache.Policy
     public class CheckDataResult<T>
     {
         /// <summary>
-        /// Determines whether need to query database
+        /// Indicates whether need to query database
         /// </summary>
         public bool QueryDatabase { get; set; }
 
         /// <summary>
-        /// Determines whhether has value
+        /// Indicates whhether has value
         /// </summary>
         public bool HasValue { get; set; }
 
-        public static CheckDataResult<T> Default(string message = "")
-        {
-            if (!string.IsNullOrWhiteSpace(message))
-            {
-                LogManager.LogWarning<QueryDataResult<T>>(message);
-            }
-            return new CheckDataResult<T>()
-            {
-                QueryDatabase = true,
-                HasValue = false
-            };
-        }
+        //public static CheckDataResult<T> Default(string message = "")
+        //{
+        //    if (!string.IsNullOrWhiteSpace(message))
+        //    {
+        //        LogManager.LogDebug<QueryDataResult<T>>(message);
+        //    }
+        //    return new CheckDataResult<T>()
+        //    {
+        //        QueryDatabase = true,
+        //        HasValue = false
+        //    };
+        //}
     }
 }

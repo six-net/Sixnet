@@ -20,10 +20,10 @@ namespace EZNEW.Development.Query
             {
                 return sourceQuery;
             }
-            return sourceQuery.Combine(new CombineItem()
+            return sourceQuery.Combine(new CombineEntry()
             {
-                CombineType = CombineType.UnionAll,
-                CombineQuery = combineQuery
+                Type = CombineType.UnionAll,
+                Query = combineQuery
             });
         }
 
@@ -43,10 +43,10 @@ namespace EZNEW.Development.Query
             {
                 return sourceQuery;
             }
-            return sourceQuery.Combine(new CombineItem()
+            return sourceQuery.Combine(new CombineEntry()
             {
-                CombineType = CombineType.Union,
-                CombineQuery = combineQuery
+                Type = CombineType.Union,
+                Query = combineQuery
             });
         }
 
@@ -66,10 +66,10 @@ namespace EZNEW.Development.Query
             {
                 return sourceQuery;
             }
-            return sourceQuery.Combine(new CombineItem()
+            return sourceQuery.Combine(new CombineEntry()
             {
-                CombineType = CombineType.Except,
-                CombineQuery = combineQuery
+                Type = CombineType.Except,
+                Query = combineQuery
             });
         }
 
@@ -89,10 +89,10 @@ namespace EZNEW.Development.Query
             {
                 return sourceQuery;
             }
-            return sourceQuery.Combine(new CombineItem()
+            return sourceQuery.Combine(new CombineEntry()
             {
-                CombineType = CombineType.Intersect,
-                CombineQuery = combineQuery
+                Type = CombineType.Intersect,
+                Query = combineQuery
             });
         }
 

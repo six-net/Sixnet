@@ -300,7 +300,7 @@ namespace EZNEW.Development.UnitOfWork
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="command">Command</param>
         /// <returns>Return datas</returns>
-        public static IEnumerable<T> Query<T>(ICommand command)
+        public static IEnumerable<T> Query<T>(ICommand command) where T : BaseEntity<T>, new()
         {
             if (command is null)
             {
@@ -316,7 +316,7 @@ namespace EZNEW.Development.UnitOfWork
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="command">Command</param>
         /// <returns>Return datas</returns>
-        public static async Task<IEnumerable<T>> QueryAsync<T>(ICommand command)
+        public static async Task<IEnumerable<T>> QueryAsync<T>(ICommand command) where T : BaseEntity<T>, new()
         {
             if (command?.IsObsolete ?? true)
             {
@@ -360,27 +360,27 @@ namespace EZNEW.Development.UnitOfWork
         }
 
         /// <summary>
-        /// Determine whether data is exist
+        /// Determines whether exists data
         /// </summary>
         /// <param name="command">Command</param>
-        /// <returns>Reeturn whether data is exist</returns>
-        public static bool Query(ICommand command)
+        /// <returns>Whether exists data</returns>
+        public static bool Exists(ICommand command)
         {
-            return QueryAsync(command).Result;
+            return ExistsAsync(command).Result;
         }
 
         /// <summary>
-        /// Determine whether data is exist
+        /// Determines whether exists data
         /// </summary>
         /// <param name="command">Command</param>
-        /// <returns>Return whether data is exist</returns>
-        public static async Task<bool> QueryAsync(ICommand command)
+        /// <returns>Whether exists data</returns>
+        public static async Task<bool> ExistsAsync(ICommand command)
         {
             if (command?.IsObsolete ?? true)
             {
                 return false;
             }
-            return await CommandExecutionManager.QueryAsync(command).ConfigureAwait(false);
+            return await CommandExecutionManager.ExistsAsync(command).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -389,7 +389,7 @@ namespace EZNEW.Development.UnitOfWork
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="command">Command</param>
         /// <returns>Return data</returns>
-        public static T QuerySingle<T>(ICommand command)
+        public static T QuerySingle<T>(ICommand command) where T : BaseEntity<T>, new()
         {
             return QuerySingleAsync<T>(command).Result;
         }
@@ -400,7 +400,7 @@ namespace EZNEW.Development.UnitOfWork
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="command">Command</param>
         /// <returns>Return data</returns>
-        public static async Task<T> QuerySingleAsync<T>(ICommand command)
+        public static async Task<T> QuerySingleAsync<T>(ICommand command) where T : BaseEntity<T>, new()
         {
             if (command?.IsObsolete ?? true)
             {
@@ -460,10 +460,10 @@ namespace EZNEW.Development.UnitOfWork
         /// <returns>Return data set</returns>
         public static async Task<DataSet> QueryMultipleAsync(string commandText, object parameters = null, CommandTextType commandTextType = CommandTextType.Text)
         {
-            var rdbCmd = DefaultCommand.CreateNewCommand(CommandOperationType.Query, parameters);
-            rdbCmd.CommandType = commandTextType;
-            rdbCmd.CommandText = commandText;
-            return await QueryMultipleAsync(rdbCmd).ConfigureAwait(false);
+            var command = DefaultCommand.Create(CommandOperationType.Query, CommandParameters.Parse(parameters));
+            command.TextType = commandTextType;
+            command.Text = commandText;
+            return await QueryMultipleAsync(command).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -550,11 +550,11 @@ namespace EZNEW.Development.UnitOfWork
         /// <returns>Return the effect data number</returns>
         public static async Task<int> ExecuteAsync(string commandText, object parameters = null, CommandTextType commandTextType = CommandTextType.Text, CommandExecutionOptions executeOptions = null)
         {
-            var rdbCmd = DefaultCommand.CreateNewCommand(CommandOperationType.Query, parameters);
-            rdbCmd.CommandType = commandTextType;
-            rdbCmd.CommandText = commandText;
-            rdbCmd.ExecutionMode = CommandExecutionMode.CommandText;
-            return await ExecuteAsync(executeOptions, rdbCmd).ConfigureAwait(false);
+            var newCmd = DefaultCommand.Create(CommandOperationType.Query, CommandParameters.Parse(parameters));
+            newCmd.TextType = commandTextType;
+            newCmd.Text = commandText;
+            newCmd.ExecutionMode = CommandExecutionMode.CommandText;
+            return await ExecuteAsync(executeOptions, newCmd).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -676,7 +676,7 @@ namespace EZNEW.Development.UnitOfWork
         /// <param name="datas">Datas</param>
         /// <param name="tableName">Table name,will use the configuration entity name or object type name when it is null or empty</param>
         /// <param name="bulkInsertOptions">Bulk insert options</param>
-        public static void BulkInsert<T>(DatabaseServer server, IEnumerable<T> datas, string tableName = "", IBulkInsertOptions bulkInsertOptions = null)
+        public static void BulkInsert<T>(DatabaseServer server, IEnumerable<T> datas, string tableName = "", IBulkInsertionOptions bulkInsertOptions = null)
         {
             BulkInsertAsync(server, datas, tableName, bulkInsertOptions).Wait();
         }
@@ -689,7 +689,7 @@ namespace EZNEW.Development.UnitOfWork
         /// <param name="datas">Datas</param>
         /// <param name="tableName">Table name,will use the configuration entity name or object type name when it is null or empty</param>
         /// <param name="bulkInsertOptions">Bulk insert options</param>
-        public static async Task BulkInsertAsync<T>(DatabaseServer server, IEnumerable<T> datas, string tableName = "", IBulkInsertOptions bulkInsertOptions = null)
+        public static async Task BulkInsertAsync<T>(DatabaseServer server, IEnumerable<T> datas, string tableName = "", IBulkInsertionOptions bulkInsertOptions = null)
         {
             var datatable = datas.ToDataTable();
             if (datatable == null)
@@ -699,7 +699,7 @@ namespace EZNEW.Development.UnitOfWork
             if (string.IsNullOrWhiteSpace(tableName))
             {
                 Type dataType = typeof(T);
-                tableName = DataManager.GetEntityObjectName(DatabaseServerType.Oracle, typeof(T));
+                tableName = EntityManager.GetEntityObjectName(dataType);
                 if (string.IsNullOrWhiteSpace(tableName))
                 {
                     tableName = dataType.Name;
@@ -715,7 +715,7 @@ namespace EZNEW.Development.UnitOfWork
         /// <param name="server">Database server</param>
         /// <param name="dataTable">Data table</param>
         /// <param name="bulkInsertOptions">Bulk insert options</param>
-        public static void BulkInsert(DatabaseServer server, DataTable dataTable, IBulkInsertOptions bulkInsertOptions = null)
+        public static void BulkInsert(DatabaseServer server, DataTable dataTable, IBulkInsertionOptions bulkInsertOptions = null)
         {
             BulkInsertAsync(server, dataTable, bulkInsertOptions).Wait();
         }
@@ -726,7 +726,7 @@ namespace EZNEW.Development.UnitOfWork
         /// <param name="server">Database server</param>
         /// <param name="dataTable">Data table</param>
         /// <param name="bulkInsertOptions">Bulk insert options</param>
-        public static async Task BulkInsertAsync(DatabaseServer server, DataTable dataTable, IBulkInsertOptions bulkInsertOptions = null)
+        public static async Task BulkInsertAsync(DatabaseServer server, DataTable dataTable, IBulkInsertionOptions bulkInsertOptions = null)
         {
             await CommandExecutionManager.BulkInsertAsync(server, dataTable, bulkInsertOptions).ConfigureAwait(false);
         }

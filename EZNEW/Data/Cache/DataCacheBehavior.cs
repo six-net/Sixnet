@@ -23,17 +23,18 @@ namespace EZNEW.Data.Cache
         /// <returns>Return starting result</returns>
         public StartingResult GetStartingResult(Exception ex)
         {
+            if (ex != null)
+            {
+                LogManager.LogError<DataCacheBehavior>(FrameworkLogEvents.Cache.CacheOperationError, ex, ex.Message);
+            }
             switch (ExceptionHandling)
             {
                 case DataCacheExceptionHandling.Break:
-                    LogManager.LogWarning<DataCacheBehavior>($"Break data access");
-                    return StartingResult.Break(ex.Message);
+                    return StartingResult.Break(ex.Message, ex);
                 case DataCacheExceptionHandling.ThrowException:
-                    LogManager.LogError<DataCacheBehavior>(ex, ex?.Message ?? string.Empty);
                     throw ex;
                 default:
-                    LogManager.LogWarning<DataCacheBehavior>($"Continue data access");
-                    return StartingResult.Success(ex?.Message ?? string.Empty);
+                    return StartingResult.Success(ex?.Message ?? string.Empty, ex);
             }
         }
 
@@ -45,16 +46,17 @@ namespace EZNEW.Data.Cache
         /// <returns>Return query data result</returns>
         public QueryDataResult<T> GetQueryDataResult<T>(Exception ex)
         {
+            if (ex != null)
+            {
+                LogManager.LogError<DataCacheBehavior>(FrameworkLogEvents.Cache.CacheOperationError, ex, ex.Message);
+            }
             switch (ExceptionHandling)
             {
                 case DataCacheExceptionHandling.Break:
-                    LogManager.LogWarning<DataCacheBehavior>($"Break query database");
                     return QueryDataResult<T>.Break(ex.Message, ex);
                 case DataCacheExceptionHandling.ThrowException:
-                    LogManager.LogError<DataCacheBehavior>(ex, ex?.Message ?? string.Empty);
                     throw ex;
                 default:
-                    LogManager.LogWarning<DataCacheBehavior>($"Continue query database");
                     return QueryDataResult<T>.Default(exception: ex);
             }
         }

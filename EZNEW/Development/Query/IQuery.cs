@@ -3,32 +3,33 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading;
 using EZNEW.Paging;
-using EZNEW.Development.Query.CriteriaConverter;
 using EZNEW.Development.DataAccess;
+using EZNEW.Development.Entity;
+using EZNEW.Data;
 
 namespace EZNEW.Development.Query
 {
     /// <summary>
-    /// All iquery instance and criteria inherit this interface
+    /// Defines query object contract
     /// </summary>
-    public interface IQueryItem { }
-
-    /// <summary>
-    /// Query info contract
-    /// </summary>
-    public interface IQuery : IQueryItem
+    public interface IQuery : ICondition
     {
         #region Properties
 
         /// <summary>
-        /// Gets the all criterias or other IQuery items
+        /// Gets all conditions
         /// </summary>
-        IEnumerable<Tuple<QueryOperator, IQueryItem>> Criterias { get; }
+        IEnumerable<ICondition> Conditions { get; }
 
         /// <summary>
-        /// Gets the order items
+        /// Gets all criterion
         /// </summary>
-        IEnumerable<SortCriteria> Orders { get; }
+        IEnumerable<Criterion> Criteria { get; }
+
+        /// <summary>
+        /// Gets all sorts
+        /// </summary>
+        IEnumerable<SortEntry> Sorts { get; }
 
         /// <summary>
         /// Gets the specific query fields(it's priority greater than NoQueryFields)
@@ -48,17 +49,17 @@ namespace EZNEW.Development.Query
         /// <summary>
         /// Gets the query text
         /// </summary>
-        string QueryText { get; }
+        string Text { get; }
 
         /// <summary>
         /// Gets the query text parameter
         /// </summary>
-        IEnumerable<KeyValuePair<string, object>> QueryTextParameters { get; }
+        IEnumerable<KeyValuePair<string, object>> TextParameters { get; }
 
         /// <summary>
         /// Gets the query command type
         /// </summary>
-        QueryCommandType QueryType { get; }
+        QueryExecutionMode ExecutionMode { get; }
 
         /// <summary>
         /// Gets or sets query data size
@@ -68,78 +69,78 @@ namespace EZNEW.Development.Query
         /// <summary>
         /// Gets all of data properties allow to lazy load
         /// </summary>
-        IEnumerable<KeyValuePair<string, bool>> LoadPropertys { get; }
+        IEnumerable<KeyValuePair<string, bool>> LoadProperties { get; }
 
         /// <summary>
-        /// Gets whether has subquery
+        /// Indicates whether has subquery
         /// </summary>
         bool HasSubquery { get; }
 
         /// <summary>
-        /// Gets whether has recurve criteria
+        /// Indicates whether has recurve
         /// </summary>
-        bool HasRecurveCriteria { get; }
+        bool HasRecurve { get; }
 
         /// <summary>
-        /// Gets whether has join item
+        /// Indicates whether has join
         /// </summary>
         bool HasJoin { get; }
 
         /// <summary>
-        /// Gets whether has combine items
+        /// Indicates whether has combine
         /// </summary>
         bool HasCombine { get; }
 
         /// <summary>
-        /// Gets whether has criteria converter
+        /// Indicates whether has field converter
         /// </summary>
-        bool HasConverter { get; }
+        bool HasFieldConverter { get; }
 
         /// <summary>
-        /// Gets whether is a complex query
-        /// Include subquery,recurve criteria,join item
+        /// Indicates whether is a complex query
+        /// Has subquery,recurve,join,field converter
         /// </summary>
-        bool IsComplexQuery { get; }
+        bool IsComplex { get; }
 
         /// <summary>
-        /// Gets the recurve criteria
+        /// Gets the recurve condition
         /// </summary>
-        RecurveCriteria RecurveCriteria { get; }
+        Recurve Recurve { get; }
 
         /// <summary>
-        /// Gets or sets whether must return value for success
+        /// Indicates whether must affect data
         /// </summary>
-        bool MustReturnValueOnSuccess { get; set; }
+        bool MustAffectData { get; set; }
 
         /// <summary>
-        /// Gets whether the query object is obsolete
+        /// Indicates whether is obsolete
         /// </summary>
         bool IsObsolete { get; }
 
         /// <summary>
-        /// Gets the join items
+        /// Gets the join entries
         /// </summary>
-        IEnumerable<JoinItem> JoinItems { get; }
+        IEnumerable<JoinEntry> Joins { get; }
 
         /// <summary>
-        /// Gets the combine items
+        /// Gets the combine entries
         /// </summary>
-        IEnumerable<CombineItem> CombineItems { get; }
+        IEnumerable<CombineEntry> Combines { get; }
 
         /// <summary>
-        /// Gets whether is a none condition object
+        /// Indicates there is no conditions
         /// </summary>
         bool NoneCondition { get; }
 
-        /// <summary>
-        /// Gets the atomic condition count
-        /// </summary>
-        int AtomicConditionCount { get; }
+        ///// <summary>
+        ///// Gets the atomic condition count
+        ///// </summary>
+        //int AtomicConditionCount { get; }
 
-        /// <summary>
-        /// Gets all condition field names
-        /// </summary>
-        IEnumerable<string> AllConditionFieldNames { get; }
+        ///// <summary>
+        ///// Gets all condition field names
+        ///// </summary>
+        //IEnumerable<string> AllConditionFieldNames { get; }
 
         /// <summary>
         /// Gets all subqueries
@@ -152,7 +153,7 @@ namespace EZNEW.Development.Query
         DataIsolationLevel? IsolationLevel { get; set; }
 
         /// <summary>
-        /// Indecates whether query obsolete data
+        /// Indicates whether query obsolete data
         /// </summary>
         bool IncludeObsoleteData { get; set; }
 
@@ -160,27 +161,40 @@ namespace EZNEW.Development.Query
 
         #region Methods
 
-        #region Sort Condition
+        #region Sort
 
-        #region Add order
+        #region Add sort
 
         /// <summary>
-        /// Add order
+        /// Add sort
         /// </summary>
         /// <param name="fieldName">Field name</param>
         /// <param name="desc">Sort by desc</param>
-        /// <param name="converter">Field converter</param>
-        IQuery AddOrder(string fieldName, bool desc = false, ICriteriaConverter converter = null);
+        /// <param name="options">Sort options</param>
+        IQuery AddSort(string fieldName, bool desc = false, SortOptions options = null);
 
         #endregion
 
-        #region Clear Order
+        #region Clear sort
 
         /// <summary>
-        /// Clear order condition
+        /// Clear sort
         /// </summary>
         /// <returns>Return the newest IQuery object</returns>
-        IQuery ClearOrder();
+        IQuery ClearSort();
+
+        #endregion
+
+        #region Sort datas
+
+        /// <summary>
+        /// Sort datas
+        /// </summary>
+        /// <typeparam name="TEntity">Entity data type</typeparam>
+        /// <param name="datas">Datas</param>
+        /// <param name="useDefaultFieldToSort">Whether use default field to sort</param>
+        /// <returns>Return the sorted data set</returns>
+        IEnumerable<TEntity> SortData<TEntity>(IEnumerable<TEntity> datas, bool useDefaultFieldToSort = false) where TEntity : BaseEntity<TEntity>, new();
 
         #endregion
 
@@ -251,25 +265,25 @@ namespace EZNEW.Development.Query
         /// Item1: whether return entity full query fields
         /// </summary>
         /// <param name="entityType">Entity type</param>
-        /// <param name="forceMustFields">Whether return the must query fields</param>
+        /// <param name="forceNecessaryFields">Whether include necessary fields</param>
         /// <returns>Return actually query fields</returns>
-        Tuple<bool, IEnumerable<string>> GetActuallyQueryFieldsWithSign(Type entityType, bool forceMustFields);
+        Tuple<bool, IEnumerable<string>> GetActuallyQueryFieldsWithSign(Type entityType, bool forceNecessaryFields);
 
         #endregion
 
-        #region QueryText
+        #region Text
 
         /// <summary>
-        /// Set query text
+        /// Set text
         /// </summary>
-        /// <param name="queryText">Query text</param>
+        /// <param name="text">Text</param>
         /// <param name="parameters">Parameters</param>
         /// <returns>Return the newest IQuery object</returns>
-        IQuery SetQueryText(string queryText, object parameters = null);
+        IQuery SetText(string text, object parameters = null);
 
         #endregion
 
-        #region Load Propertys
+        #region Load Property
 
         /// <summary>
         /// Set allow load data properties
@@ -302,72 +316,60 @@ namespace EZNEW.Development.Query
 
         #endregion
 
-        #region Get Special Keys Equal Values
+        #region Get parameters
 
         /// <summary>
-        /// Get special keys equal values
+        /// Get equal parameters
         /// </summary>
-        /// <param name="keys">keys</param>
-        /// <returns>Return key and values</returns>
-        Dictionary<string, List<dynamic>> GetKeysEqualValue(IEnumerable<string> keys);
+        /// <param name="parameterNames">Parameter names</param>
+        /// <returns>Return parameter and values</returns>
+        Dictionary<string, List<dynamic>> GetEqualParameters(IEnumerable<string> parameterNames = null);
 
         #endregion
 
-        #region Get Expression
+        #region Get validation function
 
         /// <summary>
-        /// Get expression
+        /// Get validation function
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
-        /// <returns>Return expression</returns>
-        Func<T, bool> GetQueryExpression<T>();
-
-        #endregion
-
-        #region Order Datas
-
-        /// <summary>
-        /// Order datas
-        /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
-        /// <param name="datas">Datas</param>
-        /// <returns>Return the sorted data set</returns>
-        IEnumerable<T> Sort<T>(IEnumerable<T> datas);
+        /// <returns>Return a function delegate</returns>
+        Func<T, bool> GetValidationFunction<T>();
 
         #endregion
 
         #region Recurve
 
         /// <summary>
-        /// Set recurve criteria
+        /// Set recurve
         /// </summary>
-        /// <param name="key">Key</param>
-        /// <param name="relationKey">Relation key</param>
+        /// <param name="dataField">Data field</param>
+        /// <param name="relationField">Relation field</param>
         /// <param name="direction">Recurve direction</param>
         /// <returns>Return the newest IQuery object</returns>
-        IQuery SetRecurve(string key, string relationKey, RecurveDirection direction = RecurveDirection.Down);
+        IQuery SetRecurve(string dataField, string relationField, RecurveDirection direction = RecurveDirection.Down);
 
         /// <summary>
-        /// set recurve criteria
+        /// set recurve
         /// </summary>
         /// <typeparam name="TQueryModel">Query model</typeparam>
-        /// <param name="key">Key</param>
-        /// <param name="relationKey">Relation key</param>
+        /// <param name="dataField">Data field</param>
+        /// <param name="relationField">Relation field</param>
         /// <param name="direction">Recurve direction</param>
         /// <returns>Return the newest IQuery object</returns>
-        IQuery SetRecurve<TQueryModel>(Expression<Func<TQueryModel, dynamic>> key, Expression<Func<TQueryModel, dynamic>> relationKey, RecurveDirection direction = RecurveDirection.Down) where TQueryModel : IQueryModel<TQueryModel>;
+        IQuery SetRecurve<TQueryModel>(Expression<Func<TQueryModel, dynamic>> dataField, Expression<Func<TQueryModel, dynamic>> relationField, RecurveDirection direction = RecurveDirection.Down) where TQueryModel : IQueryModel<TQueryModel>;
 
         #endregion
 
         #region Obsolete
 
         /// <summary>
-        /// Bbsolete query
+        /// Obsolete
         /// </summary>
         void Obsolete();
 
         /// <summary>
-        /// Cancel obsolete
+        /// Activate
         /// </summary>
         void Activate();
 
@@ -376,13 +378,13 @@ namespace EZNEW.Development.Query
         #region Clone
 
         /// <summary>
-        /// Copy a IQuery object
+        /// Clone an IQuery object
         /// </summary>
         /// <returns>Return the replicated Query object</returns>
         IQuery LightClone();
 
         /// <summary>
-        /// Deep copy a IQuery object
+        /// Deep clone an IQuery object
         /// </summary>
         /// <returns>Return the replicated Query object</returns>
         IQuery Clone();
@@ -392,7 +394,7 @@ namespace EZNEW.Development.Query
         #region Join
 
         /// <summary>
-        /// Add a join query
+        /// Add join
         /// </summary>
         /// <param name="joinFields">Join fields</param>
         /// <param name="joinType">Join type</param>
@@ -402,22 +404,22 @@ namespace EZNEW.Development.Query
         IQuery Join(Dictionary<string, string> joinFields, JoinType joinType, JoinOperator joinOperator, IQuery joinQuery);
 
         /// <summary>
-        /// Add a join item
+        /// Add join
         /// </summary>
-        /// <param name="joinItem">Join item</param>
+        /// <param name="joinEntry">Join entry</param>
         /// <returns>Return the newest IQuery object</returns>
-        IQuery Join(JoinItem joinItem);
+        IQuery Join(JoinEntry joinEntry);
 
         #endregion
 
         #region Combine
 
         /// <summary>
-        /// Add a combine item
+        /// Add combine
         /// </summary>
-        /// <param name="combineItem">Combine item</param>
+        /// <param name="combineEntry">Combine entry</param>
         /// <returns>Return the newest IQuery object</returns>
-        IQuery Combine(CombineItem combineItem);
+        IQuery Combine(CombineEntry combineEntry);
 
         #endregion
 
@@ -427,12 +429,11 @@ namespace EZNEW.Development.Query
         /// Set global condition
         /// </summary>
         /// <param name="globalCondition">Global condition</param>
-        /// <param name="queryOperator">Query operator</param>
         /// <returns>Return the newest IQuery object</returns>
-        IQuery SetGlobalCondition(IQuery globalCondition, QueryOperator queryOperator);
+        IQuery SetGlobalCondition(IQuery globalCondition);
 
         /// <summary>
-        /// Whether allow set global condition
+        /// Indicates whether allow set global condition
         /// </summary>
         /// <returns>Return whether allow set global condition</returns>
         bool AllowSetGlobalCondition();
@@ -485,37 +486,42 @@ namespace EZNEW.Development.Query
         #region Paging
 
         /// <summary>
-        /// Set paging
+        /// Set paging info
         /// </summary>
         /// <param name="pagingFilter">Paging filter</param>
         IQuery SetPaging(PagingFilter pagingFilter);
 
+        /// <summary>
+        /// Set paging info
+        /// </summary>
+        /// <param name="pageIndex">Page index</param>
+        /// <param name="pageSize">Page size</param>
+        /// <returns></returns>
+        IQuery SetPaging(int pageIndex, int pageSize = 20);
+
         #endregion
 
-        #region Add criteria
+        #region Add criterion
 
         /// <summary>
-        /// Add a criteria
+        /// Add a criterion
         /// </summary>
-        /// <param name="queryOperator">Connect operator</param>
+        /// <param name="connectionOperator">Connection operator</param>
         /// <param name="fieldName">Field name</param>
-        /// <param name="criteriaOperator">Condition operator</param>
+        /// <param name="criterionOperator">Condition operator</param>
         /// <param name="value">Value</param>
-        /// <param name="converter">Converter</param>
-        /// <param name="queryOption">query parameter option</param>
-        IQuery AddCriteria(QueryOperator queryOperator, string fieldName, CriteriaOperator criteriaOperator, dynamic value, ICriteriaConverter converter = null, QueryParameterOptions queryOption = null);
+        /// <param name="criterionOptions">Criterion options</param>
+        IQuery AddCriterion(ConditionConnectionOperator connectionOperator, string fieldName, CriterionOperator criterionOperator, dynamic value, CriterionOptions criterionOptions = null);
 
         #endregion
 
-        #region Add query item
+        #region Add condition
 
         /// <summary>
-        /// Add a IQueryItem
+        /// Add condition
         /// </summary>
-        /// <param name="queryOperator">Connect operator</param>
-        /// <param name="queryItem">query item</param>
-        /// <param name="queryOption">query parameter option</param>
-        IQuery AddQueryItem(QueryOperator queryOperator, IQueryItem queryItem, QueryParameterOptions queryOption = null);
+        /// <param name="condition">Condition</param>
+        IQuery AddCondition(ICondition condition);
 
         #endregion
 

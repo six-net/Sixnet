@@ -1,11 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using EZNEW.Development.Command.Modification;
+using EZNEW.Data.Modification;
 using EZNEW.Development.Query;
 using EZNEW.Development.Domain.Model;
 using EZNEW.Development.Domain.Repository.Warehouse;
 using EZNEW.Development.UnitOfWork;
 using EZNEW.Paging;
+using System.Linq.Expressions;
+using System;
 
 namespace EZNEW.Development.Domain.Repository
 {
@@ -14,46 +16,81 @@ namespace EZNEW.Development.Domain.Repository
     /// </summary>
     public abstract class BaseRepository<TModel> : IRepository<TModel> where TModel : IModel<TModel>
     {
-        #region Save data
+        #region Save
 
         /// <summary>
-        /// Save data
+        /// Save object
         /// </summary>
-        /// <param name="data">Data</param>
+        /// <param name="object">Model object</param>
         /// <param name="activationOptions">Activation options</param>
-        public abstract TModel Save(TModel data, ActivationOptions activationOptions = null);
+        public abstract TModel Save(TModel @object, ActivationOptions activationOptions = null);
 
         /// <summary>
-        /// save datas
+        /// Save objects
         /// </summary>
-        /// <param name="datas">Datas</param>
+        /// <param name="objects">Model objects</param>
         /// <param name="activationOptions">Activation options</param>
-        public abstract List<TModel> Save(IEnumerable<TModel> datas, ActivationOptions activationOptions = null);
+        public abstract List<TModel> Save(IEnumerable<TModel> objects, ActivationOptions activationOptions = null);
+
+        /// <summary>
+        /// Save object
+        /// </summary>
+        /// <param name="object">Model object</param>
+        /// <param name="activationOptions">Activation options</param>
+        public abstract Task<TModel> SaveAsync(TModel @object, ActivationOptions activationOptions = null);
+
+        /// <summary>
+        /// Save objects
+        /// </summary>
+        /// <param name="objects">Model objects</param>
+        /// <param name="activationOptions">Activation options</param>
+        public abstract Task<List<TModel>> SaveAsync(IEnumerable<TModel> objects, ActivationOptions activationOptions = null);
 
         #endregion
 
-        #region Remove data
+        #region Remove
 
         /// <summary>
-        /// Remove data
+        /// Remove object
         /// </summary>
-        /// <param name="data">Data</param>
+        /// <param name="object">Model object</param>
         /// <param name="activationOptions">Activation options</param>
-        public abstract void Remove(TModel data, ActivationOptions activationOptions = null);
+        public abstract void Remove(TModel @object, ActivationOptions activationOptions = null);
 
         /// <summary>
-        /// Remove datas
+        /// Remove objects
         /// </summary>
-        /// <param name="datas">Datas</param>
+        /// <param name="objects">Model objects</param>
         /// <param name="activationOptions">Activation options</param>
-        public abstract void Remove(IEnumerable<TModel> datas, ActivationOptions activationOptions = null);
+        public abstract void Remove(IEnumerable<TModel> objects, ActivationOptions activationOptions = null);
 
         /// <summary>
-        /// Remove by relation data
+        /// Remove by relation object
         /// </summary>
-        /// <param name="relationDatas">Relation datas</param>
+        /// <param name="relationObjects">Relation objects</param>
         /// <param name="activationOptions">Activation options</param>
-        public abstract void RemoveByRelationData<TRelationModel>(IEnumerable<TRelationModel> relationDatas, ActivationOptions activationOptions = null);
+        public abstract void RemoveByRelationData<TRelationModel>(IEnumerable<TRelationModel> relationObjects, ActivationOptions activationOptions = null);
+
+        /// <summary>
+        /// Remove object
+        /// </summary>
+        /// <param name="object">Model object</param>
+        /// <param name="activationOptions">Activation options</param>
+        public abstract Task RemoveAsync(TModel @object, ActivationOptions activationOptions = null);
+
+        /// <summary>
+        /// Remove objects
+        /// </summary>
+        /// <param name="objects">Model objects</param>
+        /// <param name="activationOptions">Activation options</param>
+        public abstract Task RemoveAsync(IEnumerable<TModel> objects, ActivationOptions activationOptions = null);
+
+        /// <summary>
+        /// Remove by relation object
+        /// </summary>
+        /// <param name="relationObjects">Relation datas</param>
+        /// <param name="activationOptions">Activation options</param>
+        public abstract Task RemoveByRelationDataAsync<TRelationModel>(IEnumerable<TRelationModel> relationObjects, ActivationOptions activationOptions = null);
 
         #endregion
 
@@ -67,151 +104,243 @@ namespace EZNEW.Development.Domain.Repository
         public abstract void Remove(IQuery query, ActivationOptions activationOptions = null);
 
         /// <summary>
+        /// Remove data by condition
+        /// </summary>
+        /// <param name="conditionExpression">Condition expression</param>
+        /// <param name="activationOptions">Activation options</param>
+        public abstract void Remove(Expression<Func<TModel, bool>> conditionExpression, ActivationOptions activationOptions = null);
+
+        /// <summary>
+        /// Remove by relation object query
+        /// </summary>
+        /// <param name="relationModelQuery">Relation object query object</param>
+        /// <param name="activationOptions">Activation options</param>
+        public abstract void RemoveByRelationData(IQuery relationModelQuery, ActivationOptions activationOptions = null);
+
+        /// <summary>
+        /// Remove by condition
+        /// </summary>
+        /// <param name="query">Query object</param>
+        /// <param name="activationOptions">Activation options</param>
+        public abstract Task RemoveAsync(IQuery query, ActivationOptions activationOptions = null);
+
+        /// <summary>
+        /// Remove by condition
+        /// </summary>
+        /// <param name="conditionExpression">Condition expression</param>
+        /// <param name="activationOptions">Activation options</param>
+        public abstract Task RemoveAsync(Expression<Func<TModel, bool>> conditionExpression, ActivationOptions activationOptions = null);
+
+        /// <summary>
         /// Remove by relation data
         /// </summary>
-        /// <param name="query">Relation query object</param>
+        /// <param name="relationModelQuery">Relation object query object</param>
         /// <param name="activationOptions">Activation options</param>
-        public abstract void RemoveByRelationData(IQuery query, ActivationOptions activationOptions = null);
+        public abstract Task RemoveByRelationDataAsync(IQuery relationModelQuery, ActivationOptions activationOptions = null);
 
         #endregion
 
         #region Modify
 
         /// <summary>
-        /// Modify data
+        /// Modify
         /// </summary>
-        /// <param name="expression">Modify expression</param>
+        /// <param name="modificationExpression">Modification expression</param>
         /// <param name="query">Query object</param>
         /// <param name="activationOptions">Activation options</param>
-        public abstract void Modify(IModification expression, IQuery query, ActivationOptions activationOptions = null);
+        public abstract void Modify(IModification modificationExpression, IQuery query, ActivationOptions activationOptions = null);
+
+        /// <summary>
+        /// Modify
+        /// </summary>
+        /// <param name="expression">Modification expression</param>
+        /// <param name="query">Query object</param>
+        /// <param name="activationOptions">Activation options</param>
+        public abstract Task ModifyAsync(IModification expression, IQuery query, ActivationOptions activationOptions = null);
 
         #endregion
 
-        #region Get data
+        #region Get
 
         /// <summary>
-        /// Get data
+        /// Get object
         /// </summary>
         /// <param name="query">Query object</param>
-        /// <returns>Return data</returns>
+        /// <returns>Return object data</returns>
         public abstract TModel Get(IQuery query);
 
         /// <summary>
+        /// Get object
+        /// </summary>
+        /// <param name="conditionExpression">Condition expression</param>
+        /// <returns>Return object data</returns>
+        public abstract TModel Get(Expression<Func<TModel, bool>> conditionExpression);
+
+        /// <summary>
+        /// Get by current object
+        /// </summary>
+        /// <param name="currentObject">Current object</param>
+        /// <returns>Return object data</returns>
+        public abstract TModel GetByCurrent(TModel currentObject);
+
+        /// <summary>
         /// Get data by current data
         /// </summary>
         /// <param name="currentData">Current data</param>
         /// <returns>Return data</returns>
-        public abstract TModel Get(TModel currentData);
+        public abstract Task<TModel> GetByCurrentAsync(TModel currentData);
 
         /// <summary>
-        /// Get data
+        /// Get object
         /// </summary>
         /// <param name="query">Query object</param>
-        /// <returns>Return data</returns>
+        /// <returns>Return object</returns>
         public abstract Task<TModel> GetAsync(IQuery query);
 
         /// <summary>
-        /// Get data by current data
+        /// Get object
         /// </summary>
-        /// <param name="currentData">Current data</param>
-        /// <returns>Return data</returns>
-        public abstract Task<TModel> GetAsync(TModel currentData);
+        /// <param name="conditionExpression">Condition expression</param>
+        /// <returns>Return object data</returns>
+        public abstract Task<TModel> GetAsync(Expression<Func<TModel, bool>> conditionExpression);
 
         #endregion
 
-        #region Get data list
+        #region Get list
 
         /// <summary>
-        /// Get data list
+        /// Get object list
         /// </summary>
         /// <param name="query">Query object</param>
-        /// <returns>Return data list</returns>
+        /// <returns>Return object list</returns>
         public abstract List<TModel> GetList(IQuery query);
 
         /// <summary>
-        /// Get data list
+        /// Get object list
+        /// </summary>
+        /// <param name="conditionExpression">Condition expression</param>
+        /// <returns>Return data list</returns>
+        public abstract List<TModel> GetList(Expression<Func<TModel, bool>> conditionExpression);
+
+        /// <summary>
+        /// Gets list by current object
+        /// </summary>
+        /// <param name="currentObjects">Current objects</param>
+        /// <returns>Return object list</returns>
+        public abstract List<TModel> GetListByCurrent(IEnumerable<TModel> currentObjects);
+
+        /// <summary>
+        /// Get list by relation objects
+        /// </summary>
+        /// <param name="relationObjects">Relation objects</param>
+        /// <returns>Return object list</returns>
+        public abstract List<TModel> GetListByRelationData<TRelationModel>(IEnumerable<TRelationModel> relationObjects);
+
+        /// <summary>
+        /// Get object list
         /// </summary>
         /// <param name="query">Query object</param>
         /// <returns>Return data list</returns>
         public abstract Task<List<TModel>> GetListAsync(IQuery query);
 
         /// <summary>
-        /// Gets data list by current data
+        /// Get object list
         /// </summary>
-        /// <param name="currentDatas">Current datas</param>
-        /// <returns>Return data list</returns>
-        public abstract List<TModel> GetList(IEnumerable<TModel> currentDatas);
+        /// <param name="conditionExpression">Condition expression</param>
+        /// <returns>Return object list</returns>
+        public abstract Task<List<TModel>> GetListAsync(Expression<Func<TModel, bool>> conditionExpression);
 
         /// <summary>
-        /// Gets data list by current data
+        /// Gets list by current object
         /// </summary>
-        /// <param name="currentDatas">Current datas</param>
-        /// <returns>Return data list</returns>
-        public abstract Task<List<TModel>> GetListAsync(IEnumerable<TModel> currentDatas);
+        /// <param name="currentObjects">Current objects</param>
+        /// <returns>Return object list</returns>
+        public abstract Task<List<TModel>> GetListByCurrentAsync(IEnumerable<TModel> currentObjects);
 
         /// <summary>
-        /// Get list by relation datas
+        /// Get list by relation objects
         /// </summary>
-        /// <param name="relationDatas">Relation datas</param>
+        /// <param name="relationObjects">Relation datas</param>
         /// <returns>Return datas</returns>
-        public abstract List<TModel> GetListByRelationData<TRelationModel>(IEnumerable<TRelationModel> relationDatas);
-
-        /// <summary>
-        /// Get list by relation datas
-        /// </summary>
-        /// <param name="relationDatas">Relation datas</param>
-        /// <returns>Return datas</returns>
-        public abstract Task<List<TModel>> GetListByRelationDataAsync<TRelationModel>(IEnumerable<TRelationModel> relationDatas);
+        public abstract Task<List<TModel>> GetListByRelationDataAsync<TRelationModel>(IEnumerable<TRelationModel> relationObjects);
 
         #endregion
 
-        #region Get data paging
+        #region Get paging
 
         /// <summary>
-        /// Get data paging
+        /// Get paging data
         /// </summary>
         /// <param name="query">Query object</param>
-        /// <returns>Return data paging</returns>
+        /// <returns>Return paging data</returns>
         public abstract PagingInfo<TModel> GetPaging(IQuery query);
 
         /// <summary>
-        /// Get data paging
+        /// Get paging data
+        /// </summary>
+        /// <param name="conditionExpression">Condition expression</param>
+        /// <returns>Return paging data</returns>
+        public abstract PagingInfo<TModel> GetPaging(Expression<Func<TModel, bool>> conditionExpression);
+
+        /// <summary>
+        /// Get paging data
         /// </summary>
         /// <param name="query">Query object</param>
-        /// <returns>Return data paging</returns>
+        /// <returns>Return paging data</returns>
         public abstract Task<PagingInfo<TModel>> GetPagingAsync(IQuery query);
 
         /// <summary>
-        /// Get list by relation datas
+        /// Get paging data
         /// </summary>
-        /// <param name="relationDatas">Relation datas</param>
-        /// <returns>Return datas</returns>
-        public abstract PagingInfo<TModel> GetPagingByRelationData<TRelationModel>(IEnumerable<TRelationModel> relationDatas);
+        /// <param name="conditionExpression">Condition expression</param>
+        /// <returns>Return paging data</returns>
+        public abstract Task<PagingInfo<TModel>> GetPagingAsync(Expression<Func<TModel, bool>> conditionExpression);
 
         /// <summary>
-        /// Get list by relation datas
+        /// Get paging by relation objects
         /// </summary>
-        /// <param name="relationDatas">Relation datas</param>
-        /// <returns>Return datas</returns>
-        public abstract Task<PagingInfo<TModel>> GetPagingByRelationDataAsync<TRelationModel>(IEnumerable<TRelationModel> relationDatas);
+        /// <param name="relationObjects">Relation objects</param>
+        /// <returns>Return paging data</returns>
+        public abstract PagingInfo<TModel> GetPagingByRelationData<TRelationModel>(IEnumerable<TRelationModel> relationObjects);
+
+        /// <summary>
+        /// Get paging by relation objects
+        /// </summary>
+        /// <param name="relationObjects">Relation objects</param>
+        /// <returns>Return paging data</returns>
+        public abstract Task<PagingInfo<TModel>> GetPagingByRelationDataAsync<TRelationModel>(IEnumerable<TRelationModel> relationObjects);
 
         #endregion
 
-        #region Exist
+        #region Exists
 
         /// <summary>
-        /// Exist data
+        /// Determines whether has data
         /// </summary>
         /// <param name="query">Query object</param>
-        /// <returns>Return whether data is exist</returns>
-        public abstract bool Exist(IQuery query);
+        /// <returns>Return whether has data</returns>
+        public abstract bool Exists(IQuery query);
 
         /// <summary>
-        /// Exist data
+        /// Determines whether has data
+        /// </summary>
+        /// <param name="conditionExpression">Condition expression</param>
+        /// <returns>Return whether has data</returns>
+        public abstract bool Exists(Expression<Func<TModel, bool>> conditionExpression);
+
+        /// <summary>
+        /// Determines whether has data
         /// </summary>
         /// <param name="query">Query object</param>
-        /// <returns>Return whether data is exist</returns>
-        public abstract Task<bool> ExistAsync(IQuery query);
+        /// <returns>Return whether has data</returns>
+        public abstract Task<bool> ExistsAsync(IQuery query);
+
+        /// <summary>
+        /// Determines whether has data
+        /// </summary>
+        /// <param name="conditionExpression">Condition expression</param>
+        /// <returns>Return whether has data</returns>
+        public abstract Task<bool> ExistsAsync(Expression<Func<TModel, bool>> conditionExpression);
 
         #endregion
 
@@ -227,9 +356,23 @@ namespace EZNEW.Development.Domain.Repository
         /// <summary>
         /// Get data count
         /// </summary>
+        /// <param name="conditionExpression">Condition expression</param>
+        /// <returns>Return data count</returns>
+        public abstract long Count(Expression<Func<TModel, bool>> conditionExpression);
+
+        /// <summary>
+        /// Get data count
+        /// </summary>
         /// <param name="query">Query object</param>
         /// <returns>Return data count</returns>
         public abstract Task<long> CountAsync(IQuery query);
+
+        /// <summary>
+        /// Get data count
+        /// </summary>
+        /// <param name="conditionExpression">Condition expression</param>
+        /// <returns>Return data count</returns>
+        public abstract Task<long> CountAsync(Expression<Func<TModel, bool>> conditionExpression);
 
         #endregion
 
@@ -247,9 +390,25 @@ namespace EZNEW.Development.Domain.Repository
         /// Get max value
         /// </summary>
         /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="conditionExpression">Condition expression</param>
+        /// <returns>Return the max value</returns>
+        public abstract TValue Max<TValue>(Expression<Func<TModel, bool>> conditionExpression);
+
+        /// <summary>
+        /// Get max value
+        /// </summary>
+        /// <typeparam name="TValue">Value type</typeparam>
         /// <param name="query">Query object</param>
         /// <returns>Return the max value</returns>
         public abstract Task<TValue> MaxAsync<TValue>(IQuery query);
+
+        /// <summary>
+        /// Get max value
+        /// </summary>
+        /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="conditionExpression">Condition expression</param>
+        /// <returns>Return the max value</returns>
+        public abstract Task<TValue> MaxAsync<TValue>(Expression<Func<TModel, bool>> conditionExpression);
 
         #endregion
 
@@ -267,13 +426,29 @@ namespace EZNEW.Development.Domain.Repository
         /// Get min value
         /// </summary>
         /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="conditionExpression">Condition expression</param>
+        /// <returns>Return the min value</returns>
+        public abstract TValue Min<TValue>(Expression<Func<TModel, bool>> conditionExpression);
+
+        /// <summary>
+        /// Get min value
+        /// </summary>
+        /// <typeparam name="TValue">Value type</typeparam>
         /// <param name="query">Query object</param>
         /// <returns>Return the min value</returns>
         public abstract Task<TValue> MinAsync<TValue>(IQuery query);
 
+        /// <summary>
+        /// Get min value
+        /// </summary>
+        /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="conditionExpression">Condition expression</param>
+        /// <returns>Return the min value</returns>
+        public abstract Task<TValue> MinAsync<TValue>(Expression<Func<TModel, bool>> conditionExpression);
+
         #endregion
 
-        #region get sum value
+        #region Get sum value
 
         /// <summary>
         /// Get sum value
@@ -287,9 +462,25 @@ namespace EZNEW.Development.Domain.Repository
         /// Get sum value
         /// </summary>
         /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="conditionExpression">Condition expression</param>
+        /// <returns>Return the sum value</returns>
+        public abstract TValue Sum<TValue>(Expression<Func<TModel, bool>> conditionExpression);
+
+        /// <summary>
+        /// Get sum value
+        /// </summary>
+        /// <typeparam name="TValue">Value type</typeparam>
         /// <param name="query">Query object</param>
         /// <returns>Return the sum value</returns>
         public abstract Task<TValue> SumAsync<TValue>(IQuery query);
+
+        /// <summary>
+        /// Get sum value
+        /// </summary>
+        /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="conditionExpression">Condition expression</param>
+        /// <returns>Return the sum value</returns>
+        public abstract Task<TValue> SumAsync<TValue>(Expression<Func<TModel, bool>> conditionExpression);
 
         #endregion
 
@@ -307,31 +498,47 @@ namespace EZNEW.Development.Domain.Repository
         /// Get average value
         /// </summary>
         /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="conditionExpression">Condition expression</param>
+        /// <returns>Return the average value</returns>
+        public abstract TValue Avg<TValue>(Expression<Func<TModel, bool>> conditionExpression);
+
+        /// <summary>
+        /// Get average value
+        /// </summary>
+        /// <typeparam name="TValue">Value type</typeparam>
         /// <param name="query">Query object</param>
         /// <returns>Return the average value</returns>
         public abstract Task<TValue> AvgAsync<TValue>(IQuery query);
 
+        /// <summary>
+        /// Get average value
+        /// </summary>
+        /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="conditionExpression">Condition expression</param>
+        /// <returns>Return the average value</returns>
+        public abstract Task<TValue> AvgAsync<TValue>(Expression<Func<TModel, bool>> conditionExpression);
+
         #endregion
 
-        #region Get life status
+        #region Get data source
 
         /// <summary>
-        /// Get life status
+        /// Get object data source
         /// </summary>
-        /// <param name="data">Data</param>
+        /// <param name="object">Model object</param>
         /// <returns>Return the data life source</returns>
-        public abstract DataLifeSource GetLifeSource(IModel data);
+        public abstract DataSource GetDataSource(IModel @object);
 
         #endregion
 
-        #region Modify life source
+        #region Modify data source
 
         /// <summary>
-        /// Modify life source
+        /// Modify data source
         /// </summary>
-        /// <param name="data">Data</param>
-        /// <param name="lifeSource">Life source</param>
-        public abstract void ModifyLifeSource(IModel data, DataLifeSource lifeSource);
+        /// <param name="object">Model object</param>
+        /// <param name="source">Life source</param>
+        public abstract void ModifyDataSource(IModel @object, DataSource source);
 
         #endregion
     }

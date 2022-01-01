@@ -5,7 +5,7 @@ using EZNEW.Development.Query;
 namespace EZNEW.Development.Command
 {
     /// <summary>
-    /// Execute command contract
+    /// Defines command contract
     /// </summary>
     public interface ICommand
     {
@@ -19,37 +19,27 @@ namespace EZNEW.Development.Command
         /// <summary>
         /// Gets or sets the command text
         /// </summary>
-        string CommandText { get; set; }
+        string Text { get; set; }
 
         /// <summary>
         /// Gets or sets the parameters
         /// </summary>
-        dynamic Parameters { get; set; }
+        CommandParameters Parameters { get; set; }
 
         /// <summary>
-        /// Gets or sets the object name
+        /// Gets or sets the entity object name
         /// </summary>
-        string ObjectName { get; set; }
+        string EntityObjectName { get; set; }
 
         /// <summary>
-        /// Gets or sets the object keys
+        /// Gets or sets the entity identity values
         /// </summary>
-        List<string> ObjectKeys { get; set; }
+        Dictionary<string, dynamic> EntityIdentityValues { get; set; }
 
         /// <summary>
-        /// Gets or sets the object key values
+        /// Gets or sets the command properties
         /// </summary>
-        Dictionary<string, dynamic> ObjectKeyValues { get; set; }
-
-        /// <summary>
-        /// Gets or sets server keys
-        /// </summary>
-        List<string> ServerKeys { get; set; }
-
-        /// <summary>
-        /// Gets or sets the server key values
-        /// </summary>
-        Dictionary<string, dynamic> ServerKeyValues { get; set; }
+        Dictionary<string, dynamic> Properties { get; set; }
 
         /// <summary>
         /// Gets or sets the command execution mode
@@ -64,7 +54,7 @@ namespace EZNEW.Development.Command
         /// <summary>
         /// Gets or sets the operate type
         /// </summary>
-        CommandOperationType OperateType { get; set; }
+        CommandOperationType OperationType { get; set; }
 
         /// <summary>
         /// Gets or sets the fields
@@ -82,9 +72,9 @@ namespace EZNEW.Development.Command
         Type EntityType { get; set; }
 
         /// <summary>
-        /// Gets or sets whether must return value on successful
+        /// Indicates whether must affect data
         /// </summary>
-        bool MustReturnValueOnSuccess { get; set; }
+        bool MustAffectedData { get; set; }
 
         #endregion
 

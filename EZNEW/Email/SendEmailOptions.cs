@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Text;
-using EZNEW.Diagnostics;
+using EZNEW.Configuration;
 
 namespace EZNEW.Email
 {
@@ -11,7 +11,7 @@ namespace EZNEW.Email
     /// Send email options
     /// </summary>
     [Serializable]
-    public class SendEmailOptions : IAdditionalOption
+    public class SendEmailOptions : IParameterOptions
     {
         /// <summary>
         /// Gets or sets the email id
@@ -19,9 +19,9 @@ namespace EZNEW.Email
         public string Id { get; set; } = Guid.NewGuid().ToString();
 
         /// <summary>
-        /// Gets or sets the additional info
+        /// Gets or sets the parameters
         /// </summary>
-        public Dictionary<string, string> Additionals { get; set; }
+        public Dictionary<string, string> Parameters { get; set; }
 
         /// <summary>
         /// Gets or sets the email category
@@ -80,7 +80,7 @@ namespace EZNEW.Email
                 Emails = Emails.Select(c => c).ToList(),
                 Subject = Subject,
                 SubjectEncoding = SubjectEncoding,
-                Additionals = Additionals?.ToDictionary(c => c.Key, c => c.Value) ?? new Dictionary<string, string>(0)
+                Parameters = Parameters?.ToDictionary(c => c.Key, c => c.Value) ?? new Dictionary<string, string>(0)
             };
         }
     }

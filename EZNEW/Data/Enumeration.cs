@@ -15,6 +15,18 @@ namespace EZNEW.Data
         //MongoDB = 140,
         SQLite = 150,
         PostgreSQL = 160,
-        Access = 170
+        //Access = 170
+    }
+
+    /// <summary>
+    /// Defines calculation operator
+    /// </summary>
+    [Serializable]
+    public enum CalculationOperator
+    {
+        Add,
+        Subtract,
+        Multiply,
+        Divide
     }
 }

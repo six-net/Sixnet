@@ -6,9 +6,11 @@ using EZNEW.DataValidation;
 using EZNEW.Development.Domain.Event;
 using EZNEW.Development.Domain.Repository;
 using EZNEW.Development.Domain.Repository.Warehouse;
+using EZNEW.Development.UnitOfWork;
 using EZNEW.Exceptions;
 using EZNEW.Expressions;
 using EZNEW.Model;
+using EZNEW.Serialization;
 
 namespace EZNEW.Development.Domain.Model
 {
@@ -20,26 +22,26 @@ namespace EZNEW.Development.Domain.Model
     {
         internal static bool IsNew(IRepository<T> repository, Type dataType, IModel data)
         {
-            if (data?.IdentityValueIsNone() ?? true)
+            if (data?.IdentityValueIsNull() ?? true)
             {
                 return true;
             }
             CheckRepository(repository);
             var isVirtual = ModelManager.IsVirtualModel(dataType);
-            return isVirtual || repository.GetLifeSource(data) == DataLifeSource.New;
+            return isVirtual || repository.GetDataSource(data) == DataSource.New;
         }
 
         internal static bool MarkNew(IRepository<T> repository, IModel data)
         {
             CheckRepository(repository);
-            repository?.ModifyLifeSource(data, DataLifeSource.New);
+            repository?.ModifyDataSource(data, DataSource.New);
             return true;
         }
 
         internal static bool MarkStored(IRepository<T> repository, IModel data)
         {
             CheckRepository(repository);
-            repository.ModifyLifeSource(data, DataLifeSource.DataSource);
+            repository.ModifyDataSource(data, DataSource.Storage);
             return true;
         }
 
@@ -69,10 +71,10 @@ namespace EZNEW.Development.Domain.Model
             SetLoadProperties(propertyDict, ref sourceLoadProperties);
         }
 
-        internal static Result<T> Save(IRepository<T> repository, T data)
+        internal static Result<T> Save(IRepository<T> repository, T data, ActivationOptions activationOptions)
         {
             CheckRepository(repository);
-            var saveData = repository.Save(data);
+            var saveData = repository.Save(data, activationOptions);
             if (saveData == null)
             {
                 return Result<T>.FailedResult("Data saved failed");
@@ -84,10 +86,10 @@ namespace EZNEW.Development.Domain.Model
             return Result<T>.SuccessResult(saveData, "Data saved successfully", "");
         }
 
-        internal static Result Remove(IRepository<T> repository, T data)
+        internal static Result Remove(IRepository<T> repository, T data, ActivationOptions activationOptions)
         {
             CheckRepository(repository);
-            repository.Remove(data);
+            repository.Remove(data, activationOptions);
             DomainEventBus.Publish(new DefaultRemoveDomainEvent<T>()
             {
                 Object = data
@@ -97,11 +99,11 @@ namespace EZNEW.Development.Domain.Model
 
         internal static bool SaveValidation(T data)
         {
-            var verifyResults = ValidationManager.Validate(data);
+            var verifyResults = ValidationManager.Validate(data, ValidationConstants.UseCaseNames.Domain);
             var errorMessages = verifyResults.GetErrorMessages();
             if (!errorMessages.IsNullOrEmpty())
             {
-                throw new EZNEWException(string.Join("\n", errorMessages));
+                throw new EZNEWException(JsonSerializer.Serialize(errorMessages));
             }
             return true;
         }

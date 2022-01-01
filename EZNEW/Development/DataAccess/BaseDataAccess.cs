@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using EZNEW.Development.Command;
-using EZNEW.Development.Command.Modification;
+using EZNEW.Data.Modification;
 using EZNEW.Development.Query;
 using EZNEW.Development.DataAccess.Event;
 using EZNEW.Development.Entity;
-using EZNEW.Exceptions;
 using EZNEW.Paging;
+using EZNEW.Data;
+using System.Linq;
 
 namespace EZNEW.Development.DataAccess
 {
@@ -31,7 +32,7 @@ namespace EZNEW.Development.DataAccess
         {
             InitVersionFieldValue(data);//init version field value
             InitDefaultDateTimeFieldValue(data);//init datetime value
-            var command = ExecuteAdd(data);
+            var command = ExecuteAdding(data);
 
             //publish add event
             DataAccessEventBus.PublishAddEvent(data, data.GetAllValues());
@@ -88,8 +89,8 @@ namespace EZNEW.Development.DataAccess
                 throw new ArgumentNullException($"{nameof(query)}");
             }
 
-            Dictionary<string, dynamic> modifyValues = newData.GetModifyValues(oldData);
-            if (modifyValues.IsNullOrEmpty())
+            Dictionary<string, dynamic> modificationValues = newData.GetModifyValues(oldData);
+            if (modificationValues.IsNullOrEmpty())
             {
                 return null;
             }
@@ -97,34 +98,34 @@ namespace EZNEW.Development.DataAccess
             #region control version
 
             string versionFieldName = EntityManager.GetVersionField(entityType);
-            if (!string.IsNullOrWhiteSpace(versionFieldName) && !modifyValues.ContainsKey(versionFieldName))
+            if (!string.IsNullOrWhiteSpace(versionFieldName) && !modificationValues.ContainsKey(versionFieldName))
             {
                 var nowVersionValue = oldData.GetValue(versionFieldName);
                 var newVersionValue = nowVersionValue + 1;
                 newData.SetValue(versionFieldName, newVersionValue);
-                modifyValues.Add(versionFieldName, newVersionValue);
-                query = AndExtensions.And(query, versionFieldName, CriteriaOperator.Equal, nowVersionValue);
+                modificationValues.Add(versionFieldName, newVersionValue);
+                query = ConnectionExtensions.And(query, versionFieldName, CriterionOperator.Equal, nowVersionValue);
             }
 
             #endregion
 
-            #region update date
+            #region update time
 
             string updateDateTimeFieldName = EntityManager.GetUpdateTimeField(entityType);
-            if (!string.IsNullOrWhiteSpace(updateDateTimeFieldName) && !modifyValues.ContainsKey(updateDateTimeFieldName))
+            if (!string.IsNullOrWhiteSpace(updateDateTimeFieldName) && !modificationValues.ContainsKey(updateDateTimeFieldName))
             {
                 var nowDate = DateTimeOffset.Now;
                 newData.SetValue(updateDateTimeFieldName, nowDate);
-                modifyValues.Add(updateDateTimeFieldName, nowDate);
+                modificationValues.Add(updateDateTimeFieldName, nowDate);
             }
 
             #endregion
 
             var originValues = oldData.GetAllValues();
-            var command = ExecuteModifyData(originValues, modifyValues, query);
+            var command = ExecuteDataModification(originValues, modificationValues, query);
 
             //publish modify data event
-            DataAccessEventBus.PublishModifyDataEvent<TEntity>(originValues, modifyValues, query);
+            DataAccessEventBus.PublishModifyDataEvent<TEntity>(originValues, modificationValues, query);
 
             return command;
         }
@@ -132,13 +133,13 @@ namespace EZNEW.Development.DataAccess
         /// <summary>
         /// Modify data by expression
         /// </summary>
-        /// <param name="modifyExpression">modify expression</param>
+        /// <param name="modification">Modification</param>
         /// <param name="query">Query object</param>
         /// <returns>ICommand object</returns>
-        public ICommand Modify(IModification modifyExpression, IQuery query)
+        public ICommand Modify(IModification modification, IQuery query)
         {
-            Dictionary<string, IModificationValue> modifyValues = modifyExpression.GetModificationValues();
-            if (modifyValues.IsNullOrEmpty())
+            var modificationValues = modification?.ModificationEntries?.ToDictionary(c => c.FieldName, c => c.Value);
+            if (modificationValues.IsNullOrEmpty())
             {
                 return null;
             }
@@ -146,27 +147,27 @@ namespace EZNEW.Development.DataAccess
             #region control version
 
             string versionFieldName = EntityManager.GetVersionField(typeof(TEntity));
-            if (!string.IsNullOrWhiteSpace(versionFieldName) && !modifyValues.ContainsKey(versionFieldName))
+            if (!string.IsNullOrWhiteSpace(versionFieldName) && !modificationValues.ContainsKey(versionFieldName))
             {
-                modifyValues.Add(versionFieldName, new CalculationModificationValue(CalculationOperator.Add, 1));
+                modificationValues.Add(versionFieldName, new CalculationModificationValue(CalculationOperator.Add, 1));
             }
 
             #endregion
 
-            #region update date
+            #region update time
 
             string updateFieldName = EntityManager.GetUpdateTimeField(typeof(TEntity));
-            if (!string.IsNullOrWhiteSpace(updateFieldName) && !modifyValues.ContainsKey(updateFieldName))
+            if (!string.IsNullOrWhiteSpace(updateFieldName) && !modificationValues.ContainsKey(updateFieldName))
             {
-                modifyValues.Add(updateFieldName, new FixedModificationValue(DateTimeOffset.Now));
+                modificationValues.Add(updateFieldName, new FixedModificationValue(DateTimeOffset.Now));
             }
 
             #endregion
 
-            var command = ExecuteModifyExpression(modifyValues, query);
+            var command = ExecuteModification(modificationValues, query);
 
             //publish modify expression event
-            DataAccessEventBus.PublishModifyExpressionEvent<TEntity>(modifyValues, query);
+            DataAccessEventBus.PublishModifyExpressionEvent<TEntity>(modificationValues, query);
 
             return command;
         }
@@ -183,7 +184,7 @@ namespace EZNEW.Development.DataAccess
         public ICommand Delete(TEntity data)
         {
             //Execute delete
-            var command = ExecuteDeleteData(data);
+            var command = ExecuteDataDeletion(data);
 
             //publish delete data event
             DataAccessEventBus.PublishDeleteEvent(data, data.GetPrimaryKeyValues());
@@ -198,7 +199,7 @@ namespace EZNEW.Development.DataAccess
         /// <returns>Return command</returns>
         public ICommand Delete(IQuery query)
         {
-            var command = ExecuteDeleteByCondition(query);
+            var command = ExecuteDeletion(query);
 
             //publish delete by condition event
             DataAccessEventBus.PublishDeleteByCondition<TEntity>(query);
@@ -286,23 +287,23 @@ namespace EZNEW.Development.DataAccess
         }
 
         /// <summary>
-        /// Determine whether data is exist
+        /// Determines whether exists data
         /// </summary>
         /// <param name="query">Query object</param>
-        /// <returns>Return whether does data is exist</returns>
-        public bool Exist(IQuery query)
+        /// <returns>Return whether exists data</returns>
+        public bool Exists(IQuery query)
         {
-            return ExistAsync(query).Result;
+            return ExistsAsync(query).Result;
         }
 
         /// <summary>
-        /// Determine whether data is exist
+        /// Determines whether exists data
         /// </summary>
         /// <param name="query">Query object</param>
-        /// <returns>Return whether does data is exist</returns>
-        public async Task<bool> ExistAsync(IQuery query)
+        /// <returns>Return whether exists data</returns>
+        public async Task<bool> ExistsAsync(IQuery query)
         {
-            var existValue = await ExecuteExistAsync(query).ConfigureAwait(false);
+            var existValue = await ExecuteExistsAsync(query).ConfigureAwait(false);
 
             //publish check data event
             DataAccessEventBus.PublishCheckDataEvent<TEntity>(query, existValue);
@@ -449,60 +450,60 @@ namespace EZNEW.Development.DataAccess
 
         #region Function
 
-        #region  Execute add
+        #region  Execute adding
 
         /// <summary>
         /// Execute add data
         /// </summary>
         /// <param name="data">Data</param>
         /// <returns>Return add command</returns>
-        protected abstract ICommand ExecuteAdd(TEntity data);
+        protected abstract ICommand ExecuteAdding(TEntity data);
 
         #endregion
 
-        #region  Execute modify
+        #region  Execute modification
 
         /// <summary>
-        /// Execute modify data
+        /// Execute data modification
         /// </summary>
         /// <param name="originalValues">Original values</param>
         /// <param name="newValues">New values</param>
         /// <param name="query">Query object</param>
         /// <returns>Return modify data command</returns>
-        protected abstract ICommand ExecuteModifyData(Dictionary<string, dynamic> originalValues, Dictionary<string, dynamic> newValues, IQuery query);
+        protected abstract ICommand ExecuteDataModification(Dictionary<string, dynamic> originalValues, Dictionary<string, dynamic> newValues, IQuery query);
 
         /// <summary>
-        /// Execute modify expression
+        /// Execute modification
         /// </summary>
-        /// <param name="modifyValues">Modify values</param>
+        /// <param name="modificationValues">Modification values</param>
         /// <param name="query">Query object</param>
         /// <returns>Return modify expression command</returns>
-        protected abstract ICommand ExecuteModifyExpression(Dictionary<string, IModificationValue> modifyValues, IQuery query);
+        protected abstract ICommand ExecuteModification(Dictionary<string, IModificationValue> modificationValues, IQuery query);
 
         #endregion
 
-        #region  Execute delete
+        #region  Execute deletion
 
         /// <summary>
-        /// Execute delete data async
+        /// Execute data deletion
         /// </summary>
         /// <param name="data">Data</param>
-        /// <returns>Return delete data command</returns>
-        protected abstract ICommand ExecuteDeleteData(TEntity data);
+        /// <returns>Return a data deletion command</returns>
+        protected abstract ICommand ExecuteDataDeletion(TEntity data);
 
         /// <summary>
-        /// Execute delete by condition
+        /// Execute deletion
         /// </summary>
         /// <param name="query">Query object</param>
-        /// <returns>Return delete by condition command</returns>
-        protected abstract ICommand ExecuteDeleteByCondition(IQuery query);
+        /// <returns>Return a deletion command</returns>
+        protected abstract ICommand ExecuteDeletion(IQuery query);
 
         #endregion
 
         #region  Execute query
 
         /// <summary>
-        /// Execute get 
+        /// Execute query 
         /// </summary>
         /// <param name="query">Query object</param>
         /// <returns>Return data</returns>
@@ -527,7 +528,7 @@ namespace EZNEW.Development.DataAccess
         /// </summary>
         /// <param name="query">Query object</param>
         /// <returns>Return whether does data is exist</returns>
-        protected abstract Task<bool> ExecuteExistAsync(IQuery query);
+        protected abstract Task<bool> ExecuteExistsAsync(IQuery query);
 
         /// <summary>
         /// Execute get max value

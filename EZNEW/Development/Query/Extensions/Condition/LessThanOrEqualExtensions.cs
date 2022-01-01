@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Text;
-using EZNEW.Development.Query.CriteriaConverter;
 using EZNEW.Expressions;
 
 namespace EZNEW.Development.Query
@@ -10,71 +9,64 @@ namespace EZNEW.Development.Query
     public static class LessThanOrEqualExtensions
     {
         /// <summary>
-        /// Less than or equal condition
+        /// LessThanOrEqual condition
         /// </summary>
         /// <param name="sourceQuery">Source query</param>
         /// <param name="fieldName">Field name</param>
         /// <param name="value">Value</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <param name="converter">Criteria converter</param>
+        /// <param name="or">Connection with 'and'(true/default) or 'or'(false)</param>
+        /// <param name="criterionOptions">Criterion options</param>
         /// <returns>Return the newest IQuery object</returns>
-        public static IQuery LessThanOrEqual(this IQuery sourceQuery, string fieldName, dynamic value, bool or = false, ICriteriaConverter converter = null)
+        public static IQuery LessThanOrEqual(this IQuery sourceQuery, string fieldName, dynamic value, bool or = false, CriterionOptions criterionOptions = null)
         {
-            return sourceQuery.AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, fieldName, CriteriaOperator.LessThanOrEqual, value, converter);
+            return CriterionOperatorExtensions.Add(sourceQuery, CriterionOperator.LessThanOrEqual, fieldName, value, or, criterionOptions);
         }
 
         /// <summary>
-        /// Less than or equal condition
+        /// LessThanOrEqual condition
         /// </summary>
         /// <param name="sourceQuery">Source query</param>
         /// <param name="fieldName">Field name</param>
         /// <param name="subquery">Subquery</param>
         /// <param name="subqueryFieldName">Subquery field</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
+        /// <param name="or">Connection with 'and'(true/default) or 'or'(false)</param>
         /// <returns>Return the newest IQuery object</returns>
         public static IQuery LessThanOrEqual(this IQuery sourceQuery, string fieldName, IQuery subquery, string subqueryFieldName = "", bool or = false)
         {
-            if (subquery != null)
-            {
-                sourceQuery = sourceQuery.AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, fieldName, CriteriaOperator.LessThanOrEqual, subquery, null, new QueryParameterOptions()
-                {
-                    QueryFieldName = subqueryFieldName
-                });
-            }
-            return sourceQuery;
+            return CriterionOperatorExtensions.Add(sourceQuery, CriterionOperator.LessThanOrEqual, fieldName, subquery, subqueryFieldName, or);
         }
 
         /// <summary>
-        /// Less than or equal condition
+        /// LessThanOrEqual condition
         /// </summary>
         /// <typeparam name="TQueryModel">Query model</typeparam>
         /// <param name="sourceQuery">Source query</param>
         /// <param name="field">Field</param>
         /// <param name="value">Value</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
-        /// <param name="converter">Criteria converter</param>
+        /// <param name="or">Connection with 'and'(true/default) or 'or'(false)</param>
+        /// <param name="criterionOptions">Criterion options</param>
         /// <returns>Return the newest IQuery object</returns>
-        public static IQuery LessThanOrEqual<TQueryModel>(this IQuery sourceQuery, Expression<Func<TQueryModel, dynamic>> field, dynamic value, bool or = false, ICriteriaConverter converter = null) where TQueryModel : IQueryModel<TQueryModel>
+        public static IQuery LessThanOrEqual<TQueryModel>(this IQuery sourceQuery, Expression<Func<TQueryModel, dynamic>> field, dynamic value, bool or = false, CriterionOptions criterionOptions = null) where TQueryModel : IQueryModel<TQueryModel>
         {
-            return sourceQuery.AddCriteria(or ? QueryOperator.OR : QueryOperator.AND, ExpressionHelper.GetExpressionPropertyName(field.Body), CriteriaOperator.LessThanOrEqual, value, converter);
+            return CriterionOperatorExtensions.Add(sourceQuery, CriterionOperator.LessThanOrEqual, field, value, or, criterionOptions);
         }
 
         /// <summary>
-        /// Less than or equal condition
+        /// LessThanOrEqual condition
         /// </summary>
         /// <typeparam name="TQueryModel">Query model</typeparam>
         /// <param name="sourceQuery">Source query</param>
         /// <param name="field">Field</param>
         /// <param name="subquery">Subquery</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
+        /// <param name="or">Connection with 'and'(true/default) or 'or'(false)</param>
         /// <returns>Return the newest IQuery object</returns>
         public static IQuery LessThanOrEqual<TQueryModel>(this IQuery sourceQuery, Expression<Func<TQueryModel, dynamic>> field, IQuery subquery, bool or = false) where TQueryModel : IQueryModel<TQueryModel>
         {
-            return or ? OrExtensions.Or(sourceQuery, field, CriteriaOperator.LessThanOrEqual, subquery) : AndExtensions.And(sourceQuery, field, CriteriaOperator.LessThanOrEqual, subquery);
+            return CriterionOperatorExtensions.Add(sourceQuery, CriterionOperator.LessThanOrEqual, field, subquery, or);
         }
 
         /// <summary>
-        /// Less than or equal condition
+        /// LessThanOrEqual condition
         /// </summary>
         /// <typeparam name="TSourceQueryModel">Source query model</typeparam>
         /// <typeparam name="TSubqueryQueryModel">Subquery query model</typeparam>
@@ -82,17 +74,11 @@ namespace EZNEW.Development.Query
         /// <param name="field">Field</param>
         /// <param name="subquery">Subquery</param>
         /// <param name="subqueryField">Subquery field</param>
-        /// <param name="or">Connect with 'and'(true/default) or 'or'(false)</param>
+        /// <param name="or">Connection with 'and'(true/default) or 'or'(false)</param>
         /// <returns>Return the newest IQuery object</returns>
         public static IQuery LessThanOrEqual<TSourceQueryModel, TSubqueryQueryModel>(this IQuery sourceQuery, Expression<Func<TSourceQueryModel, dynamic>> field, IQuery subquery, Expression<Func<TSubqueryQueryModel, dynamic>> subqueryField, bool or = false) where TSourceQueryModel : IQueryModel<TSourceQueryModel> where TSubqueryQueryModel : IQueryModel<TSubqueryQueryModel>
         {
-            if (field == null || subquery == null || subqueryField == null)
-            {
-                return sourceQuery;
-            }
-            var fieldName = ExpressionHelper.GetExpressionPropertyName(field);
-            var subFieldName = ExpressionHelper.GetExpressionPropertyName(subqueryField);
-            return LessThanOrEqual(sourceQuery, fieldName, subquery, subFieldName, or);
+            return CriterionOperatorExtensions.Add(sourceQuery, CriterionOperator.LessThanOrEqual, field, subquery, subqueryField, or);
         }
     }
 }

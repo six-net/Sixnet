@@ -21,11 +21,11 @@ namespace EZNEW.Logging
 
         const char SplitChar = '=';
 
-        static readonly string TitleLogTemplate = $"{new string(SplitChar, SplitNum)}{{0}}{new string(SplitChar, SplitNum)}";
+        static readonly string TitleTemplate = $"{new string(SplitChar, SplitNum)}{{0}}{new string(SplitChar, SplitNum)}";
 
-        static readonly string NewLine = $"{Environment.NewLine}{Environment.NewLine}";
+        static readonly string NewLine = $"{Environment.NewLine}";
 
-        internal static LogLevel LogLevel = LogLevel.Information;
+        internal static LogLevel LogLevel = LogLevel.Debug;
 
         static bool EnableTraceLog = false;
 
@@ -39,14 +39,14 @@ namespace EZNEW.Logging
             });
         }
 
-        internal static void Log(string categoryName, string message)
+        internal static void Log(string categoryName, int eventId, string message)
         {
-            LogManager.Log(categoryName, LogLevel, $"{NewLine}{message}");
+            LogManager.Log(categoryName, LogLevel, eventId, $"{NewLine}{message}");
         }
 
         static string GetTitle(string title)
         {
-            return string.Format(TitleLogTemplate, title);
+            return string.Format(TitleTemplate, title);
         }
 
         static string GetMultilineMessage(params string[] messages)
@@ -61,57 +61,107 @@ namespace EZNEW.Logging
         #region UnitOfWork
 
         /// <summary>
-        /// Log begin work
+        /// Log work start submitting
         /// </summary>
-        /// <param name="work"></param>
-        internal static void LogWorkBegin(IWork work, CommandExecutionOptions options = null)
+        /// <param name="work">Work object</param>
+        internal static void LogWorkStartSubmitting(IWork work)
         {
             if (EnableTraceLog && work != null)
             {
-                string title = GetTitle($"【Work:{work.WorkId}】Start submitting work");
-                string content = options == null ? string.Empty : JsonSerializer.Serialize(options);
-                Log(string.Empty, GetMultilineMessage(title, content));
+                string title = GetTitle($"【Work:{work.WorkId}】Start submitting");
+                Log(work.GetType().FullName, FrameworkLogEvents.Work.StartSubmitting, GetMultilineMessage(title));
             }
         }
 
         /// <summary>
-        /// Log begin work
+        /// Log work options
         /// </summary>
-        /// <param name="work"></param>
-        internal static void LogWorkSuccessful(IWork work, WorkCommitResult commitResult)
+        /// <param name="work">Work object</param>
+        /// <param name="options">Execution options</param>
+        internal static void LogWorkOptions(IWork work, CommandExecutionOptions options = null)
+        {
+            if (EnableTraceLog && work != null)
+            {
+                string title = GetTitle($"【Work:{work.WorkId}】Execution options");
+                string content = options == null ? string.Empty : JsonSerializer.Serialize(options);
+                Log(work.GetType().FullName, FrameworkLogEvents.Work.ExecutionOptions, GetMultilineMessage(title, content));
+            }
+        }
+
+        /// <summary>
+        /// Log work submitted successfully
+        /// </summary>
+        /// <param name="work">Work object</param>
+        internal static void LogWorkSubmittedSuccessfully(IWork work, WorkCommitResult commitResult)
         {
             if (EnableTraceLog && work != null && commitResult != null)
             {
-                string title = GetTitle($"【{work.WorkId}】Work submit successful");
-                string content = $"Total command count：{commitResult.CommitCommandCount},Affected data count：{commitResult.ExecutedDataCount},Allow empty result command count：{commitResult.AllowEmptyResultCommandCount}";
-                Log(string.Empty, GetMultilineMessage(title, content));
+                string title = GetTitle($"【Work:{work.WorkId}】Submitted successfully");
+                string content = $"Total command count：{commitResult.CommittedCommandCount},Affected data count：{commitResult.AffectedDataCount},Allow empty result command count：{commitResult.AllowEmptyCommandCount}";
+                Log(work.GetType().FullName, FrameworkLogEvents.Work.SubmittedSuccessfully, GetMultilineMessage(title, content));
             }
         }
 
         /// <summary>
-        /// Log work failed
+        /// Log work submitted failure
         /// </summary>
-        /// <param name="work"></param>
-        internal static void LogWorkFailed(IWork work, WorkCommitResult commitResult)
+        /// <param name="work">Work object</param>
+        internal static void LogWorkSubmittedFailure(IWork work, WorkCommitResult commitResult)
         {
             if (EnableTraceLog && work != null)
             {
-                string title = GetTitle($"【{work.WorkId}】Work submit Failed");
-                string content = $"Total command count：{commitResult.CommitCommandCount},Affected data count：{commitResult.ExecutedDataCount},Allow empty result command count：{commitResult.AllowEmptyResultCommandCount}";
-                Log(string.Empty, GetMultilineMessage(title, content));
+                string title = GetTitle($"【Work:{work.WorkId}】Submitted failure");
+                string content = $"Total command count：{commitResult.CommittedCommandCount},Affected data count：{commitResult.AffectedDataCount},Allow empty result command count：{commitResult.AllowEmptyCommandCount}";
+                Log(work.GetType().FullName, FrameworkLogEvents.Work.SubmittedFailure, GetMultilineMessage(title, content));
             }
         }
 
         /// <summary>
-        /// Log begin exception
+        /// Log work subbmited exception
         /// </summary>
-        /// <param name="work"></param>
-        internal static void LogWorkException(IWork work, Exception ex)
+        /// <param name="work">Work object</param>
+        internal static void LogWorkSubmittedException(IWork work, Exception ex)
         {
             if (EnableTraceLog && work != null && ex != null)
             {
-                string title = GetTitle($"【{work.WorkId}】Work submit exception");
-                Log(string.Empty, GetMultilineMessage(title, ex.Message));
+                string title = GetTitle($"【Work:{work.WorkId}】Submitted Exception");
+                Log(work.GetType().FullName, FrameworkLogEvents.Work.SubmittedException, GetMultilineMessage(title, ex.Message));
+            }
+        }
+
+        /// <summary>
+        /// Log work rollback
+        /// </summary>
+        internal static void LogWorkRollback(IWork work)
+        {
+            if (EnableTraceLog && work != null)
+            {
+                string title = GetTitle($"【Work:{work.WorkId}】Rollback");
+                Log(work.GetType().FullName, FrameworkLogEvents.Work.Rollback, GetMultilineMessage(title));
+            }
+        }
+
+        /// <summary>
+        /// Log work reset
+        /// </summary>
+        internal static void LogWorkReset(IWork work)
+        {
+            if (EnableTraceLog && work != null)
+            {
+                string title = GetTitle($"【Work:{work.WorkId}】Reset");
+                Log(work.GetType().FullName, FrameworkLogEvents.Work.Reset, GetMultilineMessage(title));
+            }
+        }
+
+        /// <summary>
+        /// Log work dispose
+        /// </summary>
+        internal static void LogWorkDispose(IWork work)
+        {
+            if (EnableTraceLog && work != null)
+            {
+                string title = GetTitle($"【Work:{work.WorkId}】Dispose");
+                Log(work.GetType().FullName, FrameworkLogEvents.Work.Reset, GetMultilineMessage(title));
             }
         }
 
@@ -129,7 +179,7 @@ namespace EZNEW.Logging
             if (EnableTraceLog && work != null && activationRecord != null)
             {
                 string message = $"【Work:{work.WorkId}】【Record:{activationRecord.IdentityValue}】{(command == null ? "No execution command was generated" : $"The execution command is obsolete")}";
-                Log(string.Empty, message);
+                Log(work.GetType().FullName, FrameworkLogEvents.ActivationRecord.Obsolete, message);
             }
         }
 
@@ -143,7 +193,7 @@ namespace EZNEW.Logging
             if (EnableTraceLog && work != null && activationRecord != null && command != null)
             {
                 string message = $"【Work:{work.WorkId}】【Record:{activationRecord.IdentityValue}】【Command:{command.Id}】 is break off by the command startting event handler";
-                Log(string.Empty, message);
+                Log(work.GetType().FullName, FrameworkLogEvents.ActivationRecord.Break, message);
             }
         }
 
@@ -154,29 +204,31 @@ namespace EZNEW.Logging
         /// <summary>
         /// Log database script
         /// </summary>
+        /// <param name="databaseProviderType">Database provider type</param>
         /// <param name="databaseServerType">Database server type</param>
         /// <param name="script">Script</param>
         /// <param name="parameters">Parameters</param>
-        public static void LogDatabaseScript(DatabaseServerType databaseServerType, string script, object parameters)
+        public static void LogDatabaseScript(Type databaseProviderType, DatabaseServerType databaseServerType, string script, object parameters)
         {
             if (EnableTraceLog && !string.IsNullOrWhiteSpace(script))
             {
                 string title = GetTitle($"【{databaseServerType}】Execution script");
                 //string content
-                Log(string.Empty, GetMultilineMessage(GetTitle(title), script, JsonSerializer.Serialize(parameters)));
+                Log(databaseProviderType.FullName, FrameworkLogEvents.Database.Script, GetMultilineMessage(GetTitle(title), script, JsonSerializer.Serialize(parameters)));
             }
         }
 
         /// <summary>
         /// Log database execution command
         /// </summary>
+        /// <param name="databaseProviderType">Database provider type</param>
         /// <param name="databaseServerType">Database server type</param>
         /// <param name="cmd">Command</param>
-        public static void LogDatabaseExecutionCommand(DatabaseServerType databaseServerType, DatabaseExecutionCommand cmd)
+        public static void LogDatabaseExecutionCommand(Type databaseProviderType, DatabaseServerType databaseServerType, DatabaseExecutionCommand cmd)
         {
             if (EnableTraceLog && cmd != null)
             {
-                LogDatabaseScript(databaseServerType, cmd.CommandText, cmd.Parameters);
+                LogDatabaseScript(databaseProviderType, databaseServerType, cmd.CommandText, cmd.Parameters);
             }
         }
 

@@ -8,6 +8,7 @@ using EZNEW.Application;
 using EZNEW.Reflection;
 using EZNEW.Development.DataAccess;
 using EZNEW.Development.Domain.Model;
+using EZNEW.Development.Domain.Repository.Warehouse;
 
 namespace EZNEW.Development.Entity
 {
@@ -16,10 +17,7 @@ namespace EZNEW.Development.Entity
     /// </summary>
     public static class EntityManager
     {
-        static EntityManager()
-        {
-            ApplicationInitializer.Init();
-        }
+        #region Fields
 
         /// <summary>
         /// Value:Entity configuration
@@ -36,6 +34,8 @@ namespace EZNEW.Development.Entity
         /// Defines boolean type
         /// </summary>
         static readonly Type booleanType = typeof(bool);
+
+        #endregion
 
         #region Entity
 
@@ -68,7 +68,6 @@ namespace EZNEW.Development.Entity
                     Group = entityAttribute?.Group ?? string.Empty
                 };
             }
-            entityConfig.Structure = entityAttribute.Structure;
             //table name
             if (string.IsNullOrWhiteSpace(entityConfig.TableName))
             {
@@ -447,6 +446,40 @@ namespace EZNEW.Development.Entity
             EntityField field = null;
             GetEntityConfiguration(entityType)?.AllFields.TryGetValue(propertyName, out field);
             return field;
+        }
+
+        #endregion
+
+        #region Get entity default field
+
+        /// <summary>
+        /// Get entity default field
+        /// </summary>
+        /// <param name="entityType">Entity type</param>
+        /// <returns>Return default field</returns>
+        public static EntityField GetDefaultField(Type entityType)
+        {
+            var entityConfig = GetEntityConfiguration(entityType);
+            if (entityConfig == null)
+            {
+                return null;
+            }
+            var primaryKeys = entityConfig?.PrimaryKeys;
+            if (primaryKeys.IsNullOrEmpty())
+            {
+                primaryKeys = entityConfig?.QueryFields;
+            }
+            return primaryKeys?.FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Get entity default field
+        /// </summary>
+        /// <typeparam name="TEntity">Entity type</typeparam>
+        /// <returns>Return default field</returns>
+        public static EntityField GetDefaultField<TEntity>()
+        {
+            return GetDefaultField(typeof(TEntity));
         }
 
         #endregion

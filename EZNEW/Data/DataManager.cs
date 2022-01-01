@@ -3,20 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Data;
 using System.IO;
+using System.Collections;
 using Dapper;
 using EZNEW.Development.DataAccess;
-using EZNEW.Data.CriteriaConverter;
 using EZNEW.Development.Entity;
-using EZNEW.Development.Query.Translator;
+using EZNEW.Development.Query.Translation;
 using EZNEW.Serialization;
 using EZNEW.Data.Configuration;
-using EZNEW.DependencyInjection;
-using EZNEW.Development.Command;
 using EZNEW.Development.Query;
 using EZNEW.Application;
 using EZNEW.Exceptions;
 using EZNEW.Data.ParameterHandler;
 using EZNEW.Data.TypeHandler;
+using EZNEW.Data.Conversion;
+using EZNEW.Development.Command;
 
 namespace EZNEW.Data
 {
@@ -27,10 +27,14 @@ namespace EZNEW.Data
     {
         static DataManager()
         {
-            ApplicationInitializer.Init();
-            ContainerManager.Container?.Register(typeof(ICommandExecutor), typeof(DatabaseCommandExecutor));
             SqlMapper.Settings.ApplyNullValues = true;
             SqlMapper.AddTypeHandler(new DateTimeOffsetHandler());
+            SqlMapper.AddTypeHandler(new GuidHandler());
+            SqlMapper.AddTypeHandler(new ByteHandler());
+            SqlMapper.AddTypeHandler(new UIntHandler());
+            SqlMapper.AddTypeHandler(new UShortHandler());
+            SqlMapper.AddTypeHandler(new ULongHandler());
+            SqlMapper.AddTypeHandler(new TimeSpanHandler());
             ConfigureDefaultParameterHandler();
         }
 
@@ -61,7 +65,7 @@ namespace EZNEW.Data
         /// key:{database server type}_{entity type id}
         /// value:object name
         /// </summary>
-        static readonly Dictionary<string, string> DatabaseServerEntityObjectNames = new Dictionary<string, string>();
+        static readonly Dictionary<string, string> DatabaseServerDefaultEntityObjectNames = new Dictionary<string, string>();
 
         /// <summary>
         /// servertype&entity fields
@@ -119,9 +123,9 @@ namespace EZNEW.Data
             };
 
         /// <summary>
-        /// criteria convert parse config
+        /// Field converters
         /// </summary>
-        static readonly Dictionary<string, Func<CriteriaConverterParseOptions, string>> CriteriaConverterParsers = new Dictionary<string, Func<CriteriaConverterParseOptions, string>>();
+        static readonly Dictionary<string, IFieldConverter> FieldConverterCollection = new Dictionary<string, IFieldConverter>();
 
         /// <summary>
         /// Key=>DatabaseServerType+DbType
@@ -138,6 +142,11 @@ namespace EZNEW.Data
         /// Data options
         /// </summary>
         public static DataOptions DataOptions { get; private set; } = new DataOptions();
+
+        /// <summary>
+        /// Entity object name delegate collection
+        /// </summary>
+        static Dictionary<Guid, Func<DataAccessContext, string>> EntityObjectNameDelegateCollection = new();
 
         #endregion
 
@@ -256,7 +265,7 @@ namespace EZNEW.Data
                 return;
             }
             //Configure object name
-            ConfigureEntityObjectName(serverType, entityType, entityConfiguration.TableName);
+            ConfigureDatabaseServerEntityObjectName(serverType, entityType, entityConfiguration.TableName);
             //Configure fields
             ConfigureEntityFields(serverType, entityType, entityConfiguration.Fields);
         }
@@ -268,10 +277,10 @@ namespace EZNEW.Data
         /// <summary>
         /// Configure database server
         /// </summary>
-        /// <param name="getDatabaseServerOperation">Get database server operation</param>
-        public static void ConfigureDatabaseServer(Func<ICommand, List<DatabaseServer>> getDatabaseServerOperation)
+        /// <param name="getDatabaseServerDelegate">Get database server delegate</param>
+        public static void ConfigureDatabaseServer(Func<ICommand, List<DatabaseServer>> getDatabaseServerDelegate)
         {
-            GetDatabaseServerDelegate = getDatabaseServerOperation;
+            GetDatabaseServerDelegate = getDatabaseServerDelegate;
         }
 
         /// <summary>
@@ -438,53 +447,108 @@ namespace EZNEW.Data
         #region Entity object name
 
         /// <summary>
-        /// Configure entity object name
+        /// Configure database server entity object name
         /// </summary>
         /// <param name="serverType">Database server type</param>
         /// <param name="entityType">Entity type</param>
         /// <param name="objectName">Object name</param>
-        public static void ConfigureEntityObjectName(DatabaseServerType serverType, Type entityType, string objectName)
+        public static void ConfigureDatabaseServerEntityObjectName(DatabaseServerType serverType, Type entityType, string objectName)
         {
             if (entityType == null || string.IsNullOrWhiteSpace(objectName))
             {
                 return;
             }
-            DatabaseServerEntityObjectNames[GetDatabaseServerEntityFormatKey(serverType, entityType)] = objectName;
+            DatabaseServerDefaultEntityObjectNames[GetDatabaseServerEntityFormatKey(serverType, entityType)] = objectName;
         }
 
         /// <summary>
-        /// Get entity object name
+        /// Configure entity object name
         /// </summary>
-        /// <param name="serverType">Database server type</param>
         /// <param name="entityType">Entity type</param>
-        /// <param name="defaultName">Default name</param>
-        /// <returns>Return Entity object name</returns>
-        public static string GetEntityObjectName(DatabaseServerType serverType, Type entityType, string defaultName = "")
+        /// <param name="getEntityObjectNameDelegate">Get entity object name delegate</param>
+        public static void ConfigureEntityObjectName(Type entityType, Func<DataAccessContext, string> getEntityObjectNameDelegate)
         {
-            DatabaseServerEntityObjectNames.TryGetValue(GetDatabaseServerEntityFormatKey(serverType, entityType), out var objectName);
-            if (!string.IsNullOrWhiteSpace(objectName))
+            if (entityType == null)
             {
-                return objectName;
+                return;
             }
-            objectName = EntityManager.GetEntityObjectName(entityType);
-            return string.IsNullOrWhiteSpace(objectName) ? defaultName : objectName;
+            EntityObjectNameDelegateCollection[entityType.GUID] = getEntityObjectNameDelegate;
         }
 
         /// <summary>
-        /// Get query object name
+        /// Gets entity object name
         /// </summary>
-        /// <param name="serverType">Database server type</param>
-        /// <param name="query">Query object</param>
-        /// <returns>Return query relation entity object name</returns>
-        public static string GetQueryRelationObjectName(DatabaseServerType serverType, IQuery query)
+        /// <param name="databaseAccessContext">Database access context</param>
+        /// <param name="defaultObjectName">Default object name</param>
+        /// <returns></returns>
+        public static string GetEntityObjectName(DataAccessContext databaseAccessContext, string defaultObjectName = "")
         {
-            var entityType = query?.GetEntityType();
-            if (query == null || entityType == null)
+            if (databaseAccessContext?.Command?.EntityType == null)
             {
-                return string.Empty;
+                throw new ArgumentNullException($"{nameof(DataAccessContext.Command.EntityType)}");
             }
-            return GetEntityObjectName(serverType, entityType);
+
+            Type entityType = databaseAccessContext.Command.EntityType;
+
+            if (databaseAccessContext.ActivityQuery != null)
+            {
+                entityType = databaseAccessContext.ActivityQuery.GetEntityType();
+            }
+            if (entityType == null)
+            {
+                throw new EZNEWException("No entity type is set");
+            }
+
+            string entityObjectName = string.Empty;
+            if (EntityObjectNameDelegateCollection.TryGetValue(entityType.GUID, out var getEntityObjectNameFunc))
+            {
+                entityObjectName = getEntityObjectNameFunc?.Invoke(databaseAccessContext);
+            }
+            if (string.IsNullOrEmpty(entityObjectName) && databaseAccessContext.Server != null)
+            {
+                DatabaseServerDefaultEntityObjectNames.TryGetValue(GetDatabaseServerEntityFormatKey(databaseAccessContext.Server.ServerType, entityType), out entityObjectName);
+            }
+            if (string.IsNullOrWhiteSpace(entityObjectName))
+            {
+                entityObjectName = EntityManager.GetEntityObjectName(entityType);
+            }
+            return string.IsNullOrWhiteSpace(entityObjectName) ? defaultObjectName : entityObjectName;
         }
+
+        ///// <summary>
+        ///// Get entity object name
+        ///// </summary>
+        ///// <param name="server">Database server</param>
+        ///// <param name="entityType">Entity type</param>
+        ///// <param name="defaultObjectName">Default name</param>
+        ///// <returns>Return Entity object name</returns>
+        //public static string GetEntityObjectName(DatabaseServer server, Type entityType, string defaultObjectName = "")
+        //{
+
+        //    DatabaseServerDefaultEntityObjectNames.TryGetValue(GetDatabaseServerEntityFormatKey(server, entityType), out var objectName);
+        //    if (!string.IsNullOrWhiteSpace(objectName))
+        //    {
+        //        return objectName;
+        //    }
+        //    objectName = EntityManager.GetEntityObjectName(entityType);
+        //    return string.IsNullOrWhiteSpace(objectName) ? defaultObjectName : objectName;
+        //}
+
+        ///// <summary>
+        ///// Get query object name
+        ///// </summary>
+        ///// <param name="serverType">Database server type</param>
+        ///// <param name="query">Query object</param>
+        ///// <returns>Return query relation entity object name</returns>
+        //public static string GetQueryRelationObjectName(DatabaseServerType serverType, IQuery query)
+        //{
+        //    var entityType = query?.GetEntityType();
+        //    if (query == null || entityType == null)
+        //    {
+        //        return string.Empty;
+        //    }
+        //    return GetEntityObjectName(serverType, entityType);
+        //}
 
         #endregion
 
@@ -619,11 +683,11 @@ namespace EZNEW.Data
         /// <param name="serverType">Database server type</param>
         /// <param name="entityType">Entity type</param>
         /// <param name="query">Query object</param>
-        /// <param name="forceMustFields">Whether return the must query fields</param>
+        /// <param name="forceNecessaryFields">Whether include necessary fields</param>
         /// <returns>Return entity fields</returns>
-        public static IEnumerable<EntityField> GetQueryFields(DatabaseServerType serverType, Type entityType, IQuery query, bool forceMustFields)
+        public static IEnumerable<EntityField> GetQueryFields(DatabaseServerType serverType, Type entityType, IQuery query, bool forceNecessaryFields)
         {
-            var queryFieldsWithSign = query.GetActuallyQueryFieldsWithSign(entityType, forceMustFields);
+            var queryFieldsWithSign = query.GetActuallyQueryFieldsWithSign(entityType, forceNecessaryFields);
             if (queryFieldsWithSign.Item1)
             {
                 return GetAllQueryFields(serverType, entityType);
@@ -655,38 +719,42 @@ namespace EZNEW.Data
         /// <returns>Return default field</returns>
         public static EntityField GetDefaultField(DatabaseServerType serverType, Type entityType)
         {
-            var entityConfig = EntityManager.GetEntityConfiguration(entityType);
-            var primaryKeys = entityConfig?.PrimaryKeys;
-            if (primaryKeys.IsNullOrEmpty())
+            //var entityConfig = EntityManager.GetEntityConfiguration(entityType);
+            //var primaryKeys = entityConfig?.PrimaryKeys;
+            //if (primaryKeys.IsNullOrEmpty())
+            //{
+            //    primaryKeys = entityConfig?.QueryFields;
+            //}
+            //if (primaryKeys.IsNullOrEmpty())
+            //{
+            //    return null;
+            //}
+            var defaultField = EntityManager.GetDefaultField(entityType);
+            if (defaultField != null)
             {
-                primaryKeys = entityConfig?.QueryFields;
+                return GetField(serverType, entityType, defaultField);
             }
-            if (primaryKeys.IsNullOrEmpty())
-            {
-                return null;
-            }
-            var defaultField = primaryKeys[0];
-            return GetField(serverType, entityType, defaultField);
+            return null;
         }
 
         #endregion
 
         #region Batch execution configuration
 
-        #region Configure batch execute
+        #region Configure batch execution
 
         /// <summary>
         /// Configure batch execution
         /// </summary>
         /// <param name="serverType">Database server type</param>
-        /// <param name="batchExecuteConfig">Batch execution configuration</param>
-        public static void ConfigureBatchExecution(DatabaseServerType serverType, BatchExecutionConfiguration batchExecuteConfig)
+        /// <param name="batchExecutionConfiguration">Batch execution configuration</param>
+        public static void ConfigureBatchExecution(DatabaseServerType serverType, BatchExecutionConfiguration batchExecutionConfiguration)
         {
-            if (batchExecuteConfig == null)
+            if (batchExecutionConfiguration == null)
             {
                 return;
             }
-            DatabaseServerExecuteConfigurations[serverType] = batchExecuteConfig;
+            DatabaseServerExecuteConfigurations[serverType] = batchExecutionConfiguration;
         }
 
         #endregion
@@ -763,31 +831,45 @@ namespace EZNEW.Data
 
         #endregion
 
-        #region Criteria converter
+        #region Field conversion
 
         /// <summary>
-        /// Configure criteria converter parser
+        /// Configure field conversion
         /// </summary>
-        /// <param name="converterConfigName">Converter config name</param>
-        /// <param name="converterParseOperation">Converter parse operation</param>
-        public static void ConfigureCriteriaConverterParser(string converterConfigName, Func<CriteriaConverterParseOptions, string> converterParseOperation)
+        /// <param name="conversionName">Conversion name</param>
+        /// <param name="fieldConversionDelegate">Field conversion delegate</param>
+        public static void ConfigureFieldConversion(string conversionName, Func<FieldConversionContext, FieldConversionResult> fieldConversionDelegate)
         {
-            if (string.IsNullOrWhiteSpace(converterConfigName) || converterParseOperation == null)
+            if (string.IsNullOrWhiteSpace(conversionName) || fieldConversionDelegate == null)
             {
                 return;
             }
-            CriteriaConverterParsers[converterConfigName] = converterParseOperation;
+            ConfigureFieldConversion(conversionName, new DefaultFieldConverter(fieldConversionDelegate));
         }
 
         /// <summary>
-        /// Get criteria converter parser
+        /// Configure field conversion
         /// </summary>
-        /// <param name="converterConfigName">Converter config name</param>
-        /// <returns>Return convert parse operation</returns>
-        public static Func<CriteriaConverterParseOptions, string> GetCriteriaConverterParser(string converterConfigName)
+        /// <param name="conversionName">Conversion name</param>
+        /// <param name="fieldConverter">Field converter</param>
+        public static void ConfigureFieldConversion(string conversionName, IFieldConverter fieldConverter)
         {
-            CriteriaConverterParsers.TryGetValue(converterConfigName, out var parse);
-            return parse;
+            if (string.IsNullOrWhiteSpace(conversionName) || fieldConverter == null)
+            {
+                return;
+            }
+            FieldConverterCollection[conversionName] = fieldConverter;
+        }
+
+        /// <summary>
+        /// Get field converter
+        /// </summary>
+        /// <param name="conversionName">Conversion name</param>
+        /// <returns>Return field converter</returns>
+        public static IFieldConverter GetFieldConverter(string conversionName)
+        {
+            FieldConverterCollection.TryGetValue(conversionName, out var converter);
+            return converter;
         }
 
         #endregion
@@ -869,9 +951,25 @@ namespace EZNEW.Data
                 DbType? dbType = parameter.DbType;
                 if (!dbType.HasValue && parameter.Value != null)
                 {
-#pragma warning disable CS0618 // 类型或成员已过时
-                    dbType = SqlMapper.LookupDbType(parameter.Value.GetType(), parameter.Name, false, out _);
-#pragma warning restore CS0618 // 类型或成员已过时
+                    Type valueType = parameter.Value.GetType();
+                    bool isCollection = false;
+                    if (valueType != typeof(string) && parameter.Value is IEnumerable values)
+                    {
+                        isCollection = true;
+                        foreach (var val in values)
+                        {
+                            valueType = val.GetType();
+                            break;
+                        }
+                    }
+
+#pragma warning disable CS0618
+                    dbType = SqlMapper.LookupDbType(valueType, parameter.Name, false, out _);
+#pragma warning restore CS0618
+                    if (!isCollection)
+                    {
+                        //parameter.DbType = dbType;
+                    }
                 }
                 return GetParameterHandler(databaseServerType, dbType.GetValueOrDefault());
             }
@@ -908,6 +1006,14 @@ namespace EZNEW.Data
         {
             var datetimeOffsetHandler = new DateTimeOffsetParameterHandler();
             var boolToIntegerHandler = new BooleanToIntegerParameterHandler();
+            var guidHandler = new GuidFormattingParameterHandler();
+            var sbyteHandler = new SByteToShortParameterHandler();
+            var uintHandler = new UIntToLongParameterHandler();
+            var ushortHandler = new UShortToIntParameterHandler();
+            var ulongHandler = new ULongToDecimalParameterHandler();
+            var timespanHandler = new TimeSpanParameterHandler();
+            var charHandler = new CharToStringParameterHandler();
+            var ulongToStringHandler = new ULongToStringParameterHandler();
 
             #region MySQL
 
@@ -920,6 +1026,20 @@ namespace EZNEW.Data
 
             //boolean
             AddParameterHandler(DatabaseServerType.Oracle, DbType.Boolean, boolToIntegerHandler);
+            //Guid
+            AddParameterHandler(DatabaseServerType.Oracle, DbType.Guid, guidHandler);
+            //SByte
+            AddParameterHandler(DatabaseServerType.Oracle, DbType.SByte, sbyteHandler);
+            //UInt
+            AddParameterHandler(DatabaseServerType.Oracle, DbType.UInt32, uintHandler);
+            //UShort
+            AddParameterHandler(DatabaseServerType.Oracle, DbType.UInt16, ushortHandler);
+            //ULong
+            AddParameterHandler(DatabaseServerType.Oracle, DbType.UInt64, ulongHandler);
+            //Timespan
+            AddParameterHandler(DatabaseServerType.Oracle, DbType.Time, timespanHandler);
+            //Char
+            AddParameterHandler(DatabaseServerType.Oracle, DbType.StringFixedLength, charHandler);
 
             #endregion
 
@@ -927,6 +1047,32 @@ namespace EZNEW.Data
 
             //DateTimeOffset
             AddParameterHandler(DatabaseServerType.SQLite, DbType.DateTimeOffset, datetimeOffsetHandler);
+            //ULong
+            AddParameterHandler(DatabaseServerType.SQLite, DbType.UInt64, ulongToStringHandler);
+
+            #endregion
+
+            #region SQL Server
+
+            //SByte
+            AddParameterHandler(DatabaseServerType.SQLServer, DbType.SByte, sbyteHandler);
+            //UInt
+            AddParameterHandler(DatabaseServerType.SQLServer, DbType.UInt32, uintHandler);
+            //UShort
+            AddParameterHandler(DatabaseServerType.SQLServer, DbType.UInt16, ushortHandler);
+            //ULong
+            AddParameterHandler(DatabaseServerType.SQLServer, DbType.UInt64, ulongHandler);
+
+            #endregion
+
+            #region PostgreSQL
+
+            //UInt
+            AddParameterHandler(DatabaseServerType.PostgreSQL, DbType.UInt32, uintHandler);
+            //ULong
+            AddParameterHandler(DatabaseServerType.PostgreSQL, DbType.UInt64, ulongHandler);
+            //UShort
+            AddParameterHandler(DatabaseServerType.PostgreSQL, DbType.UInt16, ushortHandler);
 
             #endregion
         }

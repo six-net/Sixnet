@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using EZNEW.Development.Command;
-using EZNEW.Development.Command.Modification;
+using EZNEW.Data.Modification;
 using EZNEW.Development.Query;
 
 namespace EZNEW.Development.UnitOfWork
@@ -45,7 +45,7 @@ namespace EZNEW.Development.UnitOfWork
         /// <summary>
         /// Gets or sets the modify expression
         /// </summary>
-        IModification ModifyExpression { get; set; }
+        IModification ModificationExpression { get; set; }
 
         /// <summary>
         /// Gets whether the record is obsolete
@@ -57,16 +57,16 @@ namespace EZNEW.Development.UnitOfWork
         #region Methods
 
         /// <summary>
-        /// Add follow records
+        /// Add follow record
         /// </summary>
         /// <param name="records">Activation records</param>
-        void AddFollowRecords(params IActivationRecord[] records);
+        void AddFollowRecord(params IActivationRecord[] records);
 
         /// <summary>
-        /// Add follow records
+        /// Add follow record
         /// </summary>
         /// <param name="records">Activation records</param>
-        void AddFollowRecords(IEnumerable<IActivationRecord> records);
+        void AddFollowRecord(IEnumerable<IActivationRecord> records);
 
         /// <summary>
         /// Get follow records
@@ -75,10 +75,10 @@ namespace EZNEW.Development.UnitOfWork
         IEnumerable<IActivationRecord> GetFollowRecords();
 
         /// <summary>
-        /// Get execute commands
+        /// Get execution command
         /// </summary>
         /// <returns>Return execute command</returns>
-        ICommand GetExecuteCommand();
+        ICommand GetExecutionCommand();
 
         /// <summary>
         /// Obsolete

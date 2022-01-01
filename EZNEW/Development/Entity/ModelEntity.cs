@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Text;
+using EZNEW.Code;
 using EZNEW.Development.Domain.Model;
 using EZNEW.Development.Domain.Repository;
+using EZNEW.Development.UnitOfWork;
 using EZNEW.Expressions;
 using EZNEW.Model;
 
@@ -12,25 +14,37 @@ namespace EZNEW.Development.Entity
     /// <summary>
     /// Defines model entity
     /// </summary>
-    public class ModelEntity<T> : BaseEntity<T>, IModel<T> where T : BaseEntity<T>, IModel<T>, new()
+    public abstract class ModelEntity<T> : BaseEntity<T>, IModel<T> where T : BaseEntity<T>, IModel<T>, new()
     {
         #region Fields
 
         /// <summary>
         /// The _repository object
         /// </summary>
+        [NonData]
         private IRepository<T> _repository = RepositoryManager.GetRepository<T>();
 
         /// <summary>
-        /// Indecates whether to load lazy member
+        /// Indicates whether to load lazy member
         /// </summary>
+        [NonData]
         bool _allowLoadLazyMember = false;
 
         /// <summary>
         /// Lazy properties
         /// </summary>
+        [NonData]
         private Dictionary<string, bool> _loadProperties = new();
 
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// Gets the repository
+        /// </summary>
+        [NonData]
+        protected IRepository<T> Repository => _repository;
 
         #endregion
 
@@ -39,7 +53,7 @@ namespace EZNEW.Development.Entity
         #region Save
 
         /// <summary>
-        /// Indecates whether allow to save
+        /// Indicates whether allow to save
         /// </summary>
         /// <returns></returns>
         public bool AllowToSave()
@@ -57,11 +71,23 @@ namespace EZNEW.Development.Entity
         }
 
         /// <summary>
-        /// Save
+        /// Save model
         /// </summary>
-        public virtual Result<T> Save()
+        /// <param name="force">Indicates whether to enforce</param>
+        /// <returns></returns>
+        public virtual Result<T> Save(bool force = false)
         {
-            return ModelDataManager<T>.Save(_repository, this as T);
+            return Save(new ActivationOptions(force));
+        }
+
+        /// <summary>
+        /// Save model
+        /// </summary>
+        /// <param name="activationOptions">Activation options</param>
+        /// <returns></returns>
+        public virtual Result<T> Save(ActivationOptions activationOptions)
+        {
+            return ModelDataManager<T>.Save(_repository, this as T, activationOptions);
         }
 
         #endregion
@@ -69,7 +95,7 @@ namespace EZNEW.Development.Entity
         #region Remove
 
         /// <summary>
-        /// Indecates whether allow to remove
+        /// Indicates whether allow to remove
         /// </summary>
         /// <returns></returns>
         public bool AllowToRemove()
@@ -83,15 +109,27 @@ namespace EZNEW.Development.Entity
         /// <returns>Return whether allow to remove</returns>
         protected virtual bool RemoveValidation()
         {
-            return !IdentityValueIsNone();
+            return !IdentityValueIsNull();
         }
 
         /// <summary>
-        /// Remove
+        /// Remove model
         /// </summary>
-        public virtual Result Remove()
+        /// <param name="force">Indicates whether to enforce</param>
+        /// <returns></returns>
+        public virtual Result Remove(bool force = false)
         {
-            return ModelDataManager<T>.Remove(_repository, this as T);
+            return Remove(new ActivationOptions(force));
+        }
+
+        /// <summary>
+        /// Remove model
+        /// </summary>
+        /// <param name="activationOptions">Activation options</param>
+        /// <returns></returns>
+        public virtual Result Remove(ActivationOptions activationOptions)
+        {
+            return ModelDataManager<T>.Remove(_repository, this as T, activationOptions);
         }
 
         #endregion
@@ -99,7 +137,7 @@ namespace EZNEW.Development.Entity
         #region LifeSource
 
         /// <summary>
-        /// Indecates whether is a new object
+        /// Indicates whether is a new object
         /// </summary>
         /// <returns></returns>
         public bool IsNew()
@@ -202,7 +240,7 @@ namespace EZNEW.Development.Entity
         /// <returns>Return whether allow load data</returns>
         protected virtual bool AllowLoad<TModel>(Expression<Func<T, dynamic>> property, LazyMember<TModel> lazyMember) where TModel : IModel<TModel>
         {
-            return AllowLoad(property) && !(lazyMember.CurrentValue?.IdentityValueIsNone() ?? true);
+            return AllowLoad(property) && !(lazyMember.CurrentValue?.IdentityValueIsNull() ?? true);
         }
 
         #endregion
@@ -212,15 +250,152 @@ namespace EZNEW.Development.Entity
         /// <summary>
         /// Init primary value
         /// </summary>
-        public virtual void InitIdentityValue() { }
+        public virtual void InitIdentityValue()
+        {
+            var primaryKeys = EntityManager.GetPrimaryKeys<T>();
+            if (primaryKeys.IsNullOrEmpty())
+            {
+                return;
+            }
+            foreach (var pk in primaryKeys)
+            {
+                var field = EntityManager.GetEntityField(typeof(T), pk);
+                if (field != null)
+                {
+                    var valueType = field.DataType?.GetRealValueType();
+                    var typeCode = Type.GetTypeCode(valueType);
+                    switch (typeCode)
+                    {
+                        case TypeCode.Byte:
+                            SetValue(pk, RandomNumberHelper.GetRandomNumber(byte.MaxValue, 1));
+                            break;
+                        case TypeCode.SByte:
+                            SetValue(pk, RandomNumberHelper.GetRandomNumber(sbyte.MaxValue, 1));
+                            break;
+                        case TypeCode.Int16:
+                            SetValue(pk, RandomNumberHelper.GetRandomNumber(short.MaxValue, 1));
+                            break;
+                        case TypeCode.UInt16:
+                            SetValue(pk, RandomNumberHelper.GetRandomNumber(ushort.MaxValue, 1));
+                            break;
+                        case TypeCode.Int32:
+                        case TypeCode.UInt32:
+                            SetValue(pk, RandomNumberHelper.GetRandomNumber(int.MaxValue, 1));
+                            break;
+                        case TypeCode.Int64:
+                        case TypeCode.UInt64:
+                        case TypeCode.Double:
+                        case TypeCode.Single:
+                        case TypeCode.Decimal:
+                            SetValue(pk, SerialNumber.GenerateSerialNumber<T>());
+                            break;
+                        case TypeCode.String:
+                            SetValue(pk, SerialNumber.GenerateSerialNumber<T>().ToString());
+                            break;
+                        case TypeCode.DateTime:
+                            SetValue(pk, DateTime.Now);
+                            break;
+                        default:
+                            if (valueType == typeof(Guid))
+                            {
+                                SetValue(pk, Guid.NewGuid());
+                            }
+                            else if (valueType == typeof(DateTimeOffset))
+                            {
+                                SetValue(pk, DateTimeOffset.Now);
+                            }
+                            else
+                            {
+                                throw new InvalidOperationException($"Initialization values are not supported for {field.DataType}.");
+                            }
+                            break;
+                    }
+                }
+            }
+        }
 
         /// <summary>
-        /// Check identity value is none
+        /// Check identity value is null
         /// </summary>
         /// <returns>Return identity value whether has value</returns>
-        public virtual bool IdentityValueIsNone()
+        public virtual bool IdentityValueIsNull()
         {
-            return string.IsNullOrWhiteSpace(GetIdentityValue());
+            var primaryKeys = EntityManager.GetPrimaryKeys<T>();
+            if (primaryKeys.IsNullOrEmpty())
+            {
+                return true;
+            }
+            bool identityValueIsNull = false;
+            foreach (var pk in primaryKeys)
+            {
+                var field = EntityManager.GetEntityField(typeof(T), pk);
+                identityValueIsNull = field == null;
+                if (!identityValueIsNull)
+                {
+                    var valueType = field.DataType?.GetRealValueType();
+                    var typeCode = Type.GetTypeCode(valueType);
+                    var fieldValue = field.ValueProvider.Get(this);
+                    switch (typeCode)
+                    {
+                        case TypeCode.Byte:
+                            identityValueIsNull = !byte.TryParse(fieldValue?.ToString(), out var byteValue) || byteValue < 1;
+                            break;
+                        case TypeCode.SByte:
+                            identityValueIsNull = !sbyte.TryParse(fieldValue?.ToString(), out var sbyteValue) || sbyteValue < 1;
+                            break;
+                        case TypeCode.Int16:
+                            identityValueIsNull = !short.TryParse(fieldValue?.ToString(), out var shortValue) || shortValue < 1;
+                            break;
+                        case TypeCode.UInt16:
+                            identityValueIsNull = !ushort.TryParse(fieldValue?.ToString(), out var ushortValue) || ushortValue < 1;
+                            break;
+                        case TypeCode.Int32:
+                            identityValueIsNull = !int.TryParse(fieldValue?.ToString(), out var intValue) || intValue < 1;
+                            break;
+                        case TypeCode.UInt32:
+                            identityValueIsNull = !uint.TryParse(fieldValue?.ToString(), out var uintValue) || uintValue < 1;
+                            break;
+                        case TypeCode.Int64:
+                            identityValueIsNull = !long.TryParse(fieldValue?.ToString(), out var longValue) || longValue < 1;
+                            break;
+                        case TypeCode.UInt64:
+                            identityValueIsNull = !ulong.TryParse(fieldValue?.ToString(), out var ulongValue) || ulongValue < 1;
+                            break;
+                        case TypeCode.Double:
+                        case TypeCode.Single:
+                            identityValueIsNull = !double.TryParse(fieldValue?.ToString(), out var doubleValue) || doubleValue < 1;
+                            break;
+                        case TypeCode.Decimal:
+                            identityValueIsNull = !decimal.TryParse(fieldValue?.ToString(), out var decimalValue) || decimalValue < 1;
+                            break;
+                        case TypeCode.String:
+                            identityValueIsNull = string.IsNullOrWhiteSpace(fieldValue?.ToString());
+                            break;
+                        case TypeCode.DateTime:
+                            identityValueIsNull = !DateTime.TryParse(fieldValue?.ToString(), out var dateTimeValue) || dateTimeValue <= DateTime.MinValue;
+                            break;
+                        default:
+                            if (valueType == typeof(Guid))
+                            {
+                                identityValueIsNull = !Guid.TryParse(fieldValue?.ToString(), out var guidValue) || guidValue.Equals(Guid.Empty);
+                            }
+                            else if (valueType == typeof(DateTimeOffset))
+                            {
+                                identityValueIsNull = !DateTimeOffset.TryParse(fieldValue?.ToString(), out var dateTimeOffsetValue) && dateTimeOffsetValue <= DateTimeOffset.MinValue;
+                            }
+                            else
+                            {
+                                throw new InvalidOperationException($"Not supported check value for {field.DataType}.");
+                            }
+                            break;
+                    }
+                }
+                if (identityValueIsNull)
+                {
+                    break;
+                }
+            }
+            return identityValueIsNull;
         }
 
         #endregion
@@ -244,7 +419,21 @@ namespace EZNEW.Development.Entity
         /// <returns></returns>
         internal protected virtual T OnUpdating(T newData)
         {
-            return newData;
+            var entityConfig = EntityManager.GetEntityConfiguration<T>();
+            if (!(entityConfig?.AllFields.IsNullOrEmpty() ?? true))
+            {
+                foreach (var fieldItem in entityConfig.AllFields)
+                {
+                    if (fieldItem.Value.InRole(FieldRole.CreationTime)
+                        || fieldItem.Value.InRole(FieldRole.UpdateTime)
+                        || fieldItem.Value.InRole(FieldRole.Version))
+                    {
+                        continue;
+                    }
+                    SetValue(fieldItem.Key, newData.GetValue(fieldItem.Key));
+                }
+            }
+            return this as T;
         }
 
         #endregion
@@ -257,6 +446,10 @@ namespace EZNEW.Development.Entity
         /// <returns>Return data</returns>
         public IModel OnDataAdding()
         {
+            if (IdentityValueIsNull())
+            {
+                InitIdentityValue();
+            }
             return OnAdding();
         }
 
@@ -266,10 +459,6 @@ namespace EZNEW.Development.Entity
         /// <returns>Return data</returns>
         internal protected virtual T OnAdding()
         {
-            if (IdentityValueIsNone())
-            {
-                InitIdentityValue();
-            }
             return this as T;
         }
 
@@ -314,11 +503,11 @@ namespace EZNEW.Development.Entity
         /// Set _repository
         /// </summary>
         /// <param name="_repository">Repository</param>
-        protected void SetRepository(IRepository<T> _repository)
+        protected void SetRepository(IRepository<T> repository)
         {
-            if (_repository != null)
+            if (repository != null)
             {
-                _repository = _repository;
+                _repository = repository;
             }
         }
 

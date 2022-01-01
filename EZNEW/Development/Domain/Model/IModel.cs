@@ -10,13 +10,13 @@ namespace EZNEW.Development.Domain.Model
     public interface IModel
     {
         /// <summary>
-        /// Indecates whether allow to save
+        /// Indicates whether allow to save
         /// </summary>
         /// <returns></returns>
         bool AllowToSave();
 
         /// <summary>
-        /// Indecates whether allow to remove
+        /// Indicates whether allow to remove
         /// </summary>
         /// <returns></returns>
         bool AllowToRemove();
@@ -28,7 +28,7 @@ namespace EZNEW.Development.Domain.Model
         string GetIdentityValue();
 
         /// <summary>
-        /// Indecates whether is a new object
+        /// Indicates whether is a new object
         /// </summary>
         /// <returns></returns>
         bool IsNew();
@@ -45,10 +45,10 @@ namespace EZNEW.Development.Domain.Model
         bool MarkStored();
 
         /// <summary>
-        /// Check identity value is none
+        /// Check identity value is null
         /// </summary>
-        /// <returns>Return identity value whether is none</returns>
-        bool IdentityValueIsNone();
+        /// <returns>Return identity value whether is null</returns>
+        bool IdentityValueIsNull();
     }
 
     /// <summary>

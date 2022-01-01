@@ -281,22 +281,22 @@ namespace EZNEW.Security.Cryptography
 
         #region Get integer size
 
-        static int GetIntegerSize(BinaryReader binr)
+        static int GetIntegerSize(BinaryReader binaryReader)
         {
             byte bt = 0;
             int count = 0;
-            bt = binr.ReadByte();
+            bt = binaryReader.ReadByte();
             if (bt != 0x02)
                 return 0;
-            bt = binr.ReadByte();
+            bt = binaryReader.ReadByte();
 
             if (bt == 0x81)
-                count = binr.ReadByte();
+                count = binaryReader.ReadByte();
             else
             if (bt == 0x82)
             {
-                var highbyte = binr.ReadByte();
-                var lowbyte = binr.ReadByte();
+                var highbyte = binaryReader.ReadByte();
+                var lowbyte = binaryReader.ReadByte();
                 byte[] modint = { lowbyte, highbyte, 0x00, 0x00 };
                 count = BitConverter.ToInt32(modint, 0);
             }
@@ -305,11 +305,11 @@ namespace EZNEW.Security.Cryptography
                 count = bt;
             }
 
-            while (binr.ReadByte() == 0x00)
+            while (binaryReader.ReadByte() == 0x00)
             {
                 count -= 1;
             }
-            binr.BaseStream.Seek(-1, SeekOrigin.Current);
+            binaryReader.BaseStream.Seek(-1, SeekOrigin.Current);
             return count;
         }
 
