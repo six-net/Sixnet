@@ -9,6 +9,7 @@ using EZNEW.Development.Entity;
 using EZNEW.Exceptions;
 using EZNEW.DependencyInjection;
 using EZNEW.Development.Domain.Repository.Warehouse.Storage;
+using EZNEW.Logging;
 
 namespace EZNEW.Development.UnitOfWork
 {
@@ -253,8 +254,10 @@ namespace EZNEW.Development.UnitOfWork
         /// <returns>Return the record command</returns>
         ICommand GetSavingObjectCommand()
         {
+            LogManager.LogDebug<DefaultActivationRecord<TEntity, TDataAccess>>(FrameworkLogEvents.ActivationRecord.GenerateSavingCommand, "Generate saving command");
             if (string.IsNullOrWhiteSpace(IdentityValue))
             {
+                LogManager.LogDebug<DefaultActivationRecord<TEntity, TDataAccess>>(FrameworkLogEvents.ActivationRecord.GenerateSavingCommand, "Identity value is null or empty");
                 return null;
             }
             var dataPackage = EntityStorage<TEntity>.GetCurrentEntityStorage(true).GetDataPackage(IdentityValue);
@@ -265,13 +268,15 @@ namespace EZNEW.Development.UnitOfWork
             var dataAccessService = ContainerManager.Resolve<TDataAccess>();
             if (dataPackage.Source == DataSource.New) //new add value
             {
+                LogManager.LogDebug<DefaultActivationRecord<TEntity, TDataAccess>>(FrameworkLogEvents.ActivationRecord.GenerateSavingCommand, "Generate add command");
                 return dataAccessService.Add(dataPackage.LatestData);
             }
-            else if (dataPackage.HasValueChanged) // update value
+            else if (dataPackage.HasValueChanged) //update value
             {
-                var data = dataPackage.LatestData;
-                return dataAccessService.Modify(data, dataPackage.OriginalData);
+                LogManager.LogDebug<DefaultActivationRecord<TEntity, TDataAccess>>(FrameworkLogEvents.ActivationRecord.GenerateSavingCommand, "Generate modification command");
+                return dataAccessService.Modify(dataPackage.LatestData, dataPackage.OriginalData);
             }
+            LogManager.LogDebug<DefaultActivationRecord<TEntity, TDataAccess>>(FrameworkLogEvents.ActivationRecord.GenerateSavingCommand, "No saving command generated");
             return null;
         }
 
@@ -281,18 +286,20 @@ namespace EZNEW.Development.UnitOfWork
         /// <returns>Return the record command</returns>
         ICommand GetRemovingObjectCommand()
         {
+            LogManager.LogDebug<DefaultActivationRecord<TEntity, TDataAccess>>(FrameworkLogEvents.ActivationRecord.GenerateRemovingCommand, "Generate removing command");
             if (string.IsNullOrWhiteSpace(IdentityValue))
             {
+                LogManager.LogDebug<DefaultActivationRecord<TEntity, TDataAccess>>(FrameworkLogEvents.ActivationRecord.GenerateRemovingCommand, "Identity value is null or empty");
                 return null;
             }
             var dataPackage = EntityStorage<TEntity>.GetCurrentEntityStorage(true).GetDataPackage(IdentityValue);
             if (dataPackage == null || (!ActivationOptions.ForceExecution && (dataPackage.Operation != DataRecordOperation.Remove || dataPackage.IsRealRemove)))
             {
+                LogManager.LogDebug<DefaultActivationRecord<TEntity, TDataAccess>>(FrameworkLogEvents.ActivationRecord.GenerateRemovingCommand, "Ignore removing record");
                 return null;
             }
             var dataAccessService = ContainerManager.Resolve<TDataAccess>();
-            var data = dataPackage.LatestData;
-            return dataAccessService.Delete(data);
+            return dataAccessService.Delete(dataPackage.LatestData);
         }
 
         /// <summary>
@@ -301,6 +308,7 @@ namespace EZNEW.Development.UnitOfWork
         /// <returns>Return the record command</returns>
         ICommand GetRemovingByConditionCommand()
         {
+            LogManager.LogDebug<DefaultActivationRecord<TEntity, TDataAccess>>(FrameworkLogEvents.ActivationRecord.GenerateRemovingByConditionCommand, "Generate removing by condition command");
             var dataAccessService = ContainerManager.Resolve<TDataAccess>();
             return dataAccessService.Delete(Query);
         }
@@ -311,6 +319,7 @@ namespace EZNEW.Development.UnitOfWork
         /// <returns>Return the record command</returns>
         ICommand GetModificationExpressionCommand()
         {
+            LogManager.LogDebug<DefaultActivationRecord<TEntity, TDataAccess>>(FrameworkLogEvents.ActivationRecord.GenerateModificationExpressionCommand, "Generate modification expression command");
             var dataAccessService = ContainerManager.Resolve<TDataAccess>();
             return dataAccessService.Modify(ModificationExpression, Query);
         }

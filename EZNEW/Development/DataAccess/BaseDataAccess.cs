@@ -9,6 +9,7 @@ using EZNEW.Development.Entity;
 using EZNEW.Paging;
 using EZNEW.Data;
 using System.Linq;
+using EZNEW.Logging;
 
 namespace EZNEW.Development.DataAccess
 {
@@ -92,6 +93,7 @@ namespace EZNEW.Development.DataAccess
             Dictionary<string, dynamic> modificationValues = newData.GetModifiedValues(oldData);
             if (modificationValues.IsNullOrEmpty())
             {
+                LogManager.LogDebug<BaseDataAccess<TEntity>>(FrameworkLogEvents.Database.NotModificationValue, "No modification values");
                 return null;
             }
 

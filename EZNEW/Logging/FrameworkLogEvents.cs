@@ -53,6 +53,10 @@ namespace EZNEW.Logging
         {
             public const int Obsolete = 51520000;
             public const int Break = 51520001;
+            public const int GenerateSavingCommand = 51520003;
+            public const int GenerateRemovingCommand = 51520004;
+            public const int GenerateRemovingByConditionCommand = 51520005;
+            public const int GenerateModificationExpressionCommand = 51520006;
         }
 
         #endregion
@@ -63,6 +67,7 @@ namespace EZNEW.Logging
         {
             public const int Script = 51530000;
             public const int NotSetDatabaseServer = 51530001;
+            public const int NotModificationValue = 51530002;
         }
 
         #endregion
