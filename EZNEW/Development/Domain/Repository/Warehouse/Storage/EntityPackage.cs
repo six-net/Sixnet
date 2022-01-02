@@ -323,11 +323,10 @@ namespace EZNEW.Development.Domain.Repository.Warehouse.Storage
             {
                 throw new ArgumentNullException(nameof(entity));
             }
-            var copyData = entity.Clone();
             var dataPackage = new EntityPackage<TEntity>()
             {
-                LatestData = copyData,
-                OriginalData = copyData,
+                LatestData = entity,
+                OriginalData = entity.Clone(),
                 Source = DataSource.Storage,
                 Operation = DataRecordOperation.None
             };
