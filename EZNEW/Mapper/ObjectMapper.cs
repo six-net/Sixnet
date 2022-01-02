@@ -11,9 +11,9 @@ namespace EZNEW.Mapper
     public static class ObjectMapper
     {
         /// <summary>
-        /// Default mapper builder
+        /// Global mapper configuration action
         /// </summary>
-        static readonly ConventionMapperBuilder DefaultMapperBuilder = new();
+        static Action<IMapperConfigurationExpression> GlobalMapperConfigurationAction;
 
         /// <summary>
         /// Get or set current object mapper
@@ -27,11 +27,10 @@ namespace EZNEW.Mapper
         /// <returns></returns>
         public static void ConfigureMap(Action<IMapperConfigurationExpression> configureAction)
         {
-            if (configureAction == null)
+            if (configureAction != null)
             {
-                return;
+                GlobalMapperConfigurationAction += configureAction;
             }
-            DefaultMapperBuilder.ConfigureMap(configureAction);
         }
 
         /// <summary>
@@ -42,14 +41,10 @@ namespace EZNEW.Mapper
         {
             if (Current == null || Current is ConventionMapper)
             {
-                if (ApplicationManager.Options.MapperBuilder == null)
-                {
-                    Current = DefaultMapperBuilder.CreateMapper();
-                }
-                else
-                {
-                    Current = ApplicationManager.Options.MapperBuilder.CreateMapper();
-                }
+                var mapperBuilder = ApplicationManager.Options.MapperBuilder;
+                mapperBuilder ??= new ConventionMapperBuilder();
+                mapperBuilder.ConfigureMap(GlobalMapperConfigurationAction);
+                Current = mapperBuilder.CreateMapper();
             }
             return Current;
         }

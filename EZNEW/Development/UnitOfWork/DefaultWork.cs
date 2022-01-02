@@ -325,9 +325,10 @@ namespace EZNEW.Development.UnitOfWork
             {
                 return;
             }
+            var workCommands = commandCollection.Select(c => c).ToList();
             ThreadPool.QueueUserWorkItem(s =>
             {
-                foreach (var command in commandCollection)
+                foreach (var command in workCommands)
                 {
                     var callbackCommand = command;
                     ThreadPool.QueueUserWorkItem(state =>

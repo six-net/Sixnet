@@ -22,7 +22,7 @@ namespace EZNEW.Development.Query
         /// <returns>Return the newest IQuery object</returns>
         public static IQuery And(this IQuery sourceQuery, string fieldName, CriterionOperator @operator, dynamic value, CriterionOptions criterionOptions = null)
         {
-            return Connect(sourceQuery, CriterionConnectionOperator.Or, fieldName, @operator, value, criterionOptions);
+            return Connect(sourceQuery, CriterionConnectionOperator.And, fieldName, @operator, value, criterionOptions);
         }
 
         /// <summary>
@@ -51,7 +51,7 @@ namespace EZNEW.Development.Query
         /// <returns>Return the newest IQuery object</returns>
         public static IQuery And(this IQuery sourceQuery, CriterionConnectionOperator eachFieldConnectionOperator, CriterionOperator @operator, dynamic value, CriterionOptions criterionOptions, params string[] fieldNames)
         {
-            return Connect(sourceQuery, CriterionConnectionOperator.Or, eachFieldConnectionOperator, @operator, value, criterionOptions, fieldNames);
+            return Connect(sourceQuery, CriterionConnectionOperator.And, eachFieldConnectionOperator, @operator, value, criterionOptions, fieldNames);
         }
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace EZNEW.Development.Query
         /// <returns>Return the newest IQuery object</returns>
         public static IQuery And<TQueryModel>(this IQuery sourceQuery, Expression<Func<TQueryModel, bool>> conditionExpression) where TQueryModel : IQueryModel<TQueryModel>
         {
-            return Connect(sourceQuery, CriterionConnectionOperator.Or, conditionExpression);
+            return Connect(sourceQuery, CriterionConnectionOperator.And, conditionExpression);
         }
 
         /// <summary>
@@ -109,7 +109,7 @@ namespace EZNEW.Development.Query
         /// <returns>Return the newest IQuery object</returns>
         public static IQuery And<TQueryModel>(this IQuery sourceQuery, CriterionConnectionOperator eachFieldConnectionOperator, CriterionOperator @operator, dynamic value, CriterionOptions criterionOptions, params Expression<Func<TQueryModel, dynamic>>[] fields) where TQueryModel : IQueryModel<TQueryModel>
         {
-            return Connect(sourceQuery, CriterionConnectionOperator.Or, eachFieldConnectionOperator, @operator, value, criterionOptions, fields);
+            return Connect(sourceQuery, CriterionConnectionOperator.And, eachFieldConnectionOperator, @operator, value, criterionOptions, fields);
         }
 
         /// <summary>
@@ -120,7 +120,7 @@ namespace EZNEW.Development.Query
         /// <returns>Return the newest IQuery object</returns>
         public static IQuery And(this IQuery sourceQuery, IQuery groupQuery)
         {
-            return Connect(sourceQuery, CriterionConnectionOperator.Or, groupQuery);
+            return Connect(sourceQuery, CriterionConnectionOperator.And, groupQuery);
         }
 
         #endregion

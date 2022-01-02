@@ -44,10 +44,10 @@ namespace EZNEW.Development.Entity
         }
 
         /// <summary>
-        /// Gets the modifed values
+        /// Gets the modified values
         /// </summary>
         /// <returns>Return the modify values</returns>
-        internal Dictionary<string, dynamic> GetModifyValues(T oldData)
+        internal Dictionary<string, dynamic> GetModifiedValues(T oldData)
         {
             var valueDict = GetAllValues();
             if (oldData == null)
@@ -72,9 +72,10 @@ namespace EZNEW.Development.Entity
                 {
                     var oldValue = oldValues[valueItem.Key];
                     var newValue = valueItem.Value;
+                    bool isValueType = field.DataType.IsValueType || typeof(string).IsAssignableFrom(field.DataType);
                     bool modification = !oldValues.ContainsKey(valueItem.Key)
-                        || ((field.DataType.IsValueType || typeof(string).IsAssignableFrom(field.DataType)) && oldValue != newValue)
-                        || (!field.DataType.IsValueType && (field.DataType.IsSerializable ? BinarySerializer.SerializeObjectToString(oldValue) != BinarySerializer.SerializeObjectToString(newValue) : oldValue != newValue));
+                        || (isValueType ? oldValue != newValue
+                        : field.DataType.IsSerializable ? BinarySerializer.SerializeObjectToString(oldValue) != BinarySerializer.SerializeObjectToString(newValue) : oldValue != newValue);
                     if (modification)
                     {
                         modificationValues.Add(valueItem.Key, valueItem.Value);

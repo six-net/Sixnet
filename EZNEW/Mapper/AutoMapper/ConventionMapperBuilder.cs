@@ -25,12 +25,12 @@ namespace AutoMapper
         /// <summary>
         /// Configure map
         /// </summary>
-        /// <param name="configureAction">Configure action</param>
-        public void ConfigureMap(Action<IMapperConfigurationExpression> configureAction)
+        /// <param name="configurationAction">Configuration action</param>
+        public void ConfigureMap(Action<IMapperConfigurationExpression> configurationAction)
         {
-            if (configureAction != null)
+            if (configurationAction != null)
             {
-                mapperConfigurationAction += configureAction;
+                mapperConfigurationAction += configurationAction;
             }
         }
 

@@ -71,7 +71,8 @@ namespace EZNEW.Development.Query
         {
             return new Criterion(Name, Operator, Value)
             {
-                Options = Options?.Clone()
+                Options = Options?.Clone(),
+                ConnectionOperator = ConnectionOperator
             };
         }
 

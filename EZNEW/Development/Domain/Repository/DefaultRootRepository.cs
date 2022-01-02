@@ -174,6 +174,10 @@ namespace EZNEW.Development.Domain.Repository
                 throw new EZNEWException($"{nameof(objects)} is null or empty");
             }
             var records = new List<IActivationRecord>();
+            if (!(activationOptions?.ForceExecution ?? false))
+            {
+                await GetObjectListByCurrentAsync(objects, true, false).ConfigureAwait(false);
+            }
             foreach (var objectItem in objects)
             {
                 if (objectItem == null)
@@ -183,10 +187,6 @@ namespace EZNEW.Development.Domain.Repository
                 if (!objectItem.AllowToRemove())
                 {
                     throw new EZNEWException($"{typeof(TModel)} object:{objectItem.GetIdentityValue()} cann't to be remove");
-                }
-                if (!(activationOptions?.ForceExecution ?? false))
-                {
-                    await GetObjectListByCurrentAsync(objects, true, false).ConfigureAwait(false);
                 }
                 var record = ExecuteRemoving(objectItem, activationOptions);//Execute remove
                 if (record != null)

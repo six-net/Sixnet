@@ -101,16 +101,6 @@ namespace EZNEW.Development.Query
         /// </summary>
         internal bool hasFieldConverter = false;
 
-        ///// <summary>
-        ///// Atomic condition count
-        ///// </summary>
-        //internal int atomicConditionCount = 0;
-
-        ///// <summary>
-        ///// All condition field names
-        ///// </summary>
-        //internal List<string> allConditionFieldNameCollection = new List<string>();
-
         /// <summary>
         /// Actually query fields
         /// </summary>
@@ -1088,7 +1078,6 @@ namespace EZNEW.Development.Query
             newQuery.joinCollection = joinCollection.Select(c => c.Clone()).ToList();
             newQuery.combineCollection = combineCollection.Select(c => c.Clone()).ToList();
             newQuery.subqueryCollection = subqueryCollection.Select(c => c.Clone()).ToList();
-            //newQuery.allConditionFieldNameCollection = new List<string>(allConditionFieldNameCollection);
             newQuery.actuallyQueryFields = actuallyQueryFields == null ? null : new Tuple<bool, IEnumerable<string>>(actuallyQueryFields.Item1, actuallyQueryFields.Item2?.Select(c => c));
             newQuery.PagingInfo = PagingInfo == null ? null : new PagingFilter() { Page = PagingInfo.Page, PageSize = PagingInfo.PageSize, QuerySize = PagingInfo.QuerySize };
             newQuery.validationFuncDict = new Dictionary<Guid, dynamic>(validationFuncDict);
@@ -1112,7 +1101,6 @@ namespace EZNEW.Development.Query
                 hasRecurve = hasRecurve,
                 hasCombine = hasCombine,
                 hasFieldConverter = hasFieldConverter,
-                //atomicConditionCount = atomicConditionCount,
                 entityTypeAssemblyQualifiedName = entityTypeAssemblyQualifiedName,
                 cancellationToken = cancellationToken,
                 entityType = entityType,

@@ -89,7 +89,7 @@ namespace EZNEW.Development.DataAccess
                 throw new ArgumentNullException($"{nameof(query)}");
             }
 
-            Dictionary<string, dynamic> modificationValues = newData.GetModifyValues(oldData);
+            Dictionary<string, dynamic> modificationValues = newData.GetModifiedValues(oldData);
             if (modificationValues.IsNullOrEmpty())
             {
                 return null;

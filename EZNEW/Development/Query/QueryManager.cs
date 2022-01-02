@@ -318,8 +318,6 @@ namespace EZNEW.Development.Query
                 }
             }
             originalQuery.criteria.Add(criterion);
-            //originalQuery.atomicConditionCount++;
-            //originalQuery.allConditionFieldNameCollection.Add(criterion.Name);
             return criterion;
         }
 
