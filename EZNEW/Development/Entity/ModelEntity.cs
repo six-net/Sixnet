@@ -21,19 +21,19 @@ namespace EZNEW.Development.Entity
         /// <summary>
         /// The _repository object
         /// </summary>
-        [NonData]
+        [NonDataField]
         private IRepository<T> _repository = RepositoryManager.GetRepository<T>();
 
         /// <summary>
         /// Indicates whether to load lazy member
         /// </summary>
-        [NonData]
+        [NonDataField]
         bool _allowLoadLazyMember = false;
 
         /// <summary>
         /// Lazy properties
         /// </summary>
-        [NonData]
+        [NonDataField]
         private Dictionary<string, bool> _loadProperties = new();
 
         #endregion
@@ -43,7 +43,7 @@ namespace EZNEW.Development.Entity
         /// <summary>
         /// Gets the repository
         /// </summary>
-        [NonData]
+        [NonDataField]
         protected IRepository<T> Repository => _repository;
 
         #endregion

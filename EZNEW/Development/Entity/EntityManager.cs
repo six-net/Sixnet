@@ -91,7 +91,7 @@ namespace EZNEW.Development.Entity
             string obsoleteField = null;
             foreach (var member in memberInfos)
             {
-                var nonDataAttribute = member.GetCustomAttribute<NonDataAttribute>();
+                var nonDataAttribute = member.GetCustomAttribute<NonDataFieldAttribute>();
                 if (nonDataAttribute != null)
                 {
                     continue;
