@@ -765,13 +765,13 @@ namespace EZNEW.Development.Query
             {
                 return validationFuncDict[modelType.GUID];
             }
-            if (IsComplex)
-            {
-                Func<T, bool> falseFunc = (data) => false;
-                validationFuncDict.Add(modelType.GUID, falseFunc);
-                return falseFunc;
-            }
-            if (conditionCollection.IsNullOrEmpty())
+            //if (IsComplex || conditionCollection.IsNullOrEmpty())
+            //{
+            //    Func<T, bool> falseFunc = (data) => false;
+            //    validationFuncDict.Add(modelType.GUID, falseFunc);
+            //    return falseFunc;
+            //}
+            if (IsComplex || conditionCollection.IsNullOrEmpty())
             {
                 Func<T, bool> trueFunc = (data) => true;
                 validationFuncDict.Add(modelType.GUID, trueFunc);
