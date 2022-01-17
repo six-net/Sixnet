@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
+using System.Text.Json.Serialization;
 
 namespace EZNEW.Model
 {
@@ -25,40 +27,34 @@ namespace EZNEW.Model
     /// </summary>
     public class Result : IResult
     {
-        #region Fields
-
-        /// <summary>
-        /// Default success message
-        /// </summary>
-        protected const string DefaultSuccessMessage = "success";
-
-        /// <summary>
-        /// Default fail message
-        /// </summary>
-        protected const string DefaultFailedMessage = "failed";
-
-        #endregion
-
         #region Properties
 
         /// <summary>
-        /// Gets or sets whether the operation was successful
+        /// Indicates whether is successfully
         /// </summary>
+        [JsonPropertyName(ResultOptions.SuccessField_JsonPropertyName)]
+        [JsonProperty(ResultOptions.SuccessField_JsonPropertyName)]
         public bool Success { get; set; }
 
         /// <summary>
         /// Gets or sets the operation response status code
         /// </summary>
+        [JsonPropertyName(ResultOptions.CodeField_JsonPropertyName)]
+        [JsonProperty(ResultOptions.CodeField_JsonPropertyName)]
         public string Code { get; set; }
 
         /// <summary>
         /// Gets or sets the operation response message
         /// </summary>
+        [JsonPropertyName(ResultOptions.MessageField_JsonPropertyName)]
+        [JsonProperty(ResultOptions.MessageField_JsonPropertyName)]
         public string Message { get; set; }
 
         /// <summary>
         /// Gets or sets the data returned by the operation
         /// </summary>
+        [JsonPropertyName(ResultOptions.DataField_JsonPropertyName)]
+        [JsonProperty(ResultOptions.DataField_JsonPropertyName)]
         public object Data { get; set; }
 
         #endregion
@@ -76,11 +72,14 @@ namespace EZNEW.Model
         /// <returns>Return a successful result</returns>
         public static Result SuccessResult(string message = "", string code = "", object data = null)
         {
-            Result result = new Result();
-            result.Success = true;
-            result.Code = code;
-            result.Data = data;
-            result.Message = string.IsNullOrWhiteSpace(message) ? DefaultSuccessMessage : message;
+            Result result = new Result
+            {
+                Success = true,
+                Code = code,
+                Data = data,
+                Message = message
+            };
+            ResultOptions.SetResult(result);
             return result;
         }
 
@@ -97,11 +96,14 @@ namespace EZNEW.Model
         /// <returns>Return a failed result</returns>
         public static Result FailedResult(string message = "", string code = "", object data = null)
         {
-            Result result = new Result();
-            result.Success = false;
-            result.Code = code;
-            result.Data = data;
-            result.Message = string.IsNullOrWhiteSpace(message) ? DefaultFailedMessage : message;
+            Result result = new Result
+            {
+                Success = false,
+                Code = code,
+                Data = data,
+                Message = message
+            };
+            ResultOptions.SetResult(result);
             return result;
         }
 
@@ -112,10 +114,7 @@ namespace EZNEW.Model
         /// <returns>Return a failed result</returns>
         public static Result FailedResult(Exception exception)
         {
-            Result result = new Result();
-            result.Success = false;
-            result.Message = exception.Message;
-            return result;
+            return FailedResult(exception?.Message);
         }
 
         #endregion
@@ -129,40 +128,34 @@ namespace EZNEW.Model
     /// <typeparam name="T">data type</typeparam>
     public class Result<T> : IResult
     {
-        #region Fields
-
-        /// <summary>
-        /// Default success message
-        /// </summary>
-        protected const string DefaultSuccessMessage = "success";
-
-        /// <summary>
-        /// Default fail message
-        /// </summary>
-        protected const string DefaultFailedMessage = "failed";
-
-        #endregion
-
         #region Properties
 
         /// <summary>
-        /// Gets or sets whether the operation was successful
+        /// Indicates whether is successfully
         /// </summary>
+        [JsonPropertyName(ResultOptions.SuccessField_JsonPropertyName)]
+        [JsonProperty(ResultOptions.SuccessField_JsonPropertyName)]
         public bool Success { get; set; }
 
         /// <summary>
         /// Gets or sets the operation response status code
         /// </summary>
+        [JsonPropertyName(ResultOptions.CodeField_JsonPropertyName)]
+        [JsonProperty(ResultOptions.CodeField_JsonPropertyName)]
         public string Code { get; set; }
 
         /// <summary>
         /// Gets or sets the operation response message
         /// </summary>
+        [JsonPropertyName(ResultOptions.MessageField_JsonPropertyName)]
+        [JsonProperty(ResultOptions.MessageField_JsonPropertyName)]
         public string Message { get; set; }
 
         /// <summary>
         /// Gets or sets the data returned by the operation
         /// </summary>
+        [JsonPropertyName(ResultOptions.DataField_JsonPropertyName)]
+        [JsonProperty(ResultOptions.DataField_JsonPropertyName)]
         public T Data { get; set; }
 
         #endregion
@@ -180,13 +173,15 @@ namespace EZNEW.Model
         /// <returns>Return a successful result</returns>
         public static Result<T> SuccessResult(T data = default, string message = "", string code = "")
         {
-            return new Result<T>()
+            var result = new Result<T>()
             {
                 Code = code,
-                Message = string.IsNullOrWhiteSpace(message) ? DefaultSuccessMessage : message,
+                Message = message,
                 Success = true,
                 Data = data
             };
+            ResultOptions.SetResult(result);
+            return result;
         }
 
         /// <summary>
@@ -223,13 +218,15 @@ namespace EZNEW.Model
         /// <returns>Return a failed result</returns>
         public static Result<T> FailedResult(string message = "", string code = "", T data = default)
         {
-            return new Result<T>()
+            var result = new Result<T>()
             {
                 Code = code,
-                Message = string.IsNullOrWhiteSpace(message) ? DefaultSuccessMessage : message,
+                Message = message,
                 Success = false,
                 Data = data
             };
+            ResultOptions.SetResult(result);
+            return result;
         }
 
         /// <summary>
@@ -243,6 +240,87 @@ namespace EZNEW.Model
         }
 
         #endregion
+
+        #endregion
+    }
+
+    /// <summary>
+    /// Define result options
+    /// </summary>
+    public static class ResultOptions
+    {
+        #region message
+
+        /// <summary>
+        /// Default success message
+        /// </summary>
+        public static string DefaultSuccessMessage = "success";
+
+        /// <summary>
+        /// Default fail message
+        /// </summary>
+        public static string DefaultFailedMessage = "failed";
+
+        #endregion
+
+        #region code
+
+        /// <summary>
+        /// Default success code
+        /// </summary>
+        public static string DefaultSuccessCode = "200";
+
+        /// <summary>
+        /// Default failed code
+        /// </summary>
+        public static string DefaultFailedCode = "500";
+
+        #endregion
+
+        #region json property name
+
+        /// <summary>
+        /// Success field json property name
+        /// </summary>
+        internal const string SuccessField_JsonPropertyName = "success";
+
+        /// <summary>
+        /// Code field json property name
+        /// </summary>
+        internal const string CodeField_JsonPropertyName = "code";
+
+        /// <summary>
+        /// Message field json property name
+        /// </summary>
+        internal const string MessageField_JsonPropertyName = "msg";
+
+        /// <summary>
+        /// Data field json property name
+        /// </summary>
+        internal const string DataField_JsonPropertyName = "data";
+
+        #endregion
+
+        #region methods
+
+        /// <summary>
+        /// Set result
+        /// </summary>
+        /// <param name="originalResult">Original result</param>
+        internal static void SetResult(IResult originalResult)
+        {
+            if (originalResult != null)
+            {
+                if (string.IsNullOrWhiteSpace(originalResult.Code))
+                {
+                    originalResult.Code = originalResult.Success ? DefaultSuccessCode : DefaultFailedCode;
+                }
+                if (string.IsNullOrWhiteSpace(originalResult.Message))
+                {
+                    originalResult.Message = originalResult.Success ? DefaultSuccessMessage : DefaultFailedMessage;
+                }
+            }
+        }
 
         #endregion
     }
