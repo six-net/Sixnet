@@ -21,6 +21,8 @@ namespace EZNEW.Serialization.Json
 
         #endregion
 
+        #region Convert to JsonSerializerOptions
+
         /// <summary>
         /// Convert to JsonSerializerOptions
         /// </summary>
@@ -29,15 +31,19 @@ namespace EZNEW.Serialization.Json
         public static JsonSerializerOptions ConvertToJsonSerializerOptions(this JsonSerializationOptions currentOptions)
         {
             JsonSerializerOptions serializerOptions = new();
-            return currentOptions.MergeToJsonSerializerOptions(serializerOptions);
+            return currentOptions.ApplyToJsonSerializerOptions(serializerOptions);
         }
 
+        #endregion
+
+        #region Apply to JsonSerializerOptions
+
         /// <summary>
-        /// Merge to JsonSerializerOptions
+        /// Apply to JsonSerializerOptions
         /// </summary>
         /// <param name="jsonSerializationOptions">Current json serialization options</param>
         /// <param name="sourceJsonSerializerOptions">Source json serializer options</param>
-        public static JsonSerializerOptions MergeToJsonSerializerOptions(this JsonSerializationOptions jsonSerializationOptions, JsonSerializerOptions sourceJsonSerializerOptions)
+        public static JsonSerializerOptions ApplyToJsonSerializerOptions(this JsonSerializationOptions jsonSerializationOptions, JsonSerializerOptions sourceJsonSerializerOptions)
         {
             if (sourceJsonSerializerOptions == null)
             {
@@ -50,7 +56,6 @@ namespace EZNEW.Serialization.Json
             sourceJsonSerializerOptions.DefaultIgnoreCondition = jsonSerializationOptions.DefaultIgnoreCondition;
             sourceJsonSerializerOptions.ReadCommentHandling = jsonSerializationOptions.ReadCommentHandling;
             sourceJsonSerializerOptions.PropertyNameCaseInsensitive = jsonSerializationOptions.PropertyNameCaseInsensitive;
-            sourceJsonSerializerOptions.PropertyNamingPolicy = jsonSerializationOptions.PropertyNamingPolicy;
             sourceJsonSerializerOptions.MaxDepth = jsonSerializationOptions.MaxDepth;
             sourceJsonSerializerOptions.IncludeFields = jsonSerializationOptions.IncludeFields;
             sourceJsonSerializerOptions.IgnoreReadOnlyFields = jsonSerializationOptions.IgnoreReadOnlyFields;
@@ -64,14 +69,25 @@ namespace EZNEW.Serialization.Json
             sourceJsonSerializerOptions.AllowTrailingCommas = jsonSerializationOptions.AllowTrailingCommas;
             sourceJsonSerializerOptions.NumberHandling = jsonSerializationOptions.NumberHandling;
 
-            if (sourceJsonSerializerOptions.PropertyNamingPolicy == null)
+            //naming policy
+            if (jsonSerializationOptions.PropertyNamingPolicy == null)
             {
-                sourceJsonSerializerOptions.PropertyNamingPolicy = GetJsonNamingPolicy(jsonSerializationOptions.DefaultNamingPolicy);
+                jsonSerializationOptions.PropertyNamingPolicy = GetJsonNamingPolicy(jsonSerializationOptions.DefaultNamingPolicy);
             }
-            if (sourceJsonSerializerOptions.DictionaryKeyPolicy == null)
+            if (jsonSerializationOptions.PropertyNamingPolicy != null)
             {
-                sourceJsonSerializerOptions.DictionaryKeyPolicy = sourceJsonSerializerOptions.PropertyNamingPolicy;
+                sourceJsonSerializerOptions.PropertyNamingPolicy = jsonSerializationOptions.PropertyNamingPolicy;
             }
+            if (jsonSerializationOptions.DictionaryKeyPolicy == null)
+            {
+                jsonSerializationOptions.DictionaryKeyPolicy = jsonSerializationOptions.PropertyNamingPolicy;
+            }
+            if (jsonSerializationOptions.DictionaryKeyPolicy != null)
+            {
+                sourceJsonSerializerOptions.DictionaryKeyPolicy = jsonSerializationOptions.DictionaryKeyPolicy;
+            }
+
+            //converters
             if (!jsonSerializationOptions.Converters.IsNullOrEmpty())
             {
                 foreach (var converter in jsonSerializationOptions.Converters)
@@ -91,6 +107,45 @@ namespace EZNEW.Serialization.Json
             return sourceJsonSerializerOptions;
         }
 
+        #endregion
+
+        #region Merge from JsonSerializerOptions
+
+        /// <summary>
+        /// Merge from JsonSerializerOptions
+        /// </summary>
+        /// <param name="jsonSerializationOptions">Json serialization options</param>
+        /// <param name="sourceJsonSerializerOptions">Source json serializer options</param>
+        /// <returns></returns>
+        public static JsonSerializationOptions MergeFromJsonSerializerOptions(this JsonSerializationOptions jsonSerializationOptions, JsonSerializerOptions sourceJsonSerializerOptions)
+        {
+            if (jsonSerializationOptions == null || sourceJsonSerializerOptions == null)
+            {
+                return jsonSerializationOptions;
+            }
+            jsonSerializationOptions.DefaultIgnoreCondition = sourceJsonSerializerOptions.DefaultIgnoreCondition;
+            jsonSerializationOptions.ReadCommentHandling = sourceJsonSerializerOptions.ReadCommentHandling;
+            jsonSerializationOptions.PropertyNameCaseInsensitive = sourceJsonSerializerOptions.PropertyNameCaseInsensitive;
+            jsonSerializationOptions.MaxDepth = sourceJsonSerializerOptions.MaxDepth;
+            jsonSerializationOptions.IncludeFields = sourceJsonSerializerOptions.IncludeFields;
+            jsonSerializationOptions.IgnoreReadOnlyFields = sourceJsonSerializerOptions.IgnoreReadOnlyFields;
+            jsonSerializationOptions.IgnoreReadOnlyProperties = sourceJsonSerializerOptions.IgnoreReadOnlyProperties;
+            jsonSerializationOptions.ReferenceHandler = sourceJsonSerializerOptions.ReferenceHandler;
+            jsonSerializationOptions.WriteIndented = sourceJsonSerializerOptions.WriteIndented;
+            jsonSerializationOptions.IgnoreNullValues = sourceJsonSerializerOptions.IgnoreNullValues;
+            jsonSerializationOptions.DictionaryKeyPolicy = sourceJsonSerializerOptions.DictionaryKeyPolicy;
+            jsonSerializationOptions.Encoder = sourceJsonSerializerOptions.Encoder;
+            jsonSerializationOptions.DefaultBufferSize = sourceJsonSerializerOptions.DefaultBufferSize;
+            jsonSerializationOptions.AllowTrailingCommas = sourceJsonSerializerOptions.AllowTrailingCommas;
+            jsonSerializationOptions.NumberHandling = sourceJsonSerializerOptions.NumberHandling;
+
+            return jsonSerializationOptions;
+        } 
+
+        #endregion
+
+        #region Get json naming policy
+
         /// <summary>
         /// Get json naming policy
         /// </summary>
@@ -101,5 +156,7 @@ namespace EZNEW.Serialization.Json
             NamingPolicies.TryGetValue(propertyNamingPolicy, out var jsonNamingPolicy);
             return jsonNamingPolicy;
         }
+
+        #endregion
     }
 }
