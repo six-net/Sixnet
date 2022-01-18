@@ -19,11 +19,17 @@ namespace EZNEW.Serialization.Json.Converter
         /// <returns>Return big number value</returns>
         public override long Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            if (!long.TryParse(reader.GetString(), out long result))
+            long value = 0;
+            switch (reader.TokenType)
             {
-                result = 0;
+                case JsonTokenType.String:
+                    long.TryParse(reader.GetString(), out value);
+                    break;
+                case JsonTokenType.Number:
+                    value = reader.GetInt64();
+                    break;
             }
-            return result;
+            return value;
         }
 
         /// <summary>
@@ -37,7 +43,7 @@ namespace EZNEW.Serialization.Json.Converter
             writer.WriteStringValue(value.ToString());
         }
 
-        public static LongJsonConverter Instance = new LongJsonConverter();
+        public static readonly LongJsonConverter Instance = new LongJsonConverter();
     }
 
     /// <summary>
@@ -54,11 +60,20 @@ namespace EZNEW.Serialization.Json.Converter
         /// <returns>Return big number value</returns>
         public override long? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            if (!long.TryParse(reader.GetString(), out long result))
+            long? value = null;
+            switch (reader.TokenType)
             {
-                return null;
+                case JsonTokenType.String:
+                    if (long.TryParse(reader.GetString(), out var numValue))
+                    {
+                        value = numValue;
+                    }
+                    break;
+                case JsonTokenType.Number:
+                    value = reader.GetInt64();
+                    break;
             }
-            return result;
+            return value;
         }
 
         /// <summary>
@@ -72,7 +87,7 @@ namespace EZNEW.Serialization.Json.Converter
             writer.WriteStringValue(value?.ToString() ?? string.Empty);
         }
 
-        public static LongAllowNullJsonConverter Instance = new LongAllowNullJsonConverter();
+        public static readonly LongAllowNullJsonConverter Instance = new LongAllowNullJsonConverter();
     }
 
     /// <summary>
@@ -89,11 +104,17 @@ namespace EZNEW.Serialization.Json.Converter
         /// <returns>Return big number value</returns>
         public override ulong Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            if (!ulong.TryParse(reader.GetString(), out ulong result))
+            ulong value = 0;
+            switch (reader.TokenType)
             {
-                result = 0;
+                case JsonTokenType.String:
+                    ulong.TryParse(reader.GetString(), out value);
+                    break;
+                case JsonTokenType.Number:
+                    value = reader.GetUInt64();
+                    break;
             }
-            return result;
+            return value;
         }
 
         /// <summary>
@@ -107,7 +128,7 @@ namespace EZNEW.Serialization.Json.Converter
             writer.WriteStringValue(value.ToString());
         }
 
-        public static ULongJsonConverter Instance = new ULongJsonConverter();
+        public static readonly ULongJsonConverter Instance = new ULongJsonConverter();
     }
 
     /// <summary>
@@ -124,11 +145,20 @@ namespace EZNEW.Serialization.Json.Converter
         /// <returns>Return big number value</returns>
         public override ulong? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            if (!ulong.TryParse(reader.GetString(), out ulong result))
+            ulong? value = null;
+            switch (reader.TokenType)
             {
-                return null;
+                case JsonTokenType.String:
+                    if (ulong.TryParse(reader.GetString(), out var numValue))
+                    {
+                        value = numValue;
+                    }
+                    break;
+                case JsonTokenType.Number:
+                    value = reader.GetUInt64();
+                    break;
             }
-            return result;
+            return value;
         }
 
         /// <summary>
@@ -142,7 +172,7 @@ namespace EZNEW.Serialization.Json.Converter
             writer.WriteStringValue(value?.ToString() ?? string.Empty);
         }
 
-        public static ULongAllowNullJsonConverter Instance = new ULongAllowNullJsonConverter();
+        public static readonly ULongAllowNullJsonConverter Instance = new ULongAllowNullJsonConverter();
     }
 
     /// <summary>
@@ -159,11 +189,17 @@ namespace EZNEW.Serialization.Json.Converter
         /// <returns>Return decimal value</returns>
         public override decimal Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            if (!decimal.TryParse(reader.GetString(), out decimal result))
+            decimal value = 0m;
+            switch (reader.TokenType)
             {
-                result = 0.00M;
+                case JsonTokenType.String:
+                    decimal.TryParse(reader.GetString(), out value);
+                    break;
+                case JsonTokenType.Number:
+                    value = reader.GetDecimal();
+                    break;
             }
-            return result;
+            return value;
         }
 
         /// <summary>
@@ -177,7 +213,7 @@ namespace EZNEW.Serialization.Json.Converter
             writer.WriteStringValue(value.ToString());
         }
 
-        public static DecimalJsonConverter Instance = new DecimalJsonConverter();
+        public static readonly DecimalJsonConverter Instance = new DecimalJsonConverter();
     }
 
     /// <summary>
@@ -194,11 +230,20 @@ namespace EZNEW.Serialization.Json.Converter
         /// <returns>Return decimal value</returns>
         public override decimal? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            if (!decimal.TryParse(reader.GetString(), out decimal result))
+            decimal? value = null;
+            switch (reader.TokenType)
             {
-                return null;
+                case JsonTokenType.String:
+                    if (decimal.TryParse(reader.GetString(), out var numValue))
+                    {
+                        value = numValue;
+                    }
+                    break;
+                case JsonTokenType.Number:
+                    value = reader.GetDecimal();
+                    break;
             }
-            return result;
+            return value;
         }
 
         /// <summary>
@@ -212,6 +257,6 @@ namespace EZNEW.Serialization.Json.Converter
             writer.WriteStringValue(value?.ToString() ?? string.Empty);
         }
 
-        public static DecimalAllowNullJsonConverter Instance = new DecimalAllowNullJsonConverter();
+        public static readonly DecimalAllowNullJsonConverter Instance = new DecimalAllowNullJsonConverter();
     }
 }
