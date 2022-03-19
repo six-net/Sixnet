@@ -915,7 +915,7 @@ namespace EZNEW.Data.Cache.Policy
                     QueryDatabase = true
                 };
             }
-            var otherKeys = query?.Criteria?.Select(c => c.Name).Distinct() ?? Array.Empty<string>();
+            var otherKeys = query?.Criteria?.Select(c => c.Field?.Name ?? string.Empty).Distinct() ?? Array.Empty<string>();
             var cacheObject = new CacheObject()
             {
                 ObjectName = entityType.Name

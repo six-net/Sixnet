@@ -8,18 +8,33 @@ namespace EZNEW.Development.Query
 {
     public static class LikeExtensions
     {
+
+        /// <summary>
+        /// Like Condition
+        /// </summary>
+        /// <param name="sourceQuery">Source query</param>
+        /// <param name="field">Field</param>
+        /// <param name="value">Value</param>
+        /// <param name="criterionOptions">Criterion options</param>
+        /// <param name="connector">Connector</param>
+        /// <returns>Return the newest IQuery object</returns>
+        public static IQuery Like(this IQuery sourceQuery, FieldInfo field, string value, CriterionOptions criterionOptions = null, CriterionConnector connector = CriterionConnector.And)
+        {
+            return sourceQuery.AddCriterion(connector, field, CriterionOperator.Like, value, criterionOptions);
+        }
+
         /// <summary>
         /// Like Condition
         /// </summary>
         /// <param name="sourceQuery">Source query</param>
         /// <param name="fieldName">Field name</param>
         /// <param name="value">Value</param>
-        /// <param name="or">Connection with 'and'(true/default) or 'or'(false)</param>
         /// <param name="criterionOptions">Criterion options</param>
+        /// <param name="connector">Connector</param>
         /// <returns>Return the newest IQuery object</returns>
-        public static IQuery Like(this IQuery sourceQuery, string fieldName, string value, bool or = false, CriterionOptions criterionOptions = null)
+        public static IQuery Like(this IQuery sourceQuery, string fieldName, string value, CriterionOptions criterionOptions = null, CriterionConnector connector = CriterionConnector.And)
         {
-            return sourceQuery.AddCriterion(or ? CriterionConnectionOperator.Or : CriterionConnectionOperator.And, fieldName, CriterionOperator.Like, value, criterionOptions);
+            return Like(sourceQuery, FieldInfo.Create(fieldName), value, criterionOptions, connector);
         }
 
         /// <summary>
@@ -29,12 +44,13 @@ namespace EZNEW.Development.Query
         /// <param name="sourceQuery">Source query</param>
         /// <param name="field">Field</param>
         /// <param name="value">Value</param>
-        /// <param name="or">Connection with 'and'(true/default) or 'or'(false)</param>
         /// <param name="criterionOptions">Criterion options</param>
+        /// <param name="connector">Connector</param>
         /// <returns>Return the newest IQuery object</returns>
-        public static IQuery Like<TQueryModel>(this IQuery sourceQuery, Expression<Func<TQueryModel, dynamic>> field, string value, bool or = false, CriterionOptions criterionOptions = null) where TQueryModel : IQueryModel<TQueryModel>
+        public static IQuery Like<TQueryModel>(this IQuery sourceQuery, Expression<Func<TQueryModel, dynamic>> field, string value, CriterionOptions criterionOptions = null, CriterionConnector connector = CriterionConnector.And) where TQueryModel : IQueryModel<TQueryModel>
         {
-            return sourceQuery.AddCriterion(or ? CriterionConnectionOperator.Or : CriterionConnectionOperator.And, ExpressionHelper.GetExpressionPropertyName(field.Body), CriterionOperator.Like, value, criterionOptions);
+            string fieldName = ExpressionHelper.GetExpressionPropertyName(field.Body);
+            return Like(sourceQuery, fieldName, value, criterionOptions, connector);
         }
     }
 }

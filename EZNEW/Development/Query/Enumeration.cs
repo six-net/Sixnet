@@ -29,10 +29,10 @@ namespace EZNEW.Development.Query
     }
 
     /// <summary>
-    /// Defines criterion connection operator
+    /// Defines criterion connector
     /// </summary>
     [Serializable]
-    public enum CriterionConnectionOperator
+    public enum CriterionConnector
     {
         And,
         Or
@@ -61,18 +61,29 @@ namespace EZNEW.Development.Query
         CrossJoin = 32
     }
 
+    ///// <summary>
+    ///// Defines join operator
+    ///// </summary>
+    //[Serializable]
+    //public enum JoinOperator
+    //{
+    //    Equal = 2,              //=  
+    //    NotEqual = 4,      //<>  
+    //    LessThanOrEqual = 8,    //<=  
+    //    LessThan = 16,           //<  
+    //    GreaterThan = 32,        //>  
+    //    GreaterThanOrEqual = 64 //>=
+    //}
+
     /// <summary>
-    /// Defines join operator
+    /// Defines join field type
     /// </summary>
     [Serializable]
-    public enum JoinOperator
+    public enum JoinFieldType
     {
-        Equal,              //=  
-        NotEqual,      //<>  
-        LessThanOrEqual,    //<=  
-        LessThan,           //<  
-        GreaterThan,        //>  
-        GreaterThanOrEqual //>=
+        Field = 2,
+        Constant = 4,
+        Condition = 8
     }
 
     /// <summary>
@@ -96,7 +107,8 @@ namespace EZNEW.Development.Query
         Top = 2,
         Subuery = 4,
         Join = 8,
-        Combine = 16
+        Combine = 16,
+        JoinConnection = 32
     }
 
     /// <summary>

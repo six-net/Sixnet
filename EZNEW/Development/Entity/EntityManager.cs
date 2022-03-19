@@ -779,10 +779,33 @@ namespace EZNEW.Development.Entity
             {
                 return new Dictionary<string, string>(0);
             }
-            var entityConfig = GetEntityConfiguration(sourceEntityType);
-            Dictionary<string, EntityRelationFieldAttribute> relationFields = null;
-            entityConfig?.RelationFields?.TryGetValue(relationEntityType.GUID, out relationFields);
-            return relationFields?.ToDictionary(c => c.Key, c => c.Value.RelationField) ?? new Dictionary<string, string>(0);
+
+            //source => target
+            var sourceRelationFields = GetSingleRelationFields(sourceEntityType, relationEntityType);
+            sourceRelationFields = sourceRelationFields ?? new Dictionary<string, string>(0);
+
+            //tart => source
+            var targetRelationFields = GetSingleRelationFields(relationEntityType, sourceEntityType);
+            if (!targetRelationFields.IsNullOrEmpty())
+            {
+                foreach (var targetKeyItem in targetRelationFields)
+                {
+                    sourceRelationFields[targetKeyItem.Value] = targetKeyItem.Key;
+                }
+            }
+            return sourceRelationFields;
+        }
+
+        static Dictionary<string, string> GetSingleRelationFields(Type sourceEntityType, Type relationEntityType)
+        {
+            if (sourceEntityType == null || relationEntityType == null)
+            {
+                return new Dictionary<string, string>(0);
+            }
+            var sourceEntityConfig = GetEntityConfiguration(sourceEntityType);
+            Dictionary<string, EntityRelationFieldAttribute> sourceRelationFields = null;
+            sourceEntityConfig?.RelationFields?.TryGetValue(relationEntityType.GUID, out sourceRelationFields);
+            return sourceRelationFields?.ToDictionary(c => c.Key, c => c.Value.RelationField) ?? new Dictionary<string, string>(0);
         }
 
         #endregion

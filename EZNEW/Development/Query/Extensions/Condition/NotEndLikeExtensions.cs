@@ -12,14 +12,28 @@ namespace EZNEW.Development.Query
         /// NotEndLike Condition
         /// </summary>
         /// <param name="sourceQuery">Source query</param>
+        /// <param name="field">Field</param>
+        /// <param name="value">Value</param>
+        /// <param name="criterionOptions">Criterion options</param>
+        /// <param name="connector">Connector</param>
+        /// <returns>Return the newest IQuery object</returns>
+        public static IQuery NotEndLike(this IQuery sourceQuery, FieldInfo field, string value, CriterionOptions criterionOptions = null, CriterionConnector connector = CriterionConnector.And)
+        {
+            return sourceQuery.AddCriterion(connector, field, CriterionOperator.NotEndLike, value, criterionOptions);
+        }
+
+        /// <summary>
+        /// NotEndLike Condition
+        /// </summary>
+        /// <param name="sourceQuery">Source query</param>
         /// <param name="fieldName">Field name</param>
         /// <param name="value">Value</param>
-        /// <param name="or">Connection with 'and'(true/default) or 'or'(false)</param>
+        /// <param name="connector">Connector</param>
         /// <param name="criterionOptions">Criterion options</param>
         /// <returns>Return the newest IQuery object</returns>
-        public static IQuery NotEndLike(this IQuery sourceQuery, string fieldName, string value, bool or = false, CriterionOptions criterionOptions = null)
+        public static IQuery NotEndLike(this IQuery sourceQuery, string fieldName, string value, CriterionOptions criterionOptions = null, CriterionConnector connector = CriterionConnector.And)
         {
-            return sourceQuery.AddCriterion(or ? CriterionConnectionOperator.Or : CriterionConnectionOperator.And, fieldName, CriterionOperator.NotEndLike, value, criterionOptions);
+            return NotEndLike(sourceQuery, FieldInfo.Create(fieldName), value, criterionOptions, connector);
         }
 
         /// <summary>
@@ -29,12 +43,13 @@ namespace EZNEW.Development.Query
         /// <param name="sourceQuery">Source query</param>
         /// <param name="field">Field</param>
         /// <param name="value">Value</param>
-        /// <param name="or">Connection with 'and'(true/default) or 'or'(false)</param>
+        /// <param name="connector">Connector</param>
         /// <param name="criterionOptions">Criterion options</param>
         /// <returns>Return the newest IQuery object</returns>
-        public static IQuery NotEndLike<TQueryModel>(this IQuery sourceQuery, Expression<Func<TQueryModel, dynamic>> field, string value, bool or = false, CriterionOptions criterionOptions = null) where TQueryModel : IQueryModel<TQueryModel>
+        public static IQuery NotEndLike<TQueryModel>(this IQuery sourceQuery, Expression<Func<TQueryModel, dynamic>> field, string value, CriterionOptions criterionOptions = null, CriterionConnector connector = CriterionConnector.And) where TQueryModel : IQueryModel<TQueryModel>
         {
-            return sourceQuery.AddCriterion(or ? CriterionConnectionOperator.Or : CriterionConnectionOperator.And, ExpressionHelper.GetExpressionPropertyName(field.Body), CriterionOperator.NotEndLike, value, criterionOptions);
+            string fieldName = ExpressionHelper.GetExpressionPropertyName(field.Body);
+            return NotEndLike(sourceQuery, fieldName, value, criterionOptions, connector);
         }
     }
 }

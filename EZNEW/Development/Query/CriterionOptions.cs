@@ -11,14 +11,9 @@ namespace EZNEW.Development.Query
     public class CriterionOptions
     {
         /// <summary>
-        /// Gets or sets the field conversion options
-        /// </summary>
-        public FieldConversionOptions FieldConversionOptions { get; set; }
-
-        /// <summary>
         /// Gets or sets the query field name used for subquery
         /// </summary>
-        public string SubqueryValueFieldName { get; set; }
+        public string SubqueryField { get; set; }
 
         /// <summary>
         /// Clone a new criterion options
@@ -28,7 +23,7 @@ namespace EZNEW.Development.Query
         {
             return new CriterionOptions()
             {
-                FieldConversionOptions = FieldConversionOptions?.Clone()
+                SubqueryField = SubqueryField
             };
         }
     }

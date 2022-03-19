@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq.Expressions;
+using EZNEW.Data.Conversion;
 using EZNEW.Expressions;
 
 namespace EZNEW.Development.Query
@@ -13,14 +14,28 @@ namespace EZNEW.Development.Query
         #region Constructor
 
         /// <summary>
-        /// Initialize a condition instance
+        /// Initialize a criterion instance
         /// </summary>
         /// <param name="fieldName">Field name</param>
         /// <param name="criterionOperator">Criterion operator</param>
         /// <param name="value">Value</param>
-        private Criterion(string fieldName, CriterionOperator criterionOperator, dynamic value)
+        /// <param name="fieldConversionOptions">Field conversion options</param>
+        private Criterion(string fieldName, CriterionOperator criterionOperator, dynamic value, FieldConversionOptions fieldConversionOptions = null)
         {
-            Name = fieldName;
+            Field = FieldInfo.Create(fieldName, fieldConversionOptions);
+            Operator = criterionOperator;
+            Value = CalculateValue(value);
+        }
+
+        /// <summary>
+        /// Initialize a criterion instance
+        /// </summary>
+        /// <param name="field">Filed</param>
+        /// <param name="criterionOperator">Criterion operator</param>
+        /// <param name="value">Value</param>
+        private Criterion(FieldInfo field, CriterionOperator criterionOperator, dynamic value)
+        {
+            Field = field;
             Operator = criterionOperator;
             Value = CalculateValue(value);
         }
@@ -30,9 +45,9 @@ namespace EZNEW.Development.Query
         #region Properties
 
         /// <summary>
-        /// Gets or sets the field name
+        /// Gets or sets the field
         /// </summary>
-        public string Name { get; private set; }
+        public FieldInfo Field { get; private set; }
 
         /// <summary>
         /// Gets or sets the criterion operator
@@ -50,9 +65,9 @@ namespace EZNEW.Development.Query
         public CriterionOptions Options { get; set; }
 
         /// <summary>
-        /// Gets or sets the connection operator
+        /// Gets or sets the connector
         /// </summary>
-        public CriterionConnectionOperator ConnectionOperator { get; set; } = CriterionConnectionOperator.And;
+        public CriterionConnector Connector { get; set; } = CriterionConnector.And;
 
         /// <summary>
         /// Indicates whether is an equal criterion
@@ -69,10 +84,10 @@ namespace EZNEW.Development.Query
         /// <returns></returns>
         public Criterion Clone()
         {
-            return new Criterion(Name, Operator, Value)
+            return new Criterion(Field, Operator, Value)
             {
                 Options = Options?.Clone(),
-                ConnectionOperator = ConnectionOperator
+                Connector = Connector
             };
         }
 
@@ -82,7 +97,7 @@ namespace EZNEW.Development.Query
         /// <returns></returns>
         public bool HasFieldConversion()
         {
-            return !string.IsNullOrWhiteSpace(Options?.FieldConversionOptions?.ConversionName);
+            return Field?.HasConversion ?? false;
         }
 
         /// <summary>
@@ -199,12 +214,35 @@ namespace EZNEW.Development.Query
         /// <param name="fieldName">Field name</param>
         /// <param name="operator">Condition operator</param>
         /// <param name="value">Value</param>
+        /// <param name="connector">Connector</param>
+        /// <param name="fieldConversionOptions">Field conversion options</param>
+        /// <param name="criterionOptions">Criterion options</param>
         /// <returns>Return a new criterion</returns>
-        public static Criterion Create(string fieldName, CriterionOperator @operator, dynamic value, CriterionConnectionOperator connectionOperator = CriterionConnectionOperator.And, CriterionOptions criterionOptions = null)
+        public static Criterion Create(string fieldName, CriterionOperator @operator, dynamic value
+            , CriterionConnector connector = CriterionConnector.And, FieldConversionOptions fieldConversionOptions = null, CriterionOptions criterionOptions = null)
         {
-            return new Criterion(fieldName, @operator, value)
+            return new Criterion(fieldName, @operator, value, fieldConversionOptions)
             {
-                ConnectionOperator = connectionOperator,
+                Connector = connector,
+                Options = criterionOptions
+            };
+        }
+
+        /// <summary>
+        /// Create a criterion
+        /// </summary>
+        /// <param name="field">Field</param>
+        /// <param name="operator">Condition operator</param>
+        /// <param name="value">Value</param>
+        /// <param name="connector">Connector</param>
+        /// <param name="criterionOptions">Criterion options</param>
+        /// <returns>Return a new criterion</returns>
+        public static Criterion Create(FieldInfo field, CriterionOperator @operator, dynamic value
+            , CriterionConnector connector = CriterionConnector.And, CriterionOptions criterionOptions = null)
+        {
+            return new Criterion(field, @operator, value)
+            {
+                Connector = connector,
                 Options = criterionOptions
             };
         }

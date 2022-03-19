@@ -271,7 +271,7 @@ namespace EZNEW.Development.Query
         /// <summary>
         /// Gets or sets the connection operator
         /// </summary>
-        public CriterionConnectionOperator ConnectionOperator { get; set; } = CriterionConnectionOperator.And;
+        public CriterionConnector Connector { get; set; } = CriterionConnector.And;
 
         #endregion
 
@@ -282,20 +282,18 @@ namespace EZNEW.Development.Query
         /// <summary>
         /// Add criterion
         /// </summary>
-        /// <param name="connectionOperator">Connection operator</param>
-        /// <param name="fieldName">Field name</param>
+        /// <param name="connector">Connector</param>
+        /// <param name="field">Field</param>
         /// <param name="criterionOperator">Criterion operator</param>
         /// <param name="value">Value</param>
         /// <param name="criterionOptions">Criterion options</param>
-        public IQuery AddCriterion(CriterionConnectionOperator connectionOperator, string fieldName, CriterionOperator criterionOperator, dynamic value, CriterionOptions criterionOptions = null)
+        public IQuery AddCriterion(CriterionConnector connector, FieldInfo field, CriterionOperator criterionOperator, dynamic value, CriterionOptions criterionOptions = null)
         {
-            if (string.IsNullOrWhiteSpace(fieldName))
+            if (string.IsNullOrWhiteSpace(field?.Name))
             {
                 throw new EZNEWException($"Field name for [{value}] is null or empty.");
             }
-            Criterion newCriterion = Criterion.Create(fieldName, criterionOperator, value);
-            newCriterion.Options = criterionOptions;
-            newCriterion.ConnectionOperator = connectionOperator;
+            Criterion newCriterion = Criterion.Create(field, criterionOperator, value, connector, criterionOptions);
             return AddCondition(newCriterion);
         }
 
@@ -346,23 +344,49 @@ namespace EZNEW.Development.Query
 
         #region Add sort
 
+        ///// <summary>
+        ///// Add sort
+        ///// </summary>
+        ///// <param name="fieldName">Field name</param>
+        ///// <param name="desc">Sort by desc</param>
+        ///// <param name="sortOptions">Sort options</param>
+        //public IQuery AddSort(string fieldName, bool desc = false, SortOptions sortOptions = null)
+        //{
+        //    return AddSort(FieldInfo.Create(fieldName), desc, sortOptions);
+        //}
+
+        ///// <summary>
+        ///// Add sort
+        ///// </summary>
+        ///// <param name="field">Field name</param>
+        ///// <param name="desc">Sort by desc</param>
+        ///// <param name="sortOptions">Sort options</param>
+        //public IQuery AddSort(FieldInfo field, bool desc = false, SortOptions sortOptions = null)
+        //{
+        //    if (!string.IsNullOrWhiteSpace(field?.Name))
+        //    {
+        //        sortCollection.Add(new SortEntry()
+        //        {
+        //            Field = field,
+        //            Desc = desc,
+        //            Options = sortOptions
+        //        });
+        //    }
+        //    return this;
+        //}
+
         /// <summary>
         /// Add sort
         /// </summary>
-        /// <param name="fieldName">Field name</param>
-        /// <param name="desc">Sort by desc</param>
-        /// <param name="sortOptions">Sort options</param>
-        public IQuery AddSort(string fieldName, bool desc = false, SortOptions sortOptions = null)
+        /// <param name="sortEntries">Sort entries</param>
+        /// <returns></returns>
+        public IQuery AddSort(params SortEntry[] sortEntries)
         {
-            if (!string.IsNullOrWhiteSpace(fieldName))
+            if (sortEntries.IsNullOrEmpty())
             {
-                sortCollection.Add(new SortEntry()
-                {
-                    Name = fieldName,
-                    Desc = desc,
-                    Options = sortOptions
-                });
+                return this;
             }
+            sortCollection.AddRange(sortEntries);
             return this;
         }
 
@@ -393,10 +417,10 @@ namespace EZNEW.Development.Query
                     {
                         continue;
                     }
-                    var field = EntityManager.GetEntityField(entityType, sortEntry.Name);
+                    var field = EntityManager.GetEntityField(entityType, sortEntry.Field?.Name);
                     if (field == null)
                     {
-                        throw new EZNEWException($"{entityType.FullName}=>{sortEntry.Name}:Entity field config not find.");
+                        throw new EZNEWException($"{entityType.FullName}=>{sortEntry.Field}:Entity field config not find.");
                     }
                     Func<TEntity, object> getDataFunc = field.ValueProvider.Get;//ExpressionHelper.GetPropertyOrFieldFunction<TEntity>(sortEntry.Name);
                     if (getDataFunc == null)
@@ -706,7 +730,7 @@ namespace EZNEW.Development.Query
             {
                 return new Dictionary<string, List<dynamic>>(0);
             }
-            var criteriaGroup = criteria.GroupBy(c => c.Name);
+            var criteriaGroup = criteria.GroupBy(c => c.Field.Name);
             if (names != null && !names.IsNullOrEmpty())
             {
                 criteriaGroup = criteriaGroup.Where(c => names.Contains(c.Key));
@@ -765,13 +789,13 @@ namespace EZNEW.Development.Query
             {
                 return validationFuncDict[modelType.GUID];
             }
-            //if (IsComplex || conditionCollection.IsNullOrEmpty())
-            //{
-            //    Func<T, bool> falseFunc = (data) => false;
-            //    validationFuncDict.Add(modelType.GUID, falseFunc);
-            //    return falseFunc;
-            //}
-            if (IsComplex || conditionCollection.IsNullOrEmpty())
+            if (IsComplex)
+            {
+                Func<T, bool> falseFunc = (data) => false;
+                validationFuncDict.Add(modelType.GUID, falseFunc);
+                return falseFunc;
+            }
+            if (conditionCollection.IsNullOrEmpty())
             {
                 Func<T, bool> trueFunc = (data) => true;
                 validationFuncDict.Add(modelType.GUID, trueFunc);
@@ -794,7 +818,7 @@ namespace EZNEW.Development.Query
                     conditionExpression = childExpression;
                     continue;
                 }
-                if (conditionEntry.ConnectionOperator == CriterionConnectionOperator.And)
+                if (conditionEntry.Connector == CriterionConnector.And)
                 {
                     conditionExpression = Expression.AndAlso(conditionExpression, childExpression);
                 }
@@ -849,7 +873,7 @@ namespace EZNEW.Development.Query
                     conditionExpression = childExpression;
                     continue;
                 }
-                if (conditionEntry.ConnectionOperator == CriterionConnectionOperator.And)
+                if (conditionEntry.Connector == CriterionConnector.And)
                 {
                     conditionExpression = Expression.AndAlso(conditionExpression, childExpression);
                 }
@@ -871,7 +895,7 @@ namespace EZNEW.Development.Query
         {
             object criteriaValue = criterion.Value;
             Expression valueExpression = Expression.Constant(criteriaValue, criteriaValue?.GetType() ?? typeof(object));
-            Expression property = string.IsNullOrWhiteSpace(criterion.Name) ? null : Expression.PropertyOrField(parameter, criterion.Name);
+            Expression property = string.IsNullOrWhiteSpace(criterion.Field?.Name) ? null : Expression.PropertyOrField(parameter, criterion.Field.Name);
             switch (criterion.Operator)
             {
                 case CriterionOperator.False:
@@ -1111,7 +1135,7 @@ namespace EZNEW.Development.Query
                 IsObsolete = IsObsolete,
                 IsolationLevel = IsolationLevel,
                 IncludeObsoleteData = IncludeObsoleteData,
-                ConnectionOperator = ConnectionOperator
+                Connector = Connector
             };
             return newQuery;
         }
@@ -1123,46 +1147,23 @@ namespace EZNEW.Development.Query
         /// <summary>
         /// Add join
         /// </summary>
-        /// <param name="joinFields">Join fields</param>
-        /// <param name="joinType">Join type</param>
-        /// <param name="joinOperator">Join operator</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        public IQuery Join(Dictionary<string, string> joinFields, JoinType joinType, JoinOperator joinOperator, IQuery joinQuery)
-        {
-            if (joinQuery.GetEntityType() == null)
-            {
-                throw new EZNEWException("the IQuery object used for the join operation must set the property EntityType");
-            }
-            return Join(new JoinEntry()
-            {
-                JoinType = joinType,
-                Operator = joinOperator,
-                JoinFields = joinFields,
-                JoinQuery = joinQuery,
-                Sort = joinSort++
-            });
-        }
-
-        /// <summary>
-        /// Add join
-        /// </summary>
-        /// <param name="joinEntry">Join item</param>
+        /// <param name="joinEntry">Join entry</param>
         /// <returns>Return the newest IQuery object</returns>
         public IQuery Join(JoinEntry joinEntry)
         {
-            if (joinEntry?.JoinQuery == null)
+            if (joinEntry?.JoinObjectFilter == null)
             {
                 return this;
             }
-            joinEntry.JoinQuery = QueryManager.HandleParameterQueryBeforeUse(joinEntry.JoinQuery);
-            if (joinEntry.ExtraQuery != null)
+            joinEntry.JoinObjectFilter = QueryManager.HandleParameterQueryBeforeUse(joinEntry.JoinObjectFilter);
+            if (joinEntry.JoinObjectExtraFilter != null)
             {
-                joinEntry.ExtraQuery = QueryManager.HandleParameterQueryBeforeUse(joinEntry.ExtraQuery);
+                joinEntry.JoinObjectExtraFilter = QueryManager.HandleParameterQueryBeforeUse(joinEntry.JoinObjectExtraFilter);
             }
+            joinEntry.Sort = joinSort++;
             joinCollection.Add(joinEntry);
             hasJoin = true;
-            hasFieldConverter |= joinEntry.JoinQuery.HasFieldConverter;
+            hasFieldConverter |= joinEntry.JoinObjectFilter.HasFieldConverter;
             return this;
         }
 

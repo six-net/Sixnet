@@ -14,28 +14,28 @@ namespace EZNEW.Development.Query
         /// <param name="sourceQuery">Source query</param>
         /// <param name="sourceField">Source field</param>
         /// <param name="targetField">Target field</param>
-        /// <param name="joinOperator">Join operator</param>
+        /// <param name="operator">Operator</param>
         /// <param name="joinQuery">Join query</param>
         /// <returns>Return the newest IQuery object</returns>
-        public static IQuery LeftJoin(this IQuery sourceQuery, string sourceField, string targetField, JoinOperator joinOperator, IQuery joinQuery)
+        public static IQuery LeftJoin(this IQuery sourceQuery, string sourceField, string targetField, CriterionOperator @operator, IQuery joinQuery)
         {
-            return sourceQuery.Join(sourceField, targetField, JoinType.LeftJoin, joinOperator, joinQuery);
+            return sourceQuery.Join(sourceField, targetField, JoinType.LeftJoin, @operator, joinQuery);
         }
 
         /// <summary>
         /// Add a left join query
         /// </summary>
         /// <param name="sourceQuery">Source query</param>
-        /// <param name="joinOperator">Join operator</param>
+        /// <param name="operator">Operator</param>
         /// <param name="joinQuerys">Join querys</param>
         /// <returns>Return the newest IQuery object</returns>
-        public static IQuery LeftJoin(this IQuery sourceQuery, JoinOperator joinOperator, params IQuery[] joinQuerys)
+        public static IQuery LeftJoin(this IQuery sourceQuery, CriterionOperator @operator, params IQuery[] joinQuerys)
         {
             if (!joinQuerys.IsNullOrEmpty())
             {
                 foreach (var joinQuery in joinQuerys)
                 {
-                    sourceQuery = LeftJoin(sourceQuery, string.Empty, string.Empty, joinOperator, joinQuery);
+                    sourceQuery = LeftJoin(sourceQuery, string.Empty, string.Empty, @operator, joinQuery);
                 }
             }
             return sourceQuery;
@@ -46,12 +46,12 @@ namespace EZNEW.Development.Query
         /// </summary>
         /// <param name="sourceQuery">Source query</param>
         /// <param name="joinField">Join field</param>
-        /// <param name="joinOperator">Join operator</param>
+        /// <param name="operator">Operator</param>
         /// <param name="joinQuery">Join query</param>
         /// <returns>Return the newest IQuery object</returns>
-        public static IQuery LeftJoin(this IQuery sourceQuery, string joinField, JoinOperator joinOperator, IQuery joinQuery)
+        public static IQuery LeftJoin(this IQuery sourceQuery, string joinField, CriterionOperator @operator, IQuery joinQuery)
         {
-            return LeftJoin(sourceQuery, joinField, joinField, joinOperator, joinQuery);
+            return LeftJoin(sourceQuery, joinField, joinField, @operator, joinQuery);
         }
 
         /// <summary>
@@ -62,14 +62,14 @@ namespace EZNEW.Development.Query
         /// <param name="sourceQuery">Source query</param>
         /// <param name="sourceField">Source field</param>
         /// <param name="targetField">Target field</param>
-        /// <param name="joinOperator">Join operator</param>
+        /// <param name="operator">Operator</param>
         /// <param name="joinQuery">Join query</param>
         /// <returns>Return the newest IQuery object</returns>
-        public static IQuery LeftJoin<TSource, TTarget>(this IQuery sourceQuery, Expression<Func<TSource, dynamic>> sourceField, Expression<Func<TTarget, dynamic>> targetField, JoinOperator joinOperator, IQuery joinQuery)
+        public static IQuery LeftJoin<TSource, TTarget>(this IQuery sourceQuery, Expression<Func<TSource, dynamic>> sourceField, Expression<Func<TTarget, dynamic>> targetField, CriterionOperator @operator, IQuery joinQuery)
         {
             var sourceFieldName = ExpressionHelper.GetExpressionPropertyName(sourceField);
             var targetFieldName = ExpressionHelper.GetExpressionPropertyName(targetField);
-            return LeftJoin(sourceQuery, sourceFieldName, targetFieldName, joinOperator, joinQuery);
+            return LeftJoin(sourceQuery, sourceFieldName, targetFieldName, @operator, joinQuery);
         }
 
         /// <summary>
@@ -78,13 +78,13 @@ namespace EZNEW.Development.Query
         /// <typeparam name="TSource">Join source type</typeparam>
         /// <param name="sourceQuery">Source query</param>
         /// <param name="joinField">Join field</param>
-        /// <param name="joinOperator">Join operator</param>
+        /// <param name="operator">Operator</param>
         /// <param name="joinQuery">Join query</param>
         /// <returns>Return the newest IQuery object</returns>
-        public static IQuery LeftJoin<TSource>(this IQuery sourceQuery, Expression<Func<TSource, dynamic>> joinField, JoinOperator joinOperator, IQuery joinQuery)
+        public static IQuery LeftJoin<TSource>(this IQuery sourceQuery, Expression<Func<TSource, dynamic>> joinField, CriterionOperator @operator, IQuery joinQuery)
         {
             var joinFieldName = ExpressionHelper.GetExpressionPropertyName(joinField);
-            return LeftJoin(sourceQuery, joinFieldName, joinFieldName, joinOperator, joinQuery);
+            return LeftJoin(sourceQuery, joinFieldName, joinFieldName, @operator, joinQuery);
         }
     }
 }

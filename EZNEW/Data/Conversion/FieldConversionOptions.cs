@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EZNEW.Development.Query;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -7,7 +8,7 @@ namespace EZNEW.Data.Conversion
     /// <summary>
     /// Defines field conversion options
     /// </summary>
-    public class FieldConversionOptions
+    public class FieldConversionOptions : IInnerClone<FieldConversionOptions>
     {
         /// <summary>
         /// Gets or sets the conversion name
@@ -34,6 +35,10 @@ namespace EZNEW.Data.Conversion
             };
         }
 
+        /// <summary>
+        /// Clone conversion options
+        /// </summary>
+        /// <returns></returns>
         public FieldConversionOptions Clone()
         {
             return new FieldConversionOptions()

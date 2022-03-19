@@ -182,6 +182,10 @@ namespace EZNEW.Development.Domain.Repository.Warehouse.Storage
         public List<TEntity> Merge(IEnumerable<TEntity> entities, IQuery query = null)
         {
             var mergeResultEntities = MergeEntityData(entities, query);
+            if (query?.IsComplex ?? false)
+            {
+                return mergeResultEntities;
+            }
             var allEntities = GetLatestEntities(query);
             if (query != null)
             {
@@ -216,8 +220,11 @@ namespace EZNEW.Development.Domain.Repository.Warehouse.Storage
             {
                 originalPaging = Pager.Empty<TEntity>();
             }
-            var totalCount = originalPaging.TotalCount;
             var mergeDatas = MergeEntityData(originalPaging.Items, query);
+            if (!(query?.IsComplex ?? false))
+            {
+                
+            }
             var newEntities = GetLatestEntities(query, true);
             if (!newEntities.IsNullOrEmpty() && query?.PagingInfo?.Page == originalPaging.PageCount)
             {

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Text;
+using EZNEW.Data.Conversion;
 using EZNEW.Expressions;
 
 namespace EZNEW.Development.Query
@@ -13,14 +14,42 @@ namespace EZNEW.Development.Query
         /// Include condition
         /// </summary>
         /// <param name="sourceQuery">Source query</param>
+        /// <param name="field">Field</param>
+        /// <param name="value">Value</param>
+        /// <param name="criterionOptions">Criterion options</param>
+        /// <param name="connector">Connector</param>
+        /// <returns>Return the newest IQuery object</returns>
+        public static IQuery In(this IQuery sourceQuery, FieldInfo field, IEnumerable value, CriterionOptions criterionOptions = null, CriterionConnector connector = CriterionConnector.And)
+        {
+            return CriterionOperatorExtensions.Add(sourceQuery, CriterionOperator.In, field, value, criterionOptions, connector);
+        }
+
+        /// <summary>
+        /// Include condition
+        /// </summary>
+        /// <param name="sourceQuery">Source query</param>
         /// <param name="fieldName">Field name</param>
         /// <param name="value">Value</param>
-        /// <param name="or">Connection with 'and'(true/default) or 'or'(false)</param>
         /// <param name="criterionOptions">Criterion options</param>
+        /// <param name="connector">Connector</param>
         /// <returns>Return the newest IQuery object</returns>
-        public static IQuery In(this IQuery sourceQuery, string fieldName, IEnumerable value, bool or = false, CriterionOptions criterionOptions = null)
+        public static IQuery In(this IQuery sourceQuery, string fieldName, IEnumerable value, CriterionOptions criterionOptions = null, CriterionConnector connector = CriterionConnector.And)
         {
-            return CriterionOperatorExtensions.Add(sourceQuery, CriterionOperator.In, fieldName, value, or, criterionOptions);
+            return In(sourceQuery, FieldInfo.Create(fieldName), value, criterionOptions, connector);
+        }
+
+        /// <summary>
+        /// Include condition
+        /// </summary>
+        /// <param name="sourceQuery">Source query</param>
+        /// <param name="field">Field</param>
+        /// <param name="subquery">Subquery</param>
+        /// <param name="subqueryFieldName">Subquery field</param>
+        /// <param name="connector">Connector</param>
+        /// <returns>Return the newest IQuery object</returns>
+        public static IQuery In(this IQuery sourceQuery, FieldInfo field, IQuery subquery, string subqueryFieldName = "", CriterionConnector connector = CriterionConnector.And)
+        {
+            return CriterionOperatorExtensions.Add(sourceQuery, CriterionOperator.In, field, subquery, subqueryFieldName, connector);
         }
 
         /// <summary>
@@ -30,11 +59,11 @@ namespace EZNEW.Development.Query
         /// <param name="fieldName">Field name</param>
         /// <param name="subquery">Subquery</param>
         /// <param name="subqueryFieldName">Subquery field</param>
-        /// <param name="or">Connection with 'and'(true/default) or 'or'(false)</param>
+        /// <param name="connector">Connector</param>
         /// <returns>Return the newest IQuery object</returns>
-        public static IQuery In(this IQuery sourceQuery, string fieldName, IQuery subquery, string subqueryFieldName = "", bool or = false)
+        public static IQuery In(this IQuery sourceQuery, string fieldName, IQuery subquery, string subqueryFieldName = "", CriterionConnector connector = CriterionConnector.And)
         {
-            return CriterionOperatorExtensions.Add(sourceQuery, CriterionOperator.In, fieldName, subquery, subqueryFieldName, or);
+            return In(sourceQuery, FieldInfo.Create(fieldName), subquery, subqueryFieldName, connector);
         }
 
         /// <summary>
@@ -44,12 +73,42 @@ namespace EZNEW.Development.Query
         /// <param name="sourceQuery">Source query</param>
         /// <param name="field">Field</param>
         /// <param name="value">Value</param>
-        /// <param name="or">Connection with 'and'(true/default) or 'or'(false)</param>
-        /// <param name="criterionOptions">Criterion options</param>
+        /// <param name="connector">Connector</param>
         /// <returns>Return the newest IQuery object</returns>
-        public static IQuery In<TQueryModel>(this IQuery sourceQuery, Expression<Func<TQueryModel, dynamic>> field, IEnumerable value, bool or = false, CriterionOptions criterionOptions = null) where TQueryModel : IQueryModel<TQueryModel>
+        public static IQuery In<TQueryModel>(this IQuery sourceQuery, Expression<Func<TQueryModel, dynamic>> field, IEnumerable value, CriterionConnector connector = CriterionConnector.And) where TQueryModel : IQueryModel<TQueryModel>
         {
-            return CriterionOperatorExtensions.Add(sourceQuery, CriterionOperator.In, field, value, or, criterionOptions);
+            CriterionOptions criterionOptions = null;
+            return CriterionOperatorExtensions.Add(sourceQuery, CriterionOperator.In, field, value, criterionOptions, connector);
+        }
+
+        /// <summary>
+        /// Include condition
+        /// </summary>
+        /// <typeparam name="TQueryModel">Query model</typeparam> 
+        /// <param name="sourceQuery">Source query</param>
+        /// <param name="field">Field</param>
+        /// <param name="value">Value</param>
+        /// <param name="criterionOptions">Criterion options</param>
+        /// <param name="connector">Connector</param>
+        /// <returns>Return the newest IQuery object</returns>
+        public static IQuery In<TQueryModel>(this IQuery sourceQuery, Expression<Func<TQueryModel, dynamic>> field, IEnumerable value, CriterionOptions criterionOptions, CriterionConnector connector = CriterionConnector.And) where TQueryModel : IQueryModel<TQueryModel>
+        {
+            return CriterionOperatorExtensions.Add(sourceQuery, CriterionOperator.In, field, value, criterionOptions, connector);
+        }
+
+        /// <summary>
+        /// Include condition
+        /// </summary>
+        /// <typeparam name="TQueryModel">Query model</typeparam> 
+        /// <param name="sourceQuery">Source query</param>
+        /// <param name="field">Field</param>
+        /// <param name="value">Value</param>
+        /// <param name="fieldConversionOptions">Field conversion options</param>
+        /// <param name="connector">Connector</param>
+        /// <returns>Return the newest IQuery object</returns>
+        public static IQuery In<TQueryModel>(this IQuery sourceQuery, Expression<Func<TQueryModel, dynamic>> field, IEnumerable value, FieldConversionOptions fieldConversionOptions, CriterionConnector connector = CriterionConnector.And) where TQueryModel : IQueryModel<TQueryModel>
+        {
+            return CriterionOperatorExtensions.Add(sourceQuery, CriterionOperator.In, field, value, fieldConversionOptions, connector);
         }
 
         /// <summary>
@@ -59,11 +118,11 @@ namespace EZNEW.Development.Query
         /// <param name="sourceQuery">Source query</param>
         /// <param name="field">Field</param>
         /// <param name="subquery">Subquery</param>
-        /// <param name="or">Connection with 'and'(true/default) or 'or'(false)</param>
+        /// <param name="connector">Connector</param>
         /// <returns>Return the newest IQuery object</returns>
-        public static IQuery In<TQueryModel>(this IQuery sourceQuery, Expression<Func<TQueryModel, dynamic>> field, IQuery subquery, bool or = false) where TQueryModel : IQueryModel<TQueryModel>
+        public static IQuery In<TQueryModel>(this IQuery sourceQuery, Expression<Func<TQueryModel, dynamic>> field, IQuery subquery, CriterionConnector connector = CriterionConnector.And) where TQueryModel : IQueryModel<TQueryModel>
         {
-            return CriterionOperatorExtensions.Add(sourceQuery, CriterionOperator.In, field, subquery, or);
+            return CriterionOperatorExtensions.Add(sourceQuery, CriterionOperator.In, field, subquery, connector);
         }
 
         /// <summary>
@@ -75,11 +134,11 @@ namespace EZNEW.Development.Query
         /// <param name="field">Field</param>
         /// <param name="subquery">Subquery</param>
         /// <param name="subqueryField">Subquery field</param>
-        /// <param name="or">Connection with 'and'(true/default) or 'or'(false)</param>
+        /// <param name="connector">Connector</param>
         /// <returns>Return the newest IQuery object</returns>
-        public static IQuery In<TSourceQueryModel, TSubqueryQueryModel>(this IQuery sourceQuery, Expression<Func<TSourceQueryModel, dynamic>> field, IQuery subquery, Expression<Func<TSubqueryQueryModel, dynamic>> subqueryField, bool or = false) where TSourceQueryModel : IQueryModel<TSourceQueryModel> where TSubqueryQueryModel : IQueryModel<TSubqueryQueryModel>
+        public static IQuery In<TSourceQueryModel, TSubqueryQueryModel>(this IQuery sourceQuery, Expression<Func<TSourceQueryModel, dynamic>> field, IQuery subquery, Expression<Func<TSubqueryQueryModel, dynamic>> subqueryField, CriterionConnector connector = CriterionConnector.And) where TSourceQueryModel : IQueryModel<TSourceQueryModel> where TSubqueryQueryModel : IQueryModel<TSubqueryQueryModel>
         {
-            return CriterionOperatorExtensions.Add(sourceQuery, CriterionOperator.In, field, subquery, subqueryField, or);
+            return CriterionOperatorExtensions.Add(sourceQuery, CriterionOperator.In, field, subquery, subqueryField, connector);
         }
     }
 }

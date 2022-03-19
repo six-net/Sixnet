@@ -18,7 +18,7 @@ namespace EZNEW.Development.Query
         /// <returns>Return the newest IQuery object</returns>
         public static IQuery GreaterThanOrEqualLeftJoin(this IQuery sourceQuery, string sourceField, string targetField, IQuery joinQuery)
         {
-            return sourceQuery.LeftJoin(sourceField, targetField, JoinOperator.GreaterThanOrEqual, joinQuery);
+            return sourceQuery.LeftJoin(sourceField, targetField, CriterionOperator.GreaterThanOrEqual, joinQuery);
         }
 
         /// <summary>
@@ -31,6 +31,29 @@ namespace EZNEW.Development.Query
         public static IQuery GreaterThanOrEqualLeftJoin(this IQuery sourceQuery, string joinField, IQuery joinQuery)
         {
             return GreaterThanOrEqualLeftJoin(sourceQuery, joinField, joinField, joinQuery);
+        }
+
+        /// <summary>
+        /// Add a left join by using the GreaterThanOrEqual operation
+        /// </summary>
+        /// <typeparam name="TTarget">Join model type</typeparam>
+        /// <param name="sourceQuery">Source query</param>
+        /// <returns></returns>
+        public static IQuery GreaterThanOrEqualLeftJoin<TTarget>(this IQuery sourceQuery) where TTarget : IQueryModel<TTarget>
+        {
+            return GreaterThanOrEqualLeftJoin<TTarget>(sourceQuery, null);
+        }
+
+        /// <summary>
+        /// Add a left join by using the GreaterThanOrEqual operation
+        /// </summary>
+        /// <typeparam name="TTarget">Join model type</typeparam>
+        /// <param name="sourceQuery">Source query</param>
+        /// <param name="targetFilter">Join model filter</param>
+        /// <returns></returns>
+        public static IQuery GreaterThanOrEqualLeftJoin<TTarget>(this IQuery sourceQuery, Expression<Func<TTarget, bool>> targetFilter) where TTarget : IQueryModel<TTarget>
+        {
+            return sourceQuery.Join(JoinType.LeftJoin, CriterionOperator.GreaterThanOrEqual, targetFilter);
         }
 
         /// <summary>

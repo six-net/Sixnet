@@ -18,7 +18,7 @@ namespace EZNEW.Development.Query
         /// <returns>Return the newest IQuery object</returns>
         public static IQuery GreaterThanInnerJoin(this IQuery sourceQuery, string sourceField, string targetField, IQuery joinQuery)
         {
-            return sourceQuery.InnerJoin(sourceField, targetField, JoinOperator.GreaterThan, joinQuery);
+            return sourceQuery.InnerJoin(sourceField, targetField, CriterionOperator.GreaterThan, joinQuery);
         }
 
         /// <summary>
@@ -31,6 +31,29 @@ namespace EZNEW.Development.Query
         public static IQuery GreaterThanInnerJoin(this IQuery sourceQuery, string joinField, IQuery joinQuery)
         {
             return GreaterThanInnerJoin(sourceQuery, joinField, joinField, joinQuery);
+        }
+
+        /// <summary>
+        /// Add a inner join by using the GreaterThan operation
+        /// </summary>
+        /// <typeparam name="TTarget">Join model type</typeparam>
+        /// <param name="sourceQuery">Source query</param>
+        /// <returns></returns>
+        public static IQuery GreaterThanInnerJoin<TTarget>(this IQuery sourceQuery) where TTarget : IQueryModel<TTarget>
+        {
+            return GreaterThanInnerJoin<TTarget>(sourceQuery, null);
+        }
+
+        /// <summary>
+        /// Add a inner join by using the GreaterThan operation
+        /// </summary>
+        /// <typeparam name="TTarget">Join model type</typeparam>
+        /// <param name="sourceQuery">Source query</param>
+        /// <param name="targetFilter">Join model filter</param>
+        /// <returns></returns>
+        public static IQuery GreaterThanInnerJoin<TTarget>(this IQuery sourceQuery, Expression<Func<TTarget, bool>> targetFilter) where TTarget : IQueryModel<TTarget>
+        {
+            return sourceQuery.Join(JoinType.InnerJoin, CriterionOperator.GreaterThan, targetFilter);
         }
 
         /// <summary>

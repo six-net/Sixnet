@@ -18,7 +18,7 @@ namespace EZNEW.Development.Query
         /// <returns>Return the newest IQuery object</returns>
         public static IQuery NotEqualInnerJoin(this IQuery sourceQuery, string sourceField, string targetField, IQuery joinQuery)
         {
-            return sourceQuery.InnerJoin(sourceField, targetField, JoinOperator.NotEqual, joinQuery);
+            return sourceQuery.InnerJoin(sourceField, targetField, CriterionOperator.NotEqual, joinQuery);
         }
 
         /// <summary>
@@ -31,6 +31,29 @@ namespace EZNEW.Development.Query
         public static IQuery NotEqualInnerJoin(this IQuery sourceQuery, string joinField, IQuery joinQuery)
         {
             return NotEqualInnerJoin(sourceQuery, joinField, joinField, joinQuery);
+        }
+
+        /// <summary>
+        /// Add a inner join by using the NotEqual operation
+        /// </summary>
+        /// <typeparam name="TTarget">Join model type</typeparam>
+        /// <param name="sourceQuery">Source query</param>
+        /// <returns></returns>
+        public static IQuery NotEqualInnerJoin<TTarget>(this IQuery sourceQuery) where TTarget : IQueryModel<TTarget>
+        {
+            return NotEqualInnerJoin<TTarget>(sourceQuery, null);
+        }
+
+        /// <summary>
+        /// Add a inner join by using the NotEqual operation
+        /// </summary>
+        /// <typeparam name="TTarget">Join model type</typeparam>
+        /// <param name="sourceQuery">Source query</param>
+        /// <param name="targetFilter">Join model filter</param>
+        /// <returns></returns>
+        public static IQuery NotEqualInnerJoin<TTarget>(this IQuery sourceQuery, Expression<Func<TTarget, bool>> targetFilter) where TTarget : IQueryModel<TTarget>
+        {
+            return sourceQuery.Join(JoinType.InnerJoin, CriterionOperator.NotEqual, targetFilter);
         }
 
         /// <summary>

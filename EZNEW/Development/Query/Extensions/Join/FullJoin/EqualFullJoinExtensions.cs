@@ -18,7 +18,7 @@ namespace EZNEW.Development.Query
         /// <returns>Return the newest IQuery object</returns>
         public static IQuery EqualFullJoin(this IQuery sourceQuery, string sourceField, string targetField, IQuery joinQuery)
         {
-            return sourceQuery.FullJoin(sourceField, targetField, JoinOperator.Equal, joinQuery);
+            return sourceQuery.FullJoin(sourceField, targetField, CriterionOperator.Equal, joinQuery);
         }
 
         /// <summary>
@@ -31,6 +31,29 @@ namespace EZNEW.Development.Query
         public static IQuery EqualFullJoin(this IQuery sourceQuery, string joinField, IQuery joinQuery)
         {
             return EqualFullJoin(sourceQuery, joinField, joinField, joinQuery);
+        }
+
+        /// <summary>
+        /// Add a full join by using the Equal operation
+        /// </summary>
+        /// <typeparam name="TTarget">Join model type</typeparam>
+        /// <param name="sourceQuery">Source query</param>
+        /// <returns></returns>
+        public static IQuery EqualFullJoin<TTarget>(this IQuery sourceQuery) where TTarget : IQueryModel<TTarget>
+        {
+            return EqualFullJoin<TTarget>(sourceQuery,null);
+        }
+
+        /// <summary>
+        /// Add a full join by using the Equal operation
+        /// </summary>
+        /// <typeparam name="TTarget">Join model type</typeparam>
+        /// <param name="sourceQuery">Source query</param>
+        /// <param name="targetFilter">Join model filter</param>
+        /// <returns></returns>
+        public static IQuery EqualFullJoin<TTarget>(this IQuery sourceQuery, Expression<Func<TTarget, bool>> targetFilter) where TTarget : IQueryModel<TTarget>
+        {
+            return sourceQuery.Join(JoinType.FullJoin, CriterionOperator.Equal, targetFilter);
         }
 
         /// <summary>

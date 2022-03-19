@@ -287,13 +287,13 @@ namespace EZNEW.Development.Query
             {
                 if (valueQuery.GetEntityType() == null)
                 {
-                    throw new EZNEWException("the IQuery object used for the subquery must set EntityType");
+                    throw new EZNEWException("The IQuery object used for the subquery must set EntityType");
                 }
                 valueQuery = HandleParameterQueryBeforeUse(valueQuery);
-                if (!string.IsNullOrWhiteSpace(criterion.Options?.SubqueryValueFieldName))
+                if (!string.IsNullOrWhiteSpace(criterion.Options?.SubqueryField))
                 {
                     valueQuery.ClearQueryFields();
-                    valueQuery.AddQueryFields(criterion.Options.SubqueryValueFieldName);
+                    valueQuery.AddQueryFields(criterion.Options.SubqueryField);
                 }
                 criterion.SetValue(valueQuery);
                 originalQuery.AddSubquery(valueQuery);
@@ -486,12 +486,32 @@ namespace EZNEW.Development.Query
             {
                 foreach (var join in originalQuery.Joins)
                 {
-                    if (join?.JoinQuery != null)
+                    if (join?.JoinObjectFilter != null)
                     {
-                        globalConditionContext.OriginalQuery = join.JoinQuery;
+                        globalConditionContext.OriginalQuery = join.JoinObjectFilter;
                         globalConditionContext.Location = QueryLocation.Join;
-                        globalConditionContext.EntityType = join.JoinQuery.GetEntityType();
+                        globalConditionContext.EntityType = join.JoinObjectFilter.GetEntityType();
                         SetQueryObjectGlobalCondition(globalConditionContext);
+                    }
+                    if (!join.JoinCriteria.IsNullOrEmpty())
+                    {
+                        foreach (var joinCriterion in join.JoinCriteria)
+                        {
+                            if (joinCriterion is RegularJoinCriterion regularJoinCriterion && regularJoinCriterion.Value is IQuery valueQuery)
+                            {
+                                globalConditionContext.OriginalQuery = valueQuery;
+                                globalConditionContext.Location = QueryLocation.JoinConnection;
+                                globalConditionContext.EntityType = valueQuery.GetEntityType();
+                                SetQueryObjectGlobalCondition(globalConditionContext);
+                            }
+                            if (joinCriterion is QueryJoinCriterion queryJoinCriterion)
+                            {
+                                globalConditionContext.OriginalQuery = queryJoinCriterion.Criteria;
+                                globalConditionContext.Location = QueryLocation.JoinConnection;
+                                globalConditionContext.EntityType = queryJoinCriterion.Criteria?.GetEntityType();
+                                SetQueryObjectGlobalCondition(globalConditionContext);
+                            }
+                        }
                     }
                 }
             }
@@ -657,7 +677,6 @@ namespace EZNEW.Development.Query
         /// Handle parameter query object before use
         /// </summary>
         /// <param name="parameterQuery">Parameter query</param>
-        /// <param name="parameterQueryOption">Parameter query option</param>
         /// <returns>Return the newest query object</returns>
         internal static TQuery HandleParameterQueryBeforeUse<TQuery>(TQuery parameterQuery) where TQuery : IQuery
         {

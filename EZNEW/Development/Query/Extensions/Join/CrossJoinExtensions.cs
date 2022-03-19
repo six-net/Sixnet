@@ -17,7 +17,7 @@ namespace EZNEW.Development.Query
             {
                 foreach (var query in joinQuerys)
                 {
-                    sourceQuery = sourceQuery.Join(string.Empty, string.Empty, JoinType.CrossJoin, JoinOperator.Equal, query);
+                    sourceQuery = sourceQuery.Join(string.Empty, string.Empty, JoinType.CrossJoin, CriterionOperator.Equal, query);
                 }
             }
             return sourceQuery;

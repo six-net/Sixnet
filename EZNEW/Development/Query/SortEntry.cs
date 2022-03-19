@@ -6,12 +6,12 @@ namespace EZNEW.Development.Query
     /// Sort entry
     /// </summary>
     [Serializable]
-    public class SortEntry
+    public class SortEntry : IInnerClone<SortEntry>
     {
         /// <summary>
-        /// Gets or sets the field name
+        /// Gets or sets the field
         /// </summary>
-        public string Name { get; set; }
+        public FieldInfo Field { get; set; }
 
         /// <summary>
         /// Indicates whether order by desc
@@ -31,7 +31,7 @@ namespace EZNEW.Development.Query
         {
             return new SortEntry()
             {
-                Name = Name,
+                Field = Field?.Clone(),
                 Desc = Desc,
                 Options = Options?.Clone()
             };

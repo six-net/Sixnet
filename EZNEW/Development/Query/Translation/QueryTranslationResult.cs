@@ -17,6 +17,11 @@ namespace EZNEW.Development.Query.Translation
         public string SortString { get; set; }
 
         /// <summary>
+        /// Gets or sets the sort field string
+        /// </summary>
+        public List<string> SortFields { get; set; }
+
+        /// <summary>
         /// Gets or sets the condition string
         /// </summary>
         public string ConditionString { get; set; }

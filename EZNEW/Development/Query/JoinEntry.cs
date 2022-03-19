@@ -19,28 +19,22 @@ namespace EZNEW.Development.Query
         /// <summary>
         /// Gets or sets the join type
         /// </summary>
-        public JoinType JoinType { get; set; }
+        public JoinType Type { get; set; }
 
         /// <summary>
-        /// Gets or sets the join fields
-        /// key:source field,value:target field
+        /// Gets or sets the join criteria
         /// </summary>
-        public Dictionary<string, string> JoinFields { get; set; }
+        public List<IJoinCriterion> JoinCriteria { get; set; }
 
         /// <summary>
         /// Gets or sets the join query object
         /// </summary>
-        public IQuery JoinQuery { get; set; }
+        public IQuery JoinObjectFilter { get; set; }
 
         /// <summary>
         /// Gets or sets the extra query
         /// </summary>
-        public IQuery ExtraQuery { get; set; }
-
-        /// <summary>
-        /// Gets or sets the join operator
-        /// </summary>
-        public JoinOperator Operator { get; set; }
+        public IQuery JoinObjectExtraFilter { get; set; }
 
         /// <summary>
         /// Clone a new join item
@@ -51,11 +45,10 @@ namespace EZNEW.Development.Query
             return new JoinEntry()
             {
                 Sort = Sort,
-                JoinType = JoinType,
-                JoinFields = JoinFields?.ToDictionary(c => c.Key, c => c.Value),
-                JoinQuery = JoinQuery?.Clone(),
-                ExtraQuery = ExtraQuery?.Clone(),
-                Operator = Operator
+                Type = Type,
+                JoinCriteria = JoinCriteria?.Select(c => c?.Clone()).ToList(),
+                JoinObjectFilter = JoinObjectFilter?.Clone(),
+                JoinObjectExtraFilter = JoinObjectExtraFilter?.Clone()
             };
         }
     }

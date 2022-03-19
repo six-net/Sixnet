@@ -165,13 +165,29 @@ namespace EZNEW.Development.Query
 
         #region Add sort
 
+        ///// <summary>
+        ///// Add sort
+        ///// </summary>
+        ///// <param name="fieldName">Field name</param>
+        ///// <param name="desc">Sort by desc</param>
+        ///// <param name="options">Sort options</param>
+        //IQuery AddSort(string fieldName, bool desc = false, SortOptions options = null);
+
+        ///// <summary>
+        ///// Add sort
+        ///// </summary>
+        ///// <param name="field">Field name</param>
+        ///// <param name="desc">Sort by desc</param>
+        ///// <param name="sortOptions">Sort options</param>
+        //IQuery AddSort(FieldInfo field, bool desc = false, SortOptions sortOptions = null);
+
         /// <summary>
         /// Add sort
         /// </summary>
-        /// <param name="fieldName">Field name</param>
+        /// <param name="field">Field name</param>
         /// <param name="desc">Sort by desc</param>
-        /// <param name="options">Sort options</param>
-        IQuery AddSort(string fieldName, bool desc = false, SortOptions options = null);
+        /// <param name="sortOptions">Sort options</param>
+        IQuery AddSort(params SortEntry[] sortEntries);
 
         #endregion
 
@@ -396,16 +412,6 @@ namespace EZNEW.Development.Query
         /// <summary>
         /// Add join
         /// </summary>
-        /// <param name="joinFields">Join fields</param>
-        /// <param name="joinType">Join type</param>
-        /// <param name="joinOperator">Join operator</param>
-        /// <param name="joinQuery">Join query</param>
-        /// <returns>Return the newest IQuery object</returns>
-        IQuery Join(Dictionary<string, string> joinFields, JoinType joinType, JoinOperator joinOperator, IQuery joinQuery);
-
-        /// <summary>
-        /// Add join
-        /// </summary>
         /// <param name="joinEntry">Join entry</param>
         /// <returns>Return the newest IQuery object</returns>
         IQuery Join(JoinEntry joinEntry);
@@ -504,14 +510,14 @@ namespace EZNEW.Development.Query
         #region Add criterion
 
         /// <summary>
-        /// Add a criterion
+        /// Add criterion
         /// </summary>
-        /// <param name="connectionOperator">Connection operator</param>
-        /// <param name="fieldName">Field name</param>
-        /// <param name="criterionOperator">Condition operator</param>
+        /// <param name="connector">Connector</param>
+        /// <param name="field">Field</param>
+        /// <param name="criterionOperator">Criterion operator</param>
         /// <param name="value">Value</param>
         /// <param name="criterionOptions">Criterion options</param>
-        IQuery AddCriterion(CriterionConnectionOperator connectionOperator, string fieldName, CriterionOperator criterionOperator, dynamic value, CriterionOptions criterionOptions = null);
+        IQuery AddCriterion(CriterionConnector connector, FieldInfo field, CriterionOperator criterionOperator, dynamic value, CriterionOptions criterionOptions = null);
 
         #endregion
 

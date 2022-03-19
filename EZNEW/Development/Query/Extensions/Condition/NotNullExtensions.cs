@@ -13,11 +13,11 @@ namespace EZNEW.Development.Query
         /// </summary>
         /// <param name="sourceQuery">Source query</param>
         /// <param name="fieldName">Field name</param>
-        /// <param name="or">Connection with 'and'(true/default) or 'or'(false)</param>
+        /// <param name="connector">Connector</param>
         /// <returns>Return the newest IQuery object</returns>
-        public static IQuery NotNull(this IQuery sourceQuery, string fieldName, bool or = false)
+        public static IQuery NotNull(this IQuery sourceQuery, string fieldName, CriterionConnector connector = CriterionConnector.And)
         {
-            return sourceQuery.AddCriterion(or ? CriterionConnectionOperator.Or : CriterionConnectionOperator.And, fieldName, CriterionOperator.NotNull, null);
+            return sourceQuery.AddCriterion(connector, FieldInfo.Create(fieldName), CriterionOperator.NotNull, null);
         }
 
         /// <summary>
@@ -26,11 +26,11 @@ namespace EZNEW.Development.Query
         /// <typeparam name="TQueryModel">Query model</typeparam>
         /// <param name="sourceQuery">Source query</param>
         /// <param name="field">Field</param>
-        /// <param name="or">Connection with 'and'(true/default) or 'or'(false)</param>
+        /// <param name="connector">Connector</param>
         /// <returns>Return the newest IQuery object</returns>
-        public static IQuery NotNull<TQueryModel>(this IQuery sourceQuery, Expression<Func<TQueryModel, dynamic>> field, bool or = false) where TQueryModel : IQueryModel<TQueryModel>
+        public static IQuery NotNull<TQueryModel>(this IQuery sourceQuery, Expression<Func<TQueryModel, dynamic>> field, CriterionConnector connector = CriterionConnector.And) where TQueryModel : IQueryModel<TQueryModel>
         {
-            return sourceQuery.AddCriterion(or ? CriterionConnectionOperator.Or : CriterionConnectionOperator.And, ExpressionHelper.GetExpressionPropertyName(field.Body), CriterionOperator.NotNull, null);
+            return sourceQuery.AddCriterion(connector, FieldInfo.Create(ExpressionHelper.GetExpressionPropertyName(field.Body)), CriterionOperator.NotNull, null);
         }
     }
 }
