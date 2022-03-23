@@ -64,9 +64,9 @@ namespace EZNEW.Development.Domain.Model
                 if (modelAttribute.EntityType == null)
                 {
                     //Mapping default entity
-                    var defaultEntityName = $"{modelType.Name}Entity";
-                    var entityKey = allTypeDict.Keys.FirstOrDefault(c => c.EndsWith(defaultEntityName,StringComparison.OrdinalIgnoreCase));
-                    if (!string.IsNullOrWhiteSpace(entityKey) && allTypeDict.TryGetValue(entityKey,out var entityType) && entityContractType.IsAssignableFrom(entityType))
+                    var defaultEntityName = $".{modelType.Name}Entity";
+                    var entityKey = allTypeDict.Keys.FirstOrDefault(c => c.EndsWith(defaultEntityName, StringComparison.OrdinalIgnoreCase));
+                    if (!string.IsNullOrWhiteSpace(entityKey) && allTypeDict.TryGetValue(entityKey, out var entityType) && entityContractType.IsAssignableFrom(entityType))
                     {
                         modelAttribute.EntityType = entityType;
                     }

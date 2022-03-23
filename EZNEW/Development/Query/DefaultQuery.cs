@@ -344,37 +344,6 @@ namespace EZNEW.Development.Query
 
         #region Add sort
 
-        ///// <summary>
-        ///// Add sort
-        ///// </summary>
-        ///// <param name="fieldName">Field name</param>
-        ///// <param name="desc">Sort by desc</param>
-        ///// <param name="sortOptions">Sort options</param>
-        //public IQuery AddSort(string fieldName, bool desc = false, SortOptions sortOptions = null)
-        //{
-        //    return AddSort(FieldInfo.Create(fieldName), desc, sortOptions);
-        //}
-
-        ///// <summary>
-        ///// Add sort
-        ///// </summary>
-        ///// <param name="field">Field name</param>
-        ///// <param name="desc">Sort by desc</param>
-        ///// <param name="sortOptions">Sort options</param>
-        //public IQuery AddSort(FieldInfo field, bool desc = false, SortOptions sortOptions = null)
-        //{
-        //    if (!string.IsNullOrWhiteSpace(field?.Name))
-        //    {
-        //        sortCollection.Add(new SortEntry()
-        //        {
-        //            Field = field,
-        //            Desc = desc,
-        //            Options = sortOptions
-        //        });
-        //    }
-        //    return this;
-        //}
-
         /// <summary>
         /// Add sort
         /// </summary>

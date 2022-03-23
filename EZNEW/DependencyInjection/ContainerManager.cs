@@ -51,21 +51,6 @@ namespace EZNEW.DependencyInjection
         /// </summary>
         public static IDIContainer Container { get; private set; } = null;
 
-        ///// <summary>
-        ///// Gets or sets the default services
-        ///// </summary>
-        //public static IServiceCollection ServiceCollection
-        //{
-        //    get
-        //    {
-        //        return defaultServices;
-        //    }
-        //    set
-        //    {
-        //        SetDefaultServiceCollection(value);
-        //    }
-        //}
-
         /// <summary>
         /// Gets the current service provider
         /// </summary>

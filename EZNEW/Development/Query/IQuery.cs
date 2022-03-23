@@ -132,16 +132,6 @@ namespace EZNEW.Development.Query
         /// </summary>
         bool NoneCondition { get; }
 
-        ///// <summary>
-        ///// Gets the atomic condition count
-        ///// </summary>
-        //int AtomicConditionCount { get; }
-
-        ///// <summary>
-        ///// Gets all condition field names
-        ///// </summary>
-        //IEnumerable<string> AllConditionFieldNames { get; }
-
         /// <summary>
         /// Gets all subqueries
         /// </summary>
@@ -164,22 +154,6 @@ namespace EZNEW.Development.Query
         #region Sort
 
         #region Add sort
-
-        ///// <summary>
-        ///// Add sort
-        ///// </summary>
-        ///// <param name="fieldName">Field name</param>
-        ///// <param name="desc">Sort by desc</param>
-        ///// <param name="options">Sort options</param>
-        //IQuery AddSort(string fieldName, bool desc = false, SortOptions options = null);
-
-        ///// <summary>
-        ///// Add sort
-        ///// </summary>
-        ///// <param name="field">Field name</param>
-        ///// <param name="desc">Sort by desc</param>
-        ///// <param name="sortOptions">Sort options</param>
-        //IQuery AddSort(FieldInfo field, bool desc = false, SortOptions sortOptions = null);
 
         /// <summary>
         /// Add sort
