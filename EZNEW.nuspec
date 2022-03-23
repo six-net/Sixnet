@@ -24,7 +24,6 @@
 		<dependency id="Microsoft.Extensions.Options.ConfigurationExtensions" version="5.0.0" />
 		<dependency id="Newtonsoft.Json" version="13.0.1" />
 		<dependency id="System.ComponentModel.Annotations" version="5.0.0" />
-		<dependency id="System.DirectoryServices.Protocols" version="5.0.0" />
 		<dependency id="System.Reflection.Emit" version="4.7.0" />
 		<dependency id="System.Reflection.Emit.Lightweight" version="4.7.0" />
 		<dependency id="System.Text.Json" version="5.0.2" />
