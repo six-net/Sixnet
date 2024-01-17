@@ -9,9 +9,7 @@ namespace Sixnet.Localization
     /// <summary>
     /// Defines sixnet string localizer
     /// </summary>
-#pragma warning disable CS3027
     public interface ISixnetStringLocalizer : IStringLocalizer
-#pragma warning restore CS3027
     {
         /// <summary>
         /// Gets the string resource with the given name
