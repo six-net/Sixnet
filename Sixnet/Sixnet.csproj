@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
 	  <LangVersion>9.0</LangVersion>
@@ -13,6 +12,7 @@
 	  <Authors>DingBin.Li</Authors>
 	  <Company>DingBin.Li</Company>
 	  <PackageTags>.NET,Sixnet</PackageTags>
+	  <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 
   <ItemGroup>
