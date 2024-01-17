@@ -32,8 +32,8 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="Sixnet\bin\$configuration$\netstandard2.0\Sixnet.dll" target="lib\netstandard2.0" />
-	<file src="Sixnet\bin\$configuration$\netstandard2.0\Sixnet.pdb" target="lib\netstandard2.0" />
+    <file src="Sixnet\bin\$configuration$\netstandard2.1\Sixnet.dll" target="lib\netstandard2.1" />
+	<file src="Sixnet\bin\$configuration$\netstandard2.1\Sixnet.pdb" target="lib\netstandard2.1" />
 	<file src=".\nugeticon.png" target="images\" />
   </files>
 </package>
