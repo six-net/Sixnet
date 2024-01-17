@@ -10,6 +10,7 @@
 		<Authors>DingBin.Li</Authors>
 		<PackageTags>.NET,Sixnet</PackageTags>
 		<NoWarn>CS3027;CS3003;CS3002;CS3001</NoWarn>
+		<GenerateSourceRevisionId>false</GenerateSourceRevisionId>
 	</PropertyGroup>
 
 	<ItemGroup>
