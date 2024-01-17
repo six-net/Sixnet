@@ -7,10 +7,7 @@
 		<Copyright>Copyright © DingBin.Li</Copyright>
 		<PackageProjectUrl>https://github.com/six-net</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/six-net</RepositoryUrl>
-		<Version>3.1.2</Version>
-		<FileVersion>3.1.2.03</FileVersion>
 		<Authors>DingBin.Li</Authors>
-		<Company>DingBin.Li</Company>
 		<PackageTags>.NET,Sixnet</PackageTags>
 		<NoWarn>CS3027;CS3003;CS3002;CS3001</NoWarn>
 	</PropertyGroup>
