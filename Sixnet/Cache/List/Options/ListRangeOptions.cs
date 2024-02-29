@@ -7,7 +7,7 @@ namespace Sixnet.Cache.List.Options
     /// <summary>
     /// List range options
     /// </summary>
-    public class ListRangeOptions : CacheOptions<ListRangeResponse>
+    public class ListRangeOptions : CacheOperationOptions<ListRangeResponse>
     {
         /// <summary>
         /// Gets or sets the cache key
@@ -30,7 +30,7 @@ namespace Sixnet.Cache.List.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return list range response</returns>
-        protected override async Task<ListRangeResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<ListRangeResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.ListRangeAsync(server, this).ConfigureAwait(false);
         }
@@ -41,7 +41,7 @@ namespace Sixnet.Cache.List.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return list range response</returns>
-        protected override ListRangeResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override ListRangeResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.ListRange(server, this);
         }

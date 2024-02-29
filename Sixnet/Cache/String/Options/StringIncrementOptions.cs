@@ -7,7 +7,7 @@ namespace Sixnet.Cache.String
     /// <summary>
     /// String increment options
     /// </summary>
-    public class StringIncrementOptions : CacheOptions<StringIncrementResponse>
+    public class StringIncrementOptions : CacheOperationOptions<StringIncrementResponse>
     {
         /// <summary>
         /// Gets or sets the cache key
@@ -31,7 +31,7 @@ namespace Sixnet.Cache.String
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return string increment response</returns>
-        protected override async Task<StringIncrementResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<StringIncrementResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.StringIncrementAsync(server, this).ConfigureAwait(false);
         }
@@ -42,7 +42,7 @@ namespace Sixnet.Cache.String
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return string increment response</returns>
-        protected override StringIncrementResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override StringIncrementResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.StringIncrement(server, this);
         }

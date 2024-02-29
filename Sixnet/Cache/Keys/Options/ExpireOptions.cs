@@ -7,7 +7,7 @@ namespace Sixnet.Cache.Keys.Options
     /// <summary>
     /// Expire key options
     /// </summary>
-    public class ExpireOptions : CacheOptions<ExpireResponse>
+    public class ExpireOptions : CacheOperationOptions<ExpireResponse>
     {
         /// <summary>
         /// Gets or sets the cache key
@@ -25,7 +25,7 @@ namespace Sixnet.Cache.Keys.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return expire key response</returns>
-        protected override async Task<ExpireResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<ExpireResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.KeyExpireAsync(server, this).ConfigureAwait(false);
         }
@@ -36,7 +36,7 @@ namespace Sixnet.Cache.Keys.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return expire key response</returns>
-        protected override ExpireResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override ExpireResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.KeyExpire(server, this);
         }

@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Sixnet.Development.Data.Event;
-using Sixnet.Development.Events;
+using Sixnet.Development.Event;
 using Sixnet.Exceptions;
 
 namespace Sixnet.Development.Domain.Event
@@ -11,10 +11,11 @@ namespace Sixnet.Development.Domain.Event
     /// Default domain event handler
     /// </summary>
     /// <typeparam name="TEvent"></typeparam>
-    public class DefaultDomainEventHandler<TEvent> : DefaultSixnetEventHandler<TEvent>, IDomainEventHandler where TEvent : IDomainEvent
+    public class DefaultDomainEventHandler<TEvent> : DefaultEventHandler<TEvent>, ISixnetDomainEventHandler where TEvent : ISixnetDomainEvent
     {
 
-        public DefaultDomainEventHandler(Func<TEvent, CancellationToken, Task> handlerExecutor, DomainEventHandlerOptions options = null) : base(handlerExecutor, options?.GetSixnetEventHandlerOptions())
+        public DefaultDomainEventHandler(Func<TEvent, CancellationToken, Task> handlerExecutor, DomainEventHandlerOptions options = null) 
+            : base(handlerExecutor, options?.GetSixnetEventHandlerOptions())
         {
         }
 

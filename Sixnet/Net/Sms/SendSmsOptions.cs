@@ -7,7 +7,7 @@ namespace Sixnet.Net.Sms
     /// <summary>
     /// Sms send options
     /// </summary>
-    public class SendSmsOptions : SmsOptions
+    public class SendSmsOptions : SmsExecutionOptions
     {
         /// <summary>
         /// Gets or sets the message id
@@ -61,7 +61,7 @@ namespace Sixnet.Net.Sms
         /// </summary>
         public Func<SendSmsOptions, bool> OnAsyncBeforeSend { get; set; }
 
-        public override SmsOptions Clone()
+        public override SmsExecutionOptions Clone()
         {
             return new SendSmsOptions()
             {

@@ -7,7 +7,7 @@ namespace Sixnet.Cache.Hash.Options
     /// <summary>
     /// Hash get options
     /// </summary>
-    public class HashGetOptions : CacheOptions<HashGetResponse>
+    public class HashGetOptions : CacheOperationOptions<HashGetResponse>
     {
         /// <summary>
         /// Gets or sets the cache key
@@ -25,7 +25,7 @@ namespace Sixnet.Cache.Hash.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return hash get response</returns>
-        protected override async Task<HashGetResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<HashGetResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.HashGetAsync(server, this).ConfigureAwait(false);
         }
@@ -36,7 +36,7 @@ namespace Sixnet.Cache.Hash.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return hash get response</returns>
-        protected override HashGetResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override HashGetResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.HashGet(server, this);
         }

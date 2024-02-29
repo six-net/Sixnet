@@ -1,37 +1,36 @@
-﻿using System;
+﻿using Sixnet.Development.Data;
+using Sixnet.Development.Data.Database;
+using Sixnet.Development.Domain.Event;
+using Sixnet.Development.Domain.Message;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
-using Sixnet.Development.Data;
-using Sixnet.Development.Data.Database;
-using Sixnet.Development.Domain.Event;
-using Sixnet.Development.Message;
 
 namespace Sixnet.Development.Work
 {
     /// <summary>
     /// Wrok manager
     /// </summary>
-    public class UnitOfWork
+    public static class UnitOfWork
     {
         static UnitOfWork()
         {
             SubscribeCreateWorkEvent(w =>
             {
-                MessageManager.Init();
+                SixnetMessager.Init();
             });
             SubscribeWorkSuccessEvent((work) =>
             {
-                MessageManager.Commit(true);
+                SixnetMessager.Commit(true);
             });
             SubscribeWorkRollbackEvent(w =>
             {
-                MessageManager.Clear();
+                SixnetMessager.Clear();
             });
             SubscribeWorkFailEvent((work) =>
             {
-                MessageManager.Clear();
+                SixnetMessager.Clear();
             });
         }
 
@@ -45,22 +44,22 @@ namespace Sixnet.Development.Work
         /// <summary>
         /// create work event handler
         /// </summary>
-        static Action<IWork> CreateWorkEventHandler;
+        static Action<ISixnetWork> CreateWorkEventHandler;
 
         /// <summary>
         /// Commit success event handler
         /// </summary>
-        static Action<IWork> WorkSuccessEventHandler;
+        static Action<ISixnetWork> WorkSuccessEventHandler;
 
         /// <summary>
         /// Commit fail event handler
         /// </summary>
-        static Action<IWork> WorkFailEventHandler;
+        static Action<ISixnetWork> WorkFailEventHandler;
 
         /// <summary>
         /// Work rollback event handler
         /// </summary>
-        static Action<IWork> WorkRollbackEventHandler;
+        static Action<ISixnetWork> WorkRollbackEventHandler;
 
         #endregion
 
@@ -69,7 +68,7 @@ namespace Sixnet.Development.Work
         /// <summary>
         /// Gets the current work
         /// </summary>
-        public static IWork Current
+        public static ISixnetWork Current
         {
             get
             {
@@ -92,9 +91,9 @@ namespace Sixnet.Development.Work
         /// </summary>
         /// <param name="isolationLevel">Data isolation level</param>
         /// <returns>Return a new work object</returns>
-        public static IWork Create(DataIsolationLevel? isolationLevel = null)
+        public static ISixnetWork Create(DataIsolationLevel? isolationLevel = null)
         {
-            return Create(Array.Empty<DatabaseServer>(), isolationLevel);
+            return Create(Array.Empty<SixnetDatabaseServer>(), isolationLevel);
         }
 
         /// <summary>
@@ -103,13 +102,13 @@ namespace Sixnet.Development.Work
         /// <param name="databaseServerConfigNames">Database server config names</param>
         /// <param name="isolationLevel">Isllation level</param>
         /// <returns></returns>
-        public static IWork Create(IEnumerable<string> databaseServerConfigNames, DataIsolationLevel? isolationLevel = null)
+        public static ISixnetWork Create(IEnumerable<string> databaseServerConfigNames, DataIsolationLevel? isolationLevel = null)
         {
             if (databaseServerConfigNames.IsNullOrEmpty())
             {
                 throw new ArgumentNullException(nameof(databaseServerConfigNames));
             }
-            var servers = DataManager.GetConfiguredDatabaseServers(databaseServerConfigNames.ToArray());
+            var servers = SixnetDataManager.GetDatabaseServers(databaseServerConfigNames.ToArray());
             return Create(servers, isolationLevel);
         }
 
@@ -119,7 +118,7 @@ namespace Sixnet.Development.Work
         /// <param name="databaseServerConfigNames">Database server config names</param>
         /// <param name="isolationLevel">Isllation level</param>
         /// <returns></returns>
-        public static IWork Create(IEnumerable<DatabaseServer> servers, DataIsolationLevel? isolationLevel = null)
+        public static ISixnetWork Create(IEnumerable<SixnetDatabaseServer> servers, DataIsolationLevel? isolationLevel = null)
         {
             return Current ?? new DefaultWork(servers, isolationLevel);
         }
@@ -134,7 +133,7 @@ namespace Sixnet.Development.Work
         /// Subscribe create work event
         /// </summary>
         /// <param name="eventHandlers">Event handlers</param>
-        public static void SubscribeCreateWorkEvent(IEnumerable<Action<IWork>> eventHandlers)
+        public static void SubscribeCreateWorkEvent(IEnumerable<Action<ISixnetWork>> eventHandlers)
         {
             if (!eventHandlers.IsNullOrEmpty())
             {
@@ -149,9 +148,9 @@ namespace Sixnet.Development.Work
         /// Subscribe create work event
         /// </summary>
         /// <param name="eventHandlers">Event handlers</param>
-        public static void SubscribeCreateWorkEvent(params Action<IWork>[] eventHandlers)
+        public static void SubscribeCreateWorkEvent(params Action<ISixnetWork>[] eventHandlers)
         {
-            IEnumerable<Action<IWork>> handlerCollection = eventHandlers;
+            IEnumerable<Action<ISixnetWork>> handlerCollection = eventHandlers;
             SubscribeCreateWorkEvent(handlerCollection);
         }
 
@@ -159,7 +158,7 @@ namespace Sixnet.Development.Work
         /// Trigger create work event
         /// </summary>
         /// <param name="work">Work object</param>
-        internal static void TriggerCreateWorkEvent(IWork work)
+        internal static void TriggerCreateWorkEvent(ISixnetWork work)
         {
             CreateWorkEventHandler?.Invoke(work);
         }
@@ -172,7 +171,7 @@ namespace Sixnet.Development.Work
         /// Subscribe work commit success event
         /// </summary>
         /// <param name="eventHandlers">Event handlers</param>
-        public static void SubscribeWorkSuccessEvent(IEnumerable<Action<IWork>> eventHandlers)
+        public static void SubscribeWorkSuccessEvent(IEnumerable<Action<ISixnetWork>> eventHandlers)
         {
             if (!eventHandlers.IsNullOrEmpty())
             {
@@ -187,9 +186,9 @@ namespace Sixnet.Development.Work
         /// Subscribe work commit success event
         /// </summary>
         /// <param name="eventHandlers">Event handlers</param>
-        public static void SubscribeWorkSuccessEvent(params Action<IWork>[] eventHandlers)
+        public static void SubscribeWorkSuccessEvent(params Action<ISixnetWork>[] eventHandlers)
         {
-            IEnumerable<Action<IWork>> handlerCollection = eventHandlers;
+            IEnumerable<Action<ISixnetWork>> handlerCollection = eventHandlers;
             SubscribeWorkSuccessEvent(handlerCollection);
         }
 
@@ -199,7 +198,7 @@ namespace Sixnet.Development.Work
         /// <param name="work">Work object</param>
         /// <param name="commitResult">Work commit result</param>
         /// <param name="commands">Commands</param>
-        internal static void TriggerWorkSuccessEvent(IWork work)
+        internal static void TriggerWorkSuccessEvent(ISixnetWork work)
         {
             ThreadPool.QueueUserWorkItem(s => { WorkSuccessEventHandler(work); });
         }
@@ -212,7 +211,7 @@ namespace Sixnet.Development.Work
         /// Subscribe work commit fail event
         /// </summary>
         /// <param name="eventHandlers">Event handlers</param>
-        public static void SubscribeWorkFailEvent(IEnumerable<Action<IWork>> eventHandlers)
+        public static void SubscribeWorkFailEvent(IEnumerable<Action<ISixnetWork>> eventHandlers)
         {
             if (!eventHandlers.IsNullOrEmpty())
             {
@@ -227,9 +226,9 @@ namespace Sixnet.Development.Work
         /// Subscribe work commit fail event
         /// </summary>
         /// <param name="eventHandlers">Event handlers</param>
-        public static void SubscribeWorkFailEvent(params Action<IWork>[] eventHandlers)
+        public static void SubscribeWorkFailEvent(params Action<ISixnetWork>[] eventHandlers)
         {
-            IEnumerable<Action<IWork>> handlerCollection = eventHandlers;
+            IEnumerable<Action<ISixnetWork>> handlerCollection = eventHandlers;
             SubscribeWorkFailEvent(handlerCollection);
         }
 
@@ -239,7 +238,7 @@ namespace Sixnet.Development.Work
         /// <param name="work">Work object</param>
         /// <param name="commitResult">Work commit result</param>
         /// <param name="commands">Commands</param>
-        internal static void TriggerWorkFailEvent(IWork work)
+        internal static void TriggerWorkFailEvent(ISixnetWork work)
         {
             ThreadPool.QueueUserWorkItem(s => { WorkFailEventHandler(work); });
         }
@@ -252,7 +251,7 @@ namespace Sixnet.Development.Work
         /// Subscribe work rollback event
         /// </summary>
         /// <param name="eventHandlers">Event handlers</param>
-        public static void SubscribeWorkRollbackEvent(IEnumerable<Action<IWork>> eventHandlers)
+        public static void SubscribeWorkRollbackEvent(IEnumerable<Action<ISixnetWork>> eventHandlers)
         {
             if (!eventHandlers.IsNullOrEmpty())
             {
@@ -267,9 +266,9 @@ namespace Sixnet.Development.Work
         /// Subscribe work rollback event
         /// </summary>
         /// <param name="eventHandlers">Event handlers</param>
-        public static void SubscribeWorkRollbackEvent(params Action<IWork>[] eventHandlers)
+        public static void SubscribeWorkRollbackEvent(params Action<ISixnetWork>[] eventHandlers)
         {
-            IEnumerable<Action<IWork>> handlerCollection = eventHandlers;
+            IEnumerable<Action<ISixnetWork>> handlerCollection = eventHandlers;
             SubscribeWorkRollbackEvent(handlerCollection);
         }
 
@@ -277,7 +276,7 @@ namespace Sixnet.Development.Work
         /// Trigger create work event
         /// </summary>
         /// <param name="work">Work object</param>
-        internal static void TriggerWorkRollbackEvent(IWork work)
+        internal static void TriggerWorkRollbackEvent(ISixnetWork work)
         {
             ThreadPool.QueueUserWorkItem(s => { WorkRollbackEventHandler(work); });
         }
@@ -292,7 +291,7 @@ namespace Sixnet.Development.Work
         /// Publish domain event
         /// </summary>
         /// <param name="domainEvents">Domain events</param>
-        internal static void PublishDomainEvent(IEnumerable<IDomainEvent> domainEvents)
+        internal static void PublishDomainEvent(IEnumerable<ISixnetDomainEvent> domainEvents)
         {
             if (!domainEvents.IsNullOrEmpty() && CurrentWork.Value != null)
             {
@@ -304,9 +303,9 @@ namespace Sixnet.Development.Work
         /// Publish domain event
         /// </summary>
         /// <param name="domainEvents">Domain events</param>
-        internal static void PublishDomainEvent(params IDomainEvent[] domainEvents)
+        internal static void PublishDomainEvent(params ISixnetDomainEvent[] domainEvents)
         {
-            IEnumerable<IDomainEvent> eventCollection = domainEvents;
+            IEnumerable<ISixnetDomainEvent> eventCollection = domainEvents;
             PublishDomainEvent(eventCollection);
         }
 

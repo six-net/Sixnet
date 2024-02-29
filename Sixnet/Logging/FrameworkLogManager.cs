@@ -32,9 +32,9 @@ namespace Sixnet.Logging
 
         static FrameworkLogManager()
         {
-            EnableTraceLog = SwitchManager.ShouldTraceFramework(sw =>
+            EnableTraceLog = SixnetSwitches.ShouldTraceFramework(sw =>
             {
-                EnableTraceLog = SwitchManager.ShouldTraceFramework();
+                EnableTraceLog = SixnetSwitches.ShouldTraceFramework();
             });
         }
 
@@ -48,7 +48,7 @@ namespace Sixnet.Logging
         /// <param name="message"></param>
         internal static void Log(string categoryName, int eventId, string message)
         {
-            LogManager.Log(categoryName, LogLevel, eventId, $"{NewLine}{message}");
+            SixnetLogger.Log(categoryName, LogLevel, eventId, $"{NewLine}{message}");
         }
 
         /// <summary>
@@ -83,12 +83,12 @@ namespace Sixnet.Logging
         /// Log work start submitting
         /// </summary>
         /// <param name="work">Work object</param>
-        internal static void LogWorkStartSubmitting(IWork work)
+        internal static void LogWorkStartSubmitting(ISixnetWork work)
         {
             if (EnableTraceLog && work != null)
             {
                 string title = GetTitle($"【Work:{work.WorkId}】start submitting");
-                Log(work.GetType().FullName, FrameworkLogEvents.Work.StartSubmitting, GetMultilineMessage(title));
+                Log(work.GetType().FullName, SixnetLogEvents.Work.StartSubmitting, GetMultilineMessage(title));
             }
         }
 
@@ -96,12 +96,12 @@ namespace Sixnet.Logging
         /// Log work submitted successfully
         /// </summary>
         /// <param name="work">Work object</param>
-        internal static void LogWorkSubmittedSuccessfully(IWork work)
+        internal static void LogWorkSubmittedSuccessfully(ISixnetWork work)
         {
             if (EnableTraceLog && work != null)
             {
                 string title = GetTitle($"【Work:{work.WorkId}】submit successfully");
-                Log(work.GetType().FullName, FrameworkLogEvents.Work.SubmittedSuccessfully, GetMultilineMessage(title, string.Empty));
+                Log(work.GetType().FullName, SixnetLogEvents.Work.SubmittedSuccessfully, GetMultilineMessage(title, string.Empty));
             }
         }
 
@@ -109,12 +109,12 @@ namespace Sixnet.Logging
         /// Log work submitted failure
         /// </summary>
         /// <param name="work">Work object</param>
-        internal static void LogWorkSubmittedFailure(IWork work)
+        internal static void LogWorkSubmittedFailure(ISixnetWork work)
         {
             if (EnableTraceLog && work != null)
             {
                 string title = GetTitle($"【Work:{work.WorkId}】submit failure");
-                Log(work.GetType().FullName, FrameworkLogEvents.Work.SubmittedFailure, GetMultilineMessage(title, string.Empty));
+                Log(work.GetType().FullName, SixnetLogEvents.Work.SubmittedFailure, GetMultilineMessage(title, string.Empty));
             }
         }
 
@@ -122,36 +122,36 @@ namespace Sixnet.Logging
         /// Log work subbmited exception
         /// </summary>
         /// <param name="work">Work object</param>
-        internal static void LogWorkSubmittedException(IWork work, Exception ex)
+        internal static void LogWorkSubmittedException(ISixnetWork work, Exception ex)
         {
             if (EnableTraceLog && work != null && ex != null)
             {
                 string title = GetTitle($"【Work:{work.WorkId}】submit error");
-                Log(work.GetType().FullName, FrameworkLogEvents.Work.SubmittedException, GetMultilineMessage(title, ex.Message));
+                Log(work.GetType().FullName, SixnetLogEvents.Work.SubmittedException, GetMultilineMessage(title, ex.Message));
             }
         }
 
         /// <summary>
         /// Log work rollback
         /// </summary>
-        internal static void LogWorkRollback(IWork work)
+        internal static void LogWorkRollback(ISixnetWork work)
         {
             if (EnableTraceLog && work != null)
             {
                 string title = GetTitle($"【Work:{work.WorkId}】rollback");
-                Log(work.GetType().FullName, FrameworkLogEvents.Work.Rollback, GetMultilineMessage(title));
+                Log(work.GetType().FullName, SixnetLogEvents.Work.Rollback, GetMultilineMessage(title));
             }
         }
 
         /// <summary>
         /// Log work dispose
         /// </summary>
-        internal static void LogWorkDispose(IWork work)
+        internal static void LogWorkDispose(ISixnetWork work)
         {
             if (EnableTraceLog && work != null)
             {
                 string title = GetTitle($"【Work:{work.WorkId}】dispose");
-                Log(work.GetType().FullName, FrameworkLogEvents.Work.Reset, GetMultilineMessage(title));
+                Log(work.GetType().FullName, SixnetLogEvents.Work.Reset, GetMultilineMessage(title));
             }
         }
 
@@ -172,7 +172,7 @@ namespace Sixnet.Logging
             {
                 string title = GetTitle($"【{databaseServerType}】Execution script");
                 //string content
-                Log(databaseProviderType.FullName, FrameworkLogEvents.Database.Script, GetMultilineMessage(GetTitle(title), script, JsonSerializer.Serialize(parameters)));
+                Log(databaseProviderType.FullName, SixnetLogEvents.Database.Script, GetMultilineMessage(GetTitle(title), script, SixnetJsonSerializer.Serialize(parameters)));
             }
         }
 
@@ -182,7 +182,7 @@ namespace Sixnet.Logging
         /// <param name="databaseProviderType">Database provider type</param>
         /// <param name="databaseServerType">Database server type</param>
         /// <param name="statement">Satement</param>
-        public static void LogDatabaseExecutionStatement(Type databaseProviderType, DatabaseServerType databaseServerType, DatabaseExecutionStatement statement)
+        public static void LogDatabaseExecutionStatement(Type databaseProviderType, DatabaseServerType databaseServerType, ExecutionDatabaseStatement statement)
         {
             if (EnableTraceLog && statement != null)
             {

@@ -289,8 +289,8 @@ namespace System
         /// <returns>Return the constellation</returns>
         public static Constellation GetConstellation(this DateTime date)
         {
-            var constellDate = new DateTimeOffset(2000, date.Month, date.Day, 0, 0, 0, TimeConstants.Zero);
-            return TimeConstants.Constellations.FirstOrDefault(c => c.Value.Item1 <= constellDate && c.Value.Item2 >= constellDate).Key;
+            var constellDate = new DateTimeOffset(2000, date.Month, date.Day, 0, 0, 0, SixnetTimes.Zero);
+            return SixnetTimes.Constellations.FirstOrDefault(c => c.Value.Item1 <= constellDate && c.Value.Item2 >= constellDate).Key;
         }
 
         #endregion
@@ -577,8 +577,8 @@ namespace System
         /// <returns>Return the constellation</returns>
         public static Constellation GetConstellation(this DateTimeOffset date)
         {
-            var constellDate = new DateTimeOffset(2000, date.Month, date.Day, 0, 0, 0, TimeConstants.Zero);
-            return TimeConstants.Constellations.FirstOrDefault(c => c.Value.Item1 <= constellDate && c.Value.Item2 >= constellDate).Key;
+            var constellDate = new DateTimeOffset(2000, date.Month, date.Day, 0, 0, 0, SixnetTimes.Zero);
+            return SixnetTimes.Constellations.FirstOrDefault(c => c.Value.Item1 <= constellDate && c.Value.Item2 >= constellDate).Key;
         }
 
         #endregion

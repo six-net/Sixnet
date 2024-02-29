@@ -9,7 +9,7 @@ namespace Sixnet.Development.Data.Event
     /// Got value event
     /// </summary>
     public class GotValueEvent
-        : BaseDataEvent
+        : BaseSixnetDataEvent
     {
         public GotValueEvent()
         {
@@ -26,9 +26,9 @@ namespace Sixnet.Development.Data.Event
         /// </summary>
         public dynamic Value { get; set; }
 
-        public static GotValueEvent Create(IDataClient dataClient, DataCommand command,  dynamic value)
+        public static GotValueEvent Create(ISixnetDataClient dataClient, SixnetDataCommand command,  dynamic value)
         {
-            ThrowHelper.ThrowArgNullIf(command == null, nameof(command));
+            SixnetDirectThrower.ThrowArgNullIf(command == null, nameof(command));
 
             return new GotValueEvent()
             {

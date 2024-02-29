@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sixnet.Exceptions;
+using System;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Security.Cryptography;
@@ -6,6 +7,9 @@ using System.Text;
 
 namespace Sixnet.Security.Cryptography
 {
+    /// <summary>
+    /// RSA helper
+    /// </summary>
     public static class RSAHelper
     {
         static readonly ConcurrentDictionary<string, RSA> _RSACollections = new ConcurrentDictionary<string, RSA>();
@@ -13,20 +17,22 @@ namespace Sixnet.Security.Cryptography
         #region Encrypt
 
         /// <summary>
-        /// Encrypt value
+        /// Encrypt
         /// </summary>
-        /// <param name="publicKey">Public key</param>
-        /// <param name="originalValue">Original value</param>
+        /// <param name="value">Original value</param>
+        /// <param name="key">Encrypt key</param>
+        /// <param name="byPublicKey">Whether use public key(Default is true)</param>
         /// <param name="encoding">Encoding(The default is UTF-8)</param>
+        /// <param name="encryptionPadding">Encryption padding(Default is Pkcs1)</param>
         /// <returns>Return the encrypted value</returns>
-        public static string Encrypt(string publicKey, string originalValue, Encoding encoding = null)
+        public static string Encrypt(string value, string key, bool byPublicKey = true, Encoding encoding = null, RSAEncryptionPadding encryptionPadding = null)
         {
-            var rsa = CreateRSAProviderFromPublicKey(publicKey);
-            if (encoding == null)
-            {
-                encoding = Encoding.UTF8;
-            }
-            return Convert.ToBase64String(rsa.Encrypt(encoding.GetBytes(originalValue), RSAEncryptionPadding.Pkcs1));
+            var rsa = byPublicKey
+                ? CreateRSAProviderFromPublicKey(key)
+                : CreateRSAProviderFromPrivateKey(key);
+            encoding ??= Encoding.UTF8;
+            encryptionPadding ??= RSAEncryptionPadding.Pkcs1;
+            return Convert.ToBase64String(rsa.Encrypt(encoding.GetBytes(value), encryptionPadding));
         }
 
         #endregion
@@ -36,18 +42,20 @@ namespace Sixnet.Security.Cryptography
         /// <summary>
         /// Decrypt value
         /// </summary>
-        /// <param name="privateKey">Private key</param>
-        /// <param name="encryptedValue">Encrypted value</param>
+        /// <param name="value">Original value</param>
+        /// <param name="key">Encrypt key</param>
+        /// <param name="byPublicKey">Whether use public key(Default is false)</param>
         /// <param name="encoding">Encoding(The default is UTF-8)</param>
+        /// <param name="encryptionPadding">Encryption padding(Default is Pkcs1)</param>
         /// <returns>Return the original value</returns>
-        public static string Decrypt(string privateKey, string encryptedValue, Encoding encoding = null)
+        public static string Decrypt(string value, string key, bool byPublicKey = false, Encoding encoding = null, RSAEncryptionPadding encryptionPadding = null)
         {
-            var rsa = CreateRSAProviderFromPrivateKey(privateKey);
-            if (encoding == null)
-            {
-                encoding = Encoding.UTF8;
-            }
-            return encoding.GetString(rsa.Decrypt(Convert.FromBase64String(encryptedValue), RSAEncryptionPadding.Pkcs1));
+            var rsa = byPublicKey
+                ? CreateRSAProviderFromPublicKey(key)
+                : CreateRSAProviderFromPrivateKey(key);
+            encoding ??= Encoding.UTF8;
+            encryptionPadding ??= RSAEncryptionPadding.Pkcs1;
+            return encoding.GetString(rsa.Decrypt(Convert.FromBase64String(value), encryptionPadding));
         }
 
         #endregion
@@ -57,24 +65,25 @@ namespace Sixnet.Security.Cryptography
         /// <summary>
         /// Sign data
         /// </summary>
-        /// <param name="privateKey">Private key</param>
-        /// <param name="originalValue">Original value</param>
+        /// <param name="value">Original value</param>
+        /// <param name="key">Encrypt key</param>
+        /// <param name="byPublicKey">Whether use public key(Default is false)</param>
         /// <param name="encoding">Encoding(The default is UTF-8)</param>
         /// <param name="hashAlgorithmName">Hash algorithm nam(The default is SHA256)</param>
+        /// <param name="signaturePadding">Encryption padding(Default is Pkcs1)</param>
         /// <returns></returns>
-        public static string Sign(string privateKey, string originalValue, Encoding encoding = null, HashAlgorithmName? hashAlgorithmName = null)
+        public static string Sign(string value, string key, bool byPublicKey = false, Encoding encoding = null, HashAlgorithmName? hashAlgorithmName = null, RSASignaturePadding signaturePadding = null)
         {
-            var rsa = CreateRSAProviderFromPrivateKey(privateKey);
-            if (encoding == null)
-            {
-                encoding = Encoding.UTF8;
-            }
-            if (hashAlgorithmName == null)
-            {
-                hashAlgorithmName = HashAlgorithmName.SHA256;
-            }
-            byte[] dataBytes = encoding.GetBytes(originalValue);
-            var signatureBytes = rsa.SignData(dataBytes, hashAlgorithmName.Value, RSASignaturePadding.Pkcs1);
+            var rsa = byPublicKey
+                ? CreateRSAProviderFromPrivateKey(key)
+                : CreateRSAProviderFromPrivateKey(key);
+
+            encoding ??= Encoding.UTF8;
+            hashAlgorithmName ??= HashAlgorithmName.SHA256;
+            signaturePadding ??= RSASignaturePadding.Pkcs1;
+
+            var dataBytes = encoding.GetBytes(value);
+            var signatureBytes = rsa.SignData(dataBytes, hashAlgorithmName.Value, signaturePadding);
             return Convert.ToBase64String(signatureBytes);
         }
 
@@ -85,27 +94,25 @@ namespace Sixnet.Security.Cryptography
         /// <summary>
         /// Verify sign
         /// </summary>
-        /// <param name="publicKey">Public key</param>
-        /// <param name="originalData">Original data</param>
+        /// <param name="value">Original data</param>
         /// <param name="sign">Sign</param>
+        /// <param name="key">Encrypt key</param>
         /// <param name="encoding">Encoding(The default is UTF-8)</param>
         /// <param name="hashAlgorithmName">Hash algorithm nam(The default is SHA256)</param>
         /// <returns></returns>
-        public static bool Verify(string publicKey, string originalData, string sign, Encoding encoding = null, HashAlgorithmName? hashAlgorithmName = null)
+        public static bool Verify(string value, string sign, string key, bool byPublicKey = false, Encoding encoding = null, HashAlgorithmName? hashAlgorithmName = null, RSASignaturePadding signaturePadding = null)
         {
-            var rsa = CreateRSAProviderFromPublicKey(publicKey);
-            if (encoding == null)
-            {
-                encoding = Encoding.UTF8;
-            }
-            if (hashAlgorithmName == null)
-            {
-                hashAlgorithmName = HashAlgorithmName.SHA256;
-            }
-            byte[] dataBytes = encoding.GetBytes(originalData);
-            byte[] signBytes = Convert.FromBase64String(sign);
-            var verify = rsa.VerifyData(dataBytes, signBytes, hashAlgorithmName.Value, RSASignaturePadding.Pkcs1);
-            return verify;
+            var rsa = byPublicKey
+                ? CreateRSAProviderFromPrivateKey(key)
+                : CreateRSAProviderFromPrivateKey(key);
+
+            encoding ??= Encoding.UTF8;
+            hashAlgorithmName ??= HashAlgorithmName.SHA256;
+            signaturePadding ??= RSASignaturePadding.Pkcs1;
+
+            var dataBytes = encoding.GetBytes(value);
+            var signBytes = Convert.FromBase64String(sign);
+            return rsa.VerifyData(dataBytes, signBytes, hashAlgorithmName.Value, signaturePadding);
         }
 
         #endregion
@@ -119,18 +126,16 @@ namespace Sixnet.Security.Cryptography
         /// <returns>Return a RSA instance</returns>
         static RSA CreateRSAProviderFromPublicKey(string publicKey)
         {
-            if (string.IsNullOrWhiteSpace(publicKey))
-            {
-                throw new ArgumentException(nameof(publicKey));
-            }
+            SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(publicKey), nameof(publicKey));
+
             if (_RSACollections.TryGetValue(publicKey, out var rsa) && rsa != null)
             {
                 return rsa;
             }
 
             // encoded OID sequence for  PKCS #1 rsaEncryption szOID_RSA_RSA = "1.2.840.113549.1.1.1"
-            byte[] seqOid = { 0x30, 0x0D, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01, 0x01, 0x05, 0x00 };
-            byte[] seq = new byte[15];
+            var seqOid = new byte[] { 0x30, 0x0D, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01, 0x01, 0x05, 0x00 };
+            var seq = new byte[15];
             var x509Key = Convert.FromBase64String(publicKey);
 
             // ---------  Set up stream to read the asn.1 encoded SubjectPublicKeyInfo blob  ------
@@ -150,7 +155,7 @@ namespace Sixnet.Security.Cryptography
                         return null;
 
                     seq = binr.ReadBytes(15);       //read the Sequence OID
-                    if (!CompareByteArrays(seq, seqOid))    //make sure Sequence for OID is correct
+                    if (!CompareBytes(seq, seqOid))    //make sure Sequence for OID is correct
                         return null;
 
                     twobytes = binr.ReadUInt16();
@@ -205,7 +210,7 @@ namespace Sixnet.Security.Cryptography
 
                     // ------- create RSACryptoServiceProvider instance and initialize with public key -----
                     rsa = RSA.Create();
-                    RSAParameters rsaKeyInfo = new RSAParameters
+                    var rsaKeyInfo = new RSAParameters
                     {
                         Modulus = modulus,
                         Exponent = exponent
@@ -314,16 +319,16 @@ namespace Sixnet.Security.Cryptography
 
         #endregion
 
-        #region Compare byte arrays
+        #region Compare bytes
 
-        static bool CompareByteArrays(byte[] a, byte[] b)
+        static bool CompareBytes(byte[] first, byte[] second)
         {
-            if (a.Length != b.Length)
+            if (first.Length != second.Length)
                 return false;
             int i = 0;
-            foreach (byte c in a)
+            foreach (byte c in first)
             {
-                if (c != b[i])
+                if (c != second[i])
                     return false;
                 i++;
             }

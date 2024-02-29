@@ -7,7 +7,7 @@ namespace Sixnet.Cache.SortedSet.Options
     /// <summary>
     /// Sorted set decrement option
     /// </summary>
-    public class SortedSetDecrementOptions : CacheOptions<SortedSetDecrementResponse>
+    public class SortedSetDecrementOptions : CacheOperationOptions<SortedSetDecrementResponse>
     {
         /// <summary>
         /// Gets or sets the cache key
@@ -36,7 +36,7 @@ namespace Sixnet.Cache.SortedSet.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return sorted set decrement response</returns>
-        protected override async Task<SortedSetDecrementResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<SortedSetDecrementResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.SortedSetDecrementAsync(server, this).ConfigureAwait(false);
         }
@@ -47,7 +47,7 @@ namespace Sixnet.Cache.SortedSet.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return sorted set decrement response</returns>
-        protected override SortedSetDecrementResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override SortedSetDecrementResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.SortedSetDecrement(server, this);
         }

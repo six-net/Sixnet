@@ -13,20 +13,20 @@ namespace Sixnet.Development.Repository
     /// </summary>
     /// <typeparam name="TModel">Entity</typeparam>
     public partial class DefaultRepository<TModel> : DefaultRootRepository<TModel>
-        where TModel : class, IEntity<TModel>
+        where TModel : class, ISixnetEntity<TModel>
     {
         #region Fields
 
         /// <summary>
         /// Data access
         /// </summary>
-        readonly IDataAccess<TModel> dataAccess = null;
+        readonly ISixnetDataAccess<TModel> dataAccess = null;
 
         #endregion
 
         #region Constructor
 
-        public DefaultRepository(IDataAccess<TModel> dataAccess)
+        public DefaultRepository(ISixnetDataAccess<TModel> dataAccess)
         {
             this.dataAccess = dataAccess;
         }

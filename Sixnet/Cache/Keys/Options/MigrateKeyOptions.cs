@@ -7,7 +7,7 @@ namespace Sixnet.Cache.Keys.Options
     /// <summary>
     /// Migrate key options
     /// </summary>
-    public class MigrateKeyOptions : CacheOptions<MigrateKeyResponse>
+    public class MigrateKeyOptions : CacheOperationOptions<MigrateKeyResponse>
     {
         /// <summary>
         /// Gets or sets the cache key
@@ -40,7 +40,7 @@ namespace Sixnet.Cache.Keys.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return migrate key response</returns>
-        protected override async Task<MigrateKeyResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<MigrateKeyResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.KeyMigrateAsync(server, this).ConfigureAwait(false);
         }
@@ -51,7 +51,7 @@ namespace Sixnet.Cache.Keys.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return migrate key response</returns>
-        protected override MigrateKeyResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override MigrateKeyResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.KeyMigrate(server, this);
         }

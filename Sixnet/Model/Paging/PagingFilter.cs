@@ -20,7 +20,7 @@ namespace Sixnet.Model.Paging
         /// <summary>
         /// page size
         /// </summary>
-        protected int pageSizeValue = DataManager.DefaultPagingSize;
+        protected int pageSizeValue = SixnetDataManager.DefaultPagingSize;
 
         #endregion
 
@@ -54,7 +54,7 @@ namespace Sixnet.Model.Paging
             {
                 if (pageSizeValue < 1)
                 {
-                    pageSizeValue = DataManager.DefaultPagingSize;
+                    pageSizeValue = SixnetDataManager.DefaultPagingSize;
                 }
                 return pageSizeValue;
             }

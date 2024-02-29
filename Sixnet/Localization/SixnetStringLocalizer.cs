@@ -29,7 +29,7 @@ namespace Sixnet.Localization
 
         public SixnetStringLocalizer(ISixnetStringLocalizerFactory factory)
         {
-            ThrowHelper.ThrowArgNullIf(factory == null, nameof(factory));
+            SixnetDirectThrower.ThrowArgNullIf(factory == null, nameof(factory));
             var assemblyName = new AssemblyName(typeof(SixnetStringLocalizer).GetTypeInfo().Assembly.FullName);
             _localizer = factory.CreateLocalizer(string.Empty, assemblyName.FullName);
         }

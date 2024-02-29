@@ -31,7 +31,7 @@ namespace System.Data
             }
             if (string.IsNullOrWhiteSpace(savePath))
             {
-                savePath = ApplicationManager.GetRootPath();
+                savePath = SixnetApplication.GetRootPath();
             }
             if (!Directory.Exists(savePath))
             {

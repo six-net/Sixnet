@@ -7,7 +7,7 @@ namespace Sixnet.Cache.Set.Options
     /// <summary>
     /// Set combine and store options
     /// </summary>
-    public class SetCombineAndStoreOptions : CacheOptions<SetCombineAndStoreResponse>
+    public class SetCombineAndStoreOptions : CacheOperationOptions<SetCombineAndStoreResponse>
     {
         /// <summary>
         /// Gets or sets the source keys
@@ -36,7 +36,7 @@ namespace Sixnet.Cache.Set.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return set combine and store response</returns>
-        protected override async Task<SetCombineAndStoreResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<SetCombineAndStoreResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.SetCombineAndStoreAsync(server, this).ConfigureAwait(false);
         }
@@ -47,7 +47,7 @@ namespace Sixnet.Cache.Set.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return set combine and store response</returns>
-        protected override SetCombineAndStoreResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override SetCombineAndStoreResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.SetCombineAndStore(server, this);
         }

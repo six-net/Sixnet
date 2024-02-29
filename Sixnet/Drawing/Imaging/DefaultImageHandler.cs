@@ -8,9 +8,9 @@ using System.Linq;
 namespace Sixnet.Drawing.Imaging
 {
     /// <summary>
-    /// Defines the default implements for IImageHandler
+    /// Defines the default implements for ISixnetImageHandler
     /// </summary>
-    public class DefaultImageHandler : IImageHandler
+    public class DefaultImageHandler : ISixnetImageHandler
     {
         #region Fields
 
@@ -53,14 +53,18 @@ namespace Sixnet.Drawing.Imaging
                     gh.Clear(DEFAULT_BACKGROUND_COLOR);
                 }
             }
-        }; 
+        };
 
         #endregion
+
+        #region Constructor
 
         static DefaultImageHandler()
         {
             ImageEncoderDict = ImageCodecInfo.GetImageEncoders().ToDictionary(c => c.MimeType, c => c);
         }
+
+        #endregion
 
         #region Scale
 
@@ -69,7 +73,7 @@ namespace Sixnet.Drawing.Imaging
         /// </summary>
         /// <param name="imageHandlingOptions">Image handling options</param>
         /// <returns>Return a new Image object </returns>
-        public Image Scale(ImageHandlingOptions imageHandlingOptions)
+        public Image Scale(HandleImageOptions imageHandlingOptions)
         {
             #region Check arguments
 
@@ -101,7 +105,7 @@ namespace Sixnet.Drawing.Imaging
         /// </summary>
         /// <param name="imageHandlingOptions">Image handling options</param>
         /// <returns>Return a new Image object </returns>
-        public Image Cut(ImageHandlingOptions imageHandlingOptions)
+        public Image Cut(HandleImageOptions imageHandlingOptions)
         {
             #region Check parameters
 
@@ -151,7 +155,7 @@ namespace Sixnet.Drawing.Imaging
         /// </summary>
         /// <param name="imageHandlingOptions">Image handling options</param>
         /// <returns></returns>
-        DrawingRange GetDrawingRange(ImageHandlingType imageHandlingType, ImageHandlingOptions imageHandlingOptions)
+        DrawingRange GetDrawingRange(ImageHandlingType imageHandlingType, HandleImageOptions imageHandlingOptions)
         {
             switch (imageHandlingType)
             {
@@ -169,7 +173,7 @@ namespace Sixnet.Drawing.Imaging
         /// </summary>
         /// <param name="imageHandlingOptions">Image handling options</param>
         /// <returns></returns>
-        DrawingRange GetScaleRange(ImageHandlingOptions imageHandlingOptions)
+        DrawingRange GetScaleRange(HandleImageOptions imageHandlingOptions)
         {
             var originalImage = imageHandlingOptions.OriginalImage;
             DrawingRange drawingRange = default;
@@ -196,7 +200,7 @@ namespace Sixnet.Drawing.Imaging
         /// </summary>
         /// <param name="imageHandlingOptions">Image handling options</param>
         /// <returns></returns>
-        DrawingRange GetScaleRangeByFixedSize(ImageHandlingOptions imageHandlingOptions)
+        DrawingRange GetScaleRangeByFixedSize(HandleImageOptions imageHandlingOptions)
         {
             var originalImage = imageHandlingOptions.OriginalImage;
 
@@ -243,7 +247,7 @@ namespace Sixnet.Drawing.Imaging
         /// </summary>
         /// <param name="imageHandlingOptions"></param>
         /// <returns></returns>
-        DrawingRange GetScaleRangeByRegular(ImageHandlingOptions imageHandlingOptions)
+        DrawingRange GetScaleRangeByRegular(HandleImageOptions imageHandlingOptions)
         {
             var image = imageHandlingOptions.OriginalImage;
 
@@ -282,7 +286,7 @@ namespace Sixnet.Drawing.Imaging
         /// </summary>
         /// <param name="imageHandlingOptions"></param>
         /// <returns></returns>
-        DrawingRange GetScaleRangeByWidthFirst(ImageHandlingOptions imageHandlingOptions)
+        DrawingRange GetScaleRangeByWidthFirst(HandleImageOptions imageHandlingOptions)
         {
             var image = imageHandlingOptions.OriginalImage;
 
@@ -310,7 +314,7 @@ namespace Sixnet.Drawing.Imaging
         /// </summary>
         /// <param name="imageHandlingOptions"></param>
         /// <returns></returns>
-        DrawingRange GetScaleRangeByHeightFirst(ImageHandlingOptions imageHandlingOptions)
+        DrawingRange GetScaleRangeByHeightFirst(HandleImageOptions imageHandlingOptions)
         {
             var image = imageHandlingOptions.OriginalImage;
 
@@ -338,7 +342,7 @@ namespace Sixnet.Drawing.Imaging
         /// </summary>
         /// <param name="imageHandlingOptions"></param>
         /// <returns></returns>
-        DrawingRange GetCutRange(ImageHandlingOptions imageHandlingOptions)
+        DrawingRange GetCutRange(HandleImageOptions imageHandlingOptions)
         {
             var image = imageHandlingOptions.OriginalImage;
             int originalImageWidth = image.Width;
@@ -373,7 +377,7 @@ namespace Sixnet.Drawing.Imaging
         /// <param name="drawingRange">Drawing range</param>
         /// <param name="imageHandlingOptions">Image handling options</param>
         /// <returns></returns>
-        Image GenerateImage(ImageHandlingType imageHandlingType, DrawingRange drawingRange, ImageHandlingOptions imageHandlingOptions)
+        Image GenerateImage(ImageHandlingType imageHandlingType, DrawingRange drawingRange, HandleImageOptions imageHandlingOptions)
         {
             var image = imageHandlingOptions.OriginalImage;
             PixelFormat newFormat = IsPixelFormatIndexed(image.PixelFormat) ? PixelFormat.Format24bppRgb : image.PixelFormat;

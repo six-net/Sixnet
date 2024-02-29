@@ -7,7 +7,7 @@ namespace Sixnet.Cache.SortedSet.Options
     /// <summary>
     /// Sorted set add options
     /// </summary>
-    public class SortedSetAddOptions : CacheOptions<SortedSetAddResponse>
+    public class SortedSetAddOptions : CacheOperationOptions<SortedSetAddResponse>
     {
         /// <summary>
         /// Gets or sets the cache key
@@ -31,7 +31,7 @@ namespace Sixnet.Cache.SortedSet.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return sorted set response</returns>
-        protected override async Task<SortedSetAddResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<SortedSetAddResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.SortedSetAddAsync(server, this).ConfigureAwait(false);
         }
@@ -42,7 +42,7 @@ namespace Sixnet.Cache.SortedSet.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return sorted set response</returns>
-        protected override SortedSetAddResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override SortedSetAddResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.SortedSetAdd(server, this);
         }

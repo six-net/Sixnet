@@ -42,7 +42,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Gets or sets the field format options
         /// </summary>
-        public FieldFormatOption FormatOptions { get; set; }
+        public FieldFormatSetting FormatOptions { get; set; }
 
         /// <summary>
         /// Gets or sets the database type

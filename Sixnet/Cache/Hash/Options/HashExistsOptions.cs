@@ -7,7 +7,7 @@ namespace Sixnet.Cache.Hash.Options
     /// <summary>
     /// Hash exists options
     /// </summary>
-    public class HashExistsOptions : CacheOptions<HashExistsResponse>
+    public class HashExistsOptions : CacheOperationOptions<HashExistsResponse>
     {
         /// <summary>
         /// Gets or sets the cache key
@@ -25,7 +25,7 @@ namespace Sixnet.Cache.Hash.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return hash exists response</returns>
-        protected override async Task<HashExistsResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<HashExistsResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.HashExistAsync(server, this).ConfigureAwait(false);
         }
@@ -36,7 +36,7 @@ namespace Sixnet.Cache.Hash.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return hash exists response</returns>
-        protected override HashExistsResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override HashExistsResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.HashExist(server, this);
         }

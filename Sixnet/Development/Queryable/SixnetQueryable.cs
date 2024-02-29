@@ -32,7 +32,7 @@ namespace Sixnet.Development.Queryable
         /// <summary>
         /// Type global filters
         /// </summary>
-        static readonly Dictionary<Guid, ICondition> typeGlobalFilters = new();
+        static readonly Dictionary<Guid, ISixnetCondition> typeGlobalFilters = new();
 
         /// <summary>
         /// Global filter delegate
@@ -204,7 +204,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="originalQueryable">Original queryable</param>
         /// <param name="exclude">Exclude</param>
         /// <returns>Return the newest queryable</returns>
-        public static ISixnetQueryable AppendEntityIdentityCondition<TEntity>(IEnumerable<TEntity> entities, ISixnetQueryable originalQueryable = null, bool exclude = false) where TEntity : class, IEntity<TEntity>
+        public static ISixnetQueryable AppendEntityIdentityCondition<TEntity>(IEnumerable<TEntity> entities, ISixnetQueryable originalQueryable = null, bool exclude = false) where TEntity : class, ISixnetEntity<TEntity>
         {
             return AppendEntityIdentityCore(entities, originalQueryable, exclude);
         }
@@ -218,7 +218,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="originalQueryable">Original queryable</param>
         /// <param name="exclude">Exclude</param>
         /// <returns>Return the newest queryable</returns>
-        public static ISixnetQueryable AppendEntityIdentityCondition<TEntity>(TEntity entity, ISixnetQueryable originalQueryable = null, bool exclude = false) where TEntity : class, IEntity<TEntity>
+        public static ISixnetQueryable AppendEntityIdentityCondition<TEntity>(TEntity entity, ISixnetQueryable originalQueryable = null, bool exclude = false) where TEntity : class, ISixnetEntity<TEntity>
         {
             return AppendEntityIdentityCore(new List<TEntity>() { entity }, originalQueryable, exclude);
         }
@@ -232,7 +232,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="originalQueryable">Original queryable</param>
         /// <param name="exclude">Exclude</param>
         /// <returns></returns>
-        internal static ISixnetQueryable AppendEntityIdentityCore<TEntity>(IEnumerable<TEntity> entities, ISixnetQueryable originalQueryable = null, bool exclude = false) where TEntity : class, IEntity<TEntity>
+        internal static ISixnetQueryable AppendEntityIdentityCore<TEntity>(IEnumerable<TEntity> entities, ISixnetQueryable originalQueryable = null, bool exclude = false) where TEntity : class, ISixnetEntity<TEntity>
         {
             if (entities.IsNullOrEmpty())
             {
@@ -241,8 +241,8 @@ namespace Sixnet.Development.Queryable
             var entityType = typeof(TEntity);
             originalQueryable ??= Create().SetModelType(entityType);
 
-            var primaryKeys = EntityManager.GetPrimaryKeyNames(entityType);
-            ThrowHelper.ThrowFrameworkErrorIf(primaryKeys.IsNullOrEmpty(), string.Format("Type:{0} isn't set primary keys", entityType.FullName));
+            var primaryKeys = SixnetEntityManager.GetPrimaryKeyNames(entityType);
+            SixnetDirectThrower.ThrowSixnetExceptionIf(primaryKeys.IsNullOrEmpty(), string.Format("Type:{0} isn't set primary keys", entityType.FullName));
 
             var primaryKeyValues = new List<dynamic>();
             var primaryKeyCount = primaryKeys.GetCount();
@@ -294,7 +294,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <typeparam name="TFilter"></typeparam>
         /// <param name="globalFilter">Global filter</param>
-        public static void AddGlobalFilter<TFilter>(ICondition globalFilter)
+        public static void AddGlobalFilter<TFilter>(ISixnetCondition globalFilter)
         {
             typeGlobalFilters[typeof(TFilter).GUID] = globalFilter;
         }
@@ -306,7 +306,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="globalFilterExpression">Global filter expression</param>
         public static void AddGlobalFilter<TFilter>(Expression<Func<TFilter, bool>> globalFilterExpression)
         {
-            var globalFilterCondition = ExpressionHelper.GetQueryable(globalFilterExpression, CriterionConnector.And);
+            var globalFilterCondition = SixnetExpressionHelper.GetQueryable(globalFilterExpression, CriterionConnector.And);
             AddGlobalFilter<TFilter>(globalFilterCondition);
         }
 
@@ -328,7 +328,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="globalFilterContext">Global filter context</param>
         /// <returns></returns>
-        internal static ICondition GetGlobalFilter(GlobalFilterContext globalFilterContext)
+        internal static ISixnetCondition GetGlobalFilter(GlobalFilterContext globalFilterContext)
         {
             SixnetException.ThrowIf(globalFilterContext == null, $"{nameof(globalFilterContext)} is null");
 
@@ -349,7 +349,7 @@ namespace Sixnet.Development.Queryable
             // filter archived data
             if (!DisabledInactiveDataFilter && !originalQueryable.IncludeArchivedData)
             {
-                var inactiveFieldName = EntityManager.GetRoleFieldName(globalFilterContext.ModelType, FieldRole.Archived);
+                var inactiveFieldName = SixnetEntityManager.GetRoleFieldName(globalFilterContext.ModelType, FieldRole.Archived);
                 if (!string.IsNullOrWhiteSpace(inactiveFieldName))
                 {
                     globalFilter ??= Create().SetModelType(globalFilterContext.ModelType);
@@ -360,11 +360,11 @@ namespace Sixnet.Development.Queryable
             // filter isolation data
             if (!DisabledIsolationDataFilter && !globalFilterContext.OriginalQueryable.UnisolatedData)
             {
-                var isolationFieldName = EntityManager.GetRoleFieldName(globalFilterContext.ModelType, FieldRole.Isolation);
+                var isolationFieldName = SixnetEntityManager.GetRoleFieldName(globalFilterContext.ModelType, FieldRole.Isolation);
                 if (!string.IsNullOrWhiteSpace(isolationFieldName))
                 {
-                    var isolationField = EntityManager.GetEntityConfiguration(globalFilterContext.ModelType).AllFields[isolationFieldName];
-                    var isolationDataId = SessionContext.Current?.IsolationData?.Id;
+                    var isolationField = SixnetEntityManager.GetEntityConfiguration(globalFilterContext.ModelType).AllFields[isolationFieldName];
+                    var isolationDataId = SessionContext.Current?.Isolation?.Id;
 
                     SixnetException.ThrowIf(string.IsNullOrWhiteSpace(isolationDataId), "Not set isolation value");
 
@@ -416,7 +416,7 @@ namespace Sixnet.Development.Queryable
         /// <returns></returns>
         static ISixnetQueryable SetQueryableGlobalFilter(GlobalFilterContext globalFilterContext)
         {
-            ThrowHelper.ThrowArgNullIf(globalFilterContext?.OriginalQueryable is null, nameof(GlobalFilterContext.OriginalQueryable));
+            SixnetDirectThrower.ThrowArgNullIf(globalFilterContext?.OriginalQueryable is null, nameof(GlobalFilterContext.OriginalQueryable));
             var originalQueryable = globalFilterContext.OriginalQueryable;
 
             // group queryable not set global condition
@@ -595,7 +595,7 @@ namespace Sixnet.Development.Queryable
             {
                 return null;
             }
-            var entityConfig = EntityManager.GetEntityConfiguration(entityType);
+            var entityConfig = SixnetEntityManager.GetEntityConfiguration(entityType);
             return entityConfig?.PredicateType ?? FuncType.MakeGenericType(entityType, BooleanType);
         }
 

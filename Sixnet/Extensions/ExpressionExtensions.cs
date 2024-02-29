@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Sixnet.Development.Data.Field;
+﻿using Sixnet.Development.Data.Field;
 using Sixnet.Development.Data.Field.Formatting;
 using Sixnet.Development.Queryable;
 using Sixnet.Expressions.Linq;
@@ -17,7 +14,7 @@ namespace System.Linq.Expressions
         /// <returns></returns>
         public static string GetLastMemberName(this Expression expression)
         {
-            return ExpressionHelper.GetExpressionLastPropertyName(ExpressionHelper.GetLastChildExpression(expression));
+            return SixnetExpressionHelper.GetExpressionLastPropertyName(SixnetExpressionHelper.GetLastChildExpression(expression));
         }
 
         /// <summary>
@@ -28,7 +25,7 @@ namespace System.Linq.Expressions
         /// <returns></returns>
         internal static ISixnetQueryable GetQueryable<T>(this Expression expression)
         {
-            return ExpressionHelper.GetQueryable<T>(expression);
+            return SixnetExpressionHelper.GetQueryable<T>(expression);
         }
 
         /// <summary>
@@ -39,7 +36,7 @@ namespace System.Linq.Expressions
         /// <returns></returns>
         internal static FieldsAssignment GetFieldsAssignment(this Expression expression)
         {
-            return ExpressionHelper.GetFieldsAssignment(expression);
+            return SixnetExpressionHelper.GetFieldsAssignment(expression);
         }
 
         /// <summary>
@@ -47,12 +44,12 @@ namespace System.Linq.Expressions
         /// </summary>
         /// <param name="expression"></param>
         /// <returns></returns>
-        internal static IDataField GetDataField(this Expression expression, string formatterName = "")
+        internal static ISixnetDataField GetDataField(this Expression expression, string formatterName = "")
         {
-            var dataField = ExpressionHelper.GetDataField(expression);
+            var dataField = SixnetExpressionHelper.GetDataField(expression);
             if (dataField != null && !string.IsNullOrWhiteSpace(formatterName))
             {
-                dataField.FormatOption = FieldFormatOption.Create(formatterName);
+                dataField.FormatOption = FieldFormatSetting.Create(formatterName);
             }
             return dataField;
         }

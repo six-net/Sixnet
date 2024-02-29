@@ -120,7 +120,7 @@ namespace System
         /// <returns>Return the target object</returns>
         public static TTarget MapTo<TTarget>(this object source)
         {
-            return ObjectMapper.MapTo<TTarget>(source);
+            return SixnetMapper.MapTo<TTarget>(source);
         }
 
         #endregion
@@ -159,8 +159,8 @@ namespace System
             {
                 return default;
             }
-            var objectString = JsonSerializer.Serialize(sourceObject, true);
-            return JsonSerializer.Deserialize<T>(objectString, new JsonSerializationOptions()
+            var objectString = SixnetJsonSerializer.Serialize(sourceObject, true);
+            return SixnetJsonSerializer.Deserialize<T>(objectString, new JsonSerializationOptions()
             {
                 ResolveNonPublic = true,
                 DeserializeType = sourceObject.GetType()
@@ -173,8 +173,8 @@ namespace System
             {
                 return default(T);
             }
-            var objectString = JsonSerializer.Serialize(sourceObject, false);
-            return JsonSerializer.Deserialize<T>(objectString, new JsonSerializationOptions()
+            var objectString = SixnetJsonSerializer.Serialize(sourceObject, false);
+            return SixnetJsonSerializer.Deserialize<T>(objectString, new JsonSerializationOptions()
             {
                 ResolveNonPublic = false,
                 DeserializeType = sourceObject.GetType()

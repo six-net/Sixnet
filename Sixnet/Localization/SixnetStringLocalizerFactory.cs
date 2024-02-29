@@ -12,7 +12,7 @@ namespace Sixnet.Localization
 
         public SixnetStringLocalizerFactory(IStringLocalizerFactory factory)
         {
-            ThrowHelper.ThrowArgNullIf(factory == null, nameof(factory));
+            SixnetDirectThrower.ThrowArgNullIf(factory == null, nameof(factory));
             _factory = factory;
         }
 

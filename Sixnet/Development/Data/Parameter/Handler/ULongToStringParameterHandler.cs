@@ -5,7 +5,7 @@ using Sixnet.Development.Data.Parameter.Handler;
 
 namespace Sixnet.Development.Data.ParameterHandler.Handler
 {
-    public class ULongToStringParameterHandler : IDataCommandParameterHandler
+    public class ULongToStringParameterHandler : ISixnetDataCommandParameterHandler
     {
         public DataCommandParameterItem Parse(DataCommandParameterItem originalParameter)
         {

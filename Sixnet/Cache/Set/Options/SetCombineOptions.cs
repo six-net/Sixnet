@@ -7,7 +7,7 @@ namespace Sixnet.Cache.Set.Options
     /// <summary>
     /// Set combine options
     /// </summary>
-    public class SetCombineOptions : CacheOptions<SetCombineResponse>
+    public class SetCombineOptions : CacheOperationOptions<SetCombineResponse>
     {
         /// <summary>
         /// Gets or sets the cache keys
@@ -25,7 +25,7 @@ namespace Sixnet.Cache.Set.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return save server configuration response</returns>
-        protected override async Task<SetCombineResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<SetCombineResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.SetCombineAsync(server, this).ConfigureAwait(false);
         }
@@ -36,7 +36,7 @@ namespace Sixnet.Cache.Set.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return save server configuration response</returns>
-        protected override SetCombineResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override SetCombineResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.SetCombine(server, this);
         }

@@ -7,7 +7,7 @@ namespace Sixnet.Development.Entity
     /// Defines default entity property value provider
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    internal class DefaultEntityPropertyValueProvider<T> : IEntityPropertyValueProvider
+    internal class DefaultEntityPropertyValueProvider<T> : ISixnetEntityPropertyValueProvider
     {
         internal Func<T, object> Getter { get; set; }
 

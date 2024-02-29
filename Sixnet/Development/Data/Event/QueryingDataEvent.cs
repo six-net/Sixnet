@@ -8,14 +8,14 @@ namespace Sixnet.Development.Data.Event
     /// Querying data event
     /// </summary>
     [Serializable]
-    public class QueryingDataEvent : BaseDataEvent
+    public class QueryingDataEvent : BaseSixnetDataEvent
     {
         public QueryingDataEvent()
         {
             EventType = DataEventType.Querying;
         }
 
-        public static QueryingDataEvent Create(IDataClient dataClient, DataCommand command)
+        public static QueryingDataEvent Create(ISixnetDataClient dataClient, SixnetDataCommand command)
         {
             return Create<QueryingDataEvent>(dataClient, command);
         }

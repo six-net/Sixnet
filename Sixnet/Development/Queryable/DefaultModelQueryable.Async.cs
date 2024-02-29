@@ -25,7 +25,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Data</returns>
         public async Task<TModel> FirstAsync(Action<DataOperationOptions> configure = null)
         {
-            if (queryableContext.Repository is IRepository<TModel> firstRepository)
+            if (queryableContext.Repository is ISixnetRepository<TModel> firstRepository)
             {
                 return await firstRepository.GetAsync(this, configure).ConfigureAwait(false);
             }
@@ -43,7 +43,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Data list</returns>
         public async Task<List<TModel>> ToListAsync(Action<DataOperationOptions> configure = null)
         {
-            if (queryableContext.Repository is IRepository<TModel> firstRepository)
+            if (queryableContext.Repository is ISixnetRepository<TModel> firstRepository)
             {
                 return await firstRepository.GetListAsync(this, configure).ConfigureAwait(false);
             }
@@ -62,7 +62,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Paging data</returns>
         public async Task<PagingInfo<TModel>> ToPagingAsync(PagingFilter pagingFilter, Action<DataOperationOptions> configure = null)
         {
-            if (queryableContext.Repository is IRepository<TModel> firstRepository)
+            if (queryableContext.Repository is ISixnetRepository<TModel> firstRepository)
             {
                 return await firstRepository.GetPagingAsync(this, pagingFilter, configure).ConfigureAwait(false);
             }
@@ -78,7 +78,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Paging data</returns>
         public async Task<PagingInfo<TModel>> ToPagingAsync(int page, int pageSize, Action<DataOperationOptions> configure = null)
         {
-            if (queryableContext.Repository is IRepository<TModel> firstRepository)
+            if (queryableContext.Repository is ISixnetRepository<TModel> firstRepository)
             {
                 return await firstRepository.GetPagingAsync(this, page, pageSize, configure).ConfigureAwait(false);
             }

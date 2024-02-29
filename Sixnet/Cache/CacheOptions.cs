@@ -1,148 +1,136 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Sixnet.Cache.Command.Result;
-using Sixnet.Cache.Constant;
-using Sixnet.Exceptions;
-using Sixnet.Logging;
+using System.Text;
 
 namespace Sixnet.Cache
 {
     /// <summary>
-    /// Cache request option
+    /// Cache options
     /// </summary>
-    public abstract class CacheOptions<TResponse> : ICacheOptions where TResponse : CacheResponse, new()
+    public class CacheOptions
     {
-        /// <summary>
-        /// Gets or sets the cache object
-        /// </summary>
-        public CacheObject CacheObject { get; set; }
+        #region Fields
 
-        /// <summary>
-        /// Gets or sets the command flags
-        /// </summary>
-        public CacheCommandFlags CommandFlags { get; set; } = CacheCommandFlags.None;
-
-        /// <summary>
-        /// Gets or sets the cache structure pattern
-        /// </summary>
-        public CacheStructurePattern StructurePattern { get; set; } = CacheStructurePattern.Distribute;
-
-        /// <summary>
-        /// Whether in memory cache first
-        /// </summary>
-        public bool InMemoryFirst { get; set; } = false;
-
-        /// <summary>
-        /// Whether use in memory for default
-        /// </summary>
-        public bool UseInMemoryForDefault { get; set; } = false;
-
-        /// <summary>
-        /// Verify response
-        /// </summary>
-        public Func<TResponse, bool> VerifyResponse { get; set; } = res => res?.Success ?? false;
-
-        /// <summary>
-        /// Execute cache operation
-        /// </summary>
-        /// <returns>Return cache result</returns>
-        internal async Task<TResponse> ExecuteAsync()
+        readonly Dictionary<CacheServerType, ISixnetCacheProvider> _providers = new();
+        internal CacheServer DefaultInMemoryServer = new()
         {
-            var server = GetCacheServer();
-            CacheResult<TResponse> result = new CacheResult<TResponse>();
-            var provider = CacheManager.Configuration.GetCacheProvider(server.ServerType);
-            if (provider == null)
-            {
-                throw new SixnetException($"【{server.ServerType}】Not set provider");
-            }
-            return await ExecuteCacheOperationAsync(provider, server).ConfigureAwait(false);
-        }
+            Name = "SIXNET_DEFAULT_IN_MEMORY_SERVER_NAME",
+            Type = CacheServerType.InMemory
+        };
+
+        #endregion
+
+        #region Properties
 
         /// <summary>
-        /// Execute cache operation
+        /// Get cache servers operation func
         /// </summary>
-        /// <returns>Return cache result</returns>
-        internal TResponse Execute()
-        {
-            var server = GetCacheServer();
-            CacheResult<TResponse> result = new CacheResult<TResponse>();
-            var provider = CacheManager.Configuration.GetCacheProvider(server.ServerType);
-            if (provider == null)
-            {
-                throw new SixnetException($"【{server.ServerType}】Not set provider");
-            }
-            return ExecuteCacheOperation(provider, server);
-        }
+        public Func<ISixnetCacheOperationOptions, CacheServer> GetCacheServersFunc { get; set; }
 
         /// <summary>
-        /// Execute cache operation
+        /// Get global cache key prefixs func
         /// </summary>
-        /// <param name="server">Cache server</param>
-        /// <returns>Return cache result</returns>
-        internal async Task<TResponse> ExecuteAsync(CacheServer server)
-        {
-            if (server == null)
-            {
-                throw new ArgumentNullException(nameof(server));
-            }
-            var provider = CacheManager.Configuration.GetCacheProvider(server.ServerType);
-            if (provider == null)
-            {
-                throw new SixnetException($"【{server.ServerType}】Not set provider");
-            }
-            return await ExecuteCacheOperationAsync(provider, server).ConfigureAwait(false);
-        }
+        public Func<List<string>> GetGlobalCacheKeyPrefixsFunc { get; set; }
 
         /// <summary>
-        /// Execute cache operation
+        /// Get cache object prefixs func
         /// </summary>
-        /// <param name="server">Cache server</param>
-        /// <returns>Return cache result</returns>
-        internal TResponse Execute(CacheServer server)
-        {
-            if (server == null)
-            {
-                throw new ArgumentNullException(nameof(server));
-            }
-            var provider = CacheManager.Configuration.GetCacheProvider(server.ServerType);
-            if (provider == null)
-            {
-                throw new SixnetException($"【{server.ServerType}】Not set provider");
-            }
-            return ExecuteCacheOperation(provider, server);
-        }
+        public Func<CacheObject, List<string>> GetCacheObjectPrefixsFunc { get; set; }
 
         /// <summary>
-        /// Execute cache operation
+        /// Gets or sets the each key name split char
         /// </summary>
+        public string KeyNameSplitChar { get; set; } = ":";
+
+        /// <summary>
+        /// Gets or sets the name&value split char
+        /// </summary>
+        public string NameValueSplitChar { get; set; } = "$";
+
+        /// <summary>
+        /// Gets or sets the encoding
+        /// </summary>
+        public Encoding Encoding { get; set; } = Encoding.UTF8;
+
+        /// <summary>
+        /// Whether throw exception when not get any database
+        /// </summary>
+        public bool ThrowOnMissingDatabase { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets the default cache server
+        /// </summary>
+        public CacheServer Server { get; set; }
+
+        #endregion
+
+        #region Methods
+
+        #region Provider
+
+        /// <summary>
+        /// Add cache provider
+        /// </summary>
+        /// <param name="serverType">Cache server type</param>
         /// <param name="cacheProvider">Cache provider</param>
-        /// <param name="server">Cache server</param>
-        /// <returns>Return cache operation response</returns>
-        protected abstract Task<TResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server);
+        public void AddCacheProvider(CacheServerType serverType, ISixnetCacheProvider cacheProvider)
+        {
+            if (cacheProvider != null)
+            {
+                _providers[serverType] = cacheProvider;
+            }
+        }
 
         /// <summary>
-        /// Execute cache operation
+        /// Get cache provider
         /// </summary>
-        /// <param name="cacheProvider">Cache provider</param>
-        /// <param name="server">Cache server</param>
-        /// <returns>Return cache operation response</returns>
-        protected abstract TResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server);
+        /// <param name="serverType">Server type</param>
+        /// <returns>Return cache provider</returns>
+        public ISixnetCacheProvider GetCacheProvider(CacheServerType serverType)
+        {
+            _providers.TryGetValue(serverType, out var provider);
+            return provider;
+        }
+
+        #endregion
+
+        #region Cache server
 
         /// <summary>
         /// Get cache server
         /// </summary>
+        /// <param name="operationOptions">Cache operation options</param>
         /// <returns>Return cache server</returns>
-        protected virtual CacheServer GetCacheServer()
+        public CacheServer GetCacheServer<T>(CacheOperationOptions<T> operationOptions) where T : CacheResponse, new()
         {
-            var server = CacheManager.Configuration.GetCacheServer(this);
-            if (server == null && UseInMemoryForDefault)
-            {
-                server = CacheManager.Configuration.DefaultInMemoryServer;
-            }
-            ThrowHelper.ThrowFrameworkErrorIf(server == null, $"Not config cache sever for {CacheObject?.ObjectName}");
-            return server;
+            return GetCacheServersFunc?.Invoke(operationOptions) ?? Server;
         }
+
+        #endregion
+
+        #region Key prefixs
+
+        /// <summary>
+        /// Get global cache key prefixs
+        /// </summary>
+        /// <returns>Return global cache key prefixs</returns>
+        public List<string> GetGlobalPrefixs()
+        {
+            return GetGlobalCacheKeyPrefixsFunc?.Invoke() ?? new List<string>(0);
+        }
+
+        /// <summary>
+        /// Get cache object prefixs
+        /// </summary>
+        /// <param name="cacheObject">Cache object</param>
+        /// <returns>Return cache object prefixs</returns>
+        public List<string> GetObjectPrefixs(CacheObject cacheObject)
+        {
+            return GetCacheObjectPrefixsFunc?.Invoke(cacheObject) ?? new List<string>(0);
+        }
+
+        #endregion
+
+        #endregion
     }
 }

@@ -14,8 +14,8 @@ namespace Sixnet.Net.Upload
         public string Name { get; set; }
 
         /// <summary>
-        /// Gets or sets upload option
+        /// Gets or sets upload options
         /// </summary>
-        public UploadOptions UploadOption { get; set; }
+        public UploadSetting Options { get; set; }
     }
 }

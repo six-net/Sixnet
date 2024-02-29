@@ -13,7 +13,7 @@ namespace Sixnet.Development.Data
     /// <summary>
     /// Default data access
     /// </summary>
-    public partial class DefaultDataAccess<TEntity> : IDataAccess<TEntity> where TEntity : BaseEntity<TEntity>, new()
+    public partial class DefaultDataAccess<TEntity> : ISixnetDataAccess<TEntity> where TEntity : SixnetBaseEntity<TEntity>, new()
     {
         #region Insert
 

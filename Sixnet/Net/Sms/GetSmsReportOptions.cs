@@ -7,7 +7,7 @@ namespace Sixnet.Net.Sms
     /// <summary>
     /// Get sms report options
     /// </summary>
-    public class GetSmsReportOptions : SmsOptions
+    public class GetSmsReportOptions : SmsExecutionOptions
     {
         /// <summary>
         /// Gets or sets the mobile number
@@ -34,7 +34,7 @@ namespace Sixnet.Net.Sms
         /// </summary>
         public string MessageId { get; set; }
 
-        public override SmsOptions Clone()
+        public override SmsExecutionOptions Clone()
         {
             return new GetSmsReportOptions()
             {

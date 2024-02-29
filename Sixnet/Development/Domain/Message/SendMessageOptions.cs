@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Sixnet.Development.Message
+namespace Sixnet.Development.Domain.Message
 {
     /// <summary>
     /// Send message options
@@ -10,6 +10,6 @@ namespace Sixnet.Development.Message
         /// <summary>
         /// Gets or sets the messages
         /// </summary>
-        public List<MessageInfo> Messages { get; set; }
+        public List<SixnetMessageInfo> Messages { get; set; }
     }
 }

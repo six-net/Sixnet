@@ -7,7 +7,7 @@ namespace Sixnet.Cache.Keys.Options
     /// <summary>
     /// Rename options
     /// </summary>
-    public class RenameOptions : CacheOptions<RenameResponse>
+    public class RenameOptions : CacheOperationOptions<RenameResponse>
     {
         /// <summary>
         /// Gets or sets the cache key
@@ -30,7 +30,7 @@ namespace Sixnet.Cache.Keys.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return rename response</returns>
-        protected override async Task<RenameResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<RenameResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.KeyRenameAsync(server, this).ConfigureAwait(false);
         }
@@ -41,7 +41,7 @@ namespace Sixnet.Cache.Keys.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return rename response</returns>
-        protected override RenameResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override RenameResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.KeyRename(server, this);
         }

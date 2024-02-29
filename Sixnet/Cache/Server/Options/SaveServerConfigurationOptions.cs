@@ -7,7 +7,7 @@ namespace Sixnet.Cache.Server.Options
     /// <summary>
     /// Save server configuration options
     /// </summary>
-    public class SaveServerConfigurationOptions : CacheOptions<SaveServerConfigurationResponse>
+    public class SaveServerConfigurationOptions : CacheOperationOptions<SaveServerConfigurationResponse>
     {
         /// <summary>
         /// Gets or sets the configuration
@@ -25,7 +25,7 @@ namespace Sixnet.Cache.Server.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return save server configuration response</returns>
-        protected override async Task<SaveServerConfigurationResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<SaveServerConfigurationResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.SaveServerConfigurationAsync(server, this).ConfigureAwait(false);
         }
@@ -36,7 +36,7 @@ namespace Sixnet.Cache.Server.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return save server configuration response</returns>
-        protected override SaveServerConfigurationResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override SaveServerConfigurationResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.SaveServerConfiguration(server, this);
         }

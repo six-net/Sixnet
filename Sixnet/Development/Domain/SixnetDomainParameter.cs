@@ -6,12 +6,12 @@ namespace Sixnet.Development.Domain
     /// <summary>
     /// Domain parameter
     /// </summary>
-    public abstract class SixnetDomainParameter : SixnetDomainModel, IValidatableModel
+    public abstract class SixnetDomainParameter : SixnetDomainModel, ISixnetValidatableModel
     {
         /// <summary>
         /// Validate
         /// </summary>
-        public virtual void Validate()
+        public virtual void ValidateValue()
         {
         }
     }

@@ -7,7 +7,7 @@ namespace Sixnet.Cache.Set.Options
     /// <summary>
     /// Set add options
     /// </summary>
-    public class SetAddOptions : CacheOptions<SetAddResponse>
+    public class SetAddOptions : CacheOperationOptions<SetAddResponse>
     {
         /// <summary>
         /// Gets or sets the cache key
@@ -31,7 +31,7 @@ namespace Sixnet.Cache.Set.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return set add response</returns>
-        protected override async Task<SetAddResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<SetAddResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.SetAddAsync(server, this).ConfigureAwait(false);
         }
@@ -42,7 +42,7 @@ namespace Sixnet.Cache.Set.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return set add response</returns>
-        protected override SetAddResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override SetAddResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.SetAdd(server, this);
         }

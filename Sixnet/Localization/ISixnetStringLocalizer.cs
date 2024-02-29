@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.Extensions.Localization;
 using System.Globalization;
-using System.Text;
-using Microsoft.Extensions.Localization;
 
 namespace Sixnet.Localization
 {
     /// <summary>
     /// Defines sixnet string localizer
     /// </summary>
+#pragma warning disable CS3027
     public interface ISixnetStringLocalizer : IStringLocalizer
+#pragma warning restore CS3027
     {
         /// <summary>
         /// Gets the string resource with the given name

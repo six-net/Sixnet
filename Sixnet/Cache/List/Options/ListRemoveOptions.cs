@@ -7,7 +7,7 @@ namespace Sixnet.Cache.List.Options
     /// <summary>
     /// List remove options
     /// </summary>
-    public class ListRemoveOptions : CacheOptions<ListRemoveResponse>
+    public class ListRemoveOptions : CacheOperationOptions<ListRemoveResponse>
     {
         /// <summary>
         /// Gets or sets the cache key
@@ -30,7 +30,7 @@ namespace Sixnet.Cache.List.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return list remove response</returns>
-        protected override async Task<ListRemoveResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<ListRemoveResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.ListRemoveAsync(server, this).ConfigureAwait(false);
         }
@@ -41,7 +41,7 @@ namespace Sixnet.Cache.List.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return list remove response</returns>
-        protected override ListRemoveResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override ListRemoveResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.ListRemove(server, this);
         }

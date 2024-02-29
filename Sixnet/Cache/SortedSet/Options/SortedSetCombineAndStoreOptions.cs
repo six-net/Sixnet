@@ -7,7 +7,7 @@ namespace Sixnet.Cache.SortedSet.Options
     /// <summary>
     /// Sorted set combine and store options
     /// </summary>
-    public class SortedSetCombineAndStoreOptions : CacheOptions<SortedSetCombineAndStoreResponse>
+    public class SortedSetCombineAndStoreOptions : CacheOperationOptions<SortedSetCombineAndStoreResponse>
     {
         /// <summary>
         /// Gets or sets the source keys
@@ -46,7 +46,7 @@ namespace Sixnet.Cache.SortedSet.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return sorted set combine and store response</returns>
-        protected override async Task<SortedSetCombineAndStoreResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<SortedSetCombineAndStoreResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.SortedSetCombineAndStoreAsync(server, this).ConfigureAwait(false);
         }
@@ -57,7 +57,7 @@ namespace Sixnet.Cache.SortedSet.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return sorted set combine and store response</returns>
-        protected override SortedSetCombineAndStoreResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override SortedSetCombineAndStoreResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.SortedSetCombineAndStore(server, this);
         }

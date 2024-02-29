@@ -7,7 +7,7 @@ namespace Sixnet.Cache.List.Options
     /// <summary>
     /// List left pop options
     /// </summary>
-    public class ListLeftPopOptions : CacheOptions<ListLeftPopResponse>
+    public class ListLeftPopOptions : CacheOperationOptions<ListLeftPopResponse>
     {
         /// <summary>
         /// Gets or sets the cache key
@@ -20,7 +20,7 @@ namespace Sixnet.Cache.List.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return list left pop response</returns>
-        protected override async Task<ListLeftPopResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<ListLeftPopResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.ListLeftPopAsync(server, this).ConfigureAwait(false);
         }
@@ -31,7 +31,7 @@ namespace Sixnet.Cache.List.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return list left pop response</returns>
-        protected override ListLeftPopResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override ListLeftPopResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.ListLeftPop(server, this);
         }

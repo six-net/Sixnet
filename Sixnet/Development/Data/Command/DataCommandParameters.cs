@@ -225,7 +225,7 @@ namespace Sixnet.Development.Data.Command
             DynamicParameters dynamicParameters = new DynamicParameters();
             foreach (var item in Items)
             {
-                var parameter = DataManager.HandleParameter(databaseServerType, item.Value);
+                var parameter = SixnetDataManager.HandleParameter(databaseServerType, item.Value);
                 dynamicParameters.Add(parameter.Name, parameter.Value
                                     , parameter.DbType, parameter.ParameterDirection
                                     , parameter.Size, parameter.Precision

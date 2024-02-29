@@ -7,7 +7,7 @@ namespace Sixnet.Cache.Server.Options
     /// <summary>
     /// Clear data options
     /// </summary>
-    public class ClearDataOptions : CacheOptions<ClearDataResponse>
+    public class ClearDataOptions : CacheOperationOptions<ClearDataResponse>
     {
         ///// <summary>
         ///// Gets or sets the clear data databases
@@ -25,7 +25,7 @@ namespace Sixnet.Cache.Server.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return clear data response</returns>
-        protected override async Task<ClearDataResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<ClearDataResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.ClearDataAsync(server, this).ConfigureAwait(false);
         }
@@ -36,7 +36,7 @@ namespace Sixnet.Cache.Server.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return clear data response</returns>
-        protected override ClearDataResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override ClearDataResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.ClearData(server, this);
         }

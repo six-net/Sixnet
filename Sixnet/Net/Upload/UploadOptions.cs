@@ -1,85 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
-using Sixnet.Algorithm.Selection;
 
 namespace Sixnet.Net.Upload
 {
     /// <summary>
-    /// Upload option
+    /// Upload options
     /// </summary>
     [Serializable]
     public class UploadOptions
     {
         /// <summary>
-        /// remote selection provider
+        /// Gets or sets the default upload option
         /// </summary>
-        DataSelectionProvider<RemoteServerOptions> remoteSelectionProvider = null;
+        public UploadSetting Default { get; set; } = new();
 
         /// <summary>
-        /// remote server options
+        /// Gets or sets the upload object settings
+        /// Key: upload object name
         /// </summary>
-        List<RemoteServerOptions> remoteServerOptions = null;
+        public Dictionary<string, UploadSetting> UploadObjects { get; set; } = new Dictionary<string, UploadSetting>();
 
         /// <summary>
-        /// Gets or sets whether to use remote upload
+        /// Gets upload provider func
         /// </summary>
-        public bool Remote { get; set; }
-
-        /// <summary>
-        /// Gets or sets file save path
-        /// </summary>
-        public string SavePath { get; set; }
-
-        /// <summary>
-        /// Gets or sets whether save to content root folder
-        /// default is true
-        /// </summary>
-        public bool SaveToContentRoot { get; set; } = true;
-
-        /// <summary>
-        /// Gets or sets upload content root folder path
-        /// default value is 'wwwroot'
-        /// </summary>
-        public string ContentRootPath { get; set; } = UploadManager.DefaultContentFolder;
-
-        /// <summary>
-        /// Gets or sets remote configs
-        /// </summary>
-        public List<RemoteServerOptions> RemoteConfigurations
-        {
-            get
-            {
-                return remoteServerOptions;
-            }
-            set
-            {
-                remoteServerOptions = value;
-                remoteSelectionProvider = new DataSelectionProvider<RemoteServerOptions>(remoteServerOptions);
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets upload server choice pattern
-        /// default value is 'Random' pattern
-        /// </summary>
-        public SelectionMatchPattern RemoteServerChoicePattern { get; set; } = SelectionMatchPattern.EquiprobableRandom;
-
-        /// <summary>
-        /// Gets remote options
-        /// </summary>
-        /// <returns></returns>
-        public RemoteServerOptions GetRemoteOptions()
-        {
-            if (RemoteConfigurations.IsNullOrEmpty())
-            {
-                return null;
-            }
-            int serverCount = RemoteConfigurations.Count;
-            if (serverCount == 1)
-            {
-                return RemoteConfigurations[0];
-            }
-            return remoteSelectionProvider.Get(RemoteServerChoicePattern);
-        }
+        public Func<UploadParameter, ISixnetUploadProvider> GetUploadProviderFunc { get; set; }
     }
 }

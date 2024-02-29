@@ -8,16 +8,16 @@ namespace Sixnet.Development.Data.Event
     /// <summary>
     /// Added data event
     /// </summary>
-    public class AddedDataEvent : BaseDataEvent
+    public class AddedDataEvent : BaseSixnetDataEvent
     {
         public AddedDataEvent()
         {
             EventType = DataEventType.Added;
         }
 
-        public static AddedDataEvent Create(IDataClient dataClient, DataCommand command)
+        public static AddedDataEvent Create(ISixnetDataClient dataClient, SixnetDataCommand command)
         {
-            ThrowHelper.ThrowArgNullIf(command == null, nameof(command));
+            SixnetDirectThrower.ThrowArgNullIf(command == null, nameof(command));
 
             return new AddedDataEvent()
             {

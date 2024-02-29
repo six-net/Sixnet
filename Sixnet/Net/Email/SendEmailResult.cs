@@ -26,9 +26,9 @@ namespace Sixnet.Net.Email
         public Exception Exception { get; set; }
 
         /// <summary>
-        /// Gets or sets the send info
+        /// Gets or sets the email info
         /// </summary>
-        public SendEmailOptions SendInfo { get; set; }
+        public EmailInfo EmailInfo { get; set; }
 
         /// <summary>
         /// Gets or sets the email account
@@ -44,42 +44,33 @@ namespace Sixnet.Net.Email
         /// </summary>
         /// <param name="message">Message</param>
         /// <param name="exception">Exception</param>
-        /// <param name="sendInfo">Email send info</param>
+        /// <param name="emailInfo">Email info</param>
         /// <returns>Return the email send result</returns>
-        public static SendEmailResult FailResult(string message = "", Exception exception = null, SendEmailOptions sendInfo = null)
+        public static SendEmailResult FailResult(string message = "", Exception exception = null, EmailInfo emailInfo = null)
         {
             return new SendEmailResult()
             {
                 Success = false,
                 Exception = exception,
                 Message = message,
-                SendInfo = sendInfo
+                EmailInfo = emailInfo
             };
         }
 
         /// <summary>
         /// Get a success result
         /// </summary>
-        /// <param name="sendInfo">Email send info</param>
+        /// <param name="emailInfo">Email info</param>
         /// <param name="message">Message</param>
         /// <returns>Return the email send result</returns>
-        public static SendEmailResult SuccessResult(SendEmailOptions sendInfo, string message = "")
+        public static SendEmailResult SuccessResult(EmailInfo emailInfo, string message = "")
         {
             return new SendEmailResult()
             {
                 Success = true,
-                SendInfo = sendInfo,
+                EmailInfo = emailInfo,
                 Message = message,
             };
-        }
-
-        /// <summary>
-        /// Get an empty result
-        /// </summary>
-        /// <returns></returns>
-        public static SendEmailResult Empty()
-        {
-            return SuccessResult(null, "Empty email send result");
         }
 
         /// <summary>
@@ -93,7 +84,7 @@ namespace Sixnet.Net.Email
                 Success = Success,
                 Exception = Exception,
                 Message = Message,
-                SendInfo = SendInfo?.Clone(),
+                EmailInfo = EmailInfo?.Clone(),
                 EmailAccount = EmailAccount?.Clone()
             };
         }

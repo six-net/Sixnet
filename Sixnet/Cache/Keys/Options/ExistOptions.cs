@@ -7,7 +7,7 @@ namespace Sixnet.Cache.Keys.Options
     /// <summary>
     /// Exists key options
     /// </summary>
-    public class ExistOptions : CacheOptions<ExistResponse>
+    public class ExistOptions : CacheOperationOptions<ExistResponse>
     {
         /// <summary>
         /// Gets or sets the cache keys
@@ -20,7 +20,7 @@ namespace Sixnet.Cache.Keys.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return exists key response</returns>
-        protected override async Task<ExistResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<ExistResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.KeyExistAsync(server, this).ConfigureAwait(false);
         }
@@ -31,7 +31,7 @@ namespace Sixnet.Cache.Keys.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return exists key response</returns>
-        protected override ExistResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override ExistResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.KeyExist(server, this);
         }

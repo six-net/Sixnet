@@ -73,7 +73,7 @@ namespace Sixnet.Development.Queryable
         /// <summary>
         /// Pre output fields
         /// </summary>
-        IEnumerable<IDataField> preOutputFields;
+        IEnumerable<ISixnetDataField> preOutputFields;
 
         /// <summary>
         /// Negation func
@@ -356,7 +356,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="statement">Output statement</param>
         /// <param name="fields">Output fiels</param>
         /// <returns></returns>
-        public QueryableTranslationResult SetPreOutput(string statement, IEnumerable<IDataField> fields = null)
+        public QueryableTranslationResult SetPreOutput(string statement, IEnumerable<ISixnetDataField> fields = null)
         {
             preOutput = statement;
             preOutputFields = fields;
@@ -376,7 +376,7 @@ namespace Sixnet.Development.Queryable
         /// Get output fields
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<IDataField> GetPreOutputFields()
+        public IEnumerable<ISixnetDataField> GetPreOutputFields()
         {
             return preOutputFields;
         }

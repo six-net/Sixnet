@@ -7,7 +7,7 @@ namespace Sixnet.Cache.Set.Options
     /// <summary>
     /// Set length options
     /// </summary>
-    public class SetLengthOptions : CacheOptions<SetLengthResponse>
+    public class SetLengthOptions : CacheOperationOptions<SetLengthResponse>
     {
         /// <summary>
         /// Gets or sets the cache key
@@ -20,7 +20,7 @@ namespace Sixnet.Cache.Set.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return set length response</returns>
-        protected override async Task<SetLengthResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<SetLengthResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.SetLengthAsync(server, this).ConfigureAwait(false);
         }
@@ -31,7 +31,7 @@ namespace Sixnet.Cache.Set.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return set length response</returns>
-        protected override SetLengthResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override SetLengthResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.SetLength(server, this);
         }

@@ -3,7 +3,7 @@
 namespace Sixnet.Algorithm.Selection
 {
     /// <summary>
-    /// Define a selection matching pattern
+    /// Selection matching pattern
     /// </summary>
     [Serializable]
     public enum SelectionMatchPattern

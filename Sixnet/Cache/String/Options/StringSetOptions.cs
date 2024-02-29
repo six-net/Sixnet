@@ -8,7 +8,7 @@ namespace Sixnet.Cache.String
     /// <summary>
     /// String set options
     /// </summary>
-    public class StringSetOptions : CacheOptions<StringSetResponse>
+    public class StringSetOptions : CacheOperationOptions<StringSetResponse>
     {
         /// <summary>
         /// Gets or sets the data items
@@ -21,7 +21,7 @@ namespace Sixnet.Cache.String
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return string set response</returns>
-        protected override async Task<StringSetResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<StringSetResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.StringSetAsync(server, this).ConfigureAwait(false);
         }
@@ -32,7 +32,7 @@ namespace Sixnet.Cache.String
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return string set response</returns>
-        protected override StringSetResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override StringSetResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.StringSet(server, this);
         }

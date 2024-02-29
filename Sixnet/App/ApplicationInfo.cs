@@ -3,7 +3,7 @@
 namespace Sixnet.App
 {
     /// <summary>
-    /// Defines application info
+    /// Application info
     /// </summary>
     [Serializable]
     public class ApplicationInfo
@@ -31,7 +31,7 @@ namespace Sixnet.App
         /// <summary>
         /// Gets or sets the application type
         /// </summary>
-        public ApplicationType Type { get; set; }
+        public SixnetApplicationType Type { get; set; }
 
         /// <summary>
         /// Gets or sets the application version
@@ -41,6 +41,6 @@ namespace Sixnet.App
         /// <summary>
         /// Gets or sets the application status
         /// </summary>
-        public ApplicationStatus Status { get; set; } = ApplicationStatus.Running;
+        public SixnetApplicationStatus Status { get; set; } = SixnetApplicationStatus.Running;
     }
 }

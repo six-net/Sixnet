@@ -13,7 +13,7 @@ namespace Sixnet.Session
         /// <summary>
         /// Current session info
         /// </summary>
-        static readonly AsyncLocal<SessionInfo> current = new();
+        static readonly AsyncLocal<SixnetSession> current = new();
 
         /// <summary>
         /// Isolation id key
@@ -57,7 +57,7 @@ namespace Sixnet.Session
         /// <summary>
         /// Gets the current session info
         /// </summary>
-        public static SessionInfo Current
+        public static SixnetSession Current
         {
             get
             {
@@ -78,16 +78,16 @@ namespace Sixnet.Session
         /// <summary>
         /// Create session
         /// </summary>
-        /// <param name="configureSessionAction">Configure session action</param>
+        /// <param name="configure">Configure</param>
         /// <returns></returns>
-        public static SessionInfo Create(Action<SessionInfo> configureSessionAction = null)
+        public static SixnetSession Create(Action<SixnetSession> configure = null)
         {
             if (Current != null)
             {
                 return Current;
             }
-            var newSession = new SessionInfo();
-            configureSessionAction?.Invoke(newSession);
+            var newSession = new SixnetSession();
+            configure?.Invoke(newSession);
             return newSession;
         }
 

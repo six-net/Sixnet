@@ -9,7 +9,7 @@ using Sixnet.Model;
 
 namespace AutoMapper
 {
-    public class ConventionMapperBuilder : IMapperBuilder
+    public class ConventionMapperBuilder : ISixnetMapperBuilder
     {
         private Action<IMapperConfigurationExpression> mapperConfigurationAction;
 
@@ -38,7 +38,7 @@ namespace AutoMapper
         /// Create a mapper
         /// </summary>
         /// <returns>Return IMapper object</returns>
-        public Sixnet.Mapper.IMapper CreateMapper()
+        public Sixnet.Mapper.ISixnetMapper CreateMapper()
         {
             return new ConventionMapper(mapperConfigurationAction);
         }
@@ -49,11 +49,11 @@ namespace AutoMapper
         /// <param name="mapperConfigurationExpression"></param>
         void ConfigureConventionMap(IMapperConfigurationExpression mapperConfigurationExpression)
         {
-            var conventionTypes = ApplicationManager.GetAllConventionTypes();
+            var conventionTypes = SixnetApplication.GetAllConventionTypes();
             if (!conventionTypes.IsNullOrEmpty())
             {
-                var mappableModelContract = typeof(IMappableModel);
-                var entityContract = typeof(IEntity);
+                var mappableModelContract = typeof(ISixnetMappableModel);
+                var entityContract = typeof(ISixnetEntity);
                 var domainParameterContract = typeof(SixnetDomainParameter);
                 var defaultMemberValidation = MemberList.None;
                 var stringComparison = StringComparison.OrdinalIgnoreCase;

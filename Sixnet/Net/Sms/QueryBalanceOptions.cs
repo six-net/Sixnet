@@ -6,9 +6,9 @@ namespace Sixnet.Net.Sms
     /// <summary>
     /// Query balance options
     /// </summary>
-    public class QueryBalanceOptions : SmsOptions
+    public class QueryBalanceOptions : SmsExecutionOptions
     {
-        public override SmsOptions Clone()
+        public override SmsExecutionOptions Clone()
         {
             return new QueryBalanceOptions()
             {

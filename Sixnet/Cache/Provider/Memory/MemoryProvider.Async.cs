@@ -7,7 +7,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using Sixnet.Algorithm.Selection;
-using Sixnet.Cache.Constant;
 using Sixnet.Cache.Hash.Options;
 using Sixnet.Cache.Hash.Response;
 using Sixnet.Cache.Keys.Options;
@@ -31,7 +30,7 @@ namespace Sixnet.Cache.Provider.Memory
     /// <summary>
     /// In memory cache provider
     /// </summary>
-    public partial class MemoryProvider : ICacheProvider
+    public partial class MemoryProvider : ISixnetCacheProvider
     {
         /// <summary>
         /// Default memory cache name
@@ -78,16 +77,16 @@ namespace Sixnet.Cache.Provider.Memory
             string key = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(key))
             {
-                return CacheResponse.FailResponse<StringSetRangeResponse>(CacheCodes.KeyIsNullOrEmpty);
+                return CacheResponse.FailResponse<StringSetRangeResponse>(SixnetCacheCodes.KeyIsNullOrEmpty);
             }
             if (options.Offset < 0)
             {
-                return CacheResponse.FailResponse<StringSetRangeResponse>(CacheCodes.OffsetLessZero);
+                return CacheResponse.FailResponse<StringSetRangeResponse>(SixnetCacheCodes.OffsetLessZero);
             }
             var database = GetDatabase(server);
             if (database == null)
             {
-                return CacheResponse.FailResponse<StringSetRangeResponse>(CacheCodes.DatabaseIsNull);
+                return CacheResponse.FailResponse<StringSetRangeResponse>(SixnetCacheCodes.DatabaseIsNull);
             }
             var found = database.Store.TryGetEntry(key, out ICacheEntry cacheEntry);
             var cacheValue = found ? cacheEntry?.Value?.ToString() ?? string.Empty : string.Empty;
@@ -140,11 +139,11 @@ namespace Sixnet.Cache.Provider.Memory
             var key = options?.Key?.GetActualKey() ?? string.Empty;
             if (string.IsNullOrWhiteSpace(key))
             {
-                return CacheResponse.FailResponse<StringSetBitResponse>(CacheCodes.KeyIsNullOrEmpty);
+                return CacheResponse.FailResponse<StringSetBitResponse>(SixnetCacheCodes.KeyIsNullOrEmpty);
             }
             if (options.Offset < 0)
             {
-                return CacheResponse.FailResponse<StringSetBitResponse>(CacheCodes.OffsetLessZero);
+                return CacheResponse.FailResponse<StringSetBitResponse>(SixnetCacheCodes.OffsetLessZero);
             }
             var database = GetDatabase(server);
             var found = database.Store.TryGetEntry(key, out ICacheEntry cacheEntry);
@@ -205,7 +204,7 @@ namespace Sixnet.Cache.Provider.Memory
         {
             if (options?.Items.IsNullOrEmpty() ?? true)
             {
-                return CacheResponse.FailResponse<StringSetResponse>(CacheCodes.ValuesIsNullOrEmpty);
+                return CacheResponse.FailResponse<StringSetResponse>(SixnetCacheCodes.ValuesIsNullOrEmpty);
             }
             var results = new List<StringEntrySetResult>(options.Items.Count);
             var database = GetDatabase(server);
@@ -256,7 +255,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<StringLengthResponse>(CacheCodes.KeyIsNullOrEmpty);
+                return CacheResponse.FailResponse<StringLengthResponse>(SixnetCacheCodes.KeyIsNullOrEmpty);
             }
             var database = GetDatabase(server);
             var response = CacheResponse.SuccessResponse<StringLengthResponse>(server, database);
@@ -286,7 +285,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<StringIncrementResponse>(CacheCodes.KeyIsNullOrEmpty);
+                return CacheResponse.FailResponse<StringIncrementResponse>(SixnetCacheCodes.KeyIsNullOrEmpty);
             }
             var database = GetDatabase(server);
             StringIncrementResponse response = null;
@@ -300,7 +299,7 @@ namespace Sixnet.Cache.Provider.Memory
                 }
                 else
                 {
-                    response = CacheResponse.FailResponse<StringIncrementResponse>(CacheCodes.ValueCannotBeCalculated, server: server, database: database);
+                    response = CacheResponse.FailResponse<StringIncrementResponse>(SixnetCacheCodes.ValueCannotBeCalculated, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
             }
@@ -335,7 +334,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<StringGetWithExpiryResponse>(CacheCodes.KeyIsNullOrEmpty);
+                return CacheResponse.FailResponse<StringGetWithExpiryResponse>(SixnetCacheCodes.KeyIsNullOrEmpty);
             }
             var nowValue = string.Empty;
             TimeSpan? expriy = null;
@@ -366,7 +365,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<StringGetSetResponse>(CacheCodes.KeyIsNullOrEmpty);
+                return CacheResponse.FailResponse<StringGetSetResponse>(SixnetCacheCodes.KeyIsNullOrEmpty);
             }
             var oldValue = string.Empty;
             var database = GetDatabase(server);
@@ -405,7 +404,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<StringGetRangeResponse>(CacheCodes.KeyIsNullOrEmpty);
+                return CacheResponse.FailResponse<StringGetRangeResponse>(SixnetCacheCodes.KeyIsNullOrEmpty);
             }
             var subValue = string.Empty;
             var database = GetDatabase(server);
@@ -421,7 +420,7 @@ namespace Sixnet.Cache.Provider.Memory
                 }
                 if (start < 0 || start >= valueLength)
                 {
-                    response = CacheResponse.FailResponse<StringGetRangeResponse>(CacheCodes.OffsetError, server: server, database: database);
+                    response = CacheResponse.FailResponse<StringGetRangeResponse>(SixnetCacheCodes.OffsetError, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 if (end < 0)
@@ -430,7 +429,7 @@ namespace Sixnet.Cache.Provider.Memory
                 }
                 if (end < 0 || end >= valueLength)
                 {
-                    response = CacheResponse.FailResponse<StringGetRangeResponse>(CacheCodes.OffsetError, server: server, database: database);
+                    response = CacheResponse.FailResponse<StringGetRangeResponse>(SixnetCacheCodes.OffsetError, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 subValue = value.Substring(Math.Min(start, end), Math.Abs(end - start) + 1);
@@ -457,7 +456,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<StringGetBitResponse>(CacheCodes.KeyIsNullOrEmpty);
+                return CacheResponse.FailResponse<StringGetBitResponse>(SixnetCacheCodes.KeyIsNullOrEmpty);
             }
             var database = GetDatabase(server);
             StringGetBitResponse response = null;
@@ -472,7 +471,7 @@ namespace Sixnet.Cache.Provider.Memory
                 }
                 if (offset < 0 || offset >= binaryArray.LongLength)
                 {
-                    response = CacheResponse.FailResponse<StringGetBitResponse>(CacheCodes.OffsetError, server: server, database: database);
+                    response = CacheResponse.FailResponse<StringGetBitResponse>(SixnetCacheCodes.OffsetError, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 bit = binaryArray[offset];
@@ -497,7 +496,7 @@ namespace Sixnet.Cache.Provider.Memory
         {
             if (options?.Keys.IsNullOrEmpty() ?? true)
             {
-                return CacheResponse.FailResponse<StringGetResponse>(CacheCodes.KeyIsNullOrEmpty);
+                return CacheResponse.FailResponse<StringGetResponse>(SixnetCacheCodes.KeyIsNullOrEmpty);
             }
             var database = GetDatabase(server);
             var datas = new List<CacheEntry>();
@@ -546,7 +545,7 @@ namespace Sixnet.Cache.Provider.Memory
             string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<StringDecrementResponse>(CacheCodes.KeyIsNullOrEmpty);
+                return CacheResponse.FailResponse<StringDecrementResponse>(SixnetCacheCodes.KeyIsNullOrEmpty);
             }
             var database = GetDatabase(server);
             long nowValue = 0;
@@ -560,7 +559,7 @@ namespace Sixnet.Cache.Provider.Memory
                 }
                 else
                 {
-                    response = CacheResponse.FailResponse<StringDecrementResponse>(CacheCodes.ValueCannotBeCalculated, server: server, database: database);
+                    response = CacheResponse.FailResponse<StringDecrementResponse>(SixnetCacheCodes.ValueCannotBeCalculated, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
             }
@@ -599,11 +598,11 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<StringBitPositionResponse>(CacheCodes.KeyIsNullOrEmpty);
+                return CacheResponse.FailResponse<StringBitPositionResponse>(SixnetCacheCodes.KeyIsNullOrEmpty);
             }
             if ((options.Start >= 0 && options.End < options.Start) || (options.Start < 0 && options.End > options.Start))
             {
-                return CacheResponse.FailResponse<StringBitPositionResponse>(CacheCodes.OffsetError);
+                return CacheResponse.FailResponse<StringBitPositionResponse>(SixnetCacheCodes.OffsetError);
             }
             var database = GetDatabase(server);
             StringBitPositionResponse response = null;
@@ -622,7 +621,7 @@ namespace Sixnet.Cache.Provider.Memory
                 }
                 if (start < 0 || start >= length)
                 {
-                    response = CacheResponse.FailResponse<StringBitPositionResponse>(CacheCodes.OffsetError, server: server, database: database);
+                    response = CacheResponse.FailResponse<StringBitPositionResponse>(SixnetCacheCodes.OffsetError, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 if (end < 0)
@@ -631,7 +630,7 @@ namespace Sixnet.Cache.Provider.Memory
                 }
                 if (end < 0 || end >= length)
                 {
-                    response = CacheResponse.FailResponse<StringBitPositionResponse>(CacheCodes.OffsetError, server: server, database: database);
+                    response = CacheResponse.FailResponse<StringBitPositionResponse>(SixnetCacheCodes.OffsetError, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 var begin = Math.Min(start, end);
@@ -670,7 +669,7 @@ namespace Sixnet.Cache.Provider.Memory
         {
             if (options.Keys.IsNullOrEmpty() || string.IsNullOrWhiteSpace(options.DestinationKey))
             {
-                return CacheResponse.FailResponse<StringBitOperationResponse>(CacheCodes.KeyIsNullOrEmpty);
+                return CacheResponse.FailResponse<StringBitOperationResponse>(SixnetCacheCodes.KeyIsNullOrEmpty);
             }
             if (options.Keys.Count > 1 && options.Bitwise == CacheBitwise.Not)
             {
@@ -704,7 +703,7 @@ namespace Sixnet.Cache.Provider.Memory
             }
             if (bitArray == null)
             {
-                return CacheResponse.FailResponse<StringBitOperationResponse>(CacheCodes.ValuesIsNullOrEmpty, server: server, database: database);
+                return CacheResponse.FailResponse<StringBitOperationResponse>(SixnetCacheCodes.ValuesIsNullOrEmpty, server: server, database: database);
             }
             var bitString = string.Join("", bitArray.Cast<bool>().Select(c => c ? 1 : 0));
             var originalString = bitString.ToOriginalString(GetEncoding());
@@ -792,7 +791,7 @@ namespace Sixnet.Cache.Provider.Memory
             string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<StringAppendResponse>(CacheCodes.KeyIsNullOrEmpty);
+                return CacheResponse.FailResponse<StringAppendResponse>(SixnetCacheCodes.KeyIsNullOrEmpty);
             }
             long valueLength = 0;
             var database = GetDatabase(server);
@@ -841,7 +840,7 @@ namespace Sixnet.Cache.Provider.Memory
             string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<ListTrimResponse>(CacheCodes.KeyIsNullOrEmpty);
+                return CacheResponse.FailResponse<ListTrimResponse>(SixnetCacheCodes.KeyIsNullOrEmpty);
             }
             var database = GetDatabase(server);
             ListTrimResponse response = null;
@@ -849,7 +848,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not List<string> list)
                 {
-                    response = CacheResponse.FailResponse<ListTrimResponse>(CacheCodes.ValueIsNotList, server: server, database: database);
+                    response = CacheResponse.FailResponse<ListTrimResponse>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 var start = options.Start;
@@ -861,7 +860,7 @@ namespace Sixnet.Cache.Provider.Memory
                 }
                 if (start < 0 || start >= count)
                 {
-                    response = CacheResponse.FailResponse<ListTrimResponse>(CacheCodes.OffsetError, server: server, database: database);
+                    response = CacheResponse.FailResponse<ListTrimResponse>(SixnetCacheCodes.OffsetError, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 if (end < 0)
@@ -870,7 +869,7 @@ namespace Sixnet.Cache.Provider.Memory
                 }
                 if (end < 0 || end >= count)
                 {
-                    response = CacheResponse.FailResponse<ListTrimResponse>(CacheCodes.OffsetError, server: server, database: database);
+                    response = CacheResponse.FailResponse<ListTrimResponse>(SixnetCacheCodes.OffsetError, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 var begin = Math.Min(start, end);
@@ -881,7 +880,7 @@ namespace Sixnet.Cache.Provider.Memory
             }
             else
             {
-                response = CacheResponse.FailResponse<ListTrimResponse>(CacheCodes.KeyIsNotExist);
+                response = CacheResponse.FailResponse<ListTrimResponse>(SixnetCacheCodes.KeyIsNotExist);
             }
             response.CacheServer = server;
             response.Database = database;
@@ -904,7 +903,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<ListSetByIndexResponse>(CacheCodes.KeyIsNullOrEmpty);
+                return CacheResponse.FailResponse<ListSetByIndexResponse>(SixnetCacheCodes.KeyIsNullOrEmpty);
             }
             var database = GetDatabase(server);
             ListSetByIndexResponse response = null;
@@ -912,7 +911,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not List<string> list)
                 {
-                    response = CacheResponse.FailResponse<ListSetByIndexResponse>(CacheCodes.ValueIsNotList, server: server, database: database);
+                    response = CacheResponse.FailResponse<ListSetByIndexResponse>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 var index = options.Index;
@@ -922,7 +921,7 @@ namespace Sixnet.Cache.Provider.Memory
                 }
                 if (index < 0 || index >= list.Count)
                 {
-                    response = CacheResponse.FailResponse<ListSetByIndexResponse>(CacheCodes.OffsetError, server: server, database: database);
+                    response = CacheResponse.FailResponse<ListSetByIndexResponse>(SixnetCacheCodes.OffsetError, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 list[index] = options.Value;
@@ -930,7 +929,7 @@ namespace Sixnet.Cache.Provider.Memory
             }
             else
             {
-                response = CacheResponse.FailResponse<ListSetByIndexResponse>(CacheCodes.KeyIsNotExist);
+                response = CacheResponse.FailResponse<ListSetByIndexResponse>(SixnetCacheCodes.KeyIsNotExist);
             }
             response.CacheServer = server;
             response.Database = database;
@@ -957,11 +956,11 @@ namespace Sixnet.Cache.Provider.Memory
             string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<ListRightPushResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<ListRightPushResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             if (options.Values.IsNullOrEmpty())
             {
-                return CacheResponse.FailResponse<ListRightPushResponse>(CacheCodes.ValuesIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<ListRightPushResponse>(SixnetCacheCodes.ValuesIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             ListRightPushResponse response;
@@ -969,7 +968,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (!(entry.Value is List<string> list))
                 {
-                    response = CacheResponse.FailResponse<ListRightPushResponse>(CacheCodes.ValueIsNotList, server: server, database: database);
+                    response = CacheResponse.FailResponse<ListRightPushResponse>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 list = list.Concat(options.Values).ToList();
@@ -1010,7 +1009,7 @@ namespace Sixnet.Cache.Provider.Memory
             var destionationCacheKey = options?.DestinationKey?.GetActualKey();
             if (string.IsNullOrWhiteSpace(sourceCacheKey) || string.IsNullOrWhiteSpace(destionationCacheKey))
             {
-                return CacheResponse.FailResponse<ListRightPopLeftPushResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<ListRightPopLeftPushResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             ListRightPopLeftPushResponse response = null;
@@ -1018,12 +1017,12 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not List<string> list)
                 {
-                    response = CacheResponse.FailResponse<ListRightPopLeftPushResponse>(CacheCodes.ValueIsNotList, server: server, database: database);
+                    response = CacheResponse.FailResponse<ListRightPopLeftPushResponse>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 if (list.Count < 1)
                 {
-                    response = CacheResponse.FailResponse<ListRightPopLeftPushResponse>(CacheCodes.ListIsEmpty, server: server, database: database);
+                    response = CacheResponse.FailResponse<ListRightPopLeftPushResponse>(SixnetCacheCodes.ListIsEmpty, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 List<string> desList = null;
@@ -1032,7 +1031,7 @@ namespace Sixnet.Cache.Provider.Memory
                     desList = desEntry.Value as List<string>;
                     if (desList == null)
                     {
-                        response = CacheResponse.FailResponse<ListRightPopLeftPushResponse>(CacheCodes.ValueIsNotList, server: server, database: database);
+                        response = CacheResponse.FailResponse<ListRightPopLeftPushResponse>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
                         return await Task.FromResult(response).ConfigureAwait(false);
                     }
                 }
@@ -1056,7 +1055,7 @@ namespace Sixnet.Cache.Provider.Memory
             }
             else
             {
-                response = CacheResponse.FailResponse<ListRightPopLeftPushResponse>(CacheCodes.KeyIsNotExist);
+                response = CacheResponse.FailResponse<ListRightPopLeftPushResponse>(SixnetCacheCodes.KeyIsNotExist);
             }
             response.CacheServer = server;
             response.Database = database;
@@ -1078,7 +1077,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<ListRightPopResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<ListRightPopResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             ListRightPopResponse response = null;
@@ -1087,12 +1086,12 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (!(entry.Value is List<string> list))
                 {
-                    response = CacheResponse.FailResponse<ListRightPopResponse>(CacheCodes.ValueIsNotList, server: server, database: database);
+                    response = CacheResponse.FailResponse<ListRightPopResponse>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 if (list.Count < 1)
                 {
-                    response = CacheResponse.FailResponse<ListRightPopResponse>(CacheCodes.ListIsEmpty, server: server, database: database);
+                    response = CacheResponse.FailResponse<ListRightPopResponse>(SixnetCacheCodes.ListIsEmpty, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 var index = list.Count - 1;
@@ -1103,7 +1102,7 @@ namespace Sixnet.Cache.Provider.Memory
             }
             else
             {
-                response = CacheResponse.FailResponse<ListRightPopResponse>(CacheCodes.KeyIsNotExist);
+                response = CacheResponse.FailResponse<ListRightPopResponse>(SixnetCacheCodes.KeyIsNotExist);
             }
             response.CacheServer = server;
             response.Database = database;
@@ -1129,7 +1128,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<ListRemoveResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<ListRemoveResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             ListRemoveResponse response = null;
@@ -1137,7 +1136,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not List<string> list)
                 {
-                    response = CacheResponse.FailResponse<ListRemoveResponse>(CacheCodes.ValueIsNotList, server: server, database: database);
+                    response = CacheResponse.FailResponse<ListRemoveResponse>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 var removeCount = 0;
@@ -1165,7 +1164,7 @@ namespace Sixnet.Cache.Provider.Memory
             }
             else
             {
-                response = CacheResponse.FailResponse<ListRemoveResponse>(CacheCodes.KeyIsNotExist);
+                response = CacheResponse.FailResponse<ListRemoveResponse>(SixnetCacheCodes.KeyIsNotExist);
             }
             response.CacheServer = server;
             response.Database = database;
@@ -1193,7 +1192,7 @@ namespace Sixnet.Cache.Provider.Memory
             string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<ListRangeResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<ListRangeResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             ListRangeResponse response;
@@ -1201,7 +1200,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not List<string> list)
                 {
-                    response = CacheResponse.FailResponse<ListRangeResponse>(CacheCodes.ValueIsNotList, server: server, database: database);
+                    response = CacheResponse.FailResponse<ListRangeResponse>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 var start = options.Start;
@@ -1211,7 +1210,7 @@ namespace Sixnet.Cache.Provider.Memory
                 }
                 if (start < 0 || start >= list.Count)
                 {
-                    response = CacheResponse.FailResponse<ListRangeResponse>(CacheCodes.OffsetError, server: server, database: database);
+                    response = CacheResponse.FailResponse<ListRangeResponse>(SixnetCacheCodes.OffsetError, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 var end = options.Stop;
@@ -1221,7 +1220,7 @@ namespace Sixnet.Cache.Provider.Memory
                 }
                 if (end < 0 || end >= list.Count)
                 {
-                    response = CacheResponse.FailResponse<ListRangeResponse>(CacheCodes.OffsetError, server: server, database: database);
+                    response = CacheResponse.FailResponse<ListRangeResponse>(SixnetCacheCodes.OffsetError, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 var begin = Math.Min(start, end);
@@ -1230,7 +1229,7 @@ namespace Sixnet.Cache.Provider.Memory
             }
             else
             {
-                response = CacheResponse.FailResponse<ListRangeResponse>(CacheCodes.KeyIsNotExist);
+                response = CacheResponse.FailResponse<ListRangeResponse>(SixnetCacheCodes.KeyIsNotExist);
             }
             response.CacheServer = server;
             response.Database = database;
@@ -1253,7 +1252,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<ListLengthResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<ListLengthResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             var length = 0;
@@ -1262,7 +1261,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not List<string> list)
                 {
-                    response = CacheResponse.FailResponse<ListLengthResponse>(CacheCodes.ValueIsNotList, server: server, database: database);
+                    response = CacheResponse.FailResponse<ListLengthResponse>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 length = list.Count;
@@ -1290,11 +1289,11 @@ namespace Sixnet.Cache.Provider.Memory
             string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<ListLeftPushResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<ListLeftPushResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             if (options.Values.IsNullOrEmpty())
             {
-                return CacheResponse.FailResponse<ListLeftPushResponse>(CacheCodes.ValuesIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<ListLeftPushResponse>(SixnetCacheCodes.ValuesIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             ListLeftPushResponse response;
@@ -1302,7 +1301,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not List<string> list)
                 {
-                    response = CacheResponse.FailResponse<ListLeftPushResponse>(CacheCodes.ValueIsNotList, server: server, database: database);
+                    response = CacheResponse.FailResponse<ListLeftPushResponse>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 list = options.Values.Concat(list).ToList();
@@ -1340,7 +1339,7 @@ namespace Sixnet.Cache.Provider.Memory
             string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<ListLeftPopResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<ListLeftPopResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             ListLeftPopResponse response = null;
@@ -1349,12 +1348,12 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not List<string> list)
                 {
-                    response = CacheResponse.FailResponse<ListLeftPopResponse>(CacheCodes.ValueIsNotList, server: server, database: database);
+                    response = CacheResponse.FailResponse<ListLeftPopResponse>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 if (list.Count < 1)
                 {
-                    response = CacheResponse.FailResponse<ListLeftPopResponse>(CacheCodes.ListIsEmpty, server: server, database: database);
+                    response = CacheResponse.FailResponse<ListLeftPopResponse>(SixnetCacheCodes.ListIsEmpty, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 value = list[0];
@@ -1365,7 +1364,7 @@ namespace Sixnet.Cache.Provider.Memory
             }
             else
             {
-                response = CacheResponse.FailResponse<ListLeftPopResponse>(CacheCodes.KeyIsNotExist);
+                response = CacheResponse.FailResponse<ListLeftPopResponse>(SixnetCacheCodes.KeyIsNotExist);
             }
             response.CacheServer = server;
             response.Database = database;
@@ -1389,7 +1388,7 @@ namespace Sixnet.Cache.Provider.Memory
             string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<ListInsertBeforeResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<ListInsertBeforeResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             int newLength = 0;
@@ -1399,7 +1398,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not List<string> list)
                 {
-                    response = CacheResponse.FailResponse<ListInsertBeforeResponse>(CacheCodes.ValueIsNotList, server: server, database: database);
+                    response = CacheResponse.FailResponse<ListInsertBeforeResponse>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 var index = list.FindIndex(c => c == options.PivotValue);
@@ -1438,7 +1437,7 @@ namespace Sixnet.Cache.Provider.Memory
             string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<ListInsertAfterResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<ListInsertAfterResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             var newLength = 0;
@@ -1449,7 +1448,7 @@ namespace Sixnet.Cache.Provider.Memory
                 var list = entry.Value as List<string>;
                 if (list == null)
                 {
-                    response = CacheResponse.FailResponse<ListInsertAfterResponse>(CacheCodes.ValueIsNotList, server: server, database: database);
+                    response = CacheResponse.FailResponse<ListInsertAfterResponse>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 var index = list.FindIndex(c => c == options.PivotValue);
@@ -1489,7 +1488,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<ListGetByIndexResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<ListGetByIndexResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             var value = "";
@@ -1498,7 +1497,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not List<string> list)
                 {
-                    response = CacheResponse.FailResponse<ListGetByIndexResponse>(CacheCodes.ValueIsNotList, server: server, database: database);
+                    response = CacheResponse.FailResponse<ListGetByIndexResponse>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 var index = options.Index;
@@ -1508,7 +1507,7 @@ namespace Sixnet.Cache.Provider.Memory
                 }
                 if (index < 0 || index >= list.Count)
                 {
-                    response = CacheResponse.FailResponse<ListGetByIndexResponse>(CacheCodes.OffsetError, server: server, database: database);
+                    response = CacheResponse.FailResponse<ListGetByIndexResponse>(SixnetCacheCodes.OffsetError, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 value = list[index];
@@ -1539,7 +1538,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<HashValuesResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<HashValuesResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             List<dynamic> values = null;
@@ -1548,7 +1547,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not ConcurrentDictionary<string, dynamic> dict)
                 {
-                    response = CacheResponse.FailResponse<HashValuesResponse>(CacheCodes.ValueIsNotDict, server: server, database: database);
+                    response = CacheResponse.FailResponse<HashValuesResponse>(SixnetCacheCodes.ValueIsNotDict, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 values = dict.Values.ToList();
@@ -1575,7 +1574,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<HashSetResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<HashSetResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             HashSetResponse response;
@@ -1583,7 +1582,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not ConcurrentDictionary<string, dynamic> dict)
                 {
-                    response = CacheResponse.FailResponse<HashSetResponse>(CacheCodes.ValueIsNotDict, server: server, database: database);
+                    response = CacheResponse.FailResponse<HashSetResponse>(SixnetCacheCodes.ValueIsNotDict, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 foreach (var item in options.Items)
@@ -1619,7 +1618,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<HashLengthResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<HashLengthResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             int length = 0;
@@ -1628,7 +1627,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not ConcurrentDictionary<string, dynamic> dict)
                 {
-                    response = CacheResponse.FailResponse<HashLengthResponse>(CacheCodes.ValueIsNotDict, server: server, database: database);
+                    response = CacheResponse.FailResponse<HashLengthResponse>(SixnetCacheCodes.ValueIsNotDict, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 length = dict.Keys.Count;
@@ -1653,7 +1652,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<HashKeysResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<HashKeysResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             HashKeysResponse response;
@@ -1662,7 +1661,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not ConcurrentDictionary<string, dynamic> dict)
                 {
-                    response = CacheResponse.FailResponse<HashKeysResponse>(CacheCodes.ValueIsNotDict, server: server, database: database);
+                    response = CacheResponse.FailResponse<HashKeysResponse>(SixnetCacheCodes.ValueIsNotDict, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 keys = dict.Keys.ToList();
@@ -1691,7 +1690,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<HashIncrementResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<HashIncrementResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             var newValue = options.IncrementValue;
@@ -1700,7 +1699,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not ConcurrentDictionary<string, dynamic> dict)
                 {
-                    response = CacheResponse.FailResponse<HashIncrementResponse>(CacheCodes.ValueIsNotDict, server: server, database: database);
+                    response = CacheResponse.FailResponse<HashIncrementResponse>(SixnetCacheCodes.ValueIsNotDict, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 if (dict.TryGetValue(options.HashField, out var value))
@@ -1743,7 +1742,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<HashGetResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<HashGetResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             dynamic value = null;
@@ -1752,7 +1751,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not ConcurrentDictionary<string, dynamic> dict)
                 {
-                    response = CacheResponse.FailResponse<HashGetResponse>(CacheCodes.ValueIsNotDict, server: server, database: database);
+                    response = CacheResponse.FailResponse<HashGetResponse>(SixnetCacheCodes.ValueIsNotDict, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 dict.TryGetValue(options.HashField, out value);
@@ -1777,7 +1776,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<HashGetAllResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<HashGetAllResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             ConcurrentDictionary<string, dynamic> values = null;
@@ -1786,7 +1785,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not ConcurrentDictionary<string, dynamic> dict)
                 {
-                    response = CacheResponse.FailResponse<HashGetAllResponse>(CacheCodes.ValueIsNotDict, server: server, database: database);
+                    response = CacheResponse.FailResponse<HashGetAllResponse>(SixnetCacheCodes.ValueIsNotDict, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false); ;
                 }
                 values = new ConcurrentDictionary<string, dynamic>(dict);
@@ -1811,7 +1810,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<HashExistsResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<HashExistsResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             var existKey = false;
@@ -1820,7 +1819,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not ConcurrentDictionary<string, dynamic> dict)
                 {
-                    response = CacheResponse.FailResponse<HashExistsResponse>(CacheCodes.ValueIsNotDict, server: server, database: database);
+                    response = CacheResponse.FailResponse<HashExistsResponse>(SixnetCacheCodes.ValueIsNotDict, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 existKey = dict.ContainsKey(options.HashField);
@@ -1846,7 +1845,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<HashDeleteResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<HashDeleteResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             HashDeleteResponse response;
@@ -1855,7 +1854,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not ConcurrentDictionary<string, dynamic> dict)
                 {
-                    response = CacheResponse.FailResponse<HashDeleteResponse>(CacheCodes.ValueIsNotDict, server: server, database: database);
+                    response = CacheResponse.FailResponse<HashDeleteResponse>(SixnetCacheCodes.ValueIsNotDict, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 foreach (var field in options.HashFields)
@@ -1889,7 +1888,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                CacheResponse.FailResponse<HashDecrementResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                CacheResponse.FailResponse<HashDecrementResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             var newValue = options.DecrementValue;
@@ -1898,7 +1897,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not ConcurrentDictionary<string, dynamic> dict)
                 {
-                    response = CacheResponse.FailResponse<HashDecrementResponse>(CacheCodes.ValueIsNotDict, server: server, database: database);
+                    response = CacheResponse.FailResponse<HashDecrementResponse>(SixnetCacheCodes.ValueIsNotDict, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 if (dict.TryGetValue(options.HashField, out var value))
@@ -1942,7 +1941,7 @@ namespace Sixnet.Cache.Provider.Memory
             string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                CacheResponse.FailResponse<HashScanResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                CacheResponse.FailResponse<HashScanResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             var values = new Dictionary<string, dynamic>();
@@ -1952,7 +1951,7 @@ namespace Sixnet.Cache.Provider.Memory
                 var dict = entry.Value as ConcurrentDictionary<string, dynamic>;
                 if (dict == null)
                 {
-                    response = CacheResponse.FailResponse<HashScanResponse>(CacheCodes.ValueIsNotDict, server: server, database: database);
+                    response = CacheResponse.FailResponse<HashScanResponse>(SixnetCacheCodes.ValueIsNotDict, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 var pageSize = options.PageSize;
@@ -2006,7 +2005,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<SetRemoveResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<SetRemoveResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             var removeCount = 0;
@@ -2015,7 +2014,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not ConcurrentDictionary<string, byte> dict)
                 {
-                    response = CacheResponse.FailResponse<SetRemoveResponse>(CacheCodes.ValueIsNotSet, server: server, database: database);
+                    response = CacheResponse.FailResponse<SetRemoveResponse>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 foreach (var member in options.RemoveMembers)
@@ -2049,7 +2048,7 @@ namespace Sixnet.Cache.Provider.Memory
             string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<SetRandomMembersResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<SetRandomMembersResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             var members = new List<string>();
@@ -2058,7 +2057,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not ConcurrentDictionary<string, byte> dict)
                 {
-                    response = CacheResponse.FailResponse<SetRandomMembersResponse>(CacheCodes.ValueIsNotSet, server: server, database: database);
+                    response = CacheResponse.FailResponse<SetRandomMembersResponse>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 var allowSame = options.Count < 0;
@@ -2080,7 +2079,7 @@ namespace Sixnet.Cache.Provider.Memory
                 }
                 else
                 {
-                    var shuffle = new ShuffleNet<string>(keys);
+                    var shuffle = new SixnetShuffleNet<string>(keys);
                     members.AddRange(shuffle.TakeNextValues(count));
                 }
             }
@@ -2104,7 +2103,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<SetRandomMemberResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<SetRandomMemberResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             var member = string.Empty;
@@ -2113,7 +2112,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not ConcurrentDictionary<string, byte> dict)
                 {
-                    response = CacheResponse.FailResponse<SetRandomMemberResponse>(CacheCodes.ValueIsNotSet, server: server, database: database);
+                    response = CacheResponse.FailResponse<SetRandomMemberResponse>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 var keys = dict.Keys;
@@ -2143,7 +2142,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<SetPopResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<SetPopResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             var member = string.Empty;
@@ -2152,7 +2151,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not ConcurrentDictionary<string, byte> dict)
                 {
-                    response = CacheResponse.FailResponse<SetPopResponse>(CacheCodes.ValueIsNotSet, server: server, database: database);
+                    response = CacheResponse.FailResponse<SetPopResponse>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 var keys = dict.Keys;
@@ -2187,7 +2186,7 @@ namespace Sixnet.Cache.Provider.Memory
             var desKey = options?.DestinationKey?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey) || string.IsNullOrWhiteSpace(desKey))
             {
-                return CacheResponse.FailResponse<SetMoveResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<SetMoveResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             var isRemove = false;
@@ -2196,7 +2195,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not ConcurrentDictionary<string, byte> dict)
                 {
-                    response = CacheResponse.FailResponse<SetMoveResponse>(CacheCodes.ValueIsNotSet, server: server, database: database);
+                    response = CacheResponse.FailResponse<SetMoveResponse>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 database.Store.TryGetEntry(desKey, out var desEntry);
@@ -2206,7 +2205,7 @@ namespace Sixnet.Cache.Provider.Memory
                     desDict = desEntry.Value as ConcurrentDictionary<string, byte>;
                     if (desDict == null)
                     {
-                        response = CacheResponse.FailResponse<SetMoveResponse>(CacheCodes.ValueIsNotSet, server: server, database: database);
+                        response = CacheResponse.FailResponse<SetMoveResponse>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
                         return await Task.FromResult(response).ConfigureAwait(false);
                     }
                 }
@@ -2253,7 +2252,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<SetMembersResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<SetMembersResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             List<string> members = null;
@@ -2262,7 +2261,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not ConcurrentDictionary<string, byte> dict)
                 {
-                    response = CacheResponse.FailResponse<SetMembersResponse>(CacheCodes.ValueIsNotSet, server: server, database: database);
+                    response = CacheResponse.FailResponse<SetMembersResponse>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 members = new List<string>(dict.Count);
@@ -2289,7 +2288,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<SetLengthResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<SetLengthResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             var length = 0;
@@ -2298,7 +2297,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not ConcurrentDictionary<string, byte> dict)
                 {
-                    response = CacheResponse.FailResponse<SetLengthResponse>(CacheCodes.ValueIsNotSet, server: server, database: database);
+                    response = CacheResponse.FailResponse<SetLengthResponse>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 length = dict.Count;
@@ -2323,7 +2322,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<SetContainsResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<SetContainsResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             var existMember = false;
@@ -2332,7 +2331,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not ConcurrentDictionary<string, byte> dict)
                 {
-                    response = CacheResponse.FailResponse<SetContainsResponse>(CacheCodes.ValueIsNotSet, server: server, database: database);
+                    response = CacheResponse.FailResponse<SetContainsResponse>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 existMember = dict.ContainsKey(options.Member);
@@ -2357,7 +2356,7 @@ namespace Sixnet.Cache.Provider.Memory
         {
             if (options?.Keys.IsNullOrEmpty() ?? true)
             {
-                return CacheResponse.FailResponse<SetCombineResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<SetCombineResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             List<IEnumerable<string>> allKeyValues = new List<IEnumerable<string>>();
@@ -2429,7 +2428,7 @@ namespace Sixnet.Cache.Provider.Memory
             var desCacheKey = options.DestinationKey?.GetActualKey() ?? string.Empty;
             if (string.IsNullOrWhiteSpace(desCacheKey) || (options?.SourceKeys.IsNullOrEmpty() ?? true))
             {
-                return CacheResponse.FailResponse<SetCombineAndStoreResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<SetCombineAndStoreResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             List<string> members = null;
@@ -2445,7 +2444,7 @@ namespace Sixnet.Cache.Provider.Memory
                 {
                     if (nowEntry.Value is not ConcurrentDictionary<string, byte> nowDict)
                     {
-                        response = CacheResponse.FailResponse<SetCombineAndStoreResponse>(CacheCodes.ValueIsNotSet, server: server, database: database);
+                        response = CacheResponse.FailResponse<SetCombineAndStoreResponse>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
                         return await Task.FromResult(response).ConfigureAwait(false);
                     }
                     if (nowDict.IsNullOrEmpty())
@@ -2480,7 +2479,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (desEntry.Value is not ConcurrentDictionary<string, byte> desDict)
                 {
-                    response = CacheResponse.FailResponse<SetCombineAndStoreResponse>(CacheCodes.ValueIsNotSet, server: server, database: database);
+                    response = CacheResponse.FailResponse<SetCombineAndStoreResponse>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 foreach (var mem in members)
@@ -2523,7 +2522,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<SetAddResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<SetAddResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             SetAddResponse response;
@@ -2531,7 +2530,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not ConcurrentDictionary<string, byte> dict)
                 {
-                    response = CacheResponse.FailResponse<SetAddResponse>(CacheCodes.ValueIsNotSet, server: server, database: database);
+                    response = CacheResponse.FailResponse<SetAddResponse>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 foreach (var member in options.Members)
@@ -2581,7 +2580,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<SortedSetScoreResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<SortedSetScoreResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             double? score = null;
@@ -2590,7 +2589,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not ConcurrentDictionary<string, double> dict)
                 {
-                    response = CacheResponse.FailResponse<SortedSetScoreResponse>(CacheCodes.ValueIsNotSortedSet, server: server, database: database);
+                    response = CacheResponse.FailResponse<SortedSetScoreResponse>(SixnetCacheCodes.ValueIsNotSortedSet, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 if (dict.TryGetValue(options.Member, out var memberScore))
@@ -2620,7 +2619,7 @@ namespace Sixnet.Cache.Provider.Memory
             string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<SortedSetRemoveRangeByValueResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<SortedSetRemoveRangeByValueResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             var removeCount = 0;
@@ -2629,7 +2628,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not ConcurrentDictionary<string, double> dict)
                 {
-                    response = CacheResponse.FailResponse<SortedSetRemoveRangeByValueResponse>(CacheCodes.ValueIsNotSortedSet, server: server, database: database);
+                    response = CacheResponse.FailResponse<SortedSetRemoveRangeByValueResponse>(SixnetCacheCodes.ValueIsNotSortedSet, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 var min = options.MinValue;
@@ -2687,7 +2686,7 @@ namespace Sixnet.Cache.Provider.Memory
             string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<SortedSetRemoveRangeByScoreResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<SortedSetRemoveRangeByScoreResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             var removeCount = 0;
@@ -2696,7 +2695,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not ConcurrentDictionary<string, double> dict)
                 {
-                    response = CacheResponse.FailResponse<SortedSetRemoveRangeByScoreResponse>(CacheCodes.ValueIsNotSortedSet, server: server, database: database);
+                    response = CacheResponse.FailResponse<SortedSetRemoveRangeByScoreResponse>(SixnetCacheCodes.ValueIsNotSortedSet, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 var min = options.Start;
@@ -2755,7 +2754,7 @@ namespace Sixnet.Cache.Provider.Memory
             string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<SortedSetRemoveRangeByRankResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<SortedSetRemoveRangeByRankResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             int removeCount = 0;
@@ -2764,7 +2763,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not ConcurrentDictionary<string, double> dict)
                 {
-                    response = CacheResponse.FailResponse<SortedSetRemoveRangeByRankResponse>(CacheCodes.ValueIsNotSortedSet, server: server, database: database);
+                    response = CacheResponse.FailResponse<SortedSetRemoveRangeByRankResponse>(SixnetCacheCodes.ValueIsNotSortedSet, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 var min = options.Start;
@@ -2818,7 +2817,7 @@ namespace Sixnet.Cache.Provider.Memory
             string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<SortedSetRemoveResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<SortedSetRemoveResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             var removeCount = 0;
@@ -2827,7 +2826,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not ConcurrentDictionary<string, double> dict)
                 {
-                    response = CacheResponse.FailResponse<SortedSetRemoveResponse>(CacheCodes.ValueIsNotSortedSet, server: server, database: database);
+                    response = CacheResponse.FailResponse<SortedSetRemoveResponse>(SixnetCacheCodes.ValueIsNotSortedSet, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 foreach (var rmem in options.RemoveMembers)
@@ -2860,7 +2859,7 @@ namespace Sixnet.Cache.Provider.Memory
             string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<SortedSetRankResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<SortedSetRankResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             long? rank = null;
@@ -2869,7 +2868,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not ConcurrentDictionary<string, double> dict)
                 {
-                    response = CacheResponse.FailResponse<SortedSetRankResponse>(CacheCodes.ValueIsNotSortedSet, server: server, database: database);
+                    response = CacheResponse.FailResponse<SortedSetRankResponse>(SixnetCacheCodes.ValueIsNotSortedSet, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 if (!dict.IsNullOrEmpty() && dict.ContainsKey(options.Member))
@@ -2916,7 +2915,7 @@ namespace Sixnet.Cache.Provider.Memory
             string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<SortedSetRangeByValueResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<SortedSetRangeByValueResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             List<string> members = null;
@@ -2926,7 +2925,7 @@ namespace Sixnet.Cache.Provider.Memory
                 var dict = entry.Value as ConcurrentDictionary<string, double>;
                 if (dict == null)
                 {
-                    response = CacheResponse.FailResponse<SortedSetRangeByValueResponse>(CacheCodes.ValueIsNotSortedSet, server: server, database: database);
+                    response = CacheResponse.FailResponse<SortedSetRangeByValueResponse>(SixnetCacheCodes.ValueIsNotSortedSet, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 var min = options.MinValue;
@@ -2988,7 +2987,7 @@ namespace Sixnet.Cache.Provider.Memory
             string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<SortedSetRangeByScoreWithScoresResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<SortedSetRangeByScoreWithScoresResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             List<SortedSetMember> members = null;
@@ -2997,7 +2996,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not ConcurrentDictionary<string, double> dict)
                 {
-                    response = CacheResponse.FailResponse<SortedSetRangeByScoreWithScoresResponse>(CacheCodes.ValueIsNotSortedSet, server: server, database: database);
+                    response = CacheResponse.FailResponse<SortedSetRangeByScoreWithScoresResponse>(SixnetCacheCodes.ValueIsNotSortedSet, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 var min = options.Start;
@@ -3106,7 +3105,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<SortedSetRangeByRankWithScoresResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<SortedSetRangeByRankWithScoresResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             List<SortedSetMember> members = null;
@@ -3115,7 +3114,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not ConcurrentDictionary<string, double> dict)
                 {
-                    response = CacheResponse.FailResponse<SortedSetRangeByRankWithScoresResponse>(CacheCodes.ValueIsNotSortedSet, server: server, database: database);
+                    response = CacheResponse.FailResponse<SortedSetRangeByRankWithScoresResponse>(SixnetCacheCodes.ValueIsNotSortedSet, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 var min = options.Start;
@@ -3288,7 +3287,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<SortedSetIncrementResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<SortedSetIncrementResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             double score = 0;
@@ -3297,7 +3296,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not ConcurrentDictionary<string, double> dict)
                 {
-                    response = CacheResponse.FailResponse<SortedSetIncrementResponse>(CacheCodes.ValueIsNotSortedSet, server: server, database: database);
+                    response = CacheResponse.FailResponse<SortedSetIncrementResponse>(SixnetCacheCodes.ValueIsNotSortedSet, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 if (dict.TryGetValue(options.Member, out var memberScore))
@@ -3328,7 +3327,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<SortedSetDecrementResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<SortedSetDecrementResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             SortedSetDecrementResponse response;
@@ -3337,7 +3336,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not ConcurrentDictionary<string, double> dict)
                 {
-                    response = CacheResponse.FailResponse<SortedSetDecrementResponse>(CacheCodes.ValueIsNotSortedSet, server: server, database: database);
+                    response = CacheResponse.FailResponse<SortedSetDecrementResponse>(SixnetCacheCodes.ValueIsNotSortedSet, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 if (dict.TryGetValue(options.Member, out var memberScore))
@@ -3368,7 +3367,7 @@ namespace Sixnet.Cache.Provider.Memory
             var desCacheKey = options.DestinationKey?.GetActualKey() ?? string.Empty;
             if (string.IsNullOrWhiteSpace(desCacheKey) || (options?.SourceKeys.IsNullOrEmpty() ?? true))
             {
-                return CacheResponse.FailResponse<SortedSetCombineAndStoreResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<SortedSetCombineAndStoreResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             HashSet<string> members = null;
@@ -3387,7 +3386,7 @@ namespace Sixnet.Cache.Provider.Memory
                     var nowDict = nowEntry.Value as ConcurrentDictionary<string, double>;
                     if (nowDict == null)
                     {
-                        response = CacheResponse.FailResponse<SortedSetCombineAndStoreResponse>(CacheCodes.ValueIsNotSet, server: server, database: database);
+                        response = CacheResponse.FailResponse<SortedSetCombineAndStoreResponse>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
                         return await Task.FromResult(response).ConfigureAwait(false);
                     }
                     if (nowDict.IsNullOrEmpty())
@@ -3451,7 +3450,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (desEntry.Value is not ConcurrentDictionary<string, double> desDict)
                 {
-                    response = CacheResponse.FailResponse<SortedSetCombineAndStoreResponse>(CacheCodes.ValueIsNotSet, server: server, database: database);
+                    response = CacheResponse.FailResponse<SortedSetCombineAndStoreResponse>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 desEntry.Value = resultItems;
@@ -3487,11 +3486,11 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<SortedSetAddResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<SortedSetAddResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             if (options.Members.IsNullOrEmpty())
             {
-                return CacheResponse.FailResponse<SortedSetAddResponse>(CacheCodes.ValuesIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<SortedSetAddResponse>(SixnetCacheCodes.ValuesIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             long length = 0;
@@ -3500,7 +3499,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 if (entry.Value is not ConcurrentDictionary<string, double> dict)
                 {
-                    response = CacheResponse.FailResponse<SortedSetAddResponse>(CacheCodes.ValueIsNotSortedSet, server: server, database: database);
+                    response = CacheResponse.FailResponse<SortedSetAddResponse>(SixnetCacheCodes.ValueIsNotSortedSet, server: server, database: database);
                     return await Task.FromResult(response).ConfigureAwait(false);
                 }
                 foreach (var mem in options.Members)
@@ -3748,7 +3747,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<TypeResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<TypeResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             TypeResponse response = null;
@@ -3776,7 +3775,7 @@ namespace Sixnet.Cache.Provider.Memory
             }
             else
             {
-                response = CacheResponse.FailResponse<TypeResponse>(CacheCodes.KeyIsNotExist, server: server, database: database);
+                response = CacheResponse.FailResponse<TypeResponse>(SixnetCacheCodes.KeyIsNotExist, server: server, database: database);
             }
             return await Task.FromResult(response).ConfigureAwait(false);
         }
@@ -3798,7 +3797,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<TimeToLiveResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<TimeToLiveResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             TimeToLiveResponse response = null;
@@ -3810,7 +3809,7 @@ namespace Sixnet.Cache.Provider.Memory
             }
             else
             {
-                response = CacheResponse.FailResponse<TimeToLiveResponse>(CacheCodes.KeyIsNotExist);
+                response = CacheResponse.FailResponse<TimeToLiveResponse>(SixnetCacheCodes.KeyIsNotExist);
             }
             response.CacheServer = server;
             response.Database = database;
@@ -3834,7 +3833,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<RestoreResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<RestoreResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             using (var entry = database.Store.CreateEntry(cacheKey))
@@ -3862,7 +3861,7 @@ namespace Sixnet.Cache.Provider.Memory
             string newCacheKey = options?.NewKey?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey) || string.IsNullOrWhiteSpace(newCacheKey))
             {
-                return CacheResponse.FailResponse<RenameResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<RenameResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             RenameResponse response = null;
@@ -3882,7 +3881,7 @@ namespace Sixnet.Cache.Provider.Memory
             }
             else
             {
-                response = CacheResponse.FailResponse<RenameResponse>(CacheCodes.KeyIsNotExist);
+                response = CacheResponse.FailResponse<RenameResponse>(SixnetCacheCodes.KeyIsNotExist);
             }
             response.CacheServer = server;
             response.Database = database;
@@ -3923,7 +3922,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<PersistResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<PersistResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             PersistResponse response = null;
@@ -3937,7 +3936,7 @@ namespace Sixnet.Cache.Provider.Memory
             }
             else
             {
-                response = CacheResponse.FailResponse<PersistResponse>(CacheCodes.KeyIsNotExist);
+                response = CacheResponse.FailResponse<PersistResponse>(SixnetCacheCodes.KeyIsNotExist);
             }
             response.CacheServer = server;
             response.Database = database;
@@ -3962,7 +3961,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<MoveResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<MoveResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var desDatabase = GetDatabase(options.DatabaseName);
             if (desDatabase == null)
@@ -4001,7 +4000,7 @@ namespace Sixnet.Cache.Provider.Memory
         /// <returns>Return key migrate response</returns>
         public async Task<MigrateKeyResponse> KeyMigrateAsync(CacheServer server, MigrateKeyOptions options)
         {
-            return await Task.FromResult(CacheResponse.FailResponse<MigrateKeyResponse>(CacheCodes.OperationIsNotSupported, server: server)).ConfigureAwait(false);
+            return await Task.FromResult(CacheResponse.FailResponse<MigrateKeyResponse>(SixnetCacheCodes.OperationIsNotSupported, server: server)).ConfigureAwait(false);
         }
 
         #endregion
@@ -4021,7 +4020,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<ExpireResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<ExpireResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             ExpireResponse response = null;
@@ -4032,7 +4031,7 @@ namespace Sixnet.Cache.Provider.Memory
             }
             else
             {
-                response = CacheResponse.FailResponse<ExpireResponse>(CacheCodes.KeyIsNotExist);
+                response = CacheResponse.FailResponse<ExpireResponse>(SixnetCacheCodes.KeyIsNotExist);
             }
             response.CacheServer = server;
             response.Database = database;
@@ -4056,7 +4055,7 @@ namespace Sixnet.Cache.Provider.Memory
             var cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<DumpResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<DumpResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             DumpResponse response = null;
@@ -4067,7 +4066,7 @@ namespace Sixnet.Cache.Provider.Memory
             }
             else
             {
-                response = CacheResponse.FailResponse<DumpResponse>(CacheCodes.KeyIsNotExist);
+                response = CacheResponse.FailResponse<DumpResponse>(SixnetCacheCodes.KeyIsNotExist);
             }
             response.CacheServer = server;
             response.Database = database;
@@ -4088,7 +4087,7 @@ namespace Sixnet.Cache.Provider.Memory
         {
             if (options.Keys?.IsNullOrEmpty() ?? true)
             {
-                return CacheResponse.FailResponse<DeleteResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<DeleteResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             long deleteCount = 0;
@@ -4120,7 +4119,7 @@ namespace Sixnet.Cache.Provider.Memory
         {
             if (options.Keys?.IsNullOrEmpty() ?? true)
             {
-                return CacheResponse.FailResponse<ExistResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<ExistResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             long count = 0;
@@ -4230,7 +4229,7 @@ namespace Sixnet.Cache.Provider.Memory
             string cacheKey = options?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResponse.FailResponse<GetDetailResponse>(CacheCodes.KeyIsNullOrEmpty, server: server);
+                return CacheResponse.FailResponse<GetDetailResponse>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             GetDetailResponse response = null;
@@ -4270,7 +4269,7 @@ namespace Sixnet.Cache.Provider.Memory
             }
             else
             {
-                response = CacheResponse.FailResponse<GetDetailResponse>(CacheCodes.KeyIsNotExist);
+                response = CacheResponse.FailResponse<GetDetailResponse>(SixnetCacheCodes.KeyIsNotExist);
             }
             response.CacheServer = server;
             response.Database = database;
@@ -4289,7 +4288,7 @@ namespace Sixnet.Cache.Provider.Memory
         /// <returns>Return get server config response</returns>
         public async Task<GetServerConfigurationResponse> GetServerConfigurationAsync(CacheServer server, GetServerConfigurationOptions options)
         {
-            return await Task.FromResult(CacheResponse.FailResponse<GetServerConfigurationResponse>(CacheCodes.OperationIsNotSupported)).ConfigureAwait(false);
+            return await Task.FromResult(CacheResponse.FailResponse<GetServerConfigurationResponse>(SixnetCacheCodes.OperationIsNotSupported)).ConfigureAwait(false);
         }
 
         #endregion
@@ -4304,7 +4303,7 @@ namespace Sixnet.Cache.Provider.Memory
         /// <returns>Return save server config response</returns>
         public async Task<SaveServerConfigurationResponse> SaveServerConfigurationAsync(CacheServer server, SaveServerConfigurationOptions options)
         {
-            return await Task.FromResult(CacheResponse.FailResponse<SaveServerConfigurationResponse>(CacheCodes.OperationIsNotSupported)).ConfigureAwait(false);
+            return await Task.FromResult(CacheResponse.FailResponse<SaveServerConfigurationResponse>(SixnetCacheCodes.OperationIsNotSupported)).ConfigureAwait(false);
         }
 
         #endregion
@@ -4399,7 +4398,7 @@ namespace Sixnet.Cache.Provider.Memory
         /// <returns></returns>
         static Encoding GetEncoding()
         {
-            return CacheManager.Configuration.DefaultEncoding ?? Encoding.UTF8;
+            return SixnetCacher.Encoding ?? Encoding.UTF8;
         }
 
         static IEnumerable<T> WrapResponse<T>(params T[] responses)

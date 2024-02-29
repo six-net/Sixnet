@@ -49,7 +49,7 @@ namespace Sixnet.Development.Queryable
         /// <summary>
         /// Gets all conditions
         /// </summary>
-        public IEnumerable<ICondition> Conditions => queryableContext.Conditions;
+        public IEnumerable<ISixnetCondition> Conditions => queryableContext.Conditions;
 
         /// <summary>
         /// Gets all criterion
@@ -64,17 +64,17 @@ namespace Sixnet.Development.Queryable
         /// <summary>
         /// Get the selected fields
         /// </summary>
-        public IEnumerable<IDataField> SelectedFields => queryableContext.SelectedFields;
+        public IEnumerable<ISixnetDataField> SelectedFields => queryableContext.SelectedFields;
 
         /// <summary>
         /// Get the unselected fields
         /// </summary>
-        public IEnumerable<IDataField> UnselectedFields => queryableContext.UnselectedFields;
+        public IEnumerable<ISixnetDataField> UnselectedFields => queryableContext.UnselectedFields;
 
         /// <summary>
         /// Gets the group fields
         /// </summary>
-        public IEnumerable<IDataField> GroupFields => queryableContext.GroupFields;
+        public IEnumerable<ISixnetDataField> GroupFields => queryableContext.GroupFields;
 
         /// <summary>
         /// Gets the query text
@@ -140,7 +140,7 @@ namespace Sixnet.Development.Queryable
         /// <summary>
         /// Gets the recurve condition
         /// </summary>
-        public TreeInfo TreeInfo => queryableContext.TreeInfo;
+        public TreeMatchOptions TreeInfo => queryableContext.TreeInfo;
 
         /// <summary>
         /// Gets the join entries
@@ -248,7 +248,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="condition">Group condition</param>
         /// <returns></returns>
-        public ISixnetQueryable Where(ICondition condition)
+        public ISixnetQueryable Where(ISixnetCondition condition)
         {
             queryableContext.AddCondition(condition);
             return this;
@@ -260,7 +260,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="predicate">Predicate</param>
         /// <param name="condition">Group condition</param>
         /// <returns></returns>
-        public ISixnetQueryable WhereIf(bool predicate, ICondition condition)
+        public ISixnetQueryable WhereIf(bool predicate, ISixnetCondition condition)
         {
             if (predicate)
             {
@@ -278,7 +278,7 @@ namespace Sixnet.Development.Queryable
         {
             if (expression != null)
             {
-                var expressionCondition = ExpressionHelper.GetQueryable(expression, connector);
+                var expressionCondition = SixnetExpressionHelper.GetQueryable(expression, connector);
                 queryableContext.AddCondition(expressionCondition);
             }
         }
@@ -328,7 +328,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="field">Field</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        public ISixnetQueryable OrderBy(IDataField field, bool desc = false)
+        public ISixnetQueryable OrderBy(ISixnetDataField field, bool desc = false)
         {
             queryableContext.AddSort(new SortEntry()
             {
@@ -344,7 +344,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        public ISixnetQueryable OrderBy(IEnumerable<IDataField> fields, bool desc = false)
+        public ISixnetQueryable OrderBy(IEnumerable<ISixnetDataField> fields, bool desc = false)
         {
             if (!fields.IsNullOrEmpty())
             {
@@ -400,7 +400,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="field">Field</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        public ISixnetQueryable OrderByIf(bool predicate, IDataField field, bool desc = false)
+        public ISixnetQueryable OrderByIf(bool predicate, ISixnetDataField field, bool desc = false)
         {
             if (predicate)
             {
@@ -416,7 +416,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        public ISixnetQueryable OrderByIf(bool predicate, IEnumerable<IDataField> fields, bool desc = false)
+        public ISixnetQueryable OrderByIf(bool predicate, IEnumerable<ISixnetDataField> fields, bool desc = false)
         {
             if (predicate)
             {
@@ -444,7 +444,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        public ISixnetQueryable Select(params IDataField[] fields)
+        public ISixnetQueryable Select(params ISixnetDataField[] fields)
         {
             if (!fields.IsNullOrEmpty())
             {
@@ -468,7 +468,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        public ISixnetQueryable Unselect(params IDataField[] fields)
+        public ISixnetQueryable Unselect(params ISixnetDataField[] fields)
         {
             if (!fields.IsNullOrEmpty())
             {
@@ -493,7 +493,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="modelType">Model type</param>
         /// <param name="includeNecessaryFields">Whether include the necessary fields</param>
         /// <returns></returns>
-        public IEnumerable<IDataField> GetSelectedFields(Type modelType, bool includeNecessaryFields)
+        public IEnumerable<ISixnetDataField> GetSelectedFields(Type modelType, bool includeNecessaryFields)
         {
             return queryableContext.GetFinallyFields(modelType, includeNecessaryFields);
         }
@@ -522,7 +522,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="parentField">Parent field</param>
         /// <param name="direction">Matching direction</param>
         /// <returns></returns>
-        public ISixnetQueryable TreeMatching(IDataField dataField, IDataField parentField, TreeMatchingDirection direction = TreeMatchingDirection.Down)
+        public ISixnetQueryable TreeMatching(ISixnetDataField dataField, ISixnetDataField parentField, TreeMatchingDirection direction = TreeMatchingDirection.Down)
         {
             queryableContext.TreeMatching(dataField, parentField, direction);
             return this;
@@ -878,7 +878,7 @@ namespace Sixnet.Development.Queryable
         {
             if (predicate)
             {
-                var joinQueryable = ExpressionHelper.GetQueryable(joinExpression, CriterionConnector.And);
+                var joinQueryable = SixnetExpressionHelper.GetQueryable(joinExpression, CriterionConnector.And);
                 var targetQueryable = SixnetQueryable.Create<TFirst>();
                 if (firstQueryable != null)
                 {
@@ -1094,7 +1094,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        public ISixnetQueryable GroupBy(params IDataField[] fields)
+        public ISixnetQueryable GroupBy(params ISixnetDataField[] fields)
         {
             queryableContext.GroupBy(fields);
             return this;
@@ -1139,7 +1139,7 @@ namespace Sixnet.Development.Queryable
         {
             if (predicate && expression != null)
             {
-                var expressionCondition = ExpressionHelper.GetQueryable(expression, connector);
+                var expressionCondition = SixnetExpressionHelper.GetQueryable(expression, connector);
                 queryableContext.Having(expressionCondition);
             }
         }
@@ -1412,7 +1412,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Data</returns>
         public T First<T>(Action<DataOperationOptions> configure = null)
         {
-            if (queryableContext.Repository is IRepository<T> repository)
+            if (queryableContext.Repository is ISixnetRepository<T> repository)
             {
                 return repository.Get(this, configure);
             }
@@ -1430,7 +1430,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Data list</returns>
         public List<T> ToList<T>(Action<DataOperationOptions> configure = null)
         {
-            if (queryableContext.Repository is IRepository<T> repository)
+            if (queryableContext.Repository is ISixnetRepository<T> repository)
             {
                 return repository.GetList(this, configure);
             }
@@ -1548,7 +1548,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Paging data</returns>
         public PagingInfo<T> ToPaging<T>(PagingFilter pagingFilter, Action<DataOperationOptions> configure = null)
         {
-            if (queryableContext.Repository is IRepository<T> repository)
+            if (queryableContext.Repository is ISixnetRepository<T> repository)
             {
                 return repository.GetPaging(this, pagingFilter, configure);
             }

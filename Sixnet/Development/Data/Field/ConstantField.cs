@@ -12,7 +12,7 @@ namespace Sixnet.Development.Data.Field
     /// <summary>
     /// Constant field
     /// </summary>
-    public class ConstantField : IDataField
+    public class ConstantField : ISixnetDataField
     {
         /// <summary>
         /// Whether has field formatter
@@ -37,7 +37,7 @@ namespace Sixnet.Development.Data.Field
         /// <summary>
         /// Gets or sets the field format options
         /// </summary>
-        public FieldFormatOption FormatOption { get; set; }
+        public FieldFormatSetting FormatOption { get; set; }
 
         /// <summary>
         /// Whether is a constant field and no formatter
@@ -134,7 +134,7 @@ namespace Sixnet.Development.Data.Field
             return value;
         }
 
-        public IDataField Clone()
+        public ISixnetDataField Clone()
         {
             return new ConstantField()
             {

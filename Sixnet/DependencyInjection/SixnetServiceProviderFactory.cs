@@ -1,32 +1,44 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Sixnet.App;
-using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace Sixnet.DependencyInjection
 {
     /// <summary>
     /// Defines default service provider factory
     /// </summary>
-    public class SixnetServiceProviderFactory : IServiceProviderFactory<IDIContainer>
+    public class SixnetServiceProviderFactory : IServiceProviderFactory<ISixnetContainer>
     {
-        readonly Action<IServiceCollection> _configureServices = null;
-        readonly Action<ApplicationOptions> _configureApplication = null;
+        readonly Action<SixnetOptions> _configure = null;
+        readonly SixnetOptions _options = SixnetContainer.Options;
 
-        public SixnetServiceProviderFactory(Action<IServiceCollection> configureServices = null, Action<ApplicationOptions> configureApplication = null)
+        public SixnetServiceProviderFactory(Action<SixnetOptions> configure = null)
         {
-            _configureServices = configureServices;
-            _configureApplication = configureApplication;
+            _configure = configure;
         }
 
-        public IDIContainer CreateBuilder(IServiceCollection services)
+        public SixnetServiceProviderFactory(SixnetOptions options)
         {
-            ContainerManager.Configure(services, _configureServices, _configureApplication);
-            return ContainerManager.Container;
+            if (options != null)
+            {
+                _options = options;
+            }
         }
 
-        public IServiceProvider CreateServiceProvider(IDIContainer containerBuilder)
+        public ISixnetContainer CreateBuilder(IServiceCollection services)
         {
-            return ContainerManager.BuildServiceProvider();
+            if (_options != null)
+            {
+                _options.Services = services;
+                _configure?.Invoke(_options);
+            }
+            SixnetContainer.Configure(_options);
+            return SixnetContainer.Container;
+        }
+
+        public IServiceProvider CreateServiceProvider(ISixnetContainer containerBuilder)
+        {
+            return SixnetContainer.ServiceProvider;
         }
     }
 }

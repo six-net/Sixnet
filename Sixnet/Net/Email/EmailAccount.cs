@@ -45,17 +45,6 @@ namespace Sixnet.Net.Email
         /// </summary>
         public bool EnableSsl { get; set; }
 
-        /// <summary>
-        /// Gets the email account identity key
-        /// </summary>
-        public string IdentityKey
-        {
-            get
-            {
-                return GetIdentityKey();
-            }
-        }
-
         #endregion
 
         public EmailAccount Clone()
@@ -72,12 +61,17 @@ namespace Sixnet.Net.Email
             };
         }
 
-        /// <summary>
-        /// Gets the email account identity key
-        /// </summary>
-        string GetIdentityKey()
+        public override bool Equals(object obj)
         {
-            return string.Format("{0}_{1}", SmtpAddress, SendEmailAddress);
+            if (obj is EmailAccount objAccount)
+            {
+                return string.Equals($"{SmtpAddress}_{SendEmailAddress}", $"{objAccount.SmtpAddress}_{objAccount.SendEmailAddress}", StringComparison.OrdinalIgnoreCase);
+            }
+            return false;
+        }
+        public override int GetHashCode()
+        {
+            return $"{SmtpAddress}_{SendEmailAddress}".GetHashCode();
         }
     }
 }

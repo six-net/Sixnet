@@ -6,7 +6,7 @@ namespace Sixnet.Development.Domain.Event
     /// Dase domain event
     /// </summary>
     [Serializable]
-    public abstract class BaseDomainEvent : IDomainEvent
+    public abstract class BaseDomainEvent : ISixnetDomainEvent
     {
         /// <summary>
         /// Gets or sets the event id
@@ -14,8 +14,8 @@ namespace Sixnet.Development.Domain.Event
         public string Id { get; set; } = Guid.NewGuid().ToString();
 
         /// <summary>
-        /// Gets or set sthe event created date
+        /// Gets or set sthe event create date
         /// </summary>
-        public DateTimeOffset CreatedDate { get; set; } = DateTimeOffset.Now;
+        public DateTimeOffset CreateDate { get; set; } = DateTimeOffset.Now;
     }
 }

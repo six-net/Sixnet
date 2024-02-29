@@ -31,7 +31,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Data</returns>
         public TModel First(Action<DataOperationOptions> configure = null)
         {
-            if (queryableContext.Repository is IRepository<TModel> firstRepository)
+            if (queryableContext.Repository is ISixnetRepository<TModel> firstRepository)
             {
                 return firstRepository.Get(this, configure);
             }
@@ -49,7 +49,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Data list</returns>
         public List<TModel> ToList(Action<DataOperationOptions> configure = null)
         {
-            if (queryableContext.Repository is IRepository<TModel> firstRepository)
+            if (queryableContext.Repository is ISixnetRepository<TModel> firstRepository)
             {
                 return firstRepository.GetList(this, configure);
             }
@@ -68,7 +68,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Paging data</returns>
         public PagingInfo<TModel> ToPaging(PagingFilter pagingFilter, Action<DataOperationOptions> configure = null)
         {
-            if (queryableContext.Repository is IRepository<TModel> firstRepository)
+            if (queryableContext.Repository is ISixnetRepository<TModel> firstRepository)
             {
                 return firstRepository.GetPaging(this, pagingFilter, configure);
             }

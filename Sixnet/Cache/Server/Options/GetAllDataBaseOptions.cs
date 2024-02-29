@@ -7,7 +7,7 @@ namespace Sixnet.Cache.Server.Options
     /// <summary>
     /// Get all database options
     /// </summary>
-    public class GetAllDataBaseOptions : CacheOptions<GetAllDataBaseResponse>
+    public class GetAllDataBaseOptions : CacheOperationOptions<GetAllDataBaseResponse>
     {
         /// <summary>
         /// Gets or sets the endpoint
@@ -20,7 +20,7 @@ namespace Sixnet.Cache.Server.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return get all database response</returns>
-        protected override async Task<GetAllDataBaseResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<GetAllDataBaseResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.GetAllDataBaseAsync(server, this).ConfigureAwait(false);
         }
@@ -31,7 +31,7 @@ namespace Sixnet.Cache.Server.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return get all database response</returns>
-        protected override GetAllDataBaseResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override GetAllDataBaseResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.GetAllDataBase(server, this);
         }

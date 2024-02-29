@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Sixnet.Development.Events;
+using Sixnet.Development.Event;
 using Sixnet.Exceptions;
 
 namespace Sixnet.Development.Data.Event
@@ -9,7 +9,7 @@ namespace Sixnet.Development.Data.Event
     /// <summary>
     /// Default data event handler
     /// </summary>
-    public class DefaultDataEventHandler<TEvent> : DefaultSixnetEventHandler<TEvent>, IDataEventHandler where TEvent : IDataEvent
+    public class DefaultDataEventHandler<TEvent> : DefaultEventHandler<TEvent>, ISixnetDataEventHandler where TEvent : ISixnetDataEvent
     {
         public DefaultDataEventHandler(Func<TEvent, CancellationToken, Task> handlerExecutor, DataEventHandlerOptions options = null) : base(handlerExecutor, options?.GetSixnetEventHandlerOptions())
         {

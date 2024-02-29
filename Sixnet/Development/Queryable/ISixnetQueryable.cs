@@ -11,7 +11,7 @@ namespace Sixnet.Development.Queryable
     /// <summary>
     /// Defines queryable contract
     /// </summary>
-    public partial interface ISixnetQueryable : ICondition
+    public partial interface ISixnetQueryable : ISixnetCondition
     {
         #region Properties
 
@@ -23,7 +23,7 @@ namespace Sixnet.Development.Queryable
         /// <summary>
         /// Gets all conditions
         /// </summary>
-        IEnumerable<ICondition> Conditions { get; }
+        IEnumerable<ISixnetCondition> Conditions { get; }
 
         /// <summary>
         /// Gets all criterion
@@ -38,17 +38,17 @@ namespace Sixnet.Development.Queryable
         /// <summary>
         /// Get the selected fields
         /// </summary>
-        IEnumerable<IDataField> SelectedFields { get; }
+        IEnumerable<ISixnetDataField> SelectedFields { get; }
 
         /// <summary>
         /// Get the unselected fields
         /// </summary>
-        IEnumerable<IDataField> UnselectedFields { get; }
+        IEnumerable<ISixnetDataField> UnselectedFields { get; }
 
         /// <summary>
         /// Gets the group fields
         /// </summary>
-        IEnumerable<IDataField> GroupFields { get; }
+        IEnumerable<ISixnetDataField> GroupFields { get; }
 
         /// <summary>
         /// Gets the script
@@ -114,7 +114,7 @@ namespace Sixnet.Development.Queryable
         /// <summary>
         /// Gets the tree info
         /// </summary>
-        TreeInfo TreeInfo { get; }
+        TreeMatchOptions TreeInfo { get; }
 
         /// <summary>
         /// Gets the join entries
@@ -187,7 +187,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="condition">Group condition</param>
         /// <returns></returns>
-        ISixnetQueryable Where(ICondition condition);
+        ISixnetQueryable Where(ISixnetCondition condition);
 
         /// <summary>
         /// Append group condition
@@ -195,7 +195,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="predicate">Predicate</param>
         /// <param name="condition">Group condition</param>
         /// <returns></returns>
-        ISixnetQueryable WhereIf(bool predicate, ICondition condition);
+        ISixnetQueryable WhereIf(bool predicate, ISixnetCondition condition);
 
         #endregion
 
@@ -225,7 +225,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="field">Field</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable OrderBy(IDataField field, bool desc = false);
+        ISixnetQueryable OrderBy(ISixnetDataField field, bool desc = false);
 
         /// <summary>
         /// Order by fields
@@ -233,7 +233,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable OrderBy(IEnumerable<IDataField> fields, bool desc = false);
+        ISixnetQueryable OrderBy(IEnumerable<ISixnetDataField> fields, bool desc = false);
 
         /// <summary>
         /// Order by fields
@@ -262,7 +262,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="field">Field</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable OrderByIf(bool predicate, IDataField field, bool desc = false);
+        ISixnetQueryable OrderByIf(bool predicate, ISixnetDataField field, bool desc = false);
 
         /// <summary>
         /// Order by fields
@@ -271,7 +271,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable OrderByIf(bool predicate, IEnumerable<IDataField> fields, bool desc = false);
+        ISixnetQueryable OrderByIf(bool predicate, IEnumerable<ISixnetDataField> fields, bool desc = false);
 
         #endregion
 
@@ -493,7 +493,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable Select(params IDataField[] fields);
+        ISixnetQueryable Select(params ISixnetDataField[] fields);
 
         /// <summary>
         /// Select fields
@@ -507,7 +507,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable Unselect(params IDataField[] fields);
+        ISixnetQueryable Unselect(params ISixnetDataField[] fields);
 
         /// <summary>
         /// Unselect fields
@@ -522,7 +522,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="modelType">Model type</param>
         /// <param name="includeNecessaryFields">Whether include necessary fields</param>
         /// <returns></returns>
-        IEnumerable<IDataField> GetSelectedFields(Type modelType, bool includeNecessaryFields);
+        IEnumerable<ISixnetDataField> GetSelectedFields(Type modelType, bool includeNecessaryFields);
 
         #endregion
 
@@ -544,7 +544,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="parentField">Parent field</param>
         /// <param name="direction">Matching direction</param>
         /// <returns></returns>
-        ISixnetQueryable TreeMatching(IDataField dataField, IDataField parentField, TreeMatchingDirection direction = TreeMatchingDirection.Down);
+        ISixnetQueryable TreeMatching(ISixnetDataField dataField, ISixnetDataField parentField, TreeMatchingDirection direction = TreeMatchingDirection.Down);
 
         #endregion
 
@@ -721,7 +721,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable GroupBy(params IDataField[] fields);
+        ISixnetQueryable GroupBy(params ISixnetDataField[] fields);
 
         #endregion
 
@@ -1247,7 +1247,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="field">Field</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        new ISixnetQueryable<TFirst> OrderBy(IDataField field, bool desc = false);
+        new ISixnetQueryable<TFirst> OrderBy(ISixnetDataField field, bool desc = false);
 
         /// <summary>
         /// Order by fields
@@ -1255,7 +1255,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        new ISixnetQueryable<TFirst> OrderBy(IEnumerable<IDataField> fields, bool desc = false);
+        new ISixnetQueryable<TFirst> OrderBy(IEnumerable<ISixnetDataField> fields, bool desc = false);
 
         /// <summary>
         /// Order by fields
@@ -1284,7 +1284,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="field">Field</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        new ISixnetQueryable<TFirst> OrderByIf(bool predicate, IDataField field, bool desc = false);
+        new ISixnetQueryable<TFirst> OrderByIf(bool predicate, ISixnetDataField field, bool desc = false);
 
         /// <summary>
         /// Order by fields
@@ -1293,7 +1293,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        new ISixnetQueryable<TFirst> OrderByIf(bool predicate, IEnumerable<IDataField> fields, bool desc = false);
+        new ISixnetQueryable<TFirst> OrderByIf(bool predicate, IEnumerable<ISixnetDataField> fields, bool desc = false);
 
         /// <summary>
         /// Order by field
@@ -1532,7 +1532,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        new ISixnetQueryable<TFirst> Select(params IDataField[] fields);
+        new ISixnetQueryable<TFirst> Select(params ISixnetDataField[] fields);
 
         /// <summary>
         /// Select fields
@@ -1546,7 +1546,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        new ISixnetQueryable<TFirst> Unselect(params IDataField[] fields);
+        new ISixnetQueryable<TFirst> Unselect(params ISixnetDataField[] fields);
 
         /// <summary>
         /// Unselect fields
@@ -1589,7 +1589,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="parentField">Parent field</param>
         /// <param name="direction">Matching direction</param>
         /// <returns></returns>
-        new ISixnetQueryable<TFirst> TreeMatching(IDataField dataField, IDataField parentField, TreeMatchingDirection direction = TreeMatchingDirection.Down);
+        new ISixnetQueryable<TFirst> TreeMatching(ISixnetDataField dataField, ISixnetDataField parentField, TreeMatchingDirection direction = TreeMatchingDirection.Down);
 
         /// <summary>
         /// Tree match
@@ -1745,7 +1745,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        new ISixnetQueryable<TFirst> GroupBy(params IDataField[] fields);
+        new ISixnetQueryable<TFirst> GroupBy(params ISixnetDataField[] fields);
 
         /// <summary>
         /// Group by fields
@@ -2206,7 +2206,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        new ISixnetQueryable<TFirst, TSecond> Select(params IDataField[] fields);
+        new ISixnetQueryable<TFirst, TSecond> Select(params ISixnetDataField[] fields);
 
         /// <summary>
         /// Select fields
@@ -2270,7 +2270,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="parentField">Parent field</param>
         /// <param name="direction">Matching direction</param>
         /// <returns></returns>
-        new ISixnetQueryable<TFirst, TSecond> TreeMatching(IDataField dataField, IDataField parentField, TreeMatchingDirection direction = TreeMatchingDirection.Down);
+        new ISixnetQueryable<TFirst, TSecond> TreeMatching(ISixnetDataField dataField, ISixnetDataField parentField, TreeMatchingDirection direction = TreeMatchingDirection.Down);
 
         /// <summary>
         /// Tree match
@@ -2426,7 +2426,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        new ISixnetQueryable<TFirst, TSecond> GroupBy(params IDataField[] fields);
+        new ISixnetQueryable<TFirst, TSecond> GroupBy(params ISixnetDataField[] fields);
 
         /// <summary>
         /// Group by fields
@@ -2963,7 +2963,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        new ISixnetQueryable<TFirst, TSecond, TThird> Select(params IDataField[] fields);
+        new ISixnetQueryable<TFirst, TSecond, TThird> Select(params ISixnetDataField[] fields);
 
         /// <summary>
         /// Select fields
@@ -3041,7 +3041,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="parentField">Parent field</param>
         /// <param name="direction">Matching direction</param>
         /// <returns></returns>
-        new ISixnetQueryable<TFirst, TSecond, TThird> TreeMatching(IDataField dataField, IDataField parentField, TreeMatchingDirection direction = TreeMatchingDirection.Down);
+        new ISixnetQueryable<TFirst, TSecond, TThird> TreeMatching(ISixnetDataField dataField, ISixnetDataField parentField, TreeMatchingDirection direction = TreeMatchingDirection.Down);
 
         /// <summary>
         /// Tree match
@@ -3197,7 +3197,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        new ISixnetQueryable<TFirst, TSecond, TThird> GroupBy(params IDataField[] fields);
+        new ISixnetQueryable<TFirst, TSecond, TThird> GroupBy(params ISixnetDataField[] fields);
 
         /// <summary>
         /// Group by fields
@@ -3793,7 +3793,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth> Select(params IDataField[] fields);
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth> Select(params ISixnetDataField[] fields);
 
         /// <summary>
         /// Select fields
@@ -3885,7 +3885,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="parentField">Parent field</param>
         /// <param name="direction">Matching direction</param>
         /// <returns></returns>
-        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth> TreeMatching(IDataField dataField, IDataField parentField, TreeMatchingDirection direction = TreeMatchingDirection.Down);
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth> TreeMatching(ISixnetDataField dataField, ISixnetDataField parentField, TreeMatchingDirection direction = TreeMatchingDirection.Down);
 
         /// <summary>
         /// Tree match
@@ -4041,7 +4041,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth> GroupBy(params IDataField[] fields);
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth> GroupBy(params ISixnetDataField[] fields);
 
         /// <summary>
         /// Group by fields
@@ -4696,7 +4696,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> Select(params IDataField[] fields);
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> Select(params ISixnetDataField[] fields);
 
         /// <summary>
         /// Select fields
@@ -4802,7 +4802,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="parentField">Parent field</param>
         /// <param name="direction">Matching direction</param>
         /// <returns></returns>
-        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> TreeMatching(IDataField dataField, IDataField parentField, TreeMatchingDirection direction = TreeMatchingDirection.Down);
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> TreeMatching(ISixnetDataField dataField, ISixnetDataField parentField, TreeMatchingDirection direction = TreeMatchingDirection.Down);
 
         /// <summary>
         /// Tree match
@@ -4958,7 +4958,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> GroupBy(params IDataField[] fields);
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> GroupBy(params ISixnetDataField[] fields);
 
         /// <summary>
         /// Group by fields
@@ -5672,7 +5672,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Select(params IDataField[] fields);
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Select(params ISixnetDataField[] fields);
 
         /// <summary>
         /// Select fields
@@ -5792,7 +5792,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="parentField">Parent field</param>
         /// <param name="direction">Matching direction</param>
         /// <returns></returns>
-        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> TreeMatching(IDataField dataField, IDataField parentField, TreeMatchingDirection direction = TreeMatchingDirection.Down);
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> TreeMatching(ISixnetDataField dataField, ISixnetDataField parentField, TreeMatchingDirection direction = TreeMatchingDirection.Down);
 
         /// <summary>
         /// Tree match
@@ -5948,7 +5948,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> GroupBy(params IDataField[] fields);
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> GroupBy(params ISixnetDataField[] fields);
 
         /// <summary>
         /// Group by fields
@@ -6525,7 +6525,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> Select(params IDataField[] fields);
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> Select(params ISixnetDataField[] fields);
 
         /// <summary>
         /// Select fields
@@ -6659,7 +6659,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="parentField">Parent field</param>
         /// <param name="direction">Matching direction</param>
         /// <returns></returns>
-        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> TreeMatching(IDataField dataField, IDataField parentField, TreeMatchingDirection direction = TreeMatchingDirection.Down);
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> TreeMatching(ISixnetDataField dataField, ISixnetDataField parentField, TreeMatchingDirection direction = TreeMatchingDirection.Down);
 
         /// <summary>
         /// Tree match
@@ -6815,7 +6815,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> GroupBy(params IDataField[] fields);
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> GroupBy(params ISixnetDataField[] fields);
 
         /// <summary>
         /// Group by fields

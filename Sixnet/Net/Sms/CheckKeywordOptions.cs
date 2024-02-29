@@ -6,9 +6,9 @@ namespace Sixnet.Net.Sms
     /// <summary>
     /// Check keyword options
     /// </summary>
-    public class CheckKeywordOptions : SmsOptions
+    public class CheckKeywordOptions : SmsExecutionOptions
     {
-        public override SmsOptions Clone()
+        public override SmsExecutionOptions Clone()
         {
             return new CheckKeywordOptions()
             {

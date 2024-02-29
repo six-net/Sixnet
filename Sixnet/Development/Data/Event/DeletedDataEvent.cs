@@ -8,7 +8,7 @@ namespace Sixnet.Development.Data.Event
     /// <summary>
     /// Deleted data event
     /// </summary>
-    public class DeletedDataEvent : BaseDataEvent
+    public class DeletedDataEvent : BaseSixnetDataEvent
     {
         public DeletedDataEvent()
         {
@@ -25,9 +25,9 @@ namespace Sixnet.Development.Data.Event
         /// </summary>
         public int AffectedDatas { get; set; }
 
-        public static DeletedDataEvent Create(IDataClient dataClient, DataCommand command)
+        public static DeletedDataEvent Create(ISixnetDataClient dataClient, SixnetDataCommand command)
         {
-            ThrowHelper.ThrowArgNullIf(command == null, nameof(command));
+            SixnetDirectThrower.ThrowArgNullIf(command == null, nameof(command));
 
             return new DeletedDataEvent()
             {

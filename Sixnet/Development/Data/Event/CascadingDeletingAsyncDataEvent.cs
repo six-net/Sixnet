@@ -9,14 +9,14 @@ namespace Sixnet.Development.Data.Event
     /// <summary>
     /// Deleting async data event
     /// </summary>
-    internal class CascadingDeletingAsyncDataEvent : BaseDataEvent
+    public class CascadingDeletingAsyncDataEvent : BaseSixnetDataEvent
     {
         public CascadingDeletingAsyncDataEvent()
         {
             EventType = DataEventType.Deleting;
         }
 
-        public static CascadingDeletingAsyncDataEvent Create(IDataClient dataClient, DataCommand command)
+        public static CascadingDeletingAsyncDataEvent Create(ISixnetDataClient dataClient, SixnetDataCommand command)
         {
             return Create<CascadingDeletingAsyncDataEvent>(dataClient, command);
         }

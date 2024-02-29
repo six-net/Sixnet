@@ -7,7 +7,7 @@ namespace Sixnet.Cache.List.Options
     /// <summary>
     /// List right pop left push options
     /// </summary>
-    public class ListRightPopLeftPushOptions : CacheOptions<ListRightPopLeftPushResponse>
+    public class ListRightPopLeftPushOptions : CacheOperationOptions<ListRightPopLeftPushResponse>
     {
         /// <summary>
         /// Gets or sets the source key
@@ -31,7 +31,7 @@ namespace Sixnet.Cache.List.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return right pop left push response</returns>
-        protected override async Task<ListRightPopLeftPushResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<ListRightPopLeftPushResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.ListRightPopLeftPushAsync(server, this).ConfigureAwait(false);
         }
@@ -42,7 +42,7 @@ namespace Sixnet.Cache.List.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return right pop left push response</returns>
-        protected override ListRightPopLeftPushResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override ListRightPopLeftPushResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.ListRightPopLeftPush(server, this);
         }

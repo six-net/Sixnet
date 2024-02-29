@@ -16,12 +16,12 @@ namespace Sixnet.Code
         /// <summary>
         /// Provides an object that generates a random value
         /// </summary>
-        private static readonly ShuffleNet<char> ShuffleConstantCode;
+        private static readonly SixnetShuffleNet<char> ShuffleConstantCode;
 
         static GuidHelper()
         {
             ConstantCode = "1a2b3c4d5e6f7g8h9i0j9k8l7m6n5o4p3q2r1s0t1u2v3w4x5y6z".ToUpper();
-            ShuffleConstantCode = new ShuffleNet<char>(ConstantCode, true, true);
+            ShuffleConstantCode = new SixnetShuffleNet<char>(ConstantCode, true, true);
         }
 
         #region Gets a new guid value

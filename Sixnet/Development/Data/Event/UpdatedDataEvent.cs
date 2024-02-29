@@ -7,16 +7,16 @@ namespace Sixnet.Development.Data.Event
     /// <summary>
     /// Updated data event
     /// </summary>
-    public class UpdatedDataEvent : BaseDataEvent
+    public class UpdatedDataEvent : BaseSixnetDataEvent
     {
         public UpdatedDataEvent()
         {
             EventType = DataEventType.Updated;
         }
 
-        public static UpdatedDataEvent Create(IDataClient dataClient, DataCommand command)
+        public static UpdatedDataEvent Create(ISixnetDataClient dataClient, SixnetDataCommand command)
         {
-            ThrowHelper.ThrowArgNullIf(command == null, nameof(command));
+            SixnetDirectThrower.ThrowArgNullIf(command == null, nameof(command));
 
             return new UpdatedDataEvent()
             {

@@ -8,7 +8,7 @@ using Sixnet.Development.Data.Client;
 using Sixnet.Development.Data.Database;
 using Sixnet.Development.Data.Event;
 using Sixnet.Development.Domain.Event;
-using Sixnet.Development.Events;
+using Sixnet.Development.Event;
 using Sixnet.Logging;
 
 namespace Sixnet.Development.Work
@@ -16,14 +16,14 @@ namespace Sixnet.Development.Work
     /// <summary>
     /// Default implements for work
     /// </summary>
-    internal class DefaultWork : IWork
+    internal class DefaultWork : ISixnetWork
     {
         #region Constructor
 
         /// <summary>
         /// Initialize default work
         /// </summary>
-        internal DefaultWork(IEnumerable<DatabaseServer> databaseServers = null, DataIsolationLevel? isolationLevel = null)
+        internal DefaultWork(IEnumerable<SixnetDatabaseServer> databaseServers = null, DataIsolationLevel? isolationLevel = null)
         {
             WorkId = Guid.NewGuid().ToString();
             dataClient = new DefaultDataClient(true, true, databaseServers, isolationLevel);
@@ -38,22 +38,22 @@ namespace Sixnet.Development.Work
         /// <summary>
         /// commit success event handler
         /// </summary>
-        readonly ConcurrentQueue<Action<IWork>> commitSuccessEventHandlerCollection = new();
+        readonly ConcurrentQueue<Action<ISixnetWork>> commitSuccessEventHandlerCollection = new();
 
         /// <summary>
         /// domain events
         /// </summary>
-        readonly ConcurrentQueue<IDomainEvent> domainEventCollection = new();
+        readonly ConcurrentQueue<ISixnetDomainEvent> domainEventCollection = new();
 
         /// <summary>
         /// data events
         /// </summary>
-        readonly ConcurrentQueue<IDataEvent> dataEventCollection = new();
+        readonly ConcurrentQueue<ISixnetDataEvent> dataEventCollection = new();
 
         /// <summary>
         /// Data client
         /// </summary>
-        readonly IDataClient dataClient = null;
+        readonly ISixnetDataClient dataClient = null;
 
         #endregion
 
@@ -67,7 +67,7 @@ namespace Sixnet.Development.Work
         /// <summary>
         /// Get the data client
         /// </summary>
-        public IDataClient DataClient => dataClient;
+        public ISixnetDataClient DataClient => dataClient;
 
         #endregion
 
@@ -177,9 +177,9 @@ namespace Sixnet.Development.Work
         /// Subscribe commit success event
         /// </summary>
         /// <param name="eventHandlers">Event handlers</param>
-        public void SubscribeCommitSuccessEvent(params Action<IWork>[] eventHandlers)
+        public void SubscribeCommitSuccessEvent(params Action<ISixnetWork>[] eventHandlers)
         {
-            IEnumerable<Action<IWork>> handlerCollection = eventHandlers;
+            IEnumerable<Action<ISixnetWork>> handlerCollection = eventHandlers;
             SubscribeCommitSuccessEvent(handlerCollection);
         }
 
@@ -187,7 +187,7 @@ namespace Sixnet.Development.Work
         /// Subscribe commit success event
         /// </summary>
         /// <param name="eventHandlers">Event handlers</param>
-        public void SubscribeCommitSuccessEvent(IEnumerable<Action<IWork>> eventHandlers)
+        public void SubscribeCommitSuccessEvent(IEnumerable<Action<ISixnetWork>> eventHandlers)
         {
             if (!eventHandlers.IsNullOrEmpty())
             {
@@ -224,9 +224,9 @@ namespace Sixnet.Development.Work
         /// Publish domain event
         /// </summary>
         /// <param name="domainEvents">Domain events</param>
-        internal void PublishDomainEvent(params IDomainEvent[] domainEvents)
+        internal void PublishDomainEvent(params ISixnetDomainEvent[] domainEvents)
         {
-            IEnumerable<IDomainEvent> eventCollection = domainEvents;
+            IEnumerable<ISixnetDomainEvent> eventCollection = domainEvents;
             PublishDomainEvent(eventCollection);
         }
 
@@ -234,7 +234,7 @@ namespace Sixnet.Development.Work
         /// Publish domain event
         /// </summary>
         /// <param name="domainEvents">Domain events</param>
-        internal void PublishDomainEvent(IEnumerable<IDomainEvent> domainEvents)
+        internal void PublishDomainEvent(IEnumerable<ISixnetDomainEvent> domainEvents)
         {
             if (!domainEvents.IsNullOrEmpty())
             {
@@ -250,7 +250,7 @@ namespace Sixnet.Development.Work
         /// </summary>
         Task HandleDomainEvent(CancellationToken cancellationToken = default)
         {
-            var handleWorkTask = DomainEventBus.HandleWorkCompleted(domainEventCollection, cancellationToken);
+            var handleWorkTask = SixnetDomainEventBus.HandleWorkCompleted(domainEventCollection, cancellationToken);
             domainEventCollection?.Clear();
             return handleWorkTask;
         }
@@ -263,9 +263,9 @@ namespace Sixnet.Development.Work
         /// Publish data event
         /// </summary>
         /// <param name="dataEvents">Data events</param>
-        internal void PublishDataEvent(params IDataEvent[] dataEvents)
+        internal void PublishDataEvent(params ISixnetDataEvent[] dataEvents)
         {
-            IEnumerable<IDataEvent> eventCollection = dataEvents;
+            IEnumerable<ISixnetDataEvent> eventCollection = dataEvents;
             PublishDataEvent(eventCollection);
         }
 
@@ -273,7 +273,7 @@ namespace Sixnet.Development.Work
         /// Publish data event
         /// </summary>
         /// <param name="dataEvents">Data events</param>
-        internal void PublishDataEvent(IEnumerable<IDataEvent> dataEvents)
+        internal void PublishDataEvent(IEnumerable<ISixnetDataEvent> dataEvents)
         {
             if (!dataEvents.IsNullOrEmpty())
             {
@@ -289,7 +289,7 @@ namespace Sixnet.Development.Work
         /// </summary>
         Task HandleDataEvent(CancellationToken cancellationToken = default)
         {
-            var handleWorkTask = DataEventBus.HandleWorkCompleted(dataEventCollection, cancellationToken);
+            var handleWorkTask = SixnetDataEventBus.HandleWorkCompleted(dataEventCollection, cancellationToken);
             dataEventCollection?.Clear();
             return handleWorkTask;
         }

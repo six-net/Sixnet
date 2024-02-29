@@ -16,7 +16,7 @@ namespace Sixnet.Development.Data.Field
     /// <summary>
     /// Property field
     /// </summary>
-    public class PropertyField : IDataField
+    public class PropertyField : ISixnetDataField
     {
         string identityValue = string.Empty;
 
@@ -53,7 +53,7 @@ namespace Sixnet.Development.Data.Field
         /// <summary>
         /// Gets or sets the field format options
         /// </summary>
-        public FieldFormatOption FormatOption { get; set; }
+        public FieldFormatSetting FormatOption { get; set; }
 
         /// <summary>
         /// Whether has field formatter
@@ -74,9 +74,9 @@ namespace Sixnet.Development.Data.Field
         /// <param name="fieldFormatOptions">Field conversion options</param>
         /// <param name="fieldName">Field name</param>
         /// <returns></returns>
-        public static PropertyField Create(string propertyName, Type modelType = null, int modelTypeIndex = 0, FieldFormatOption fieldFormatOption = null, string fieldName = "")
+        public static PropertyField Create(string propertyName, Type modelType = null, int modelTypeIndex = 0, FieldFormatSetting fieldFormatOption = null, string fieldName = "")
         {
-            ThrowHelper.ThrowArgErrorIf(string.IsNullOrWhiteSpace(propertyName), "Property name is null or empty");
+            SixnetDirectThrower.ThrowArgErrorIf(string.IsNullOrWhiteSpace(propertyName), "Property name is null or empty");
             var field = new PropertyField()
             {
                 PropertyName = propertyName,
@@ -98,9 +98,9 @@ namespace Sixnet.Development.Data.Field
         /// <param name="fieldFormatOptions">Field format options</param>
         /// <param name="fieldName">Field name</param>
         /// <returns></returns>
-        public static PropertyField Create<TModel>(Expression<Func<TModel, dynamic>> field, int modelTypeIndex = 0, FieldFormatOption fieldFormatOption = null, string fieldName = "")
+        public static PropertyField Create<TModel>(Expression<Func<TModel, dynamic>> field, int modelTypeIndex = 0, FieldFormatSetting fieldFormatOption = null, string fieldName = "")
         {
-            var propertyName = ExpressionHelper.GetExpressionLastPropertyName(field);
+            var propertyName = SixnetExpressionHelper.GetExpressionLastPropertyName(field);
             return Create(propertyName, typeof(TModel), modelTypeIndex, fieldFormatOption, fieldName);
         }
 
@@ -115,8 +115,8 @@ namespace Sixnet.Development.Data.Field
         /// <returns></returns>
         public static PropertyField Create<TModel>(Expression<Func<TModel, dynamic>> field, int modelTypeIndex = 0, string formatterName = "", string fieldName = "")
         {
-            var propertyName = ExpressionHelper.GetExpressionLastPropertyName(field);
-            return Create(propertyName, typeof(TModel), modelTypeIndex, FieldFormatOption.Create(formatterName), fieldName);
+            var propertyName = SixnetExpressionHelper.GetExpressionLastPropertyName(field);
+            return Create(propertyName, typeof(TModel), modelTypeIndex, FieldFormatSetting.Create(formatterName), fieldName);
         }
 
         string GetIdentity()
@@ -128,7 +128,7 @@ namespace Sixnet.Development.Data.Field
         /// Clone a field
         /// </summary>
         /// <returns></returns>
-        public IDataField Clone()
+        public ISixnetDataField Clone()
         {
             return new PropertyField()
             {

@@ -7,7 +7,7 @@ namespace Sixnet.Cache.String
     /// <summary>
     /// String bit operation options
     /// </summary>
-    public class StringBitOperationOptions : CacheOptions<StringBitOperationResponse>
+    public class StringBitOperationOptions : CacheOperationOptions<StringBitOperationResponse>
     {
         /// <summary>
         /// Gets or sets the bit wise
@@ -36,7 +36,7 @@ namespace Sixnet.Cache.String
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return string bit operation response</returns>
-        protected override async Task<StringBitOperationResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<StringBitOperationResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.StringBitOperationAsync(server, this).ConfigureAwait(false);
         }
@@ -47,7 +47,7 @@ namespace Sixnet.Cache.String
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return string bit operation response</returns>
-        protected override StringBitOperationResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override StringBitOperationResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.StringBitOperation(server, this);
         }

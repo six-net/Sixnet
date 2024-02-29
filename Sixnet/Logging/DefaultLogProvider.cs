@@ -7,7 +7,7 @@ namespace Sixnet.Logging
     /// <summary>
     /// Default log provider
     /// </summary>
-    internal class DefaultLogProvider : ILogProvider
+    internal class DefaultLogProvider : ISixnetLogProvider
     {
         /// <summary>
         /// Logger factory
@@ -16,7 +16,7 @@ namespace Sixnet.Logging
 
         static DefaultLogProvider()
         {
-            LoggerFactory = ContainerManager.Resolve<ILoggerFactory>();
+            LoggerFactory = SixnetContainer.GetService<ILoggerFactory>();
         }
 
         #region Gets logger
@@ -32,7 +32,9 @@ namespace Sixnet.Logging
             {
                 return null;
             }
-            loggerCategoryName = string.IsNullOrWhiteSpace(loggerCategoryName) ? LogManager.DefaultLoggerCategoryName : loggerCategoryName;
+            loggerCategoryName = string.IsNullOrWhiteSpace(loggerCategoryName) 
+                ? SixnetLogger.DefaultLoggerCategoryName 
+                : loggerCategoryName;
             return LoggerFactory.CreateLogger(loggerCategoryName);
         }
 

@@ -7,7 +7,7 @@ namespace Sixnet.Cache.Keys.Options
     /// <summary>
     /// Key type options
     /// </summary>
-    public class TypeOptions : CacheOptions<TypeResponse>
+    public class TypeOptions : CacheOperationOptions<TypeResponse>
     {
         /// <summary>
         /// Gets or sets the cache key
@@ -20,7 +20,7 @@ namespace Sixnet.Cache.Keys.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return key type response</returns>
-        protected override async Task<TypeResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<TypeResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.KeyTypeAsync(server, this).ConfigureAwait(false);
         }
@@ -31,7 +31,7 @@ namespace Sixnet.Cache.Keys.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return key type response</returns>
-        protected override TypeResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override TypeResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.KeyType(server, this);
         }

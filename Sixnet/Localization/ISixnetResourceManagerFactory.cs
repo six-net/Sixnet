@@ -7,6 +7,6 @@ namespace Sixnet.Localization
 {
     public interface ISixnetResourceManagerFactory
     {
-        ISixnetResourceManager Create(string baseName, Assembly assembly);
+        ISixnetResourceManager Create(ResourcePrefix resourcePrefix, Assembly assembly);
     }
 }

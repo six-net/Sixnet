@@ -6,7 +6,7 @@ namespace Sixnet.Cache.Hash.Options
     /// <summary>
     /// Hash decrement options
     /// </summary>
-    public class HashDecrementOptions : CacheOptions<HashDecrementResponse>
+    public class HashDecrementOptions : CacheOperationOptions<HashDecrementResponse>
     {
         /// <summary>
         /// Gets or sets the key
@@ -35,7 +35,7 @@ namespace Sixnet.Cache.Hash.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return hash decrement response</returns>
-        protected override async Task<HashDecrementResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<HashDecrementResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.HashDecrementAsync(server, this).ConfigureAwait(false);
         }
@@ -46,7 +46,7 @@ namespace Sixnet.Cache.Hash.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return hash decrement response</returns>
-        protected override HashDecrementResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override HashDecrementResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.HashDecrement(server, this);
         }

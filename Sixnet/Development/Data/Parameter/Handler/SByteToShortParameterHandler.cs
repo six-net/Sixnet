@@ -6,7 +6,7 @@ using Sixnet.Development.Data.Parameter.Handler;
 
 namespace Sixnet.Development.Data.ParameterHandler.Handler
 {
-    public class SByteToShortParameterHandler : IDataCommandParameterHandler
+    public class SByteToShortParameterHandler : ISixnetDataCommandParameterHandler
     {
         public DataCommandParameterItem Parse(DataCommandParameterItem originalParameter)
         {

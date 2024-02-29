@@ -10,14 +10,14 @@ namespace Sixnet.Development.Data.Event
     /// Deleting event
     /// </summary>
     [Serializable]
-    public class DeletingDataEvent : BaseDataEvent
+    public class DeletingDataEvent : BaseSixnetDataEvent
     {
         public DeletingDataEvent()
         {
             EventType = DataEventType.Deleting;
         }
 
-        public static DeletingDataEvent Create(IDataClient dataClient, DataCommand command)
+        public static DeletingDataEvent Create(ISixnetDataClient dataClient, SixnetDataCommand command)
         {
             return Create<DeletingDataEvent>(dataClient, command);
         }

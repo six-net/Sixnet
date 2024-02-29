@@ -18,7 +18,7 @@ namespace Sixnet.Code
         /// <returns>Return the max number</returns>
         public static int GetMaximum(int numberLength)
         {
-            ThrowHelper.ThrowArgErrorIf(numberLength < 1 || numberLength > 9, "Number length must be between 1 to 9");
+            SixnetDirectThrower.ThrowArgErrorIf(numberLength < 1 || numberLength > 9, "Number length must be between 1 to 9");
 
             if (numberLength == 9)
             {
@@ -40,7 +40,7 @@ namespace Sixnet.Code
         /// <returns>Return the minimum</returns>
         public static int GetMinimum(int numberLength)
         {
-            ThrowHelper.ThrowArgErrorIf(numberLength < 1 || numberLength > 10, "Number length must be between 1 to 10");
+            SixnetDirectThrower.ThrowArgErrorIf(numberLength < 1 || numberLength > 10, "Number length must be between 1 to 10");
 
             if (numberLength == 1)
             {

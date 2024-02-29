@@ -7,7 +7,7 @@ namespace Sixnet.Cache.Keys.Options
     /// <summary>
     /// Sort and store options
     /// </summary>
-    public class SortAndStoreOptions : CacheOptions<SortAndStoreResponse>
+    public class SortAndStoreOptions : CacheOperationOptions<SortAndStoreResponse>
     {
         /// <summary>
         /// Gets or sets the destination key
@@ -61,7 +61,7 @@ namespace Sixnet.Cache.Keys.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return sort and store response</returns>
-        protected override async Task<SortAndStoreResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<SortAndStoreResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.SortAndStoreAsync(server, this).ConfigureAwait(false);
         }
@@ -72,7 +72,7 @@ namespace Sixnet.Cache.Keys.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return sort and store response</returns>
-        protected override SortAndStoreResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override SortAndStoreResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.SortAndStore(server, this);
         }

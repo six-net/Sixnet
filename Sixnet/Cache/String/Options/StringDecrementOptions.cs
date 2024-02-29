@@ -7,7 +7,7 @@ namespace Sixnet.Cache.String
     /// <summary>
     /// String decrement options
     /// </summary>
-    public class StringDecrementOptions : CacheOptions<StringDecrementResponse>
+    public class StringDecrementOptions : CacheOperationOptions<StringDecrementResponse>
     {
         /// <summary>
         /// Gets or sets the cache key
@@ -31,7 +31,7 @@ namespace Sixnet.Cache.String
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return string decrement response</returns>
-        protected override async Task<StringDecrementResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<StringDecrementResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.StringDecrementAsync(server, this).ConfigureAwait(false);
         }
@@ -42,7 +42,7 @@ namespace Sixnet.Cache.String
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return string decrement response</returns>
-        protected override StringDecrementResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override StringDecrementResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.StringDecrement(server, this);
         }

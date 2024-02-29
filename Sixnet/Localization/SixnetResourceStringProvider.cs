@@ -12,18 +12,18 @@ namespace Sixnet.Localization
         private readonly IResourceNamesCache _resourceNamesCache;
         private readonly ISixnetResourceManager _resourceManager;
         private readonly Assembly _assembly;
-        private readonly string _resourceBaseName;
+        private readonly ResourcePrefix _resourcePrefix;
 
         public SixnetResourceStringProvider(
             IResourceNamesCache resourceCache,
             ISixnetResourceManager resourceManager,
             Assembly assembly,
-            string baseName)
+            ResourcePrefix resourcePrefix)
         {
             _resourceManager = resourceManager;
             _resourceNamesCache = resourceCache;
             _assembly = assembly;
-            _resourceBaseName = baseName;
+            _resourcePrefix = resourcePrefix;
         }
 
         private string GetResourceCacheKey(CultureInfo culture)

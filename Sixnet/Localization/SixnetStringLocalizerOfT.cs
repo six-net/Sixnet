@@ -25,7 +25,7 @@ namespace Sixnet.Localization
 
         public SixnetStringLocalizer(ISixnetStringLocalizerFactory factory)
         {
-            ThrowHelper.ThrowArgNullIf(factory == null, nameof(factory));
+            SixnetDirectThrower.ThrowArgErrorIf(factory == null, nameof(factory));
             _localizer = factory.CreateLocalizer(typeof(TResourceSource));
         }
 

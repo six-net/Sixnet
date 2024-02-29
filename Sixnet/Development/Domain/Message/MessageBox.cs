@@ -1,32 +1,32 @@
 ﻿using System.Collections.Generic;
 using Sixnet.Development.Work;
 
-namespace Sixnet.Development.Message
+namespace Sixnet.Development.Domain.Message
 {
     /// <summary>
     /// Message box
     /// </summary>
     internal class MessageBox
     {
-        readonly List<MessageInfo> _messages = new List<MessageInfo>();
+        readonly List<SixnetMessageInfo> _messages = new List<SixnetMessageInfo>();
 
         private MessageBox()
         {
-            MessageManager.CurrentMessageBox?.Dispose();
-            MessageManager.CurrentMessageBox = this;
+            SixnetMessager.MessageBox?.Dispose();
+            SixnetMessager.MessageBox = this;
         }
 
-        public IEnumerable<MessageInfo> Messages => _messages;
+        public IEnumerable<SixnetMessageInfo> Messages => _messages;
 
         /// <summary>
         /// Add message
         /// </summary>
         /// <param name="newMessages">new messages</param>
-        public void Add(params MessageInfo[] newMessages)
+        public void Add(params SixnetMessageInfo[] newMessages)
         {
             if (!newMessages.IsNullOrEmpty())
             {
-                foreach (MessageInfo message in newMessages)
+                foreach (SixnetMessageInfo message in newMessages)
                 {
                     if (string.IsNullOrWhiteSpace(message.WorkId))
                     {

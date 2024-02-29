@@ -23,14 +23,10 @@ namespace Sixnet.Security.Cryptography
         /// <returns>Return the encrypted value</returns>
         public static string Encrypt(string originalValue)
         {
-            #region varyfy args
-
             if (string.IsNullOrWhiteSpace(originalValue))
             {
                 return string.Empty;
             }
-
-            #endregion
 
             byte[] valueBytes = Encoding.UTF8.GetBytes(originalValue);
             byte[] md5Bytes = MD5CryptoServiceProvider.ComputeHash(valueBytes);
@@ -50,14 +46,10 @@ namespace Sixnet.Security.Cryptography
         /// <returns>Return the encrypted value</returns>
         public static string Encrypt(string originalValue, int times)
         {
-            #region verify args
-
             if (string.IsNullOrWhiteSpace(originalValue))
             {
                 return string.Empty;
             }
-
-            #endregion
 
             string encryptValue;
             do

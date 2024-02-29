@@ -6,7 +6,7 @@ namespace Sixnet.App
     /// Defines application type
     /// </summary>
     [Serializable]
-    public enum ApplicationType
+    public enum SixnetApplicationType
     {
         /// <summary>
         /// Unknown
@@ -42,7 +42,7 @@ namespace Sixnet.App
     /// Defines application status
     /// </summary>
     [Serializable]
-    public enum ApplicationStatus
+    public enum SixnetApplicationStatus
     {
         /// <summary>
         /// Ready
@@ -74,7 +74,7 @@ namespace Sixnet.App
     /// Defines file match pattern
     /// </summary>
     [Serializable]
-    public enum FileMatchPattern
+    public enum SixnetFileMatchPattern
     {
         /// <summary>
         /// Match all files

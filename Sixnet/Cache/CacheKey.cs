@@ -81,7 +81,7 @@ namespace Sixnet.Cache
         /// <summary>
         /// Key values
         /// </summary>
-        readonly SortedDictionary<string, string> nameValues = new SortedDictionary<string, string>();
+        readonly List<KeyValuePair<string, string>> nameValues = new();
 
         /// <summary>
         /// Actual cache key value
@@ -114,26 +114,7 @@ namespace Sixnet.Cache
             {
                 return this;
             }
-            nameValues[name] = value;
-            generatedActualKey = false;
-            return this;
-        }
-
-        /// <summary>
-        /// Remove names
-        /// </summary>
-        /// <param name="names">Cache key names</param>
-        /// <returns>Return the newest cache key</returns>
-        public CacheKey RemoveNames(params string[] names)
-        {
-            if (names.IsNullOrEmpty())
-            {
-                return this;
-            }
-            foreach (var name in names)
-            {
-                nameValues.Remove(name);
-            }
+            nameValues.Add(new KeyValuePair<string, string>(name, value));
             generatedActualKey = false;
             return this;
         }
@@ -148,25 +129,25 @@ namespace Sixnet.Cache
             {
                 return actualCacheKey;
             }
-            List<string> allKeys = new List<string>();
+            var allKeys = new List<string>();
 
             //global keys
-            var globalPrefixs = CacheManager.Configuration.GetGlobalPrefixs();
+            var globalPrefixs = SixnetCacher.GetGlobalPrefixs();
             if (!globalPrefixs.IsNullOrEmpty())
             {
                 allKeys.AddRange(globalPrefixs);
             }
             //object keys
-            var objectPrefixs = CacheManager.Configuration.GetObjectPrefixs(cacheObject);
+            var objectPrefixs = SixnetCacher.GetObjectPrefixs(cacheObject);
             if (!objectPrefixs.IsNullOrEmpty())
             {
                 allKeys.AddRange(objectPrefixs);
             }
             if (!nameValues.IsNullOrEmpty())
             {
-                allKeys.AddRange(nameValues.Select(c => string.IsNullOrWhiteSpace(c.Value) ? c.Key : string.Format("{0}{1}{2}", c.Key, CacheManager.Configuration.NameValueSplitWord, c.Value)));
+                allKeys.AddRange(nameValues.Select(c => string.IsNullOrWhiteSpace(c.Value) ? c.Key : string.Format("{0}{1}{2}", c.Key, SixnetCacher.GetNameValueSplitChar(), c.Value)));
             }
-            actualCacheKey = string.Join(CacheManager.Configuration.KeyNameSplitWord, allKeys);
+            actualCacheKey = string.Join(SixnetCacher.GetKeyNameSplitChar(), allKeys);
             generatedActualKey = true;
             return actualCacheKey;
         }
@@ -191,13 +172,16 @@ namespace Sixnet.Cache
             {
                 return cacheKey;
             }
-            var keyNameItems = key.LSplit(CacheManager.Configuration.KeyNameSplitWord);
-            var globalPrefixs = CacheManager.Configuration.GetGlobalPrefixs();
+            var keyNameItems = key.LSplit(SixnetCacher.GetKeyNameSplitChar());
+            var globalPrefixs = SixnetCacher.GetGlobalPrefixs();
             if (!globalPrefixs.IsNullOrEmpty())
             {
                 keyNameItems = keyNameItems.Except(globalPrefixs).ToArray();
             }
-            cacheKey.AddName(key);
+            foreach (var keyItem in keyNameItems)
+            {
+                cacheKey.AddName(keyItem);
+            }
             return cacheKey;
         }
 

@@ -1,4 +1,4 @@
-﻿namespace Sixnet.Development.Message
+﻿namespace Sixnet.Development.Domain.Message
 {
     /// <summary>
     /// Defines message result type

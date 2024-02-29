@@ -11,7 +11,7 @@ namespace Sixnet.Development.Repository
     /// <summary>
     /// Defines base repository
     /// </summary>
-    public abstract partial class BaseRepository<TModel> : IRepository<TModel>
+    public abstract partial class BaseRepository<TModel> : ISixnetRepository<TModel>
     {
         #region Add
 

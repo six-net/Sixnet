@@ -1,10 +1,8 @@
-﻿using System;
-using Microsoft.Extensions.DependencyInjection.Extensions;
+﻿using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Localization;
 using Sixnet.Exceptions;
 using Sixnet.Localization;
-using Sixnet.Localization.Json;
-using Sixnet.Localization.Resource;
+using System;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -22,61 +20,27 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <exception cref="ArgumentNullException"></exception>
         public static IServiceCollection AddSixnetLocalization(this IServiceCollection services, Action<SixnetLocalizationOptions> configure = null)
         {
-            ThrowHelper.ThrowArgNullIf(services == null, nameof(services));
+            SixnetDirectThrower.ThrowArgNullIf(services == null, nameof(services));
 
+            // local options
             var options = new SixnetLocalizationOptions();
             configure?.Invoke(options);
 
-            switch (options.StringSource)
-            {
-                case LocalizationStringSource.Resource:
-                    AddResourceLocalization(services, op =>
-                    {
-                        op.ResourcesPath = options.ResourcesPath;
-                    });
-                    break;
-                case LocalizationStringSource.Json:
-                    AddJsonLocalization(services, op =>
-                    {
-                        op.ResourcesPath = options.ResourcesPath;
-                    });
-                    break;
-            }
-
             // system
-            services.TryAddSingleton<IStringLocalizer, SixnetStringLocalizer>();
             services.TryAddSingleton<IStringLocalizerFactory, SixnetResourceStringLocalizerFactory>();
+            services.TryAddSingleton<IStringLocalizer, SixnetStringLocalizer>();
             services.TryAddTransient(typeof(IStringLocalizer<>), typeof(StringLocalizer<>));
+            services.Configure<LocalizationOptions>(op =>
+            {
+                op.ResourcesPath = options.ResourcesPath;
+            });
 
             // sixnet
-            services.TryAddSingleton<ISixnetStringLocalizer, SixnetStringLocalizer>();
-            services.TryAddTransient(typeof(ISixnetStringLocalizer<>), typeof(SixnetStringLocalizer<>));
             services.TryAddSingleton<ISixnetStringLocalizerFactory, SixnetStringLocalizerFactory>();
+            services.TryAddSingleton<ISixnetResourceManagerFactory, SixnetResourceManagerFactory>();
+            services.TryAddSingleton<ISixnetStringLocalizer, SixnetStringLocalizer>();
+            services.TryAddSingleton(typeof(ISixnetStringLocalizer<>), typeof(SixnetStringLocalizer<>));
 
-            return services;
-        }
-
-        /// <summary>
-        /// Add resource localization
-        /// </summary>
-        /// <param name="services">Services</param>
-        /// <param name="configure">Configure</param>
-        /// <returns></returns>
-        static IServiceCollection AddResourceLocalization(IServiceCollection services, Action<LocalizationOptions> configure = null)
-        {
-            services.AddSixnetResourceLocalization(configure);
-            return services;
-        }
-
-        /// <summary>
-        /// Add sixnet json localization
-        /// </summary>
-        /// <param name="services">Services</param>
-        /// <param name="configure">Configure</param>
-        /// <returns></returns>
-        static IServiceCollection AddJsonLocalization(IServiceCollection services, Action<LocalizationOptions> configure = null)
-        {
-            services.AddSixnetJsonLocalization(configure);
             return services;
         }
     }

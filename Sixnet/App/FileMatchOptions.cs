@@ -12,7 +12,7 @@ namespace Sixnet.App
         /// <summary>
         /// Gets or sets the file match pattern
         /// </summary>
-        public FileMatchPattern FileMatchPattern { get; set; } = FileMatchPattern.Convention;
+        public SixnetFileMatchPattern FileMatchPattern { get; set; } = SixnetFileMatchPattern.Convention;
 
         /// <summary>
         /// File search option

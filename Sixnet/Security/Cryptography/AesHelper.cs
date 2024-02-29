@@ -18,21 +18,18 @@ namespace Sixnet.Security.Cryptography
         /// <summary>
         /// Encrypt
         /// </summary>
+        /// <param name="value">Original value</param>
         /// <param name="key">Key</param>
-        /// <param name="originalValue">Original value</param>
         /// <param name="iv">IV</param>
         /// <param name="encoding">Encoding(The default is UTF-8)</param>
         /// <returns>Return a encrypted value</returns>
-        public static string Encrypt(string key, string originalValue, string iv = DefaultIV, Encoding encoding = null, CipherMode mode = CipherMode.ECB, PaddingMode paddingMode = PaddingMode.PKCS7)
+        public static string Encrypt(string value, string key, string iv = DefaultIV, Encoding encoding = null, CipherMode mode = CipherMode.ECB, PaddingMode paddingMode = PaddingMode.PKCS7)
         {
-            if (encoding == null)
-            {
-                encoding = Encoding.UTF8;
-            }
+            encoding ??= Encoding.UTF8;
             var aes = GetAes(key, iv, mode, paddingMode, encoding);
             using (var encryptor = aes.CreateEncryptor())
             {
-                byte[] encryptArray = encoding.GetBytes(originalValue);
+                byte[] encryptArray = encoding.GetBytes(value);
                 return Convert.ToBase64String(encryptor.TransformFinalBlock(encryptArray, 0, encryptArray.Length));
             }
         }
@@ -44,21 +41,18 @@ namespace Sixnet.Security.Cryptography
         /// <summary>
         /// Decrypt
         /// </summary>
+        /// <param name="value">Original value</param>
         /// <param name="key">Key</param>
-        /// <param name="encryptedValue">Original value</param>
         /// <param name="iv">IV</param>
         /// <param name="encoding">Encoding(The default is UTF-8)</param>
         /// <returns>Return a encrypted value</returns>
-        public static string Decrypt(string key, string encryptedValue, string iv = DefaultIV, Encoding encoding = null, CipherMode mode = CipherMode.ECB, PaddingMode paddingMode = PaddingMode.PKCS7)
+        public static string Decrypt(string value, string key, string iv = DefaultIV, Encoding encoding = null, CipherMode mode = CipherMode.ECB, PaddingMode paddingMode = PaddingMode.PKCS7)
         {
-            if (encoding == null)
-            {
-                encoding = Encoding.UTF8;
-            }
+            encoding ??= Encoding.UTF8;
             var aes = GetAes(key, iv, mode, paddingMode, encoding);
             using (var decryptor = aes.CreateDecryptor())
             {
-                byte[] decryptArray = Convert.FromBase64String(encryptedValue);
+                byte[] decryptArray = Convert.FromBase64String(value);
                 return encoding.GetString(decryptor.TransformFinalBlock(decryptArray, 0, decryptArray.Length));
             }
         }

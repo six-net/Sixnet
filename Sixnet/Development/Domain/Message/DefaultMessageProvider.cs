@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Sixnet.Development.Message
+namespace Sixnet.Development.Domain.Message
 {
     /// <summary>
     /// Default message provider
     /// </summary>
-    public class DefaultMessageProvider : IMessageProvider
+    public class DefaultMessageProvider : ISixnetMessageProvider
     {
         /// <summary>
         /// Send message
@@ -29,7 +29,7 @@ namespace Sixnet.Development.Message
             {
                 return SendMessageResult.NoOptions();
             }
-            Dictionary<string, List<MessageInfo>> messageGroups = new Dictionary<string, List<MessageInfo>>();
+            var messageGroups = new Dictionary<string, List<SixnetMessageInfo>>();
             foreach (var msg in options.Messages)
             {
                 if (messageGroups.ContainsKey(msg.Type))
@@ -38,16 +38,16 @@ namespace Sixnet.Development.Message
                 }
                 else
                 {
-                    messageGroups.Add(msg.Type, new List<MessageInfo>()
+                    messageGroups.Add(msg.Type, new List<SixnetMessageInfo>()
                     {
                         msg
                     });
                 }
             }
-            SendMessageResult sendResult = SendMessageResult.SendSuccess();
+            var sendResult = SendMessageResult.SendSuccess();
             foreach (var msgGroup in messageGroups)
             {
-                var messageHandler = MessageManager.GetMessageHandler(msgGroup.Key);
+                var messageHandler = SixnetMessager.GetMessageHandler(msgGroup.Key);
                 if (messageHandler == null)
                 {
                     return SendMessageResult.NoHandler(string.Format("Not set handler for {0}", msgGroup.Key));

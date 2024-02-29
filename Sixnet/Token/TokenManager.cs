@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Sixnet.Exceptions;
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace Sixnet.Token
@@ -11,7 +13,7 @@ namespace Sixnet.Token
         /// <summary>
         /// Token providers
         /// </summary>
-        static readonly Dictionary<string, ITokenProvider> TokenProviders = new Dictionary<string, ITokenProvider>();
+        static readonly ConcurrentDictionary<string, ITokenProvider> TokenProviders = new ConcurrentDictionary<string, ITokenProvider>();
 
         #region Encode
 
@@ -66,14 +68,14 @@ namespace Sixnet.Token
 
         #endregion
 
-        #region Configure token provider
+        #region Add token provider
 
         /// <summary>
-        /// Configure token provider
+        /// Add token provider
         /// </summary>
         /// <param name="tokenType">Token type</param>
         /// <param name="tokenProvider">Token provider</param>
-        public static void ConfigureTokenProvider(string tokenType, ITokenProvider tokenProvider)
+        public static void AddTokenProvider(string tokenType, ITokenProvider tokenProvider)
         {
             TokenProviders[tokenType] = tokenProvider;
         }
@@ -89,15 +91,8 @@ namespace Sixnet.Token
         /// <returns>Return token provider</returns>
         static ITokenProvider GetTokenProvider(string tokenType)
         {
-            if (string.IsNullOrWhiteSpace(tokenType) || TokenProviders == null || TokenProviders.Count < 1)
-            {
-                throw new Exception("Token provider is not found");
-            }
-            if (TokenProviders.ContainsKey(tokenType))
-            {
-                return TokenProviders[tokenType];
-            }
-            throw new Exception("Token provider is not found");
+            SixnetDirectThrower.ThrowSixnetExceptionIf(string.IsNullOrWhiteSpace(tokenType) || !TokenProviders.ContainsKey(tokenType), "Token provider is not found");
+            return TokenProviders[tokenType];
         }
 
         #endregion

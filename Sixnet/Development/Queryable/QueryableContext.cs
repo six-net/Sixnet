@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Dynamic;
-using System.Linq;
-using System.Linq.Expressions;
-using Newtonsoft.Json.Bson;
-using Sixnet.Development.Data;
-using Sixnet.Development.Data.Command;
+﻿using Sixnet.Development.Data;
 using Sixnet.Development.Data.Database;
 using Sixnet.Development.Data.Field;
 using Sixnet.Development.Entity;
@@ -15,20 +8,25 @@ using Sixnet.Expressions.Linq;
 using Sixnet.Model;
 using Sixnet.Model.Paging;
 using Sixnet.Reflection;
+using System;
+using System.Collections.Generic;
+using System.Dynamic;
+using System.Linq;
+using System.Linq.Expressions;
 
 namespace Sixnet.Development.Queryable
 {
     /// <summary>
     /// Defines queryable context
     /// </summary>
-    internal class QueryableContext : IInnerClone<QueryableContext>
+    internal class QueryableContext : ISixnetCloneableModel<QueryableContext>
     {
         #region Fields
 
         /// <summary>
         /// Finally fields cache
         /// </summary>
-        Dictionary<string, IEnumerable<IDataField>> finallyFieldsCache = new();
+        Dictionary<string, IEnumerable<ISixnetDataField>> finallyFieldsCache = new();
 
         /// <summary>
         /// Indecates whether exclude necessary fields
@@ -88,7 +86,7 @@ namespace Sixnet.Development.Queryable
         /// <summary>
         /// Gets all condition
         /// </summary>
-        public List<ICondition> Conditions { get; private set; }
+        public List<ISixnetCondition> Conditions { get; private set; }
 
         /// <summary>
         /// Gets all criterion
@@ -103,17 +101,17 @@ namespace Sixnet.Development.Queryable
         /// <summary>
         /// Get the selected fields
         /// </summary>
-        public List<IDataField> SelectedFields { get; private set; }
+        public List<ISixnetDataField> SelectedFields { get; private set; }
 
         /// <summary>
         /// Get the unselected fields
         /// </summary>
-        public List<IDataField> UnselectedFields { get; private set; }
+        public List<ISixnetDataField> UnselectedFields { get; private set; }
 
         /// <summary>
         /// Gets the group fields
         /// </summary>
-        public List<IDataField> GroupFields { get; set; }
+        public List<ISixnetDataField> GroupFields { get; set; }
 
         /// <summary>
         /// Gets the script
@@ -179,7 +177,7 @@ namespace Sixnet.Development.Queryable
         /// <summary>
         /// Gets the tree info
         /// </summary>
-        public TreeInfo TreeInfo { get; private set; }
+        public TreeMatchOptions TreeInfo { get; private set; }
 
         /// <summary>
         /// Gets the joins
@@ -234,7 +232,7 @@ namespace Sixnet.Development.Queryable
         /// <summary>
         /// Gets or sets the repository
         /// </summary>
-        public IRepository Repository { get; set; }
+        public ISixnetRepository Repository { get; set; }
 
         /// <summary>
         /// Gets or sets the having queryable
@@ -270,9 +268,9 @@ namespace Sixnet.Development.Queryable
         /// <param name="criterionOperator">Criterion operator</param>
         /// <param name="value">Value</param>
         /// <param name="criterionOptions">Criterion options</param>
-        public QueryableContext AddCriterion(CriterionConnector connector, IDataField field, CriterionOperator criterionOperator, dynamic value, CriterionOptions criterionOptions = null)
+        public QueryableContext AddCriterion(CriterionConnector connector, ISixnetDataField field, CriterionOperator criterionOperator, dynamic value, CriterionOptions criterionOptions = null)
         {
-            ThrowHelper.ThrowArgErrorIf(field == null, "Field is null");
+            SixnetDirectThrower.ThrowArgErrorIf(field == null, "Field is null");
             var newCriterion = Criterion.Create(criterionOperator, field, value, connector, criterionOptions);
             return AddCondition(newCriterion);
         }
@@ -281,7 +279,7 @@ namespace Sixnet.Development.Queryable
         /// Add condition
         /// </summary>
         /// <param name="condition">Condition</param>
-        public QueryableContext AddCondition(ICondition condition)
+        public QueryableContext AddCondition(ISixnetCondition condition)
         {
             #region Handle condition
 
@@ -324,7 +322,7 @@ namespace Sixnet.Development.Queryable
             {
                 // Clear validation function
                 validationFuncDict?.Clear();
-                Conditions ??= new List<ICondition>();
+                Conditions ??= new List<ISixnetCondition>();
                 Conditions.Add(condition);
             }
 
@@ -435,11 +433,11 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        public QueryableContext SelectFields(params IDataField[] fields)
+        public QueryableContext SelectFields(params ISixnetDataField[] fields)
         {
             if (!fields.IsNullOrEmpty())
             {
-                SelectedFields ??= new List<IDataField>();
+                SelectedFields ??= new List<ISixnetDataField>();
                 SelectedFields.AddRange(fields);
                 ClearCacheFields();
             }
@@ -454,7 +452,7 @@ namespace Sixnet.Development.Queryable
         /// <returns></returns>
         public QueryableContext SelectFields<T>(params Expression<Func<T, dynamic>>[] fields)
         {
-            return SelectFields(fields?.Select(f => ExpressionHelper.GetDataField(f.Body)).ToArray());
+            return SelectFields(fields?.Select(f => SixnetExpressionHelper.GetDataField(f.Body)).ToArray());
         }
 
         /// <summary>
@@ -473,11 +471,11 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        public QueryableContext UnselectFields(params IDataField[] fields)
+        public QueryableContext UnselectFields(params ISixnetDataField[] fields)
         {
             if (!fields.IsNullOrEmpty())
             {
-                UnselectedFields ??= new List<IDataField>();
+                UnselectedFields ??= new List<ISixnetDataField>();
                 UnselectedFields.AddRange(fields);
                 ClearCacheFields();
             }
@@ -492,7 +490,7 @@ namespace Sixnet.Development.Queryable
         /// <returns></returns>
         public QueryableContext UnselectFields<T>(params Expression<Func<T, object>>[] fields)
         {
-            return UnselectFields(fields?.Select(f => ExpressionHelper.GetDataField(f.Body)).ToArray());
+            return UnselectFields(fields?.Select(f => SixnetExpressionHelper.GetDataField(f.Body)).ToArray());
         }
 
         /// <summary>
@@ -512,7 +510,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="modelType">Model type</param>
         /// <param name="includeNecessaryFields">Whether include the necessary fields</param>
         /// <returns></returns>
-        public IEnumerable<IDataField> GetFinallyFields(Type modelType, bool includeNecessaryFields)
+        public IEnumerable<ISixnetDataField> GetFinallyFields(Type modelType, bool includeNecessaryFields)
         {
             string fieldsCacheKey = $"{modelType?.GUID ?? NullableEntityId}_{(includeNecessaryFields ? 1 : 0)}";
             if (!finallyFieldsCache.TryGetValue(fieldsCacheKey, out var finallyFields) || (finallyFields?.IsNullOrEmpty() ?? true))
@@ -520,7 +518,7 @@ namespace Sixnet.Development.Queryable
                 finallyFields = SelectedFields;
                 bool hasSelectedFields = !(finallyFields?.IsNullOrEmpty() ?? true);
                 bool hasUnselectedFields = !(UnselectedFields?.IsNullOrEmpty() ?? true);
-                var modelQueryableFields = EntityManager.GetQueryableFields(modelType);
+                var modelQueryableFields = SixnetEntityManager.GetQueryableFields(modelType);
                 var fullFields = !hasSelectedFields;
 
                 // unselect fields
@@ -654,7 +652,7 @@ namespace Sixnet.Development.Queryable
             {
                 return null;
             }
-            var genericLambdaMethod = ReflectionManager.Expression.LambdaMethod.MakeGenericMethod(funcType);
+            var genericLambdaMethod = SixnetReflecter.Expression.LambdaMethod.MakeGenericMethod(funcType);
             var lambdaExpression = genericLambdaMethod.Invoke(null, new object[]
             {
                 conditionExpression,parameterArray
@@ -670,7 +668,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="parameter">Parameter expression</param>
         /// <param name="condition">Condition</param>
         /// <returns>Return query expression</returns>
-        Expression GenerateExpression(Expression parameter, ICondition condition)
+        Expression GenerateExpression(Expression parameter, ISixnetCondition condition)
         {
             if (condition is Criterion)
             {
@@ -738,7 +736,7 @@ namespace Sixnet.Development.Queryable
                 criterionValue = rightConstantField.Value;
             }
             var valueType = criterionValue?.GetType();
-            var valueIsNotCollection = valueType == null || !ReflectionManager.Collections.IsCollectionType(valueType);
+            var valueIsNotCollection = valueType == null || !SixnetReflecter.Collections.IsCollectionType(valueType);
             if (leftExp != null && leftExp.NodeType == ExpressionType.MemberAccess && leftExp.Type.IsEnum && valueIsNotCollection)
             {
                 leftExp = Expression.Convert(leftExp, criterionValue.GetType());
@@ -806,19 +804,19 @@ namespace Sixnet.Development.Queryable
                     conditionExp = Expression.LessThanOrEqual(leftExp, rightExp);
                     break;
                 case CriterionOperator.BeginLike:
-                    var beginLikeExpression = Expression.Call(propertyExp, ReflectionManager.String.StringIndexOfMethod, valueExp);
+                    var beginLikeExpression = Expression.Call(propertyExp, SixnetReflecter.String.StringIndexOfMethod, valueExp);
                     conditionExp = Expression.Equal(beginLikeExpression, Expression.Constant(0));
                     break;
                 case CriterionOperator.Like:
-                    var likeExpression = Expression.Call(propertyExp, ReflectionManager.String.StringIndexOfMethod, valueExp);
+                    var likeExpression = Expression.Call(propertyExp, SixnetReflecter.String.StringIndexOfMethod, valueExp);
                     conditionExp = Expression.GreaterThanOrEqual(likeExpression, Expression.Constant(0));
                     break;
                 case CriterionOperator.EndLike:
-                    var endLikeExpression = Expression.Call(propertyExp, ReflectionManager.String.EndWithMethod, valueExp);
+                    var endLikeExpression = Expression.Call(propertyExp, SixnetReflecter.String.EndWithMethod, valueExp);
                     conditionExp = Expression.Equal(endLikeExpression, Expression.Constant(true));
                     break;
                 case CriterionOperator.In:
-                    ThrowHelper.ThrowArgNullIf(criterionValue == null, "Criterion value is null");
+                    SixnetDirectThrower.ThrowArgNullIf(criterionValue == null, "Criterion value is null");
                     if (valueType != null && valueType.GenericTypeArguments != null && valueType.GenericTypeArguments.Length > 0)
                     {
                         valueType = valueType.GenericTypeArguments[valueType.GenericTypeArguments.Length - 1];
@@ -839,11 +837,11 @@ namespace Sixnet.Development.Queryable
                     {
                         valueType = typeof(object);
                     }
-                    var inMethod = ReflectionManager.Collections.GetCollectionContainsMethod(valueType);
+                    var inMethod = SixnetReflecter.Collections.GetCollectionContainsMethod(valueType);
                     conditionExp = Expression.Call(inMethod, valueExp, propertyExp);
                     break;
                 case CriterionOperator.NotIn:
-                    ThrowHelper.ThrowArgNullIf(criterionValue == null, "Criterion value is null");
+                    SixnetDirectThrower.ThrowArgNullIf(criterionValue == null, "Criterion value is null");
                     if (valueType != null && valueType.GenericTypeArguments != null)
                     {
                         valueType = valueType.GenericTypeArguments[0];
@@ -852,7 +850,7 @@ namespace Sixnet.Development.Queryable
                     {
                         valueType = typeof(object);
                     }
-                    var notInMethod = ReflectionManager.Collections.GetCollectionContainsMethod(valueType);
+                    var notInMethod = SixnetReflecter.Collections.GetCollectionContainsMethod(valueType);
                     conditionExp = Expression.Not(Expression.Call(notInMethod, valueExp, propertyExp));
                     break;
                 default:
@@ -862,7 +860,7 @@ namespace Sixnet.Development.Queryable
             return conditionExp;
         }
 
-        Expression GetFieldExpression(Expression parameter, IDataField field)
+        Expression GetFieldExpression(Expression parameter, ISixnetDataField field)
         {
             if (field == null)
             {
@@ -894,7 +892,7 @@ namespace Sixnet.Development.Queryable
         /// <returns></returns>
         public QueryableContext TreeMatching(string dataFieldName, string parentFieldName, TreeMatchingDirection direction = TreeMatchingDirection.Down)
         {
-            ThrowHelper.ThrowArgErrorIf(string.IsNullOrWhiteSpace(dataFieldName) || string.IsNullOrWhiteSpace(parentFieldName), $"{nameof(dataFieldName)} or {nameof(parentFieldName)} is null or empty");
+            SixnetDirectThrower.ThrowArgErrorIf(string.IsNullOrWhiteSpace(dataFieldName) || string.IsNullOrWhiteSpace(parentFieldName), $"{nameof(dataFieldName)} or {nameof(parentFieldName)} is null or empty");
             return TreeMatching(PropertyField.Create(dataFieldName), PropertyField.Create(parentFieldName), direction);
         }
 
@@ -905,12 +903,12 @@ namespace Sixnet.Development.Queryable
         /// <param name="parentField">Parent field</param>
         /// <param name="direction">Matching direction</param>
         /// <returns></returns>
-        public QueryableContext TreeMatching(IDataField dataField, IDataField parentField, TreeMatchingDirection direction = TreeMatchingDirection.Down)
+        public QueryableContext TreeMatching(ISixnetDataField dataField, ISixnetDataField parentField, TreeMatchingDirection direction = TreeMatchingDirection.Down)
         {
-            ThrowHelper.ThrowArgErrorIf(dataField == null || parentField == null, $"{nameof(dataField)} or {nameof(parentField)} is null");
-            ThrowHelper.ThrowArgErrorIf(dataField == parentField, $"{nameof(dataField)} and {nameof(parentField)} can not be the same value");
+            SixnetDirectThrower.ThrowArgErrorIf(dataField == null || parentField == null, $"{nameof(dataField)} or {nameof(parentField)} is null");
+            SixnetDirectThrower.ThrowArgErrorIf(dataField == parentField, $"{nameof(dataField)} and {nameof(parentField)} can not be the same value");
 
-            TreeInfo = new TreeInfo()
+            TreeInfo = new TreeMatchOptions()
             {
                 DataField = dataField,
                 ParentField = parentField,
@@ -931,12 +929,12 @@ namespace Sixnet.Development.Queryable
         public QueryableContext LightClone()
         {
             var newQueryableContext = CloneValueMember();
-            newQueryableContext.Conditions = Conditions == null ? null : new List<ICondition>(Conditions);
+            newQueryableContext.Conditions = Conditions == null ? null : new List<ISixnetCondition>(Conditions);
             newQueryableContext.Criteria = Criteria == null ? null : new List<Criterion>(Criteria);
             newQueryableContext.Sorts = Sorts == null ? null : new List<SortEntry>(Sorts);
-            newQueryableContext.SelectedFields = SelectedFields == null ? null : new List<IDataField>(SelectedFields);
-            newQueryableContext.UnselectedFields = UnselectedFields == null ? null : new List<IDataField>(UnselectedFields);
-            newQueryableContext.GroupFields = GroupFields == null ? null : new List<IDataField>(GroupFields);
+            newQueryableContext.SelectedFields = SelectedFields == null ? null : new List<ISixnetDataField>(SelectedFields);
+            newQueryableContext.UnselectedFields = UnselectedFields == null ? null : new List<ISixnetDataField>(UnselectedFields);
+            newQueryableContext.GroupFields = GroupFields == null ? null : new List<ISixnetDataField>(GroupFields);
             newQueryableContext.ScriptParameters = ScriptParameters?.ToDictionary(c => c.Key, c => c.Value);
             newQueryableContext.TreeInfo = TreeInfo;
             newQueryableContext.Joins = Joins == null ? null : new List<JoinEntry>(Joins);
@@ -945,7 +943,7 @@ namespace Sixnet.Development.Queryable
             newQueryableContext.Repository = Repository;
             newQueryableContext.HavingQueryable = HavingQueryable?.LightClone();
             newQueryableContext.SplitTableBehavior = SplitTableBehavior;
-            newQueryableContext.finallyFieldsCache = new Dictionary<string, IEnumerable<IDataField>>(finallyFieldsCache);
+            newQueryableContext.finallyFieldsCache = new Dictionary<string, IEnumerable<ISixnetDataField>>(finallyFieldsCache);
             newQueryableContext.validationFuncDict = new Dictionary<Guid, dynamic>(validationFuncDict);
             return newQueryableContext;
         }
@@ -1035,13 +1033,13 @@ namespace Sixnet.Development.Queryable
                     var targetModelType = joinEntry.TargetQueryable.GetModelType();
                     if (sourceModelType == targetModelType)
                     {
-                        var primaryKeys = EntityManager.GetPrimaryKeyNames(sourceModelType);
-                        ThrowHelper.ThrowFrameworkErrorIf(primaryKeys.IsNullOrEmpty(), $"{sourceModelType.FullName} not set primary key");
+                        var primaryKeys = SixnetEntityManager.GetPrimaryKeyNames(sourceModelType);
+                        SixnetDirectThrower.ThrowSixnetExceptionIf(primaryKeys.IsNullOrEmpty(), $"{sourceModelType.FullName} not set primary key");
                         joinFields = primaryKeys.ToDictionary(c => c, c => c);
                     }
                     else
                     {
-                        joinFields = EntityManager.GetRelationFieldNames(sourceModelType, targetModelType);
+                        joinFields = SixnetEntityManager.GetRelationFieldNames(sourceModelType, targetModelType);
                     }
                     if (!joinFields.IsNullOrEmpty())
                     {
@@ -1150,7 +1148,7 @@ namespace Sixnet.Development.Queryable
             }
             if (pageSize < 1)
             {
-                pageSize = DataManager.DefaultPagingSize;
+                pageSize = SixnetDataManager.DefaultPagingSize;
             }
 
             return Take(pageSize, (pageIndex - 1) * pageSize);
@@ -1165,7 +1163,7 @@ namespace Sixnet.Development.Queryable
         {
             if (pagingFilter == null)
             {
-                return TakeByPaging(1, DataManager.DefaultPagingSize);
+                return TakeByPaging(1, SixnetDataManager.DefaultPagingSize);
             }
             return TakeByPaging(pagingFilter.Page, pagingFilter.PageSize);
         }
@@ -1182,7 +1180,7 @@ namespace Sixnet.Development.Queryable
             }
             if (TakeCount < 1)
             {
-                TakeCount = DataManager.DefaultPagingSize;
+                TakeCount = SixnetDataManager.DefaultPagingSize;
             }
             return new PagingFilter()
             {
@@ -1210,11 +1208,11 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        public QueryableContext GroupBy(params IDataField[] fields)
+        public QueryableContext GroupBy(params ISixnetDataField[] fields)
         {
             if (!fields.IsNullOrEmpty())
             {
-                GroupFields ??= new List<IDataField>();
+                GroupFields ??= new List<ISixnetDataField>();
                 GroupFields.AddRange(fields);
             }
             return this;

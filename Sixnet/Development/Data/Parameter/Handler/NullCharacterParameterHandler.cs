@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Sixnet.Development.Data.Parameter.Handler
 {
-    public class NullCharacterParameterHandler : IDataCommandParameterHandler
+    public class NullCharacterParameterHandler : ISixnetDataCommandParameterHandler
     {
         const char nullChar = '\u0000';
         public DataCommandParameterItem Parse(DataCommandParameterItem originalParameter)

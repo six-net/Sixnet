@@ -27,7 +27,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="condition">Condition</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> Where(ICondition condition)
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> Where(ISixnetCondition condition)
         {
             base.Where(condition);
             return this;
@@ -39,7 +39,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="predicate">Predicate</param>
         /// <param name="condition">Group condition</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> WhereIf(bool predicate, ICondition condition)
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> WhereIf(bool predicate, ISixnetCondition condition)
         {
             base.WhereIf(predicate, condition);
             return this;
@@ -221,7 +221,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="field">Field</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> OrderBy(IDataField field, bool desc = false)
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> OrderBy(ISixnetDataField field, bool desc = false)
         {
             base.OrderBy(field, desc);
             return this;
@@ -233,7 +233,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> OrderBy(IEnumerable<IDataField> fields, bool desc = false)
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> OrderBy(IEnumerable<ISixnetDataField> fields, bool desc = false)
         {
             base.OrderBy(fields, desc);
             return this;
@@ -274,7 +274,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="field">Field</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> OrderByIf(bool predicate, IDataField field, bool desc = false)
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> OrderByIf(bool predicate, ISixnetDataField field, bool desc = false)
         {
             base.OrderByIf(predicate, field, desc);
             return this;
@@ -287,7 +287,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> OrderByIf(bool predicate, IEnumerable<IDataField> fields, bool desc = false)
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> OrderByIf(bool predicate, IEnumerable<ISixnetDataField> fields, bool desc = false)
         {
             base.OrderByIf(predicate, fields, desc);
             return this;
@@ -704,7 +704,7 @@ namespace Sixnet.Development.Queryable
         {
             if (predicate)
             {
-                var joinQueryable = ExpressionHelper.GetQueryable(joinExpression, CriterionConnector.And);
+                var joinQueryable = SixnetExpressionHelper.GetQueryable(joinExpression, CriterionConnector.And);
                 var targetQueryable = SixnetQueryable.Create<TSixth>();
                 if (sixthQueryable != null)
                 {
@@ -731,7 +731,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> Select(params IDataField[] fields)
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> Select(params ISixnetDataField[] fields)
         {
             base.Select(fields);
             return this;
@@ -753,7 +753,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> Unselect(params IDataField[] fields)
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> Unselect(params ISixnetDataField[] fields)
         {
             base.Unselect(fields);
             return this;
@@ -904,7 +904,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="parentField">Parent field</param>
         /// <param name="direction">Matching direction</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> TreeMatching(IDataField dataField, IDataField parentField, TreeMatchingDirection direction = TreeMatchingDirection.Down)
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> TreeMatching(ISixnetDataField dataField, ISixnetDataField parentField, TreeMatchingDirection direction = TreeMatchingDirection.Down)
         {
             base.TreeMatching(dataField, parentField, direction);
             return this;
@@ -919,7 +919,7 @@ namespace Sixnet.Development.Queryable
         /// <returns></returns>
         public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> TreeMatching(Expression<Func<TFirst, object>> dataField, Expression<Func<TFirst, object>> parentField, TreeMatchingDirection direction = TreeMatchingDirection.Down)
         {
-            TreeMatching(ExpressionHelper.GetDataField(dataField), ExpressionHelper.GetDataField(parentField), direction);
+            TreeMatching(SixnetExpressionHelper.GetDataField(dataField), SixnetExpressionHelper.GetDataField(parentField), direction);
             return this;
         }
 
@@ -1132,7 +1132,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> GroupBy(params IDataField[] fields)
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> GroupBy(params ISixnetDataField[] fields)
         {
             base.GroupBy(fields);
             return this;

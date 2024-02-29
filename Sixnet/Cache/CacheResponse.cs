@@ -1,6 +1,4 @@
-﻿using Sixnet.Cache.Constant;
-
-namespace Sixnet.Cache
+﻿namespace Sixnet.Cache
 {
     /// <summary>
     /// Cache response
@@ -75,7 +73,7 @@ namespace Sixnet.Cache
             };
             if (string.IsNullOrWhiteSpace(message))
             {
-                CacheCodes.CodeMessages.TryGetValue(code, out message);
+                SixnetCacheCodes.CodeMessages.TryGetValue(code, out message);
             }
             response.Message = message;
             return response;

@@ -13,8 +13,13 @@ namespace Sixnet.Localization
 #pragma warning restore CS3009
     {
         /// <summary>
-        /// Gets or sets the localization string source
+        /// Json resource path
         /// </summary>
-        public LocalizationStringSource StringSource { get; set; } = LocalizationStringSource.Resource;
+        public string JsonResourcePath { get; set; }
+
+        /// <summary>
+        /// Whether Auto localize throwed message
+        /// </summary>
+        public bool AutoLocalizeThrowMessage { get; set; } = true;
     }
 }

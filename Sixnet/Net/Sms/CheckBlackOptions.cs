@@ -6,9 +6,9 @@ namespace Sixnet.Net.Sms
     /// <summary>
     /// Check black options
     /// </summary>
-    public class CheckBlackOptions : SmsOptions
+    public class CheckBlackOptions : SmsExecutionOptions
     {
-        public override SmsOptions Clone()
+        public override SmsExecutionOptions Clone()
         {
             return new CheckBlackOptions()
             {

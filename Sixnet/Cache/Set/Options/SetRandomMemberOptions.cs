@@ -7,7 +7,7 @@ namespace Sixnet.Cache.Set.Options
     /// <summary>
     /// Set random member options
     /// </summary>
-    public class SetRandomMemberOptions : CacheOptions<SetRandomMemberResponse>
+    public class SetRandomMemberOptions : CacheOperationOptions<SetRandomMemberResponse>
     {
         /// <summary>
         /// Gets or sets the cache key
@@ -20,7 +20,7 @@ namespace Sixnet.Cache.Set.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return set random member response</returns>
-        protected override async Task<SetRandomMemberResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<SetRandomMemberResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.SetRandomMemberAsync(server, this).ConfigureAwait(false);
         }
@@ -31,7 +31,7 @@ namespace Sixnet.Cache.Set.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return set random member response</returns>
-        protected override SetRandomMemberResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override SetRandomMemberResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.SetRandomMember(server, this);
         }

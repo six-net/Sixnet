@@ -6,7 +6,6 @@ using System.Linq;
 using System.Reflection;
 using System.Resources;
 using Microsoft.Extensions.Localization;
-using Microsoft.Extensions.Localization.Internal;
 using Microsoft.Extensions.Logging;
 
 namespace Sixnet.Localization
@@ -17,7 +16,7 @@ namespace Sixnet.Localization
         private readonly IResourceNamesCache _resourceNamesCache;
         private readonly ISixnetResourceManager _resourceManager;
         private readonly ISixnetResourceStringProvider _resourceStringProvider;
-        private readonly string _resourceBaseName;
+        private readonly ResourcePrefix _resourcePrefix;
         private readonly ILogger _logger;
 
         /// <summary>
@@ -31,13 +30,13 @@ namespace Sixnet.Localization
         public SixnetResourceStringLocalizer(
             ISixnetResourceManager resourceManager,
             Assembly resourceAssembly,
-            string baseName,
+            ResourcePrefix resourcePrefix,
             IResourceNamesCache resourceNamesCache,
             ILogger logger)
             : this(
                 resourceManager,
                 new SixnetAssemblyWrapper(resourceAssembly),
-                baseName,
+                resourcePrefix,
                 resourceNamesCache,
                 logger)
         {
@@ -49,7 +48,7 @@ namespace Sixnet.Localization
         internal SixnetResourceStringLocalizer(
             ISixnetResourceManager resourceManager,
             SixnetAssemblyWrapper resourceAssemblyWrapper,
-            string baseName,
+            ResourcePrefix resourcePrefix,
             IResourceNamesCache resourceNamesCache,
             ILogger logger)
             : this(
@@ -58,8 +57,8 @@ namespace Sixnet.Localization
                       resourceNamesCache,
                       resourceManager,
                       resourceAssemblyWrapper.Assembly,
-                      baseName),
-                  baseName,
+                      resourcePrefix),
+                  resourcePrefix,
                   resourceNamesCache,
                   logger)
         {
@@ -71,15 +70,15 @@ namespace Sixnet.Localization
         internal SixnetResourceStringLocalizer(
             ISixnetResourceManager resourceManager,
             ISixnetResourceStringProvider resourceStringProvider,
-            string baseName,
+            ResourcePrefix resourcePrefix,
             IResourceNamesCache resourceNamesCache,
             ILogger logger)
         {
             _resourceStringProvider = resourceStringProvider ?? throw new ArgumentNullException(nameof(resourceStringProvider));
             _resourceManager = resourceManager ?? throw new ArgumentNullException(nameof(resourceManager));
-            _resourceBaseName = baseName ?? throw new ArgumentNullException(nameof(baseName));
             _resourceNamesCache = resourceNamesCache ?? throw new ArgumentNullException(nameof(resourceNamesCache));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _resourcePrefix = resourcePrefix;
         }
 
         public virtual LocalizedString this[string name]
@@ -87,7 +86,7 @@ namespace Sixnet.Localization
             get
             {
                 var value = GetStringSafely(name, null);
-                return new LocalizedString(name, value ?? name, resourceNotFound: value == null, searchedLocation: _resourceBaseName);
+                return new LocalizedString(name, value ?? name, resourceNotFound: value == null, searchedLocation: _resourcePrefix.ResxBaseName);
             }
         }
 
@@ -97,7 +96,7 @@ namespace Sixnet.Localization
             {
                 var format = GetStringSafely(name, null);
                 var value = string.Format(CultureInfo.CurrentCulture, format ?? name, arguments);
-                return new LocalizedString(name, value, resourceNotFound: format == null, searchedLocation: _resourceBaseName);
+                return new LocalizedString(name, value, resourceNotFound: format == null, searchedLocation: _resourcePrefix.ResxBaseName);
             }
         }
 
@@ -106,7 +105,7 @@ namespace Sixnet.Localization
             get
             {
                 var value = GetStringSafely(name, culture);
-                return new LocalizedString(name, value ?? name, resourceNotFound: value == null, searchedLocation: _resourceBaseName);
+                return new LocalizedString(name, value ?? name, resourceNotFound: value == null, searchedLocation: _resourcePrefix.ResxBaseName);
             }
         }
 
@@ -115,7 +114,7 @@ namespace Sixnet.Localization
             get
             {
                 var value = GetStringSafely(name, new CultureInfo(cultureName));
-                return new LocalizedString(name, value ?? name, resourceNotFound: value == null, searchedLocation: _resourceBaseName);
+                return new LocalizedString(name, value ?? name, resourceNotFound: value == null, searchedLocation: _resourcePrefix.ResxBaseName);
             }
         }
 
@@ -125,7 +124,7 @@ namespace Sixnet.Localization
             {
                 var format = GetStringSafely(name, culture);
                 var value = string.Format(CultureInfo.CurrentCulture, format ?? name, arguments);
-                return new LocalizedString(name, value, resourceNotFound: format == null, searchedLocation: _resourceBaseName);
+                return new LocalizedString(name, value, resourceNotFound: format == null, searchedLocation: _resourcePrefix.ResxBaseName);
             }
         }
 
@@ -135,7 +134,7 @@ namespace Sixnet.Localization
             {
                 var format = GetStringSafely(name, new CultureInfo(cultureName));
                 var value = string.Format(CultureInfo.CurrentCulture, format ?? name, arguments);
-                return new LocalizedString(name, value, resourceNotFound: format == null, searchedLocation: _resourceBaseName);
+                return new LocalizedString(name, value, resourceNotFound: format == null, searchedLocation: _resourcePrefix.ResxBaseName);
             }
         }
 
@@ -162,7 +161,7 @@ namespace Sixnet.Localization
             foreach (var name in resourceNames ?? Enumerable.Empty<string>())
             {
                 var value = GetStringSafely(name, culture);
-                yield return new LocalizedString(name, value ?? name, resourceNotFound: value == null, searchedLocation: _resourceBaseName);
+                yield return new LocalizedString(name, value ?? name, resourceNotFound: value == null, searchedLocation: _resourcePrefix.ResxBaseName);
             }
         }
 
@@ -181,7 +180,7 @@ namespace Sixnet.Localization
             }
 
             var keyCulture = culture ?? CultureInfo.CurrentUICulture;
-            _logger.SearchedLocation(name, _resourceBaseName, keyCulture);
+            _logger.SearchedLocation(name, _resourcePrefix.ResxBaseName, keyCulture);
 
             var cacheKey = $"name={name}&culture={keyCulture.Name}";
             if (_missingManifestCache.ContainsKey(cacheKey))
@@ -193,7 +192,7 @@ namespace Sixnet.Localization
             {
                 return _resourceManager.GetString(name, culture);
             }
-            catch (MissingManifestResourceException)
+            catch (MissingManifestResourceException ex)
             {
                 _missingManifestCache.TryAdd(cacheKey, null);
                 return null;
@@ -204,7 +203,6 @@ namespace Sixnet.Localization
         {
             var currentCulture = startingCulture;
             var resourceNames = new HashSet<string>();
-
             var hasAnyCultures = false;
 
             while (true)

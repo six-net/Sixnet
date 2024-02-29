@@ -1,40 +1,44 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
-using Sixnet.App.Module;
-using Sixnet.DependencyInjection;
+﻿using Sixnet.DependencyInjection;
 using Sixnet.Development.Entity;
 using Sixnet.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime;
+using System.Text.RegularExpressions;
 
 namespace Sixnet.App
 {
     /// <summary>
-    /// Defines application initializer
+    /// Application initializer
     /// </summary>
     internal class ApplicationInitializer
     {
+        #region Constructor
+
         static ApplicationInitializer()
         {
             InitApplication();
         }
+
+        #endregion
 
         #region Fields
 
         /// <summary>
         /// Entity contract type
         /// </summary>
-        static readonly Type entityContractType = typeof(IEntity);
+        static readonly Type _entityContractType = typeof(ISixnetEntity);
 
         /// <summary>
-        /// Module configuration contract
+        /// Module contract contract
         /// </summary>
-        static readonly Type moduleConfigurationType = typeof(IModuleConfiguration);
+        static readonly Type _moduleContractType = typeof(ISixnetModule);
 
         /// <summary>
         /// Convention service patterns
         /// </summary>
-        internal static readonly List<string> ConventionServicePatterns = new()
+        static readonly List<string> _conventionServicePatterns = new()
         {
             @"Service",
             @"Business",
@@ -58,12 +62,12 @@ namespace Sixnet.App
         {
             try
             {
-                LogManager.LogInformation<ApplicationInitializer>(FrameworkLogEvents.Application.Initialization, $"Start initialize the application");
+                SixnetLogger.LogInformation<ApplicationInitializer>(SixnetLogEvents.Application.Initialization, "Start init application.");
 
-                var allConventionTypes = ApplicationManager.GetAllConventionTypes();
+                var allConventionTypes = SixnetApplication.GetAllConventionTypes();
                 if (allConventionTypes.IsNullOrEmpty())
                 {
-                    LogManager.LogWarning<ApplicationInitializer>(FrameworkLogEvents.Application.Initialization, $"No type found that needs to be initialized");
+                    SixnetLogger.LogWarning<ApplicationInitializer>(SixnetLogEvents.Application.Initialization, "No convention type was found that needs to be initialized");
                     return;
                 }
 
@@ -71,9 +75,9 @@ namespace Sixnet.App
 
                 foreach (var type in allConventionTypes)
                 {
-                    if ((!(type.IsInterface || type.IsAbstract)) && entityContractType.IsAssignableFrom(type))
+                    if ((!(type.IsInterface || type.IsAbstract)) && _entityContractType.IsAssignableFrom(type))
                     {
-                        EntityManager.ConfigureEntity(type);
+                        SixnetEntityManager.ConfigureEntity(type);
                     }
                 }
 
@@ -90,13 +94,13 @@ namespace Sixnet.App
 
                         #region Default service
 
-                        var serviceRegex = new Regex($@"^*({string.Join("|", ConventionServicePatterns)})$", RegexOptions.IgnoreCase);
+                        var serviceRegex = new Regex($@"^*({string.Join("|", _conventionServicePatterns)})$", RegexOptions.IgnoreCase);
                         if (serviceRegex.IsMatch(typeName))
                         {
                             var implementType = allConventionTypes.FirstOrDefault(t => t.FullName != type.FullName && !t.IsInterface && !t.IsAbstract && type.IsAssignableFrom(t));
                             if (implementType != null)
                             {
-                                ContainerManager.AddDefaultProjectService(type, implementType);
+                                SixnetContainer.AddProjectService(type, implementType);
                             }
                         }
                         if (typeName.EndsWith("DataAccess", ignoreCaseComparison))
@@ -106,7 +110,7 @@ namespace Sixnet.App
                             {
                                 var providerType = relateTypes.FirstOrDefault(c => c.Name.EndsWith("CacheDataAccess", ignoreCaseComparison));
                                 providerType ??= relateTypes.First();
-                                ContainerManager.AddDefaultProjectService(type, providerType);
+                                SixnetContainer.AddProjectService(type, providerType);
                             }
                         }
 
@@ -114,27 +118,22 @@ namespace Sixnet.App
                     }
                     else if (!type.IsAbstract)
                     {
-                        var isEntity = entityContractType.IsAssignableFrom(type);
-
-                        #region Module configuration
-
-                        if (moduleConfigurationType.IsAssignableFrom(type))
+                        if (_moduleContractType.IsAssignableFrom(type)) // module configuration
                         {
-                            var moduleConfiguration = Activator.CreateInstance(type) as IModuleConfiguration;
-                            ModuleManager.RegisterModuleConfiguration(moduleConfiguration);
+                            var moduleConfiguration = Activator.CreateInstance(type) as ISixnetModule;
+                            SixnetApplication.AddModule(moduleConfiguration);
                         }
-
-                        #endregion 
                     }
                 }
 
                 #endregion
 
+                GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
                 GC.Collect();
             }
             catch (Exception ex)
             {
-                LogManager.LogError<ApplicationInitializer>(FrameworkLogEvents.Application.InitializationFailure, ex, ex.Message);
+                SixnetLogger.LogError<ApplicationInitializer>(SixnetLogEvents.Application.InitializationFailure, ex, ex.Message);
             }
         }
 

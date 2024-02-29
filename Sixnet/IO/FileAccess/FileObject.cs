@@ -14,8 +14,8 @@ namespace Sixnet.IO.FileAccess
         public string Name { get; set; }
 
         /// <summary>
-        /// Gets or sets the file access options
+        /// Gets or sets the file access setting
         /// </summary>
-        public FileAccessOptions FileAccessOptions { get; set; }
+        public FileAccessSetting AccessSetting { get; set; }
     }
 }

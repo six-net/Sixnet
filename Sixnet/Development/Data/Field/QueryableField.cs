@@ -11,7 +11,7 @@ namespace Sixnet.Development.Data.Field
     /// <summary>
     /// Queryable field
     /// </summary>
-    public class QueryableField : IDataField
+    public class QueryableField : ISixnetDataField
     {
         /// <summary>
         /// Whether has field formatter
@@ -36,7 +36,7 @@ namespace Sixnet.Development.Data.Field
         /// <summary>
         /// Gets or sets the field format options
         /// </summary>
-        public FieldFormatOption FormatOption { get; set; }
+        public FieldFormatSetting FormatOption { get; set; }
 
         /// <summary>
         /// Whether is a constant field and no formatter
@@ -47,7 +47,7 @@ namespace Sixnet.Development.Data.Field
         /// Clone a query criterion field
         /// </summary>
         /// <returns></returns>
-        public IDataField Clone()
+        public ISixnetDataField Clone()
         {
             return new QueryableField()
             {

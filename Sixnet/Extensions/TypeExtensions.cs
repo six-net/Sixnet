@@ -270,12 +270,12 @@ namespace System
         /// <returns></returns>
         public static DbType GetDbType(this Type type)
         {
-            ThrowHelper.ThrowArgNullIf(type == null, nameof(type));
+            SixnetDirectThrower.ThrowArgNullIf(type == null, nameof(type));
             if (type.IsEnum)
             {
                 return DbType.Int32;
             }
-            ThrowHelper.ThrowNotSupportIf(!dbTypeMapping.ContainsKey(type), type.FullName);
+            SixnetDirectThrower.ThrowNotSupportIf(!dbTypeMapping.ContainsKey(type), type.FullName);
             return dbTypeMapping[type];
         }
 

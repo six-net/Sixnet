@@ -5,19 +5,19 @@ using Sixnet.Mapper;
 namespace Sixnet.App
 {
     /// <summary>
-    /// Defines application options
+    /// Application options
     /// </summary>
     public class ApplicationOptions
     {
         /// <summary>
         /// Gets or sets object mapper builder
         /// </summary>
-        public IMapperBuilder MapperBuilder { get; set; } = new ConventionMapperBuilder();
+        public ISixnetMapperBuilder MapperBuilder { get; set; } = new ConventionMapperBuilder();
 
         /// <summary>
         /// Gets or sets the dependency injection container
         /// </summary>
-        public IDIContainer DIContainer { get; set; }
+        public ISixnetContainer DIContainer { get; set; }
 
         /// <summary>
         /// Gets or sets the file match options
@@ -27,11 +27,16 @@ namespace Sixnet.App
         /// <summary>
         /// Gets the current application info
         /// </summary>
-        public ApplicationInfo Current { get; internal set; } = ApplicationManager.Current;
+        public ApplicationInfo Current { get; internal set; } = SixnetApplication.Current;
 
         /// <summary>
-        /// Whether register project default service
+        /// Whether register default service
         /// </summary>
-        public bool RegisterProjectDefaultService { get; set; } = true;
+        public bool RegisterDefaultService { get; set; } = true;
+
+        /// <summary>
+        /// Gets or sets the virtual path
+        /// </summary>
+        public string VirtualPath { get; set; }
     }
 }

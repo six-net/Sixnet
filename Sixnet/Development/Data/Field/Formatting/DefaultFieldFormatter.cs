@@ -6,11 +6,11 @@ namespace Sixnet.Development.Data.Field.Formatting
     /// Default default field formatter
     /// </summary>
     [Serializable]
-    public class DefaultFieldFormatter : IFieldFormatter
+    public class DefaultFieldFormatter : ISixnetFieldFormatter
     {
-        readonly Func<FieldFormatContext, string> _fieldFormatDelegate = null;
+        readonly Func<FormatFieldContext, string> _fieldFormatDelegate = null;
 
-        public DefaultFieldFormatter(Func<FieldFormatContext, string> fieldFormatDelegate)
+        public DefaultFieldFormatter(Func<FormatFieldContext, string> fieldFormatDelegate)
         {
             if (fieldFormatDelegate is null)
             {
@@ -19,7 +19,7 @@ namespace Sixnet.Development.Data.Field.Formatting
             _fieldFormatDelegate = fieldFormatDelegate;
         }
 
-        public string Format(FieldFormatContext fieldConversionContext)
+        public string Format(FormatFieldContext fieldConversionContext)
         {
             return _fieldFormatDelegate?.Invoke(fieldConversionContext);
         }

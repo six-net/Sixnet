@@ -29,7 +29,7 @@ namespace Sixnet.Model.Paging
                 Items = datas?.ToList() ?? new List<T>(0);
                 if (PageSize < 1)
                 {
-                    PageSize = DataManager.DefaultPagingSize;
+                    PageSize = SixnetDataManager.DefaultPagingSize;
                 }
                 PageCount = totalCount / PageSize;
                 if (totalCount % PageSize > 0)
@@ -51,7 +51,7 @@ namespace Sixnet.Model.Paging
         /// <summary>
         /// Gets the page size
         /// </summary>
-        public int PageSize { get; set; } = DataManager.DefaultPagingSize;
+        public int PageSize { get; set; } = SixnetDataManager.DefaultPagingSize;
 
         /// <summary>
         /// Gets the page count
@@ -76,9 +76,9 @@ namespace Sixnet.Model.Paging
         #region Methods
 
         /// <summary>
-        /// Returns an enumerator that iterates through the EZNEW.Paging.Paging<>
+        /// Returns an enumerator that iterates through the Sixnet.Paging.Paging<>
         /// </summary>
-        /// <returns>A EZNEW.Paging.Paging<>.Enumerator for the EZNEW.Paging.Paging<></returns>
+        /// <returns>A Sixnet.Paging.Paging<>.Enumerator for the Sixnet.Paging.Paging<></returns>
         public IEnumerator<T> GetEnumerator()
         {
             return Items.GetEnumerator();

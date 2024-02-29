@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Text;
-using Microsoft.Extensions.Localization;
+﻿using Microsoft.Extensions.Localization;
 
-namespace Sixnet.Extensions
+namespace System.Reflection
 {
     /// <summary>
     /// Assembly extensions

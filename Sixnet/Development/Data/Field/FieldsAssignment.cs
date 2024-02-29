@@ -10,7 +10,7 @@ namespace Sixnet.Development.Data.Field
     /// <summary>
     /// Fields assignment
     /// </summary>
-    public class FieldsAssignment : IInnerClone<FieldsAssignment>
+    public class FieldsAssignment : ISixnetCloneableModel<FieldsAssignment>
     {
         #region Fields
 
@@ -82,7 +82,7 @@ namespace Sixnet.Development.Data.Field
         /// <returns></returns>
         public dynamic GetNewValue(string propertyName)
         {
-            ThrowHelper.ThrowArgNullIf(string.IsNullOrWhiteSpace(propertyName), nameof(propertyName));
+            SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(propertyName), nameof(propertyName));
             newValues.TryGetValue(propertyName, out var newValue);
             return newValue;
         }
@@ -94,7 +94,7 @@ namespace Sixnet.Development.Data.Field
         /// <returns></returns>
         public dynamic GetOldValue(string propertyName)
         {
-            ThrowHelper.ThrowArgNullIf(string.IsNullOrWhiteSpace(propertyName), nameof(propertyName));
+            SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(propertyName), nameof(propertyName));
             dynamic oldValue = null;
             OldValues?.TryGetValue(propertyName, out oldValue);
             return oldValue;

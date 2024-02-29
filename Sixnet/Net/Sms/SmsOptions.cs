@@ -1,23 +1,23 @@
-﻿using System.Collections.Generic;
-using Sixnet.Model;
+﻿using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace Sixnet.Net.Sms
 {
     /// <summary>
     /// Sms options
     /// </summary>
-    public abstract class SmsOptions : IParameterOptions
+    public class SmsOptions
     {
         /// <summary>
-        /// Gets or sets the tag
+        /// Get sms account func
         /// </summary>
-        public string Tag { get; set; } = SmsManager.DefaultTag;
+        public Func<SmsExecutionOptions, SmsAccount> GetSmsAccountFunc { get; set; }
 
         /// <summary>
-        /// Gets or sets the parameters
+        /// Send sms callbacl
         /// </summary>
-        public Dictionary<string, string> Parameters { get; set; }
-
-        public abstract SmsOptions Clone();
+        public Action<IEnumerable<SendSmsResult>> SendCallback { get; set; }
     }
 }

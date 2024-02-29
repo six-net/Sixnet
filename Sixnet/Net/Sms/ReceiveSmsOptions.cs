@@ -6,9 +6,9 @@ namespace Sixnet.Net.Sms
     /// <summary>
     /// Sms receive options
     /// </summary>
-    public class ReceiveSmsOptions : SmsOptions
+    public class ReceiveSmsOptions : SmsExecutionOptions
     {
-        public override SmsOptions Clone()
+        public override SmsExecutionOptions Clone()
         {
             return new ReceiveSmsOptions()
             {

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace Sixnet.Development.Message
+namespace Sixnet.Development.Domain.Message
 {
     /// <summary>
     /// Send message result

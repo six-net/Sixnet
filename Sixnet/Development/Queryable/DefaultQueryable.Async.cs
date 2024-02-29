@@ -66,7 +66,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Data</returns>
         public async Task<T> FirstAsync<T>(Action<DataOperationOptions> configure = null)
         {
-            if (queryableContext.Repository is IRepository<T> repository)
+            if (queryableContext.Repository is ISixnetRepository<T> repository)
             {
                 return await repository.GetAsync(this, configure).ConfigureAwait(false);
             }
@@ -84,7 +84,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Data list</returns>
         public async Task<List<T>> ToListAsync<T>(Action<DataOperationOptions> configure = null)
         {
-            if (queryableContext.Repository is IRepository<T> repository)
+            if (queryableContext.Repository is ISixnetRepository<T> repository)
             {
                 return await repository.GetListAsync(this, configure).ConfigureAwait(false);
             }
@@ -202,7 +202,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Paging data</returns>
         public async Task<PagingInfo<T>> ToPagingAsync<T>(PagingFilter pagingFilter, Action<DataOperationOptions> configure = null)
         {
-            if (queryableContext.Repository is IRepository<T> repository)
+            if (queryableContext.Repository is ISixnetRepository<T> repository)
             {
                 return await repository.GetPagingAsync(this, pagingFilter, configure).ConfigureAwait(false);
             }

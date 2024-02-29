@@ -7,7 +7,7 @@ namespace Sixnet.Cache.SortedSet.Options
     /// <summary>
     /// Sorted set remove range by rank options
     /// </summary>
-    public class SortedSetRemoveRangeByRankOptions : CacheOptions<SortedSetRemoveRangeByRankResponse>
+    public class SortedSetRemoveRangeByRankOptions : CacheOperationOptions<SortedSetRemoveRangeByRankResponse>
     {
         /// <summary>
         /// Gets or sets the cache key
@@ -30,7 +30,7 @@ namespace Sixnet.Cache.SortedSet.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return sorted set remove range by rank response</returns>
-        protected override async Task<SortedSetRemoveRangeByRankResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<SortedSetRemoveRangeByRankResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.SortedSetRemoveRangeByRankAsync(server, this).ConfigureAwait(false);
         }
@@ -41,7 +41,7 @@ namespace Sixnet.Cache.SortedSet.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return sorted set remove range by rank response</returns>
-        protected override SortedSetRemoveRangeByRankResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override SortedSetRemoveRangeByRankResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.SortedSetRemoveRangeByRank(server, this);
         }

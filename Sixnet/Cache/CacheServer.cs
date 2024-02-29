@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sixnet.Exceptions;
+using System;
 using System.Collections.Generic;
 
 namespace Sixnet.Cache
@@ -8,32 +9,18 @@ namespace Sixnet.Cache
     /// </summary>
     public class CacheServer
     {
-        public CacheServer(string name)
-        {
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                throw new ArgumentNullException("Cache server name is null or empty");
-            }
-            Name = name;
-        }
-
-        public CacheServer(string name, CacheServerType serverType) : this(name)
-        {
-            ServerType = serverType;
-        }
-
         #region Properties
 
         /// <summary>
         /// Gets or sets the server type
         /// </summary>
-        public CacheServerType ServerType { get; set; }
+        public CacheServerType Type { get; set; }
 
         /// <summary>
         /// Gets the server name
         /// Every cache ser should be set a unique name
         /// </summary>
-        public string Name { get; protected set; }
+        public string Name { get; set; }
 
         /// <summary>
         /// Gets or sets the end points
@@ -111,8 +98,7 @@ namespace Sixnet.Cache
         /// <returns>Return whether equal</returns>
         public override bool Equals(object obj)
         {
-            CacheServer objServer = obj as CacheServer;
-            if (objServer == null)
+            if (obj is not CacheServer objServer)
             {
                 return false;
             }
@@ -125,7 +111,7 @@ namespace Sixnet.Cache
         /// <returns></returns>
         public override int GetHashCode()
         {
-            return Name.GetHashCode();
+            return Name?.GetHashCode() ?? 0;
         }
 
         #endregion

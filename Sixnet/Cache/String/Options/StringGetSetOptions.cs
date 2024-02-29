@@ -7,7 +7,7 @@ namespace Sixnet.Cache.String
     /// <summary>
     /// String get set options
     /// </summary>
-    public class StringGetSetOptions : CacheOptions<StringGetSetResponse>
+    public class StringGetSetOptions : CacheOperationOptions<StringGetSetResponse>
     {
         /// <summary>
         /// Gets or sets the cache key
@@ -31,7 +31,7 @@ namespace Sixnet.Cache.String
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return string get set response</returns>
-        protected override async Task<StringGetSetResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<StringGetSetResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.StringGetSetAsync(server, this).ConfigureAwait(false);
         }
@@ -42,7 +42,7 @@ namespace Sixnet.Cache.String
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return string get set response</returns>
-        protected override StringGetSetResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override StringGetSetResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.StringGetSet(server, this);
         }

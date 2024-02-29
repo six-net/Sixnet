@@ -6,7 +6,7 @@ using Sixnet.Development.Data.Field.Formatting;
 namespace Sixnet.Development.Entity
 {
     /// <summary>
-    ///Entity field
+    ///  Entity field
     /// </summary>
     public class EntityField : PropertyField, IComparable
     {
@@ -40,7 +40,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Gets or sets the field format options
         /// </summary>
-        public FieldFormatOption FormatOptions { get; set; }
+        public FieldFormatSetting FormatOptions { get; set; }
 
         /// <summary>
         /// Gets or sets the database type
@@ -65,7 +65,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Gets or sets the value provider
         /// </summary>
-        internal IEntityPropertyValueProvider ValueProvider { get; set; }
+        internal ISixnetEntityPropertyValueProvider ValueProvider { get; set; }
 
         #endregion
 

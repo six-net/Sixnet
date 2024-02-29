@@ -7,7 +7,7 @@ namespace Sixnet.Cache.Set.Options
     /// <summary>
     /// Set move options
     /// </summary>
-    public class SetMoveOptions : CacheOptions<SetMoveResponse>
+    public class SetMoveOptions : CacheOperationOptions<SetMoveResponse>
     {
         /// <summary>
         /// Gets or sets the source key
@@ -36,7 +36,7 @@ namespace Sixnet.Cache.Set.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return set move response</returns>
-        protected override async Task<SetMoveResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<SetMoveResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.SetMoveAsync(server, this).ConfigureAwait(false);
         }
@@ -47,7 +47,7 @@ namespace Sixnet.Cache.Set.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return set move response</returns>
-        protected override SetMoveResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override SetMoveResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.SetMove(server, this);
         }

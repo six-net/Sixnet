@@ -7,7 +7,7 @@ namespace Sixnet.Cache.String
     /// <summary>
     /// String get bit options
     /// </summary>
-    public class StringGetBitOptions : CacheOptions<StringGetBitResponse>
+    public class StringGetBitOptions : CacheOperationOptions<StringGetBitResponse>
     {
         /// <summary>
         /// Gets or sets the cache key
@@ -25,7 +25,7 @@ namespace Sixnet.Cache.String
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return string get bit response</returns>
-        protected override async Task<StringGetBitResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<StringGetBitResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.StringGetBitAsync(server, this).ConfigureAwait(false);
         }
@@ -36,7 +36,7 @@ namespace Sixnet.Cache.String
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return string get bit response</returns>
-        protected override StringGetBitResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override StringGetBitResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.StringGetBit(server, this);
         }

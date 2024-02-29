@@ -7,7 +7,7 @@ namespace Sixnet.Cache.Hash.Options
     /// <summary>
     /// Hash increment options
     /// </summary>
-    public class HashIncrementOptions : CacheOptions<HashIncrementResponse>
+    public class HashIncrementOptions : CacheOperationOptions<HashIncrementResponse>
     {
         /// <summary>
         /// Gets or sets the cache key
@@ -36,7 +36,7 @@ namespace Sixnet.Cache.Hash.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return hash increment response</returns>
-        protected override async Task<HashIncrementResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<HashIncrementResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.HashIncrementAsync(server, this).ConfigureAwait(false);
         }
@@ -47,7 +47,7 @@ namespace Sixnet.Cache.Hash.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return hash increment response</returns>
-        protected override HashIncrementResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override HashIncrementResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.HashIncrement(server, this);
         }

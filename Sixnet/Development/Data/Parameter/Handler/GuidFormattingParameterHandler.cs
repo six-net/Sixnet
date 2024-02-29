@@ -9,7 +9,7 @@ namespace Sixnet.Development.Data.ParameterHandler.Handler
     /// <summary>
     /// Defines guid parameter handler
     /// </summary>
-    public class GuidFormattingParameterHandler : IDataCommandParameterHandler
+    public class GuidFormattingParameterHandler : ISixnetDataCommandParameterHandler
     {
         public DataCommandParameterItem Parse(DataCommandParameterItem originalParameter)
         {

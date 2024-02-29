@@ -7,7 +7,7 @@ namespace Sixnet.Cache.String
     /// <summary>
     /// String get range options
     /// </summary>
-    public class StringGetRangeOptions : CacheOptions<StringGetRangeResponse>
+    public class StringGetRangeOptions : CacheOperationOptions<StringGetRangeResponse>
     {
         /// <summary>
         /// Gets or sets the cache key
@@ -30,7 +30,7 @@ namespace Sixnet.Cache.String
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return string get range response</returns>
-        protected override async Task<StringGetRangeResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<StringGetRangeResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.StringGetRangeAsync(server, this).ConfigureAwait(false);
         }
@@ -41,7 +41,7 @@ namespace Sixnet.Cache.String
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return string get range response</returns>
-        protected override StringGetRangeResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override StringGetRangeResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.StringGetRange(server, this);
         }

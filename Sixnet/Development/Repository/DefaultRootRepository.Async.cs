@@ -16,7 +16,7 @@ namespace Sixnet.Development.Repository
     /// <summary>
     /// Defines default root repository
     /// </summary>
-    public abstract partial class DefaultRootRepository<TModel> : BaseRepository<TModel> where TModel : class, IEntity<TModel>
+    public abstract partial class DefaultRootRepository<TModel> : BaseRepository<TModel> where TModel : class, ISixnetEntity<TModel>
     {
         #region Impl
 

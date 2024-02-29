@@ -14,7 +14,7 @@ namespace Sixnet.Development.Data.Command
     {
         #region Constructor
 
-        private DataCommandExecutionContext(DatabaseConnection connection, DataCommand command)
+        private DataCommandExecutionContext(SixnetDatabaseConnection connection, SixnetDataCommand command)
         {
             Server = connection?.DatabaseServer ?? throw new ArgumentNullException(nameof(DatabaseConnection.DatabaseServer));
             DatabaseConnection = connection;
@@ -31,17 +31,17 @@ namespace Sixnet.Development.Data.Command
         /// <summary>
         /// Gets the server
         /// </summary>
-        public DatabaseServer Server { get; private set; }
+        public SixnetDatabaseServer Server { get; private set; }
 
         /// <summary>
         /// Database connection
         /// </summary>
-        public DatabaseConnection DatabaseConnection { get; private set; }
+        public SixnetDatabaseConnection DatabaseConnection { get; private set; }
 
         /// <summary>
         /// Gets the data command
         /// </summary>
-        public DataCommand Command { get; private set; }
+        public SixnetDataCommand Command { get; private set; }
 
         /// <summary>
         /// Gets the activity queryable
@@ -68,7 +68,7 @@ namespace Sixnet.Development.Data.Command
         /// </summary>
         /// <param name="command">Command</param>
         /// <returns>Return table name</returns>
-        public List<string> GetTableNames(DataCommand command = null)
+        public List<string> GetTableNames(SixnetDataCommand command = null)
         {
             if (command != null)
             {
@@ -90,7 +90,7 @@ namespace Sixnet.Development.Data.Command
                 throw new SixnetException($"Data command is null");
             }
             SetActivityQueryable(activityQueryable, queryableLocation);
-            return DataManager.GetTableNames(this);
+            return SixnetDataManager.GetTableNames(this);
         }
 
         /// <summary>
@@ -108,9 +108,9 @@ namespace Sixnet.Development.Data.Command
         /// Set command
         /// </summary>
         /// <param name="command">Command</param>
-        public void SetCommand(DataCommand command)
+        public void SetCommand(SixnetDataCommand command)
         {
-            ThrowHelper.ThrowArgNullIf(command == null, nameof(command));
+            SixnetDirectThrower.ThrowArgNullIf(command == null, nameof(command));
 
             Command = command;
             SetActivityQueryable(command.Queryable, QueryableLocation.Top);
@@ -156,7 +156,7 @@ namespace Sixnet.Development.Data.Command
         /// <param name="server">Database server</param>
         /// <param name="command">Command</param>
         /// <returns></returns>
-        public static DataCommandExecutionContext Create(DatabaseConnection connection, DataCommand command = null)
+        public static DataCommandExecutionContext Create(SixnetDatabaseConnection connection, SixnetDataCommand command = null)
         {
             return new DataCommandExecutionContext(connection, command)
             {

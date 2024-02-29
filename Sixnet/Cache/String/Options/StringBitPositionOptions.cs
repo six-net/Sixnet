@@ -7,7 +7,7 @@ namespace Sixnet.Cache.String
     /// <summary>
     /// String bit position options
     /// </summary>
-    public class StringBitPositionOptions : CacheOptions<StringBitPositionResponse>
+    public class StringBitPositionOptions : CacheOperationOptions<StringBitPositionResponse>
     {
         /// <summary>
         /// Gets or sets cache key
@@ -35,7 +35,7 @@ namespace Sixnet.Cache.String
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return string bit position response</returns>
-        protected override async Task<StringBitPositionResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<StringBitPositionResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.StringBitPositionAsync(server, this).ConfigureAwait(false);
         }
@@ -46,7 +46,7 @@ namespace Sixnet.Cache.String
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return string bit position response</returns>
-        protected override StringBitPositionResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override StringBitPositionResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.StringBitPosition(server, this);
         }

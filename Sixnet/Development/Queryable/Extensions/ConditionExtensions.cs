@@ -9,7 +9,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="originalCondition">Original condition</param>
         /// <returns>Return a new condition</returns>
-        public static ICondition Clone(this ICondition originalCondition)
+        public static ISixnetCondition Clone(this ISixnetCondition originalCondition)
         {
             if (originalCondition is Criterion criterion)
             {

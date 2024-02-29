@@ -4,7 +4,7 @@ using System.Text;
 
 namespace AutoMapper
 {
-    internal class ConventionMapper : Sixnet.Mapper.IMapper
+    internal class ConventionMapper : Sixnet.Mapper.ISixnetMapper
     {
         readonly IMapper Mapper = null;
 

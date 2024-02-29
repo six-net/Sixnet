@@ -7,14 +7,14 @@ namespace Sixnet.Development.Data.Event
     /// <summary>
     /// Add data event
     /// </summary>
-    public class AddingDataEvent : BaseDataEvent
+    public class AddingDataEvent : BaseSixnetDataEvent
     {
         public AddingDataEvent()
         {
             EventType = DataEventType.Adding;
         }
 
-        public static AddingDataEvent Create(IDataClient dataClient, DataCommand command)
+        public static AddingDataEvent Create(ISixnetDataClient dataClient, SixnetDataCommand command)
         {
             return Create<AddingDataEvent>(dataClient, command);
         }

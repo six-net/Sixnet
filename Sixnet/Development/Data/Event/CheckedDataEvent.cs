@@ -8,7 +8,7 @@ namespace Sixnet.Development.Data.Event
     /// <summary>
     /// Checked data event
     /// </summary>
-    public class CheckedDataEvent : BaseDataEvent
+    public class CheckedDataEvent : BaseSixnetDataEvent
     {
         public CheckedDataEvent()
         {
@@ -20,7 +20,7 @@ namespace Sixnet.Development.Data.Event
         /// </summary>
         public bool HasValue { get; set; }
 
-        public static CheckedDataEvent Create(IDataClient dataClient, DataCommand command, bool hasValue)
+        public static CheckedDataEvent Create(ISixnetDataClient dataClient, SixnetDataCommand command, bool hasValue)
         {
             var dataEvent = Create<CheckedDataEvent>(dataClient, command);
             dataEvent.HasValue = hasValue;

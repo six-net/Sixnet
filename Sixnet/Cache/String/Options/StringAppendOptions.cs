@@ -7,7 +7,7 @@ namespace Sixnet.Cache.String
     /// <summary>
     /// String append options
     /// </summary>
-    public class StringAppendOptions : CacheOptions<StringAppendResponse>
+    public class StringAppendOptions : CacheOperationOptions<StringAppendResponse>
     {
         /// <summary>
         /// Gets or sets the cache key
@@ -31,7 +31,7 @@ namespace Sixnet.Cache.String
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return string append response</returns>
-        protected override async Task<StringAppendResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<StringAppendResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.StringAppendAsync(server, this).ConfigureAwait(false);
         }
@@ -42,7 +42,7 @@ namespace Sixnet.Cache.String
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return string append response</returns>
-        protected override StringAppendResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override StringAppendResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.StringAppend(server, this);
         }

@@ -260,7 +260,7 @@ namespace System
                 Uri uri = new Uri(value);
                 path = uri.PathAndQuery?.Trim(PathTrimChars);
             }
-            string virtualPath = ApplicationManager.VirtualPath?.Trim(PathTrimChars);
+            string virtualPath = SixnetApplication.VirtualPath?.Trim(PathTrimChars);
             if (!string.IsNullOrWhiteSpace(virtualPath))
             {
                 var virthalPathArray = path.LSplit(virtualPath);
@@ -277,21 +277,23 @@ namespace System
         /// Convert to local string
         /// </summary>
         /// <param name="value">Value</param>
+        /// <param name="args">Args</param>
         /// <returns></returns>
-        public static string ToLocalString(this string value)
+        public static string Localize(this string value,params string[] args)
         {
-            return Localizer.GetString(value);
+            return SixnetLocalizer.GetString(value,args);
         }
 
         /// <summary>
         /// Convert to local string
         /// </summary>
         /// <param name="value">Value</param>
+        /// <param name="args">Args</param>
         /// <returns></returns>
-        public static string ToLocalString<TResourceSource>(this string value)
+        public static string Localize<TResourceSource>(this string value, params string[] args)
         {
-            return Localizer.GetString<TResourceSource>(value);
-        }
+            return SixnetLocalizer.GetString<TResourceSource>(value, args);
+        }        
 
         #endregion
     }

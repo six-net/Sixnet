@@ -23,7 +23,7 @@ namespace Sixnet.Code
         readonly object lockObj = new();
 
         /// <summary>
-        /// Initializes a new instance of the EZNEW.Code.SnowflakeNet class
+        /// Initializes a new instance of the Sixnet.Code.SnowflakeNet class
         /// </summary>
         /// <param name="dataCenterId">Data center id(1-31)</param>
         /// <param name="workerId">Worker id(1-31)</param>
@@ -35,14 +35,14 @@ namespace Sixnet.Code
             DataCenterId = dataCenterId;
             Sequence = sequence;
 
-            ThrowHelper.ThrowArgErrorIf(workerId > maxWorkerId || workerId < 0, string.Format("Worker Id can't be greater than {0} or less than 0", maxWorkerId));
-            ThrowHelper.ThrowArgErrorIf(dataCenterId > maxDatacenterId || dataCenterId < 0, string.Format("Data Center Id can't be greater than {0} or less than 0", maxDatacenterId));
+            SixnetDirectThrower.ThrowArgErrorIf(workerId > maxWorkerId || workerId < 0, string.Format("Worker Id can't be greater than {0} or less than 0", maxWorkerId));
+            SixnetDirectThrower.ThrowArgErrorIf(dataCenterId > maxDatacenterId || dataCenterId < 0, string.Format("Data Center Id can't be greater than {0} or less than 0", maxDatacenterId));
 
             if (startDate.HasValue)
             {
                 var nowDate = DateTimeOffset.UtcNow;
 
-                ThrowHelper.ThrowArgErrorIf(nowDate <= startDate, $"{nameof(startDate)} must less than DateTimeOffset.UtcNow");
+                SixnetDirectThrower.ThrowArgErrorIf(nowDate <= startDate, $"{nameof(startDate)} must less than DateTimeOffset.UtcNow");
 
                 this.startDate = startDate.Value;
                 twepoch = (long)(nowDate - startDate.Value).TotalMilliseconds;
@@ -74,7 +74,7 @@ namespace Sixnet.Code
             {
                 var timestamp = TimeGen();
 
-                ThrowHelper.ThrowInvalidOperationIf(timestamp < lastTimestamp, "Time is return back,generated fail");
+                SixnetDirectThrower.ThrowInvalidOperationIf(timestamp < lastTimestamp, "Time is return back,generated fail");
 
                 if (lastTimestamp == timestamp)
                 {
@@ -106,7 +106,7 @@ namespace Sixnet.Code
         {
             lock (lockObj)
             {
-                ThrowHelper.ThrowInvalidOperationIf(timestamp < lastTimestamp, "Time is return back,generated fail");
+                SixnetDirectThrower.ThrowInvalidOperationIf(timestamp < lastTimestamp, "Time is return back,generated fail");
 
                 if (lastTimestamp == timestamp)
                 {

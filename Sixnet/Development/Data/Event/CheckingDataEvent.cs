@@ -10,14 +10,14 @@ namespace Sixnet.Development.Data.Event
     /// Checking data event
     /// </summary>
     [Serializable]
-    public class CheckingDataEvent : BaseDataEvent
+    public class CheckingDataEvent : BaseSixnetDataEvent
     {
         public CheckingDataEvent()
         {
             EventType = DataEventType.Checking;
         }
 
-        public static CheckingDataEvent Create(IDataClient dataClient, DataCommand command)
+        public static CheckingDataEvent Create(ISixnetDataClient dataClient, SixnetDataCommand command)
         {
             return Create<CheckingDataEvent>(dataClient, command);
         }

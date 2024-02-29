@@ -7,7 +7,7 @@ namespace Sixnet.Cache.List.Options
     /// <summary>
     /// List set by index options
     /// </summary>
-    public class ListSetByIndexOptions : CacheOptions<ListSetByIndexResponse>
+    public class ListSetByIndexOptions : CacheOperationOptions<ListSetByIndexResponse>
     {
         /// <summary>
         /// Gets or sets the cache key
@@ -30,7 +30,7 @@ namespace Sixnet.Cache.List.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return list set by index response</returns>
-        protected override async Task<ListSetByIndexResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<ListSetByIndexResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.ListSetByIndexAsync(server, this).ConfigureAwait(false);
         }
@@ -41,7 +41,7 @@ namespace Sixnet.Cache.List.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return list set by index response</returns>
-        protected override ListSetByIndexResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override ListSetByIndexResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.ListSetByIndex(server, this);
         }

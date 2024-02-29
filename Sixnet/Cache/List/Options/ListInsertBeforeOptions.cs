@@ -7,7 +7,7 @@ namespace Sixnet.Cache.List.Options
     /// <summary>
     /// List insert before options
     /// </summary>
-    public class ListInsertBeforeOptions : CacheOptions<ListInsertBeforeResponse>
+    public class ListInsertBeforeOptions : CacheOperationOptions<ListInsertBeforeResponse>
     {
         /// <summary>
         /// Gets or sets the cache key
@@ -30,7 +30,7 @@ namespace Sixnet.Cache.List.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return insert before response</returns>
-        protected override async Task<ListInsertBeforeResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<ListInsertBeforeResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.ListInsertBeforeAsync(server, this).ConfigureAwait(false);
         }
@@ -41,7 +41,7 @@ namespace Sixnet.Cache.List.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return insert before response</returns>
-        protected override ListInsertBeforeResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override ListInsertBeforeResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.ListInsertBefore(server, this);
         }

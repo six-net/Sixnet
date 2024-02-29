@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Sixnet.Development.Entity;
 using Sixnet.Model;
 
 namespace Sixnet.Development.Data.Database
@@ -10,7 +8,7 @@ namespace Sixnet.Development.Data.Database
     /// <summary>
     /// Split table behavior
     /// </summary>
-    public class SplitTableBehavior : IInnerClone<SplitTableBehavior>
+    public class SplitTableBehavior : ISixnetCloneableModel<SplitTableBehavior>
     {
         /// <summary>
         /// Gets or sets the split values

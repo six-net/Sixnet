@@ -7,7 +7,7 @@ namespace Sixnet.Cache.Keys.Options
     /// <summary>
     /// Time to live options
     /// </summary>
-    public class TimeToLiveOptions : CacheOptions<TimeToLiveResponse>
+    public class TimeToLiveOptions : CacheOperationOptions<TimeToLiveResponse>
     {
         /// <summary>
         /// Gets or sets the cache key
@@ -20,7 +20,7 @@ namespace Sixnet.Cache.Keys.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return time to live response</returns>
-        protected override async Task<TimeToLiveResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<TimeToLiveResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.KeyTimeToLiveAsync(server, this).ConfigureAwait(false);
         }
@@ -31,7 +31,7 @@ namespace Sixnet.Cache.Keys.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return time to live response</returns>
-        protected override TimeToLiveResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override TimeToLiveResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.KeyTimeToLive(server, this);
         }

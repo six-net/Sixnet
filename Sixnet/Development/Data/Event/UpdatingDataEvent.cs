@@ -12,14 +12,14 @@ namespace Sixnet.Development.Data.Event
     /// Updating data event
     /// </summary>
     [Serializable]
-    public class UpdatingDataEvent : BaseDataEvent
+    public class UpdatingDataEvent : BaseSixnetDataEvent
     {
         public UpdatingDataEvent()
         {
             EventType = DataEventType.Updating;
         }
 
-        public static UpdatingDataEvent Create(IDataClient dataClient, DataCommand command)
+        public static UpdatingDataEvent Create(ISixnetDataClient dataClient, SixnetDataCommand command)
         {
             return Create<UpdatingDataEvent>(dataClient, command);
         }

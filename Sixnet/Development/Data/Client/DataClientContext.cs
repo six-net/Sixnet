@@ -72,7 +72,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="datas">Datas</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Updated datas</returns>
-        public static List<T> Update<T>(IEnumerable<T> datas, Action<DataOperationOptions> configure = null) where T : class, IEntity<T>
+        public static List<T> Update<T>(IEnumerable<T> datas, Action<DataOperationOptions> configure = null) where T : class, ISixnetEntity<T>
         {
             var options = GetDataOperationOptions(configure);
 
@@ -121,7 +121,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="datas">Datas</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        public static int Delete<T>(IEnumerable<T> datas, Action<DataOperationOptions> configure = null) where T : class, IEntity<T>
+        public static int Delete<T>(IEnumerable<T> datas, Action<DataOperationOptions> configure = null) where T : class, ISixnetEntity<T>
         {
             var options = GetDataOperationOptions(configure);
 
@@ -209,7 +209,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="currentDatas">Current datas</param>
         /// <param name="configure">Confirure options </param>
         /// <returns></returns>
-        public static List<T> QueryByCurrent<T>(IEnumerable<T> currentDatas, Action<DataOperationOptions> configure = null) where T : class, IEntity<T>
+        public static List<T> QueryByCurrent<T>(IEnumerable<T> currentDatas, Action<DataOperationOptions> configure = null) where T : class, ISixnetEntity<T>
         {
             var options = GetDataOperationOptions(configure);
 
@@ -552,9 +552,9 @@ namespace Sixnet.Development.Data.Client
         /// Get a data client
         /// </summary>
         /// <returns></returns>
-        static IDataClient GetDataClient(bool forQuery)
+        static ISixnetDataClient GetDataClient(bool forQuery)
         {
-            return DataManager.GetClient(true, !forQuery);
+            return SixnetDataManager.GetClient(true, !forQuery);
         }
 
         #endregion

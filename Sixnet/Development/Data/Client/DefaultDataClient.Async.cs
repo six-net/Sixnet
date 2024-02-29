@@ -31,7 +31,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="currentDatas">Current datas</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public async Task<List<T>> QueryByCurrentAsync<T>(IEnumerable<T> currentDatas, DataOperationOptions options = null) where T : class, IEntity<T>
+        public async Task<List<T>> QueryByCurrentAsync<T>(IEnumerable<T> currentDatas, DataOperationOptions options = null) where T : class, ISixnetEntity<T>
         {
             var storedDatasAndQueryable = GetCurrentDatasAndQueryable(currentDatas);
             if (storedDatasAndQueryable.Item2 != null)
@@ -60,7 +60,7 @@ namespace Sixnet.Development.Data.Client
         /// <returns>Data list</returns>
         public async Task<List<T>> QueryAsync<T>(ISixnetQueryable queryable, DataOperationOptions options = null)
         {
-            var command = DataCommand.CreateQueryCommand<T>(queryable);
+            var command = SixnetDataCommand.CreateQueryCommand<T>(queryable);
             var connections = GetConnections(await GetDataCommandDatabaseServersAsync(command, true).ConfigureAwait(false));
             var datas = await DataCommandExecutor.QueryAsync<T>(connections, command, options).ConfigureAwait(false);
 
@@ -89,7 +89,7 @@ namespace Sixnet.Development.Data.Client
         /// <returns>Data list</returns>
         public async Task<T> QueryFirstAsync<T>(ISixnetQueryable queryable, DataOperationOptions options = null)
         {
-            var command = DataCommand.CreateQueryCommand<T>(queryable);
+            var command = SixnetDataCommand.CreateQueryCommand<T>(queryable);
             var connections = GetConnections(await GetDataCommandDatabaseServersAsync(command, true).ConfigureAwait(false));
             var data = await DataCommandExecutor.QueryFirstAsync<T>(connections, command, options).ConfigureAwait(false);
 
@@ -146,7 +146,7 @@ namespace Sixnet.Development.Data.Client
         /// <returns>Dynamic object paging</returns>
         public async Task<PagingInfo<T>> QueryPagingAsync<T>(ISixnetQueryable queryable, PagingFilter pagingFilter, DataOperationOptions options = null)
         {
-            var command = DataCommand.CreateQueryCommand<T>(queryable);
+            var command = SixnetDataCommand.CreateQueryCommand<T>(queryable);
             command.PagingFilter = pagingFilter;
             var connections = GetConnections(await GetDataCommandDatabaseServersAsync(command, true).ConfigureAwait(false));
             var datas = await DataCommandExecutor.QueryPagingAsync<T>(connections, command, options).ConfigureAwait(false);
@@ -169,7 +169,7 @@ namespace Sixnet.Development.Data.Client
         /// <returns>Return the datas</returns>
         public async Task<List<TReturn>> QueryMappingAsync<TFirst, TSecond, TReturn>(ISixnetQueryable queryable, Func<TFirst, TSecond, TReturn> dataMappingFunc, DataOperationOptions options = null)
         {
-            var command = DataCommand.CreateQueryCommand<TReturn>(queryable);
+            var command = SixnetDataCommand.CreateQueryCommand<TReturn>(queryable);
             var connections = GetConnections(await GetDataCommandDatabaseServersAsync(command, true).ConfigureAwait(false));
             var datas = await DataCommandExecutor.QueryMappingAsync(connections, command, dataMappingFunc, options).ConfigureAwait(false);
 
@@ -192,7 +192,7 @@ namespace Sixnet.Development.Data.Client
         /// <returns>Return the datas</returns>
         public async Task<List<TReturn>> QueryMappingAsync<TFirst, TSecond, TThird, TReturn>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TReturn> dataMappingFunc, DataOperationOptions options = null)
         {
-            var command = DataCommand.CreateQueryCommand<TReturn>(queryable);
+            var command = SixnetDataCommand.CreateQueryCommand<TReturn>(queryable);
             var connections = GetConnections(await GetDataCommandDatabaseServersAsync(command, true).ConfigureAwait(false));
             var datas = await DataCommandExecutor.QueryMappingAsync(connections, command, dataMappingFunc, options).ConfigureAwait(false);
 
@@ -216,7 +216,7 @@ namespace Sixnet.Development.Data.Client
         /// <returns>Return the datas</returns>
         public async Task<List<TReturn>> QueryMappingAsync<TFirst, TSecond, TThird, TFourth, TReturn>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TReturn> dataMappingFunc, DataOperationOptions options = null)
         {
-            var command = DataCommand.CreateQueryCommand<TReturn>(queryable);
+            var command = SixnetDataCommand.CreateQueryCommand<TReturn>(queryable);
             var connections = GetConnections(await GetDataCommandDatabaseServersAsync(command, true).ConfigureAwait(false));
             var datas = await DataCommandExecutor.QueryMappingAsync(connections, command, dataMappingFunc, options).ConfigureAwait(false);
 
@@ -241,7 +241,7 @@ namespace Sixnet.Development.Data.Client
         /// <returns>Return the datas</returns>
         public async Task<List<TReturn>> QueryMappingAsync<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> dataMappingFunc, DataOperationOptions options = null)
         {
-            var command = DataCommand.CreateQueryCommand<TReturn>(queryable);
+            var command = SixnetDataCommand.CreateQueryCommand<TReturn>(queryable);
             var connections = GetConnections(await GetDataCommandDatabaseServersAsync(command, true).ConfigureAwait(false));
             var datas = await DataCommandExecutor.QueryMappingAsync(connections, command, dataMappingFunc, options).ConfigureAwait(false);
 
@@ -267,7 +267,7 @@ namespace Sixnet.Development.Data.Client
         /// <returns>Return the datas</returns>
         public async Task<List<TReturn>> QueryMappingAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> dataMappingFunc, DataOperationOptions options = null)
         {
-            var command = DataCommand.CreateQueryCommand(queryable);
+            var command = SixnetDataCommand.CreateQueryCommand(queryable);
             var connections = GetConnections(await GetDataCommandDatabaseServersAsync(command, true).ConfigureAwait(false));
             var datas = await DataCommandExecutor.QueryMappingAsync(connections, command, dataMappingFunc, options).ConfigureAwait(false);
 
@@ -294,7 +294,7 @@ namespace Sixnet.Development.Data.Client
         /// <returns>Return the datas</returns>
         public async Task<List<TReturn>> QueryMappingAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> dataMappingFunc, DataOperationOptions options = null)
         {
-            var command = DataCommand.CreateQueryCommand<TReturn>(queryable);
+            var command = SixnetDataCommand.CreateQueryCommand<TReturn>(queryable);
             var connections = GetConnections(await GetDataCommandDatabaseServersAsync(command, true).ConfigureAwait(false));
             var datas = await DataCommandExecutor.QueryMappingAsync(connections, command, dataMappingFunc, options).ConfigureAwait(false);
 
@@ -323,7 +323,7 @@ namespace Sixnet.Development.Data.Client
         /// <returns>Return whether the data exists or not</returns>
         public async Task<bool> ExistsAsync(ISixnetQueryable queryable, DataOperationOptions options = null)
         {
-            var command = DataCommand.CreateQueryCommand(queryable);
+            var command = SixnetDataCommand.CreateQueryCommand(queryable);
             var connections = GetConnections(await GetDataCommandDatabaseServersAsync(command, true).ConfigureAwait(false));
             var hasData = await DataCommandExecutor.ExistsAsync(connections, command, options).ConfigureAwait(false);
 
@@ -352,9 +352,9 @@ namespace Sixnet.Development.Data.Client
         /// <returns></returns>
         public async Task<int> CountAsync(ISixnetQueryable queryable, DataOperationOptions options = null)
         {
-            ThrowHelper.ThrowArgNullIf(queryable == null, nameof(queryable));
+            SixnetDirectThrower.ThrowArgNullIf(queryable == null, nameof(queryable));
 
-            var command = DataCommand.CreateQueryCommand(queryable);
+            var command = SixnetDataCommand.CreateQueryCommand(queryable);
             var connections = GetConnections(GetDataCommandDatabaseServers(command, true));
             return await DataCommandExecutor.CountAsync(connections, command, options).ConfigureAwait(false);
         }
@@ -472,7 +472,7 @@ namespace Sixnet.Development.Data.Client
         /// <returns>Return the data</returns>
         public async Task<TValue> ScalarAsync<TValue>(ISixnetQueryable queryable, DataOperationOptions options = null)
         {
-            var command = DataCommand.CreateQueryCommand(queryable);
+            var command = SixnetDataCommand.CreateQueryCommand(queryable);
             var connections = GetConnections(await GetDataCommandDatabaseServersAsync(command, true).ConfigureAwait(false));
             var value = await DataCommandExecutor.ScalarAsync<TValue>(connections, command, options).ConfigureAwait(false);
 
@@ -490,13 +490,13 @@ namespace Sixnet.Development.Data.Client
         /// <returns>Return the dataset</returns>
         public async Task<DataSet> QueryMultipleAsync(IEnumerable<ISixnetQueryable> queries, DataOperationOptions options = null)
         {
-            var commands = queries?.Select(c => DataCommand.CreateQueryCommand(c));
+            var commands = queries?.Select(c => SixnetDataCommand.CreateQueryCommand(c));
             var serverGroups = await GroupDataCommandsDatabaseServerAsync(commands, true).ConfigureAwait(false);
             var queryTasks = new List<Task<DataSet>>(serverGroups.Count);
             foreach (var serverItem in serverGroups)
             {
                 var serverConnection = GetConnection(serverItem.Value.Item1);
-                queryTasks.Add(DataCommandExecutor.QueryMultipleAsync(new List<DatabaseConnection>(1) { serverConnection }, serverItem.Value.Item2, options));
+                queryTasks.Add(DataCommandExecutor.QueryMultipleAsync(new List<SixnetDatabaseConnection>(1) { serverConnection }, serverItem.Value.Item2, options));
             }
             var taskDataSets = await Task.WhenAll(queryTasks).ConfigureAwait(false);
             return UnionDataSet(taskDataSets);
@@ -512,13 +512,13 @@ namespace Sixnet.Development.Data.Client
         /// <returns></returns>
         public async Task<Tuple<List<TFirst>, List<TSecond>>> QueryMultipleAsync<TFirst, TSecond>(IEnumerable<ISixnetQueryable> queries, DataOperationOptions options = null)
         {
-            var commands = queries?.Select(c => DataCommand.CreateQueryCommand(c));
+            var commands = queries?.Select(c => SixnetDataCommand.CreateQueryCommand(c));
             var serverGroups = await GroupDataCommandsDatabaseServerAsync(commands, true).ConfigureAwait(false);
             var queryTasks = new List<Task<Tuple<List<TFirst>, List<TSecond>>>>(serverGroups.Count);
             foreach (var serverItem in serverGroups)
             {
                 var serverConnection = GetConnection(serverItem.Value.Item1);
-                queryTasks.Add(DataCommandExecutor.QueryMultipleAsync<TFirst, TSecond>(new List<DatabaseConnection>(1) { serverConnection }, serverItem.Value.Item2, options));
+                queryTasks.Add(DataCommandExecutor.QueryMultipleAsync<TFirst, TSecond>(new List<SixnetDatabaseConnection>(1) { serverConnection }, serverItem.Value.Item2, options));
             }
             var taskDatas = await Task.WhenAll(queryTasks).ConfigureAwait(false);
             return UnionMultipleDatas(taskDatas, taskDatas?.Length ?? 0);
@@ -535,13 +535,13 @@ namespace Sixnet.Development.Data.Client
         /// <returns></returns>
         public async Task<Tuple<List<TFirst>, List<TSecond>, List<TThird>>> QueryMultipleAsync<TFirst, TSecond, TThird>(IEnumerable<ISixnetQueryable> queries, DataOperationOptions options = null)
         {
-            var commands = queries?.Select(c => DataCommand.CreateQueryCommand(c));
+            var commands = queries?.Select(c => SixnetDataCommand.CreateQueryCommand(c));
             var serverGroups = await GroupDataCommandsDatabaseServerAsync(commands, true).ConfigureAwait(false);
             var queryTasks = new List<Task<Tuple<List<TFirst>, List<TSecond>, List<TThird>>>>(serverGroups.Count);
             foreach (var serverItem in serverGroups)
             {
                 var serverConnection = GetConnection(serverItem.Value.Item1);
-                queryTasks.Add(DataCommandExecutor.QueryMultipleAsync<TFirst, TSecond, TThird>(new List<DatabaseConnection>(1) { serverConnection }, serverItem.Value.Item2, options));
+                queryTasks.Add(DataCommandExecutor.QueryMultipleAsync<TFirst, TSecond, TThird>(new List<SixnetDatabaseConnection>(1) { serverConnection }, serverItem.Value.Item2, options));
             }
             var taskDatas = await Task.WhenAll(queryTasks).ConfigureAwait(false);
             return UnionMultipleDatas(taskDatas, taskDatas?.Length ?? 0);
@@ -559,13 +559,13 @@ namespace Sixnet.Development.Data.Client
         /// <returns></returns>
         public async Task<Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>>> QueryMultipleAsync<TFirst, TSecond, TThird, TFourth>(IEnumerable<ISixnetQueryable> queries, DataOperationOptions options = null)
         {
-            var commands = queries?.Select(c => DataCommand.CreateQueryCommand(c));
+            var commands = queries?.Select(c => SixnetDataCommand.CreateQueryCommand(c));
             var serverGroups = await GroupDataCommandsDatabaseServerAsync(commands, true).ConfigureAwait(false);
             var queryTasks = new List<Task<Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>>>>(serverGroups.Count);
             foreach (var serverItem in serverGroups)
             {
                 var serverConnection = GetConnection(serverItem.Value.Item1);
-                queryTasks.Add(DataCommandExecutor.QueryMultipleAsync<TFirst, TSecond, TThird, TFourth>(new List<DatabaseConnection>(1) { serverConnection }, serverItem.Value.Item2, options));
+                queryTasks.Add(DataCommandExecutor.QueryMultipleAsync<TFirst, TSecond, TThird, TFourth>(new List<SixnetDatabaseConnection>(1) { serverConnection }, serverItem.Value.Item2, options));
             }
             var taskDatas = await Task.WhenAll(queryTasks).ConfigureAwait(false);
             return UnionMultipleDatas(taskDatas, taskDatas?.Length ?? 0);
@@ -584,13 +584,13 @@ namespace Sixnet.Development.Data.Client
         /// <returns></returns>
         public async Task<Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>>> QueryMultipleAsync<TFirst, TSecond, TThird, TFourth, TFifth>(IEnumerable<ISixnetQueryable> queries, DataOperationOptions options = null)
         {
-            var commands = queries?.Select(c => DataCommand.CreateQueryCommand(c));
+            var commands = queries?.Select(c => SixnetDataCommand.CreateQueryCommand(c));
             var serverGroups = await GroupDataCommandsDatabaseServerAsync(commands, true).ConfigureAwait(false);
             var queryTasks = new List<Task<Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>>>>(serverGroups.Count);
             foreach (var serverItem in serverGroups)
             {
                 var serverConnection = GetConnection(serverItem.Value.Item1);
-                queryTasks.Add(DataCommandExecutor.QueryMultipleAsync<TFirst, TSecond, TThird, TFourth, TFifth>(new List<DatabaseConnection>(1) { serverConnection }, serverItem.Value.Item2, options));
+                queryTasks.Add(DataCommandExecutor.QueryMultipleAsync<TFirst, TSecond, TThird, TFourth, TFifth>(new List<SixnetDatabaseConnection>(1) { serverConnection }, serverItem.Value.Item2, options));
             }
             var taskDatas = await Task.WhenAll(queryTasks).ConfigureAwait(false);
             return UnionMultipleDatas(taskDatas, taskDatas?.Length ?? 0);
@@ -610,13 +610,13 @@ namespace Sixnet.Development.Data.Client
         /// <returns></returns>
         public async Task<Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>>> QueryMultipleAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(IEnumerable<ISixnetQueryable> queries, DataOperationOptions options = null)
         {
-            var commands = queries?.Select(c => DataCommand.CreateQueryCommand(c));
+            var commands = queries?.Select(c => SixnetDataCommand.CreateQueryCommand(c));
             var serverGroups = await GroupDataCommandsDatabaseServerAsync(commands, true).ConfigureAwait(false);
             var queryTasks = new List<Task<Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>>>>(serverGroups.Count);
             foreach (var serverItem in serverGroups)
             {
                 var serverConnection = GetConnection(serverItem.Value.Item1);
-                queryTasks.Add(DataCommandExecutor.QueryMultipleAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(new List<DatabaseConnection>(1) { serverConnection }, serverItem.Value.Item2, options));
+                queryTasks.Add(DataCommandExecutor.QueryMultipleAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(new List<SixnetDatabaseConnection>(1) { serverConnection }, serverItem.Value.Item2, options));
             }
             var taskDatas = await Task.WhenAll(queryTasks).ConfigureAwait(false);
             return UnionMultipleDatas(taskDatas, taskDatas?.Length ?? 0);
@@ -637,13 +637,13 @@ namespace Sixnet.Development.Data.Client
         /// <returns></returns>
         public async Task<Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>, List<TSeventh>>> QueryMultipleAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(IEnumerable<ISixnetQueryable> queries, DataOperationOptions options = null)
         {
-            var commands = queries?.Select(c => DataCommand.CreateQueryCommand(c));
+            var commands = queries?.Select(c => SixnetDataCommand.CreateQueryCommand(c));
             var serverGroups = await GroupDataCommandsDatabaseServerAsync(commands, true).ConfigureAwait(false);
             var queryTasks = new List<Task<Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>, List<TSeventh>>>>(serverGroups.Count);
             foreach (var serverItem in serverGroups)
             {
                 var serverConnection = GetConnection(serverItem.Value.Item1);
-                queryTasks.Add(DataCommandExecutor.QueryMultipleAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(new List<DatabaseConnection>(1) { serverConnection }, serverItem.Value.Item2, options));
+                queryTasks.Add(DataCommandExecutor.QueryMultipleAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(new List<SixnetDatabaseConnection>(1) { serverConnection }, serverItem.Value.Item2, options));
             }
             var taskDatas = await Task.WhenAll(queryTasks).ConfigureAwait(false);
             return UnionMultipleDatas(taskDatas, taskDatas?.Length ?? 0);
@@ -682,18 +682,18 @@ namespace Sixnet.Development.Data.Client
             }
 
             // Create data command
-            var commands = new List<DataCommand>();
+            var commands = new List<SixnetDataCommand>();
             var dataType = typeof(T);
-            var isEntity = typeof(IEntity).IsAssignableFrom(dataType);
+            var isEntity = typeof(ISixnetEntity).IsAssignableFrom(dataType);
             foreach (var data in datas)
             {
-                var addCommand = DataCommand.Create<T>(DataOperationType.Insert);
-                var valueDict = isEntity ? ((IEntity)data).GetAllValues() : data.ToDynamicDictionary();
+                var addCommand = SixnetDataCommand.Create<T>(DataOperationType.Insert);
+                var valueDict = isEntity ? ((ISixnetEntity)data).GetAllValues() : data.ToDynamicDictionary();
                 addCommand.FieldsAssignment = valueDict?.GetFieldsAssignment();
                 addCommand.Data = data;
                 commands.Add(addCommand);
             }
-            var incrementField = EntityManager.GetRoleField(dataType, FieldRole.Increment);
+            var incrementField = SixnetEntityManager.GetRoleField(dataType, FieldRole.Increment);
             var executeResult = await ExecuteCoreAsync(commands, incrementField != null, options).ConfigureAwait(false);
             return executeResult.Item2?.Values.Cast<TIdentity>().ToList() ?? new List<TIdentity>(0);
         }
@@ -740,13 +740,13 @@ namespace Sixnet.Development.Data.Client
         /// <param name="datas">Datas</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public async Task<List<T>> UpdateAsync<T>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class, IEntity<T>
+        public async Task<List<T>> UpdateAsync<T>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class, ISixnetEntity<T>
         {
             if (datas.IsNullOrEmpty())
             {
                 return new List<T>(0);
             }
-            var commands = new List<DataCommand>();
+            var commands = new List<SixnetDataCommand>();
             foreach (var newData in datas)
             {
                 if (newData == null)
@@ -778,7 +778,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="data">Data</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public async Task<T> UpdateAsync<T>(T data, DataOperationOptions options = null) where T : class, IEntity<T>
+        public async Task<T> UpdateAsync<T>(T data, DataOperationOptions options = null) where T : class, ISixnetEntity<T>
         {
             return (await UpdateAsync(new List<T>() { data }, options).ConfigureAwait(false))?.FirstOrDefault();
         }
@@ -822,7 +822,7 @@ namespace Sixnet.Development.Data.Client
             }
 
             var command = GetUpdateCommand(fieldsAssignment, queryable, options);
-            return await UpdateAsync(new List<DataCommand>(1) { command }, options).ConfigureAwait(false);
+            return await UpdateAsync(new List<SixnetDataCommand>(1) { command }, options).ConfigureAwait(false);
         }
 
 
@@ -832,7 +832,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="updateCommands">Update commands</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        async Task<int> UpdateAsync(List<DataCommand> updateCommands, DataOperationOptions options = null)
+        async Task<int> UpdateAsync(List<SixnetDataCommand> updateCommands, DataOperationOptions options = null)
         {
             return await ExecuteAsync(updateCommands, options).ConfigureAwait(false);
         }
@@ -847,7 +847,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="datas">Datas</param>
         /// <param name="options">Options</param>
         /// <returns>Affected data number</returns>
-        public async Task<int> DeleteAsync<T>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class, IEntity<T>
+        public async Task<int> DeleteAsync<T>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class, ISixnetEntity<T>
         {
             if (datas.IsNullOrEmpty())
             {
@@ -864,7 +864,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="data">Data</param>
         /// <param name="options">Options</param>
         /// <returns>Affected data number</returns>
-        public async Task<int> DeleteAsync<T>(T data, DataOperationOptions options = null) where T : class, IEntity<T>
+        public async Task<int> DeleteAsync<T>(T data, DataOperationOptions options = null) where T : class, ISixnetEntity<T>
         {
             return await DeleteAsync(new List<T>(1) { data }, options).ConfigureAwait(false);
         }
@@ -888,10 +888,10 @@ namespace Sixnet.Development.Data.Client
         /// <returns>Affected data number</returns>
         public async Task<int> DeleteAsync(ISixnetQueryable queryable, DataOperationOptions options = null)
         {
-            ThrowHelper.ThrowArgNullIf(queryable == null, nameof(queryable));
+            SixnetDirectThrower.ThrowArgNullIf(queryable == null, nameof(queryable));
 
-            var command = DataCommand.Create(DataOperationType.Delete, queryable);
-            return await ExecuteAsync(new List<DataCommand>(1) { command }, options).ConfigureAwait(false);
+            var command = SixnetDataCommand.Create(DataOperationType.Delete, queryable);
+            return await ExecuteAsync(new List<SixnetDataCommand>(1) { command }, options).ConfigureAwait(false);
         }
 
         #endregion
@@ -905,7 +905,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="identityInsert"></param>
         /// <param name="options"></param>
         /// <returns></returns>
-        async Task<Tuple<int, Dictionary<string, dynamic>>> ExecuteCoreAsync(IEnumerable<DataCommand> commands, bool identityInsert, DataOperationOptions options = null)
+        async Task<Tuple<int, Dictionary<string, dynamic>>> ExecuteCoreAsync(IEnumerable<SixnetDataCommand> commands, bool identityInsert, DataOperationOptions options = null)
         {
             var affectedRows = 0;
             var serverGroups = await GroupDataCommandsDatabaseServerAsync(commands, false).ConfigureAwait(false);
@@ -916,7 +916,7 @@ namespace Sixnet.Development.Data.Client
                 foreach (var serverItem in serverGroups)
                 {
                     var serverConnection = GetConnection(serverItem.Value.Item1);
-                    executionTasks.Add(DataCommandExecutor.InsertAndReturnAutoIdentityAsync<dynamic>(new List<DatabaseConnection>(1) { serverConnection }, serverItem.Value.Item2, options));
+                    executionTasks.Add(DataCommandExecutor.InsertAndReturnAutoIdentityAsync<dynamic>(new List<SixnetDatabaseConnection>(1) { serverConnection }, serverItem.Value.Item2, options));
                 }
                 identities = (await Task.WhenAll(executionTasks).ConfigureAwait(false))?
                     .SelectMany(c => c)
@@ -931,7 +931,7 @@ namespace Sixnet.Development.Data.Client
                 foreach (var serverItem in serverGroups)
                 {
                     var serverConnection = GetConnection(serverItem.Value.Item1);
-                    executionTasks.Add(DataCommandExecutor.ExecuteAsync(new List<DatabaseConnection>(1) { serverConnection }, serverItem.Value.Item2, options));
+                    executionTasks.Add(DataCommandExecutor.ExecuteAsync(new List<SixnetDatabaseConnection>(1) { serverConnection }, serverItem.Value.Item2, options));
                 }
                 var taskDatas = await Task.WhenAll(executionTasks).ConfigureAwait(false);
                 affectedRows = taskDatas?.Sum(c => c) ?? 0;
@@ -949,7 +949,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="commands">Data commands</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public async Task<int> ExecuteAsync(IEnumerable<DataCommand> commands, DataOperationOptions options = null)
+        public async Task<int> ExecuteAsync(IEnumerable<SixnetDataCommand> commands, DataOperationOptions options = null)
         {
             return (await ExecuteCoreAsync(commands, false, options).ConfigureAwait(false)).Item1;
         }
@@ -965,8 +965,8 @@ namespace Sixnet.Development.Data.Client
         /// <returns></returns>
         public async Task<int> ExecuteAsync(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, DataOperationOptions options = null)
         {
-            var cmd = DataCommand.CreateScriptCommand(script, parameters, scriptType);
-            return await ExecuteAsync(new List<DataCommand>(1) { cmd }, options).ConfigureAwait(false);
+            var cmd = SixnetDataCommand.CreateScriptCommand(script, parameters, scriptType);
+            return await ExecuteAsync(new List<SixnetDataCommand>(1) { cmd }, options).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -975,9 +975,9 @@ namespace Sixnet.Development.Data.Client
         /// <param name="dataTable">Data table</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public async Task BulkInsertAsync(DataTable dataTable, IBulkInsertionOptions options = null)
+        public async Task BulkInsertAsync(DataTable dataTable, ISixnetBulkInsertionOptions options = null)
         {
-            var command = DataCommand.Create(dataTable);
+            var command = SixnetDataCommand.Create(dataTable);
             var connections = GetConnections(await GetDataCommandDatabaseServersAsync(command, false).ConfigureAwait(false));
             await DataCommandExecutor.BulkInsertAsync(connections, dataTable, options).ConfigureAwait(false);
         }
@@ -993,7 +993,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="options">Data operation options</param>
         public Task MigrateAsync(MigrationInfo migrationInfo, DataOperationOptions options = null)
         {
-            ThrowHelper.ThrowNullOrEmptyIf(internalDatabaseServers.IsNullOrEmpty(), "Database servers");
+            SixnetDirectThrower.ThrowArgNullIf(internalDatabaseServers.IsNullOrEmpty(), "Database servers");
             var connections = GetConnections(internalDatabaseServers);
             return DataCommandExecutor.MigrateAsync(connections, migrationInfo, options);
         }
@@ -1007,9 +1007,9 @@ namespace Sixnet.Development.Data.Client
         /// </summary>
         /// <param name="options">Data operation options</param>
         /// <returns></returns>
-        public Task<List<DatabaseTableInfo>> GetTablesAsync(DataOperationOptions options = null)
+        public Task<List<SixnetDataTable>> GetTablesAsync(DataOperationOptions options = null)
         {
-            ThrowHelper.ThrowNullOrEmptyIf(internalDatabaseServers.IsNullOrEmpty(), "Database servers");
+            SixnetDirectThrower.ThrowArgNullIf(internalDatabaseServers.IsNullOrEmpty(), "Database servers");
             var connections = GetConnections(internalDatabaseServers);
             return DataCommandExecutor.GetTablesAsync(connections?.FirstOrDefault(), options);
         }
@@ -1046,10 +1046,10 @@ namespace Sixnet.Development.Data.Client
         /// </summary>
         /// <param name="command">Command</param>
         /// <returns></returns>
-        async Task<List<DatabaseServer>> GetDataCommandDatabaseServersAsync(DataCommand command, bool useForQuery)
+        async Task<List<SixnetDatabaseServer>> GetDataCommandDatabaseServersAsync(SixnetDataCommand command, bool useForQuery)
         {
             var servers = internalDatabaseServers.IsNullOrEmpty()
-                ? DataManager.GetDataCommandDatabaseServers(command)
+                ? SixnetDataManager.GetDataCommandDatabaseServers(command)
                 : internalDatabaseServers;
 
             // handle data command before execution
@@ -1063,11 +1063,11 @@ namespace Sixnet.Development.Data.Client
         /// </summary>
         /// <param name="commands">Commands</param>
         /// <returns>Key: database server name,Value: commands</returns>
-        async Task<Dictionary<string, Tuple<DatabaseServer, List<DataCommand>>>> GroupDataCommandsDatabaseServerAsync(IEnumerable<DataCommand> commands, bool useForQuery)
+        async Task<Dictionary<string, Tuple<SixnetDatabaseServer, List<SixnetDataCommand>>>> GroupDataCommandsDatabaseServerAsync(IEnumerable<SixnetDataCommand> commands, bool useForQuery)
         {
-            ThrowHelper.ThrowArgNullIf(commands.IsNullOrEmpty(), nameof(commands));
+            SixnetDirectThrower.ThrowArgNullIf(commands.IsNullOrEmpty(), nameof(commands));
 
-            var serverGroups = new Dictionary<string, Tuple<DatabaseServer, List<DataCommand>>>();
+            var serverGroups = new Dictionary<string, Tuple<SixnetDatabaseServer, List<SixnetDataCommand>>>();
             foreach (var command in commands)
             {
                 var databaseServers = await GetDataCommandDatabaseServersAsync(command, useForQuery).ConfigureAwait(false);
@@ -1076,7 +1076,7 @@ namespace Sixnet.Development.Data.Client
                     foreach (var server in databaseServers)
                     {
                         serverGroups.TryGetValue(server.Name, out var serverCommands);
-                        serverCommands ??= new Tuple<DatabaseServer, List<DataCommand>>(server, new List<DataCommand>());
+                        serverCommands ??= new Tuple<SixnetDatabaseServer, List<SixnetDataCommand>>(server, new List<SixnetDataCommand>());
                         serverCommands.Item2.Add(command);
                         serverGroups[server.Name] = serverCommands;
                     }
@@ -1090,7 +1090,7 @@ namespace Sixnet.Development.Data.Client
         /// </summary>
         /// <param name="dataCommand">Data command</param>
         /// <param name="useForQuery">Use for query</param>
-        async Task HandleDataCommandBeforeExecutionAsync(DataCommand dataCommand, CancellationToken cancellationToken)
+        async Task HandleDataCommandBeforeExecutionAsync(SixnetDataCommand dataCommand, CancellationToken cancellationToken)
         {
             if (dataCommand == null)
             {
@@ -1098,7 +1098,7 @@ namespace Sixnet.Development.Data.Client
             }
 
             // publish starting data event
-            await DataEventBus.PublishStartingDataEvent(this, dataCommand, true, cancellationToken).ConfigureAwait(false);
+            await SixnetDataEventBus.PublishStartingDataEvent(this, dataCommand, true, cancellationToken).ConfigureAwait(false);
 
             if (dataCommand.ExecutionMode == CommandExecutionMode.Transform)
             {
@@ -1111,9 +1111,9 @@ namespace Sixnet.Development.Data.Client
                 {
                     #region Logic delete
 
-                    if (DataManager.AllowLogicalDelete(options))
+                    if (SixnetDataManager.AllowLogicalDelete(options))
                     {
-                        var archiveFieldName = EntityManager.GetRoleFieldName(entityType, FieldRole.Archived);
+                        var archiveFieldName = SixnetEntityManager.GetRoleFieldName(entityType, FieldRole.Archived);
                         if (!string.IsNullOrWhiteSpace(archiveFieldName))
                         {
                             var fieldsAssignment = FieldsAssignment.Create();
@@ -1130,7 +1130,7 @@ namespace Sixnet.Development.Data.Client
             }
 
             // trigger data command starting event
-            DataManager.TriggerDataCommandStartingEvent(dataCommand);
+            SixnetDataManager.TriggerDataCommandStartingEvent(dataCommand);
         }
 
         /// <summary>
@@ -1139,13 +1139,13 @@ namespace Sixnet.Development.Data.Client
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="command">Command</param>
         /// <param name="datas">Datas</param>
-        async Task HandleQueryCallbackAsync<T>(DataCommand command, IEnumerable<T> datas, CancellationToken cancellationToken)
+        async Task HandleQueryCallbackAsync<T>(SixnetDataCommand command, IEnumerable<T> datas, CancellationToken cancellationToken)
         {
             // data queried event
-            await DataEventBus.PublishQueriedEvent(this, command, datas, cancellationToken).ConfigureAwait(false);
+            await SixnetDataEventBus.PublishQueriedEvent(this, command, datas, cancellationToken).ConfigureAwait(false);
 
             // command callback event
-            DataManager.TriggerDataCommandCallbackEvent(command);
+            SixnetDataManager.TriggerDataCommandCallbackEvent(command);
         }
 
         /// <summary>
@@ -1153,13 +1153,13 @@ namespace Sixnet.Development.Data.Client
         /// </summary>
         /// <param name="command">Command</param>
         /// <param name="hasValue">Has value</param>
-        async Task HandleCheckCallbackAsync(DataCommand command, bool hasValue, CancellationToken cancellationToken)
+        async Task HandleCheckCallbackAsync(SixnetDataCommand command, bool hasValue, CancellationToken cancellationToken)
         {
             // checked event
-            await DataEventBus.PublishCheckedEvent(this, command, hasValue, cancellationToken).ConfigureAwait(false);
+            await SixnetDataEventBus.PublishCheckedEvent(this, command, hasValue, cancellationToken).ConfigureAwait(false);
 
             // command callback event
-            DataManager.TriggerDataCommandCallbackEvent(command);
+            SixnetDataManager.TriggerDataCommandCallbackEvent(command);
         }
 
         /// <summary>
@@ -1167,13 +1167,13 @@ namespace Sixnet.Development.Data.Client
         /// </summary>
         /// <param name="command">Command</param>
         /// <param name="value">Value</param>
-        async Task HandleGotValueCallbackAsync(DataCommand command, dynamic value, CancellationToken cancellationToken)
+        async Task HandleGotValueCallbackAsync(SixnetDataCommand command, dynamic value, CancellationToken cancellationToken)
         {
             // Got event
-            await DataEventBus.PublishGotValueEvent(this, command, value, cancellationToken).ConfigureAwait(false);
+            await SixnetDataEventBus.PublishGotValueEvent(this, command, value, cancellationToken).ConfigureAwait(false);
 
             // command callback event
-            DataManager.TriggerDataCommandCallbackEvent(command);
+            SixnetDataManager.TriggerDataCommandCallbackEvent(command);
         }
 
         /// <summary>
@@ -1182,7 +1182,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="commands"></param>
         /// <param name="identities"></param>
         /// <returns></returns>
-        async Task HandleExecutionCallbackAsync(IEnumerable<DataCommand> commands, Dictionary<string, dynamic> identities)
+        async Task HandleExecutionCallbackAsync(IEnumerable<SixnetDataCommand> commands, Dictionary<string, dynamic> identities)
         {
             if (!commands.IsNullOrEmpty())
             {
@@ -1199,7 +1199,7 @@ namespace Sixnet.Development.Data.Client
         /// Handle execution callback
         /// </summary>
         /// <param name="command">Command</param>
-        async Task HandleExecutionCallbackAsync(DataCommand command, Dictionary<string, dynamic> identities)
+        async Task HandleExecutionCallbackAsync(SixnetDataCommand command, Dictionary<string, dynamic> identities)
         {
             // update object
             switch (command.OperationType)
@@ -1237,13 +1237,13 @@ namespace Sixnet.Development.Data.Client
         /// Execute data command callback
         /// </summary>
         /// <param name="command">Command</param>
-        async Task ExecuteDataCommandCallbackAsync(DataCommand command, CancellationToken cancellationToken = default)
+        async Task ExecuteDataCommandCallbackAsync(SixnetDataCommand command, CancellationToken cancellationToken = default)
         {
             // callback data event
-            await DataEventBus.PublishExecutedDataEvent(this, command, cancellationToken).ConfigureAwait(false);
+            await SixnetDataEventBus.PublishExecutedDataEvent(this, command, cancellationToken).ConfigureAwait(false);
 
             // command callback event
-            DataManager.TriggerDataCommandCallbackEvent(command);
+            SixnetDataManager.TriggerDataCommandCallbackEvent(command);
         }
 
         #endregion

@@ -8,12 +8,12 @@ namespace Sixnet.Development.Queryable
     /// Sort entry
     /// </summary>
     [Serializable]
-    public class SortEntry : IInnerClone<SortEntry>
+    public class SortEntry : ISixnetCloneableModel<SortEntry>
     {
         /// <summary>
         /// Gets or sets the field
         /// </summary>
-        public IDataField Field { get; set; }
+        public ISixnetDataField Field { get; set; }
 
         /// <summary>
         /// Indicates whether order by desc

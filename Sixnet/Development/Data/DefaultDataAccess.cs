@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Sixnet.Development.Data.Client;
 using Sixnet.Development.Data.Field;
 using Sixnet.Development.Entity;
@@ -12,7 +11,7 @@ namespace Sixnet.Development.Data
     /// <summary>
     /// Defines base data access
     /// </summary>
-    public partial class DefaultDataAccess<TEntity> : IDataAccess<TEntity> where TEntity : BaseEntity<TEntity>, new()
+    public partial class DefaultDataAccess<TEntity> : ISixnetDataAccess<TEntity> where TEntity : SixnetBaseEntity<TEntity>, new()
     {
         #region Insert
 

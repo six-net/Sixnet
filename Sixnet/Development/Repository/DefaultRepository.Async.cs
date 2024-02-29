@@ -13,7 +13,7 @@ namespace Sixnet.Development.Repository
     /// Default repository
     /// </summary>
     public partial class DefaultRepository<TModel> : DefaultRootRepository<TModel>
-        where TModel : class, IEntity<TModel>
+        where TModel : class, ISixnetEntity<TModel>
     {
         #region Function
 

@@ -73,7 +73,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="datas">Datas</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Updated datas</returns>
-        public static async Task<List<T>> UpdateAsync<T>(IEnumerable<T> datas, Action<DataOperationOptions> configure = null) where T : class, IEntity<T>
+        public static async Task<List<T>> UpdateAsync<T>(IEnumerable<T> datas, Action<DataOperationOptions> configure = null) where T : class, ISixnetEntity<T>
         {
             var options = GetDataOperationOptions(configure);
 
@@ -122,7 +122,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="datas">Datas</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        public static async Task<int> DeleteAsync<T>(IEnumerable<T> datas, Action<DataOperationOptions> configure = null) where T : class, IEntity<T>
+        public static async Task<int> DeleteAsync<T>(IEnumerable<T> datas, Action<DataOperationOptions> configure = null) where T : class, ISixnetEntity<T>
         {
             var options = GetDataOperationOptions(configure);
 
@@ -210,7 +210,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="currentDatas">Current datas</param>
         /// <param name="configure">Confirure options </param>
         /// <returns></returns>
-        public static async Task<List<T>> QueryByCurrentAsync<T>(IEnumerable<T> currentDatas, Action<DataOperationOptions> configure = null) where T : class, IEntity<T>
+        public static async Task<List<T>> QueryByCurrentAsync<T>(IEnumerable<T> currentDatas, Action<DataOperationOptions> configure = null) where T : class, ISixnetEntity<T>
         {
             var options = GetDataOperationOptions(configure);
 

@@ -17,7 +17,7 @@ namespace Sixnet.Development.Data.Command
         /// </summary>
         /// <param name="command">Command</param>
         /// <returns>Return table name</returns>
-        public Task<List<string>> GetTableNamesAsync(DataCommand command = null)
+        public Task<List<string>> GetTableNamesAsync(SixnetDataCommand command = null)
         {
             if (command != null)
             {
@@ -39,7 +39,7 @@ namespace Sixnet.Development.Data.Command
                 throw new SixnetException($"Data command is null");
             }
             SetActivityQueryable(activityQueryable, queryableLocation);
-            return DataManager.GetTableNamesAsync(this);
+            return SixnetDataManager.GetTableNamesAsync(this);
         }
     }
 }

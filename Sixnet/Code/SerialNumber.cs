@@ -9,15 +9,19 @@ namespace Sixnet.Code
     /// </summary>
     public static class SerialNumber
     {
+        #region Fields
+
         /// <summary>
         /// Generator groups
         /// </summary>
-        static readonly Dictionary<string, SnowflakeNet> GeneratorGroups = new();
+        static readonly Dictionary<string, SnowflakeNet> _generatorGroups = new();
 
         /// <summary>
         /// Default generator
         /// </summary>
-        static readonly SnowflakeNet DefaultGenerator = new(1, 1);
+        static readonly SnowflakeNet _defaultGenerator = new(1, 1);
+
+        #endregion
 
         #region Registers a serial number generator for the specified groups
 
@@ -29,7 +33,7 @@ namespace Sixnet.Code
         /// <param name="worderId">Work id(1-31)</param>
         /// <param name="sequence">Sequence</param>
         /// <param name="startDate">Start date</param>
-        public static void RegisterGenerator(IEnumerable<string> groups, long dataCenterId, long workerId, long sequence = 0L, DateTime? startDate = null)
+        public static void AddGenerator(IEnumerable<string> groups, long dataCenterId, long workerId, long sequence = 0L, DateTimeOffset? startDate = null)
         {
             if (groups.IsNullOrEmpty())
             {
@@ -38,9 +42,9 @@ namespace Sixnet.Code
             groups = groups.Distinct();
             foreach (string group in groups)
             {
-                if (!GeneratorGroups.ContainsKey(group))
+                if (!_generatorGroups.ContainsKey(group))
                 {
-                    GeneratorGroups.Add(group, new SnowflakeNet(dataCenterId, workerId, sequence, startDate));
+                    _generatorGroups.Add(group, new SnowflakeNet(dataCenterId, workerId, sequence, startDate));
                 }
             }
         }
@@ -53,9 +57,9 @@ namespace Sixnet.Code
         /// <param name="workerId">Worker id</param>
         /// <param name="sequence">Sequece</param>
         /// <param name="startDate">Start date</param>
-        public static void RegisterGenerator<T>(long dataCenterId, long workerId, long sequence = 0L, DateTime? startDate = null)
+        public static void AddGenerator<T>(long dataCenterId, long workerId, long sequence = 0L, DateTimeOffset? startDate = null)
         {
-            RegisterGenerator(new string[1] { typeof(T).FullName }, dataCenterId, workerId, sequence, startDate);
+            AddGenerator(new string[1] { typeof(T).FullName }, dataCenterId, workerId, sequence, startDate);
         }
 
         #endregion
@@ -70,11 +74,11 @@ namespace Sixnet.Code
         /// <returns>Return a serial number</returns>
         public static long GenerateSerialNumber(string group = "")
         {
-            if (string.IsNullOrWhiteSpace(group) || !GeneratorGroups.ContainsKey(group))
+            if (string.IsNullOrWhiteSpace(group) || !_generatorGroups.ContainsKey(group))
             {
-                return DefaultGenerator.GenerateId();
+                return _defaultGenerator.GenerateId();
             }
-            return GeneratorGroups[group].GenerateId();
+            return _generatorGroups[group].GenerateId();
         }
 
         /// <summary>

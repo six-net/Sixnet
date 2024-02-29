@@ -7,12 +7,16 @@ namespace Sixnet.Code
     /// </summary>
     public static class RandomNumberHelper
     {
+        #region Fields
+
         /// <summary>
         /// Random object
         /// </summary>
-        private static readonly Random random;
+        private static readonly Random random; 
 
-        #region Static constructor
+        #endregion
+
+        #region Constructor
 
         static RandomNumberHelper()
         {

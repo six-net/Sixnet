@@ -7,7 +7,7 @@ namespace Sixnet.Cache.Keys.Options
     /// <summary>
     /// Get keys options
     /// </summary>
-    public class GetKeysOptions : CacheOptions<GetKeysResponse>
+    public class GetKeysOptions : CacheOperationOptions<GetKeysResponse>
     {
         /// <summary>
         /// Gets or sets the query condition
@@ -25,7 +25,7 @@ namespace Sixnet.Cache.Keys.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return get keys response</returns>
-        protected override async Task<GetKeysResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<GetKeysResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.GetKeysAsync(server, this).ConfigureAwait(false);
         }
@@ -36,7 +36,7 @@ namespace Sixnet.Cache.Keys.Options
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return get keys response</returns>
-        protected override GetKeysResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override GetKeysResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.GetKeys(server, this);
         }

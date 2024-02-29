@@ -7,7 +7,7 @@ namespace Sixnet.Cache.String
     /// <summary>
     /// String get with expiry options
     /// </summary>
-    public class StringGetWithExpiryOptions : CacheOptions<StringGetWithExpiryResponse>
+    public class StringGetWithExpiryOptions : CacheOperationOptions<StringGetWithExpiryResponse>
     {
         /// <summary>
         /// Gets or sets the cahce key
@@ -20,7 +20,7 @@ namespace Sixnet.Cache.String
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return string get with expiry response</returns>
-        protected override async Task<StringGetWithExpiryResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<StringGetWithExpiryResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.StringGetWithExpiryAsync(server, this).ConfigureAwait(false);
         }
@@ -31,7 +31,7 @@ namespace Sixnet.Cache.String
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return string get with expiry response</returns>
-        protected override StringGetWithExpiryResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override StringGetWithExpiryResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.StringGetWithExpiry(server, this);
         }

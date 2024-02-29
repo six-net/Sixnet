@@ -52,7 +52,7 @@ namespace Sixnet.Development.Data.Command
 
         #region Constructor
 
-        public DataCommandResolveContext(DatabaseConnection connection, DataCommand command)
+        public DataCommandResolveContext(SixnetDatabaseConnection connection, SixnetDataCommand command)
         {
             DataCommandExecutionContext = DataCommandExecutionContext.Create(connection, command);
         }
@@ -171,7 +171,7 @@ namespace Sixnet.Development.Data.Command
             {
                 var queryableType = queryable.GetType();
                 var topEntityType = queryable.GetModelType();
-                ThrowHelper.ThrowFrameworkErrorIf(topEntityType == null, "Queryable model type is null");
+                SixnetDirectThrower.ThrowSixnetExceptionIf(topEntityType == null, "Queryable model type is null");
 
                 tablePetNameDict ??= new Dictionary<Guid, Dictionary<string, string>>();
                 var entityTablePetNameDict = new Dictionary<string, string>();
@@ -183,7 +183,7 @@ namespace Sixnet.Development.Data.Command
                     {
                         var joinTargetQueryable = joinEntry.TargetQueryable;
                         var joinModelType = joinTargetQueryable.GetModelType();
-                        ThrowHelper.ThrowFrameworkErrorIf(joinModelType == null, "Join queryable model type is null");
+                        SixnetDirectThrower.ThrowSixnetExceptionIf(joinModelType == null, "Join queryable model type is null");
                         entityTablePetNameDict[$"{topEntityType.GUID}_{joinEntry.Index}"] = GetNewTablePetName();
                     }
                 }
@@ -302,7 +302,7 @@ namespace Sixnet.Development.Data.Command
         /// Set command
         /// </summary>
         /// <param name="command">Command</param>
-        public void SetCommand(DataCommand command)
+        public void SetCommand(SixnetDataCommand command)
         {
             DataCommandExecutionContext?.SetCommand(command);
         }

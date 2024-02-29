@@ -7,7 +7,7 @@ namespace Sixnet.Cache.String
     /// <summary>
     /// String bit count operations
     /// </summary>
-    public class StringBitCountOptions : CacheOptions<StringBitCountResponse>
+    public class StringBitCountOptions : CacheOperationOptions<StringBitCountResponse>
     {
         /// <summary>
         /// Gets or sets the cache key
@@ -30,7 +30,7 @@ namespace Sixnet.Cache.String
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return string bit count response</returns>
-        protected override async Task<StringBitCountResponse> ExecuteCacheOperationAsync(ICacheProvider cacheProvider, CacheServer server)
+        protected override async Task<StringBitCountResponse> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return await cacheProvider.StringBitCountAsync(server, this).ConfigureAwait(false);
         }
@@ -41,7 +41,7 @@ namespace Sixnet.Cache.String
         /// <param name="cacheProvider">Cache provider</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return string bit count response</returns>
-        protected override StringBitCountResponse ExecuteCacheOperation(ICacheProvider cacheProvider, CacheServer server)
+        protected override StringBitCountResponse ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {
             return cacheProvider.StringBitCount(server, this);
         }
