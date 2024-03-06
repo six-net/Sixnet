@@ -1,10 +1,12 @@
 ﻿using Sixnet.DependencyInjection;
 using Sixnet.Exceptions;
 using Sixnet.Model;
+using Sixnet.MQ;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Sixnet.Net.Email
 {
@@ -21,24 +23,9 @@ namespace Sixnet.Net.Email
         static readonly ISixnetEmailProvider _defaultEmailProvider = new DefaultEmailProvider();
 
         /// <summary>
-        /// Gets or sets the method to gets email account
+        /// Default email options
         /// </summary>
-        static Func<EmailInfo, EmailAccount> _getEmailAccountFunc;
-
-        /// <summary>
-        /// Indicates whether use the same email account
-        /// </summary>
-        static bool _useSameEmailAccount;
-
-        /// <summary>
-        /// Email sent callback
-        /// </summary>
-        static Action<IEnumerable<SendEmailResult>> _sendEmailCallback;
-
-        /// <summary>
-        /// Email options
-        /// </summary>
-        readonly static EmailOptions _emailOptions = new EmailOptions();
+        readonly static EmailOptions _defaultEmailOptions = new();
 
         #endregion
 
@@ -47,115 +34,48 @@ namespace Sixnet.Net.Email
         /// <summary>
         /// Send email
         /// </summary>
-        /// <param name="emailInfos">Email infos</param>
-        /// <returns>Return the email send results</returns>
-        public static List<SendEmailResult> Send(IEnumerable<EmailInfo> emailInfos)
+        /// <param name="emails">Emails</param>
+        /// <returns></returns>
+        public static List<SendEmailResult> Send(IEnumerable<EmailInfo> emails)
         {
-            return ExecuteSend(emailInfos);
-        }
-
-        /// <summary>
-        /// Send email
-        /// </summary>
-        /// <param name="emailInfo">Email info</param>
-        /// <returns>Return send result</returns>
-        public static SendEmailResult Send(EmailInfo emailInfo)
-        {
-            return Send(new EmailInfo[1] { emailInfo })?.FirstOrDefault();
-        }
-
-        /// <summary>
-        /// Send email
-        /// </summary>
-        /// <param name="categoryName">Category name</param>
-        /// <param name="subject">Email subject</param>
-        /// <param name="content">Email content</param>
-        /// <param name="asynchronously">Whether send by asynchronously</param>
-        /// <param name="receiveAddresses">Receive addresses</param>
-        /// <returns>Return the email send result</returns>
-        public static SendEmailResult Send(string categoryName, string subject, string content, bool asynchronously = true, params string[] receiveAddresses)
-        {
-            return Send(categoryName, subject, content, asynchronously, receiveAddresses);
-        }
-
-        /// <summary>
-        /// Send email
-        /// </summary>
-        /// <param name="subject">Email subject</param>
-        /// <param name="content">Email content</param>
-        /// <param name="asynchronously">Whether send by asynchronously</param>
-        /// <param name="receiveAddresses">Receive addresses</param>
-        /// <returns>Return the email send result</returns>
-        public static SendEmailResult Send(string subject, string content, bool asynchronously = true, params string[] receiveAddresses)
-        {
-            return Send(subject, content, asynchronously, receiveAddresses);
-        }
-
-        /// <summary>
-        /// Send email
-        /// </summary>
-        /// <param name="subject">Email subject</param>
-        /// <param name="content">Email content</param>
-        /// <param name="receiveAddresses">Receive addresses</param>
-        /// <returns>Return the email send result</returns>
-        public static SendEmailResult Send(string subject, string content, params string[] receiveAddresses)
-        {
-            return Send(subject, content, receiveAddresses);
-        }
-
-        #endregion
-
-        #region Configure
-
-        /// <summary>
-        /// Configure email
-        /// </summary>
-        /// <param name="configure">Get email account function</param>
-        public static void Configure(Action<EmailOptions> configure)
-        {
-            configure?.Invoke(_emailOptions);
-        }
-
-        #endregion
-
-        #region Util
-
-        /// <summary>
-        /// Execute send emails
-        /// </summary>
-        /// <param name="emailInfos">Email infos</param>
-        /// <returns>Return the email send results</returns>
-        internal static List<SendEmailResult> ExecuteSend(IEnumerable<EmailInfo> emailInfos)
-        {
-            if (emailInfos.IsNullOrEmpty())
+            if (emails.IsNullOrEmpty())
             {
                 return new List<SendEmailResult>(0);
             }
 
             var emailProvider = GetEmailProvider();
-            var emailInfoGroups = new Dictionary<EmailAccount, List<EmailInfo>>();
+            var emailGroups = new Dictionary<EmailAccount, List<EmailInfo>>();
+            var emailOptions = GetEmailOptions();
+            EmailAccount emailAccount = null;
 
             #region Gets email account
 
-            foreach (var emailInfo in emailInfos)
+            foreach (var email in emails)
             {
-                var account = GetAccount(emailInfo);
-                if (account == null)
+                if (email == null)
                 {
                     continue;
                 }
-                if (_useSameEmailAccount)
+                if (!emailOptions.UseSameAccount || emailAccount == null)
                 {
-                    emailInfoGroups[account] = emailInfos.ToList();
+                    emailAccount = GetEmailAccount(emailOptions, email);
+                    if (emailAccount == null)
+                    {
+                        continue;
+                    }
+                }
+                if (emailOptions.UseSameAccount)
+                {
+                    emailGroups[emailAccount] = emails.ToList();
                     break;
                 }
-                if (emailInfoGroups.ContainsKey(account))
+                if (emailGroups.ContainsKey(emailAccount))
                 {
-                    emailInfoGroups[account].Add(emailInfo);
+                    emailGroups[emailAccount].Add(email);
                 }
                 else
                 {
-                    emailInfoGroups.Add(account, new List<EmailInfo>() { emailInfo });
+                    emailGroups.Add(emailAccount, new List<EmailInfo>() { email });
                 }
             }
 
@@ -163,67 +83,158 @@ namespace Sixnet.Net.Email
 
             #region Execute send
 
-            IEnumerable<SendEmailResult> sendResults = null;
-
-            //Single email account
-            if (emailInfoGroups.Count == 1)
+            List<SendEmailResult> sendResults = null;
+            if (emailGroups.Count == 1)
             {
-                var firstGroup = emailInfoGroups.First();
-                sendResults = emailProvider.Send(firstGroup.Key, firstGroup.Value);
+                var firstGroup = emailGroups.First();
+                var account = firstGroup.Key;
+                sendResults = emailProvider.Send(account, firstGroup.Value);
             }
             else
             {
-                //Multiple email account
-                var emailGroupResults = new List<SendEmailResult[]>(emailInfoGroups.Count);
-                foreach (var emailGroup in emailInfoGroups)
+                sendResults ??= new List<SendEmailResult>();
+                foreach (var emailGroup in emailGroups)
                 {
-                    emailGroupResults.Add(emailProvider.Send(emailGroup.Key, emailGroup.Value));
+                    var account = emailGroup.Key;
+                    var groupResults = emailProvider.Send(account, emailGroup.Value);
+                    if (!groupResults.IsNullOrEmpty())
+                    {
+                        sendResults.AddRange(groupResults);
+                    }
                 }
-                sendResults = emailGroupResults.SelectMany(c => c);
             }
 
             #endregion
 
             #region Callback
 
-            ThreadPool.QueueUserWorkItem(s =>
-            {
-                _sendEmailCallback?.Invoke(sendResults?.Select(c => c.Clone()).ToList() ?? new List<SendEmailResult>(0));
-            });
+            emailOptions.SendCallback?.Invoke(sendResults);
 
             #endregion
 
-            return sendResults?.ToList() ?? new List<SendEmailResult>(0);
+            return sendResults ?? new List<SendEmailResult>(0);
         }
 
         /// <summary>
-        /// Execute send emails
+        /// Send email
+        /// </summary>
+        /// <param name="emails">Emails</param>
+        /// <returns></returns>
+        public static List<SendEmailResult> Send(params EmailInfo[] emails)
+        {
+            IEnumerable<EmailInfo> emailCollection = emails;
+            return Send(emailCollection);
+        }
+
+        /// <summary>
+        /// Send email
+        /// </summary>
+        /// <param name="subject">Subject</param>
+        /// <param name="subject">Title</param>
+        /// <param name="content">Content</param>
+        /// <param name="addresses">Email addresses</param>
+        /// <returns></returns>
+        public static SendEmailResult Send(string subject, string title, string content, params string[] addresses)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(subject), nameof(subject));
+            SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(content), nameof(content));
+            SixnetDirectThrower.ThrowArgNullIf(addresses.IsNullOrEmpty(), nameof(addresses));
+
+            return Send(new EmailInfo()
+            {
+                Subject = subject,
+                Title = title,
+                Content = content,
+                Emails = addresses,
+            })?.FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Send email
+        /// </summary>
+        /// <param name="title">Subject</param>
+        /// <param name="content">Content</param>
+        /// <param name="addresses">Email addresses</param>
+        /// <returns></returns>
+        public static SendEmailResult Send(string title, string content, params string[] addresses)
+        {
+            return Send(string.Empty, title, content, addresses);
+        }
+
+        /// <summary>
+        /// Send email
         /// </summary>
         /// <param name="account">Email account</param>
-        /// <param name="emailInfos">Email infos</param>
-        /// <returns>Return the email send results</returns>
-        internal static List<SendEmailResult> ExecuteSend(EmailAccount account, IEnumerable<EmailInfo> emailInfos)
+        /// <param name="emails">Emails</param>
+        /// <returns></returns>
+        public static List<SendEmailResult> Send(EmailAccount account, IEnumerable<EmailInfo> emails)
         {
-            var emailProvider = GetEmailProvider();
-            var results = emailProvider.Send(account, emailInfos);
+            SixnetDirectThrower.ThrowArgNullIf(account == null, nameof(account));
 
-            #region Callback
-
-            ThreadPool.QueueUserWorkItem(s =>
+            if (emails.IsNullOrEmpty())
             {
-                _sendEmailCallback?.Invoke(results?.Select(c => c.Clone()).ToList() ?? new List<SendEmailResult>(0));
-            });
-
-            #endregion
-
-            return results?.ToList() ?? new List<SendEmailResult>(0);
+                return new List<SendEmailResult>(0);
+            }
+            var emailOptions = GetEmailOptions();
+            var emailProvider = GetEmailProvider();
+            var results = emailProvider.Send(account, emails);
+            emailOptions.SendCallback?.Invoke(results);
+            return results ?? new List<SendEmailResult>(0);
         }
 
-        static void SetAdditional(EmailInfo emailInfo)
+        /// <summary>
+        /// Send email
+        /// </summary>
+        /// <param name="account">Email account</param>
+        /// <param name="emails">Emails</param>
+        /// <returns></returns>
+        public static List<SendEmailResult> Send(EmailAccount account, params EmailInfo[] emails)
         {
-            //work id
-            emailInfo?.AddWorkId();
+            IEnumerable<EmailInfo> emailCollection = emails;
+            return Send(account, emailCollection);
         }
+
+        /// <summary>
+        /// Send email
+        /// </summary>
+        /// <param name="account">Account</param>
+        /// <param name="subject">Subject</param>
+        /// <param name="title">Title</param>
+        /// <param name="content">Content</param>
+        /// <param name="addresses">Email addresses</param>
+        /// <returns></returns>
+        public static SendEmailResult Send(EmailAccount account, string subject, string title
+            , string content, params string[] addresses)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(title), nameof(title));
+            SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(content), nameof(content));
+            SixnetDirectThrower.ThrowArgNullIf(addresses.IsNullOrEmpty(), nameof(addresses));
+
+            return Send(account, new EmailInfo()
+            {
+                Subject = subject,
+                Title = title,
+                Content = content,
+                Emails = addresses,
+            })?.FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Send email
+        /// </summary>
+        /// <param name="account">Account</param>
+        /// <param name="title">Title</param>
+        /// <param name="content">Content</param>>
+        /// <param name="addresses">Email addresses</param>
+        /// <returns></returns>
+        public static SendEmailResult Send(EmailAccount account, string title, string content, params string[] addresses)
+        {
+            return Send(account, string.Empty, title, content, addresses);
+        }
+
+        #endregion
+
+        #region Util
 
         /// <summary>
         /// Get email provider
@@ -239,24 +250,31 @@ namespace Sixnet.Net.Email
             return emailProvider;
         }
 
-        #region Get email account
-
         /// <summary>
         /// Get email account
         /// </summary>
-        /// <param name="sendInfo">Email send info</param>
-        /// <returns>Return the email accounts</returns>
-        static EmailAccount GetAccount(EmailInfo sendInfo)
+        /// <param name="emailOptions">Email options</param>
+        /// <param name="email">Email info</param>
+        /// <returns></returns>
+        static EmailAccount GetEmailAccount(EmailOptions emailOptions, EmailInfo email)
         {
-            SixnetDirectThrower.ThrowArgNullIf(sendInfo == null, nameof(sendInfo));
+            SixnetDirectThrower.ThrowArgNullIf(email == null, nameof(email));
 
-            var emailAccount = _getEmailAccountFunc?.Invoke(sendInfo);
-            SixnetDirectThrower.ThrowArgNullIf(emailAccount == null, "No mail sending account was specified");
+            var emailAccount = emailOptions.GetEmailAccountFunc?.Invoke(email) ?? emailOptions.Account;
+
+            SixnetDirectThrower.ThrowSixnetExceptionIf(emailAccount == null, "No set email account");
 
             return emailAccount;
         }
 
-        #endregion
+        /// <summary>
+        /// Get email options
+        /// </summary>
+        /// <returns></returns>
+        static EmailOptions GetEmailOptions()
+        {
+            return SixnetContainer.GetOptions<EmailOptions>() ?? _defaultEmailOptions;
+        }
 
         #endregion
     }

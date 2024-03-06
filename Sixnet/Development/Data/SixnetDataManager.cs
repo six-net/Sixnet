@@ -1,7 +1,7 @@
 ﻿using Sixnet.App;
 using Sixnet.Cache;
-using Sixnet.Cache.Keys.Options;
-using Sixnet.Cache.Set.Options;
+using Sixnet.Cache.Keys.Parameters;
+using Sixnet.Cache.Set.Parameters;
 using Sixnet.DependencyInjection;
 using Sixnet.Development.Data.Client;
 using Sixnet.Development.Data.Command;
@@ -752,7 +752,7 @@ namespace Sixnet.Development.Data
             var databaseServer = context.Server;
             var serverTableKey = $"{entityConfig.EntityType.Name}:{databaseServer.GetServerIdentityValue()}";
 
-            var existOptions = new ExistOptions()
+            var existOptions = new ExistParameter()
             {
                 Keys = new List<CacheKey>() { serverTableKey }
             };
@@ -831,7 +831,7 @@ namespace Sixnet.Development.Data
         /// <returns></returns>
         static List<string> GetCachedTableNames(string serverTableKey)
         {
-            var setMembers = new SetMembersOptions()
+            var setMembers = new SetMembersParameter()
             {
                 Key = serverTableKey
             };
@@ -856,7 +856,7 @@ namespace Sixnet.Development.Data
             allTableNames = allTableNames?.Where(t => t.ToLower().StartsWith(rootTableName.ToLower())).ToList() ?? new List<string>(0);
             if (!allTableNames.IsNullOrEmpty())
             {
-                var setAddOptions = new SetAddOptions()
+                var setAddOptions = new SetAddParameter()
                 {
                     Key = serverTableKey,
                     Members = allTableNames
@@ -924,7 +924,7 @@ namespace Sixnet.Development.Data
         /// Handle split table cache options
         /// </summary>
         /// <param name="cacheOptions"></param>
-        static void HandleSplitTableCacheOptions(ISixnetCacheOperationOptions cacheOptions)
+        static void HandleSplitTableCacheOptions(ISixnetCacheParameter cacheOptions)
         {
             cacheOptions.CacheObject = new CacheObject()
             {

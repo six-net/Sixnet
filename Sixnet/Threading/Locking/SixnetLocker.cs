@@ -1,6 +1,7 @@
 ﻿using Sixnet.Cache;
-using Sixnet.Cache.Keys.Options;
+using Sixnet.Cache.Keys.Parameters;
 using Sixnet.Cache.String;
+using Sixnet.Cache.String.Parameters;
 using Sixnet.Code;
 using Sixnet.Development.Data.Database;
 using Sixnet.Exceptions;
@@ -66,21 +67,21 @@ namespace Sixnet.Threading.Locking
 
         #region Common lock
 
-        #region Handle lock options
+        #region Handle lock parameter
 
         /// <summary>
-        /// Handle lock options
+        /// Handle lock parameter
         /// </summary>
-        /// <param name="cacheOptions"></param>
-        static void HandleLockOptions(ISixnetCacheOperationOptions cacheOptions)
+        /// <param name="parameter"></param>
+        static void HandleLockParameter(ISixnetCacheParameter parameter)
         {
-            if (_options.DistributeLockObjectNames?.Contains(cacheOptions.CacheObject?.ObjectName ?? string.Empty) ?? false)
+            if (_options.DistributeLockObjectNames?.Contains(parameter.CacheObject?.ObjectName ?? string.Empty) ?? false)
             {
-                cacheOptions.UseInMemoryForDefault = false;
+                parameter.UseInMemoryForDefault = false;
             }
             else
             {
-                cacheOptions.UseInMemoryForDefault = true;
+                parameter.UseInMemoryForDefault = true;
             }
         }
 
@@ -123,7 +124,7 @@ namespace Sixnet.Threading.Locking
         {
             SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(lockName), nameof(lockName));
             SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(lockValue), nameof(lockValue));
-            var lockOptions = new StringSetOptions()
+            var lockOptions = new StringSetParameter()
             {
                 CacheObject = new CacheObject()
                 {
@@ -140,7 +141,7 @@ namespace Sixnet.Threading.Locking
                     }
                 }
             };
-            HandleLockOptions(lockOptions);
+            HandleLockParameter(lockOptions);
             var expSeconds = GetExpirationSeconds(lockObject, expirationSeconds);
 
             if (SpinWait.SpinUntil(() =>
@@ -179,21 +180,21 @@ namespace Sixnet.Threading.Locking
             {
                 ObjectName = lockObject
             };
-            var getLockOptions = new StringGetOptions()
+            var getLockParameter = new StringGetParameter()
             {
                 Keys = new List<CacheKey>() { lockName },
                 CacheObject = cacheObject
             };
-            HandleLockOptions(getLockOptions);
-            var currentLockValue = SixnetCacher.String.Get(getLockOptions)?.Values?.FirstOrDefault()?.Value?.ToString();
+            HandleLockParameter(getLockParameter);
+            var currentLockValue = SixnetCacher.String.Get(getLockParameter)?.Values?.FirstOrDefault()?.Value?.ToString();
             if (currentLockValue == lockValue)
             {
-                var delLockOptions = new DeleteOptions()
+                var delLockOptions = new DeleteParameter()
                 {
                     Keys = new List<CacheKey>() { lockName },
                     CacheObject = cacheObject
                 };
-                HandleLockOptions(delLockOptions);
+                HandleLockParameter(delLockOptions);
                 return SixnetCacher.Keys.Delete(delLockOptions)?.Success ?? false;
             }
             return false;

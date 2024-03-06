@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace Sixnet.Net.Sms
 {
@@ -11,12 +9,23 @@ namespace Sixnet.Net.Sms
     public class SmsOptions
     {
         /// <summary>
-        /// Get sms account func
+        /// Whether use the same account.
+        /// Default is true
         /// </summary>
-        public Func<SmsExecutionOptions, SmsAccount> GetSmsAccountFunc { get; set; }
+        public bool UseSameAccount { get; set; } = true;
 
         /// <summary>
-        /// Send sms callbacl
+        /// Gets or sets the sms account
+        /// </summary>
+        public SmsAccount Account { get; set; }
+
+        /// <summary>
+        /// Gets or sets the get sms account func
+        /// </summary>
+        public Func<SmsParameter, SmsAccount> GetSmsAccountFunc { get; set; }
+
+        /// <summary>
+        /// Gets or sets the send sms callback
         /// </summary>
         public Action<IEnumerable<SendSmsResult>> SendCallback { get; set; }
     }

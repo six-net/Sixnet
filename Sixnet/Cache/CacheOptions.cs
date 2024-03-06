@@ -25,7 +25,7 @@ namespace Sixnet.Cache
         /// <summary>
         /// Get cache servers operation func
         /// </summary>
-        public Func<ISixnetCacheOperationOptions, CacheServer> GetCacheServersFunc { get; set; }
+        public Func<ISixnetCacheParameter, CacheServer> GetCacheServersFunc { get; set; }
 
         /// <summary>
         /// Get global cache key prefixs func
@@ -101,7 +101,7 @@ namespace Sixnet.Cache
         /// </summary>
         /// <param name="operationOptions">Cache operation options</param>
         /// <returns>Return cache server</returns>
-        public CacheServer GetCacheServer<T>(CacheOperationOptions<T> operationOptions) where T : CacheResponse, new()
+        public CacheServer GetCacheServer<T>(CacheParameter<T> operationOptions) where T : CacheResult, new()
         {
             return GetCacheServersFunc?.Invoke(operationOptions) ?? Server;
         }

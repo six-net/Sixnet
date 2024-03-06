@@ -1,17 +1,18 @@
-﻿using Sixnet.Cache.Hash.Options;
-using Sixnet.Cache.Hash.Response;
-using Sixnet.Cache.Keys.Options;
-using Sixnet.Cache.Keys.Response;
-using Sixnet.Cache.List.Options;
-using Sixnet.Cache.List.Response;
-using Sixnet.Cache.Server.Options;
+﻿using Sixnet.Cache.Hash.Parameters;
+using Sixnet.Cache.Hash.Results;
+using Sixnet.Cache.Keys.Parameters;
+using Sixnet.Cache.Keys.Results;
+using Sixnet.Cache.List.Parameters;
+using Sixnet.Cache.List.Results;
+using Sixnet.Cache.Server.Parameters;
 using Sixnet.Cache.Server.Response;
-using Sixnet.Cache.Set.Options;
-using Sixnet.Cache.Set.Response;
-using Sixnet.Cache.SortedSet.Options;
-using Sixnet.Cache.SortedSet.Response;
+using Sixnet.Cache.Set.Parameters;
+using Sixnet.Cache.Set.Results;
+using Sixnet.Cache.SortedSet.Parameters;
+using Sixnet.Cache.SortedSet.Results;
 using Sixnet.Cache.String;
-using Sixnet.Cache.String.Response;
+using Sixnet.Cache.String.Parameters;
+using Sixnet.Cache.String.Results;
 
 namespace Sixnet.Cache
 {
@@ -32,9 +33,9 @@ namespace Sixnet.Cache
         /// sure it holds a string large enough to be able to set value at offset.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return string set range response</returns>
-        StringSetRangeResponse StringSetRange(CacheServer server, StringSetRangeOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return string set range result</returns>
+        StringSetRangeResult StringSetRange(CacheServer server, StringSetRangeParameter parameter);
 
         #endregion
 
@@ -47,9 +48,9 @@ namespace Sixnet.Cache
         /// it can hold a bit at offset.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return string set bit response</returns>
-        StringSetBitResponse StringSetBit(CacheServer server, StringSetBitOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return string set bit result</returns>
+        StringSetBitResult StringSetBit(CacheServer server, StringSetBitParameter parameter);
 
         #endregion
 
@@ -60,9 +61,9 @@ namespace Sixnet.Cache
         /// regardless of its type.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return string set response</returns>
-        StringSetResponse StringSet(CacheServer server, StringSetOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return string set result</returns>
+        StringSetResult StringSet(CacheServer server, StringSetParameter parameter);
 
         #endregion
 
@@ -72,9 +73,9 @@ namespace Sixnet.Cache
         /// Returns the length of the string value stored at key.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return string length response</returns>
-        StringLengthResponse StringLength(CacheServer server, StringLengthOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return string length result</returns>
+        StringLengthResult StringLength(CacheServer server, StringLengthParameter parameter);
 
         #endregion
 
@@ -87,9 +88,9 @@ namespace Sixnet.Cache
         /// point regardless of the actual internal precision of the computation.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return string increment response</returns>
-        StringIncrementResponse StringIncrement(CacheServer server, StringIncrementOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return string increment result</returns>
+        StringIncrementResult StringIncrement(CacheServer server, StringIncrementParameter parameter);
 
         #endregion
 
@@ -101,9 +102,9 @@ namespace Sixnet.Cache
         /// only handles string values.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return string get with expiry response</returns>
-        StringGetWithExpiryResponse StringGetWithExpiry(CacheServer server, StringGetWithExpiryOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return string get with expiry result</returns>
+        StringGetWithExpiryResult StringGetWithExpiry(CacheServer server, StringGetWithExpiryParameter parameter);
 
         #endregion
 
@@ -113,9 +114,9 @@ namespace Sixnet.Cache
         /// Atomically sets key to value and returns the old value stored at key.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return string get set response</returns>
-        StringGetSetResponse StringGetSet(CacheServer server, StringGetSetOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return string get set result</returns>
+        StringGetSetResult StringGetSet(CacheServer server, StringGetSetParameter parameter);
 
         #endregion
 
@@ -128,9 +129,9 @@ namespace Sixnet.Cache
         /// -2 the penultimate and so forth.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return string get range response</returns>
-        StringGetRangeResponse StringGetRange(CacheServer server, StringGetRangeOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return string get range result</returns>
+        StringGetRangeResult StringGetRange(CacheServer server, StringGetRangeParameter parameter);
 
         #endregion
 
@@ -142,9 +143,9 @@ namespace Sixnet.Cache
         /// 0 bits
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return string get bit response</returns>
-        StringGetBitResponse StringGetBit(CacheServer server, StringGetBitOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return string get bit result</returns>
+        StringGetBitResult StringGetBit(CacheServer server, StringGetBitParameter parameter);
 
         #endregion
 
@@ -155,9 +156,9 @@ namespace Sixnet.Cache
         /// string value or does not exist, the special value nil is returned.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return string get response</returns>
-        StringGetResponse StringGet(CacheServer server, StringGetOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return string get result</returns>
+        StringGetResult StringGet(CacheServer server, StringGetParameter parameter);
 
         #endregion
 
@@ -170,9 +171,9 @@ namespace Sixnet.Cache
         /// as integer. This operation is limited to 64 bit signed integers.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return string decrement response</returns>
-        StringDecrementResponse StringDecrement(CacheServer server, StringDecrementOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return string decrement result</returns>
+        StringDecrementResult StringDecrement(CacheServer server, StringDecrementParameter parameter);
 
         #endregion
 
@@ -188,9 +189,9 @@ namespace Sixnet.Cache
         /// penultimate, and so forth.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return string bit position response</returns>
-        StringBitPositionResponse StringBitPosition(CacheServer server, StringBitPositionOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return string bit position result</returns>
+        StringBitPositionResult StringBitPosition(CacheServer server, StringBitPositionParameter parameter);
 
         #endregion
 
@@ -204,9 +205,9 @@ namespace Sixnet.Cache
         /// of the operation is always stored at destkey.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return string bit operation response</returns>
-        StringBitOperationResponse StringBitOperation(CacheServer server, StringBitOperationOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return string bit operation result</returns>
+        StringBitOperationResult StringBitOperation(CacheServer server, StringBitOperationParameter parameter);
 
         #endregion
 
@@ -221,9 +222,9 @@ namespace Sixnet.Cache
         /// last byte, -2 is the penultimate, and so forth.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return string bit count response</returns>
-        StringBitCountResponse StringBitCount(CacheServer server, StringBitCountOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return string bit count result</returns>
+        StringBitCountResult StringBitCount(CacheServer server, StringBitCountParameter parameter);
 
         #endregion
 
@@ -235,9 +236,9 @@ namespace Sixnet.Cache
         /// so APPEND will be similar to SET in this special case.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return string append response</returns>
-        StringAppendResponse StringAppend(CacheServer server, StringAppendOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return string append result</returns>
+        StringAppendResult StringAppend(CacheServer server, StringAppendParameter parameter);
 
         #endregion
 
@@ -257,9 +258,9 @@ namespace Sixnet.Cache
         /// the penultimate element and so on.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return list trim response</returns>
-        ListTrimResponse ListTrim(CacheServer server, ListTrimOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return list trim result</returns>
+        ListTrimResult ListTrim(CacheServer server, ListTrimParameter parameter);
 
         #endregion
 
@@ -270,9 +271,9 @@ namespace Sixnet.Cache
         ///  see ListGetByIndex. An error is returned for out of range indexes.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return list set by index response</returns>
-        ListSetByIndexResponse ListSetByIndex(CacheServer server, ListSetByIndexOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return list set by index result</returns>
+        ListSetByIndexResult ListSetByIndex(CacheServer server, ListSetByIndexParameter parameter);
 
         #endregion
 
@@ -287,9 +288,9 @@ namespace Sixnet.Cache
         /// and c as third element.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
+        /// <param name="parameter">Parameter</param>
         /// <returns>Return list right push</returns>
-        ListRightPushResponse ListRightPush(CacheServer server, ListRightPushOptions options);
+        ListRightPushResult ListRightPush(CacheServer server, ListRightPushParameter parameter);
 
         #endregion
 
@@ -301,9 +302,9 @@ namespace Sixnet.Cache
         /// at destination.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return list right pop left response</returns>
-        ListRightPopLeftPushResponse ListRightPopLeftPush(CacheServer server, ListRightPopLeftPushOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return list right pop left result</returns>
+        ListRightPopLeftPushResult ListRightPopLeftPush(CacheServer server, ListRightPopLeftPushParameter parameter);
 
         #endregion
 
@@ -313,9 +314,9 @@ namespace Sixnet.Cache
         /// Removes and returns the last element of the list stored at key.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return list right pop response</returns>
-        ListRightPopResponse ListRightPop(CacheServer server, ListRightPopOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return list right pop result</returns>
+        ListRightPopResult ListRightPop(CacheServer server, ListRightPopParameter parameter);
 
         #endregion
 
@@ -329,9 +330,9 @@ namespace Sixnet.Cache
         /// elements equal to value.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return list remove response</returns>
-        ListRemoveResponse ListRemove(CacheServer server, ListRemoveOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return list remove result</returns>
+        ListRemoveResult ListRemove(CacheServer server, ListRemoveParameter parameter);
 
         #endregion
 
@@ -347,9 +348,9 @@ namespace Sixnet.Cache
         /// elements, that is, the rightmost item is included.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return list range response</returns>
-        ListRangeResponse ListRange(CacheServer server, ListRangeOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return list range result</returns>
+        ListRangeResult ListRange(CacheServer server, ListRangeParameter parameter);
 
         #endregion
 
@@ -360,9 +361,9 @@ namespace Sixnet.Cache
         ///  as an empty list and 0 is returned.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return list length response</returns>
-        ListLengthResponse ListLength(CacheServer server, ListLengthOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return list length result</returns>
+        ListLengthResult ListLength(CacheServer server, ListLengthParameter parameter);
 
         #endregion
 
@@ -373,9 +374,9 @@ namespace Sixnet.Cache
         ///  not exist, it is created as empty list before performing the push operations.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return list left push response</returns>
-        ListLeftPushResponse ListLeftPush(CacheServer server, ListLeftPushOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return list left push result</returns>
+        ListLeftPushResult ListLeftPush(CacheServer server, ListLeftPushParameter parameter);
 
         #endregion
 
@@ -385,9 +386,9 @@ namespace Sixnet.Cache
         /// Removes and returns the first element of the list stored at key.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return list left pop response</returns>
-        ListLeftPopResponse ListLeftPop(CacheServer server, ListLeftPopOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return list left pop result</returns>
+        ListLeftPopResult ListLeftPop(CacheServer server, ListLeftPopParameter parameter);
 
         #endregion
 
@@ -399,9 +400,9 @@ namespace Sixnet.Cache
         /// is performed.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return list insert begore response</returns>
-        ListInsertBeforeResponse ListInsertBefore(CacheServer server, ListInsertBeforeOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return list insert begore result</returns>
+        ListInsertBeforeResult ListInsertBefore(CacheServer server, ListInsertBeforeParameter parameter);
 
         #endregion
 
@@ -413,9 +414,9 @@ namespace Sixnet.Cache
         /// is performed.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return list insert after response</returns>
-        ListInsertAfterResponse ListInsertAfter(CacheServer server, ListInsertAfterOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return list insert after result</returns>
+        ListInsertAfterResult ListInsertAfter(CacheServer server, ListInsertAfterParameter parameter);
 
         #endregion
 
@@ -428,9 +429,9 @@ namespace Sixnet.Cache
         /// means the last element, -2 means the penultimate and so forth.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return list get by index response</returns>
-        ListGetByIndexResponse ListGetByIndex(CacheServer server, ListGetByIndexOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return list get by index result</returns>
+        ListGetByIndexResult ListGetByIndex(CacheServer server, ListGetByIndexParameter parameter);
 
         #endregion
 
@@ -444,9 +445,9 @@ namespace Sixnet.Cache
         /// Returns all values in the hash stored at key.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return hash values response</returns>
-        HashValuesResponse HashValues(CacheServer server, HashValuesOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return hash values result</returns>
+        HashValuesResult HashValues(CacheServer server, HashValuesParameter parameter);
 
         #endregion
 
@@ -457,9 +458,9 @@ namespace Sixnet.Cache
         ///  holding a hash is created. If field already exists in the hash, it is overwritten.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return hash set response</returns>
-        HashSetResponse HashSet(CacheServer server, HashSetOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return hash set result</returns>
+        HashSetResult HashSet(CacheServer server, HashSetParameter parameter);
 
         #endregion
 
@@ -469,9 +470,9 @@ namespace Sixnet.Cache
         /// Returns the number of fields contained in the hash stored at key.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return hash length response</returns>
-        HashLengthResponse HashLength(CacheServer server, HashLengthOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return hash length result</returns>
+        HashLengthResult HashLength(CacheServer server, HashLengthParameter parameter);
 
         #endregion
 
@@ -481,9 +482,9 @@ namespace Sixnet.Cache
         /// Returns all field names in the hash stored at key.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return hash keys response</returns>
-        HashKeysResponse HashKeys(CacheServer server, HashKeysOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return hash keys result</returns>
+        HashKeysResult HashKeys(CacheServer server, HashKeysParameter parameter);
 
         #endregion
 
@@ -496,9 +497,9 @@ namespace Sixnet.Cache
         /// to 0 before the operation is performed.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return hash increment response</returns>
-        HashIncrementResponse HashIncrement(CacheServer server, HashIncrementOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return hash increment result</returns>
+        HashIncrementResult HashIncrement(CacheServer server, HashIncrementParameter parameter);
 
         #endregion
 
@@ -508,9 +509,9 @@ namespace Sixnet.Cache
         /// Returns the value associated with field in the hash stored at key.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return hash get response</returns>
-        HashGetResponse HashGet(CacheServer server, HashGetOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return hash get result</returns>
+        HashGetResult HashGet(CacheServer server, HashGetParameter parameter);
 
         #endregion
 
@@ -520,9 +521,9 @@ namespace Sixnet.Cache
         /// Returns all fields and values of the hash stored at key.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return hash get all response</returns>
-        HashGetAllResponse HashGetAll(CacheServer server, HashGetAllOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return hash get all result</returns>
+        HashGetAllResult HashGetAll(CacheServer server, HashGetAllParameter parameter);
 
         #endregion
 
@@ -532,9 +533,9 @@ namespace Sixnet.Cache
         /// Returns if field is an existing field in the hash stored at key.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return hash exists response</returns>
-        HashExistsResponse HashExist(CacheServer server, HashExistsOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return hash exists result</returns>
+        HashExistsResult HashExist(CacheServer server, HashExistsParameter parameter);
 
         #endregion
 
@@ -545,9 +546,9 @@ namespace Sixnet.Cache
         /// are ignored. Non-existing keys are treated as empty hashes and this option returns 0
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return hash delete response</returns>
-        HashDeleteResponse HashDelete(CacheServer server, HashDeleteOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return hash delete result</returns>
+        HashDeleteResult HashDelete(CacheServer server, HashDeleteParameter parameter);
 
         #endregion
 
@@ -559,9 +560,9 @@ namespace Sixnet.Cache
         ///  set to 0 before performing the operation.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return hash decrement response</returns>
-        HashDecrementResponse HashDecrement(CacheServer server, HashDecrementOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return hash decrement result</returns>
+        HashDecrementResult HashDecrement(CacheServer server, HashDecrementParameter parameter);
 
         #endregion
 
@@ -570,10 +571,10 @@ namespace Sixnet.Cache
         /// <summary>
         /// The hash scan option is used to incrementally iterate over a hash
         /// </summary>
-        /// <param name="options">Options</param>
+        /// <param name="parameter">Parameter</param>
         /// <param name="server">Cache server</param>
-        /// <returns>Return hash scan response</returns>
-        HashScanResponse HashScan(CacheServer server, HashScanOptions options);
+        /// <returns>Return hash scan result</returns>
+        HashScanResult HashScan(CacheServer server, HashScanParameter parameter);
 
         #endregion
 
@@ -588,9 +589,9 @@ namespace Sixnet.Cache
         /// are not a member of this set are ignored.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return set remove response</returns>
-        SetRemoveResponse SetRemove(CacheServer server, SetRemoveOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return set remove result</returns>
+        SetRemoveResult SetRemove(CacheServer server, SetRemoveParameter parameter);
 
         #endregion
 
@@ -603,9 +604,9 @@ namespace Sixnet.Cache
         /// absolute value of the specified count.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return set random members response</returns>
-        SetRandomMembersResponse SetRandomMembers(CacheServer server, SetRandomMembersOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return set random members result</returns>
+        SetRandomMembersResult SetRandomMembers(CacheServer server, SetRandomMembersParameter parameter);
 
         #endregion
 
@@ -615,9 +616,9 @@ namespace Sixnet.Cache
         /// Return a random element from the set value stored at key.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
+        /// <param name="parameter">Parameter</param>
         /// <returns>Return set random member</returns>
-        SetRandomMemberResponse SetRandomMember(CacheServer server, SetRandomMemberOptions options);
+        SetRandomMemberResult SetRandomMember(CacheServer server, SetRandomMemberParameter parameter);
 
         #endregion
 
@@ -627,9 +628,9 @@ namespace Sixnet.Cache
         /// Removes and returns a random element from the set value stored at key.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return set pop response</returns>
-        SetPopResponse SetPop(CacheServer server, SetPopOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return set pop result</returns>
+        SetPopResult SetPop(CacheServer server, SetPopParameter parameter);
 
         #endregion
 
@@ -642,9 +643,9 @@ namespace Sixnet.Cache
         /// the destination set, it is only removed from the source set.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return set move response</returns>
-        SetMoveResponse SetMove(CacheServer server, SetMoveOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return set move result</returns>
+        SetMoveResult SetMove(CacheServer server, SetMoveParameter parameter);
 
         #endregion
 
@@ -654,9 +655,9 @@ namespace Sixnet.Cache
         /// Returns all the members of the set value stored at key.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return set members response</returns>
-        SetMembersResponse SetMembers(CacheServer server, SetMembersOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return set members result</returns>
+        SetMembersResult SetMembers(CacheServer server, SetMembersParameter parameter);
 
         #endregion
 
@@ -666,9 +667,9 @@ namespace Sixnet.Cache
         /// Returns the set cardinality (number of elements) of the set stored at key.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return set length response</returns>
-        SetLengthResponse SetLength(CacheServer server, SetLengthOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return set length result</returns>
+        SetLengthResult SetLength(CacheServer server, SetLengthParameter parameter);
 
         #endregion
 
@@ -678,9 +679,9 @@ namespace Sixnet.Cache
         /// Returns if member is a member of the set stored at key.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return set contains response</returns>
-        SetContainsResponse SetContains(CacheServer server, SetContainsOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return set contains result</returns>
+        SetContainsResult SetContains(CacheServer server, SetContainsParameter parameter);
 
         #endregion
 
@@ -691,9 +692,9 @@ namespace Sixnet.Cache
         /// the given sets.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return set combine response</returns>
-        SetCombineResponse SetCombine(CacheServer server, SetCombineOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return set combine result</returns>
+        SetCombineResult SetCombine(CacheServer server, SetCombineParameter parameter);
 
         #endregion
 
@@ -704,9 +705,9 @@ namespace Sixnet.Cache
         ///  it is stored in destination. If destination already exists, it is overwritten.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return set combine and store response</returns>
-        SetCombineAndStoreResponse SetCombineAndStore(CacheServer server, SetCombineAndStoreOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return set combine and store result</returns>
+        SetCombineAndStoreResult SetCombineAndStore(CacheServer server, SetCombineAndStoreParameter parameter);
 
         #endregion
 
@@ -718,9 +719,9 @@ namespace Sixnet.Cache
         /// created before adding the specified members.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return set add response</returns>
-        SetAddResponse SetAdd(CacheServer server, SetAddOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return set add result</returns>
+        SetAddResult SetAdd(CacheServer server, SetAddParameter parameter);
 
         #endregion
 
@@ -735,9 +736,9 @@ namespace Sixnet.Cache
         /// in the sorted set, or key does not exist, nil is returned.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return sorted set score response</returns>
-        SortedSetScoreResponse SortedSetScore(CacheServer server, SortedSetScoreOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return sorted set score result</returns>
+        SortedSetScoreResult SortedSetScore(CacheServer server, SortedSetScoreParameter parameter);
 
         #endregion
 
@@ -749,9 +750,9 @@ namespace Sixnet.Cache
         /// set stored at key between the lexicographical range specified by min and max.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return sorted set remove range by value response</returns>
-        SortedSetRemoveRangeByValueResponse SortedSetRemoveRangeByValue(CacheServer server, SortedSetRemoveRangeByValueOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return sorted set remove range by value result</returns>
+        SortedSetRemoveRangeByValueResult SortedSetRemoveRangeByValue(CacheServer server, SortedSetRemoveRangeByValueParameter parameter);
 
         #endregion
 
@@ -762,9 +763,9 @@ namespace Sixnet.Cache
         ///  and max (inclusive by default).
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return sorted set remove range by score response</returns>
-        SortedSetRemoveRangeByScoreResponse SortedSetRemoveRangeByScore(CacheServer server, SortedSetRemoveRangeByScoreOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return sorted set remove range by score result</returns>
+        SortedSetRemoveRangeByScoreResult SortedSetRemoveRangeByScore(CacheServer server, SortedSetRemoveRangeByScoreParameter parameter);
 
         #endregion
 
@@ -779,9 +780,9 @@ namespace Sixnet.Cache
         /// and so forth.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return sorted set remove range by rank response</returns>
-        SortedSetRemoveRangeByRankResponse SortedSetRemoveRangeByRank(CacheServer server, SortedSetRemoveRangeByRankOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return sorted set remove range by rank result</returns>
+        SortedSetRemoveRangeByRankResult SortedSetRemoveRangeByRank(CacheServer server, SortedSetRemoveRangeByRankParameter parameter);
 
         #endregion
 
@@ -792,9 +793,9 @@ namespace Sixnet.Cache
         /// members are ignored.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return sorted set remove response</returns>
-        SortedSetRemoveResponse SortedSetRemove(CacheServer server, SortedSetRemoveOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return sorted set remove result</returns>
+        SortedSetRemoveResult SortedSetRemove(CacheServer server, SortedSetRemoveParameter parameter);
 
         #endregion
 
@@ -806,9 +807,9 @@ namespace Sixnet.Cache
         /// that the member with the lowest score has rank 0.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return sorted set rank response</returns>
-        SortedSetRankResponse SortedSetRank(CacheServer server, SortedSetRankOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return sorted set rank result</returns>
+        SortedSetRankResult SortedSetRank(CacheServer server, SortedSetRankParameter parameter);
 
         #endregion
 
@@ -820,9 +821,9 @@ namespace Sixnet.Cache
         /// sorted set at key with a value between min and max.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return sorted set range by value response</returns>
-        SortedSetRangeByValueResponse SortedSetRangeByValue(CacheServer server, SortedSetRangeByValueOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return sorted set range by value result</returns>
+        SortedSetRangeByValueResult SortedSetRangeByValue(CacheServer server, SortedSetRangeByValueParameter parameter);
 
         #endregion
 
@@ -836,9 +837,9 @@ namespace Sixnet.Cache
         /// methods the values are inclusive.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return sorted set range by score with scores response</returns>
-        SortedSetRangeByScoreWithScoresResponse SortedSetRangeByScoreWithScores(CacheServer server, SortedSetRangeByScoreWithScoresOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return sorted set range by score with scores result</returns>
+        SortedSetRangeByScoreWithScoresResult SortedSetRangeByScoreWithScores(CacheServer server, SortedSetRangeByScoreWithScoresParameter parameter);
 
         #endregion
 
@@ -852,9 +853,9 @@ namespace Sixnet.Cache
         /// methods the values are inclusive.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return sorted set range by score response</returns>
-        SortedSetRangeByScoreResponse SortedSetRangeByScore(CacheServer server, SortedSetRangeByScoreOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return sorted set range by score result</returns>
+        SortedSetRangeByScoreResult SortedSetRangeByScore(CacheServer server, SortedSetRangeByScoreParameter parameter);
 
         #endregion
 
@@ -870,9 +871,9 @@ namespace Sixnet.Cache
         /// element and so on.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return sorted set range by rank with scores response</returns>
-        SortedSetRangeByRankWithScoresResponse SortedSetRangeByRankWithScores(CacheServer server, SortedSetRangeByRankWithScoresOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return sorted set range by rank with scores result</returns>
+        SortedSetRangeByRankWithScoresResult SortedSetRangeByRankWithScores(CacheServer server, SortedSetRangeByRankWithScoresParameter parameter);
 
         #endregion
 
@@ -888,9 +889,9 @@ namespace Sixnet.Cache
         /// element and so on.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return sorted set range by rank response</returns>
-        SortedSetRangeByRankResponse SortedSetRangeByRank(CacheServer server, SortedSetRangeByRankOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return sorted set range by rank result</returns>
+        SortedSetRangeByRankResult SortedSetRangeByRank(CacheServer server, SortedSetRangeByRankParameter parameter);
 
         #endregion
 
@@ -903,8 +904,8 @@ namespace Sixnet.Cache
         /// </summary>
         /// <param name="server">Cache server</param>
         /// <param name="options">response</param>
-        /// <returns>Return sorted set lenght by value response</returns>
-        SortedSetLengthByValueResponse SortedSetLengthByValue(CacheServer server, SortedSetLengthByValueOptions options);
+        /// <returns>Return sorted set lenght by value result</returns>
+        SortedSetLengthByValueResult SortedSetLengthByValue(CacheServer server, SortedSetLengthByValueParameter parameter);
 
         #endregion
 
@@ -915,9 +916,9 @@ namespace Sixnet.Cache
         /// at key.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return sorted set length response</returns>
-        SortedSetLengthResponse SortedSetLength(CacheServer server, SortedSetLengthOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return sorted set length result</returns>
+        SortedSetLengthResult SortedSetLength(CacheServer server, SortedSetLengthParameter parameter);
 
         #endregion
 
@@ -929,9 +930,9 @@ namespace Sixnet.Cache
         /// score (as if its previous score was 0.0).
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return sorted set increment response</returns>
-        SortedSetIncrementResponse SortedSetIncrement(CacheServer server, SortedSetIncrementOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return sorted set increment result</returns>
+        SortedSetIncrementResult SortedSetIncrement(CacheServer server, SortedSetIncrementParameter parameter);
 
         #endregion
 
@@ -943,9 +944,9 @@ namespace Sixnet.Cache
         /// score (as if its previous score was 0.0).
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return sorted set decrement response</returns>
-        SortedSetDecrementResponse SortedSetDecrement(CacheServer server, SortedSetDecrementOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return sorted set decrement result</returns>
+        SortedSetDecrementResult SortedSetDecrement(CacheServer server, SortedSetDecrementParameter parameter);
 
         #endregion
 
@@ -957,9 +958,9 @@ namespace Sixnet.Cache
         /// aggregation (defaults to sum)
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return sorted set combine and store response</returns>
-        SortedSetCombineAndStoreResponse SortedSetCombineAndStore(CacheServer server, SortedSetCombineAndStoreOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return sorted set combine and store result</returns>
+        SortedSetCombineAndStoreResult SortedSetCombineAndStore(CacheServer server, SortedSetCombineAndStoreParameter parameter);
 
         #endregion
 
@@ -972,9 +973,9 @@ namespace Sixnet.Cache
         /// ordering.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return sorted set add response</returns>
-        SortedSetAddResponse SortedSetAdd(CacheServer server, SortedSetAddOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return sorted set add result</returns>
+        SortedSetAddResult SortedSetAdd(CacheServer server, SortedSetAddParameter parameter);
 
         #endregion
 
@@ -995,9 +996,9 @@ namespace Sixnet.Cache
         /// fields using -> notation (again, refer to redis documentation).
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return sort response</returns>
-        SortResponse Sort(CacheServer server, SortOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return sort result</returns>
+        SortResult Sort(CacheServer server, SortParameter parameter);
 
         #endregion
 
@@ -1014,9 +1015,9 @@ namespace Sixnet.Cache
         /// fields using -> notation (again, refer to redis documentation).
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return sort and store response</returns>
-        SortAndStoreResponse SortAndStore(CacheServer server, SortAndStoreOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return sort and store result</returns>
+        SortAndStoreResult SortAndStore(CacheServer server, SortAndStoreParameter parameter);
 
         #endregion
 
@@ -1031,9 +1032,9 @@ namespace Sixnet.Cache
         /// different types that can be returned are: string, list, set, zset and hash.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return key type response</returns>
-        TypeResponse KeyType(CacheServer server, TypeOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return key type result</returns>
+        TypeResult KeyType(CacheServer server, TypeParameter parameter);
 
         #endregion
 
@@ -1045,9 +1046,9 @@ namespace Sixnet.Cache
         /// to be part of the dataset.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return key time to live response</returns>
-        TimeToLiveResponse KeyTimeToLive(CacheServer server, TimeToLiveOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return key time to live result</returns>
+        TimeToLiveResult KeyTimeToLive(CacheServer server, TimeToLiveParameter parameter);
 
         #endregion
 
@@ -1059,9 +1060,9 @@ namespace Sixnet.Cache
         /// any expire, otherwise the specified expire time(in milliseconds) is set.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return key restore response</returns>
-        RestoreResponse KeyRestore(CacheServer server, RestoreOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return key restore result</returns>
+        RestoreResult KeyRestore(CacheServer server, RestoreParameter parameter);
 
         #endregion
 
@@ -1072,9 +1073,9 @@ namespace Sixnet.Cache
         /// are the same, or when key does not exist.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return key rename response</returns>
-        RenameResponse KeyRename(CacheServer server, RenameOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return key rename result</returns>
+        RenameResult KeyRename(CacheServer server, RenameParameter parameter);
 
         #endregion
 
@@ -1084,9 +1085,9 @@ namespace Sixnet.Cache
         /// Return a random key from the currently selected database.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return key random response</returns>
-        RandomResponse KeyRandom(CacheServer server, RandomOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return key random result</returns>
+        RandomResult KeyRandom(CacheServer server, RandomParameter parameter);
 
         #endregion
 
@@ -1097,9 +1098,9 @@ namespace Sixnet.Cache
         /// an expire set) to persistent (a key that will never expire as no timeout is associated).
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return key persist response</returns>
-        PersistResponse KeyPersist(CacheServer server, PersistOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return key persist result</returns>
+        PersistResult KeyPersist(CacheServer server, PersistParameter parameter);
 
         #endregion
 
@@ -1112,9 +1113,9 @@ namespace Sixnet.Cache
         /// a locking primitive because of this.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return key move response</returns>
-        MoveResponse KeyMove(CacheServer server, MoveOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return key move result</returns>
+        MoveResult KeyMove(CacheServer server, MoveParameter parameter);
 
         #endregion
 
@@ -1126,9 +1127,9 @@ namespace Sixnet.Cache
         /// and is guaranteed to exist in the target instance.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return key migrate response</returns>
-        MigrateKeyResponse KeyMigrate(CacheServer server, MigrateKeyOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return key migrate result</returns>
+        MigrateKeyResult KeyMigrate(CacheServer server, MigrateKeyParameter parameter);
 
         #endregion
 
@@ -1140,9 +1141,9 @@ namespace Sixnet.Cache
         /// terminology.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return key expire response</returns>
-        ExpireResponse KeyExpire(CacheServer server, ExpireOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return key expire result</returns>
+        ExpireResult KeyExpire(CacheServer server, ExpireParameter parameter);
 
         #endregion;
 
@@ -1154,9 +1155,9 @@ namespace Sixnet.Cache
         /// RESTORE option.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return key dump response</returns>
-        DumpResponse KeyDump(CacheServer server, DumpOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return key dump result</returns>
+        DumpResult KeyDump(CacheServer server, DumpParameter parameter);
 
         #endregion
 
@@ -1166,9 +1167,9 @@ namespace Sixnet.Cache
         /// Removes the specified keys. A key is ignored if it does not exist.
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return key delete response</returns>
-        DeleteResponse KeyDelete(CacheServer server, DeleteOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return key delete result</returns>
+        DeleteResult KeyDelete(CacheServer server, DeleteParameter parameter);
 
         #endregion
 
@@ -1178,9 +1179,9 @@ namespace Sixnet.Cache
         /// Key exists
         /// </summary>
         /// <param name="server">server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return exists key response</returns>
-        ExistResponse KeyExist(CacheServer server, ExistOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return exists key result</returns>
+        ExistResult KeyExist(CacheServer server, ExistParameter parameter);
 
         #endregion
 
@@ -1194,9 +1195,9 @@ namespace Sixnet.Cache
         /// Get all database
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return get all database response</returns>
-        GetAllDataBaseResponse GetAllDataBase(CacheServer server, GetAllDataBaseOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return get all database result</returns>
+        GetAllDataBaseResult GetAllDataBase(CacheServer server, GetAllDataBaseParameter parameter);
 
         #endregion
 
@@ -1206,9 +1207,9 @@ namespace Sixnet.Cache
         /// Query keys
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return get keys response</returns>
-        GetKeysResponse GetKeys(CacheServer server, GetKeysOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return get keys result</returns>
+        GetKeysResult GetKeys(CacheServer server, GetKeysParameter parameter);
 
         #endregion
 
@@ -1218,9 +1219,9 @@ namespace Sixnet.Cache
         /// Clear database data
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return clear data response</returns>
-        ClearDataResponse ClearData(CacheServer server, ClearDataOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return clear data result</returns>
+        ClearDataResult ClearData(CacheServer server, ClearDataParameter parameter);
 
         #endregion
 
@@ -1230,9 +1231,9 @@ namespace Sixnet.Cache
         /// Get cache item detail
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return get key detail response</returns>
-        GetDetailResponse GetKeyDetail(CacheServer server, GetDetailOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return get key detail result</returns>
+        GetDetailResult GetKeyDetail(CacheServer server, GetDetailParameter parameter);
 
         #endregion
 
@@ -1242,9 +1243,9 @@ namespace Sixnet.Cache
         /// Get server config
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return get server configuration response</returns>
-        GetServerConfigurationResponse GetServerConfiguration(CacheServer server, GetServerConfigurationOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return get server configuration result</returns>
+        GetServerConfigurationResult GetServerConfiguration(CacheServer server, GetServerConfigurationParameter parameter);
 
         #endregion
 
@@ -1254,9 +1255,9 @@ namespace Sixnet.Cache
         /// Save server config
         /// </summary>
         /// <param name="server">Cache server</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return save server config response</returns>
-        SaveServerConfigurationResponse SaveServerConfiguration(CacheServer server, SaveServerConfigurationOptions options);
+        /// <param name="parameter">Parameter</param>
+        /// <returns>Return save server config result</returns>
+        SaveServerConfigurationResult SaveServerConfiguration(CacheServer server, SaveServerConfigurationParameter parameter);
 
         #endregion
 

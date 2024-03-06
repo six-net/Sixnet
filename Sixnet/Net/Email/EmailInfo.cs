@@ -10,7 +10,7 @@ namespace Sixnet.Net.Email
     /// Send email options
     /// </summary>
     [Serializable]
-    public class EmailInfo : ISixnetExtraParameterModel
+    public class EmailInfo : ISixnetProperties
     {
         /// <summary>
         /// Gets or sets the email id
@@ -20,17 +20,17 @@ namespace Sixnet.Net.Email
         /// <summary>
         /// Gets or sets the parameters
         /// </summary>
-        public Dictionary<string, string> Parameters { get; set; }
-
-        /// <summary>
-        /// Gets or sets the email category
-        /// </summary>
-        public string Category { get; set; }
+        public Dictionary<string, string> Properties { get; set; }
 
         /// <summary>
         /// Gets or sets the email subject
         /// </summary>
         public string Subject { get; set; }
+
+        /// <summary>
+        /// Gets or sets the email title
+        /// </summary>
+        public string Title { get; set; }
 
         /// <summary>
         /// Gets or sets the email content
@@ -60,26 +60,19 @@ namespace Sixnet.Net.Email
         /// </summary>
         public bool BodyIsHtml { get; set; } = true;
 
-        /// <summary>
-        /// Gets or sets whether send asynchronously.
-        /// Default value is true.
-        /// </summary>
-        public bool Asynchronously { get; set; } = true;
-
         internal EmailInfo Clone()
         {
             return new EmailInfo()
             {
                 Id = Id,
-                Asynchronously = Asynchronously,
                 BodyEncoding = BodyEncoding,
                 BodyIsHtml = BodyIsHtml,
-                Category = Category,
+                Subject = Subject,
                 Content = Content,
                 Emails = Emails.Select(c => c).ToList(),
-                Subject = Subject,
+                Title = Title,
                 SubjectEncoding = SubjectEncoding,
-                Parameters = Parameters?.ToDictionary(c => c.Key, c => c.Value) ?? new Dictionary<string, string>(0)
+                Properties = Properties?.ToDictionary(c => c.Key, c => c.Value) ?? new Dictionary<string, string>(0)
             };
         }
     }

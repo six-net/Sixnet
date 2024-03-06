@@ -1,7 +1,7 @@
 ﻿using Sixnet.Development.Data;
 using Sixnet.Development.Data.Database;
 using Sixnet.Development.Domain.Event;
-using Sixnet.Development.Domain.Message;
+using Sixnet.Development.Message;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,7 +22,7 @@ namespace Sixnet.Development.Work
             });
             SubscribeWorkSuccessEvent((work) =>
             {
-                SixnetMessager.Commit(true);
+                _ = SixnetMessager.CommitAsync();
             });
             SubscribeWorkRollbackEvent(w =>
             {

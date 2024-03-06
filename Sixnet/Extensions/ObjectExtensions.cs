@@ -84,8 +84,8 @@ namespace System
             {
                 return new Dictionary<string, string>(0);
             }
-            PropertyDescriptorCollection nowPropertyCollection = TypeDescriptor.GetProperties(value);
-            Dictionary<string, string> valueDictionary = new Dictionary<string, string>(nowPropertyCollection.Count);
+            var nowPropertyCollection = TypeDescriptor.GetProperties(value);
+            var valueDictionary = new Dictionary<string, string>(nowPropertyCollection.Count);
             foreach (PropertyDescriptor ps in nowPropertyCollection)
             {
                 valueDictionary.Add(ps.Name, ps.GetValue(value)?.ToString() ?? string.Empty);

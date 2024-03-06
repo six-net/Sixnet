@@ -1,26 +1,24 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Sixnet.App;
 using Sixnet.Cache;
 using Sixnet.Cache.Provider.Memory;
 using Sixnet.Development.Data;
-using Sixnet.Development.Domain.Message;
+using Sixnet.Development.Message;
 using Sixnet.Development.Repository;
 using Sixnet.Exceptions;
 using Sixnet.IO.FileAccess;
 using Sixnet.Mapper;
+using Sixnet.Net.Email;
+using Sixnet.Net.Sms;
 using Sixnet.Net.Upload;
 using Sixnet.Security.Cryptography;
-using Sixnet.Session;
-using Sixnet.Token;
 using Sixnet.Token.Jwt;
-using static Sixnet.Logging.SixnetLogEvents;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime;
 
 namespace Sixnet.DependencyInjection
 {
@@ -30,11 +28,6 @@ namespace Sixnet.DependencyInjection
     public static class SixnetContainer
     {
         #region Fields
-
-        /// <summary>
-        /// Default project services
-        /// </summary>
-        static List<ServiceDescriptor> _defaultProjectServices = null;
 
         /// <summary>
         /// Default service collection
@@ -59,11 +52,6 @@ namespace Sixnet.DependencyInjection
         /// Gets the current service provider
         /// </summary>
         public static IServiceProvider ServiceProvider { get; private set; } = null;
-
-        /// <summary>
-        /// Gets the service collection
-        /// </summary>
-        public static IServiceCollection ServiceCollection => _serviceCollection;
 
         #endregion
 
@@ -388,26 +376,34 @@ namespace Sixnet.DependencyInjection
         /// <param name="sixnetOptions"></param>
         static void ConfigureProjectDefaultOptions(IServiceCollection services, SixnetOptions sixnetOptions)
         {
-            // Config options
-            // Configure upload
+            // Upload
             services.ConfigureIfNotNull<UploadOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Upload)));
-            // Configure file access
+            // File access
             services.ConfigureIfNotNull<FileAccessOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.FileAccess)));
-            // Configure Rsa key
+            // Rsa key
             services.ConfigureIfNotNull<RSAKeyOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.RSAKey)));
-            // Configure jwt
+            // Jwt
             services.ConfigureIfNotNull<JwtOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Jwt)));
-            // Configure database
+            // Database
             services.ConfigureIfNotNull<DataOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Data)));
-            // Configure cache
+            // Cache
             services.ConfigureIfNotNull<CacheOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Cache)));
+            // Email
+            services.ConfigureIfNotNull<EmailOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Email)));
+            // Sms
+            services.ConfigureIfNotNull<SmsOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Sms)));
+            // Message
+            services.ConfigureIfNotNull<MessageOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Message)));
 
-            // post config options
+            // Post config options
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureUpload);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureFileAccess);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureRSAKey);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureJwt);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureData);
+            services.PostConfigureIfNotNull(sixnetOptions.ConfigureEmail);
+            services.PostConfigureIfNotNull(sixnetOptions.ConfigureSms);
+            services.PostConfigureIfNotNull(sixnetOptions.ConfigureMessage);
             services.PostConfigureIfNotNull<CacheOptions>((options) =>
             {
                 options.AddCacheProvider(CacheServerType.InMemory, new MemoryProvider());

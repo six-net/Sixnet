@@ -1,43 +1,105 @@
-﻿using System.Collections.Generic;
-
-namespace Sixnet.Cache.Command.Result
+﻿namespace Sixnet.Cache
 {
     /// <summary>
-    /// Cache command result
+    /// Cache result
     /// </summary>
-    public class CacheResult<TResponse>
+    public class CacheResult
     {
-        /// <summary>
-        /// Gets or sets the responses
-        /// </summary>
-        public List<TResponse> Responses { get; set; }
+        #region Properties
 
         /// <summary>
-        /// Add response
+        /// Gets or sets whether is successful
         /// </summary>
-        /// <param name="responses">Cache responses</param>
-        public void AddResponse(params TResponse[] responses)
-        {
-            IEnumerable<TResponse> responsesCollection = responses;
-            AddResponse(responses);
-        }
+        public bool Success { get; set; }
 
-        public void AddResponse(IEnumerable<TResponse> responses)
+        /// <summary>
+        /// Gets or sets the message
+        /// </summary>
+        public string Message { get; set; }
+
+        /// <summary>
+        /// Gets or sets the response code
+        /// </summary>
+        public string Code { get; set; }
+
+        /// <summary>
+        /// Gets or sets the cache server
+        /// </summary>
+        public CacheServer CacheServer { get; set; }
+
+        /// <summary>
+        /// Gets or sets the cache database
+        /// </summary>
+        public CacheDatabase Database { get; set; }
+
+        /// <summary>
+        /// Gets or sets the end point
+        /// </summary>
+        public CacheEndPoint EndPoint { get; set; }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Get empty response
+        /// </summary>
+        /// <returns>Return empty cache response</returns>
+        public static CacheResult Empty()
         {
-            if (responses.IsNullOrEmpty())
+            return new CacheResult()
             {
-                return;
-            }
-            Responses = Responses ?? new List<TResponse>();
-            Responses.AddRange(responses);
+                Code = "0",
+                Success = true,
+                Message = "Empty response"
+            };
         }
 
         /// <summary>
-        /// Gets a empty result
+        /// Fail response
         /// </summary>
-        public static CacheResult<TResponse> EmptyResult()
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="code">code</param>
+        /// <param name="message">message</param>
+        /// <returns>Return data object</returns>
+        public static T FailResponse<T>(string code, string message = "", CacheServer server = null, CacheDatabase database = null) where T : CacheResult, new()
         {
-            return new CacheResult<TResponse>();
+            var response = new T
+            {
+                Code = code,
+                Success = false,
+                CacheServer = server,
+                Database = database
+            };
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                SixnetCacheCodes.CodeMessages.TryGetValue(code, out message);
+            }
+            response.Message = message;
+            return response;
         }
+
+        public static T NoDatabase<T>(CacheServer server) where T : CacheResult, new()
+        {
+            return FailResponse<T>("", "No cache database specified", server);
+        }
+
+        /// <summary>
+        /// Success response
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <returns>Return data object</returns>
+        public static T SuccessResponse<T>(CacheServer server = null, CacheDatabase database = null) where T : CacheResult, new()
+        {
+            var response = new T
+            {
+                Success = true,
+                CacheServer = server,
+                Database = database
+            };
+            return response;
+        }
+
+        #endregion
     }
 }

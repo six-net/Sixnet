@@ -1,4 +1,5 @@
-﻿using Sixnet.Exceptions;
+﻿using Sixnet.Development.Repository;
+using Sixnet.Exceptions;
 using Sixnet.MQ;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,253 +10,51 @@ namespace Sixnet.Net.Email
 {
     public static partial class SixnetEmailer
     {
-        #region Send
-
         /// <summary>
         /// Send email
         /// </summary>
-        /// <param name="emailInfos">Email infos</param>
-        /// <returns>Return the email send results</returns>
-        public static Task<List<SendEmailResult>> SendAsync(IEnumerable<EmailInfo> emailInfos)
+        /// <param name="emails">Emails</param>
+        /// <returns></returns>
+        public static async Task<List<SendEmailResult>> SendAsync(IEnumerable<EmailInfo> emails)
         {
-            if (emailInfos.IsNullOrEmpty())
-            {
-                return Task.FromResult(new List<SendEmailResult>(0));
-            }
-            var syncInfos = new List<EmailInfo>();
-            var asyncInfos = new List<EmailInfo>();
-            foreach (var emailInfo in emailInfos)
-            {
-                SetAdditional(emailInfo);
-                if (emailInfo == null)
-                {
-                    continue;
-                }
-                if (emailInfo.Asynchronously)
-                {
-                    asyncInfos.Add(emailInfo);
-                }
-                else
-                {
-                    syncInfos.Add(emailInfo);
-                }
-            }
-            if (!asyncInfos.IsNullOrEmpty())
-            {
-                var emailMessage = new InProcessQueueEmailMessage()
-                {
-                    EmailInfos = asyncInfos
-                };
-                _ = SixnetMQ.SendAsync(emailMessage);
-            }
-            if (syncInfos.IsNullOrEmpty())
-            {
-                return Task.FromResult(new List<SendEmailResult>(0));
-            }
-            return ExecuteSendAsync(syncInfos);
-        }
-
-        /// <summary>
-        /// Send email
-        /// </summary>
-        /// <param name="emailInfo">Send email options</param>
-        /// <returns>Return send result</returns>
-        public static async Task<SendEmailResult> SendAsync(EmailInfo emailInfo)
-        {
-            return (await SendAsync(new EmailInfo[1] { emailInfo }).ConfigureAwait(false))?.FirstOrDefault();
-        }
-
-        /// <summary>
-        /// Send email
-        /// </summary>
-        /// <param name="categoryName">Category name</param>
-        /// <param name="subject">Email subject</param>
-        /// <param name="content">Email content</param>
-        /// <param name="asynchronously">Whether send by asynchronously</param>
-        /// <param name="receiveAddresses">Receive addresses</param>
-        /// <returns>Return the email send result</returns>
-        public static Task<SendEmailResult> SendAsync(string categoryName, string subject, string content, bool asynchronously = true, params string[] receiveAddresses)
-        {
-            SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(subject), nameof(subject));
-            SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(content), nameof(content));
-            SixnetDirectThrower.ThrowArgNullIf(receiveAddresses.IsNullOrEmpty(), nameof(receiveAddresses));
-
-            return SendAsync(new EmailInfo()
-            {
-                Asynchronously = asynchronously,
-                Category = categoryName,
-                Subject = subject,
-                Content = content,
-                Emails = receiveAddresses,
-            });
-        }
-
-        /// <summary>
-        /// Send email
-        /// </summary>
-        /// <param name="subject">Email subject</param>
-        /// <param name="content">Email content</param>
-        /// <param name="asynchronously">Whether send by asynchronously</param>
-        /// <param name="receiveAddresses">Receive addresses</param>
-        /// <returns>Return the email send result</returns>
-        public static Task<SendEmailResult> SendAsync(string subject, string content, bool asynchronously = true, params string[] receiveAddresses)
-        {
-            return SendAsync(string.Empty, subject, content, asynchronously, receiveAddresses);
-        }
-
-        /// <summary>
-        /// Send email
-        /// </summary>
-        /// <param name="subject">Email subject</param>
-        /// <param name="content">Email content</param>
-        /// <param name="receiveAddresses">Receive addresses</param>
-        /// <returns>Return the email send result</returns>
-        public static Task<SendEmailResult> SendAsync(string subject, string content, params string[] receiveAddresses)
-        {
-            return SendAsync(string.Empty, subject, content, true, receiveAddresses);
-        }
-
-        /// <summary>
-        /// Send email
-        /// </summary>
-        /// <param name="account">Email account</param>
-        /// <param name="emailInfos">Email send options</param>
-        /// <returns>Return the email send result</returns>
-        public static Task<List<SendEmailResult>> SendAsync(EmailAccount account, params EmailInfo[] emailInfos)
-        {
-            SixnetDirectThrower.ThrowArgNullIf(account == null, nameof(account));
-            if (emailInfos.IsNullOrEmpty())
-            {
-                return Task.FromResult(new List<SendEmailResult>(0));
-            }
-            var syncInfos = new List<EmailInfo>();
-            var asyncInfos = new List<EmailInfo>();
-            foreach (var emailInfo in emailInfos)
-            {
-                SetAdditional(emailInfo);
-                if (emailInfo == null)
-                {
-                    continue;
-                }
-                if (emailInfo.Asynchronously)
-                {
-                    asyncInfos.Add(emailInfo);
-                }
-                else
-                {
-                    syncInfos.Add(emailInfo);
-                }
-            }
-            if (!asyncInfos.IsNullOrEmpty())
-            {
-                var emailMessage = new InProcessQueueEmailMessage()
-                {
-                    EmailInfos = asyncInfos,
-                    EmailAccount = account
-                };
-                _ = SixnetMQ.SendAsync(emailMessage);
-            }
-            if (syncInfos.IsNullOrEmpty())
-            {
-                return Task.FromResult(new List<SendEmailResult>(0));
-            }
-            return ExecuteSendAsync(account, syncInfos);
-        }
-
-        /// <summary>
-        /// Send email
-        /// </summary>
-        /// <param name="account">Email account</param>
-        /// <param name="categoryName">Category name</param>
-        /// <param name="subject">Email subject</param>
-        /// <param name="content">Email content</param>
-        /// <param name="asynchronously">Whether send by asynchronously</param>
-        /// <param name="receiveAddresses">Receive addresses</param>
-        /// <returns>Return the email send result</returns>
-        public static async Task<SendEmailResult> SendAsync(EmailAccount account, string categoryName, string subject, string content, bool asynchronously = true, params string[] receiveAddresses)
-        {
-            SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(subject), nameof(subject));
-            SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(content), nameof(content));
-            SixnetDirectThrower.ThrowArgNullIf(receiveAddresses.IsNullOrEmpty(), nameof(receiveAddresses));
-
-            var results = await SendAsync(account, new EmailInfo()
-            {
-                Asynchronously = asynchronously,
-                Category = categoryName,
-                Subject = subject,
-                Content = content,
-                Emails = receiveAddresses,
-            }).ConfigureAwait(false);
-            return results?.FirstOrDefault();
-        }
-
-        /// <summary>
-        /// Send email
-        /// </summary>
-        /// <param name="account">Email account</param>
-        /// <param name="subject">Email subject</param>
-        /// <param name="content">Email content</param>
-        /// <param name="asynchronously">Whether send by asynchronously</param>
-        /// <param name="receiveAddresses">Receive addresses</param>
-        /// <returns>Return the email send result</returns>
-        public static Task<SendEmailResult> SendAsync(EmailAccount account, string subject, string content, bool asynchronously = true, params string[] receiveAddresses)
-        {
-            return SendAsync(account, string.Empty, subject, content, asynchronously, receiveAddresses);
-        }
-
-        /// <summary>
-        /// Send email
-        /// </summary>
-        /// <param name="account">Email account</param>
-        /// <param name="subject">Email subject</param>
-        /// <param name="content">Email content</param>
-        /// <param name="receiveAddresses">Receive addresses</param>
-        /// <returns>Return the email send result</returns>
-        public static Task<SendEmailResult> SendAsync(EmailAccount account, string subject, string content, params string[] receiveAddresses)
-        {
-            return SendAsync(account, string.Empty, subject, content, true, receiveAddresses);
-        }
-
-        #endregion
-
-        #region Util
-
-        /// <summary>
-        /// Execute send emails
-        /// </summary>
-        /// <param name="emailInfos">Email infos</param>
-        /// <returns>Return the email send results</returns>
-        internal static async Task<List<SendEmailResult>> ExecuteSendAsync(IEnumerable<EmailInfo> emailInfos)
-        {
-            if (emailInfos.IsNullOrEmpty())
+            if (emails.IsNullOrEmpty())
             {
                 return new List<SendEmailResult>(0);
             }
 
             var emailProvider = GetEmailProvider();
-            var emailInfoGroups = new Dictionary<EmailAccount, List<EmailInfo>>();
+            var emailGroups = new Dictionary<EmailAccount, List<EmailInfo>>();
+            var emailOptions = GetEmailOptions();
+            EmailAccount emailAccount = null;
 
             #region Gets email account
 
-            foreach (var emailInfo in emailInfos)
+            foreach (var email in emails)
             {
-                var account = GetAccount(emailInfo);
-                if (account == null)
+                if (email == null)
                 {
                     continue;
                 }
-                if (_useSameEmailAccount)
+                if (!emailOptions.UseSameAccount || emailAccount == null)
                 {
-                    emailInfoGroups[account] = emailInfos.ToList();
+                    emailAccount = GetEmailAccount(emailOptions, email);
+                    if (emailAccount == null)
+                    {
+                        continue;
+                    }
+                }
+                if (emailOptions.UseSameAccount)
+                {
+                    emailGroups[emailAccount] = emails.ToList();
                     break;
                 }
-                if (emailInfoGroups.ContainsKey(account))
+                if (emailGroups.ContainsKey(emailAccount))
                 {
-                    emailInfoGroups[account].Add(emailInfo);
+                    emailGroups[emailAccount].Add(email);
                 }
                 else
                 {
-                    emailInfoGroups.Add(account, new List<EmailInfo>() { emailInfo });
+                    emailGroups.Add(emailAccount, new List<EmailInfo>() { email });
                 }
             }
 
@@ -263,66 +62,154 @@ namespace Sixnet.Net.Email
 
             #region Execute send
 
-            IEnumerable<SendEmailResult> sendResults = null;
+            List<SendEmailResult> sendResults = null;
 
-            //Single email account
-            if (emailInfoGroups.Count == 1)
+            if (emailGroups.Count == 1)
             {
-                var firstGroup = emailInfoGroups.First();
+                var firstGroup = emailGroups.First();
                 var account = firstGroup.Key;
-                sendResults = await emailProvider.SendAsync(account, firstGroup.Value);
+                sendResults = await emailProvider.SendAsync(account, firstGroup.Value).ConfigureAwait(false);
             }
             else
             {
-                //Multiple email account
-                var emailTasks = new Task<SendEmailResult[]>[emailInfoGroups.Count];
+                var emailTasks = new Task<List<SendEmailResult>>[emailGroups.Count];
                 var groupIndex = 0;
-                foreach (var emailGroup in emailInfoGroups)
+                foreach (var emailGroup in emailGroups)
                 {
                     var account = emailGroup.Key;
                     emailTasks[groupIndex] = emailProvider.SendAsync(account, emailGroup.Value);
                     groupIndex++;
                 }
-                sendResults = (await Task.WhenAll(emailTasks).ConfigureAwait(false)).SelectMany(c => c);
+                sendResults = (await Task.WhenAll(emailTasks).ConfigureAwait(false)).SelectMany(c => c).ToList();
             }
 
             #endregion
 
             #region Callback
 
-            ThreadPool.QueueUserWorkItem(s =>
-            {
-                _sendEmailCallback?.Invoke(sendResults?.Select(c => c.Clone()).ToList() ?? new List<SendEmailResult>(0));
-            });
+            emailOptions.SendCallback?.Invoke(sendResults);
 
             #endregion
 
-            return sendResults?.ToList() ?? new List<SendEmailResult>(0);
+            return sendResults ?? new List<SendEmailResult>(0);
         }
 
         /// <summary>
-        /// Execute send emails
+        /// Send email
         /// </summary>
-        /// <param name="emailAccount">Email account</param>
-        /// <param name="emailInfos">Email infos</param>
-        /// <returns>Return the email send results</returns>
-        internal static async Task<List<SendEmailResult>> ExecuteSendAsync(EmailAccount emailAccount, IEnumerable<EmailInfo> emailInfos)
+        /// <param name="emails">Emails</param>
+        /// <returns></returns>
+        public static Task<List<SendEmailResult>> SendAsync(params EmailInfo[] emails)
         {
-            var emailProvider = GetEmailProvider();
-            var results = await emailProvider.SendAsync(emailAccount, emailInfos).ConfigureAwait(false);
-
-            #region Callback
-
-            ThreadPool.QueueUserWorkItem(s =>
-            {
-                _sendEmailCallback?.Invoke(results?.Select(c => c.Clone()).ToList() ?? new List<SendEmailResult>(0));
-            });
-
-            #endregion
-
-            return results?.ToList() ?? new List<SendEmailResult>(0);
+            IEnumerable<EmailInfo> emailCollection = emails;
+            return SendAsync(emailCollection);
         }
 
-        #endregion
+        /// <summary>
+        /// Send email
+        /// </summary>
+        /// <param name="subject">Subject</param>
+        /// <param name="subject">Title</param>
+        /// <param name="content">Content</param>
+        /// <param name="addresses">Email addresses</param>
+        /// <returns></returns>
+        public static async Task<SendEmailResult> SendAsync(string subject, string title, string content, params string[] addresses)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(subject), nameof(subject));
+            SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(content), nameof(content));
+            SixnetDirectThrower.ThrowArgNullIf(addresses.IsNullOrEmpty(), nameof(addresses));
+
+            return (await SendAsync(new EmailInfo()
+            {
+                Subject = subject,
+                Title = title,
+                Content = content,
+                Emails = addresses,
+            }).ConfigureAwait(false))?.FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Send email
+        /// </summary>
+        /// <param name="title">Subject</param>
+        /// <param name="content">Content</param>
+        /// <param name="addresses">Email addresses</param>
+        /// <returns></returns>
+        public static Task<SendEmailResult> SendAsync(string title, string content, params string[] addresses)
+        {
+            return SendAsync(string.Empty, title, content, addresses);
+        }
+
+        /// <summary>
+        /// Send email
+        /// </summary>
+        /// <param name="account">Email account</param>
+        /// <param name="emails">Emails</param>
+        /// <returns></returns>
+        public static async Task<List<SendEmailResult>> SendAsync(EmailAccount account, IEnumerable<EmailInfo> emails)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(account == null, nameof(account));
+
+            if (emails.IsNullOrEmpty())
+            {
+                return new List<SendEmailResult>(0);
+            }
+            var emailOptions = GetEmailOptions();
+            var emailProvider = GetEmailProvider();
+            var results = await emailProvider.SendAsync(account, emails).ConfigureAwait(false);
+            emailOptions.SendCallback?.Invoke(results);
+            return results ?? new List<SendEmailResult>(0);
+        }
+
+        /// <summary>
+        /// Send email
+        /// </summary>
+        /// <param name="account">Email account</param>
+        /// <param name="emails">Emails</param>
+        /// <returns></returns>
+        public static Task<List<SendEmailResult>> SendAsync(EmailAccount account, params EmailInfo[] emails)
+        {
+            IEnumerable<EmailInfo> emailCollection = emails;
+            return SendAsync(account, emailCollection);
+        }
+
+        /// <summary>
+        /// Send email
+        /// </summary>
+        /// <param name="account">Account</param>
+        /// <param name="subject">Subject</param>
+        /// <param name="title">Title</param>
+        /// <param name="content">Content</param>
+        /// <param name="addresses">Email addresses</param>
+        /// <returns></returns>
+        public static async Task<SendEmailResult> SendAsync(EmailAccount account, string subject, string title
+            , string content, params string[] addresses)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(title), nameof(title));
+            SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(content), nameof(content));
+            SixnetDirectThrower.ThrowArgNullIf(addresses.IsNullOrEmpty(), nameof(addresses));
+
+            var results = await SendAsync(account, new EmailInfo()
+            {
+                Subject = subject,
+                Title = title,
+                Content = content,
+                Emails = addresses,
+            }).ConfigureAwait(false);
+            return results?.FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Send email
+        /// </summary>
+        /// <param name="account">Account</param>
+        /// <param name="title">Title</param>
+        /// <param name="content">Content</param>>
+        /// <param name="addresses">Email addresses</param>
+        /// <returns></returns>
+        public static Task<SendEmailResult> SendAsync(EmailAccount account, string title, string content, params string[] addresses)
+        {
+            return SendAsync(account, string.Empty, title, content, addresses);
+        }
     }
 }

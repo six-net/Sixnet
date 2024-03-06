@@ -38,7 +38,7 @@
         /// <summary>
         /// Get sor sets the sms options
         /// </summary>
-        public SmsExecutionOptions SmsOptions { get; set; }
+        public SmsParameter SmsOptions { get; set; }
 
         public static T NoSmsProvider<T>() where T : SmsResult, new()
         {

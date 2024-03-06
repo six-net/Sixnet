@@ -1,0 +1,65 @@
+﻿using System.Collections.Generic;
+using Sixnet.Development.Work;
+
+namespace Sixnet.Development.Message
+{
+    /// <summary>
+    /// Message box
+    /// </summary>
+    internal class MessageBox
+    {
+        readonly List<MessageInfo> _messages = new List<MessageInfo>();
+
+        private MessageBox()
+        {
+            SixnetMessager.MessageBox?.Dispose();
+            SixnetMessager.MessageBox = this;
+        }
+
+        public IEnumerable<MessageInfo> Messages => _messages;
+
+        /// <summary>
+        /// Add message
+        /// </summary>
+        /// <param name="newMessages">new messages</param>
+        public void Add(params MessageInfo[] newMessages)
+        {
+            if (!newMessages.IsNullOrEmpty())
+            {
+                foreach (MessageInfo message in newMessages)
+                {
+                    if (string.IsNullOrWhiteSpace(message.WorkId))
+                    {
+                        message.WorkId = UnitOfWork.Current?.WorkId;
+                    }
+                }
+                _messages.AddRange(newMessages);
+            }
+        }
+
+        /// <summary>
+        /// Clear message
+        /// </summary>
+        public void Clear()
+        {
+            _messages.Clear();
+        }
+
+        /// <summary>
+        /// Dispose
+        /// </summary>
+        public void Dispose()
+        {
+            _messages.Clear();
+        }
+
+        /// <summary>
+        /// Create message box
+        /// </summary>
+        /// <returns></returns>
+        public static MessageBox Create()
+        {
+            return new MessageBox();
+        }
+    }
+}

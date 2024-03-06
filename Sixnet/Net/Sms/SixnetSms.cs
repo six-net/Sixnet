@@ -1,8 +1,8 @@
-﻿using Sixnet.DependencyInjection;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Sixnet.DependencyInjection;
 using Sixnet.Exceptions;
-using Sixnet.Model;
-using System;
-using System.Threading.Tasks;
 
 namespace Sixnet.Net.Sms
 {
@@ -21,20 +21,7 @@ namespace Sixnet.Net.Sms
         /// <summary>
         /// Sms options
         /// </summary>
-        readonly static SmsOptions _smsOptions = new SmsOptions();
-
-        #endregion
-
-        #region Configure
-
-        /// <summary>
-        /// Configure sms
-        /// </summary>
-        /// <param name="configure"></param>
-        public static void Configure(Action<SmsOptions> configure)
-        {
-            configure?.Invoke(_smsOptions);
-        }
+        readonly static SmsOptions _defaultSmsOptions = new();
 
         #endregion
 
@@ -43,25 +30,82 @@ namespace Sixnet.Net.Sms
         /// <summary>
         /// Send sms
         /// </summary>
-        /// <param name="sendSmsOptions">Send sms options</param>
-        /// <returns>Return send sms result</returns>
-        public static SendSmsResult Send(SendSmsOptions sendSmsOptions)
+        /// <param name="parameters">Send sms parameters</param>
+        /// <returns></returns>
+        public static List<SendSmsResult> Send(IEnumerable<SendSmsParameter> parameters)
         {
-            return SendAsync(sendSmsOptions).Result;
+            SixnetDirectThrower.ThrowArgNullIf(parameters.IsNullOrEmpty(), nameof(parameters));
+
+            var smsOptions = GetSmsOptions();
+            SmsAccount smsAccount = null;
+            var results = new List<SendSmsResult>();
+            var smsProvider = GetSmsProvider();
+
+            foreach (var parameter in parameters)
+            {
+                if (parameter == null)
+                {
+                    continue;
+                }
+                if (!smsOptions.UseSameAccount || smsAccount == null)
+                {
+                    smsAccount = GetSmsAccount(smsOptions, parameter);
+                    if (smsAccount == null)
+                    {
+                        continue;
+                    }
+                }
+                var sendResult = Execute(smsAccount, parameter, smsProvider.Send);
+                results.Add(sendResult);
+            }
+            smsOptions.SendCallback?.Invoke(results);
+            return results;
+        }
+
+        /// <summary>
+        /// Send sms
+        /// </summary>
+        /// <param name="parameter">Parameter</param>
+        /// <returns></returns>
+        public static SendSmsResult Send(SendSmsParameter parameter)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(parameter == null, nameof(parameter));
+            return Send(new SendSmsParameter[1] { parameter })?.FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Send sms
+        /// </summary>
+        /// <param name="subject">Subject</param>
+        /// <param name="tag">Sms tag</param>
+        /// <param name="content">Content</param>
+        /// <param name="parameters">Parameters</param>
+        /// <param name="mobiles">Receive mobiles</param>
+        /// <returns></returns>
+        public static SendSmsResult Send(string subject, string tag, string content
+            , object parameters, params string[] mobiles)
+        {
+            return Send(new SendSmsParameter()
+            {
+                Mobiles = mobiles,
+                Subject = subject,
+                Tag = tag,
+                Content = content,
+                Properties = parameters.ToStringDictionary()
+            });
         }
 
         /// <summary>
         /// Send sms
         /// </summary>
         /// <param name="tag">Sms tag</param>
-        /// <param name="content">Content</param>
+        /// <param name="content">Sms content</param>
         /// <param name="parameters">Parameters</param>
-        /// <param name="asynchronously">Whether send by asynchronously</param>
-        /// <param name="mobiles">Receive mobiles</param>
-        /// <returns>Return sms send result</returns>
-        public static SendSmsResult Send(string tag, string content, object parameters, bool asynchronously = true, params string[] mobiles)
+        /// <param name="mobiles">Mobile numbers</param>
+        /// <returns></returns>
+        public static SendSmsResult Send(string tag, string content, object parameters, params string[] mobiles)
         {
-            return SendAsync(tag, content, parameters, asynchronously, mobiles).Result;
+            return Send(string.Empty, tag, content, parameters, mobiles);
         }
 
         /// <summary>
@@ -69,36 +113,45 @@ namespace Sixnet.Net.Sms
         /// </summary>
         /// <param name="content">Sms content</param>
         /// <param name="parameters">Parameters</param>
-        /// <param name="asynchronously">Whether send by asynchronously</param>
         /// <param name="mobiles">Mobile numbers</param>
-        /// <returns>Return the send sms result</returns>
-        public static SendSmsResult Send(string content, object parameters, bool asynchronously = true, params string[] mobiles)
+        /// <returns></returns>
+        public static SendSmsResult Send(string content, object parameters, params string[] mobiles)
         {
-            return SendAsync(content, parameters, asynchronously, mobiles).Result;
+            return Send(string.Empty, DefaultTag, content, parameters, mobiles);
         }
 
         /// <summary>
         /// Send sms
         /// </summary>
         /// <param name="account">Sms account</param>
-        /// <param name="sendSmsOptions">Send sms options</param>
-        /// <returns>Return send sms result</returns>
-        public static SendSmsResult Send(SmsAccount account, SendSmsOptions sendSmsOptions)
+        /// <param name="parameter">Send sms parameter</param>
+        /// <returns></returns>
+        public static SendSmsResult Send(SmsAccount account, SendSmsParameter parameter)
         {
-            return SendAsync(account, sendSmsOptions).Result;
+            SixnetDirectThrower.ThrowArgNullIf(account == null, nameof(account));
+            SixnetDirectThrower.ThrowArgNullIf(parameter != null, nameof(parameter));
+
+            var smsProvider = GetSmsProvider();
+            return Execute(account, parameter, smsProvider.Send);
         }
 
         /// <summary>
         /// Send sms
         /// </summary>
-        /// <param name="smsAccount">Sms account</param>
+        /// <param name="account">Sms account</param>
         /// <param name="content">Content</param>
         /// <param name="parameters">Parameters</param>
-        /// <param name="mobiles">Mobile numbers</param>
-        /// <returns>Return send result</returns>
-        public static SendSmsResult Send(SmsAccount smsAccount, string content, object parameters, bool asynchronously = true, params string[] mobiles)
+        /// <param name="mobiles">Mobiles</param>
+        /// <returns></returns>
+        public static SendSmsResult Send(SmsAccount account, string content, object parameters, params string[] mobiles)
         {
-            return SendAsync(smsAccount, content, parameters, asynchronously, mobiles).Result;
+            return Send(account, new SendSmsParameter()
+            {
+                Content = content,
+                Properties = parameters?.ToStringDictionary(),
+                Tag = DefaultTag,
+                Mobiles = mobiles
+            });
         }
 
         #endregion
@@ -108,22 +161,28 @@ namespace Sixnet.Net.Sms
         /// <summary>
         /// Receive sms
         /// </summary>
-        /// <param name="receiveSmsOptions">Receive sms options</param>
+        /// <param name="parameter">Receive sms parameter</param>
         /// <returns>Return receive sms result</returns>
-        public static ReceiveSmsResult Receive(ReceiveSmsOptions receiveSmsOptions)
+        public static ReceiveSmsResult Receive(ReceiveSmsParameter parameter)
         {
-            return ReceiveAsync(receiveSmsOptions).Result;
+            SixnetDirectThrower.ThrowArgNullIf(parameter == null, nameof(parameter));
+
+            var smsProvider = GetSmsProvider();
+            var smsOptions = GetSmsOptions();
+            var smsAccount = GetSmsAccount(smsOptions, parameter);
+            return Execute(smsAccount, parameter, smsProvider.Receive);
         }
 
         /// <summary>
         /// Receive sms
         /// </summary>
         /// <param name="account">Sms account</param>
-        /// <param name="receiveSmsOptions">Receive sms options</param>
+        /// <param name="parameter">Receive sms parameter</param>
         /// <returns>Return receive sms result</returns>
-        public static ReceiveSmsResult Receive(SmsAccount account, ReceiveSmsOptions receiveSmsOptions)
+        public static ReceiveSmsResult Receive(SmsAccount account, ReceiveSmsParameter parameter)
         {
-            return ReceiveAsync(account, receiveSmsOptions).Result;
+            var smsProvider = GetSmsProvider();
+            return Execute(account, parameter, smsProvider.Receive);
         }
 
         #endregion
@@ -133,22 +192,26 @@ namespace Sixnet.Net.Sms
         /// <summary>
         /// Get sms report
         /// </summary>
-        /// <param name="getSmsReportOptions">Get sms report options</param>
+        /// <param name="parameter">Get sms report parameter</param>
         /// <returns>Return sms report result</returns>
-        public static GetSmsReportResult GetSmsReport(GetSmsReportOptions getSmsReportOptions)
+        public static GetSmsReportResult GetSmsReport(GetSmsReportParameter parameter)
         {
-            return GetSmsReportAsync(getSmsReportOptions).Result;
+            var smsProvider = GetSmsProvider();
+            var smsOptions = GetSmsOptions();
+            var smsAccount = GetSmsAccount(smsOptions, parameter);
+            return Execute(smsAccount, parameter, smsProvider.GetSmsReport);
         }
 
         /// <summary>
         /// Get sms report
         /// </summary>
         /// <param name="account">Sms account</param>
-        /// <param name="getSmsReportOptions">Get sms report options</param>
+        /// <param name="parameter">Get sms report parameter</param>
         /// <returns>Return sms report result</returns>
-        public static GetSmsReportResult GetSmsReport(SmsAccount account, GetSmsReportOptions getSmsReportOptions)
+        public static GetSmsReportResult GetSmsReport(SmsAccount account, GetSmsReportParameter parameter)
         {
-            return GetSmsReportAsync(account, getSmsReportOptions).Result;
+            var smsProvider = GetSmsProvider();
+            return Execute(account, parameter, smsProvider.GetSmsReport);
         }
 
         #endregion
@@ -158,22 +221,26 @@ namespace Sixnet.Net.Sms
         /// <summary>
         /// Query balance
         /// </summary>
-        /// <param name="queryBalanceOptions">Query balance options</param>
+        /// <param name="parameter">Query balance parameter</param>
         /// <returns>Return query balance result</returns>
-        public static QuerySmsBalanceResult QueryBalance(QueryBalanceOptions queryBalanceOptions)
+        public static QuerySmsBalanceResult QueryBalance(QueryBalanceParameter parameter)
         {
-            return QueryBalanceAsync(queryBalanceOptions).Result;
+            var smsProvider = GetSmsProvider();
+            var smsOptions = GetSmsOptions();
+            var smsAccount = GetSmsAccount(smsOptions, parameter);
+            return Execute(smsAccount, parameter, smsProvider.QueryBalance);
         }
 
         /// <summary>
         /// Query balance
         /// </summary>
         /// <param name="account">Sms account</param>
-        /// <param name="queryBalanceOptions">Query balance options</param>
+        /// <param name="parameter">Query balance parameter</param>
         /// <returns>Return query balance result</returns>
-        public static QuerySmsBalanceResult QueryBalance(SmsAccount account, QueryBalanceOptions queryBalanceOptions)
+        public static QuerySmsBalanceResult QueryBalance(SmsAccount account, QueryBalanceParameter parameter)
         {
-            return QueryBalanceAsync(account, queryBalanceOptions).Result;
+            var smsProvider = GetSmsProvider();
+            return Execute(account, parameter, smsProvider.QueryBalance);
         }
 
         #endregion
@@ -183,22 +250,26 @@ namespace Sixnet.Net.Sms
         /// <summary>
         /// Check black
         /// </summary>
-        /// <param name="checkBlackOptions">Check black options</param>
+        /// <param name="parameter">Check black parameter</param>
         /// <returns>Return check black result</returns>
-        public static CheckBlackResult CheckBlack(CheckBlackOptions checkBlackOptions)
+        public static CheckBlackResult CheckBlack(CheckBlackParameter parameter)
         {
-            return CheckBlackAsync(checkBlackOptions).Result;
+            var smsProvider = GetSmsProvider();
+            var smsOptions = GetSmsOptions();
+            var smsAccount = GetSmsAccount(smsOptions, parameter);
+            return Execute(smsAccount, parameter, smsProvider.CheckBlack);
         }
 
         /// <summary>
         /// Check black
         /// </summary>
         /// <param name="account">Sms acount</param>
-        /// <param name="checkBlackOptions">Check black options</param>
+        /// <param name="parameter">Check black parameter</param>
         /// <returns>Return check black result</returns>
-        public static CheckBlackResult CheckBlack(SmsAccount account, CheckBlackOptions checkBlackOptions)
+        public static CheckBlackResult CheckBlack(SmsAccount account, CheckBlackParameter parameter)
         {
-            return CheckBlackAsync(account, checkBlackOptions).Result;
+            var smsProvider = GetSmsProvider();
+            return Execute(account, parameter, smsProvider.CheckBlack);
         }
 
         #endregion
@@ -208,77 +279,87 @@ namespace Sixnet.Net.Sms
         /// <summary>
         /// Check keyword
         /// </summary>
-        /// <param name="checkKeywordOptions">Check keyword options</param>
+        /// <param name="parameter">Check keyword parameter</param>
         /// <returns>Return check keyword result</returns>
-        public static CheckKeywordResult CheckKeyword(CheckKeywordOptions checkKeywordOptions)
+        public static CheckKeywordResult CheckKeyword(CheckKeywordParameter parameter)
         {
-            return CheckKeywordAsync(checkKeywordOptions).Result;
+            var smsProvider = GetSmsProvider();
+            var smsOptions = GetSmsOptions();
+            var smsAccount = GetSmsAccount(smsOptions, parameter);
+            return Execute(smsAccount, parameter, smsProvider.CheckKeyword);
         }
 
         /// <summary>
         /// Check keyword
         /// </summary>
         /// <param name="account">Sms account</param>
-        /// <param name="checkKeywordOptions">Check keyword options</param>
+        /// <param name="parameter">Check keyword options</param>
         /// <returns>Return check keyword result</returns>
-        public static CheckKeywordResult CheckKeyword(SmsAccount account, CheckKeywordOptions checkKeywordOptions)
+        public static CheckKeywordResult CheckKeyword(SmsAccount account, CheckKeywordParameter parameter)
         {
-            return CheckKeywordAsync(account, checkKeywordOptions).Result;
+            var smsProvider = GetSmsProvider();
+            return Execute(account, parameter, smsProvider.CheckKeyword);
         }
 
         #endregion
 
         #region Util
 
-        static ISixnetSmsProvider GetSmsProvider()
+        /// <summary>
+        /// Execute sms operation
+        /// </summary>
+        /// <typeparam name="TParameter"></typeparam>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="smsAccount"></param>
+        /// <param name="smsParameter"></param>
+        /// <param name="proxy"></param>
+        /// <returns></returns>
+        internal static TResult Execute<TParameter, TResult>(SmsAccount smsAccount, TParameter smsParameter
+            , Func<SmsAccount, TParameter, TResult> proxy) where TParameter : SmsParameter where TResult : SmsResult
         {
-            var smsProvider = SixnetContainer.GetService<ISixnetSmsProvider>();
-            SixnetDirectThrower.ThrowSixnetExceptionIf(smsProvider == null, "Not config sms provider");
-            return smsProvider;
-        }
-
-        internal static async Task<TResult> ExecuteAsync<TOptions, TResult>(TOptions smsOptions, Func<SmsAccount, TOptions, Task<TResult>> proxy) where TOptions : SmsExecutionOptions where TResult : SmsResult
-        {
-            var smsAccount = GetSmsAccount(smsOptions);
-            if (smsAccount == null)
-            {
-                throw new SixnetException("No sms account specified");
-            }
-            var result = await proxy(smsAccount, smsOptions).ConfigureAwait(false);
+            var result = proxy(smsAccount, smsParameter);
             if (result != null)
             {
                 result.SmsAccount = smsAccount;
-                result.SmsOptions = smsOptions;
+                result.SmsOptions = smsParameter;
             }
             return result;
         }
 
-        internal static Task<TResult> ExecuteAsync<TOptions, TResult>(SmsAccount account, TOptions smsOptions, Func<SmsAccount, TOptions, Task<TResult>> proxy) where TOptions : SmsExecutionOptions where TResult : SmsResult
+        /// <summary>
+        /// Get sms provider
+        /// </summary>
+        /// <returns></returns>
+        static ISixnetSmsProvider GetSmsProvider()
         {
-            if (account == null)
-            {
-                throw new SixnetException("No sms account specified");
-            }
-            return proxy(account, smsOptions);
-        }
-
-        static void SetAdditions(SmsExecutionOptions smsOptions)
-        {
-            if (smsOptions != null)
-            {
-                //work id
-                smsOptions.AddWorkId();
-            }
+            var smsProvider = SixnetContainer.GetService<ISixnetSmsProvider>();
+            SixnetDirectThrower.ThrowSixnetExceptionIf(smsProvider == null, "Not set sms provider");
+            return smsProvider;
         }
 
         /// <summary>
         /// Get sms account
         /// </summary>
-        /// <param name="smsOptions">Sms options</param>
+        /// <param name="smsParameter">Sms parameter</param>
         /// <returns></returns>
-        static SmsAccount GetSmsAccount(SmsExecutionOptions smsOptions)
+        static SmsAccount GetSmsAccount(SmsOptions smsOptions, SmsParameter smsParameter)
         {
-            return _smsOptions?.GetSmsAccountFunc?.Invoke(smsOptions);
+            SixnetDirectThrower.ThrowArgNullIf(smsParameter == null, nameof(smsParameter));
+
+            var smsAccount = smsOptions?.GetSmsAccountFunc(smsParameter) ?? smsOptions.Account;
+
+            SixnetDirectThrower.ThrowSixnetExceptionIf(smsAccount == null, "No set sms account");
+
+            return smsAccount;
+        }
+
+        /// <summary>
+        /// Get sms options
+        /// </summary>
+        /// <returns></returns>
+        static SmsOptions GetSmsOptions()
+        {
+            return SixnetContainer.GetOptions<SmsOptions>() ?? _defaultSmsOptions;
         }
 
         #endregion

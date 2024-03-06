@@ -5,119 +5,96 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mail;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Sixnet.Net.Email
 {
     /// <summary>
-    /// Net email provider
+    /// Default email provider
     /// </summary>
     [Serializable]
     internal class DefaultEmailProvider : ISixnetEmailProvider
     {
         /// <summary>
-        /// Send
+        /// Send email
         /// </summary>
         /// <param name="account">Email account</param>
-        /// <param name="emailInfos">Email infos</param>
-        /// <returns>Return the email send results</returns>
-        public Task<SendEmailResult[]> SendAsync(EmailAccount account, params EmailInfo[] emailInfos)
-        {
-            IEnumerable<EmailInfo> emailInfoCollection = emailInfos;
-            return SendAsync(account, emailInfoCollection);
-        }
-
-        /// <summary>
-        /// Send
-        /// </summary>
-        /// <param name="account">Email account</param>
-        /// <param name="emailInfos">Email infos</param>
-        /// <returns>Return the email send results</returns>
-        public Task<SendEmailResult[]> SendAsync(EmailAccount account, IEnumerable<EmailInfo> emailInfos)
+        /// <param name="emails">Email infos</param>
+        /// <returns></returns>
+        public async Task<List<SendEmailResult>> SendAsync(EmailAccount account, IEnumerable<EmailInfo> emails)
         {
             SixnetDirectThrower.ThrowArgNullIf(account == null, nameof(account));
 
-            if (emailInfos.IsNullOrEmpty())
+            if (emails.IsNullOrEmpty())
             {
-                return Task.FromResult(new SendEmailResult[0]);
+                return new List<SendEmailResult>(0);
             }
             var sendTasks = new List<Task<SendEmailResult>>();
-            foreach (var emailInfo in emailInfos)
+            foreach (var email in emails)
             {
-                sendTasks.Add(ExecuteSendAsync(emailInfo, account));
+                sendTasks.Add(ExecuteSendAsync(account, email));
             }
-            return Task.WhenAll(sendTasks);
+            return new List<SendEmailResult>(await Task.WhenAll(sendTasks).ConfigureAwait(false));
         }
 
         /// <summary>
         /// Send email
         /// </summary>
         /// <param name="account">Email account</param>
-        /// <param name="emailInfos">Email infos</param>
-        /// <returns>Return the email send results</returns>
-        public SendEmailResult[] Send(EmailAccount account, params EmailInfo[] emailInfos)
-        {
-            IEnumerable<EmailInfo> emailInfoCollection = emailInfos;
-            return Send(account, emailInfoCollection);
-        }
-
-        /// <summary>
-        /// Send email
-        /// </summary>
-        /// <param name="account">Email account</param>
-        /// <param name="emailInfos">Email infos</param>
-        /// <returns>Return the email send results</returns>
-        public SendEmailResult[] Send(EmailAccount account, IEnumerable<EmailInfo> emailInfos)
+        /// <param name="emails">Emails</param>
+        /// <returns></returns>
+        public List<SendEmailResult> Send(EmailAccount account, IEnumerable<EmailInfo> emails)
         {
             SixnetDirectThrower.ThrowArgNullIf(account == null, nameof(account));
 
-            if (emailInfos.IsNullOrEmpty())
+            if (emails.IsNullOrEmpty())
             {
-                return new SendEmailResult[0];
+                return new List<SendEmailResult>(0);
             }
             var results = new List<SendEmailResult>();
-            foreach (var sendInfo in emailInfos)
+            foreach (var email in emails)
             {
-                if (sendInfo != null)
+                if (email != null)
                 {
-                    results.Add(ExecuteSend(sendInfo, account));
+                    results.Add(ExecuteSend(account, email));
                 }
             }
-            return results.ToArray();
+            return results;
         }
 
         /// <summary>
         /// Execute send email
         /// </summary>
-        /// <param name="emailInfo">Email info</param>
         /// <param name="account">Email account</param>
-        /// <returns>Return email send result</returns>
-        async Task<SendEmailResult> ExecuteSendAsync(EmailInfo emailInfo, EmailAccount account)
+        /// <param name="email">Email info</param>
+        /// <returns></returns>
+        async Task<SendEmailResult> ExecuteSendAsync(EmailAccount account, EmailInfo email)
         {
-            SendEmailResult result = null;
+            SendEmailResult result;
             try
             {
-                var mailMessage = GetMailMessage(emailInfo, account);
+                var mailMessage = GetMailMessage(account, email);
                 if (mailMessage == null)
                 {
-                    result = SendEmailResult.FailResult("Convert to mail message failed", null, emailInfo);
+                    result = SendEmailResult.FailResult("Convert to mail message failed", null, email);
                 }
                 else
                 {
                     var smtpClient = GetSmtpClient(account);
                     await smtpClient.SendMailAsync(mailMessage).ConfigureAwait(false);
-                    result = SendEmailResult.SuccessResult(emailInfo);
+                    result = SendEmailResult.SuccessResult(email);
                 }
             }
             catch (Exception ex)
             {
                 SixnetLogger.LogError<DefaultEmailProvider>(SixnetLogEvents.Framework.Email, ex, ex.Message);
-                result = SendEmailResult.FailResult(ex.Message, ex, emailInfo);
+                result = SendEmailResult.FailResult(ex.Message, ex, email);
             }
             if (result != null)
             {
                 result.EmailAccount = account;
-                result.EmailInfo = emailInfo;
+                result.EmailInfo = email;
             }
             return result;
         }
@@ -125,35 +102,35 @@ namespace Sixnet.Net.Email
         /// <summary>
         /// Execute send email
         /// </summary>
-        /// <param name="emailInfo">Email info</param>
+        /// <param name="email">Email</param>
         /// <param name="account">Email account</param>
-        /// <returns>Return email send result</returns>
-        SendEmailResult ExecuteSend(EmailInfo emailInfo, EmailAccount account)
+        /// <returns></returns>
+        SendEmailResult ExecuteSend(EmailAccount account, EmailInfo email)
         {
-            SendEmailResult result = null;
+            SendEmailResult result;
             try
             {
-                var mailMessage = GetMailMessage(emailInfo, account);
+                var mailMessage = GetMailMessage(account, email);
                 if (mailMessage == null)
                 {
-                    return SendEmailResult.FailResult("Convert to mail message failed", null, emailInfo);
+                    return SendEmailResult.FailResult("Convert to mail message failed", null, email);
                 }
                 else
                 {
                     var smtpClient = GetSmtpClient(account);
                     smtpClient.Send(mailMessage);
-                    result = SendEmailResult.SuccessResult(emailInfo);
+                    result = SendEmailResult.SuccessResult(email);
                 }
             }
             catch (Exception ex)
             {
                 SixnetLogger.LogError<DefaultEmailProvider>(SixnetLogEvents.Framework.Email, ex, ex.Message);
-                result = SendEmailResult.FailResult(ex.Message, ex, emailInfo);
+                result = SendEmailResult.FailResult(ex.Message, ex, email);
             }
             if (result != null)
             {
                 result.EmailAccount = account;
-                result.EmailInfo = emailInfo;
+                result.EmailInfo = email;
             }
             return result;
         }
@@ -161,31 +138,33 @@ namespace Sixnet.Net.Email
         /// <summary>
         /// Get mail message
         /// </summary>
-        /// <param name="emailOptions"></param>
         /// <param name="account"></param>
+        /// <param name="email"></param>
         /// <returns></returns>
-        MailMessage GetMailMessage(EmailInfo emailOptions, EmailAccount account)
+        MailMessage GetMailMessage(EmailAccount account, EmailInfo email)
         {
-            var toEmailAddress = emailOptions.Emails.Where(email => email.IsEmail());//clear out irregular email addresses
+            //clear out irregular email addresses
+            var toEmailAddress = email.Emails.Where(email => email.IsEmail());
             if (toEmailAddress.IsNullOrEmpty())
             {
                 return null;
             }
-            var fromMailAddress = new MailAddress(account.SendEmailAddress, account.SendPersonName);//sender
+            //sender
+            var fromMailAddress = new MailAddress(account.SendEmailAddress, account.SendPersonName);
             var mailMessage = new MailMessage
             {
                 Sender = fromMailAddress,
                 From = fromMailAddress
             };
-            foreach (string email in toEmailAddress)
+            foreach (string emailAddress in toEmailAddress)
             {
-                mailMessage.To.Add(new MailAddress(email));
+                mailMessage.To.Add(new MailAddress(emailAddress));
             }
-            mailMessage.Subject = emailOptions.Subject;
-            mailMessage.SubjectEncoding = emailOptions.SubjectEncoding;
-            mailMessage.Body = emailOptions.Content;
-            mailMessage.BodyEncoding = emailOptions.BodyEncoding;
-            mailMessage.IsBodyHtml = emailOptions.BodyIsHtml;
+            mailMessage.Subject = email.Title;
+            mailMessage.SubjectEncoding = email.SubjectEncoding;
+            mailMessage.Body = email.Content;
+            mailMessage.BodyEncoding = email.BodyEncoding;
+            mailMessage.IsBodyHtml = email.BodyIsHtml;
             return mailMessage;
         }
 
@@ -196,7 +175,7 @@ namespace Sixnet.Net.Email
         /// <returns></returns>
         SmtpClient GetSmtpClient(EmailAccount account)
         {
-            var smtpClient = new SmtpClient
+            return new SmtpClient
             {
                 DeliveryMethod = SmtpDeliveryMethod.Network,
                 EnableSsl = account.EnableSsl,
@@ -205,7 +184,6 @@ namespace Sixnet.Net.Email
                 UseDefaultCredentials = false,
                 Credentials = new System.Net.NetworkCredential(account.UserName, account.Password),
             };
-            return smtpClient;
         }
     }
 }

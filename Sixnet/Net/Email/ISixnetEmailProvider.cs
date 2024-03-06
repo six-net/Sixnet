@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Sixnet.Net.Email
@@ -12,32 +13,16 @@ namespace Sixnet.Net.Email
         /// Send email
         /// </summary>
         /// <param name="account">Email account</param>
-        /// <param name="emailInfos">Email send infos</param>
-        /// <returns>Return the email send results</returns>
-        Task<SendEmailResult[]> SendAsync(EmailAccount account, params EmailInfo[] emailInfos);
+        /// <param name="emails">Emails</param>
+        /// <returns></returns>
+        Task<List<SendEmailResult>> SendAsync(EmailAccount account, IEnumerable<EmailInfo> emails);
 
         /// <summary>
         /// Send email
         /// </summary>
         /// <param name="account">Email account</param>
-        /// <param name="emailInfos">Email send infos</param>
+        /// <param name="emails">Emails</param>
         /// <returns>Return the email send results</returns>
-        Task<SendEmailResult[]> SendAsync(EmailAccount account, IEnumerable<EmailInfo> emailInfos);
-
-        /// <summary>
-        /// Send email
-        /// </summary>
-        /// <param name="account">Email account</param>
-        /// <param name="emailInfos">Email infos</param>
-        /// <returns>Return the email send results</returns>
-        SendEmailResult[] Send(EmailAccount account, params EmailInfo[] emailInfos);
-
-        /// <summary>
-        /// Send email
-        /// </summary>
-        /// <param name="account">Email account</param>
-        /// <param name="emailInfos">Email infos</param>
-        /// <returns>Return the email send results</returns>
-        SendEmailResult[] Send(EmailAccount account, IEnumerable<EmailInfo> emailInfos);
+        List<SendEmailResult> Send(EmailAccount account, IEnumerable<EmailInfo> emails);
     }
 }

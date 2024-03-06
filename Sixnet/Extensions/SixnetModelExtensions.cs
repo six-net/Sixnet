@@ -16,23 +16,23 @@ namespace Sixnet.Model
         /// <param name="name">Parameter name</param>
         /// <param name="value">Parameter value</param>
         /// <param name="overCurrent">Indicates whether over current value when current parameter value is not null or empty</param>
-        public static void AddParameter(this ISixnetExtraParameterModel parameterModel, string name, string value, bool overCurrent = false)
+        public static void AddParameter(this ISixnetProperties parameterModel, string name, string value, bool overCurrent = false)
         {
             if (parameterModel == null || string.IsNullOrWhiteSpace(name))
             {
                 return;
             }
             string nowParameterValue = string.Empty;
-            parameterModel.Parameters?.TryGetValue(name, out nowParameterValue);
+            parameterModel.Properties?.TryGetValue(name, out nowParameterValue);
             if (!string.IsNullOrWhiteSpace(nowParameterValue) && !overCurrent)
             {
                 return;
             }
-            if (parameterModel.Parameters == null)
+            if (parameterModel.Properties == null)
             {
-                parameterModel.Parameters = new Dictionary<string, string>();
+                parameterModel.Properties = new Dictionary<string, string>();
             }
-            parameterModel.Parameters[name] = value;
+            parameterModel.Properties[name] = value;
         }
 
         /// <summary>
@@ -42,7 +42,7 @@ namespace Sixnet.Model
         /// <param name="parameterModel">Parameter model</param>
         /// <param name="workId">Work id</param>
         /// <param name="overCurrent">Indicates whether over current value when current parameter value is not null or empty</param>
-        public static void AddWorkId(this ISixnetExtraParameterModel parameterModel, string workId = "", bool overCurrent = false)
+        public static void AddWorkId(this ISixnetProperties parameterModel, string workId = "", bool overCurrent = false)
         {
             //work id
             string currentWorkId = workId;
@@ -59,7 +59,7 @@ namespace Sixnet.Model
         /// <param name="parameterModel">Parameter model</param>
         /// <param name="messageId">Message id</param>
         /// <param name="overCurrent">Whether over current value when current parameter value is not null or empty</param>
-        public static void AddTemplateMessageId(this ISixnetExtraParameterModel parameterModel, string messageId, bool overCurrent = false)
+        public static void AddTemplateMessageId(this ISixnetProperties parameterModel, string messageId, bool overCurrent = false)
         {
             AddParameter(parameterModel, SixnetExtraParameterNames.TemplateMessageId, messageId, overCurrent);
         }

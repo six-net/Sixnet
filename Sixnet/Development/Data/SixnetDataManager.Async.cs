@@ -10,8 +10,8 @@ using Sixnet.Development.Data.Command;
 using Sixnet.Development.Data.Database;
 using Sixnet.Development.Entity;
 using Sixnet.Exceptions;
-using Sixnet.Cache.Keys.Options;
-using Sixnet.Cache.Set.Options;
+using Sixnet.Cache.Keys.Parameters;
+using Sixnet.Cache.Set.Parameters;
 
 namespace Sixnet.Development.Data
 {
@@ -72,7 +72,7 @@ namespace Sixnet.Development.Data
             // all table names
             var databaseServer = context.Server;
             var serverTableKey = $"{entityConfig.EntityType.Name}:{databaseServer.GetServerIdentityValue()}";
-            var hasGotTables = (await SixnetCacher.Keys.ExistAsync(new ExistOptions()
+            var hasGotTables = (await SixnetCacher.Keys.ExistAsync(new ExistParameter()
             {
                 Keys = new List<CacheKey>() { serverTableKey }
             }).ConfigureAwait(false))?.KeyCount == 1;
@@ -83,7 +83,7 @@ namespace Sixnet.Development.Data
             }
             else
             {
-                allTableNames = (await SixnetCacher.Set.MembersAsync(new SetMembersOptions()
+                allTableNames = (await SixnetCacher.Set.MembersAsync(new SetMembersParameter()
                 {
                     Key = serverTableKey
                 }).ConfigureAwait(false))?.Members ?? new List<string>(0);
@@ -142,7 +142,7 @@ namespace Sixnet.Development.Data
             allTableNames = allTableNames?.Where(t => t.ToLower().StartsWith(rootTableName.ToLower())).ToList() ?? new List<string>(0);
             if (!allTableNames.IsNullOrEmpty())
             {
-                await SixnetCacher.Set.AddAsync(new SetAddOptions()
+                await SixnetCacher.Set.AddAsync(new SetAddParameter()
                 {
                     Key = serverTableKey,
                     Members = allTableNames

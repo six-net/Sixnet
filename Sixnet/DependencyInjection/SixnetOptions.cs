@@ -5,9 +5,12 @@ using Microsoft.Extensions.Logging;
 using Sixnet.App;
 using Sixnet.Cache;
 using Sixnet.Development.Data;
+using Sixnet.Development.Message;
 using Sixnet.Exceptions;
 using Sixnet.IO.FileAccess;
 using Sixnet.Localization;
+using Sixnet.Net.Email;
+using Sixnet.Net.Sms;
 using Sixnet.Net.Upload;
 using Sixnet.Security.Cryptography;
 using Sixnet.Serialization.Json;
@@ -39,6 +42,21 @@ namespace Sixnet.DependencyInjection
         /// Configure data
         /// </summary>
         public Action<DataOptions> ConfigureData { get; set; }
+
+        /// <summary>
+        /// Configure email
+        /// </summary>
+        public Action<EmailOptions> ConfigureEmail { get; set; }
+
+        /// <summary>
+        /// Configure sms
+        /// </summary>
+        public Action<SmsOptions> ConfigureSms { get; set; }
+
+        /// <summary>
+        /// Configure messag
+        /// </summary>
+        public Action<MessageOptions> ConfigureMessage { get; set; }
 
         /// <summary>
         /// Configure service

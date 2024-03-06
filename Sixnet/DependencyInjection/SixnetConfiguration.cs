@@ -1,6 +1,9 @@
 ﻿using Sixnet.Cache;
 using Sixnet.Development.Data;
+using Sixnet.Development.Message;
 using Sixnet.IO.FileAccess;
+using Sixnet.Net.Email;
+using Sixnet.Net.Sms;
 using Sixnet.Net.Upload;
 using Sixnet.Security.Cryptography;
 using Sixnet.Token.Jwt;
@@ -41,5 +44,20 @@ namespace Sixnet.DependencyInjection
         /// Gets or sets cache options
         /// </summary>
         public CacheOptions Cache { get; set; }
+
+        /// <summary>
+        /// Gets or sets the email options
+        /// </summary>
+        public EmailOptions Email { get; set; }
+
+        /// <summary>
+        /// Gets or sets the sms options
+        /// </summary>
+        public SmsOptions Sms { get; set; }
+
+        /// <summary>
+        /// Gets or sets the message options
+        /// </summary>
+        public MessageOptions Message { get; set; }
     }
 }
