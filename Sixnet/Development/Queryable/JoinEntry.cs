@@ -21,7 +21,7 @@ namespace Sixnet.Development.Queryable
         /// <summary>
         /// Gets or sets the join target queryable
         /// </summary>
-        public ISixnetQueryable TargetQueryable { get; set; }
+        public ISixnetQueryable Target { get; set; }
 
         /// <summary>
         /// Join index
@@ -38,7 +38,7 @@ namespace Sixnet.Development.Queryable
             {
                 Type = Type,
                 Connection = Connection?.Clone(),
-                TargetQueryable = TargetQueryable?.Clone(),
+                Target = Target?.Clone(),
                 Index = Index
             };
         }

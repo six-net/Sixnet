@@ -6,7 +6,7 @@ namespace Sixnet.Validation.Validators
     /// <summary>
     /// Max length validator
     /// </summary>
-    public class MaxLengthValidator : SixnetValidator
+    public class MaxLengthValidator : BaseValidator
     {
         /// <summary>
         /// Gets the length
@@ -30,7 +30,7 @@ namespace Sixnet.Validation.Validators
         /// <param name="errorMessage">Error message</param>
         public override ValidationResult Validate(dynamic value, string errorMessage)
         {
-            return SixnetValidationExtensions.MaxLength(value, Length)
+            return ValidationExtensions.MaxLength(value, Length)
                 ? ValidationResult.SuccessResult()
                 : ValidationResult.ErrorResult(errorMessage);
         }

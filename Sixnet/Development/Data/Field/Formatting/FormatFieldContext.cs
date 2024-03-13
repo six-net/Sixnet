@@ -16,7 +16,7 @@ namespace Sixnet.Development.Data.Field.Formatting
         /// <summary>
         /// Gets or sets the database server
         /// </summary>
-        public SixnetDatabaseServer Server { get; set; }
+        public DatabaseServer Server { get; set; }
 
         /// <summary>
         /// Gets or sets the table pet name

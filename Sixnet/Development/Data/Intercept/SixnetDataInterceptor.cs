@@ -24,8 +24,8 @@ namespace Sixnet.Development.Data.Intercept
         /// <summary>
         /// default interceptor field role
         /// </summary>
-        static FieldRole defaultInterceptorFieldRole = FieldRole.CreatedDate | FieldRole.CreatedUserId
-            | FieldRole.UpdatedDate | FieldRole.UpdatedUserId | FieldRole.Revision | FieldRole.Isolation;
+        static FieldRole defaultInterceptorFieldRole = FieldRole.CreateDate | FieldRole.CreateUserId
+            | FieldRole.UpdateDate | FieldRole.UpdateUserId | FieldRole.Revision | FieldRole.Isolation;
 
         #endregion
 
@@ -111,12 +111,12 @@ namespace Sixnet.Development.Data.Intercept
         {
             var entityType = context.GetEntityType();
             var operationType = context.GetDataOperationType();
-            var createDateField = SixnetEntityManager.GetRoleField(entityType, defaultInterceptorFieldRole & FieldRole.CreatedDate);
-            var updateDateField = SixnetEntityManager.GetRoleField(entityType, defaultInterceptorFieldRole & FieldRole.UpdatedDate);
-            var createUserField = SixnetEntityManager.GetRoleField(entityType, defaultInterceptorFieldRole & FieldRole.CreatedUserId);
-            var updateUserField = SixnetEntityManager.GetRoleField(entityType, defaultInterceptorFieldRole & FieldRole.UpdatedUserId);
-            var versionField = SixnetEntityManager.GetRoleField(entityType, defaultInterceptorFieldRole & FieldRole.Revision);
-            var isolationField = SixnetEntityManager.GetRoleField(entityType, defaultInterceptorFieldRole & FieldRole.Isolation);
+            var createDateField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & FieldRole.CreateDate);
+            var updateDateField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & FieldRole.UpdateDate);
+            var createUserField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & FieldRole.CreateUserId);
+            var updateUserField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & FieldRole.UpdateUserId);
+            var versionField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & FieldRole.Revision);
+            var isolationField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & FieldRole.Isolation);
             switch (operationType)
             {
                 case DataOperationType.Insert:
@@ -193,8 +193,8 @@ namespace Sixnet.Development.Data.Intercept
                             }
                             else
                             {
-                                var newCalValue = PropertyField.Create(versionField.PropertyName, entityType);
-                                newCalValue.FormatOption = FieldFormatSetting.Create(FieldFormatterNames.ADD, 1);
+                                var newCalValue = DataField.Create(versionField.PropertyName, entityType);
+                                newCalValue.FormatSetting = FieldFormatSetting.Create(FieldFormatterNames.ADD, 1);
                                 context.SetNewValue(versionField.PropertyName, newCalValue);
                             }
                         }
@@ -209,7 +209,7 @@ namespace Sixnet.Development.Data.Intercept
         /// <param name="context"></param>
         /// <param name="entityField"></param>
         /// <returns></returns>
-        static bool AllowSetInterceptorValue(InterceptDataContext context, EntityField entityField)
+        static bool AllowSetInterceptorValue(InterceptDataContext context, DataField entityField)
         {
             return entityField != null && context.AllowUpdateNewValue(entityField.DataType, entityField.PropertyName);
         }

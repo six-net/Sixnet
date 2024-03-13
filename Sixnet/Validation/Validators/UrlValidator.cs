@@ -6,7 +6,7 @@ namespace Sixnet.Validation.Validators
     /// <summary>
     /// Url validator
     /// </summary>
-    public class UrlValidator : SixnetValidator
+    public class UrlValidator : BaseValidator
     {
         /// <summary>
         /// Initialize a url validator
@@ -24,7 +24,7 @@ namespace Sixnet.Validation.Validators
         public override ValidationResult Validate(dynamic value, string errorMessage)
         {
             var stringValue = value as string;
-            return SixnetValidationExtensions.IsUrlNullable(stringValue)
+            return ValidationExtensions.IsUrlNullable(stringValue)
                 ? ValidationResult.SuccessResult()
                 : ValidationResult.ErrorResult(errorMessage);
         }

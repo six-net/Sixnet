@@ -214,9 +214,9 @@ namespace Sixnet.Development.Data.Command
         /// <summary>
         /// Convert to dynamic parameters
         /// </summary>
-        /// <param name="databaseServerType">Database server type</param>
+        /// <param name="databaseType">Database type</param>
         /// <returns></returns>
-        public DynamicParameters ConvertToDynamicParameters(DatabaseServerType databaseServerType)
+        public DynamicParameters ConvertToDynamicParameters(DatabaseType databaseType)
         {
             if (Items.IsNullOrEmpty())
             {
@@ -225,7 +225,7 @@ namespace Sixnet.Development.Data.Command
             DynamicParameters dynamicParameters = new DynamicParameters();
             foreach (var item in Items)
             {
-                var parameter = SixnetDataManager.HandleParameter(databaseServerType, item.Value);
+                var parameter = SixnetDataManager.HandleParameter(databaseType, item.Value);
                 dynamicParameters.Add(parameter.Name, parameter.Value
                                     , parameter.DbType, parameter.ParameterDirection
                                     , parameter.Size, parameter.Precision

@@ -94,9 +94,9 @@ namespace Sixnet.Net.Upload
         {
             var uploadOptions = SixnetContainer.GetOptions<UploadOptions>();
             ISixnetUploadProvider provider = null;
-            if (uploadOptions?.GetUploadProviderFunc != null)
+            if (uploadOptions?.GetUploadProvider != null)
             {
-                provider = uploadOptions.GetUploadProviderFunc(parameter);
+                provider = uploadOptions.GetUploadProvider(parameter);
             }
             if (provider == null)
             {

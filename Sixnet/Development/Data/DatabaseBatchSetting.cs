@@ -1,9 +1,9 @@
 ﻿namespace Sixnet.Development.Data
 {
     /// <summary>
-    /// Batch execution configuration
+    /// Database batch setting
     /// </summary>
-    public class DatabaseBatchExecutionOptions
+    public class DatabaseBatchSetting
     {
         /// <summary>
         /// Gets or sets the group statements count
@@ -18,6 +18,6 @@
         /// <summary>
         /// Gets the default batch execute configuration
         /// </summary>
-        public static readonly DatabaseBatchExecutionOptions Default = new();
+        public static readonly DatabaseBatchSetting Default = new();
     }
 }

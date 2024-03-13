@@ -8,7 +8,7 @@ namespace Sixnet.Development.Data.Database
     /// <summary>
     /// Split table behavior
     /// </summary>
-    public class SplitTableBehavior : ISixnetCloneableModel<SplitTableBehavior>
+    public class SplitTableBehavior : ISixnetCloneable<SplitTableBehavior>
     {
         /// <summary>
         /// Gets or sets the split values

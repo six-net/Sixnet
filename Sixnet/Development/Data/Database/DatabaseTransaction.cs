@@ -8,14 +8,14 @@ namespace Sixnet.Development.Data.Database
     /// <summary>
     /// Defines database transaction
     /// </summary>
-    public class SixnetDatabaseTransaction : IDisposable
+    public class DatabaseTransaction : IDisposable
     {
         /// <summary>
         /// Get the db transaction
         /// </summary>
         public IDbTransaction DbTransaction { get; private set; }
 
-        internal SixnetDatabaseTransaction(IDbTransaction dbTransaction)
+        internal DatabaseTransaction(IDbTransaction dbTransaction)
         {
             if (dbTransaction == null)
             {

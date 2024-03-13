@@ -8,7 +8,7 @@ namespace Sixnet.Development.Data.Database
     /// <summary>
     /// Defines database single command
     /// </summary>
-    public class SingleDatabaseCommand : SixnetDatabaseCommand
+    public class SingleDatabaseCommand : DatabaseCommand
     {
         /// <summary>
         /// Gets or sets the data command

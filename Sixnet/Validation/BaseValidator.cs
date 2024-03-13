@@ -3,9 +3,9 @@
 namespace Sixnet.Validation
 {
     /// <summary>
-    /// Sixnet validator
+    /// Base validator
     /// </summary>
-    public abstract class SixnetValidator
+    public abstract class BaseValidator
     {
         #region Fields
 

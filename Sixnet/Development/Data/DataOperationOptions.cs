@@ -5,7 +5,7 @@ using Sixnet.Localization;
 namespace Sixnet.Development.Data
 {
     /// <summary>
-    /// Defines data operation options
+    /// Data operation options
     /// </summary>
     [Serializable]
     public class DataOperationOptions

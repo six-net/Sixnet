@@ -1,6 +1,5 @@
 ﻿using Sixnet.Cache;
 using Sixnet.Cache.Keys.Parameters;
-using Sixnet.Cache.String;
 using Sixnet.Cache.String.Parameters;
 using Sixnet.Code;
 using Sixnet.Development.Data.Database;
@@ -251,7 +250,7 @@ namespace Sixnet.Threading.Locking
         /// </summary>
         /// <param name="server">Database server</param>
         /// <returns></returns>
-        static string GetCreateDatabaseConnectionLockName(SixnetDatabaseServer server)
+        static string GetCreateDatabaseConnectionLockName(DatabaseServer server)
         {
             SixnetDirectThrower.ThrowArgNullIf(server == null, nameof(server));
             return $"sixnet:lock:cdc:{server.GetServerIdentityValue()}".ToLower();
@@ -264,7 +263,7 @@ namespace Sixnet.Threading.Locking
         /// <param name="lockValue">Lock value</param>
         /// <param name="expirationSeconds">Expiration seconds</param>
         /// <returns></returns>
-        public static LockInstance? GetCreateDatabaseConnectionLock(SixnetDatabaseServer server, int? expirationSeconds = null)
+        public static LockInstance? GetCreateDatabaseConnectionLock(DatabaseServer server, int? expirationSeconds = null)
         {
             var lockName = GetCreateDatabaseConnectionLockName(server);
             return GetLock(CreateDatabaseConnectionLockName, lockName, GetLockValue(), expirationSeconds);

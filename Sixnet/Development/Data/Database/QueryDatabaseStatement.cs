@@ -10,21 +10,20 @@ namespace Sixnet.Development.Data.Database
     /// <summary>
     /// Defines database query statement
     /// </summary>
-    public class QueryDatabaseStatement : SixnetDatabaseStatement
+    public class QueryDatabaseStatement : DatabaseStatement
     {
         /// <summary>
         /// Gets or sets the output fields
         /// </summary>
-        public IEnumerable<ISixnetDataField> OutputFields { get; set; }
+        public IEnumerable<ISixnetField> OutputFields { get; set; }
 
         /// <summary>
         /// Whether is complex target
         /// </summary>
         public bool ComplexTarget { get; set; }
 
-
         public static QueryDatabaseStatement Create(string script, DataCommandParameters parameters
-            , IEnumerable<ISixnetDataField> outputFields = null
+            , IEnumerable<ISixnetField> outputFields = null
             , bool complexTarget = false)
         {
             return new QueryDatabaseStatement()

@@ -8,7 +8,7 @@ namespace Sixnet.Development.Entity
     /// <summary>
     /// Defines entity contract
     /// </summary>
-    public interface ISixnetEntity : ISixnetMappableModel
+    public interface ISixnetEntity : ISixnetMappable
     {
         /// <summary>
         /// Whether allow to save

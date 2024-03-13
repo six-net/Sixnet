@@ -8,6 +8,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Sixnet.Development.Data.Field;
 using Sixnet.Development.Data.Field.Formatting;
+using Sixnet.Development.Entity;
 using Sixnet.Development.Queryable;
 using Sixnet.Exceptions;
 using Sixnet.Reflection;
@@ -19,29 +20,24 @@ namespace Sixnet.Expressions.Linq
         #region Fields
 
         /// <summary>
-        /// Properties or fields access functions
-        /// </summary>
-        static readonly ConcurrentDictionary<string, dynamic> PropertyOrFieldAccessFunctions = new();
-
-        /// <summary>
         /// Expression base type
         /// </summary>
-        static readonly Type BaseExpressType = typeof(Expression);
+        static readonly Type _baseExpressType = typeof(Expression);
 
         /// <summary>
         /// Generate lambda method
         /// </summary>
-        static readonly MethodInfo LambdaMethod = null;
+        static readonly MethodInfo _lambdaMethod = null;
 
         /// <summary>
         /// String type
         /// </summary>
-        static readonly Type StringType = typeof(string);
+        static readonly Type _stringType = typeof(string);
 
         /// <summary>
         /// Char type
         /// </summary>
-        static readonly Type CharType = typeof(char);
+        static readonly Type _charType = typeof(char);
 
         #endregion
 
@@ -49,8 +45,8 @@ namespace Sixnet.Expressions.Linq
 
         static SixnetExpressionHelper()
         {
-            var baseExpressMethods = BaseExpressType.GetMethods(BindingFlags.Public | BindingFlags.Static);
-            LambdaMethod = baseExpressMethods.FirstOrDefault(c => c.Name == "Lambda" && c.IsGenericMethod && c.GetParameters()[1].ParameterType.FullName == typeof(ParameterExpression[]).FullName);
+            var baseExpressMethods = _baseExpressType.GetMethods(BindingFlags.Public | BindingFlags.Static);
+            _lambdaMethod = baseExpressMethods.FirstOrDefault(c => c.Name == "Lambda" && c.IsGenericMethod && c.GetParameters()[1].ParameterType.FullName == typeof(ParameterExpression[]).FullName);
         }
 
         #endregion
@@ -614,7 +610,7 @@ namespace Sixnet.Expressions.Linq
         /// <returns>Return a condition</returns>
         internal static ISixnetQueryable GetQueryable<T>(Expression conditionExpression, CriterionConnector connector = CriterionConnector.And)
         {
-            var queryable = GetQueryable(conditionExpression, connector) ?? SixnetQueryable.Create<T>();
+            var queryable = GetQueryable(conditionExpression, connector) ?? SixnetQuerier.Create<T>();
             if (queryable != null)
             {
                 queryable.SetModelType(typeof(T));
@@ -652,7 +648,7 @@ namespace Sixnet.Expressions.Linq
         static ISixnetQueryable GetQueryableCore(Dictionary<string, int> parameterIndexes, CriterionConnector connector, Expression conditionExpression)
         {
             var nodeType = conditionExpression.NodeType;
-            var groupQueryable = SixnetQueryable.Create();
+            var groupQueryable = SixnetQuerier.Create();
             groupQueryable.Connector = connector;
 
             if (IsCompareNodeType(nodeType))
@@ -744,7 +740,7 @@ namespace Sixnet.Expressions.Linq
                     valueExpression = methodCallExpression.Arguments[0];
                     criterion = GetIEnumerableMethodCriterion(parameterIndexes, methodCallExpression.Method.Name, connector, fieldExpression, valueExpression);
                 }
-                else if (methodType == typeof(SixnetQueryable))
+                else if (methodType == typeof(SixnetQuerier))
                 {
                     fieldExpression = methodCallExpression.Arguments[0];
                     criterion = GetSixnetQueryableExtendMethodCriterion(parameterIndexes, methodCallExpression.Method.Name, connector, fieldExpression);
@@ -818,7 +814,7 @@ namespace Sixnet.Expressions.Linq
             {
                 return null;
             }
-            ISixnetDataField rightField = null;
+            ISixnetField rightField = null;
             if (stringValue != null)
             {
                 var value = Expression.Lambda(stringValue)?.Compile().DynamicInvoke()?.ToString();
@@ -837,17 +833,17 @@ namespace Sixnet.Expressions.Linq
                     criterionOperator = CriterionOperator.EndLike;
                     break;
                 case "IsNullOrEmpty":
-                    var nullOrEmtpyQueryable = SixnetQueryable.Create();
+                    var nullOrEmtpyQueryable = SixnetQuerier.Create();
                     nullOrEmtpyQueryable.Connector = connector;
                     nullOrEmtpyQueryable.Where(CreateCriterion(connector, CriterionOperator.IsNull, leftField, null));
                     nullOrEmtpyQueryable.Where(CreateCriterion(CriterionConnector.Or, CriterionOperator.Equal, leftField, ConstantField.Create("")));
                     return nullOrEmtpyQueryable;
                 case "IsNullOrWhiteSpace":
-                    var nullOrWhiteSpaceQueryable = SixnetQueryable.Create();
+                    var nullOrWhiteSpaceQueryable = SixnetQuerier.Create();
                     nullOrWhiteSpaceQueryable.Connector = connector;
                     nullOrWhiteSpaceQueryable.Where(CreateCriterion(connector, CriterionOperator.IsNull, leftField, null));
                     var copyField = leftField.Clone();
-                    copyField.FormatOption = FieldFormatSetting.Create(FieldFormatterNames.TRIM);
+                    copyField.FormatSetting = FieldFormatSetting.Create(FieldFormatterNames.TRIM);
                     nullOrWhiteSpaceQueryable.Where(CreateCriterion(CriterionConnector.Or, CriterionOperator.Equal, copyField, ConstantField.Create("")));
                     return nullOrWhiteSpaceQueryable;
                 default:
@@ -869,7 +865,7 @@ namespace Sixnet.Expressions.Linq
             {
                 return null;
             }
-            ISixnetDataField rightField = null;
+            ISixnetField rightField = null;
             if (subquery != null)
             {
                 var value = Expression.Lambda(subquery)?.Compile().DynamicInvoke() as ISixnetQueryable;
@@ -938,7 +934,7 @@ namespace Sixnet.Expressions.Linq
         /// <param name="left">Left field</param>
         /// <param name="right">Right field</param>
         /// <returns></returns>
-        internal static Criterion CreateCriterion(CriterionConnector connector, CriterionOperator criterionOperator, ISixnetDataField left, ISixnetDataField right)
+        internal static Criterion CreateCriterion(CriterionConnector connector, CriterionOperator criterionOperator, ISixnetField left, ISixnetField right)
         {
             return Criterion.Create(criterionOperator, left, right, connector);
         }
@@ -1030,7 +1026,7 @@ namespace Sixnet.Expressions.Linq
         /// </summary>
         /// <param name="fieldExpression">Field expression</param>
         /// <returns></returns>
-        public static ISixnetDataField GetDataField(Expression fieldExpression)
+        public static ISixnetField GetDataField(Expression fieldExpression)
         {
             SixnetDirectThrower.ThrowArgNullIf(fieldExpression == null, $"{nameof(fieldExpression)} is null");
             Dictionary<string, int> parameterIndexes = null;
@@ -1047,17 +1043,17 @@ namespace Sixnet.Expressions.Linq
         /// </summary>
         /// <param name="fieldExpression">Field expression</param>
         /// <returns></returns>
-        public static ISixnetDataField GetDataField(Expression fieldExpression, Dictionary<string, int> parameterIndexes)
+        public static ISixnetField GetDataField(Expression fieldExpression, Dictionary<string, int> parameterIndexes)
         {
             var childExpression = fieldExpression;
             SixnetDirectThrower.ThrowArgNullIf(childExpression == null, $"Not support expression:{fieldExpression?.GetType()}");
-            ISixnetDataField criterionField = null;
-            FieldFormatSetting fieldFormatOption = null;
+            ISixnetField criterionField = null;
+            FieldFormatSetting fieldFormatSetting = null;
+            FieldFormatSetting innermostFieldFormatSetting = null;
             var isEnd = false;
 
             do
             {
-
                 switch (childExpression.NodeType)
                 {
                     case ExpressionType.MemberAccess:
@@ -1069,7 +1065,12 @@ namespace Sixnet.Expressions.Linq
                             var modelType = parameterExp.Type;
                             var modelTypeIndex = 0;
                             parameterIndexes?.TryGetValue(parameterExp.Name, out modelTypeIndex);
-                            var propertyField = PropertyField.Create(propertyName, modelType, modelTypeIndex);
+                            var entityField = SixnetEntityManager.GetField(modelType, propertyName);
+                            if (entityField?.FormatSetting != null)
+                            {
+                                innermostFieldFormatSetting.Child = entityField.FormatSetting;
+                            }
+                            var propertyField = DataField.Create(propertyName, modelType, modelTypeIndex, null, entityField?.FieldName);
                             propertyField.DataType = memberExpression.Type;
                             criterionField = propertyField;
                             isEnd = true;
@@ -1092,12 +1093,16 @@ namespace Sixnet.Expressions.Linq
                 }
                 else
                 {
-                    // field format
-                    var newFieldFormatOption = GetFieldFormatOption(childExpression, parameterIndexes);
-                    if (newFieldFormatOption != null)
+                    // field format setting
+                    var newFieldFormatSetting = GetFieldFormatSetting(childExpression, parameterIndexes);
+                    if (newFieldFormatSetting != null)
                     {
-                        newFieldFormatOption.Child = fieldFormatOption;
-                        fieldFormatOption = newFieldFormatOption;
+                        newFieldFormatSetting.Child = fieldFormatSetting;
+                        if (fieldFormatSetting == null)
+                        {
+                            innermostFieldFormatSetting = newFieldFormatSetting;
+                        }
+                        fieldFormatSetting = newFieldFormatSetting;
                     }
                     childExpression = GetChildExpression(childExpression);
                 }
@@ -1105,7 +1110,7 @@ namespace Sixnet.Expressions.Linq
 
             if (criterionField != null)
             {
-                criterionField.FormatOption = fieldFormatOption;
+                criterionField.FormatSetting = fieldFormatSetting;
             }
             return criterionField;
         }
@@ -1116,7 +1121,7 @@ namespace Sixnet.Expressions.Linq
         /// <param name="queryable">Queryable</param>
         /// <param name="fieldExpression">Field expression</param>
         /// <returns></returns>
-        public static ISixnetDataField GetOutputDataField(ISixnetQueryable queryable, Expression fieldExpression)
+        public static ISixnetField GetOutputDataField(ISixnetQueryable queryable, Expression fieldExpression)
         {
             #region Type index
 
@@ -1136,78 +1141,17 @@ namespace Sixnet.Expressions.Linq
 
             #endregion
 
-            #region Field
-
-            var childExpression = fieldExpression;
-            SixnetDirectThrower.ThrowArgNullIf(childExpression == null, $"Not support expression:{fieldExpression?.GetType()}");
-            ISixnetDataField criterionField = null;
-            FieldFormatSetting fieldFormatOption = null;
-            var isEnd = false;
-            do
-            {
-
-                switch (childExpression.NodeType)
-                {
-                    case ExpressionType.MemberAccess:
-                        var memberExpression = childExpression as MemberExpression;
-                        if (memberExpression.Expression.NodeType == ExpressionType.Parameter)
-                        {
-                            var parameterExp = memberExpression.Expression as ParameterExpression;
-                            var propertyName = memberExpression.Member.Name;
-                            var modelType = parameterExp.Type;
-                            var modelTypeIndex = 0;
-                            typeIndexes?.TryGetValue(modelType.FullName, out modelTypeIndex);
-                            var propertyField = PropertyField.Create(propertyName, modelType, modelTypeIndex);
-                            propertyField.DataType = memberExpression.Type;
-                            criterionField = propertyField;
-                            isEnd = true;
-                        }
-                        break;
-                    case ExpressionType.Constant:
-                        var value = Expression.Lambda(fieldExpression).Compile().DynamicInvoke();
-                        if (value != null)
-                        {
-                            criterionField = ConstantField.Create(value);
-                        }
-                        isEnd = true;
-                        break;
-                    default:
-                        break;
-                }
-                if (isEnd)
-                {
-                    childExpression = null;
-                }
-                else
-                {
-                    // field format
-                    var newFieldFormatOption = GetFieldFormatOption(childExpression, null);
-                    if (newFieldFormatOption != null)
-                    {
-                        newFieldFormatOption.Child = fieldFormatOption;
-                        fieldFormatOption = newFieldFormatOption;
-                    }
-                    childExpression = GetChildExpression(childExpression);
-                }
-            } while (childExpression != null);
-
-            if (criterionField != null)
-            {
-                criterionField.FormatOption = fieldFormatOption;
-            }
-            return criterionField;
-
-            #endregion
+            return GetDataField(fieldExpression, typeIndexes);
         }
 
         /// <summary>
-        /// Get field format option
+        /// Get field format setting
         /// </summary>
         /// <param name="formatExpression">Format expression</param>
         /// <returns></returns>
-        static FieldFormatSetting GetFieldFormatOption(Expression formatExpression, Dictionary<string, int> parameterIndexes)
+        static FieldFormatSetting GetFieldFormatSetting(Expression formatExpression, Dictionary<string, int> parameterIndexes)
         {
-            FieldFormatSetting fieldFormatOption = null;
+            FieldFormatSetting fieldFormatSetting = null;
             if (formatExpression != null)
             {
                 switch (formatExpression.NodeType)
@@ -1215,101 +1159,106 @@ namespace Sixnet.Expressions.Linq
                     case ExpressionType.MemberAccess:
                         var memberExpression = formatExpression as MemberExpression;
                         // char length
-                        if (memberExpression.Member.Name == nameof(string.Length) && memberExpression.Expression.NodeType == ExpressionType.MemberAccess && memberExpression.Expression.Type == typeof(string))
+                        if (memberExpression.Member.Name == nameof(string.Length)
+                            && memberExpression.Expression.NodeType == ExpressionType.MemberAccess
+                            && memberExpression.Expression.Type == typeof(string))
                         {
-                            fieldFormatOption = FieldFormatSetting.Create(FieldFormatterNames.CHARLENGTH);
+                            fieldFormatSetting = FieldFormatSetting.Create(FieldFormatterNames.CHARLENGTH);
                         }
                         break;
                     case ExpressionType.Call:
                         var methodCallExpression = formatExpression as MethodCallExpression;
-                        if(methodCallExpression.Object!=null && methodCallExpression.Method.DeclaringType == typeof(string))
+                        if (methodCallExpression.Object != null
+                            && methodCallExpression.Method.DeclaringType == typeof(string))
                         {
                             if (methodCallExpression.Method.Name == nameof(string.Trim)) // trim
                             {
-                                fieldFormatOption = FieldFormatSetting.Create(FieldFormatterNames.TRIM);
+                                fieldFormatSetting = FieldFormatSetting.Create(FieldFormatterNames.TRIM);
                             }
                         }
-                        else if (methodCallExpression.Object == null && methodCallExpression.Method.IsStatic && methodCallExpression.Method.DeclaringType == typeof(SixnetQueryable))
+                        else if (methodCallExpression.Object == null
+                            && methodCallExpression.Method.IsStatic
+                            && methodCallExpression.Method.DeclaringType == typeof(SixnetQuerier))
                         {
-                            if (methodCallExpression.Method.Name == nameof(SixnetQueryable.Max)) // max
+                            if (methodCallExpression.Method.Name == nameof(SixnetQuerier.Max)) // max
                             {
-                                fieldFormatOption = FieldFormatSetting.Create(FieldFormatterNames.MAX);
+                                fieldFormatSetting = FieldFormatSetting.Create(FieldFormatterNames.MAX);
                             }
-                            else if (methodCallExpression.Method.Name == nameof(SixnetQueryable.Min)) // min
+                            else if (methodCallExpression.Method.Name == nameof(SixnetQuerier.Min)) // min
                             {
-                                fieldFormatOption = FieldFormatSetting.Create(FieldFormatterNames.MIN);
+                                fieldFormatSetting = FieldFormatSetting.Create(FieldFormatterNames.MIN);
                             }
-                            else if (methodCallExpression.Method.Name == nameof(SixnetQueryable.Avg)) // avg
+                            else if (methodCallExpression.Method.Name == nameof(SixnetQuerier.Avg)) // avg
                             {
-                                fieldFormatOption = FieldFormatSetting.Create(FieldFormatterNames.AVG);
+                                fieldFormatSetting = FieldFormatSetting.Create(FieldFormatterNames.AVG);
                             }
-                            else if (methodCallExpression.Method.Name == nameof(SixnetQueryable.Count)) // count
+                            else if (methodCallExpression.Method.Name == nameof(SixnetQuerier.Count)) // count
                             {
-                                fieldFormatOption = FieldFormatSetting.Create(FieldFormatterNames.COUNT);
+                                fieldFormatSetting = FieldFormatSetting.Create(FieldFormatterNames.COUNT);
                             }
-                            else if (methodCallExpression.Method.Name == nameof(SixnetQueryable.Sum)) // sum
+                            else if (methodCallExpression.Method.Name == nameof(SixnetQuerier.Sum)) // sum
                             {
-                                fieldFormatOption = FieldFormatSetting.Create(FieldFormatterNames.SUM);
+                                fieldFormatSetting = FieldFormatSetting.Create(FieldFormatterNames.SUM);
                             }
-                            else if (methodCallExpression.Method.Name == nameof(SixnetQueryable.JsonValue)) // json value
+                            else if (methodCallExpression.Method.Name == nameof(SixnetQuerier.JsonValue)) // json value
                             {
-                                fieldFormatOption = FieldFormatSetting.Create(FieldFormatterNames.JSON_VALUE, GetDataField(methodCallExpression.Arguments[1], parameterIndexes));
+                                fieldFormatSetting = FieldFormatSetting.Create(FieldFormatterNames.JSON_VALUE, GetDataField(methodCallExpression.Arguments[1], parameterIndexes));
                             }
-                            else if (methodCallExpression.Method.Name == nameof(SixnetQueryable.JsonObject)) // json object
+                            else if (methodCallExpression.Method.Name == nameof(SixnetQuerier.JsonObject)) // json object
                             {
-                                fieldFormatOption = FieldFormatSetting.Create(FieldFormatterNames.JSON_OBJECT, GetDataField(methodCallExpression.Arguments[1], parameterIndexes));
+                                fieldFormatSetting = FieldFormatSetting.Create(FieldFormatterNames.JSON_OBJECT, GetDataField(methodCallExpression.Arguments[1], parameterIndexes));
                             }
                         }
                         break;
                     case ExpressionType.And:
                         var andExpression = formatExpression as BinaryExpression;
-                        fieldFormatOption = FieldFormatSetting.Create(FieldFormatterNames.AND, GetDataField(andExpression.Right));
+                        fieldFormatSetting = FieldFormatSetting.Create(FieldFormatterNames.AND, GetDataField(andExpression.Right));
                         break;
                     case ExpressionType.Or:
                         var orExpression = formatExpression as BinaryExpression;
-                        fieldFormatOption = FieldFormatSetting.Create(FieldFormatterNames.OR, GetDataField(orExpression.Right));
+                        fieldFormatSetting = FieldFormatSetting.Create(FieldFormatterNames.OR, GetDataField(orExpression.Right));
                         break;
                     case ExpressionType.ExclusiveOr:
                         var exclusiveOrExpression = formatExpression as BinaryExpression;
-                        fieldFormatOption = FieldFormatSetting.Create(FieldFormatterNames.XOR, GetDataField(exclusiveOrExpression.Right));
+                        fieldFormatSetting = FieldFormatSetting.Create(FieldFormatterNames.XOR, GetDataField(exclusiveOrExpression.Right));
                         break;
                     case ExpressionType.Not:
-                        fieldFormatOption = FieldFormatSetting.Create(FieldFormatterNames.NOT);
+                        fieldFormatSetting = FieldFormatSetting.Create(FieldFormatterNames.NOT);
                         break;
                     case ExpressionType.Add:
                         var addExpression = formatExpression as BinaryExpression;
                         var parameterField = GetDataField(addExpression.Right);
-                        var fieldDataType = parameterField.GetFieldDataType();
-                        fieldFormatOption = FieldFormatSetting.Create((fieldDataType == StringType || fieldDataType == CharType) ? FieldFormatterNames.STRING_CONCAT : FieldFormatterNames.ADD, parameterField);
+                        var fieldDataType = parameterField.GetDataType();
+                        fieldFormatSetting = FieldFormatSetting.Create((fieldDataType == _stringType || fieldDataType == _charType) ? FieldFormatterNames.STRING_CONCAT : FieldFormatterNames.ADD, parameterField);
                         break;
                     case ExpressionType.Subtract:
                         var subtractExpression = formatExpression as BinaryExpression;
-                        fieldFormatOption = FieldFormatSetting.Create(FieldFormatterNames.SUBTRACT, GetDataField(subtractExpression.Right));
+                        fieldFormatSetting = FieldFormatSetting.Create(FieldFormatterNames.SUBTRACT, GetDataField(subtractExpression.Right));
                         break;
                     case ExpressionType.Multiply:
                         var multiplyExpression = formatExpression as BinaryExpression;
-                        fieldFormatOption = FieldFormatSetting.Create(FieldFormatterNames.MULTIPLY, GetDataField(multiplyExpression.Right));
+                        fieldFormatSetting = FieldFormatSetting.Create(FieldFormatterNames.MULTIPLY, GetDataField(multiplyExpression.Right));
                         break;
                     case ExpressionType.Divide:
                         var divideExpression = formatExpression as BinaryExpression;
-                        fieldFormatOption = FieldFormatSetting.Create(FieldFormatterNames.DIVIDE, GetDataField(divideExpression.Right));
+                        fieldFormatSetting = FieldFormatSetting.Create(FieldFormatterNames.DIVIDE, GetDataField(divideExpression.Right));
                         break;
                     case ExpressionType.Modulo:
                         var moduloExpression = formatExpression as BinaryExpression;
-                        fieldFormatOption = FieldFormatSetting.Create(FieldFormatterNames.MODULO, GetDataField(moduloExpression.Right));
+                        fieldFormatSetting = FieldFormatSetting.Create(FieldFormatterNames.MODULO, GetDataField(moduloExpression.Right));
                         break;
                     case ExpressionType.RightShift:
                         var rightShiftExpression = formatExpression as BinaryExpression;
-                        fieldFormatOption = FieldFormatSetting.Create(FieldFormatterNames.RIGHT_SHIFT, GetDataField(rightShiftExpression.Right));
+                        fieldFormatSetting = FieldFormatSetting.Create(FieldFormatterNames.RIGHT_SHIFT, GetDataField(rightShiftExpression.Right));
                         break;
                     case ExpressionType.LeftShift:
                         var leftShiftExpression = formatExpression as BinaryExpression;
-                        fieldFormatOption = FieldFormatSetting.Create(FieldFormatterNames.LEFT_SHIFT, GetDataField(leftShiftExpression.Right));
+                        fieldFormatSetting = FieldFormatSetting.Create(FieldFormatterNames.LEFT_SHIFT, GetDataField(leftShiftExpression.Right));
                         break;
                 }
             }
 
-            return fieldFormatOption;
+            return fieldFormatSetting;
         }
 
         #endregion

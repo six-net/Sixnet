@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
 using Sixnet.Development.Data.Command;
 using Sixnet.Development.Data.Field;
@@ -12,14 +10,13 @@ using Sixnet.Development.Entity;
 using Sixnet.Development.Queryable;
 using Sixnet.Exceptions;
 using Sixnet.Logging;
-using Sixnet.Model.Paging;
 
 namespace Sixnet.Development.Data.Database
 {
     /// <summary>
     /// Base data command resolver
     /// </summary>
-    public abstract class BaseSixnetDataCommandResolver : ISixnetDataCommandResolver
+    public abstract class BaseDataCommandResolver : ISixnetDataCommandResolver
     {
         #region Properties
 
@@ -55,7 +52,7 @@ namespace Sixnet.Development.Data.Database
         public string NegationKeyword { get; set; } = " NOT";
         public bool ParameterizationJsonFormatter { get; set; } = true;
         public Dictionary<string, bool> NotParameterizationFormatterNameDict { get; set; }
-        public DatabaseServerType DatabaseServerType { get; set; }
+        public DatabaseType DatabaseType { get; set; }
         public Dictionary<JoinType, string> JoinOperatorDict { get; set; } = new Dictionary<JoinType, string>()
         {
             { JoinType.InnerJoin," INNER JOIN " },
@@ -158,8 +155,8 @@ namespace Sixnet.Development.Data.Database
             //translation query
             var translationResult = Translate(context);
             string sqlStatement;
-            IEnumerable<ISixnetDataField> outputFields = null;
-            IEnumerable<ISixnetDataField> originalOutputFields = null;
+            IEnumerable<ISixnetField> outputFields = null;
+            IEnumerable<ISixnetField> originalOutputFields = null;
             switch (queryable.ExecutionMode)
             {
                 case QueryableExecutionMode.Script:
@@ -199,7 +196,7 @@ namespace Sixnet.Development.Data.Database
                     // output fields
                     if (outputFields.IsNullOrEmpty() || !queryable.SelectedFields.IsNullOrEmpty())
                     {
-                        originalOutputFields = outputFields = SixnetDataManager.GetQueryableFields(DatabaseServerType, queryable.GetModelType(), queryable, context.IsRootQueryable(queryable));
+                        originalOutputFields = outputFields = SixnetDataManager.GetQueryableFields(DatabaseType, queryable.GetModelType(), queryable, context.IsRootQueryable(queryable));
                     }
                     if (!queryable.Sorts.IsNullOrEmpty())
                     {
@@ -230,7 +227,7 @@ namespace Sixnet.Development.Data.Database
                             }
                             break;
                     }
-                    var pagingTotalCountFieldName = SixnetDataManager.PagingTotalCountFieldName;
+                    var pagingTotalCountFieldName = SixnetDataManager.GetPagingTotalFieldName();
                     context.AddPreScript($"{PagingTableName}{WithTableKeyword}({sqlStatement})", PagingTableName, tablePetName);
                     context.AddPreScript($"{PagingCountTableName}{WithTableKeyword}(SELECT COUNT(1){ColumnPetNameKeyword}{pagingTotalCountFieldName} FROM {PagingTableName})", PagingCountTableName, tablePetName);
                     var preScript = FormatPreScript(context);
@@ -239,7 +236,7 @@ namespace Sixnet.Development.Data.Database
                     var pagingFilter = command.DataCommand.PagingFilter;
                     var limit = GetLimitString((pagingFilter.Page - 1) * pagingFilter.PageSize, pagingFilter.PageSize, hasSort);
                     outputFieldString = FormatFieldsString(context, queryable, QueryableLocation.Top, FieldLocation.Output, originalOutputFields);
-                    sqlStatement = $"{preScript}SELECT (SELECT {pagingTotalCountFieldName} FROM {PagingCountTableName}){ColumnPetNameKeyword}{pagingTotalCountFieldName},''{ColumnPetNameKeyword}{SixnetDataManager.PagingTotalCountSplitFieldName},{outputFieldString} FROM {PagingTableName}{TablePetNameKeyword}{tablePetName}{sort}{limit}";
+                    sqlStatement = $"{preScript}SELECT (SELECT {pagingTotalCountFieldName} FROM {PagingCountTableName}){ColumnPetNameKeyword}{pagingTotalCountFieldName},''{ColumnPetNameKeyword}{SixnetDataManager.GetPagingTotalSplitFieldName()},{outputFieldString} FROM {PagingTableName}{TablePetNameKeyword}{tablePetName}{sort}{limit}";
                     break;
             }
 
@@ -285,7 +282,8 @@ namespace Sixnet.Development.Data.Database
             SixnetDirectThrower.ThrowArgNullIf(command?.DataCommands.IsNullOrEmpty() ?? true, "Data commands is null or empty");
 
             var statements = new List<ExecutionDatabaseStatement>();
-            var batchExecutionConfig = SixnetDataManager.GetBatchExecutionOptions(DatabaseServerType) ?? DatabaseBatchExecutionOptions.Default;
+            var batchExecutionConfig = SixnetDataManager.GetBatchSetting(DatabaseType)
+                ?? DatabaseBatchSetting.Default;
             var groupStatementsCount = batchExecutionConfig.GroupStatementsCount;
             groupStatementsCount = groupStatementsCount < 0 ? 1 : groupStatementsCount;
             var groupParameterCount = batchExecutionConfig.GroupParametersCount;
@@ -494,7 +492,7 @@ namespace Sixnet.Development.Data.Database
         /// <param name="field">Field</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        protected virtual string GetFieldNullable(EntityField field, MigrationInfo options)
+        protected virtual string GetFieldNullable(DataField field, MigrationInfo options)
         {
             SixnetDirectThrower.ThrowArgNullIf(field == null, nameof(field));
             var dataType = field.DataType;
@@ -511,7 +509,7 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="field">Field</param>
         /// <returns></returns>
-        protected abstract string GetSqlDataType(EntityField field, MigrationInfo options);
+        protected abstract string GetSqlDataType(DataField field, MigrationInfo options);
 
         #endregion
 
@@ -523,7 +521,7 @@ namespace Sixnet.Development.Data.Database
         /// <param name="field"></param>
         /// <param name="options"></param>
         /// <returns></returns>
-        protected virtual string GetSqlDefaultValue(EntityField field, MigrationInfo options)
+        protected virtual string GetSqlDefaultValue(DataField field, MigrationInfo options)
         {
             SixnetDirectThrower.ThrowArgNullIf(field == null, nameof(field));
             var defaultValue = field.DefaultValue;
@@ -554,7 +552,8 @@ namespace Sixnet.Development.Data.Database
         /// <param name="location">Query object location</param>
         /// <param name="applyTablePetName">Whether apply table pet name</param>
         /// <returns></returns>
-        protected virtual QueryDatabaseStatement GetFromTargetStatement(DataCommandResolveContext context, ISixnetQueryable originalQueryable, QueryableLocation location, string tablePetName, bool applyTablePetName = true)
+        protected virtual QueryDatabaseStatement GetFromTargetStatement(DataCommandResolveContext context, ISixnetQueryable originalQueryable
+            , QueryableLocation location, string tablePetName, bool applyTablePetName = true)
         {
             switch (originalQueryable.FromType)
             {
@@ -599,7 +598,7 @@ namespace Sixnet.Development.Data.Database
         /// <returns></returns>
         protected virtual QueryDatabaseStatement GetJoinTargetStatement(DataCommandResolveContext context, ISixnetQueryable topQueryable, JoinEntry joinEntry)
         {
-            var joinTargetQueryable = joinEntry.TargetQueryable;
+            var joinTargetQueryable = joinEntry.Target;
             var joinTablePetName = context.GetTablePetName(topQueryable, joinTargetQueryable.GetModelType(), joinEntry.Index);
             return GetFromTargetStatement(context, joinTargetQueryable, QueryableLocation.JoinTarget, joinTablePetName);
         }
@@ -691,7 +690,10 @@ namespace Sixnet.Development.Data.Database
                 foreach (var condition in queryable.Conditions)
                 {
                     var conditionResult = TranslateCondition(context, queryable, condition);
-                    parentTranslationResult.AddCondition(conditionResult.GetCondition(), condition.Connector.ToString().ToUpper());
+                    if (conditionResult != null)
+                    {
+                        parentTranslationResult.AddCondition(conditionResult.GetCondition(), condition.Connector.ToString().ToUpper());
+                    }
                 }
             }
             return parentTranslationResult;
@@ -823,11 +825,11 @@ namespace Sixnet.Development.Data.Database
             var combineBuilder = new StringBuilder();
             foreach (var combineEntry in topQueryable.Combines)
             {
-                if (combineEntry?.TargetQueryable == null)
+                if (combineEntry?.Target == null)
                 {
                     continue;
                 }
-                var combineQueryResult = ExecuteTranslation(context, combineEntry.TargetQueryable, QueryableLocation.Combine, true);
+                var combineQueryResult = ExecuteTranslation(context, combineEntry.Target, QueryableLocation.Combine, true);
                 var combineStatement = GenerateQueryStatementCore(context, combineQueryResult, QueryableLocation.Combine);
                 combineBuilder.Append($"{GetCombineOperator(combineEntry.Type)}{combineStatement.Script}");
             }
@@ -913,7 +915,7 @@ namespace Sixnet.Development.Data.Database
 
             var joinConnection = joinEntry.Connection;
             var sourceEntityType = topQueryable.GetModelType();
-            var targetEntityType = joinEntry.TargetQueryable.GetModelType();
+            var targetEntityType = joinEntry.Target.GetModelType();
 
             SixnetException.ThrowIf(joinConnection?.None ?? true, $"Not set join connection between {sourceEntityType?.FullName} and {targetEntityType?.FullName}");
 
@@ -956,10 +958,12 @@ namespace Sixnet.Development.Data.Database
             (var preScriptTableName, var preScriptTablePetName) = context.GetPreTableName();
 
             //field
-            var dataField = SixnetDataManager.GetField(DatabaseServerType, originalQueryable, treeInfo.DataField);
-            var parentField = SixnetDataManager.GetField(DatabaseServerType, originalQueryable, treeInfo.ParentField);
-            var treeDataFieldString = FormatField(context, originalQueryable, dataField, QueryableLocation.PreScript, FieldLocation.Join, tablePetName: treeInfo.Direction == TreeMatchingDirection.Down ? preScriptTablePetName : "");
-            var treeParentFieldString = FormatField(context, originalQueryable, parentField, QueryableLocation.PreScript, FieldLocation.Join, tablePetName: treeInfo.Direction == TreeMatchingDirection.Up ? preScriptTablePetName : "");
+            var dataField = SixnetDataManager.GetField(DatabaseType, originalQueryable?.GetModelType(), treeInfo.DataField);
+            var parentField = SixnetDataManager.GetField(DatabaseType, originalQueryable?.GetModelType(), treeInfo.ParentField);
+            var treeDataFieldString = FormatField(context, originalQueryable, dataField, QueryableLocation.PreScript
+                , FieldLocation.Join, tablePetName: treeInfo.Direction == TreeMatchingDirection.Down ? preScriptTablePetName : "");
+            var treeParentFieldString = FormatField(context, originalQueryable, parentField, QueryableLocation.PreScript
+                , FieldLocation.Join, tablePetName: treeInfo.Direction == TreeMatchingDirection.Up ? preScriptTablePetName : "");
 
             // entity table name
             context.SetActivityQueryable(originalQueryable, location);
@@ -967,7 +971,7 @@ namespace Sixnet.Development.Data.Database
 
             //fields
             string preScript;
-            IEnumerable<ISixnetDataField> outputFields;
+            IEnumerable<ISixnetField> outputFields;
             var join = translationResult.GetJoin();
             var condition = translationResult.GetCondition(ConditionStartKeyword);
             var targetStatement = GetFromTargetStatement(context, originalQueryable, location, tablePetName, false);
@@ -975,9 +979,9 @@ namespace Sixnet.Development.Data.Database
             {
                 //output fields
                 outputFields = targetStatement.OutputFields;
-                if (!outputFields.IsNullOrEmpty())
+                if (outputFields.IsNullOrEmpty())
                 {
-                    outputFields = SixnetDataManager.GetAllQueryableFields(DatabaseServerType, originalQueryable.GetModelType());
+                    outputFields = SixnetDataManager.GetAllQueryableFields(DatabaseType, originalQueryable.GetModelType());
                 }
                 var outputFieldString = FormatFieldsString(context, originalQueryable, QueryableLocation.PreScript, FieldLocation.InnerOutput, outputFields);
                 var withFields = UseFieldForRecursive ? $"({FormatColumnFieldsString(context, originalQueryable, outputFields)})" : "";
@@ -994,7 +998,7 @@ namespace Sixnet.Development.Data.Database
             else
             {
                 var fromScript = $"{targetStatement.Script}{TablePetNameKeyword}{tablePetName}";
-                outputFields = SixnetDataManager.GetAllQueryableFields(DatabaseServerType, originalQueryable.GetModelType());
+                outputFields = SixnetDataManager.GetAllQueryableFields(DatabaseType, originalQueryable.GetModelType());
                 var outputFieldString = FormatFieldsString(context, originalQueryable, QueryableLocation.PreScript, FieldLocation.InnerOutput, outputFields);
                 var withFields = UseFieldForRecursive ? $"({FormatColumnFieldsString(context, originalQueryable, outputFields)})" : "";
 
@@ -1023,11 +1027,12 @@ namespace Sixnet.Development.Data.Database
         /// <param name="translationResult">Translation result</param>
         /// <param name="location">Query object location</param>
         /// <returns></returns>
-        protected virtual QueryableTranslationResult AppendGroup(DataCommandResolveContext context, ISixnetQueryable originalQueryable, QueryableTranslationResult translationResult, QueryableLocation location)
+        protected virtual QueryableTranslationResult AppendGroup(DataCommandResolveContext context, ISixnetQueryable originalQueryable
+            , QueryableTranslationResult translationResult, QueryableLocation location)
         {
             if (!originalQueryable.GroupFields.IsNullOrEmpty())
             {
-                translationResult.SetGroup($"{GroupByKeyword}{string.Join(",", originalQueryable.GroupFields.Select(gf => FormatField(context, originalQueryable, SixnetDataManager.GetField(DatabaseServerType, originalQueryable, gf), location, FieldLocation.Criterion)))}");
+                translationResult.SetGroup($"{GroupByKeyword}{string.Join(",", originalQueryable.GroupFields.Select(gf => FormatField(context, originalQueryable, SixnetDataManager.GetField(DatabaseType, originalQueryable?.GetModelType(), gf), location, FieldLocation.Criterion)))}");
             }
             return translationResult;
         }
@@ -1153,7 +1158,7 @@ namespace Sixnet.Development.Data.Database
                 CombineType.Union => " UNION ",
                 CombineType.Except => " EXCEPT ",
                 CombineType.Intersect => " INTERSECT ",
-                _ => throw new InvalidOperationException($"{DatabaseServerType} not support {combineType}"),
+                _ => throw new InvalidOperationException($"{DatabaseType} not support {combineType}"),
             };
         }
 
@@ -1221,9 +1226,9 @@ namespace Sixnet.Development.Data.Database
 
         #region Get default sort
 
-        protected virtual string GetDefaultSort(DataCommandResolveContext context, QueryableTranslationResult translationResult, ISixnetQueryable originalQueryable, IEnumerable<ISixnetDataField> dataFields, string tablePetName)
+        protected virtual string GetDefaultSort(DataCommandResolveContext context, QueryableTranslationResult translationResult, ISixnetQueryable originalQueryable, IEnumerable<ISixnetField> dataFields, string tablePetName)
         {
-            var defaultSortField = dataFields?.Where(f => f is PropertyField)
+            var defaultSortField = dataFields?.Where(f => f is DataField)
                                               .OrderByDescending(f => f.InRole(FieldRole.Sequence))
                                               .ThenByDescending(f => f.InRole(FieldRole.PrimaryKey))
                                               .FirstOrDefault();
@@ -1248,7 +1253,7 @@ namespace Sixnet.Development.Data.Database
         /// <param name="fields">Fields</param>
         /// <param name="ignoreFormatter">Whether ignore formatter</param>
         /// <returns></returns>
-        protected virtual string FormatFieldsString(DataCommandResolveContext context, ISixnetQueryable queryable, QueryableLocation queryLocation, FieldLocation fieldLocation, IEnumerable<ISixnetDataField> fields)
+        protected virtual string FormatFieldsString(DataCommandResolveContext context, ISixnetQueryable queryable, QueryableLocation queryLocation, FieldLocation fieldLocation, IEnumerable<ISixnetField> fields)
         {
             return string.Join(",", FormatFields(context, queryable, queryLocation, fieldLocation, fields));
         }
@@ -1261,7 +1266,7 @@ namespace Sixnet.Development.Data.Database
         /// <param name="queryable">Query object</param>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        protected virtual IEnumerable<string> FormatFields(DataCommandResolveContext context, ISixnetQueryable queryable, QueryableLocation queryLocation, FieldLocation fieldLocation, IEnumerable<ISixnetDataField> fields)
+        protected virtual IEnumerable<string> FormatFields(DataCommandResolveContext context, ISixnetQueryable queryable, QueryableLocation queryLocation, FieldLocation fieldLocation, IEnumerable<ISixnetField> fields)
         {
             return fields?.Select(field => FormatField(context, queryable, field, queryLocation, fieldLocation, null)) ?? Array.Empty<string>();
         }
@@ -1274,9 +1279,9 @@ namespace Sixnet.Development.Data.Database
         /// <param name="queryable">Query object</param>
         /// <param name="field">Field</param>
         /// <returns></returns>
-        protected virtual string FormatCriterionField(DataCommandResolveContext context, ISixnetQueryable queryable, ISixnetDataField field, CriterionOperator criterionOperator)
+        protected virtual string FormatCriterionField(DataCommandResolveContext context, ISixnetQueryable queryable, ISixnetField field, CriterionOperator criterionOperator)
         {
-            field = SixnetDataManager.GetField(context.DataCommandExecutionContext.Server.ServerType, queryable, field);
+            field = SixnetDataManager.GetField(context.DataCommandExecutionContext.Server.DatabaseType, queryable?.GetModelType(), field);
             return FormatField(context, queryable, field, QueryableLocation.Top, FieldLocation.Criterion, criterionOperator);
         }
 
@@ -1289,7 +1294,7 @@ namespace Sixnet.Development.Data.Database
         /// <returns></returns>
         protected virtual string FormatSortField(DataCommandResolveContext context, ISixnetQueryable queryable, SortEntry sortEntry)
         {
-            var field = SixnetDataManager.GetField(context.DataCommandExecutionContext.Server.ServerType, queryable, sortEntry.Field);
+            var field = SixnetDataManager.GetField(context.DataCommandExecutionContext.Server.DatabaseType, queryable?.GetModelType(), sortEntry.Field);
             return FormatField(context, queryable, field, QueryableLocation.Top, FieldLocation.Sort);
         }
 
@@ -1306,9 +1311,9 @@ namespace Sixnet.Development.Data.Database
             {
                 return NullKeyword;
             }
-            var valueField = value as ISixnetDataField;
+            var valueField = value as ISixnetField;
             valueField ??= ConstantField.Create(value);
-            valueField = SixnetDataManager.GetField(context.DataCommandExecutionContext.Server.ServerType, command.GetEntityType(), valueField);
+            valueField = SixnetDataManager.GetField(context.DataCommandExecutionContext.Server.DatabaseType, command.GetEntityType(), valueField);
             return FormatField(context, command.Queryable, valueField, QueryableLocation.Top, FieldLocation.UpdateValue);
         }
 
@@ -1325,7 +1330,7 @@ namespace Sixnet.Development.Data.Database
             {
                 return NullKeyword;
             }
-            var valueField = value as ISixnetDataField;
+            var valueField = value as ISixnetField;
             valueField ??= ConstantField.Create(value);
             return FormatField(context, queryable, valueField, QueryableLocation.Top, FieldLocation.InsertValue);
         }
@@ -1340,7 +1345,7 @@ namespace Sixnet.Development.Data.Database
         /// <param name="formatOptions">Field format options</param>
         /// <param name="ignoreFormatter">Whether ignore formatter</param>
         /// <returns>Return field conversion result</returns>
-        protected virtual string FormatField(DataCommandResolveContext context, ISixnetQueryable queryable, ISixnetDataField field
+        protected virtual string FormatField(DataCommandResolveContext context, ISixnetQueryable queryable, ISixnetField field
             , QueryableLocation queryableLocation, FieldLocation fieldLocation, CriterionOperator? criterionOperator = null
             , string tablePetName = "", string formatterName = "")
         {
@@ -1351,13 +1356,21 @@ namespace Sixnet.Development.Data.Database
             var formatedFieldName = "";
             var fieldName = "";
             var propertyName = field.PropertyName;
-            var formatOption = field.FormatOption;
+            var formatOption = field.FormatSetting;
             // regular field
-            if (field is PropertyField regularField)
+            if (field is DataField regularField)
             {
+                var fieldModelType = regularField.GetModelType();
+                if (fieldModelType == null
+                    || fieldModelType == QueryableContext.DefaultModelType
+                    || (context.DataOptions?.IsFilterType(fieldModelType) ?? false))
+                {
+                    fieldModelType = queryable.GetModelType();
+                }
+
                 if (string.IsNullOrWhiteSpace(tablePetName))
                 {
-                    tablePetName = context.GetTablePetName(queryable, regularField.ModelType, regularField.ModelTypeIndex);
+                    tablePetName = context.GetTablePetName(queryable, fieldModelType, regularField.ModelTypeIndex);
                 }
                 fieldName = regularField.FieldName;
                 formatedFieldName = $"{WrapKeywordFunc(regularField.FieldName)}";
@@ -1413,7 +1426,7 @@ namespace Sixnet.Development.Data.Database
                 };
                 do
                 {
-                    if (formatOption.Parameter is ISixnetDataField parameterField)
+                    if (formatOption.Parameter is ISixnetField parameterField)
                     {
                         formatOption.Parameter = FormatField(context, queryable, parameterField, queryableLocation, FieldLocation.FormatParameter, criterionOperator, tablePetName, formatOption.Name);
                     }
@@ -1468,13 +1481,11 @@ namespace Sixnet.Development.Data.Database
         /// <param name="queryable"></param>
         /// <param name="fields"></param>
         /// <returns></returns>
-        protected virtual string FormatColumnFieldsString(DataCommandResolveContext context, ISixnetQueryable queryable, IEnumerable<ISixnetDataField> fields)
+        protected virtual string FormatColumnFieldsString(DataCommandResolveContext context, ISixnetQueryable queryable, IEnumerable<ISixnetField> fields)
         {
-            if (fields.IsNullOrEmpty())
-            {
-                return string.Empty;
-            }
-            return string.Join(",", fields.Where(f => f is PropertyField).Select(f => WrapKeywordFunc(f.GetFieldName())));
+            return fields.IsNullOrEmpty()
+                ? string.Empty
+                : string.Join(",", fields.Select(f => WrapKeywordFunc(f.GetFieldName(context.DataCommandExecutionContext.Server.DatabaseType))));
         }
 
         #endregion
@@ -1598,7 +1609,7 @@ namespace Sixnet.Development.Data.Database
         /// <param name="statement">Exection command</param>
         protected virtual void LogExecutionStatement(ExecutionDatabaseStatement statement)
         {
-            FrameworkLogManager.LogDatabaseExecutionStatement(GetType(), DatabaseServerType, statement);
+            FrameworkLogManager.LogDatabaseExecutionStatement(GetType(), DatabaseType, statement);
         }
 
         /// <summary>
@@ -1608,7 +1619,7 @@ namespace Sixnet.Development.Data.Database
         /// <param name="parameter">Parameter</param>
         protected virtual void LogScript(string script, object parameter)
         {
-            FrameworkLogManager.LogDatabaseScript(GetType(), DatabaseServerType, script, parameter);
+            FrameworkLogManager.LogDatabaseScript(GetType(), DatabaseType, script, parameter);
         }
 
         #endregion
@@ -1661,12 +1672,12 @@ namespace Sixnet.Development.Data.Database
 
         protected virtual IEnumerable<string> FormatWrapJoinPrimaryKeys(DataCommandResolveContext context, ISixnetQueryable queryable, Type entityType, string topTablePetName, string sourceTablePetName, string targetTablePetName)
         {
-            var primaryKeyFields = SixnetDataManager.GetFields(DatabaseServerType, entityType, SixnetEntityManager.GetPrimaryKeyFields(entityType));
+            var primaryKeyFields = SixnetDataManager.GetFields(DatabaseType, entityType, SixnetEntityManager.GetPrimaryKeyFields(entityType));
             SixnetException.ThrowIf(primaryKeyFields.IsNullOrEmpty(), $"{entityType?.FullName} not set primary key");
             return FormatWrapJoinFields(context, queryable, primaryKeyFields, topTablePetName, sourceTablePetName, targetTablePetName);
         }
 
-        protected virtual IEnumerable<string> FormatWrapJoinFields(DataCommandResolveContext context, ISixnetQueryable queryable, IEnumerable<ISixnetDataField> fields, string topTablePetName, string sourceTablePetName, string targetTablePetName)
+        protected virtual IEnumerable<string> FormatWrapJoinFields(DataCommandResolveContext context, ISixnetQueryable queryable, IEnumerable<ISixnetField> fields, string topTablePetName, string sourceTablePetName, string targetTablePetName)
         {
             var joinItems = fields.Select(field =>
             {

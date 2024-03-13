@@ -5,7 +5,7 @@ namespace Sixnet.Development.Data.Database
     /// <summary>
     /// Database execution statement
     /// </summary>
-    public class ExecutionDatabaseStatement : SixnetDatabaseStatement
+    public class ExecutionDatabaseStatement : DatabaseStatement
     {
         /// <summary>
         /// Indicates whether must arrect data

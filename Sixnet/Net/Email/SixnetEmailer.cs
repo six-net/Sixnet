@@ -260,7 +260,7 @@ namespace Sixnet.Net.Email
         {
             SixnetDirectThrower.ThrowArgNullIf(email == null, nameof(email));
 
-            var emailAccount = emailOptions.GetEmailAccountFunc?.Invoke(email) ?? emailOptions.Account;
+            var emailAccount = emailOptions.GetEmailAccount?.Invoke(email) ?? emailOptions.Account;
 
             SixnetDirectThrower.ThrowSixnetExceptionIf(emailAccount == null, "No set email account");
 

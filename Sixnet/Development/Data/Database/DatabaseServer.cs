@@ -3,9 +3,9 @@
 namespace Sixnet.Development.Data.Database
 {
     /// <summary>
-    /// Database server info
+    /// Database server
     /// </summary>
-    public class SixnetDatabaseServer
+    public class DatabaseServer
     {
         #region Properties
 
@@ -25,9 +25,9 @@ namespace Sixnet.Development.Data.Database
         public string ConnectionString { get; set; }
 
         /// <summary>
-        /// Gets or sets server type
+        /// Gets or sets database type
         /// </summary>
-        public DatabaseServerType ServerType { get; set; }
+        public DatabaseType DatabaseType { get; set; }
 
         #endregion
 
@@ -35,7 +35,7 @@ namespace Sixnet.Development.Data.Database
 
         public string GetServerIdentityValue()
         {
-            return $"{ServerType}_{ConnectionString}";
+            return $"{DatabaseType}_{ConnectionString}";
         }
 
         public override bool Equals(object otherServer)
@@ -44,7 +44,7 @@ namespace Sixnet.Development.Data.Database
             {
                 return false;
             }
-            if (otherServer is not SixnetDatabaseServer otherServerInfo)
+            if (otherServer is not DatabaseServer otherServerInfo)
             {
                 return false;
             }
@@ -62,7 +62,7 @@ namespace Sixnet.Development.Data.Database
         /// <returns></returns>
         public virtual bool UseSingleConnection()
         {
-            return ServerType == DatabaseServerType.SQLite;
+            return DatabaseType == DatabaseType.SQLite;
         }
 
         #endregion

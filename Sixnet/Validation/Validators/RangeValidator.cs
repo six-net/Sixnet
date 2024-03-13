@@ -6,7 +6,7 @@ namespace Sixnet.Validation.Validators
     /// <summary>
     /// Range validator
     /// </summary>
-    public class RangeValidator : SixnetValidator
+    public class RangeValidator : BaseValidator
     {
         /// <summary>
         /// Gets the minimum
@@ -44,7 +44,7 @@ namespace Sixnet.Validation.Validators
         /// <param name="errorMessage">Error message</param>
         public override ValidationResult Validate(dynamic value, string errorMessage)
         {
-            return SixnetValidationExtensions.IsInRangeNullable(value, Minimum, Maximum)
+            return ValidationExtensions.IsInRangeNullable(value, Minimum, Maximum)
                 ? ValidationResult.SuccessResult()
                 : ValidationResult.ErrorResult(errorMessage);
         }

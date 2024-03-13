@@ -20,9 +20,9 @@ namespace Sixnet.Net.Sms
         public SmsAccount Account { get; set; }
 
         /// <summary>
-        /// Gets or sets the get sms account func
+        /// Gets or sets the get sms account
         /// </summary>
-        public Func<SmsParameter, SmsAccount> GetSmsAccountFunc { get; set; }
+        public Func<SmsParameter, SmsAccount> GetSmsAccount { get; set; }
 
         /// <summary>
         /// Gets or sets the send sms callback

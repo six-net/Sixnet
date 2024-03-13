@@ -8,7 +8,7 @@ namespace Sixnet.Validation.Validators
     /// <summary>
     /// Regular expression validator
     /// </summary>
-    public class RegularExpressionValidator : SixnetValidator
+    public class RegularExpressionValidator : BaseValidator
     {
         /// <summary>
         /// Gets the mathc pattern

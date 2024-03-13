@@ -10,7 +10,7 @@ namespace Sixnet.Development.Data.Field
     /// <summary>
     /// Fields assignment
     /// </summary>
-    public class FieldsAssignment : ISixnetCloneableModel<FieldsAssignment>
+    public class FieldsAssignment : ISixnetCloneable<FieldsAssignment>
     {
         #region Fields
 

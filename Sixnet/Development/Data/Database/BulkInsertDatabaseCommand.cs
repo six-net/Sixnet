@@ -8,7 +8,7 @@ namespace Sixnet.Development.Data.Database
     /// <summary>
     /// Database bulk insert command
     /// </summary>
-    public class BulkInsertDatabaseCommand : SixnetDatabaseCommand
+    public class BulkInsertDatabaseCommand : DatabaseCommand
     {
         /// <summary>
         /// Gets or sets the data table

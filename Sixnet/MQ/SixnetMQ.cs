@@ -1,8 +1,11 @@
-﻿using Sixnet.Exceptions;
+﻿using Sixnet.DependencyInjection;
+using Sixnet.Development.Data;
+using Sixnet.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using static Sixnet.Cache.SixnetCacher;
 
 namespace Sixnet.MQ
 {
@@ -11,66 +14,6 @@ namespace Sixnet.MQ
     /// </summary>
     public static class SixnetMQ
     {
-        #region Fields
-
-        /// <summary>
-        /// Message queue providers
-        /// </summary>
-        readonly static Dictionary<MessageQueueServerType, ISixnetMessageQueueProvider> _serverQueueProviders = new();
-
-        /// <summary>
-        /// Default queue server
-        /// </summary>
-        static MessageQueueServer _defaultQueueServer;
-
-        /// <summary>
-        /// Get message queue server func
-        /// </summary>
-        static Func<ServerQueueMessage, MessageQueueServer> _getMessageQueueServerFunc = GetDefaultMessageQueueServer;
-
-        #endregion
-
-        #region Configuration
-
-        /// <summary>
-        /// Configure provider
-        /// </summary>
-        /// <param name="serverType">Service type</param>
-        /// <param name="messageQueueProvider">Message queue provider</param>
-        public static void ConfigureProvider(MessageQueueServerType serverType, ISixnetMessageQueueProvider messageQueueProvider)
-        {
-            SixnetDirectThrower.ThrowArgNullIf(messageQueueProvider == null, nameof(messageQueueProvider));
-            _serverQueueProviders[serverType] = messageQueueProvider;
-        }
-
-        /// <summary>
-        /// Configure message server
-        /// </summary>
-        /// <param name="getMessageServerFunc">Get message server func</param>
-        public static void ConfigureServer(Func<ServerQueueMessage, MessageQueueServer> getMessageServerFunc)
-        {
-            if (getMessageServerFunc != null)
-            {
-                _getMessageQueueServerFunc = getMessageServerFunc;
-            }
-            else
-            {
-                _getMessageQueueServerFunc = GetDefaultMessageQueueServer;
-            }
-        }
-
-        /// <summary>
-        /// Configure default server
-        /// </summary>
-        /// <param name="messageQueueServer">Message queue server</param>
-        public static void ConfigureServer(MessageQueueServer messageQueueServer)
-        {
-            SixnetDirectThrower.ThrowArgNullIf(messageQueueServer == null, nameof(messageQueueServer));
-            _defaultQueueServer = messageQueueServer;
-        }
-
-        #endregion
-
         #region Send message
 
         /// <summary>
@@ -106,8 +49,10 @@ namespace Sixnet.MQ
                     var messageServer = GetMessageQueueServer(serverQueueMessage);
                     if (messageServer != null)
                     {
-                        SixnetDirectThrower.ThrowSixnetExceptionIf(!_serverQueueProviders.TryGetValue(messageServer.Type, out var provider) || provider == null
-                        , $"Not config provider for {messageServer.Type}");
+                        var provider = GetMessageQueueProvider(messageServer.Type);
+
+                        SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"Not set provider for {messageServer.Type}");
+
                         serverMessageTasks.Add(provider.SendAsync(messageServer, serverQueueMessage));
                     }
                 }
@@ -147,8 +92,8 @@ namespace Sixnet.MQ
                     var messageServer = GetMessageQueueServer(serverQueueMessage);
                     if (messageServer != null)
                     {
-                        SixnetDirectThrower.ThrowSixnetExceptionIf(!_serverQueueProviders.TryGetValue(messageServer.Type, out var provider) || provider == null
-                        , $"Not config provider for {messageServer.Type}");
+                        var provider = GetMessageQueueProvider(messageServer.Type);
+                        SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"Not set provider for {messageServer.Type}");
                         provider.Send(messageServer, serverQueueMessage);
                     }
                 }
@@ -168,7 +113,11 @@ namespace Sixnet.MQ
         {
             SixnetDirectThrower.ThrowArgNullIf(server == null, nameof(server));
             SixnetDirectThrower.ThrowArgNullIf(listenOptions == null, nameof(listenOptions));
-            SixnetDirectThrower.ThrowSixnetExceptionIf(!_serverQueueProviders.TryGetValue(server.Type, out var provider) || provider == null, $"{server.Type} not set queue provider");
+
+            var provider = GetMessageQueueProvider(server.Type);
+
+            SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"{server.Type} not set queue provider");
+
             return provider.ListenAsync(server, listenOptions);
         }
 
@@ -181,7 +130,11 @@ namespace Sixnet.MQ
         {
             SixnetDirectThrower.ThrowArgNullIf(server == null, nameof(server));
             SixnetDirectThrower.ThrowArgNullIf(listenOptions == null, nameof(listenOptions));
-            SixnetDirectThrower.ThrowSixnetExceptionIf(!_serverQueueProviders.TryGetValue(server.Type, out var provider) || provider == null, $"{server.Type} not set queue provider");
+
+            var provider = GetMessageQueueProvider(server.Type);
+
+            SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"{server.Type} not set queue provider");
+
             provider.Listen(server, listenOptions);
         }
 
@@ -199,10 +152,13 @@ namespace Sixnet.MQ
 
             var serverTypes = servers.Select(c => c.Type).Distinct().ToList();
             var serverTasks = new List<Task>(serverTypes.Count);
-            foreach (var serverType in serverTypes)
+            foreach (var databaseType in serverTypes)
             {
-                SixnetDirectThrower.ThrowSixnetExceptionIf(!_serverQueueProviders.TryGetValue(serverType, out var provider), $"{serverType} not set queue provider");
-                var currentServers = servers.Where(c => c.Type == serverType);
+                var provider = GetMessageQueueProvider(databaseType);
+
+                SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"{databaseType} not set queue provider");
+
+                var currentServers = servers.Where(c => c.Type == databaseType);
                 serverTasks.Add(provider.UnlistenServerAsync(currentServers.ToArray()));
             }
             return Task.WhenAll(serverTasks);
@@ -218,10 +174,13 @@ namespace Sixnet.MQ
 
             var serverTypes = servers.Select(c => c.Type).Distinct().ToList();
             var serverTasks = new List<Task>(serverTypes.Count);
-            foreach (var serverType in serverTypes)
+            foreach (var databaseType in serverTypes)
             {
-                SixnetDirectThrower.ThrowSixnetExceptionIf(!_serverQueueProviders.TryGetValue(serverType, out var provider), $"{serverType} not set queue provider");
-                var currentServers = servers.Where(c => c.Type == serverType);
+                var provider = GetMessageQueueProvider(databaseType);
+
+                SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"{databaseType} not set queue provider");
+
+                var currentServers = servers.Where(c => c.Type == databaseType);
                 provider.UnlistenServer(currentServers.ToArray());
             }
         }
@@ -239,7 +198,11 @@ namespace Sixnet.MQ
         {
             SixnetDirectThrower.ThrowArgNullIf(server == null, nameof(server));
             SixnetDirectThrower.ThrowArgErrorIf(queueNames.IsNullOrEmpty(), "Queue names is null or empty");
-            SixnetDirectThrower.ThrowSixnetExceptionIf(!_serverQueueProviders.TryGetValue(server.Type, out var provider), $"{server.Type} not set queue provider");
+
+            var provider = GetMessageQueueProvider(server.Type);
+
+            SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"{server.Type} not set queue provider");
+
             return provider.UnlistenQueueAsync(server, queueNames);
         }
 
@@ -252,7 +215,11 @@ namespace Sixnet.MQ
         {
             SixnetDirectThrower.ThrowArgNullIf(server == null, nameof(server));
             SixnetDirectThrower.ThrowArgErrorIf(queueNames.IsNullOrEmpty(), "Queue names is null or empty");
-            SixnetDirectThrower.ThrowSixnetExceptionIf(!_serverQueueProviders.TryGetValue(server.Type, out var provider), $"{server.Type} not set queue provider");
+
+            var provider = GetMessageQueueProvider(server.Type);
+
+            SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"{server.Type} not set queue provider");
+
             provider.UnlistenQueue(server, queueNames);
         }
 
@@ -265,12 +232,17 @@ namespace Sixnet.MQ
         /// </summary>
         public static Task UnlistenAllAsync()
         {
-            var queueTasks = new List<Task>(_serverQueueProviders.Count);
-            foreach (var providerItem in _serverQueueProviders)
+            var providers = GetMessageQueueOptions()?.GetAllProviders();
+            if (!providers.IsNullOrEmpty())
             {
-                queueTasks.Add(providerItem.Value.UnlistenAllAsync());
+                var queueTasks = new List<Task>();
+                foreach (var provider in providers)
+                {
+                    queueTasks.Add(provider.UnlistenAllAsync());
+                }
+                return Task.WhenAll(queueTasks);
             }
-            return Task.WhenAll(queueTasks);
+            return Task.CompletedTask;
         }
 
         /// <summary>
@@ -278,10 +250,13 @@ namespace Sixnet.MQ
         /// </summary>
         public static void UnlistenAll()
         {
-            var queueTasks = new List<Task>(_serverQueueProviders.Count);
-            foreach (var providerItem in _serverQueueProviders)
+            var providers = GetMessageQueueOptions()?.GetAllProviders();
+            if (!providers.IsNullOrEmpty())
             {
-                providerItem.Value.UnlistenAll();
+                foreach (var provider in providers)
+                {
+                    provider.UnlistenAll();
+                }
             }
         }
 
@@ -292,23 +267,43 @@ namespace Sixnet.MQ
         /// <summary>
         /// Get message queue server
         /// </summary>
-        /// <param name="options">Message options</param>
+        /// <param name="message">Message</param>
         /// <returns></returns>
-        static MessageQueueServer GetMessageQueueServer(ServerQueueMessage options)
+        static MessageQueueServer GetMessageQueueServer(ServerQueueMessage message)
         {
-            var server = _getMessageQueueServerFunc?.Invoke(options);
-            SixnetDirectThrower.ThrowSixnetExceptionIf(server == null, "Not config message queue server");
+            var server = GetMessageQueueOptions()?.GetServer(message);
+
+            SixnetDirectThrower.ThrowSixnetExceptionIf(server == null, "Not set message queue server");
+
             return server;
         }
 
+        #endregion
+
+        #region Get message queue options
+
         /// <summary>
-        /// Get default message queue server
+        /// Get message queue options
         /// </summary>
-        /// <param name="options"></param>
         /// <returns></returns>
-        static MessageQueueServer GetDefaultMessageQueueServer(ServerQueueMessage options)
+        internal static MessageQueueOptions GetMessageQueueOptions()
         {
-            return _defaultQueueServer;
+            return SixnetContainer.GetOptions<MessageQueueOptions>();
+        }
+
+        #endregion
+
+        #region Get message queue provider
+
+        /// <summary>
+        /// Get message queue provider
+        /// </summary>
+        /// <param name="messageQueueType">Message queue type</param>
+        /// <returns></returns>
+        internal static ISixnetMessageQueueProvider GetMessageQueueProvider(MessageQueueType messageQueueType)
+        {
+            var mqOptions = GetMessageQueueOptions();
+            return mqOptions?.GetProvider(messageQueueType);
         }
 
         #endregion

@@ -29,7 +29,7 @@ namespace Sixnet.Model.Paging
                 Items = datas?.ToList() ?? new List<T>(0);
                 if (PageSize < 1)
                 {
-                    PageSize = SixnetDataManager.DefaultPagingSize;
+                    PageSize = SixnetDataManager.GetDefaultPagingSize();
                 }
                 PageCount = totalCount / PageSize;
                 if (totalCount % PageSize > 0)
@@ -51,7 +51,7 @@ namespace Sixnet.Model.Paging
         /// <summary>
         /// Gets the page size
         /// </summary>
-        public int PageSize { get; set; } = SixnetDataManager.DefaultPagingSize;
+        public int PageSize { get; set; } = SixnetDataManager.GetDefaultPagingSize();
 
         /// <summary>
         /// Gets the page count

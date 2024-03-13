@@ -5,7 +5,7 @@ namespace Sixnet.Development.Data.Field.Formatting
     /// <summary>
     /// Defines field conversion options
     /// </summary>
-    public class FieldFormatSetting : ISixnetCloneableModel<FieldFormatSetting>
+    public class FieldFormatSetting : ISixnetCloneable<FieldFormatSetting>
     {
         /// <summary>
         /// Gets or sets the conversion name

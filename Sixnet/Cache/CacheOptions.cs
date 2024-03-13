@@ -71,24 +71,24 @@ namespace Sixnet.Cache
         /// <summary>
         /// Add cache provider
         /// </summary>
-        /// <param name="serverType">Cache server type</param>
+        /// <param name="databaseType">Cache server type</param>
         /// <param name="cacheProvider">Cache provider</param>
-        public void AddCacheProvider(CacheServerType serverType, ISixnetCacheProvider cacheProvider)
+        public void AddCacheProvider(CacheServerType databaseType, ISixnetCacheProvider cacheProvider)
         {
             if (cacheProvider != null)
             {
-                _providers[serverType] = cacheProvider;
+                _providers[databaseType] = cacheProvider;
             }
         }
 
         /// <summary>
         /// Get cache provider
         /// </summary>
-        /// <param name="serverType">Server type</param>
+        /// <param name="databaseType">Server type</param>
         /// <returns>Return cache provider</returns>
-        public ISixnetCacheProvider GetCacheProvider(CacheServerType serverType)
+        public ISixnetCacheProvider GetCacheProvider(CacheServerType databaseType)
         {
-            _providers.TryGetValue(serverType, out var provider);
+            _providers.TryGetValue(databaseType, out var provider);
             return provider;
         }
 

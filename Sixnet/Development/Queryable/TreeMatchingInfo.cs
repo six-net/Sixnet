@@ -4,20 +4,20 @@ using Sixnet.Development.Data.Field;
 namespace Sixnet.Development.Queryable
 {
     /// <summary>
-    /// Tree match options
+    /// Tree match info
     /// </summary>
     [Serializable]
-    public class TreeMatchOptions
+    public class TreeMatchingInfo
     {
         /// <summary>
         /// Gets or sets the data field
         /// </summary>
-        public ISixnetDataField DataField { get; set; }
+        public ISixnetField DataField { get; set; }
 
         /// <summary>
         /// Gets or sets the parent field
         /// </summary>
-        public ISixnetDataField ParentField { get; set; }
+        public ISixnetField ParentField { get; set; }
 
         /// <summary>
         /// Gets or sets the matching direction
@@ -28,9 +28,9 @@ namespace Sixnet.Development.Queryable
         /// Clone a new treeinfo
         /// </summary>
         /// <returns></returns>
-        public TreeMatchOptions Clone()
+        public TreeMatchingInfo Clone()
         {
-            return new TreeMatchOptions()
+            return new TreeMatchingInfo()
             {
                 DataField = DataField?.Clone(),
                 Direction = Direction,

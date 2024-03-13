@@ -6,7 +6,7 @@ namespace Sixnet.Validation.Validators
     /// <summary>
     /// Min length validator
     /// </summary>
-    public class MinLengthValidator : SixnetValidator
+    public class MinLengthValidator : BaseValidator
     {
         /// <summary>
         /// Gets the length
@@ -30,7 +30,7 @@ namespace Sixnet.Validation.Validators
         /// <param name="errorMessage">Error message</param>
         public override ValidationResult Validate(dynamic value, string errorMessage)
         {
-            return SixnetValidationExtensions.MinLength(value, Length)
+            return ValidationExtensions.MinLength(value, Length)
                 ? ValidationResult.SuccessResult()
                 : ValidationResult.ErrorResult(errorMessage);
         }

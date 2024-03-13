@@ -264,7 +264,7 @@ namespace Sixnet.Development.Entity
         /// <returns></returns>
         internal protected virtual void OnUpdating(T newEntity)
         {
-            var entityConfig = SixnetEntityManager.GetEntityConfiguration<T>();
+            var entityConfig = SixnetEntityManager.GetEntityConfig<T>();
             if (!(entityConfig?.AllFields.IsNullOrEmpty() ?? true))
             {
                 foreach (var fieldItem in entityConfig.AllFields)
@@ -404,7 +404,7 @@ namespace Sixnet.Development.Entity
         /// <returns>Return all property values</returns>
         public Dictionary<string, dynamic> GetAllValues()
         {
-            var entityConfig = SixnetEntityManager.GetEntityConfiguration(entityType);
+            var entityConfig = SixnetEntityManager.GetEntityConfig(entityType);
 
             SixnetDirectThrower.ThrowSixnetExceptionIf(entityConfig == null, $"{entityType.FullName}'s configuration is null");
 

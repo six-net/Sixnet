@@ -6,9 +6,9 @@ using Sixnet.Expressions.Regular;
 namespace System
 {
     /// <summary>
-    /// Value validation extensions
+    /// Validation extensions
     /// </summary>
-    public static class SixnetValidationExtensions
+    public static class ValidationExtensions
     {
         #region Integer
 

@@ -3,9 +3,9 @@
 namespace Sixnet.Validation
 {
     /// <summary>
-    /// Property validation options
+    /// Property validation setting
     /// </summary>
-    public class SixnetPropertyValidationOptions
+    public class PropertyValidationSetting
     {
         /// <summary>
         /// Gets or sets the property name
@@ -15,6 +15,6 @@ namespace Sixnet.Validation
         /// <summary>
         /// Gets or sets the rules
         /// </summary>
-        public List<SixnetValidatorOptions> Rules { get; set; }
+        public List<ValidatorSetting> Rules { get; set; }
     }
 }

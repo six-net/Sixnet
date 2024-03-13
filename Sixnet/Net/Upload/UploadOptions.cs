@@ -10,7 +10,7 @@ namespace Sixnet.Net.Upload
     public class UploadOptions
     {
         /// <summary>
-        /// Gets or sets the default upload option
+        /// Gets or sets the default upload setting
         /// </summary>
         public UploadSetting Default { get; set; } = new();
 
@@ -21,8 +21,8 @@ namespace Sixnet.Net.Upload
         public Dictionary<string, UploadSetting> UploadObjects { get; set; } = new Dictionary<string, UploadSetting>();
 
         /// <summary>
-        /// Gets upload provider func
+        /// Gets upload provider
         /// </summary>
-        public Func<UploadParameter, ISixnetUploadProvider> GetUploadProviderFunc { get; set; }
+        public Func<UploadParameter, ISixnetUploadProvider> GetUploadProvider { get; set; }
     }
 }

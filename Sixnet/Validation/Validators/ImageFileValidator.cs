@@ -6,7 +6,7 @@ namespace Sixnet.Validation.Validators
     /// <summary>
     /// Image file validator
     /// </summary>
-    public class ImageFileValidator : SixnetValidator
+    public class ImageFileValidator : BaseValidator
     {
         /// <summary>
         /// Create validation attribute
@@ -29,7 +29,7 @@ namespace Sixnet.Validation.Validators
         /// <param name="errorMessage">Error message</param>
         public override ValidationResult Validate(dynamic value, string errorMessage)
         {
-            return SixnetValidationExtensions.IsImageFileNullable(value)
+            return ValidationExtensions.IsImageFileNullable(value)
                 ? ValidationResult.SuccessResult()
                 : ValidationResult.ErrorResult(errorMessage);
         }

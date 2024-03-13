@@ -8,7 +8,7 @@ namespace Sixnet.Development.Domain
     /// <summary>
     /// Sixnet domain model
     /// </summary>
-    public class SixnetDomainModel : ISixnetMappableModel
+    public class SixnetDomainModel : ISixnetMappable
     {
     }
 }

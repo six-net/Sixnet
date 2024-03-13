@@ -6,7 +6,7 @@ namespace Sixnet.Validation.Validators
     /// <summary>
     /// String length validator
     /// </summary>
-    public class StringLengthValidator : SixnetValidator
+    public class StringLengthValidator : BaseValidator
     {
         /// <summary>
         /// Initialize a string length validator

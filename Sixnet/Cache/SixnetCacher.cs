@@ -33,6 +33,9 @@ namespace Sixnet.Cache
         /// Split table cache object name
         /// </summary>
         public const string SplitTableCacheObjectName = "SIXNET_SPLIT_TABLE_CACHE_OBJECT_NAME";
+        /// <summary>
+        /// Default options
+        /// </summary>
         static readonly CacheOptions _defaultOptions = new();
 
         #endregion
@@ -1638,11 +1641,11 @@ namespace Sixnet.Cache
         /// <summary>
         /// Get cache provider
         /// </summary>
-        /// <param name="serverType">Server type</param>
+        /// <param name="databaseType">Server type</param>
         /// <returns>Return cache provider</returns>
-        internal static ISixnetCacheProvider GetCacheProvider(CacheServerType serverType)
+        internal static ISixnetCacheProvider GetCacheProvider(CacheServerType databaseType)
         {
-            return Options?.GetCacheProvider(serverType);
+            return Options?.GetCacheProvider(databaseType);
         }
 
         #endregion

@@ -93,7 +93,7 @@ namespace Sixnet.Development.Work
         /// <returns>Return a new work object</returns>
         public static ISixnetWork Create(DataIsolationLevel? isolationLevel = null)
         {
-            return Create(Array.Empty<SixnetDatabaseServer>(), isolationLevel);
+            return Create(Array.Empty<DatabaseServer>(), isolationLevel);
         }
 
         /// <summary>
@@ -118,7 +118,7 @@ namespace Sixnet.Development.Work
         /// <param name="databaseServerConfigNames">Database server config names</param>
         /// <param name="isolationLevel">Isllation level</param>
         /// <returns></returns>
-        public static ISixnetWork Create(IEnumerable<SixnetDatabaseServer> servers, DataIsolationLevel? isolationLevel = null)
+        public static ISixnetWork Create(IEnumerable<DatabaseServer> servers, DataIsolationLevel? isolationLevel = null)
         {
             return Current ?? new DefaultWork(servers, isolationLevel);
         }

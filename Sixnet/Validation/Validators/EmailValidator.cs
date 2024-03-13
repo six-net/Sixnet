@@ -6,7 +6,7 @@ namespace Sixnet.Validation.Validators
     /// <summary>
     /// Email validator
     /// </summary>
-    public class EmailValidator : SixnetValidator
+    public class EmailValidator : BaseValidator
     {
         /// <summary>
         /// Initialize a email validator

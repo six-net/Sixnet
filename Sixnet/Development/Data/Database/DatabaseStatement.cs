@@ -6,7 +6,7 @@ namespace Sixnet.Development.Data.Database
     /// <summary>
     /// Defines database execution statement
     /// </summary>
-    public abstract class SixnetDatabaseStatement
+    public abstract class DatabaseStatement
     {
         /// <summary>
         /// Gets or sets the statement script

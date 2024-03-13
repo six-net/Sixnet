@@ -42,13 +42,13 @@ namespace Sixnet.Development.Data
 
     #endregion
 
-    #region Database server type
+    #region Database type
 
     /// <summary>
-    /// Database server type
+    /// Database type
     /// </summary>
     [Serializable]
-    public enum DatabaseServerType
+    public enum DatabaseType
     {
         Others = 0,
         SQLServer = 110,
@@ -59,7 +59,7 @@ namespace Sixnet.Development.Data
     }
 
     /// <summary>
-    /// Database server type
+    /// Database type
     /// </summary>
     [Serializable]
     public enum DatabaseServerRole
@@ -92,12 +92,12 @@ namespace Sixnet.Development.Data
 
     #endregion
 
-    #region Default data command database server source
+    #region Database server match pattern
 
     /// <summary>
-    /// Default data command database server source
+    /// Database server match pattern
     /// </summary>
-    public enum DefaultDataCommandDatabaseServerSource
+    public enum DatabaseServerMatchPattern
     {
         None = 0,
         Default = 2,

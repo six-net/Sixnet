@@ -29,7 +29,7 @@ namespace Sixnet.Development.Message
             var emails = new List<EmailInfo>();
             foreach (var subjectEntry in context.Messages)
             {
-                if(subjectEntry.MessageInfos.IsNullOrEmpty())
+                if (subjectEntry.MessageInfos.IsNullOrEmpty())
                 {
                     continue;
                 }
@@ -47,7 +47,7 @@ namespace Sixnet.Development.Message
                     }
                     emails.Add(GetEmailInfo(msgTemplate, msgInfo, subjectEntry.Subject, receivers));
                 }
-                
+
             }
             return SixnetEmailer.SendAsync(emails);
         }

@@ -6,7 +6,7 @@ namespace Sixnet.Validation.Validators
     /// <summary>
     /// Credit card validator
     /// </summary>
-    public class CreditCardValidator : SixnetValidator
+    public class CreditCardValidator : BaseValidator
     {
         /// <summary>
         /// Initialize a credit card validator 

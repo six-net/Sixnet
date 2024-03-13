@@ -6,7 +6,7 @@ namespace Sixnet.Validation.Validators
     /// <summary>
     /// Remote validator
     /// </summary>
-    public class RemoteValidator : SixnetValidator
+    public class RemoteValidator : BaseValidator
     {
         /// <summary>
         /// Create validate attribute

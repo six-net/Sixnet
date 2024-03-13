@@ -259,7 +259,7 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="command">Command</param>
         /// <returns></returns>
-        Task<List<SixnetDataTable>> GetTablesAsync(SixnetDatabaseCommand command);
+        Task<List<SixnetDataTable>> GetTablesAsync(DatabaseCommand command);
 
         #endregion
     }

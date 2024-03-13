@@ -9,14 +9,14 @@ namespace Sixnet.Development.Data.Database
     /// <summary>
     /// Defines database connection
     /// </summary>
-    public class SixnetDatabaseConnection
+    public class DatabaseConnection
     {
         #region Properties
 
         /// <summary>
         /// Gets the database server
         /// </summary>
-        public SixnetDatabaseServer DatabaseServer { get; private set; }
+        public DatabaseServer DatabaseServer { get; private set; }
 
         /// <summary>
         /// Gets the db connection
@@ -26,7 +26,7 @@ namespace Sixnet.Development.Data.Database
         /// <summary>
         /// Gets the db transaction
         /// </summary>
-        public SixnetDatabaseTransaction Transaction { get; private set; }
+        public DatabaseTransaction Transaction { get; private set; }
 
         /// <summary>
         /// Whether use transaction
@@ -59,13 +59,13 @@ namespace Sixnet.Development.Data.Database
         /// <param name="useTransaction">Whether use transaction</param>
         /// <param name="isolationLevel">Isolation level</param>
         /// <exception cref="ArgumentNullException"></exception>
-        private SixnetDatabaseConnection(SixnetDatabaseServer databaseServer, bool useTransaction, DataIsolationLevel? isolationLevel = null, LockInstance? connLock = null)
+        private DatabaseConnection(DatabaseServer databaseServer, bool useTransaction, DataIsolationLevel? isolationLevel = null, LockInstance? connLock = null)
         {
             if (databaseServer == null)
             {
                 throw new ArgumentNullException(nameof(databaseServer));
             }
-            DatabaseProvider = SixnetDataManager.GetDatabaseProvider(databaseServer.ServerType);
+            DatabaseProvider = SixnetDataManager.GetDatabaseProvider(databaseServer.DatabaseType);
             DbConnection = DatabaseProvider.GetDbConnection(databaseServer);
             DatabaseServer = databaseServer;
             DataIsolationLevel = isolationLevel;
@@ -112,9 +112,9 @@ namespace Sixnet.Development.Data.Database
         /// <summary>
         /// Change state
         /// </summary>
-        SixnetDatabaseTransaction ChangeState(DatabaseConnectionOperationType operationType)
+        DatabaseTransaction ChangeState(DatabaseConnectionOperationType operationType)
         {
-            SixnetDatabaseTransaction newTransaction = null;
+            DatabaseTransaction newTransaction = null;
             switch (operationType)
             {
                 case DatabaseConnectionOperationType.Open:
@@ -154,7 +154,7 @@ namespace Sixnet.Development.Data.Database
         {
             var defaultIsolationLevel = DataIsolationLevel.HasValue
                 ? SixnetDataManager.GetSystemIsolationLevel(DataIsolationLevel.Value)
-                : SixnetDataManager.GetSystemIsolationLevel(SixnetDataManager.GetDataIsolationLevel(DatabaseServer.ServerType));
+                : SixnetDataManager.GetSystemIsolationLevel(SixnetDataManager.GetDataIsolationLevel(DatabaseServer.DatabaseType));
             return defaultIsolationLevel.HasValue
                    ? DbConnection.BeginTransaction(defaultIsolationLevel.Value)
                    : DbConnection.BeginTransaction();
@@ -164,12 +164,12 @@ namespace Sixnet.Development.Data.Database
         /// Open a transaction
         /// </summary>
         /// <returns></returns>
-        SixnetDatabaseTransaction OpenTransaction()
+        DatabaseTransaction OpenTransaction()
         {
             if (UseTransaction && Transaction == null)
             {
                 var newDbTransaction = GetDbTransaction();
-                Transaction = new SixnetDatabaseTransaction(newDbTransaction);
+                Transaction = new DatabaseTransaction(newDbTransaction);
                 return Transaction;
             }
             return null;
@@ -191,16 +191,16 @@ namespace Sixnet.Development.Data.Database
         /// <param name="useTransaction">Whether use transaction</param>
         /// <param name="isolationLevel">Isolation level</param>
         /// <returns></returns>
-        public static SixnetDatabaseConnection Create(SixnetDatabaseServer server, bool useTransaction, DataIsolationLevel? isolationLevel = null)
+        public static DatabaseConnection Create(DatabaseServer server, bool useTransaction, DataIsolationLevel? isolationLevel = null)
         {
             if (!server.UseSingleConnection() || !useTransaction)
             {
-                return new SixnetDatabaseConnection(server, useTransaction, isolationLevel);
+                return new DatabaseConnection(server, useTransaction, isolationLevel);
             }
             var connLock = SixnetLocker.GetCreateDatabaseConnectionLock(server);
             if (connLock != null)
             {
-                return new SixnetDatabaseConnection(server, useTransaction, isolationLevel, connLock);
+                return new DatabaseConnection(server, useTransaction, isolationLevel, connLock);
             }
             throw new InvalidOperationException($"{server.Name} is locked");
         }

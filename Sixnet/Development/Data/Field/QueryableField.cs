@@ -1,17 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Newtonsoft.Json.Linq;
-using Sixnet.Development.Data.Field.Formatting;
+﻿using Sixnet.Development.Data.Field.Formatting;
 using Sixnet.Development.Entity;
 using Sixnet.Development.Queryable;
+using System;
+using System.Linq;
 
 namespace Sixnet.Development.Data.Field
 {
     /// <summary>
     /// Queryable field
     /// </summary>
-    public class QueryableField : ISixnetDataField
+    public class QueryableField : ISixnetField
     {
         /// <summary>
         /// Whether has field formatter
@@ -36,7 +34,7 @@ namespace Sixnet.Development.Data.Field
         /// <summary>
         /// Gets or sets the field format options
         /// </summary>
-        public FieldFormatSetting FormatOption { get; set; }
+        public FieldFormatSetting FormatSetting { get; set; }
 
         /// <summary>
         /// Whether is a constant field and no formatter
@@ -47,13 +45,13 @@ namespace Sixnet.Development.Data.Field
         /// Clone a query criterion field
         /// </summary>
         /// <returns></returns>
-        public ISixnetDataField Clone()
+        public ISixnetField Clone()
         {
             return new QueryableField()
             {
                 Queryable = Queryable?.Clone(),
                 PropertyName = PropertyName,
-                FormatOption = FormatOption?.Clone()
+                FormatSetting = FormatSetting?.Clone()
             };
         }
 
@@ -66,7 +64,9 @@ namespace Sixnet.Development.Data.Field
         {
             if (!base.Equals(obj))
             {
-                return obj is QueryableField queryableField && queryableField.PropertyName == PropertyName && queryableField.Queryable?.Id == Queryable?.Id;
+                return obj is QueryableField queryableField
+                    && queryableField.PropertyName == PropertyName
+                    && queryableField.Queryable?.Id == Queryable?.Id;
             }
             return true;
         }
@@ -104,18 +104,18 @@ namespace Sixnet.Development.Data.Field
         /// Get field data type
         /// </summary>
         /// <returns></returns>
-        public Type GetFieldDataType()
+        public Type GetDataType()
         {
-            return Queryable?.SelectedFields?.FirstOrDefault()?.GetFieldDataType();
+            return Queryable?.SelectedFields?.FirstOrDefault()?.GetDataType();
         }
 
         /// <summary>
         /// Get field name
         /// </summary>
         /// <returns></returns>
-        public string GetFieldName()
+        public string GetFieldName(DatabaseType databaseType)
         {
-            return Queryable?.SelectedFields?.FirstOrDefault()?.GetFieldName() ?? string.Empty;
+            return Queryable?.SelectedFields?.FirstOrDefault()?.GetFieldName(databaseType) ?? string.Empty;
         }
     }
 }

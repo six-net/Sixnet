@@ -10,7 +10,7 @@ namespace Sixnet.Threading.Locking
     public class SixnetLockOptions
     {
         /// <summary>
-        /// 分布式锁名称
+        /// Lock names
         /// </summary>
         public List<string> DistributeLockObjectNames { get; set; }
     }

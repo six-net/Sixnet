@@ -24,10 +24,10 @@ namespace Sixnet.Development.Data.Event
 
             var deletingDataEvent = eventData as DeletingDataEvent;
             var dataClient = deletingDataEvent.DataClient;
-            var deleteRelationEntityQueryable = SixnetQueryable.Create<TRelationEntity>().Join(new JoinEntry()
+            var deleteRelationEntityQueryable = SixnetQuerier.Create<TRelationEntity>().Join(new JoinEntry()
             {
                 Type = JoinType.InnerJoin,
-                TargetQueryable = deletingDataEvent.Command?.Queryable
+                Target = deletingDataEvent.Command?.Queryable
             });
             dataClient.Delete(deleteRelationEntityQueryable, deletingDataEvent.Command.Options);
             return Task.CompletedTask;

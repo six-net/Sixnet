@@ -12,7 +12,7 @@ namespace Sixnet.Development.Data.Field
     /// <summary>
     /// Constant field
     /// </summary>
-    public class ConstantField : ISixnetDataField
+    public class ConstantField : ISixnetField
     {
         /// <summary>
         /// Whether has field formatter
@@ -37,7 +37,7 @@ namespace Sixnet.Development.Data.Field
         /// <summary>
         /// Gets or sets the field format options
         /// </summary>
-        public FieldFormatSetting FormatOption { get; set; }
+        public FieldFormatSetting FormatSetting { get; set; }
 
         /// <summary>
         /// Whether is a constant field and no formatter
@@ -134,13 +134,13 @@ namespace Sixnet.Development.Data.Field
             return value;
         }
 
-        public ISixnetDataField Clone()
+        public ISixnetField Clone()
         {
             return new ConstantField()
             {
                 Value = Value,
                 PropertyName = PropertyName,
-                FormatOption = FormatOption?.Clone()
+                FormatSetting = FormatSetting?.Clone()
             };
         }
 
@@ -153,7 +153,9 @@ namespace Sixnet.Development.Data.Field
         {
             if (!base.Equals(obj))
             {
-                return obj is ConstantField constantField && constantField.PropertyName == PropertyName && constantField.Value == Value;
+                return obj is ConstantField constantField 
+                    && constantField.PropertyName == PropertyName 
+                    && constantField.Value == Value;
             }
             return true;
         }
@@ -176,7 +178,7 @@ namespace Sixnet.Development.Data.Field
         /// Get field data type
         /// </summary>
         /// <returns></returns>
-        public Type GetFieldDataType()
+        public Type GetDataType()
         {
             if (Value != null)
             {
@@ -189,7 +191,7 @@ namespace Sixnet.Development.Data.Field
         /// Get field name
         /// </summary>
         /// <returns></returns>
-        public string GetFieldName()
+        public string GetFieldName(DatabaseType databaseType)
         {
             return Value?.ToString() ?? string.Empty;
         }

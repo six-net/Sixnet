@@ -20,9 +20,9 @@ namespace Sixnet.Net.Email
         public EmailAccount Account { get; set; }
 
         /// <summary>
-        /// Get email account func
+        /// Get email account
         /// </summary>
-        public Func<EmailInfo, EmailAccount> GetEmailAccountFunc{ get; set; }
+        public Func<EmailInfo, EmailAccount> GetEmailAccount { get; set; }
 
         /// <summary>
         /// Send callback

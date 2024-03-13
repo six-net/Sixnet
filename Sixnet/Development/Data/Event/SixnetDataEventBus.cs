@@ -606,7 +606,7 @@ namespace Sixnet.Development.Data.Event
         /// </summary>
         internal static void SubscribeDefaultDataEvent()
         {
-            var allEntityConfigs = SixnetEntityManager.GetAllEntityConfigurations();
+            var allEntityConfigs = SixnetEntityManager.GetAllEntityConfigs();
             if (!allEntityConfigs.IsNullOrEmpty())
             {
                 foreach (var entityConfig in allEntityConfigs)
@@ -621,7 +621,7 @@ namespace Sixnet.Development.Data.Event
                         if (relationItem.Value.Any(c => (c.Value.Behavior & RelationBehavior.CascadingDelete) == RelationBehavior.CascadingDelete))
                         {
                             var relationEntityTypeGuid = relationItem.Key;
-                            var relationEntityConfig = SixnetEntityManager.GetEntityConfiguration(relationEntityTypeGuid);
+                            var relationEntityConfig = SixnetEntityManager.GetEntityConfig(relationEntityTypeGuid);
 
                             var deletingHandler = Activator.CreateInstance(typeof(DefaultCascadingDeletingEventHandler<>).MakeGenericType(entityConfig.EntityType)) as ISixnetDataEventHandler;
                             SubscribeEntity(relationEntityConfig.EntityType, typeof(CascadingDeletingDataEvent), deletingHandler);

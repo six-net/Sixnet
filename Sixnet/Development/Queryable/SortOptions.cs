@@ -5,7 +5,7 @@ namespace Sixnet.Development.Queryable
     /// <summary>
     /// Defines sort options
     /// </summary>
-    public class SortOptions : ISixnetCloneableModel<SortOptions>
+    public class SortOptions : ISixnetCloneable<SortOptions>
     {
         /// <summary>
         /// Clone a new criterion options

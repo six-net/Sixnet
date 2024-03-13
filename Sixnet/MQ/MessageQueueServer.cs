@@ -15,7 +15,7 @@
         /// <summary>
         /// Gets or sets the server type
         /// </summary>
-        public MessageQueueServerType Type { get; set; }
+        public MessageQueueType Type { get; set; }
 
         /// <summary>
         /// Gets or sets the user name

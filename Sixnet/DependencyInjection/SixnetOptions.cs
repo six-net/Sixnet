@@ -9,6 +9,7 @@ using Sixnet.Development.Message;
 using Sixnet.Exceptions;
 using Sixnet.IO.FileAccess;
 using Sixnet.Localization;
+using Sixnet.MQ;
 using Sixnet.Net.Email;
 using Sixnet.Net.Sms;
 using Sixnet.Net.Upload;
@@ -102,6 +103,11 @@ namespace Sixnet.DependencyInjection
         /// Gets or sets configure json
         /// </summary>
         public Action<JsonSerializationOptions> ConfigureJson { get; set; }
+
+        /// <summary>
+        /// Configure message queue
+        /// </summary>
+        public Action<MessageQueueOptions> ConfigureMessageQueue { get; set; }
 
         /// <summary>
         /// Set options style

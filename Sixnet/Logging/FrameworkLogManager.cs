@@ -163,14 +163,14 @@ namespace Sixnet.Logging
         /// Log database script
         /// </summary>
         /// <param name="databaseProviderType">Database provider type</param>
-        /// <param name="databaseServerType">Database server type</param>
+        /// <param name="databaseType">Database type</param>
         /// <param name="script">Script</param>
         /// <param name="parameters">Parameters</param>
-        public static void LogDatabaseScript(Type databaseProviderType, DatabaseServerType databaseServerType, string script, object parameters)
+        public static void LogDatabaseScript(Type databaseProviderType, DatabaseType databaseType, string script, object parameters)
         {
             if (EnableTraceLog && !string.IsNullOrWhiteSpace(script))
             {
-                string title = GetTitle($"【{databaseServerType}】Execution script");
+                string title = GetTitle($"【{databaseType}】Execution script");
                 //string content
                 Log(databaseProviderType.FullName, SixnetLogEvents.Database.Script, GetMultilineMessage(GetTitle(title), script, SixnetJsonSerializer.Serialize(parameters)));
             }
@@ -180,13 +180,13 @@ namespace Sixnet.Logging
         /// Log database execution statement
         /// </summary>
         /// <param name="databaseProviderType">Database provider type</param>
-        /// <param name="databaseServerType">Database server type</param>
+        /// <param name="databaseType">Database type</param>
         /// <param name="statement">Satement</param>
-        public static void LogDatabaseExecutionStatement(Type databaseProviderType, DatabaseServerType databaseServerType, ExecutionDatabaseStatement statement)
+        public static void LogDatabaseExecutionStatement(Type databaseProviderType, DatabaseType databaseType, ExecutionDatabaseStatement statement)
         {
             if (EnableTraceLog && statement != null)
             {
-                LogDatabaseScript(databaseProviderType, databaseServerType, statement.Script, statement.Parameters);
+                LogDatabaseScript(databaseProviderType, databaseType, statement.Script, statement.Parameters);
             }
         }
 

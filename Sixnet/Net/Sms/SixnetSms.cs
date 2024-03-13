@@ -346,7 +346,7 @@ namespace Sixnet.Net.Sms
         {
             SixnetDirectThrower.ThrowArgNullIf(smsParameter == null, nameof(smsParameter));
 
-            var smsAccount = smsOptions?.GetSmsAccountFunc(smsParameter) ?? smsOptions.Account;
+            var smsAccount = smsOptions?.GetSmsAccount(smsParameter) ?? smsOptions.Account;
 
             SixnetDirectThrower.ThrowSixnetExceptionIf(smsAccount == null, "No set sms account");
 

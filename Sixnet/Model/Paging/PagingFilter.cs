@@ -10,59 +10,17 @@ namespace Sixnet.Model.Paging
     [Serializable]
     public class PagingFilter : QueryableFilter
     {
-        #region Fields
-
-        /// <summary>
-        /// page index
-        /// </summary>
-        protected int pageValue = 1;
-
-        /// <summary>
-        /// page size
-        /// </summary>
-        protected int pageSizeValue = SixnetDataManager.DefaultPagingSize;
-
-        #endregion
-
         #region Properties
 
         /// <summary>
         /// Gets or sets page index
         /// </summary>
-        public int Page
-        {
-            get
-            {
-                if (pageValue < 1)
-                {
-                    pageValue = 1;
-                }
-                return pageValue;
-            }
-            set
-            {
-                pageValue = value;
-            }
-        }
+        public int Page { get; set; } = 1;
 
         /// <summary>
         /// Gets or sets page size
         /// </summary>
-        public int PageSize
-        {
-            get
-            {
-                if (pageSizeValue < 1)
-                {
-                    pageSizeValue = SixnetDataManager.DefaultPagingSize;
-                }
-                return pageSizeValue;
-            }
-            set
-            {
-                pageSizeValue = value;
-            }
-        }
+        public int PageSize { get; set; } = SixnetDataManager.GetDefaultPagingSize();
 
         #endregion
 

@@ -99,7 +99,8 @@ namespace Sixnet.Development.Queryable
         JoinConnection = 64,
         Condition = 128,
         Having = 256,
-        UsingSource = 512
+        UsingSource = 512,
+        TreeField = 1024
     }
 
     /// <summary>

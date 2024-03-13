@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Sixnet.Development.Data.Field;
 using Sixnet.Development.Entity;
 
 namespace Sixnet.Development.Data.Database
@@ -28,18 +29,18 @@ namespace Sixnet.Development.Data.Database
         /// Gets or sets the new fields
         /// Key: entity type
         /// </summary>
-        public Dictionary<Type, EntityField> NewFields { get; set; }
+        public Dictionary<Type, DataField> NewFields { get; set; }
 
         /// <summary>
         /// Gets or sets the updatable fields
         /// Key: entity type
         /// </summary>
-        public Dictionary<Type, EntityField> UpdatableFields { get; set; }
+        public Dictionary<Type, DataField> UpdatableFields { get; set; }
 
         /// <summary>
         /// Gets or sets the deletable fields
         /// Key: entity type
         /// </summary>
-        public Dictionary<Type, EntityField> DeletableFields { get; set; }
+        public Dictionary<Type, DataField> DeletableFields { get; set; }
     }
 }

@@ -5,13 +5,13 @@ using System.Text;
 namespace Sixnet.Model
 {
     /// <summary>
-    /// Defines validatable model
+    /// Checkable model
     /// </summary>
-    public interface ISixnetValidatableModel
+    public interface ISixnetCheckable
     {
         /// <summary>
-        /// Validate value
+        /// Check value
         /// </summary>
-        void ValidateValue();
+        void Check();
     }
 }

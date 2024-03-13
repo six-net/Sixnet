@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using Sixnet.DependencyInjection;
 using Sixnet.Development.Data.Database;
 using Sixnet.Development.Queryable;
 using Sixnet.Exceptions;
@@ -48,13 +49,16 @@ namespace Sixnet.Development.Data.Command
 
         const string DefaultParameterName = "Param";
 
+        public DataOptions DataOptions { get;  private set; }
+
         #endregion
 
         #region Constructor
 
-        public DataCommandResolveContext(SixnetDatabaseConnection connection, SixnetDataCommand command)
+        public DataCommandResolveContext(DatabaseConnection connection, SixnetDataCommand command)
         {
             DataCommandExecutionContext = DataCommandExecutionContext.Create(connection, command);
+            DataOptions = SixnetDataManager.GetDataOptions();
         }
 
         #endregion
@@ -181,7 +185,7 @@ namespace Sixnet.Development.Data.Command
                 {
                     foreach (var joinEntry in queryable.Joins)
                     {
-                        var joinTargetQueryable = joinEntry.TargetQueryable;
+                        var joinTargetQueryable = joinEntry.Target;
                         var joinModelType = joinTargetQueryable.GetModelType();
                         SixnetDirectThrower.ThrowSixnetExceptionIf(joinModelType == null, "Join queryable model type is null");
                         entityTablePetNameDict[$"{topEntityType.GUID}_{joinEntry.Index}"] = GetNewTablePetName();

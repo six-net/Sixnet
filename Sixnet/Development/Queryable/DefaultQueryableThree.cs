@@ -165,7 +165,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="field">Field</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird> OrderBy(ISixnetDataField field, bool desc = false)
+        public new ISixnetQueryable<TFirst, TSecond, TThird> OrderBy(ISixnetField field, bool desc = false)
         {
             base.OrderBy(field, desc);
             return this;
@@ -177,7 +177,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird> OrderBy(IEnumerable<ISixnetDataField> fields, bool desc = false)
+        public new ISixnetQueryable<TFirst, TSecond, TThird> OrderBy(IEnumerable<ISixnetField> fields, bool desc = false)
         {
             base.OrderBy(fields, desc);
             return this;
@@ -218,7 +218,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="field">Field</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird> OrderByIf(bool predicate, ISixnetDataField field, bool desc = false)
+        public new ISixnetQueryable<TFirst, TSecond, TThird> OrderByIf(bool predicate, ISixnetField field, bool desc = false)
         {
             base.OrderByIf(predicate, field, desc);
             return this;
@@ -231,7 +231,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird> OrderByIf(bool predicate, IEnumerable<ISixnetDataField> fields, bool desc = false)
+        public new ISixnetQueryable<TFirst, TSecond, TThird> OrderByIf(bool predicate, IEnumerable<ISixnetField> fields, bool desc = false)
         {
             base.OrderByIf(predicate, fields, desc);
             return this;
@@ -325,11 +325,12 @@ namespace Sixnet.Development.Queryable
         /// Inner join
         /// </summary>
         /// <typeparam name="TFourth">TFourth</typeparam>
-        /// <param name="joinExpression">Join expression</param>
+        /// <param name="connection">Connection expression</param>
+        /// <param name="configure">Configure join</param>
         /// <returns></returns>
-        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth> InnerJoin<TFourth>(Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> joinExpression = null)
+        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth> InnerJoin<TFourth>(Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> connection = null, Action<JoinEntry> configure = null)
         {
-            return InnerJoin(null, joinExpression);
+            return InnerJoin(null, connection, configure);
         }
 
         /// <summary>
@@ -337,11 +338,12 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <typeparam name="TFourth">TFourth</typeparam>
         /// <param name="fourthQueryable">Fourth queryable</param>
-        /// <param name="joinExpression">Join expression</param>
+        /// <param name="connection">Connection expression</param>
+        /// <param name="configure">Configure join</param>
         /// <returns></returns>
-        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth> InnerJoin<TFourth>(ISixnetQueryable<TFourth> fourthQueryable, Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> joinExpression = null)
+        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth> InnerJoin<TFourth>(ISixnetQueryable<TFourth> fourthQueryable, Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> connection = null, Action<JoinEntry> configure = null)
         {
-            return Join(true, JoinType.InnerJoin, fourthQueryable, joinExpression);
+            return Join(true, JoinType.InnerJoin, fourthQueryable, connection, configure);
         }
 
         /// <summary>
@@ -349,11 +351,12 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <typeparam name="TFourth">TFourth</typeparam>
         /// <param name="predicate">Predicate</param>
-        /// <param name="joinExpression">Join expression</param>
+        /// <param name="connection">Connection expression</param>
+        /// <param name="configure">Configure join</param>
         /// <returns></returns>
-        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth> InnerJoinIf<TFourth>(bool predicate, Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> joinExpression = null)
+        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth> InnerJoinIf<TFourth>(bool predicate, Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> connection = null, Action<JoinEntry> configure = null)
         {
-            return InnerJoinIf(predicate, null, joinExpression);
+            return InnerJoinIf(predicate, null, connection, configure);
         }
 
         /// <summary>
@@ -362,11 +365,12 @@ namespace Sixnet.Development.Queryable
         /// <typeparam name="TFourth">TFourth</typeparam>
         /// <param name="predicate">Predicate</param>
         /// <param name="fourthQueryable">Fourth queryable</param>
-        /// <param name="joinExpression">Join expression</param>
+        /// <param name="connection">Connection expression</param>
+        /// <param name="configure">Configure join</param>
         /// <returns></returns>
-        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth> InnerJoinIf<TFourth>(bool predicate, ISixnetQueryable<TFourth> fourthQueryable, Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> joinExpression = null)
+        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth> InnerJoinIf<TFourth>(bool predicate, ISixnetQueryable<TFourth> fourthQueryable, Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> connection = null, Action<JoinEntry> configure = null)
         {
-            return Join(predicate, JoinType.InnerJoin, fourthQueryable, joinExpression);
+            return Join(predicate, JoinType.InnerJoin, fourthQueryable, connection, configure);
         }
 
         #endregion
@@ -377,11 +381,12 @@ namespace Sixnet.Development.Queryable
         /// Left join
         /// </summary>
         /// <typeparam name="TFourth">TFourth</typeparam>
-        /// <param name="joinExpression">Join expression</param>
+        /// <param name="connection">Connection expression</param>
+        /// <param name="configure">Configure join</param>
         /// <returns></returns>
-        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth> LeftJoin<TFourth>(Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> joinExpression = null)
+        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth> LeftJoin<TFourth>(Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> connection = null, Action<JoinEntry> configure = null)
         {
-            return LeftJoin(null, joinExpression);
+            return LeftJoin(null, connection, configure);
         }
 
         /// <summary>
@@ -389,11 +394,12 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <typeparam name="TFourth">TFourth</typeparam>
         /// <param name="fourthQueryable">Fourth queryable</param>
-        /// <param name="joinExpression">Join expression</param>
+        /// <param name="connection">Connection expression</param>
+        /// <param name="configure">Configure join</param>
         /// <returns></returns>
-        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth> LeftJoin<TFourth>(ISixnetQueryable<TFourth> fourthQueryable, Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> joinExpression = null)
+        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth> LeftJoin<TFourth>(ISixnetQueryable<TFourth> fourthQueryable, Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> connection = null, Action<JoinEntry> configure = null)
         {
-            return Join(true, JoinType.LeftJoin, fourthQueryable, joinExpression);
+            return Join(true, JoinType.LeftJoin, fourthQueryable, connection, configure);
         }
 
         /// <summary>
@@ -401,11 +407,12 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <typeparam name="TFourth">TFourth</typeparam>
         /// <param name="predicate">Predicate</param>
-        /// <param name="joinExpression">Join expression</param>
+        /// <param name="connection">Connection expression</param>
+        /// <param name="configure">Configure join</param>
         /// <returns></returns>
-        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth> LeftJoinIf<TFourth>(bool predicate, Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> joinExpression = null)
+        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth> LeftJoinIf<TFourth>(bool predicate, Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> connection = null, Action<JoinEntry> configure = null)
         {
-            return LeftJoinIf(predicate, null, joinExpression);
+            return LeftJoinIf(predicate, null, connection, configure);
         }
 
         /// <summary>
@@ -414,11 +421,12 @@ namespace Sixnet.Development.Queryable
         /// <typeparam name="TFourth">TFourth</typeparam>
         /// <param name="predicate">Predicate</param>
         /// <param name="fourthQueryable">Fourth queryable</param>
-        /// <param name="joinExpression">Join expression</param>
+        /// <param name="connection">Connection expression</param>
+        /// <param name="configure">Configure join</param>
         /// <returns></returns>
-        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth> LeftJoinIf<TFourth>(bool predicate, ISixnetQueryable<TFourth> fourthQueryable, Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> joinExpression = null)
+        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth> LeftJoinIf<TFourth>(bool predicate, ISixnetQueryable<TFourth> fourthQueryable, Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> connection = null, Action<JoinEntry> configure = null)
         {
-            return Join(predicate, JoinType.LeftJoin, fourthQueryable, joinExpression);
+            return Join(predicate, JoinType.LeftJoin, fourthQueryable, connection, configure);
         }
 
         #endregion
@@ -429,11 +437,12 @@ namespace Sixnet.Development.Queryable
         /// Right join
         /// </summary>
         /// <typeparam name="TFourth">TFourth</typeparam>
-        /// <param name="joinExpression">Join expression</param>
+        /// <param name="connection">Connection expression</param>
+        /// <param name="configure">Configure join</param>
         /// <returns></returns>
-        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth> RightJoin<TFourth>(Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> joinExpression = null)
+        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth> RightJoin<TFourth>(Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> connection = null, Action<JoinEntry> configure = null)
         {
-            return RightJoin(null, joinExpression);
+            return RightJoin(null, connection, configure);
         }
 
         /// <summary>
@@ -441,11 +450,12 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <typeparam name="TFourth">TFourth</typeparam>
         /// <param name="fourthQueryable">Fourth queryable</param>
-        /// <param name="joinExpression">Join expression</param>
+        /// <param name="connection">Connection expression</param>
+        /// <param name="configure">Configure join</param>
         /// <returns></returns>
-        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth> RightJoin<TFourth>(ISixnetQueryable<TFourth> fourthQueryable, Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> joinExpression = null)
+        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth> RightJoin<TFourth>(ISixnetQueryable<TFourth> fourthQueryable, Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> connection = null, Action<JoinEntry> configure = null)
         {
-            return Join(true, JoinType.RightJoin, fourthQueryable, joinExpression);
+            return Join(true, JoinType.RightJoin, fourthQueryable, connection, configure);
         }
 
         /// <summary>
@@ -453,11 +463,12 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <typeparam name="TFourth">TFourth</typeparam>
         /// <param name="predicate">Predicate</param>
-        /// <param name="joinExpression">Join expression</param>
+        /// <param name="connection">Connection expression</param>
+        /// <param name="configure">Configure join</param>
         /// <returns></returns>
-        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth> RightJoinIf<TFourth>(bool predicate, Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> joinExpression = null)
+        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth> RightJoinIf<TFourth>(bool predicate, Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> connection = null, Action<JoinEntry> configure = null)
         {
-            return RightJoinIf(predicate, null, joinExpression);
+            return RightJoinIf(predicate, null, connection, configure);
         }
 
         /// <summary>
@@ -466,11 +477,12 @@ namespace Sixnet.Development.Queryable
         /// <typeparam name="TFourth">TFourth</typeparam>
         /// <param name="predicate">Predicate</param>
         /// <param name="fourthQueryable">Fourth queryable</param>
-        /// <param name="joinExpression">Join expression</param>
+        /// <param name="connection">Connection expression</param>
+        /// <param name="configure">Configure join</param>
         /// <returns></returns>
-        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth> RightJoinIf<TFourth>(bool predicate, ISixnetQueryable<TFourth> fourthQueryable, Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> joinExpression = null)
+        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth> RightJoinIf<TFourth>(bool predicate, ISixnetQueryable<TFourth> fourthQueryable, Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> connection = null, Action<JoinEntry> configure = null)
         {
-            return Join(predicate, JoinType.RightJoin, fourthQueryable, joinExpression);
+            return Join(predicate, JoinType.RightJoin, fourthQueryable, connection, configure);
         }
 
         #endregion
@@ -481,11 +493,12 @@ namespace Sixnet.Development.Queryable
         /// Full join
         /// </summary>
         /// <typeparam name="TFourth">TFourth</typeparam>
-        /// <param name="joinExpression">Join expression</param>
+        /// <param name="connection">Connection expression</param>
+        /// <param name="configure">Configure join</param>
         /// <returns></returns>
-        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth> FullJoin<TFourth>(Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> joinExpression = null)
+        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth> FullJoin<TFourth>(Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> connection = null, Action<JoinEntry> configure = null)
         {
-            return FullJoin(null, joinExpression);
+            return FullJoin(null, connection, configure);
         }
 
         /// <summary>
@@ -493,11 +506,12 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <typeparam name="TFourth">TFourth</typeparam>
         /// <param name="fourthQueryable">Fourth queryable</param>
-        /// <param name="joinExpression">Join expression</param>
+        /// <param name="connection">Connection expression</param>
+        /// <param name="configure">Configure join</param>
         /// <returns></returns>
-        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth> FullJoin<TFourth>(ISixnetQueryable<TFourth> fourthQueryable, Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> joinExpression = null)
+        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth> FullJoin<TFourth>(ISixnetQueryable<TFourth> fourthQueryable, Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> connection = null, Action<JoinEntry> configure = null)
         {
-            return Join(true, JoinType.FullJoin, fourthQueryable, joinExpression);
+            return Join(true, JoinType.FullJoin, fourthQueryable, connection, configure);
         }
 
         /// <summary>
@@ -505,11 +519,12 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <typeparam name="TFourth">TFourth</typeparam>
         /// <param name="predicate">Predicate</param>
-        /// <param name="joinExpression">Join expression</param>
+        /// <param name="connection">Connection expression</param>
+        /// <param name="configure">Configure join</param>
         /// <returns></returns>
-        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth> FullJoinIf<TFourth>(bool predicate, Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> joinExpression = null)
+        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth> FullJoinIf<TFourth>(bool predicate, Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> connection = null, Action<JoinEntry> configure = null)
         {
-            return FullJoinIf(predicate, null, joinExpression);
+            return FullJoinIf(predicate, null, connection, configure);
         }
 
         /// <summary>
@@ -518,11 +533,12 @@ namespace Sixnet.Development.Queryable
         /// <typeparam name="TFourth">TFourth</typeparam>
         /// <param name="predicate">Predicate</param>
         /// <param name="fourthQueryable">Fourth queryable</param>
-        /// <param name="joinExpression">Join expression</param>
+        /// <param name="connection">Connection expression</param>
+        /// <param name="configure">Configure join</param>
         /// <returns></returns>
-        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth> FullJoinIf<TFourth>(bool predicate, ISixnetQueryable<TFourth> fourthQueryable, Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> joinExpression = null)
+        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth> FullJoinIf<TFourth>(bool predicate, ISixnetQueryable<TFourth> fourthQueryable, Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> connection = null, Action<JoinEntry> configure = null)
         {
-            return Join(predicate, JoinType.FullJoin, fourthQueryable, joinExpression);
+            return Join(predicate, JoinType.FullJoin, fourthQueryable, connection, configure);
         }
 
         #endregion
@@ -533,10 +549,11 @@ namespace Sixnet.Development.Queryable
         /// Cross join
         /// </summary>
         /// <typeparam name="TFourth">TFourth</typeparam>
+        /// <param name="configure">Configure join</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth> CrossJoin<TFourth>()
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth> CrossJoin<TFourth>(Action<JoinEntry> configure = null)
         {
-            return CrossJoin<TFourth>(null);
+            return CrossJoin<TFourth>(null, configure);
         }
 
         /// <summary>
@@ -544,10 +561,11 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <typeparam name="TFourth">TFourth</typeparam>
         /// <param name="fourthQueryable">Third queryable</param>
+        /// <param name="configure">Configure join</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth> CrossJoin<TFourth>(ISixnetQueryable<TFourth> fourthQueryable)
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth> CrossJoin<TFourth>(ISixnetQueryable<TFourth> fourthQueryable, Action<JoinEntry> configure = null)
         {
-            return Join(true, JoinType.CrossJoin, fourthQueryable);
+            return Join(true, JoinType.CrossJoin, fourthQueryable, null, configure);
         }
 
         /// <summary>
@@ -555,10 +573,11 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <typeparam name="TFourth">TFourth</typeparam>
         /// <param name="predicate">Predicate</param>
+        /// <param name="configure">Configure join</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth> CrossJoinIf<TFourth>(bool predicate)
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth> CrossJoinIf<TFourth>(bool predicate, Action<JoinEntry> configure = null)
         {
-            return CrossJoinIf<TFourth>(predicate, null);
+            return CrossJoinIf<TFourth>(predicate, null, configure);
         }
 
         /// <summary>
@@ -567,10 +586,11 @@ namespace Sixnet.Development.Queryable
         /// <typeparam name="TFourth">TFourth</typeparam>
         /// <param name="predicate">Predicate</param>
         /// <param name="fourthQueryable">Third queryable</param>
+        /// <param name="configure">Configure join</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth> CrossJoinIf<TFourth>(bool predicate, ISixnetQueryable<TFourth> fourthQueryable)
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth> CrossJoinIf<TFourth>(bool predicate, ISixnetQueryable<TFourth> fourthQueryable, Action<JoinEntry> configure = null)
         {
-            return Join(predicate, JoinType.CrossJoin, fourthQueryable);
+            return Join(predicate, JoinType.CrossJoin, fourthQueryable, null, configure);
         }
 
         #endregion
@@ -580,11 +600,12 @@ namespace Sixnet.Development.Queryable
         /// <summary>
         /// Add join
         /// </summary>
-        /// <param name="joinEntries">Join entries</param>
+        /// <param name="joinEntry">Join entry</param>
+        /// <param name="configure">Configure join</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird> Join(params JoinEntry[] joinEntries)
+        public new ISixnetQueryable<TFirst, TSecond, TThird> Join(JoinEntry joinEntry, Action<JoinEntry> configure = null)
         {
-            base.Join(joinEntries);
+            base.Join(joinEntry, configure);
             return this;
         }
 
@@ -592,24 +613,24 @@ namespace Sixnet.Development.Queryable
 
         #region Join core
 
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth> Join<TFourth>(bool predicate, JoinType joinType, ISixnetQueryable<TFourth> fourthQueryable, Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> joinExpression = null)
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth> Join<TFourth>(bool predicate, JoinType joinType, ISixnetQueryable<TFourth> fourthQueryable, Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> connection = null, Action<JoinEntry> configure = null)
         {
             if (predicate)
             {
-                var joinQueryable = SixnetExpressionHelper.GetQueryable(joinExpression, CriterionConnector.And);
-                var targetQueryable = SixnetQueryable.Create<TFourth>();
+                var joinQueryable = SixnetExpressionHelper.GetQueryable(connection, CriterionConnector.And);
+                var targetQueryable = SixnetQuerier.Create<TFourth>();
                 if (fourthQueryable != null)
                 {
                     targetQueryable.From(fourthQueryable);
                 }
-                queryableContext.Join(new JoinEntry()
+                Join(new JoinEntry()
                 {
-                    TargetQueryable = targetQueryable,
+                    Target = targetQueryable,
                     Type = joinType,
                     Connection = joinQueryable
-                });
+                }, configure);
             }
-            return SixnetQueryable.Create<TFirst, TSecond, TThird, TFourth>(this);
+            return SixnetQuerier.Create<TFirst, TSecond, TThird, TFourth>(this);
         }
 
         #endregion
@@ -623,7 +644,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird> Select(params ISixnetDataField[] fields)
+        public new ISixnetQueryable<TFirst, TSecond, TThird> Select(params ISixnetField[] fields)
         {
             base.Select(fields);
             return this;
@@ -645,7 +666,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird> Unselect(params ISixnetDataField[] fields)
+        public new ISixnetQueryable<TFirst, TSecond, TThird> Unselect(params ISixnetField[] fields)
         {
             base.Unselect(fields);
             return this;
@@ -739,9 +760,9 @@ namespace Sixnet.Development.Queryable
         /// <param name="parentFieldName">Parent field name</param>
         /// <param name="direction">Matching direction</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird> TreeMatching(string dataFieldName, string parentFieldName, TreeMatchingDirection direction = TreeMatchingDirection.Down)
+        public new ISixnetQueryable<TFirst, TSecond, TThird> Tree(string dataFieldName, string parentFieldName, TreeMatchingDirection direction = TreeMatchingDirection.Down)
         {
-            base.TreeMatching(dataFieldName, parentFieldName, direction);
+            base.Tree(dataFieldName, parentFieldName, direction);
             return this;
         }
 
@@ -752,9 +773,9 @@ namespace Sixnet.Development.Queryable
         /// <param name="parentField">Parent field</param>
         /// <param name="direction">Matching direction</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird> TreeMatching(ISixnetDataField dataField, ISixnetDataField parentField, TreeMatchingDirection direction = TreeMatchingDirection.Down)
+        public new ISixnetQueryable<TFirst, TSecond, TThird> Tree(ISixnetField dataField, ISixnetField parentField, TreeMatchingDirection direction = TreeMatchingDirection.Down)
         {
-            base.TreeMatching(dataField, parentField, direction);
+            base.Tree(dataField, parentField, direction);
             return this;
         }
 
@@ -765,9 +786,9 @@ namespace Sixnet.Development.Queryable
         /// <param name="parentField">Parent field</param>
         /// <param name="direction">Matching direction</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird> TreeMatching(Expression<Func<TFirst, object>> dataField, Expression<Func<TFirst, object>> parentField, TreeMatchingDirection direction = TreeMatchingDirection.Down)
+        public new ISixnetQueryable<TFirst, TSecond, TThird> Tree(Expression<Func<TFirst, object>> dataField, Expression<Func<TFirst, object>> parentField, TreeMatchingDirection direction = TreeMatchingDirection.Down)
         {
-            TreeMatching(SixnetExpressionHelper.GetDataField(dataField), SixnetExpressionHelper.GetDataField(parentField), direction);
+            Tree(SixnetExpressionHelper.GetDataField(dataField), SixnetExpressionHelper.GetDataField(parentField), direction);
             return this;
         }
 
@@ -980,7 +1001,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird> GroupBy(params ISixnetDataField[] fields)
+        public new ISixnetQueryable<TFirst, TSecond, TThird> GroupBy(params ISixnetField[] fields)
         {
             base.GroupBy(fields);
             return this;
@@ -1176,7 +1197,7 @@ namespace Sixnet.Development.Queryable
 
         #endregion
 
-        #region Archived
+        #region Filter
 
         /// <summary>
         /// Include archived
@@ -1184,21 +1205,39 @@ namespace Sixnet.Development.Queryable
         /// <returns></returns>
         public new ISixnetQueryable<TFirst, TSecond, TThird> IncludeArchived()
         {
-            queryableContext.IncludeArchived();
+            base.IncludeArchived();
             return this;
         }
 
-        #endregion
-
-        #region Isolation
-
         /// <summary>
-        /// Unisolated
+        /// Ignore data isolation
         /// </summary>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird> Unisolated()
+        public new ISixnetQueryable<TFirst, TSecond, TThird> IgnoreIsolation()
         {
-            queryableContext.Unisolated();
+            base.IgnoreIsolation();
+            return this;
+        }
+
+        /// <summary>
+        /// Ignore filter
+        /// </summary>
+        /// <typeparam name="TFilter">Filter type</typeparam>
+        /// <returns></returns>
+        public new ISixnetQueryable<TFirst, TSecond, TThird> IgnoreFilter<TFilter>()
+        {
+            base.IgnoreFilter<TFilter>();
+            return this;
+        }
+
+        /// <summary>
+        /// Ignore filter
+        /// </summary>
+        /// <param name="filterType">Filter type</param>
+        /// <returns></returns>
+        public new ISixnetQueryable<TFirst, TSecond, TThird> IgnoreFilter(Type filterType)
+        {
+            base.IgnoreFilter(filterType);
             return this;
         }
 
@@ -1213,6 +1252,20 @@ namespace Sixnet.Development.Queryable
         public new ISixnetQueryable<TFirst, TSecond, TThird> Negate()
         {
             base.Negate();
+            return this;
+        }
+
+        #endregion
+
+        #region Read only
+
+        /// <summary>
+        /// Mark as read only
+        /// </summary>
+        /// <returns></returns>
+        public new ISixnetQueryable<TFirst, TSecond, TThird> ReadOnly()
+        {
+            base.ReadOnly();
             return this;
         }
 

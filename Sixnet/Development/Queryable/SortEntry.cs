@@ -8,12 +8,12 @@ namespace Sixnet.Development.Queryable
     /// Sort entry
     /// </summary>
     [Serializable]
-    public class SortEntry : ISixnetCloneableModel<SortEntry>
+    public class SortEntry : ISixnetCloneable<SortEntry>
     {
         /// <summary>
         /// Gets or sets the field
         /// </summary>
-        public ISixnetDataField Field { get; set; }
+        public ISixnetField Field { get; set; }
 
         /// <summary>
         /// Indicates whether order by desc
@@ -37,7 +37,7 @@ namespace Sixnet.Development.Queryable
         {
             return new SortEntry()
             {
-                Field = PropertyField.Create(propertyName, modelType),
+                Field = DataField.Create(propertyName, modelType),
                 Desc = desc,
                 Options = sortOptions
             };

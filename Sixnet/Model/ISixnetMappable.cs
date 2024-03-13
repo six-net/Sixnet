@@ -7,7 +7,7 @@ namespace Sixnet.Model
     /// <summary>
     /// Defines mappable model
     /// </summary>
-    public interface ISixnetMappableModel
+    public interface ISixnetMappable
     {
     }
 }

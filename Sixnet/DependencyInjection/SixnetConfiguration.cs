@@ -2,6 +2,7 @@
 using Sixnet.Development.Data;
 using Sixnet.Development.Message;
 using Sixnet.IO.FileAccess;
+using Sixnet.MQ;
 using Sixnet.Net.Email;
 using Sixnet.Net.Sms;
 using Sixnet.Net.Upload;
@@ -59,5 +60,10 @@ namespace Sixnet.DependencyInjection
         /// Gets or sets the message options
         /// </summary>
         public MessageOptions Message { get; set; }
+
+        /// <summary>
+        /// Gets or sets the message queue options
+        /// </summary>
+        public MessageQueueOptions MessageQueue { get; set; }
     }
 }

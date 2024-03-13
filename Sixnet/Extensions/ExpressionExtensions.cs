@@ -44,12 +44,12 @@ namespace System.Linq.Expressions
         /// </summary>
         /// <param name="expression"></param>
         /// <returns></returns>
-        internal static ISixnetDataField GetDataField(this Expression expression, string formatterName = "")
+        internal static ISixnetField GetDataField(this Expression expression, string formatterName = "")
         {
             var dataField = SixnetExpressionHelper.GetDataField(expression);
             if (dataField != null && !string.IsNullOrWhiteSpace(formatterName))
             {
-                dataField.FormatOption = FieldFormatSetting.Create(formatterName);
+                dataField.FormatSetting = FieldFormatSetting.Create(formatterName);
             }
             return dataField;
         }

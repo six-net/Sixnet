@@ -6,7 +6,7 @@ namespace Sixnet.Validation.Validators
     /// <summary>
     /// Enum type validator
     /// </summary>
-    public class EnumTypeValidator : SixnetValidator
+    public class EnumTypeValidator : BaseValidator
     {
         /// <summary>
         /// Enum type
@@ -30,7 +30,7 @@ namespace Sixnet.Validation.Validators
         /// <param name="errorMessage">Error message</param>
         public override ValidationResult Validate(dynamic value, string errorMessage)
         {
-            return SixnetValidationExtensions.IsEnum(value, enumType)
+            return ValidationExtensions.IsEnum(value, enumType)
                 ? ValidationResult.SuccessResult()
                 : ValidationResult.ErrorResult(errorMessage);
         }

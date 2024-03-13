@@ -619,7 +619,7 @@ namespace Sixnet.Development.Repository
         /// <param name="field">Field</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Value</returns>
-        TValue Scalar<TValue>(PropertyField field, Action<DataOperationOptions> configure = null);
+        TValue Scalar<TValue>(DataField field, Action<DataOperationOptions> configure = null);
 
         /// <summary>
         /// Get scalar value
@@ -629,7 +629,7 @@ namespace Sixnet.Development.Repository
         /// <param name="conditionExpression">Conditionv expression</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Value</returns>
-        TValue Scalar<TValue>(PropertyField field, Expression<Func<TModel, bool>> conditionExpression, Action<DataOperationOptions> configure = null);
+        TValue Scalar<TValue>(DataField field, Expression<Func<TModel, bool>> conditionExpression, Action<DataOperationOptions> configure = null);
 
         #endregion
 

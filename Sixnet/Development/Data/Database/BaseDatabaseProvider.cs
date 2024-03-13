@@ -1,20 +1,74 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Text;
+using System.Linq;
+using Sixnet.Development.Data.Command;
 using Sixnet.Development.Data.Dapper;
 using Sixnet.Development.Queryable;
 using Sixnet.Model.Paging;
-using System.Threading.Tasks;
-using System.Linq;
 
 namespace Sixnet.Development.Data.Database
 {
     /// <summary>
     /// Defines base database provider
     /// </summary>
-    public abstract partial class BaseSixnetDatabaseProvider
+    public abstract partial class BaseDatabaseProvider : ISixnetDatabaseProvider
     {
+        #region Fields
+
+        protected string queryDatabaseTablesScript = "";
+
+        #endregion
+
+        #region Connection
+
+        /// <summary>
+        /// Get database connection
+        /// </summary>
+        /// <param name="server">Database server</param>
+        /// <returns>Database connection</returns>
+        public abstract IDbConnection GetDbConnection(DatabaseServer server);
+
+        #endregion
+
+        #region Command resolver
+
+        /// <summary>
+        /// Get data command resolver
+        /// </summary>
+        /// <returns></returns>
+        protected abstract ISixnetDataCommandResolver GetDataCommandResolver();
+
+        #endregion
+
+        #region Parameter
+
+        /// <summary>
+        /// Convert data command parametes
+        /// </summary>
+        /// <param name="parameters">Data command parameters</param>
+        /// <returns></returns>
+        protected abstract DynamicParameters ConvertDataCommandParameters(DataCommandParameters parameters);
+
+        #endregion
+
+        #region Command definition
+
+        /// <summary>
+        ///  Get command definition
+        /// </summary>
+        /// <param name="command">Database command</param>
+        /// <param name="statement">Database statement</param>
+        /// <returns></returns>
+        protected virtual CommandDefinition GetCommandDefinition(DatabaseCommand command, DatabaseStatement statement)
+        {
+            return new CommandDefinition(statement.Script, ConvertDataCommandParameters(statement.Parameters)
+                                , transaction: command.Connection?.Transaction?.DbTransaction, commandType: statement.ScriptType
+                                , cancellationToken: command?.CancellationToken ?? default);
+        }
+
+        #endregion
+
         #region Execution
 
         /// <summary>
@@ -22,14 +76,14 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="command">Database multiple command</param>
         /// <returns>Affected data numbers</returns>
-        public virtual async Task<int> ExecuteAsync(MultipleDatabaseCommand command)
+        public virtual int Execute(MultipleDatabaseCommand command)
         {
             var dataCommandResolver = GetDataCommandResolver();
             var statements = dataCommandResolver.GenerateDatabaseExecutionStatements(command);
             var totalAffectedNumber = 0;
             foreach (var statement in statements)
             {
-                totalAffectedNumber += await ExecuteDatabaseStatementAsync(command, statement).ConfigureAwait(false);
+                totalAffectedNumber += ExecuteDatabaseStatement(command, statement);
             }
             return totalAffectedNumber;
         }
@@ -40,9 +94,9 @@ namespace Sixnet.Development.Data.Database
         /// <param name="command">Database command</param>
         /// <param name="statement">Database execution statement</param>
         /// <returns></returns>
-        async Task<int> ExecuteDatabaseStatementAsync(SixnetDatabaseCommand command, ExecutionDatabaseStatement statement)
+        protected virtual int ExecuteDatabaseStatement(DatabaseCommand command, ExecutionDatabaseStatement statement)
         {
-            return await command.Connection.DbConnection.ExecuteAsync(GetCommandDefinition(command, statement)).ConfigureAwait(false);
+            return command.Connection.DbConnection.Execute(GetCommandDefinition(command, statement));
         }
 
         #endregion
@@ -55,11 +109,11 @@ namespace Sixnet.Development.Data.Database
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="command">Database single command</param>
         /// <returns>Return the datas</returns>
-        public virtual async Task<List<T>> QueryAsync<T>(SingleDatabaseCommand command)
+        public virtual List<T> Query<T>(SingleDatabaseCommand command)
         {
             var dataCommandResolver = GetDataCommandResolver();
             var queryStatement = dataCommandResolver.GenerateDatabaseQueryStatement(command);
-            return (await command.Connection.DbConnection.QueryAsync<T>(GetCommandDefinition(command, queryStatement)).ConfigureAwait(false))?.ToList() ?? new List<T>(0);
+            return command.Connection.DbConnection.Query<T>(GetCommandDefinition(command, queryStatement))?.ToList() ?? new List<T>(0);
         }
 
         /// <summary>
@@ -68,11 +122,11 @@ namespace Sixnet.Development.Data.Database
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="command">Database single command</param>
         /// <returns>Return the datas</returns>
-        public virtual async Task<T> QueryFirstAsync<T>(SingleDatabaseCommand command)
+        public virtual T QueryFirst<T>(SingleDatabaseCommand command)
         {
             var dataCommandResolver = GetDataCommandResolver();
             var queryStatement = dataCommandResolver.GenerateDatabaseQueryStatement(command);
-            return await command.Connection.DbConnection.QueryFirstOrDefaultAsync<T>(GetCommandDefinition(command, queryStatement)).ConfigureAwait(false);
+            return command.Connection.DbConnection.QueryFirstOrDefault<T>(GetCommandDefinition(command, queryStatement));
         }
 
         /// <summary>
@@ -83,11 +137,16 @@ namespace Sixnet.Development.Data.Database
         /// <typeparam name="TReturn">Return data type</typeparam>
         /// <param name="command">Database query mapping command</param>
         /// <returns>Return the datas</returns>
-        public virtual async Task<List<TReturn>> QueryMappingAsync<TFirst, TSecond, TReturn>(QueryMappingDatabaseCommand<TFirst, TSecond, TReturn> command)
+        public virtual List<TReturn> QueryMapping<TFirst, TSecond, TReturn>(QueryMappingDatabaseCommand<TFirst, TSecond, TReturn> command)
         {
             var dataCommandResolver = GetDataCommandResolver();
             var queryStatement = dataCommandResolver.GenerateDatabaseQueryStatement(command);
-            return (await command.Connection.DbConnection.QueryAsync(GetCommandDefinition(command, queryStatement), command.DataMappingFunc, command.SpiltOnFieldName).ConfigureAwait(false))?.ToList() ?? new List<TReturn>(0);
+            return command.Connection.DbConnection.Query(queryStatement.Script, command.DataMappingFunc
+                , param: ConvertDataCommandParameters(queryStatement.Parameters)
+                , transaction: command.Connection?.Transaction?.DbTransaction
+                , splitOn: command.SpiltOnFieldName
+                , commandType: queryStatement.ScriptType
+                )?.ToList() ?? new List<TReturn>(0);
         }
 
         /// <summary>
@@ -99,11 +158,16 @@ namespace Sixnet.Development.Data.Database
         /// <typeparam name="TReturn">Return data type</typeparam>
         /// <param name="command">Database query mapping command</param>
         /// <returns>Return the datas</returns>
-        public virtual async Task<List<TReturn>> QueryMappingAsync<TFirst, TSecond, TThird, TReturn>(DatabaseQueryMappingCommand<TFirst, TSecond, TThird, TReturn> command)
+        public virtual List<TReturn> QueryMapping<TFirst, TSecond, TThird, TReturn>(DatabaseQueryMappingCommand<TFirst, TSecond, TThird, TReturn> command)
         {
             var dataCommandResolver = GetDataCommandResolver();
             var queryStatement = dataCommandResolver.GenerateDatabaseQueryStatement(command);
-            return (await command.Connection.DbConnection.QueryAsync(GetCommandDefinition(command, queryStatement), command.DataMappingFunc, command.SpiltOnFieldName).ConfigureAwait(false))?.ToList() ?? new List<TReturn>(0);
+            return command.Connection.DbConnection.Query(queryStatement.Script, command.DataMappingFunc
+                , param: ConvertDataCommandParameters(queryStatement.Parameters)
+                , transaction: command.Connection?.Transaction?.DbTransaction
+                , splitOn: command.SpiltOnFieldName
+                , commandType: queryStatement.ScriptType
+                )?.ToList() ?? new List<TReturn>(0);
         }
 
         /// <summary>
@@ -116,11 +180,16 @@ namespace Sixnet.Development.Data.Database
         /// <typeparam name="TReturn">Return data type</typeparam>
         /// <param name="command">Database query mapping command</param>
         /// <returns>Return the datas</returns>
-        public virtual async Task<List<TReturn>> QueryMappingAsync<TFirst, TSecond, TThird, TFourth, TReturn>(DatabaseQueryMappingCommand<TFirst, TSecond, TThird, TFourth, TReturn> command)
+        public virtual List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TReturn>(DatabaseQueryMappingCommand<TFirst, TSecond, TThird, TFourth, TReturn> command)
         {
             var dataCommandResolver = GetDataCommandResolver();
             var queryStatement = dataCommandResolver.GenerateDatabaseQueryStatement(command);
-            return (await command.Connection.DbConnection.QueryAsync(GetCommandDefinition(command, queryStatement), command.DataMappingFunc, command.SpiltOnFieldName).ConfigureAwait(false))?.ToList() ?? new List<TReturn>(0);
+            return command.Connection.DbConnection.Query(queryStatement.Script, command.DataMappingFunc
+                , param: ConvertDataCommandParameters(queryStatement.Parameters)
+                , transaction: command.Connection?.Transaction?.DbTransaction
+                , splitOn: command.SpiltOnFieldName
+                , commandType: queryStatement.ScriptType
+                )?.ToList() ?? new List<TReturn>(0);
         }
 
         /// <summary>
@@ -134,11 +203,16 @@ namespace Sixnet.Development.Data.Database
         /// <typeparam name="TReturn">Return data type</typeparam>
         /// <param name="command">Database query mapping command</param>
         /// <returns>Return the datas</returns>
-        public virtual async Task<List<TReturn>> QueryMappingAsync<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(DatabaseQueryMappingCommand<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> command)
+        public virtual List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(DatabaseQueryMappingCommand<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> command)
         {
             var dataCommandResolver = GetDataCommandResolver();
             var queryStatement = dataCommandResolver.GenerateDatabaseQueryStatement(command);
-            return (await command.Connection.DbConnection.QueryAsync(GetCommandDefinition(command, queryStatement), command.DataMappingFunc, command.SpiltOnFieldName).ConfigureAwait(false))?.ToList() ?? new List<TReturn>(0);
+            return command.Connection.DbConnection.Query(queryStatement.Script, command.DataMappingFunc
+                , param: ConvertDataCommandParameters(queryStatement.Parameters)
+                , transaction: command.Connection?.Transaction?.DbTransaction
+                , splitOn: command.SpiltOnFieldName
+                , commandType: queryStatement.ScriptType
+                )?.ToList() ?? new List<TReturn>(0);
         }
 
         /// <summary>
@@ -153,11 +227,16 @@ namespace Sixnet.Development.Data.Database
         /// <typeparam name="TReturn">Return data type</typeparam>
         /// <param name="command">Database query mapping command</param>
         /// <returns>Return the datas</returns>
-        public virtual async Task<List<TReturn>> QueryMappingAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(DatabaseQueryMappingCommand<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> command)
+        public virtual List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(DatabaseQueryMappingCommand<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> command)
         {
             var dataCommandResolver = GetDataCommandResolver();
             var queryStatement = dataCommandResolver.GenerateDatabaseQueryStatement(command);
-            return (await command.Connection.DbConnection.QueryAsync(GetCommandDefinition(command, queryStatement), command.DataMappingFunc, command.SpiltOnFieldName).ConfigureAwait(false))?.ToList() ?? new List<TReturn>(0);
+            return command.Connection.DbConnection.Query(queryStatement.Script, command.DataMappingFunc
+                , param: ConvertDataCommandParameters(queryStatement.Parameters)
+                , transaction: command.Connection?.Transaction?.DbTransaction
+                , splitOn: command.SpiltOnFieldName
+                , commandType: queryStatement.ScriptType
+                )?.ToList() ?? new List<TReturn>(0);
         }
 
         /// <summary>
@@ -173,11 +252,16 @@ namespace Sixnet.Development.Data.Database
         /// <typeparam name="TReturn">Return data type</typeparam>
         /// <param name="command">Database query mapping command</param>
         /// <returns>Return the datas</returns>
-        public virtual async Task<List<TReturn>> QueryMappingAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(DatabaseQueryMappingCommand<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> command)
+        public virtual List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(DatabaseQueryMappingCommand<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> command)
         {
             var dataCommandResolver = GetDataCommandResolver();
             var queryStatement = dataCommandResolver.GenerateDatabaseQueryStatement(command);
-            return (await command.Connection.DbConnection.QueryAsync(GetCommandDefinition(command, queryStatement), command.DataMappingFunc, command.SpiltOnFieldName).ConfigureAwait(false))?.ToList() ?? new List<TReturn>(0);
+            return command.Connection.DbConnection.Query(queryStatement.Script, command.DataMappingFunc
+                , param: ConvertDataCommandParameters(queryStatement.Parameters)
+                , transaction: command.Connection?.Transaction?.DbTransaction
+                , splitOn: command.SpiltOnFieldName
+                , commandType: queryStatement.ScriptType
+                )?.ToList() ?? new List<TReturn>(0);
         }
 
         /// <summary>
@@ -186,13 +270,16 @@ namespace Sixnet.Development.Data.Database
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="command">Database single command</param>
         /// <returns>Return the datas</returns>
-        public virtual async Task<PagingInfo<T>> QueryPagingAsync<T>(SingleDatabaseCommand command)
+        public virtual PagingInfo<T> QueryPaging<T>(SingleDatabaseCommand command)
         {
             var dataCommandResolver = GetDataCommandResolver();
             var queryStatement = dataCommandResolver.GenerateDatabaseQueryPagingStatement(command);
-            var pagingDatas = (await command.Connection.DbConnection.QueryAsync<PagingTotalCountModel, T, PagingTotalCountMappingModel<T>>(GetCommandDefinition(command, queryStatement)
-                               , PagingTotalCountMappingModel<T>.PagingTotalCountMappingFunc, SixnetDataManager.PagingTotalCountSplitFieldName).ConfigureAwait(false)
-                               )?.ToList() ?? new List<PagingTotalCountMappingModel<T>>(0);
+            var pagingDatas = command.Connection.DbConnection.Query<PagingTotalCountModel, T, PagingTotalCountMappingModel<T>>(queryStatement.Script, PagingTotalCountMappingModel<T>.PagingTotalCountMappingFunc
+                , param: ConvertDataCommandParameters(queryStatement.Parameters)
+                , transaction: command.Connection?.Transaction?.DbTransaction
+                , splitOn: SixnetDataManager.GetPagingTotalSplitFieldName()
+                , commandType: queryStatement.ScriptType)
+                ?.ToList() ?? new List<PagingTotalCountMappingModel<T>>(0);
             if (pagingDatas.IsNullOrEmpty())
             {
                 return SixnetPager.Empty<T>();
@@ -203,14 +290,14 @@ namespace Sixnet.Development.Data.Database
         }
 
         /// <summary>
-        /// Whether has data
+        /// Query whether has any data
         /// </summary>
         /// <param name="command">Database single command</param>
-        /// <returns>Whether has data</returns>
-        public virtual async Task<bool> ExistsAsync(SingleDatabaseCommand command)
+        /// <returns>Return whether the data exists or not</returns>
+        public virtual bool Exists(SingleDatabaseCommand command)
         {
             command?.DataCommand?.Queryable?.Output(QueryableOutputType.Predicate);
-            return (await ScalarAsync<int>(command).ConfigureAwait(false)) > 0;
+            return Scalar<int>(command) > 0;
         }
 
         /// <summary>
@@ -218,10 +305,10 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="command">Database single command</param>
         /// <returns></returns>
-        public virtual async Task<int> CountAsync(SingleDatabaseCommand command)
+        public int Count(SingleDatabaseCommand command)
         {
             command?.DataCommand?.Queryable?.Output(QueryableOutputType.Count);
-            return await ScalarAsync<int>(command).ConfigureAwait(false);
+            return Scalar<int>(command);
         }
 
         /// <summary>
@@ -230,11 +317,11 @@ namespace Sixnet.Development.Data.Database
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="command">Database single command</param>
         /// <returns>Return the data</returns>
-        public virtual async Task<T> ScalarAsync<T>(SingleDatabaseCommand command)
+        public virtual T Scalar<T>(SingleDatabaseCommand command)
         {
             var dataCommandResolver = GetDataCommandResolver();
             var queryStatement = dataCommandResolver.GenerateDatabaseQueryStatement(command);
-            return await command.Connection.DbConnection.ExecuteScalarAsync<T>(GetCommandDefinition(command, queryStatement)).ConfigureAwait(false);
+            return command.Connection.DbConnection.ExecuteScalar<T>(GetCommandDefinition(command, queryStatement));
         }
 
         /// <summary>
@@ -242,11 +329,11 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="command">Database multiple command</param>
         /// <returns>Return the dataset</returns>
-        public virtual async Task<DataSet> QueryMultipleAsync(MultipleDatabaseCommand command)
+        public virtual DataSet QueryMultiple(MultipleDatabaseCommand command)
         {
             var dataCommandResolver = GetDataCommandResolver();
             var queryStatement = dataCommandResolver.GenerateDatabaseQueryStatement(command);
-            using (var reader = await command.Connection.DbConnection.ExecuteReaderAsync(GetCommandDefinition(command, queryStatement)).ConfigureAwait(false))
+            using (var reader = command.Connection.DbConnection.ExecuteReader(GetCommandDefinition(command, queryStatement)))
             {
                 var dataSet = new DataSet();
                 do
@@ -266,11 +353,11 @@ namespace Sixnet.Development.Data.Database
         /// <typeparam name="TSecond">Second data type</typeparam>
         /// <param name="command">Database multiple command</param>
         /// <returns></returns>
-        public virtual async Task<Tuple<List<TFirst>, List<TSecond>>> QueryMultipleAsync<TFirst, TSecond>(MultipleDatabaseCommand command)
+        public virtual Tuple<List<TFirst>, List<TSecond>> QueryMultiple<TFirst, TSecond>(MultipleDatabaseCommand command)
         {
             var dataCommandResolver = GetDataCommandResolver();
             var queryStatement = dataCommandResolver.GenerateDatabaseQueryStatement(command);
-            using (var gridReader = await command.Connection.DbConnection.QueryMultipleAsync(GetCommandDefinition(command, queryStatement)).ConfigureAwait(false))
+            using (var gridReader = command.Connection.DbConnection.QueryMultiple(GetCommandDefinition(command, queryStatement)))
             {
                 var firstDatas = gridReader.Read<TFirst>().ToList();
                 var secondDatas = gridReader.Read<TSecond>().ToList();
@@ -286,11 +373,11 @@ namespace Sixnet.Development.Data.Database
         /// <typeparam name="TThird">Third data type</typeparam>
         /// <param name="command">Database multiple command</param>
         /// <returns></returns>
-        public virtual async Task<Tuple<List<TFirst>, List<TSecond>, List<TThird>>> QueryMultipleAsync<TFirst, TSecond, TThird>(MultipleDatabaseCommand command)
+        public virtual Tuple<List<TFirst>, List<TSecond>, List<TThird>> QueryMultiple<TFirst, TSecond, TThird>(MultipleDatabaseCommand command)
         {
             var dataCommandResolver = GetDataCommandResolver();
             var queryStatement = dataCommandResolver.GenerateDatabaseQueryStatement(command);
-            using (var gridReader = await command.Connection.DbConnection.QueryMultipleAsync(GetCommandDefinition(command, queryStatement)).ConfigureAwait(false))
+            using (var gridReader = command.Connection.DbConnection.QueryMultiple(GetCommandDefinition(command, queryStatement)))
             {
                 var firstDatas = gridReader.Read<TFirst>().ToList();
                 var secondDatas = gridReader.Read<TSecond>().ToList();
@@ -308,11 +395,11 @@ namespace Sixnet.Development.Data.Database
         /// <typeparam name="TFourth">Fourth data type</typeparam>
         /// <param name="command">Database multiple command</param>
         /// <returns></returns>
-        public virtual async Task<Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>>> QueryMultipleAsync<TFirst, TSecond, TThird, TFourth>(MultipleDatabaseCommand command)
+        public virtual Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>> QueryMultiple<TFirst, TSecond, TThird, TFourth>(MultipleDatabaseCommand command)
         {
             var dataCommandResolver = GetDataCommandResolver();
             var queryStatement = dataCommandResolver.GenerateDatabaseQueryStatement(command);
-            using (var gridReader = await command.Connection.DbConnection.QueryMultipleAsync(GetCommandDefinition(command, queryStatement)).ConfigureAwait(false))
+            using (var gridReader = command.Connection.DbConnection.QueryMultiple(GetCommandDefinition(command, queryStatement)))
             {
                 var firstDatas = gridReader.Read<TFirst>().ToList();
                 var secondDatas = gridReader.Read<TSecond>().ToList();
@@ -332,11 +419,11 @@ namespace Sixnet.Development.Data.Database
         /// <typeparam name="TFifth">Fifth data type</typeparam>
         /// <param name="command">Database multiple command</param>
         /// <returns></returns>
-        public virtual async Task<Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>>> QueryMultipleAsync<TFirst, TSecond, TThird, TFourth, TFifth>(MultipleDatabaseCommand command)
+        public virtual Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>> QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth>(MultipleDatabaseCommand command)
         {
             var dataCommandResolver = GetDataCommandResolver();
             var queryStatement = dataCommandResolver.GenerateDatabaseQueryStatement(command);
-            using (var gridReader = await command.Connection.DbConnection.QueryMultipleAsync(GetCommandDefinition(command, queryStatement)).ConfigureAwait(false))
+            using (var gridReader = command.Connection.DbConnection.QueryMultiple(GetCommandDefinition(command, queryStatement)))
             {
                 var firstDatas = gridReader.Read<TFirst>().ToList();
                 var secondDatas = gridReader.Read<TSecond>().ToList();
@@ -358,11 +445,11 @@ namespace Sixnet.Development.Data.Database
         /// <typeparam name="TSixth">Sixth data type</typeparam>
         /// <param name="command">Database multiple command</param>
         /// <returns></returns>
-        public virtual async Task<Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>>> QueryMultipleAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(MultipleDatabaseCommand command)
+        public virtual Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>> QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(MultipleDatabaseCommand command)
         {
             var dataCommandResolver = GetDataCommandResolver();
             var queryStatement = dataCommandResolver.GenerateDatabaseQueryStatement(command);
-            using (var gridReader = await command.Connection.DbConnection.QueryMultipleAsync(GetCommandDefinition(command, queryStatement)).ConfigureAwait(false))
+            using (var gridReader = command.Connection.DbConnection.QueryMultiple(GetCommandDefinition(command, queryStatement)))
             {
                 var firstDatas = gridReader.Read<TFirst>().ToList();
                 var secondDatas = gridReader.Read<TSecond>().ToList();
@@ -386,11 +473,11 @@ namespace Sixnet.Development.Data.Database
         /// <typeparam name="TSeventh">Seventh data type</typeparam>
         /// <param name="command">Database multiple command</param>
         /// <returns></returns>
-        public virtual async Task<Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>, List<TSeventh>>> QueryMultipleAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(MultipleDatabaseCommand command)
+        public virtual Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>, List<TSeventh>> QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(MultipleDatabaseCommand command)
         {
             var dataCommandResolver = GetDataCommandResolver();
             var queryStatement = dataCommandResolver.GenerateDatabaseQueryStatement(command);
-            using (var gridReader = await command.Connection.DbConnection.QueryMultipleAsync(GetCommandDefinition(command, queryStatement)).ConfigureAwait(false))
+            using (var gridReader = command.Connection.DbConnection.QueryMultiple(GetCommandDefinition(command, queryStatement)))
             {
                 var firstDatas = gridReader.Read<TFirst>().ToList();
                 var secondDatas = gridReader.Read<TSecond>().ToList();
@@ -412,7 +499,7 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="command">Database multiple command</param>
         /// <returns>Added data identities,Key: command id, Value: identity value</returns>
-        public virtual async Task<Dictionary<string, TIdentity>> InsertAndReturnIdentityAsync<TIdentity>(MultipleDatabaseCommand command)
+        public virtual Dictionary<string, TIdentity> InsertAndReturnIdentity<TIdentity>(MultipleDatabaseCommand command)
         {
             var dataCommandResolver = GetDataCommandResolver();
             var statements = dataCommandResolver.GenerateDatabaseExecutionStatements(command);
@@ -420,7 +507,7 @@ namespace Sixnet.Development.Data.Database
             var dbConnection = command.Connection.DbConnection;
             foreach (var statement in statements)
             {
-                using (var reader = await dbConnection.ExecuteReaderAsync(GetCommandDefinition(command, statement)).ConfigureAwait(false))
+                using (var reader = dbConnection.ExecuteReader(GetCommandDefinition(command, statement)))
                 {
                     var dataTable = new DataTable();
                     dataTable.Load(reader);
@@ -441,7 +528,7 @@ namespace Sixnet.Development.Data.Database
         /// Bulk insert
         /// </summary>
         /// <param name="command">Database bulk insert command</param>
-        public abstract Task BulkInsertAsync(BulkInsertDatabaseCommand command);
+        public abstract void BulkInsert(BulkInsertDatabaseCommand command);
 
         #endregion
 
@@ -452,13 +539,13 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="command">command</param>
         /// <returns></returns>
-        public virtual async Task MigrateAsync(MigrationDatabaseCommand command)
+        public virtual void Migrate(MigrationDatabaseCommand command)
         {
             var dataCommandResolver = GetDataCommandResolver();
             var statements = dataCommandResolver.GenerateDatabaseMigrationStatements(command);
             foreach (var statement in statements)
             {
-                await ExecuteDatabaseStatementAsync(command, statement).ConfigureAwait(false);
+                ExecuteDatabaseStatement(command, statement);
             }
         }
 
@@ -467,13 +554,13 @@ namespace Sixnet.Development.Data.Database
         #region Get table
 
         /// <summary>
-        /// Get tables
+        /// Get table
         /// </summary>
         /// <param name="command">Command</param>
         /// <returns></returns>
-        public virtual async Task<List<SixnetDataTable>> GetTablesAsync(SixnetDatabaseCommand command)
+        public virtual List<SixnetDataTable> GetTables(DatabaseCommand command)
         {
-            return (await command.Connection.DbConnection.QueryAsync<SixnetDataTable>(queryDatabaseTablesScript, transaction: command.Connection?.Transaction?.DbTransaction).ConfigureAwait(false)).ToList();
+            return command.Connection.DbConnection.Query<SixnetDataTable>(queryDatabaseTablesScript, transaction: command.Connection?.Transaction?.DbTransaction).ToList();
         }
 
         #endregion

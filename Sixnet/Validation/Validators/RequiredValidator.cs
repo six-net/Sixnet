@@ -5,7 +5,7 @@ namespace Sixnet.Validation.Validators
     /// <summary>
     /// Required validatory
     /// </summary>
-    public class RequiredValidator : SixnetValidator
+    public class RequiredValidator : BaseValidator
     {
         /// <summary>
         /// Initialize a required validator

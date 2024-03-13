@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Sixnet.Cache.Keys;
-using Sixnet.Cache.Set;
 using Sixnet.Cache;
+using Sixnet.Cache.Keys.Parameters;
+using Sixnet.Cache.Set.Parameters;
 using Sixnet.Development.Data.Command;
 using Sixnet.Development.Data.Database;
 using Sixnet.Development.Entity;
 using Sixnet.Exceptions;
-using Sixnet.Cache.Keys.Parameters;
-using Sixnet.Cache.Set.Parameters;
 
 namespace Sixnet.Development.Data
 {
@@ -28,15 +25,16 @@ namespace Sixnet.Development.Data
         public static async Task<List<string>> GetTableNamesAsync(DataCommandExecutionContext context)
         {
             var queryableEntityType = context.ActivityQueryable.GetModelType();
-            var entityType = queryableEntityType == null ? context?.Command?.GetEntityType() : queryableEntityType;
+            var entityType = queryableEntityType ?? (context?.Command?.GetEntityType());
+
             SixnetDirectThrower.ThrowArgNullIf(entityType == null, $"Entity type is null");
 
             // default table name
-            var tableName = GetDefaultTableName(context.Server?.ServerType, entityType);
+            var tableName = GetDefaultTableName(context.Server?.DatabaseType, entityType);
             tableName = string.IsNullOrWhiteSpace(tableName) ? context.Command?.TableName : tableName;
 
             // split table name
-            var entityConfig = SixnetEntityManager.GetEntityConfiguration(entityType);
+            var entityConfig = SixnetEntityManager.GetEntityConfig(entityType);
             if (entityConfig != null && entityConfig.SplitTableType != SplitTableType.None)
             {
                 return await GetSplitTableNamesAsync(context, entityConfig).ConfigureAwait(false);
@@ -52,16 +50,20 @@ namespace Sixnet.Development.Data
         /// <param name="entityConfig"></param>
         /// <param name="splitValues"></param>
         /// <returns></returns>
-        public static async Task<List<string>> GetSplitTableNamesAsync(DataCommandExecutionContext context, EntityConfiguration entityConfig)
+        static async Task<List<string>> GetSplitTableNamesAsync(DataCommandExecutionContext context, EntityConfiguration entityConfig)
         {
             SixnetDirectThrower.ThrowArgNullIf(context == null, nameof(context));
             SixnetDirectThrower.ThrowArgNullIf(entityConfig == null, nameof(entityConfig));
             SixnetDirectThrower.ThrowNotSupportIf(entityConfig.SplitTableType == SplitTableType.None, $"{entityConfig.EntityType.Name} not support split table.");
             SixnetDirectThrower.ThrowSixnetExceptionIf(string.IsNullOrWhiteSpace(entityConfig.SplitTableProviderName), $"{entityConfig.EntityType.Name} not set split table provider name");
-            SixnetDirectThrower.ThrowSixnetExceptionIf(!SplitTableProviders.TryGetValue(entityConfig.SplitTableProviderName, out var provider), $"Not set split table provider for {entityConfig.SplitTableProviderName}");
+
+            var dataOptions = GetDataOptions();
+            var provider = dataOptions.GetSplitTableProvider(entityConfig.SplitTableProviderName);
+
+            SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"Not set split table provider for {entityConfig.SplitTableProviderName}");
 
             var splitBehavior = context.GetSplitTableBehavior();
-            var rootTableName = GetDefaultTableName(context.Server.ServerType, entityConfig.EntityType);
+            var rootTableName = GetDefaultTableName(context.Server.DatabaseType, entityConfig.EntityType);
             var splitTableNames = provider.GetSplitTableNames(new GetSplitTableNameOptions()
             {
                 EntityConfiguration = entityConfig,
@@ -98,7 +100,7 @@ namespace Sixnet.Development.Data
                     allTableNames = await RefreshTablesAsync(databaseServer, rootTableName, serverTableKey).ConfigureAwait(false);
                     diffTables = splitTableNames.Except(allTableNames);
                 }
-                if (!diffTables.IsNullOrEmpty() && AutoCreateSplitTable)
+                if (!diffTables.IsNullOrEmpty() && dataOptions.AutoCreateSplitTable)
                 {
                     await AutoCreateTablesAsync(databaseServer, entityConfig.EntityType, diffTables).ConfigureAwait(false);
                     await RefreshTablesAsync(databaseServer, rootTableName, serverTableKey).ConfigureAwait(false);
@@ -132,12 +134,12 @@ namespace Sixnet.Development.Data
         /// <param name="rootTableName"></param>
         /// <param name="serverTableKey"></param>
         /// <returns></returns>
-        static async Task<List<string>> RefreshTablesAsync(SixnetDatabaseServer server, string rootTableName, string serverTableKey)
+        static async Task<List<string>> RefreshTablesAsync(DatabaseServer server, string rootTableName, string serverTableKey)
         {
             List<string> allTableNames;
             using (var dataClient = GetClient(server, true, false))
             {
-                allTableNames = (await dataClient.GetTablesAsync().ConfigureAwait(false))?.Select(c => c.Name).ToList();
+                allTableNames = (await dataClient.GetTablesAsync().ConfigureAwait(false))?.Select(c => c.TableName).ToList();
             }
             allTableNames = allTableNames?.Where(t => t.ToLower().StartsWith(rootTableName.ToLower())).ToList() ?? new List<string>(0);
             if (!allTableNames.IsNullOrEmpty())
@@ -158,7 +160,7 @@ namespace Sixnet.Development.Data
         /// <param name="entityType">Entity type</param>
         /// <param name="newTableNames">New table names</param>
         /// <returns></returns>
-        static async Task AutoCreateTablesAsync(SixnetDatabaseServer server, Type entityType, IEnumerable<string> newTableNames)
+        static async Task AutoCreateTablesAsync(DatabaseServer server, Type entityType, IEnumerable<string> newTableNames)
         {
             SixnetDirectThrower.ThrowArgNullIf(newTableNames.IsNullOrEmpty(), nameof(newTableNames));
             using (var dataClient = GetClient(server, true, true))

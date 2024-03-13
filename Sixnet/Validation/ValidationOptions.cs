@@ -8,36 +8,50 @@ using Sixnet.Reflection;
 namespace Sixnet.Validation
 {
     /// <summary>
-    /// Type validation rule collection
+    /// Validation options
     /// </summary>
-    public class SixnetValidationOptions
+    public class ValidationOptions
     {
+        #region Fields
+
         /// <summary>
         /// Expression type
         /// </summary>
-        static readonly Type ExpressionType = typeof(Expression);
+        static readonly Type _expressionType = typeof(Expression);
 
         /// <summary>
         /// Lambda method
         /// </summary>
-        static readonly MethodInfo LambdaMethod = null;
+        static readonly MethodInfo _lambdaMethod = null;
 
         /// <summary>
         /// Validation methods
         /// </summary>
-        static readonly List<MethodInfo> ValidationMethods = new List<MethodInfo>();
+        static readonly List<MethodInfo> _validationMethods = new();
+
+        #endregion
+
+        #region Properties
 
         /// <summary>
         /// Gets or sets the type validation rules
         /// </summary>
-        public List<SixnetTypeValidationOptions> Types { get; set; }
+        public List<TypeValidationSetting> Types { get; set; }
 
-        static SixnetValidationOptions()
+        #endregion
+
+        #region Constructor
+
+        static ValidationOptions()
         {
-            var baseExpressMethods = ExpressionType.GetMethods(BindingFlags.Public | BindingFlags.Static);
-            LambdaMethod = baseExpressMethods.FirstOrDefault(c => c.Name == "Lambda" && c.IsGenericMethod && c.GetParameters()[1].ParameterType.FullName == typeof(ParameterExpression[]).FullName);
-            ValidationMethods = typeof(SixnetValidations).GetMethods().ToList();
+            var baseExpressMethods = _expressionType.GetMethods(BindingFlags.Public | BindingFlags.Static);
+            _lambdaMethod = baseExpressMethods.FirstOrDefault(c => c.Name == "Lambda" && c.IsGenericMethod && c.GetParameters()[1].ParameterType.FullName == typeof(ParameterExpression[]).FullName);
+            _validationMethods = typeof(SixnetValidations).GetMethods().ToList();
         }
+
+        #endregion
+
+        #region Build validation
 
         internal void BuildValidation()
         {
@@ -163,6 +177,8 @@ namespace Sixnet.Validation
             }
         }
 
+        #endregion
+
         #region Enum
 
         /// <summary>
@@ -173,7 +189,7 @@ namespace Sixnet.Validation
         /// <param name="valueFieldArray">Value field type</param>
         void BuildEnumValidation(Type modelType, Type enumType, Array valueFieldArray)
         {
-            MethodInfo enumMethod = ValidationMethods.FirstOrDefault(c => c.Name == "EnumType");
+            MethodInfo enumMethod = _validationMethods.FirstOrDefault(c => c.Name == "EnumType");
             if (enumMethod == null || enumType == null)
             {
                 return;
@@ -196,7 +212,7 @@ namespace Sixnet.Validation
         /// <param name="valueFieldArray">Value field array type</param>
         void BuidMaxLengthValidation(Type modelType, int maxValue, Array valueFieldArray)
         {
-            MethodInfo maxLengthMethod = ValidationMethods.FirstOrDefault(c => c.Name == "MaxLength");
+            MethodInfo maxLengthMethod = _validationMethods.FirstOrDefault(c => c.Name == "MaxLength");
             if (maxLengthMethod == null)
             {
                 return;
@@ -219,7 +235,7 @@ namespace Sixnet.Validation
         /// <param name="valueFieldArray">Value field array type</param>
         void BuildMinLengthValidation(Type modelType, int minValue, Array valueFieldArray)
         {
-            MethodInfo minLengthMethod = ValidationMethods.FirstOrDefault(c => c.Name == "MinLength");
+            MethodInfo minLengthMethod = _validationMethods.FirstOrDefault(c => c.Name == "MinLength");
             if (minLengthMethod == null)
             {
                 return;
@@ -245,7 +261,7 @@ namespace Sixnet.Validation
         /// <param name="valueFieldArray">Value field array</param>
         void BuildRangeValidation(Type modelType, dynamic minValue, dynamic maxValue, RangeBoundary lowerBoundary, RangeBoundary upperBoundary, Array valueFieldArray)
         {
-            MethodInfo rangeMethod = ValidationMethods.FirstOrDefault(c => c.Name == "Range");
+            MethodInfo rangeMethod = _validationMethods.FirstOrDefault(c => c.Name == "Range");
             if (rangeMethod == null)
             {
                 return;
@@ -268,7 +284,7 @@ namespace Sixnet.Validation
         /// <param name="valueFieldArray">Value field array</param>
         void BuildRegularExpressionValidation(Type modelType, dynamic value, Array valueFieldArray)
         {
-            MethodInfo regularExpressionMethod = ValidationMethods.FirstOrDefault(c => c.Name == "RegularExpression");
+            MethodInfo regularExpressionMethod = _validationMethods.FirstOrDefault(c => c.Name == "RegularExpression");
             if (regularExpressionMethod == null)
             {
                 return;
@@ -292,7 +308,7 @@ namespace Sixnet.Validation
         /// <param name="valueFieldArray">Value field array</param>
         void BuildStringLengthValidation(Type modelType, int minValue, int maxValue, Array valueFieldArray)
         {
-            MethodInfo strLengthMethod = ValidationMethods.FirstOrDefault(c => c.Name == "StringLength");
+            MethodInfo strLengthMethod = _validationMethods.FirstOrDefault(c => c.Name == "StringLength");
             if (strLengthMethod == null)
             {
                 return;
@@ -320,7 +336,7 @@ namespace Sixnet.Validation
         /// <param name="fieldInstance">field instance</param>
         void BuildCompareValidation(Type modelType, object compareValue, CompareObject compareType, ParameterExpression parameterExpression, Type funcType, Array parameterArray, CompareOperator compareOperator, object fieldInstance)
         {
-            MethodInfo compareMethod = ValidationMethods.FirstOrDefault(c => c.Name == "SetCompareValidation");
+            MethodInfo compareMethod = _validationMethods.FirstOrDefault(c => c.Name == "SetCompareValidation");
             if (compareValue == null || compareMethod == null)
             {
                 return;
@@ -341,7 +357,7 @@ namespace Sixnet.Validation
                             comparePropertyExpress = Expression.PropertyOrField(comparePropertyExpress, pname);
                         }
                     }
-                    var compareLambdaExpression = LambdaMethod.MakeGenericMethod(funcType).Invoke(null, new object[]
+                    var compareLambdaExpression = _lambdaMethod.MakeGenericMethod(funcType).Invoke(null, new object[]
                     {
                         Expression.Convert(comparePropertyExpress,typeof(object)),parameterArray
                     });
@@ -377,7 +393,7 @@ namespace Sixnet.Validation
         /// <param name="valueFieldArray">Value field array</param>
         void BuildValidatorValidation(string validatorName, Type modelType, Array valueFieldArray)
         {
-            MethodInfo validatorMethod = ValidationMethods.FirstOrDefault(c => c.Name == validatorName);
+            MethodInfo validatorMethod = _validationMethods.FirstOrDefault(c => c.Name == validatorName);
             if (validatorMethod == null)
             {
                 return;

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Sixnet.Validation
 {
-    public static class SixnetValidationRuleExtensions
+    public static class ValidationRuleExtensions
     {
         #region String length
 

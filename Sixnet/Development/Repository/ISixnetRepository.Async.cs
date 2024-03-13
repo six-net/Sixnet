@@ -620,7 +620,7 @@ namespace Sixnet.Development.Repository
         /// <param name="field">Field</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Value</returns>
-        Task<TValue> ScalarAsync<TValue>(PropertyField field, Action<DataOperationOptions> configure = null);
+        Task<TValue> ScalarAsync<TValue>(DataField field, Action<DataOperationOptions> configure = null);
 
         /// <summary>
         /// Get scalar value
@@ -630,7 +630,7 @@ namespace Sixnet.Development.Repository
         /// <param name="conditionExpression">Condition expression</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Value</returns>
-        Task<TValue> ScalarAsync<TValue>(PropertyField field, Expression<Func<TModel, bool>> conditionExpression, Action<DataOperationOptions> configure = null);
+        Task<TValue> ScalarAsync<TValue>(DataField field, Expression<Func<TModel, bool>> conditionExpression, Action<DataOperationOptions> configure = null);
 
         #endregion
     }

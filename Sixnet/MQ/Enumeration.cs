@@ -24,13 +24,15 @@
     }
 
     /// <summary>
-    /// Message queue server type
+    /// Message queue type
     /// </summary>
-    public enum MessageQueueServerType
+    public enum MessageQueueType
     {
         /// <summary>
         /// RabbmitMQ
         /// </summary>
-        RabbmitMQ = 210
+        RabbmitMQ = 210,
+        Kafka = 220,
+        Others
     }
 }

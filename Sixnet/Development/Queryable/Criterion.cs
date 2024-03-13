@@ -17,7 +17,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="criterionOperator">Criterion operator</param>
         /// <param name="leftField">Left field</param>
         /// <param name="rightField">Right field</param>
-        private Criterion(CriterionOperator criterionOperator, ISixnetDataField leftField, ISixnetDataField rightField)
+        private Criterion(CriterionOperator criterionOperator, ISixnetField leftField, ISixnetField rightField)
         {
             Left = leftField;
             Operator = criterionOperator;
@@ -31,7 +31,7 @@ namespace Sixnet.Development.Queryable
         /// <summary>
         /// Gets or sets the left field
         /// </summary>
-        public ISixnetDataField Left { get; internal set; }
+        public ISixnetField Left { get; internal set; }
 
         /// <summary>
         /// Gets or sets the criterion operator
@@ -41,7 +41,7 @@ namespace Sixnet.Development.Queryable
         /// <summary>
         /// Gets or sets the right field
         /// </summary>
-        public ISixnetDataField Right { get; internal set; }
+        public ISixnetField Right { get; internal set; }
 
         /// <summary>
         /// Gets or sets the criterion options
@@ -114,7 +114,7 @@ namespace Sixnet.Development.Queryable
 
         #region Static method
 
-        public static Criterion Create(CriterionOperator @operator, ISixnetDataField leftField, ISixnetDataField rightField
+        public static Criterion Create(CriterionOperator @operator, ISixnetField leftField, ISixnetField rightField
             , CriterionConnector connector = CriterionConnector.And, CriterionOptions criterionOptions = null, bool negation = false)
         {
             return new Criterion(@operator, leftField, rightField)

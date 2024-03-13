@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Sixnet.Development.Data;
+using Sixnet.Development.Data.Field;
 using Sixnet.Expressions.Linq;
 using Sixnet.Reflection;
 
@@ -19,17 +22,22 @@ namespace Sixnet.Development.Entity
         /// Value: Entity configuration
         /// Key: Entity type guid
         /// </summary>
-        internal static readonly Dictionary<Guid, EntityConfiguration> EntityConfigurations = new();
+        static readonly Dictionary<Guid, EntityConfiguration> _entityConfigurations = new();
 
         /// <summary>
         /// Defines boolean type
         /// </summary>
-        static readonly Type BooleanType = typeof(bool);
+        static readonly Type _booleanType = typeof(bool);
 
         /// <summary>
         /// All field roles
         /// </summary>
-        static readonly List<FieldRole> AllFieldRoles = new();
+        static readonly List<FieldRole> _allFieldRoles = new();
+
+        /// <summary>
+        /// Func<> type
+        /// </summary>
+        static readonly Type _funcType = typeof(Func<>);
 
         static SixnetEntityManager()
         {
@@ -38,7 +46,7 @@ namespace Sixnet.Development.Entity
             {
                 if (roleVal != FieldRole.None)
                 {
-                    AllFieldRoles.Add(roleVal);
+                    _allFieldRoles.Add(roleVal);
                 }
             }
         }
@@ -60,7 +68,7 @@ namespace Sixnet.Development.Entity
                 return;
             }
             var typeGuid = entityType.GUID;
-            if (EntityConfigurations.ContainsKey(typeGuid))
+            if (_entityConfigurations.ContainsKey(typeGuid))
             {
                 return;
             }
@@ -69,7 +77,7 @@ namespace Sixnet.Development.Entity
             memberInfos = memberInfos.Union(entityType.GetProperties(BindingFlags.Public | BindingFlags.Instance));
             memberInfos = memberInfos.Union(entityType.GetFields(BindingFlags.Public | BindingFlags.Instance));
             var tableName = string.IsNullOrWhiteSpace(entityAttribute.TableName) ? entityType.Name : entityAttribute.TableName;
-            if (!EntityConfigurations.TryGetValue(typeGuid, out EntityConfiguration entityConfig))
+            if (!_entityConfigurations.TryGetValue(typeGuid, out EntityConfiguration entityConfig))
             {
                 entityConfig = new EntityConfiguration()
                 {
@@ -82,17 +90,17 @@ namespace Sixnet.Development.Entity
                 entityConfig.TableName = tableName;
             }
             //fields
-            var allFields = new List<EntityField>();
-            var roleFields = new Dictionary<FieldRole, List<EntityField>>();
+            var allFields = new List<DataField>();
+            var roleFields = new Dictionary<FieldRole, List<DataField>>();
 
             //cache fields
             var cacheFieldNames = new List<string>();
             var cachePrefixFieldNames = new List<string>();
             var cacheIgnoreFieldNames = new List<string>();
 
-            var necessaryQueryableFields = new List<EntityField>();
-            var editableFields = new List<EntityField>();
-            var queryableFields = new List<EntityField>();
+            var necessaryQueryableFields = new List<DataField>();
+            var editableFields = new List<DataField>();
+            var queryableFields = new List<DataField>();
             foreach (var member in memberInfos)
             {
                 var nonDataAttribute = member.GetCustomAttribute<NotEntityFieldAttribute>();
@@ -115,7 +123,7 @@ namespace Sixnet.Development.Entity
                 {
                     memberType = fieldInfo.FieldType;
                 }
-                var propertyField = new EntityField()
+                var propertyField = new DataField()
                 {
                     FieldName = fieldName,
                     PropertyName = propertyName,
@@ -137,7 +145,7 @@ namespace Sixnet.Development.Entity
                 allFields.Add(propertyField);
 
                 // field role
-                foreach (var roleVal in AllFieldRoles)
+                foreach (var roleVal in _allFieldRoles)
                 {
                     if (propertyField.InRole(roleVal))
                     {
@@ -190,11 +198,11 @@ namespace Sixnet.Development.Entity
             allFields = allFields.OrderByDescending(f => f.InRole(FieldRole.PrimaryKey))
                         .ThenByDescending(c => cacheFieldNames.Contains(c.PropertyName))
                         .ToList();
-            var allFieldDict = new Dictionary<string, EntityField>(allFields.Count);
+            var allFieldDict = new Dictionary<string, DataField>(allFields.Count);
             foreach (var field in allFields)
             {
                 allFieldDict[field.PropertyName] = field;
-                var necessaryQueryField = field.IsNecessaryQueryField();
+                var necessaryQueryField = field.IsNecessaryField();
                 if (necessaryQueryField)
                 {
                     necessaryQueryableFields.Add(field);
@@ -216,124 +224,85 @@ namespace Sixnet.Development.Entity
             entityConfig.QueryableFields = queryableFields;
             entityConfig.EditableFields = editableFields;
             entityConfig.NecessaryQueryableFields = necessaryQueryableFields;
-            entityConfig.PredicateType = typeof(Func<,>).MakeGenericType(entityType, BooleanType);
+            entityConfig.PredicateType = typeof(Func<,>).MakeGenericType(entityType, _booleanType);
             entityConfig.EntityType = entityType;
             entityConfig.EnableCache = entityAttribute.EnableCache;
             entityConfig.Style = entityAttribute.Style;
             entityConfig.RoleFields = roleFields;
             entityConfig.SplitTableType = entityAttribute.SplitTableType;
             entityConfig.SplitTableProviderName = entityAttribute.SplitTableProviderName;
-            EntityConfigurations[typeGuid] = entityConfig;
+            _entityConfigurations[typeGuid] = entityConfig;
         }
 
-        static void AddRoleField(Dictionary<FieldRole, List<EntityField>> allRoleFields, FieldRole fieldRole, EntityField field)
+        /// <summary>
+        /// Add role field
+        /// </summary>
+        /// <param name="allRoleFields"></param>
+        /// <param name="fieldRole"></param>
+        /// <param name="field"></param>
+        static void AddRoleField(Dictionary<FieldRole, List<DataField>> allRoleFields, FieldRole fieldRole, DataField field)
         {
-            if (allRoleFields.TryGetValue(fieldRole, out List<EntityField> fields))
+            if (allRoleFields.TryGetValue(fieldRole, out List<DataField> fields))
             {
                 fields.Add(field);
             }
             else
             {
-                allRoleFields[fieldRole] = new List<EntityField>() { field };
+                allRoleFields[fieldRole] = new List<DataField>() { field };
             }
         }
 
         #endregion
 
-        #region Get entity configuration
+        #region Get entity config
 
         /// <summary>
-        /// Get entity configuration
+        /// Get entity config
         /// </summary>
         /// <param name="entityType">Entity type</param>
-        /// <returns>Return entity configuration</returns>
-        public static EntityConfiguration GetEntityConfiguration(Type entityType)
+        /// <returns></returns>
+        public static EntityConfiguration GetEntityConfig(Type entityType)
         {
             if (entityType == null)
             {
                 return null;
             }
             var typeGuid = entityType.GUID;
-            return GetEntityConfiguration(typeGuid);
+            return GetEntityConfig(typeGuid);
         }
 
         /// <summary>
-        /// Get entity configuration
+        /// Get entity config
         /// </summary>
         /// <typeparam name="TEntity">Entity type</typeparam>
-        /// <returns>Return entity configuration</returns>
-        public static EntityConfiguration GetEntityConfiguration<TEntity>()
+        /// <returns></returns>
+        public static EntityConfiguration GetEntityConfig<TEntity>()
         {
-            return GetEntityConfiguration(typeof(TEntity));
+            return GetEntityConfig(typeof(TEntity));
         }
 
         /// <summary>
-        /// Get entity configuration
+        /// Get entity config
         /// </summary>
         /// <param name="entityTypeId">Entity type id</param>
-        /// <returns>Return entity configuration</returns>
-        public static EntityConfiguration GetEntityConfiguration(Guid entityTypeId)
+        /// <returns></returns>
+        public static EntityConfiguration GetEntityConfig(Guid entityTypeId)
         {
-            EntityConfigurations.TryGetValue(entityTypeId, out var entityConfig);
+            _entityConfigurations.TryGetValue(entityTypeId, out var entityConfig);
             return entityConfig;
         }
 
         #endregion
 
-        #region Get all entity configurations
+        #region Get all entity configs
 
         /// <summary>
-        /// Get all entity configurations
+        /// Get all entity configs
         /// </summary>
-        /// <returns>Return all entity configurations</returns>
-        public static IEnumerable<EntityConfiguration> GetAllEntityConfigurations()
+        /// <returns></returns>
+        public static IEnumerable<EntityConfiguration> GetAllEntityConfigs()
         {
-            return EntityConfigurations.Values;
-        }
-
-        #endregion
-
-        #endregion
-
-        #region Table name
-
-        #region Set table name
-
-        /// <summary>
-        /// Set entity table name
-        /// </summary>
-        /// <param name="entityType">Entity type</param>
-        /// <param name="tableName">Table object name</param>
-        internal static void SetTableName(Type entityType, string tableName)
-        {
-            if (entityType == null)
-            {
-                return;
-            }
-            var entityConfiguration = GetEntityConfiguration(entityType);
-            if (entityConfiguration != null)
-            {
-                entityConfiguration.TableName = tableName;
-            }
-        }
-
-        #endregion
-
-        #region Get table name
-
-        /// <summary>
-        /// Get entity table name
-        /// </summary>
-        /// <param name="entityType">Entity type</param>
-        /// <returns>Return entity table name</returns>
-        public static string GetTableName(Type entityType)
-        {
-            if (entityType == null)
-            {
-                return string.Empty;
-            }
-            var entityConfig = GetEntityConfiguration(entityType);
-            return entityConfig?.TableName ?? string.Empty;
+            return _entityConfigurations.Values;
         }
 
         #endregion
@@ -342,25 +311,6 @@ namespace Sixnet.Development.Entity
 
         #region Entity field
 
-        #region Get all field names
-
-        /// <summary>
-        /// Get all field names
-        /// </summary>
-        /// <param name="entityType">Entity type</param>
-        /// <returns>Return all field names</returns>
-        public static IEnumerable<string> GetAllFieldNames(Type entityType)
-        {
-            var entityConfig = GetEntityConfiguration(entityType);
-            if (entityConfig?.AllFields.IsNullOrEmpty() ?? true)
-            {
-                return Array.Empty<string>();
-            }
-            return entityConfig.AllFields.Keys;
-        }
-
-        #endregion
-
         #region Queryable fields
 
         /// <summary>
@@ -368,59 +318,25 @@ namespace Sixnet.Development.Entity
         /// </summary>
         /// <param name="entityType">Entity type</param>
         /// <returns></returns>
-        public static List<EntityField> GetQueryableFields(Type entityType)
+        public static List<DataField> GetQueryableFields(Type entityType)
         {
-            var entityConfig = GetEntityConfiguration(entityType);
-            return entityConfig?.QueryableFields ?? new List<EntityField>(0);
+            var entityConfig = GetEntityConfig(entityType);
+            return entityConfig?.QueryableFields ?? new List<DataField>(0);
         }
 
         #endregion
 
-        #region Necessary queryable fields
+        #region Necessary fields
 
         /// <summary>
-        /// Get necessary queryable fields
+        /// Get necessary fields
         /// </summary>
         /// <param name="entityType">Entity type</param>
-        /// <returns>Return necessary queryable fields</returns>
-        public static List<EntityField> GetNecessaryQueryableFields(Type entityType)
+        /// <returns></returns>
+        public static List<DataField> GetNecessaryFields(Type entityType)
         {
-            var entityConfig = GetEntityConfiguration(entityType);
-            return entityConfig?.NecessaryQueryableFields ?? new List<EntityField>(0);
-        }
-
-        #endregion
-
-        #region Get entity default field
-
-        /// <summary>
-        /// Get entity default field
-        /// </summary>
-        /// <param name="entityType">Entity type</param>
-        /// <returns>Return default field</returns>
-        public static EntityField GetDefaultField(Type entityType)
-        {
-            var entityConfig = GetEntityConfiguration(entityType);
-            if (entityConfig != null)
-            {
-                entityConfig.RoleFields.TryGetValue(FieldRole.PrimaryKey, out var primaryKeys);
-                if (primaryKeys.IsNullOrEmpty())
-                {
-                    primaryKeys = entityConfig.QueryableFields;
-                }
-                return primaryKeys?.FirstOrDefault();
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// Get entity default field
-        /// </summary>
-        /// <typeparam name="TEntity">Entity type</typeparam>
-        /// <returns>Return default field</returns>
-        public static EntityField GetDefaultField<TEntity>()
-        {
-            return GetDefaultField(typeof(TEntity));
+            var entityConfig = GetEntityConfig(entityType);
+            return entityConfig?.NecessaryQueryableFields ?? new List<DataField>(0);
         }
 
         #endregion
@@ -432,27 +348,27 @@ namespace Sixnet.Development.Entity
         /// </summary>
         /// <param name="entityType">Entity type</param>
         /// <param name="propertyName">Property name</param>
-        /// <returns>Return the entity field</returns>
-        public static EntityField GetField(Type entityType, string propertyName)
+        /// <returns></returns>
+        public static DataField GetField(Type entityType, string propertyName)
         {
             if (entityType == null || string.IsNullOrWhiteSpace(propertyName))
             {
                 return null;
             }
-            EntityField field = null;
-            GetEntityConfiguration(entityType)?.AllFields.TryGetValue(propertyName, out field);
+            DataField field = null;
+            GetEntityConfig(entityType)?.AllFields.TryGetValue(propertyName, out field);
             return field;
         }
 
         /// <summary>
-        /// Get entity role field
+        /// Get entity field by role
         /// </summary>
         /// <param name="entityType">Entity type</param>
         /// <param name="fieldRole">Field role</param>
         /// <returns></returns>
-        public static EntityField GetRoleField(Type entityType, FieldRole fieldRole)
+        public static DataField GetField(Type entityType, FieldRole fieldRole)
         {
-            var fieldName = GetRoleFieldName(entityType, fieldRole);
+            var fieldName = GetFieldName(entityType, fieldRole);
             return GetField(entityType, fieldName);
         }
 
@@ -466,16 +382,16 @@ namespace Sixnet.Development.Entity
         /// <param name="entityType">Entity type</param>
         /// <param name="fieldRole">Field role</param>
         /// <returns></returns>
-        public static List<EntityField> GetRoleFields(Type entityType, FieldRole fieldRole)
+        public static List<DataField> GetFields(Type entityType, FieldRole fieldRole)
         {
             if (entityType == null || fieldRole == FieldRole.None)
             {
-                return new List<EntityField>(0);
+                return new List<DataField>(0);
             }
-            var entityConfig = GetEntityConfiguration(entityType);
-            List<EntityField> fields = null;
+            var entityConfig = GetEntityConfig(entityType);
+            List<DataField> fields = null;
             entityConfig?.RoleFields?.TryGetValue(fieldRole, out fields);
-            return fields ?? new List<EntityField>(0);
+            return fields ?? new List<DataField>(0);
         }
 
         /// <summary>
@@ -483,9 +399,9 @@ namespace Sixnet.Development.Entity
         /// </summary>
         /// <param name="fieldRole">Field role</param>
         /// <returns></returns>
-        public static List<EntityField> GetRoleFields<TEntity>(FieldRole fieldRole)
+        public static List<DataField> GetFields<TEntity>(FieldRole fieldRole)
         {
-            return GetRoleFields(typeof(TEntity), fieldRole);
+            return GetFields(typeof(TEntity), fieldRole);
         }
 
         /// <summary>
@@ -493,9 +409,9 @@ namespace Sixnet.Development.Entity
         /// </summary>
         /// <param name="fieldRole">Field role</param>
         /// <returns></returns>
-        public static List<string> GetRoleFieldNames(Type entityType, FieldRole fieldRole)
+        public static List<string> GetFieldNames(Type entityType, FieldRole fieldRole)
         {
-            return GetRoleFields(entityType, fieldRole)?.Select(f => f.PropertyName).ToList() ?? new List<string>(0);
+            return GetFields(entityType, fieldRole)?.Select(f => f.PropertyName).ToList() ?? new List<string>(0);
         }
 
         /// <summary>
@@ -503,20 +419,20 @@ namespace Sixnet.Development.Entity
         /// </summary>
         /// <param name="fieldRole">Field role</param>
         /// <returns></returns>
-        public static List<string> GetRoleFieldNames<TEntity>(FieldRole fieldRole)
+        public static List<string> GetFieldNames<TEntity>(FieldRole fieldRole)
         {
-            return GetRoleFieldNames(typeof(TEntity), fieldRole);
+            return GetFieldNames(typeof(TEntity), fieldRole);
         }
 
         /// <summary>
-        /// Get entity role field names
+        /// Get entity role field name
         /// </summary>
         /// <param name="entityType">Entity type</param>
         /// <param name="fieldRole">Field role</param>
         /// <returns></returns>
-        public static string GetRoleFieldName(Type entityType, FieldRole fieldRole)
+        public static string GetFieldName(Type entityType, FieldRole fieldRole)
         {
-            return GetRoleFieldNames(entityType, fieldRole)?.FirstOrDefault() ?? string.Empty;
+            return GetFieldNames(entityType, fieldRole)?.FirstOrDefault() ?? string.Empty;
         }
 
         /// <summary>
@@ -524,9 +440,9 @@ namespace Sixnet.Development.Entity
         /// </summary>
         /// <param name="fieldRole">Field role</param>
         /// <returns></returns>
-        public static string GetRoleFieldName<TEntity>(FieldRole fieldRole)
+        public static string GetFieldName<TEntity>(FieldRole fieldRole)
         {
-            return GetRoleFieldNames(typeof(TEntity), fieldRole)?.FirstOrDefault() ?? string.Empty;
+            return GetFieldNames(typeof(TEntity), fieldRole)?.FirstOrDefault() ?? string.Empty;
         }
 
         /// <summary>
@@ -534,9 +450,9 @@ namespace Sixnet.Development.Entity
         /// </summary>
         /// <param name="entityType">Entity type</param>
         /// <returns></returns>
-        public static List<EntityField> GetPrimaryKeyFields(Type entityType)
+        public static List<DataField> GetPrimaryKeyFields(Type entityType)
         {
-            return GetRoleFields(entityType, FieldRole.PrimaryKey);
+            return GetFields(entityType, FieldRole.PrimaryKey);
         }
 
         /// <summary>
@@ -546,7 +462,7 @@ namespace Sixnet.Development.Entity
         /// <returns>Return all primary key property names</returns>
         public static IEnumerable<string> GetPrimaryKeyNames(Type entityType)
         {
-            return GetRoleFieldNames(entityType, FieldRole.PrimaryKey);
+            return GetFieldNames(entityType, FieldRole.PrimaryKey);
         }
 
         /// <summary>
@@ -620,10 +536,33 @@ namespace Sixnet.Development.Entity
             {
                 return new Dictionary<string, string>(0);
             }
-            var sourceEntityConfig = GetEntityConfiguration(sourceEntityType);
+            var sourceEntityConfig = GetEntityConfig(sourceEntityType);
             Dictionary<string, EntityRelationFieldAttribute> sourceRelationFields = null;
             sourceEntityConfig?.RelationFields?.TryGetValue(relationEntityType.GUID, out sourceRelationFields);
             return sourceRelationFields?.ToDictionary(c => c.Key, c => c.Value.RelationField) ?? new Dictionary<string, string>(0);
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Table name
+
+        #region Get table name
+
+        /// <summary>
+        /// Get entity table name
+        /// </summary>
+        /// <param name="entityType">Entity type</param>
+        /// <returns>Return entity table name</returns>
+        public static string GetTableName(Type entityType)
+        {
+            if (entityType == null)
+            {
+                return string.Empty;
+            }
+            var entityConfig = GetEntityConfig(entityType);
+            return entityConfig?.TableName ?? string.Empty;
         }
 
         #endregion
@@ -701,6 +640,25 @@ namespace Sixnet.Development.Entity
             }
 
             return propertyProvider as ISixnetEntityPropertyValueProvider;
+        }
+
+        #endregion
+
+        #region Get predicate type
+
+        /// <summary>
+        /// Get predicate type
+        /// </summary>
+        /// <param name="entityType">Entity type</param>
+        /// <returns>Return predicate type</returns>
+        internal static Type GetEntityPredicateType(Type entityType)
+        {
+            if (entityType == null)
+            {
+                return null;
+            }
+            var entityConfig = GetEntityConfig(entityType);
+            return entityConfig?.PredicateType ?? _funcType.MakeGenericType(entityType, _booleanType);
         }
 
         #endregion

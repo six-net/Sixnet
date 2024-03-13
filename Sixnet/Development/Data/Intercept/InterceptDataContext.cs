@@ -101,7 +101,7 @@ namespace Sixnet.Development.Data.Intercept
             {
                 var value = GetNewValue(fieldName);
                 var realValue = value;
-                if (value is ISixnetDataField dataField)
+                if (value is ISixnetField dataField)
                 {
                     if (dataField is ConstantField constantField && constantField.IsSimpleConstant)
                     {

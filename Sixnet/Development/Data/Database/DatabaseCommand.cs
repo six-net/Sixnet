@@ -9,12 +9,12 @@ namespace Sixnet.Development.Data.Database
     /// <summary>
     /// Defines database command
     /// </summary>
-    public class SixnetDatabaseCommand
+    public class DatabaseCommand
     {
         /// <summary>
         /// Gets or set the database connection
         /// </summary>
-        public SixnetDatabaseConnection Connection { get; set; }
+        public DatabaseConnection Connection { get; set; }
 
         /// <summary>
         /// Gets or sets the cancellation token

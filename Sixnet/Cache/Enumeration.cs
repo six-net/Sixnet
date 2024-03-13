@@ -85,7 +85,7 @@ namespace Sixnet.Cache
     /// <summary>
     /// Defines log level
     /// </summary>
-    public enum LogLevel
+    public enum CacheLogLevel
     {
         Debug = 101,
         Verbose = 105,

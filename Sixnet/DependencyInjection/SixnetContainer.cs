@@ -1,4 +1,8 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Sixnet.App;
@@ -10,20 +14,17 @@ using Sixnet.Development.Repository;
 using Sixnet.Exceptions;
 using Sixnet.IO.FileAccess;
 using Sixnet.Mapper;
+using Sixnet.MQ;
 using Sixnet.Net.Email;
 using Sixnet.Net.Sms;
 using Sixnet.Net.Upload;
 using Sixnet.Security.Cryptography;
 using Sixnet.Token.Jwt;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime;
 
 namespace Sixnet.DependencyInjection
 {
     /// <summary>
-    /// Dependency injection container manager
+    /// Sixnet container
     /// </summary>
     public static class SixnetContainer
     {
@@ -168,7 +169,7 @@ namespace Sixnet.DependencyInjection
         /// <summary>
         /// Add service
         /// </summary>
-        /// <param name="serviceDescriptor">Service descriptor</param>
+        /// <param name="serviceDescriptors">Service descriptors</param>
         public static void AddService(params ServiceDescriptor[] serviceDescriptors)
         {
             if (!serviceDescriptors.IsNullOrEmpty())
@@ -188,7 +189,7 @@ namespace Sixnet.DependencyInjection
         /// Get service
         /// </summary>
         /// <typeparam name="TService">Service type</typeparam>
-        /// <returns>Return the service instance</returns>
+        /// <returns></returns>
         public static TService GetService<TService>()
         {
             return (TService)GetService(typeof(TService));
@@ -198,7 +199,7 @@ namespace Sixnet.DependencyInjection
         /// Get service
         /// </summary>
         /// <param name="serviceType">Service type</param>
-        /// <returns>Return the service instance</returns>
+        /// <returns></returns>
         public static object GetService(Type serviceType)
         {
             return Container != null
@@ -211,7 +212,7 @@ namespace Sixnet.DependencyInjection
         /// </summary>
         /// <typeparam name="TService">Service type</typeparam>
         /// <typeparam name="TDefault">Default service implementation</typeparam>
-        /// <returns>Return the service instance</returns>
+        /// <returns></returns>
         public static TService GetService<TService, TDefault>() where TDefault : TService, new()
         {
             var service = GetService<TService>();
@@ -223,7 +224,7 @@ namespace Sixnet.DependencyInjection
         /// Get default service
         /// </summary>
         /// <typeparam name="TService">Service type</typeparam>
-        /// <returns>Return the service instance</returns>
+        /// <returns></returns>
         internal static TService GetDefaultService<TService>()
         {
             var service = GetDefaultService(typeof(TService));
@@ -234,7 +235,7 @@ namespace Sixnet.DependencyInjection
         /// Get default service
         /// </summary>
         /// <param name="serviceType">Service type</param>
-        /// <returns>Return the service instance</returns>
+        /// <returns></returns>
         internal static object GetDefaultService(Type serviceType)
         {
             if (ServiceProvider != null && serviceType != null)
@@ -346,7 +347,7 @@ namespace Sixnet.DependencyInjection
         /// <param name="name">Options name</param>
         /// <param name="style">Options style</param>
         /// <returns></returns>
-        public static TOptions GetOptions<TOptions>(string name = "", OptionsStyle? style = null) where TOptions : class
+        public static TOptions GetOptions<TOptions>(string name, OptionsStyle? style = null) where TOptions : class
         {
             var optionsStyle = style ?? Options.GetOptionsStyle(typeof(TOptions));
 
@@ -367,6 +368,17 @@ namespace Sixnet.DependencyInjection
                     break;
             }
             return currentOptions;
+        }
+
+        /// <summary>
+        /// Get options
+        /// </summary>
+        /// <typeparam name="TOptions"></typeparam>
+        /// <param name="style">Options style</param>
+        /// <returns></returns>
+        public static TOptions GetOptions<TOptions>(OptionsStyle? style = null) where TOptions : class
+        {
+            return GetOptions<TOptions>(string.Empty, style);
         }
 
         /// <summary>
@@ -394,22 +406,24 @@ namespace Sixnet.DependencyInjection
             services.ConfigureIfNotNull<SmsOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Sms)));
             // Message
             services.ConfigureIfNotNull<MessageOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Message)));
+            // Message queue
+            services.ConfigureIfNotNull<MessageQueueOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.MessageQueue)));
 
             // Post config options
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureUpload);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureFileAccess);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureRSAKey);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureJwt);
-            services.PostConfigureIfNotNull(sixnetOptions.ConfigureData);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureEmail);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureSms);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureMessage);
+            services.PostConfigureIfNotNull(sixnetOptions.ConfigureData);
+            services.PostConfigureIfNotNull(sixnetOptions.ConfigureMessageQueue);
             services.PostConfigureIfNotNull<CacheOptions>((options) =>
             {
                 options.AddCacheProvider(CacheServerType.InMemory, new MemoryProvider());
                 sixnetOptions.ConfigureCache?.Invoke(options);
             });
-
         }
 
         #endregion

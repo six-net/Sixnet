@@ -16,7 +16,7 @@ namespace Sixnet.Development.Queryable
         /// <summary>
         /// Gets or sets the target queryable
         /// </summary>
-        public ISixnetQueryable TargetQueryable { get; set; }
+        public ISixnetQueryable Target { get; set; }
 
         /// <summary>
         /// Clone a new combine entry
@@ -27,7 +27,7 @@ namespace Sixnet.Development.Queryable
             return new CombineEntry()
             {
                 Type = Type,
-                TargetQueryable = TargetQueryable?.Clone()
+                Target = Target?.Clone()
             };
         }
     }

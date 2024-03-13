@@ -14,7 +14,7 @@ namespace Sixnet.Development.Data.Command
     {
         #region Constructor
 
-        private DataCommandExecutionContext(SixnetDatabaseConnection connection, SixnetDataCommand command)
+        private DataCommandExecutionContext(DatabaseConnection connection, SixnetDataCommand command)
         {
             Server = connection?.DatabaseServer ?? throw new ArgumentNullException(nameof(DatabaseConnection.DatabaseServer));
             DatabaseConnection = connection;
@@ -31,12 +31,12 @@ namespace Sixnet.Development.Data.Command
         /// <summary>
         /// Gets the server
         /// </summary>
-        public SixnetDatabaseServer Server { get; private set; }
+        public DatabaseServer Server { get; private set; }
 
         /// <summary>
         /// Database connection
         /// </summary>
-        public SixnetDatabaseConnection DatabaseConnection { get; private set; }
+        public DatabaseConnection DatabaseConnection { get; private set; }
 
         /// <summary>
         /// Gets the data command
@@ -156,7 +156,7 @@ namespace Sixnet.Development.Data.Command
         /// <param name="server">Database server</param>
         /// <param name="command">Command</param>
         /// <returns></returns>
-        public static DataCommandExecutionContext Create(SixnetDatabaseConnection connection, SixnetDataCommand command = null)
+        public static DataCommandExecutionContext Create(DatabaseConnection connection, SixnetDataCommand command = null)
         {
             return new DataCommandExecutionContext(connection, command)
             {

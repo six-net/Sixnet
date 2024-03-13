@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using Sixnet.Development.Data;
+using Sixnet.Development.Data.Field;
 
 namespace Sixnet.Development.Entity
 {
@@ -8,8 +10,6 @@ namespace Sixnet.Development.Entity
     /// </summary>
     public class EntityConfiguration
     {
-        #region Properties
-
         /// <summary>
         /// Gets or sets the entity type
         /// </summary>
@@ -33,32 +33,22 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Gets or sets the all fields
         /// </summary>
-        public Dictionary<string, EntityField> AllFields { get; set; }
-
-        ///// <summary>
-        ///// Gets or sets the queryable field names
-        ///// </summary>
-        //public List<string> QueryableFieldNames { get; set; }
+        public Dictionary<string, DataField> AllFields { get; set; }
 
         /// <summary>
         /// Gets or sets the queryable fields
         /// </summary>
-        internal List<EntityField> QueryableFields { get; set; }
-
-        ///// <summary>
-        ///// Gets or sets the necessary queryable field names
-        ///// </summary>
-        //public List<string> NecessaryQueryableFieldNames { get; set; }
+        internal List<DataField> QueryableFields { get; set; }
 
         /// <summary>
         /// Gets or sets the necessary fields
         /// </summary>
-        internal List<EntityField> NecessaryQueryableFields { get; set; }
+        internal List<DataField> NecessaryQueryableFields { get; set; }
 
         /// <summary>
         /// Gets or sets the edit fields
         /// </summary>
-        public List<EntityField> EditableFields { get; set; }
+        public List<DataField> EditableFields { get; set; }
 
         /// <summary>
         /// Gets or sets the cache field names
@@ -87,7 +77,7 @@ namespace Sixnet.Development.Entity
         /// Key: field role
         /// Value: fields
         /// </summary>
-        public Dictionary<FieldRole, List<EntityField>> RoleFields { get; set; }
+        public Dictionary<FieldRole, List<DataField>> RoleFields { get; set; }
 
         /// <summary>
         /// Gets or sets the predicate type
@@ -118,7 +108,5 @@ namespace Sixnet.Development.Entity
         /// Whether is split table
         /// </summary>
         public bool IsSplitTable => SplitTableType != SplitTableType.None;
-
-        #endregion
     }
 }

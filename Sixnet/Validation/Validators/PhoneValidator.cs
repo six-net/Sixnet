@@ -6,7 +6,7 @@ namespace Sixnet.Validation.Validators
     /// <summary>
     /// Phone validator
     /// </summary>
-    public class PhoneValidator : SixnetValidator
+    public class PhoneValidator : BaseValidator
     {
         /// <summary>
         /// Initialize a phone validator
@@ -15,7 +15,7 @@ namespace Sixnet.Validation.Validators
         /// <param name="errorMessage">Error message</param>
         public override ValidationResult Validate(dynamic value, string errorMessage)
         {
-            return SixnetValidationExtensions.IsPhoneNullable(value)
+            return ValidationExtensions.IsPhoneNullable(value)
                 ? ValidationResult.SuccessResult()
                 : ValidationResult.ErrorResult(errorMessage);
         }

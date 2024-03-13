@@ -8,7 +8,7 @@ namespace Sixnet.Development.Data.Database
     /// <summary>
     /// Database migration command
     /// </summary>
-    public class MigrationDatabaseCommand : SixnetDatabaseCommand
+    public class MigrationDatabaseCommand : DatabaseCommand
     {
         /// <summary>
         /// Gets or sets the migration info

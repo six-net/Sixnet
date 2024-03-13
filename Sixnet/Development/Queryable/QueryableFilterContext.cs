@@ -4,9 +4,9 @@ using Sixnet.Development.Data;
 namespace Sixnet.Development.Queryable
 {
     /// <summary>
-    /// Global filter context
+    /// Queryable filter context
     /// </summary>
-    public class GlobalFilterContext
+    public class QueryableFilterContext
     {
         /// <summary>
         /// Gets or sets the model type

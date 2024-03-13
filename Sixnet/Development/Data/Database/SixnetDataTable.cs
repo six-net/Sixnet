@@ -12,20 +12,20 @@ namespace Sixnet.Development.Data.Database
         /// <summary>
         /// Gets or sets the table name
         /// </summary>
-        public string Name { get; set; }
+        public string TableName { get; set; }
 
         public override bool Equals(object obj)
         {
             if (obj is SixnetDataTable targetTable)
             {
-                return string.Equals(Name, targetTable.Name, StringComparison.OrdinalIgnoreCase);
+                return string.Equals(TableName, targetTable.TableName, StringComparison.OrdinalIgnoreCase);
             }
             return false;
         }
 
         public override int GetHashCode()
         {
-            return Name?.GetHashCode() ?? 0;
+            return TableName?.GetHashCode() ?? 0;
         }
     }
 

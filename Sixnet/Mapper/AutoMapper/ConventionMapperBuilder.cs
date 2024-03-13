@@ -52,7 +52,7 @@ namespace AutoMapper
             var conventionTypes = SixnetApplication.GetAllConventionTypes();
             if (!conventionTypes.IsNullOrEmpty())
             {
-                var mappableModelContract = typeof(ISixnetMappableModel);
+                var mappableModelContract = typeof(ISixnetMappable);
                 var entityContract = typeof(ISixnetEntity);
                 var domainParameterContract = typeof(SixnetDomainParameter);
                 var defaultMemberValidation = MemberList.None;

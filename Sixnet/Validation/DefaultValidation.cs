@@ -23,7 +23,7 @@ namespace Sixnet.Validation
         /// <summary>
         /// Data validator
         /// </summary>
-        readonly SixnetValidator validator = null;
+        readonly BaseValidator validator = null;
 
         /// <summary>
         /// Field name
@@ -60,7 +60,7 @@ namespace Sixnet.Validation
         /// <param name="field">Field</param>
         /// <param name="validator">Data validator</param>
         /// <param name="fieldName">Field name</param>
-        public DefaultValidation(ValidationField<T> field, SixnetValidator validator, string fieldName)
+        public DefaultValidation(ValidationField<T> field, BaseValidator validator, string fieldName)
         {
             valueMethod = field.Field.Compile();
             this.validator = validator;

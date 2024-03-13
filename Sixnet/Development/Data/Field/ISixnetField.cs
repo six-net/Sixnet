@@ -10,7 +10,7 @@ namespace Sixnet.Development.Data.Field
     /// <summary>
     /// Data field contract
     /// </summary>
-    public interface ISixnetDataField : ISixnetCloneableModel<ISixnetDataField>
+    public interface ISixnetField : ISixnetCloneable<ISixnetField>
     {
         /// <summary>
         /// Whether is a constant field and no formatter
@@ -35,7 +35,7 @@ namespace Sixnet.Development.Data.Field
         /// <summary>
         /// Gets or sets the field format options
         /// </summary>
-        FieldFormatSetting FormatOption { get; set; }
+        FieldFormatSetting FormatSetting { get; set; }
 
         /// <summary>
         /// Whether in field role
@@ -54,36 +54,13 @@ namespace Sixnet.Development.Data.Field
         /// Get field data type
         /// </summary>
         /// <returns></returns>
-        Type GetFieldDataType();
+        Type GetDataType();
 
         /// <summary>
         /// Get field name
         /// </summary>
+        /// <param name="databaseType">Database type</param>
         /// <returns></returns>
-        string GetFieldName();
-    }
-
-    public class DataFieldComparer : IEqualityComparer<ISixnetDataField>
-    {
-
-        public static DataFieldComparer DefaultComparer => new();
-
-        public bool Equals(ISixnetDataField x, ISixnetDataField y)
-        {
-            if (x != y)
-            {
-                if (x is PropertyField xField && y is PropertyField yField)
-                {
-                    return string.Equals(xField.PropertyName, yField.PropertyName);
-                }
-                return false;
-            }
-            return true;
-        }
-
-        public int GetHashCode(ISixnetDataField obj)
-        {
-            return 0;
-        }
+        string GetFieldName(DatabaseType databaseType);
     }
 }

@@ -146,7 +146,7 @@ namespace Sixnet.Development.Repository
         /// <returns>Affected data number</returns>
         public sealed override Task<int> UpdateAsync(FieldsAssignment fieldsAssignment, Action<DataOperationOptions> configure = null)
         {
-            return UpdateAsync(fieldsAssignment, SixnetQueryable.Create<TModel>(), configure);
+            return UpdateAsync(fieldsAssignment, SixnetQuerier.Create<TModel>(), configure);
         }
 
         /// <summary>
@@ -181,7 +181,7 @@ namespace Sixnet.Development.Repository
         /// <returns>Affected data number</returns>
         public sealed override Task<int> UpdateAsync(Expression<Func<TModel, bool>> fieldsAssignmentExpression, Action<DataOperationOptions> configure = null)
         {
-            return UpdateAsync(fieldsAssignmentExpression, SixnetQueryable.Create<TModel>(), configure);
+            return UpdateAsync(fieldsAssignmentExpression, SixnetQuerier.Create<TModel>(), configure);
         }
 
         #endregion
@@ -235,7 +235,7 @@ namespace Sixnet.Development.Repository
         /// <returns>Affected data number</returns>
         public sealed override Task<int> DeleteAsync(Expression<Func<TModel, bool>> conditionExpression, Action<DataOperationOptions> configure = null)
         {
-            return DeleteAsync(SixnetQueryable.Create(conditionExpression), configure);
+            return DeleteAsync(SixnetQuerier.Create(conditionExpression), configure);
         }
 
         /// <summary>
@@ -245,7 +245,7 @@ namespace Sixnet.Development.Repository
         /// <returns>Affected data number</returns>
         public sealed override Task<int> DeleteAsync(Action<DataOperationOptions> configure = null)
         {
-            return DeleteAsync(SixnetQueryable.Create<TModel>(), configure);
+            return DeleteAsync(SixnetQuerier.Create<TModel>(), configure);
         }
 
         #endregion
@@ -281,7 +281,7 @@ namespace Sixnet.Development.Repository
         /// <returns>Data</returns>
         public sealed override Task<TModel> GetAsync(Action<DataOperationOptions> configure = null)
         {
-            return GetAsync(SixnetQueryable.Create<TModel>(), configure);
+            return GetAsync(SixnetQuerier.Create<TModel>(), configure);
         }
 
         #endregion
@@ -317,7 +317,7 @@ namespace Sixnet.Development.Repository
         /// <returns>Data list</returns>
         public sealed override Task<List<TModel>> GetListAsync(Action<DataOperationOptions> configure = null)
         {
-            return GetListAsync(SixnetQueryable.Create<TModel>(), configure);
+            return GetListAsync(SixnetQuerier.Create<TModel>(), configure);
         }
 
         /// <summary>
@@ -457,7 +457,7 @@ namespace Sixnet.Development.Repository
         /// <returns>Paging data</returns>
         public sealed override Task<PagingInfo<TModel>> GetPagingAsync(Expression<Func<TModel, bool>> conditionExpression, PagingFilter pagingFilter, Action<DataOperationOptions> configure = null)
         {
-            return GetPagingAsync(SixnetQueryable.Create(conditionExpression), pagingFilter, configure);
+            return GetPagingAsync(SixnetQuerier.Create(conditionExpression), pagingFilter, configure);
         }
 
         /// <summary>
@@ -470,7 +470,7 @@ namespace Sixnet.Development.Repository
         /// <returns>Paging data</returns>
         public sealed override Task<PagingInfo<TModel>> GetPagingAsync(Expression<Func<TModel, bool>> conditionExpression, int page, int pageSize, Action<DataOperationOptions> configure = null)
         {
-            return GetPagingAsync(SixnetQueryable.Create(conditionExpression), page, pageSize, configure);
+            return GetPagingAsync(SixnetQuerier.Create(conditionExpression), page, pageSize, configure);
         }
 
         /// <summary>
@@ -481,7 +481,7 @@ namespace Sixnet.Development.Repository
         /// <returns>Paging data</returns>
         public sealed override Task<PagingInfo<TModel>> GetPagingAsync(PagingFilter pagingFilter, Action<DataOperationOptions> configure = null)
         {
-            return GetPagingAsync(SixnetQueryable.Create<TModel>(), pagingFilter, configure);
+            return GetPagingAsync(SixnetQuerier.Create<TModel>(), pagingFilter, configure);
         }
 
         /// <summary>
@@ -493,7 +493,7 @@ namespace Sixnet.Development.Repository
         /// <returns>Paging data</returns>
         public sealed override Task<PagingInfo<TModel>> GetPagingAsync(int page, int pageSize, Action<DataOperationOptions> configure = null)
         {
-            return GetPagingAsync(SixnetQueryable.Create<TModel>(), page, pageSize, configure);
+            return GetPagingAsync(SixnetQuerier.Create<TModel>(), page, pageSize, configure);
         }
 
         #endregion
@@ -519,7 +519,7 @@ namespace Sixnet.Development.Repository
         /// <returns>Whether has data</returns>
         public sealed override Task<bool> ExistsAsync(Expression<Func<TModel, bool>> conditionExpression, Action<DataOperationOptions> configure = null)
         {
-            return ExistsAsync(SixnetQueryable.Create(conditionExpression), configure);
+            return ExistsAsync(SixnetQuerier.Create(conditionExpression), configure);
         }
 
         /// <summary>
@@ -529,7 +529,7 @@ namespace Sixnet.Development.Repository
         /// <returns>Whether has data</returns>
         public sealed override Task<bool> ExistsAsync(Action<DataOperationOptions> configure = null)
         {
-            return ExistsAsync(SixnetQueryable.Create<TModel>(), configure);
+            return ExistsAsync(SixnetQuerier.Create<TModel>(), configure);
         }
 
         #endregion
@@ -555,7 +555,7 @@ namespace Sixnet.Development.Repository
         /// <returns>Data num</returns>
         public sealed override Task<int> CountAsync(Expression<Func<TModel, bool>> conditionExpression, Action<DataOperationOptions> configure = null)
         {
-            return CountAsync(SixnetQueryable.Create(conditionExpression), configure);
+            return CountAsync(SixnetQuerier.Create(conditionExpression), configure);
         }
 
         /// <summary>
@@ -565,7 +565,7 @@ namespace Sixnet.Development.Repository
         /// <returns>Data num</returns>
         public sealed override Task<int> CountAsync(Action<DataOperationOptions> configure = null)
         {
-            return CountAsync(SixnetQueryable.Create<TModel>(), configure);
+            return CountAsync(SixnetQuerier.Create<TModel>(), configure);
         }
 
         #endregion
@@ -790,7 +790,7 @@ namespace Sixnet.Development.Repository
         /// <param name="field">Field</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Value</returns>
-        public sealed override Task<TValue> ScalarAsync<TValue>(PropertyField field, Action<DataOperationOptions> configure = null)
+        public sealed override Task<TValue> ScalarAsync<TValue>(DataField field, Action<DataOperationOptions> configure = null)
         {
             return ScalarAsync<TValue>(field, null, configure);
         }
@@ -803,7 +803,7 @@ namespace Sixnet.Development.Repository
         /// <param name="conditionExpression">Condition</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Value</returns>
-        public sealed override Task<TValue> ScalarAsync<TValue>(PropertyField field, Expression<Func<TModel, bool>> conditionExpression, Action<DataOperationOptions> configure = null)
+        public sealed override Task<TValue> ScalarAsync<TValue>(DataField field, Expression<Func<TModel, bool>> conditionExpression, Action<DataOperationOptions> configure = null)
         {
             var query = conditionExpression.GetQueryable<TModel>()
                         .Select(field);

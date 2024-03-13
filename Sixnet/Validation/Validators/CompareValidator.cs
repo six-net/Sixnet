@@ -7,7 +7,7 @@ namespace Sixnet.Validation.Validators
     /// <summary>
     /// Compare validator
     /// </summary>
-    public class CompareValidator : SixnetValidator
+    public class CompareValidator : BaseValidator
     {
         /// <summary>
         /// Compare operator

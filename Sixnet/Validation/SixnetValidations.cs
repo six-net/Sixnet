@@ -11,7 +11,7 @@ using Sixnet.App;
 namespace Sixnet.Validation
 {
     /// <summary>
-    /// Validation manager
+    /// Sixnet validation manager
     /// </summary>
     public static class SixnetValidations
     {
@@ -26,7 +26,7 @@ namespace Sixnet.Validation
         /// <summary>
         /// Validators
         /// </summary>
-        static readonly Dictionary<string, SixnetValidator> _validators = new Dictionary<string, SixnetValidator>();
+        static readonly Dictionary<string, BaseValidator> _validators = new Dictionary<string, BaseValidator>();
 
         /// <summary>
         /// Default validation top message
@@ -51,9 +51,9 @@ namespace Sixnet.Validation
         /// Configure validation
         /// </summary>
         /// <param name="configure">Configure</param>
-        public static void Configure(Action<SixnetValidationOptions> configure)
+        public static void Configure(Action<ValidationOptions> configure)
         {
-            var validationOptions = new SixnetValidationOptions();
+            var validationOptions = new ValidationOptions();
             configure?.Invoke(validationOptions);
             validationOptions?.BuildValidation();
         }
@@ -68,7 +68,7 @@ namespace Sixnet.Validation
             {
                 foreach (var value in jsonValues)
                 {
-                    var ruleCollection = SixnetJsonSerializer.Deserialize<SixnetValidationOptions>(value);
+                    var ruleCollection = SixnetJsonSerializer.Deserialize<ValidationOptions>(value);
                     ruleCollection?.BuildValidation();
                 }
             }
@@ -114,7 +114,7 @@ namespace Sixnet.Validation
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="validator">Validator</param>
         /// <param name="fields">Fields</param>
-        static void SetValidation<T>(SixnetValidator validator, params ValidationField<T>[] fields)
+        static void SetValidation<T>(BaseValidator validator, params ValidationField<T>[] fields)
         {
             if (validator == null || fields.IsNullOrEmpty())
             {
@@ -166,7 +166,7 @@ namespace Sixnet.Validation
         public static void Length<T>(int maxLength, int minLength = 0, params ValidationField<T>[] fields)
         {
             var validatorKey = string.Format("{0}/{1}_{2}", typeof(StringLengthValidator).FullName, maxLength, minLength);
-            SixnetValidator validator;
+            BaseValidator validator;
             if (_validators.ContainsKey(validatorKey))
             {
                 validator = _validators[validatorKey];
@@ -187,7 +187,7 @@ namespace Sixnet.Validation
         public static void Email<T>(params ValidationField<T>[] fields)
         {
             var validatorKey = typeof(EmailValidator).FullName;
-            SixnetValidator validator;
+            BaseValidator validator;
             if (_validators.ContainsKey(validatorKey))
             {
                 validator = _validators[validatorKey];
@@ -210,7 +210,7 @@ namespace Sixnet.Validation
         public static void SetCompareValidation<T>(CompareOperator compareOperator, dynamic value, ValidationField<T> field)
         {
             var validatorKey = string.Format("{0}/{1}", typeof(CompareValidator).FullName, (int)compareOperator);
-            SixnetValidator validator;
+            BaseValidator validator;
             if (_validators.ContainsKey(validatorKey))
             {
                 validator = _validators[validatorKey];
@@ -387,7 +387,7 @@ namespace Sixnet.Validation
         public static void EnumType<T>(Type enumType, params ValidationField<T>[] fields)
         {
             var validatorKey = string.Format("{0}/{1}", typeof(EnumTypeValidator).FullName, enumType.FullName);
-            SixnetValidator validator;
+            BaseValidator validator;
             if (_validators.ContainsKey(validatorKey))
             {
                 validator = _validators[validatorKey];
@@ -409,7 +409,7 @@ namespace Sixnet.Validation
         public static void MaxLength<T>(int length, params ValidationField<T>[] fields)
         {
             var validatorKey = string.Format("{0}/{1}", typeof(MaxLengthValidator).FullName, length);
-            SixnetValidator validator;
+            BaseValidator validator;
             if (_validators.ContainsKey(validatorKey))
             {
                 validator = _validators[validatorKey];
@@ -431,7 +431,7 @@ namespace Sixnet.Validation
         public static void MinLength<T>(int length, params ValidationField<T>[] fields)
         {
             var validatorKey = string.Format("{0}/{1}", typeof(MinLengthValidator).FullName, length);
-            SixnetValidator validator;
+            BaseValidator validator;
             if (_validators.ContainsKey(validatorKey))
             {
                 validator = _validators[validatorKey];
@@ -451,7 +451,7 @@ namespace Sixnet.Validation
         public static void Phone<T>(params ValidationField<T>[] fields)
         {
             var validatorKey = string.Format("{0}", typeof(PhoneValidator).FullName);
-            SixnetValidator validator;
+            BaseValidator validator;
             if (_validators.ContainsKey(validatorKey))
             {
                 validator = _validators[validatorKey];
@@ -475,7 +475,7 @@ namespace Sixnet.Validation
         public static void Range<T>(Type valueType, object minimum, object maximum, params ValidationField<T>[] fields)
         {
             var validatorKey = string.Format("{0}/{1}_{2}_{3}", typeof(RangeValidator).FullName, valueType.FullName, minimum, maximum);
-            SixnetValidator validator;
+            BaseValidator validator;
             if (_validators.ContainsKey(validatorKey))
             {
                 validator = _validators[validatorKey];
@@ -495,7 +495,7 @@ namespace Sixnet.Validation
         public static void Required<T>(params ValidationField<T>[] fields)
         {
             var validatorKey = string.Format("{0}", typeof(RequiredValidator).FullName);
-            SixnetValidator validator;
+            BaseValidator validator;
             if (_validators.ContainsKey(validatorKey))
             {
                 validator = _validators[validatorKey];
@@ -515,7 +515,7 @@ namespace Sixnet.Validation
         public static void Url<T>(params ValidationField<T>[] fields)
         {
             var validatorKey = string.Format("{0}", typeof(UrlValidator).FullName);
-            SixnetValidator validator;
+            BaseValidator validator;
             if (_validators.ContainsKey(validatorKey))
             {
                 validator = _validators[validatorKey];
@@ -535,7 +535,7 @@ namespace Sixnet.Validation
         public static void CreditCard<T>(params ValidationField<T>[] fields)
         {
             var validatorKey = string.Format("{0}", typeof(CreditCardValidator).FullName);
-            SixnetValidator validator;
+            BaseValidator validator;
             if (_validators.ContainsKey(validatorKey))
             {
                 validator = _validators[validatorKey];
@@ -555,7 +555,7 @@ namespace Sixnet.Validation
         public static void RegularExpression<T>(string pattern, params ValidationField<T>[] fields)
         {
             var validatorKey = string.Format("{0}/{1}", typeof(RegularExpressionValidator).FullName, pattern);
-            SixnetValidator validator;
+            BaseValidator validator;
             if (_validators.ContainsKey(validatorKey))
             {
                 validator = _validators[validatorKey];
@@ -796,7 +796,7 @@ namespace Sixnet.Validation
         public static void ImageFile<T>(params ValidationField<T>[] fields)
         {
             var validatorKey = typeof(ImageFileValidator).FullName;
-            SixnetValidator validator;
+            BaseValidator validator;
             if (_validators.ContainsKey(validatorKey))
             {
                 validator = _validators[validatorKey];
@@ -817,7 +817,7 @@ namespace Sixnet.Validation
         public static void CompressFile<T>(params ValidationField<T>[] fields)
         {
             var validatorKey = typeof(CompressFileValidator).FullName;
-            SixnetValidator validator;
+            BaseValidator validator;
             if (_validators.ContainsKey(validatorKey))
             {
                 validator = _validators[validatorKey];

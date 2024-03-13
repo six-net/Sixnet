@@ -23,7 +23,7 @@ namespace Sixnet.Development.Work
         /// <summary>
         /// Initialize default work
         /// </summary>
-        internal DefaultWork(IEnumerable<SixnetDatabaseServer> databaseServers = null, DataIsolationLevel? isolationLevel = null)
+        internal DefaultWork(IEnumerable<DatabaseServer> databaseServers = null, DataIsolationLevel? isolationLevel = null)
         {
             WorkId = Guid.NewGuid().ToString();
             dataClient = new DefaultDataClient(true, true, databaseServers, isolationLevel);

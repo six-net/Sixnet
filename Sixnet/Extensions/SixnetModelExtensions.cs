@@ -66,17 +66,17 @@ namespace Sixnet.Model
 
         #endregion
 
-        #region Validatable
+        #region Check
 
         /// <summary>
-        /// Validate
+        /// Check
         /// </summary>
-        /// <param name="validatableObject">Validatable object</param>
-        /// <param name="nullMessage">Message when validatableObject is null</param>
-        public static void Validate(this ISixnetValidatableModel validatableObject, string nullMessage = "")
+        /// <param name="data">Data</param>
+        /// <param name="nullMessage">Message when data is null</param>
+        public static void Check(this ISixnetCheckable data, string nullMessage = "")
         {
-            SixnetDirectThrower.ThrowArgNullIf(validatableObject == null, nullMessage);
-            validatableObject.ValidateValue();
+            SixnetDirectThrower.ThrowArgNullIf(data == null, nullMessage);
+            data.Check();
         }
 
         #endregion

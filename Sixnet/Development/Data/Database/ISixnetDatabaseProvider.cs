@@ -21,7 +21,7 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="server">Database server</param>
         /// <returns>Database connection</returns>
-        IDbConnection GetDbConnection(SixnetDatabaseServer server);
+        IDbConnection GetDbConnection(DatabaseServer server);
 
         #endregion
 
@@ -272,7 +272,7 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="command">Command</param>
         /// <returns></returns>
-        List<SixnetDataTable> GetTables(SixnetDatabaseCommand command);
+        List<SixnetDataTable> GetTables(DatabaseCommand command);
 
         #endregion
     }
