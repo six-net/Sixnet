@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Sixnet.Development.Message;
 using Sixnet.Exceptions;
 
 namespace Sixnet.Net.Sms
@@ -285,6 +286,20 @@ namespace Sixnet.Net.Sms
         {
             var smsProvider = GetSmsProvider();
             return ExecuteAsync(account, parameter, smsProvider.CheckKeywordAsync);
+        }
+
+        #endregion
+
+        #region Send template message
+
+        /// <summary>
+        /// Send template message
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public static Task<SendSmsResult> SendTemplateMessageAsync(SendMessageContext context)
+        {
+            return SendAsync(GetSmsParameter(context.Template, context.Message, context.Receivers));
         }
 
         #endregion

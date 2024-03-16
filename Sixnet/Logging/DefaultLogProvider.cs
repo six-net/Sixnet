@@ -54,10 +54,7 @@ namespace Sixnet.Logging
         public void WriteLog(string loggerCategoryName, LogLevel logLevel, EventId eventId, Exception exception, string message, params object[] args)
         {
             var logger = GetLogger(loggerCategoryName);
-            if (logger != null)
-            {
-                logger.Log(logLevel, eventId, exception, message, args);
-            }
+            logger?.Log(logLevel, eventId, exception, message, args);
         }
 
         #endregion

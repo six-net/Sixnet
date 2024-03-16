@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Sixnet.Development.Event;
 using Sixnet.Development.Work;
 
 namespace Sixnet.Development.Message
@@ -12,7 +13,7 @@ namespace Sixnet.Development.Message
         /// <summary>
         /// Gets or sets the message id
         /// </summary>
-        public string Id { get; set; } = CreateMessageId();
+        public string Id { get; set; } = GenerateMessageId();
 
         /// <summary>
         /// Gets or sets the work id
@@ -27,22 +28,22 @@ namespace Sixnet.Development.Message
         /// <summary>
         /// Gets or sets the parameters
         /// </summary>
-        public object Parameters { get; set; }
+        public object Data { get; set; }
 
         /// <summary>
-        /// Gets or sets the receivers
-        /// Key => Message type
-        /// Value => Receivers
+        /// Gets or sets the message send time
         /// </summary>
-        public Dictionary<string, List<string>> Receivers { get; set; }
+        public MessageSendTime SendTime { get; set; } = MessageSendTime.WorkCompleted;
 
         /// <summary>
-        /// Create message id
+        /// Gets or sets the create date
         /// </summary>
-        /// <returns></returns>
-        public static string CreateMessageId()
+        public DateTimeOffset CreateDate { get; set; } = DateTimeOffset.Now;
+
+        static string GenerateMessageId()
         {
-            return Guid.NewGuid().ToString();
+            var msgOptions = SixnetMessager.GetMessageOptions();
+            return msgOptions?.GetMessageId?.Invoke() ?? Guid.NewGuid().ToString();
         }
     }
 }

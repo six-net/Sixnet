@@ -1,4 +1,5 @@
-﻿using Sixnet.Development.Repository;
+﻿using Sixnet.Development.Message;
+using Sixnet.Development.Repository;
 using Sixnet.Exceptions;
 using Sixnet.MQ;
 using System.Collections.Generic;
@@ -210,6 +211,16 @@ namespace Sixnet.Net.Email
         public static Task<SendEmailResult> SendAsync(EmailAccount account, string title, string content, params string[] addresses)
         {
             return SendAsync(account, string.Empty, title, content, addresses);
+        }
+
+        /// <summary>
+        /// Send template message
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public static async Task<SendEmailResult> SendTemplateMessageAsync(SendMessageContext context)
+        {
+            return (await SendAsync(GetEmailInfo(context.Template, context.Message, context.Receivers)).ConfigureAwait(false))?.FirstOrDefault();
         }
     }
 }

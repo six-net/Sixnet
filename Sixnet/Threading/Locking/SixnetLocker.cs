@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 
 namespace Sixnet.Threading.Locking
@@ -33,6 +34,11 @@ namespace Sixnet.Threading.Locking
         /// Load localization string lock name
         /// </summary>
         public const string LoadLocalizationStringLockName = "SIXNET_LOAD_LOCALIZATION_STRING_LOCK";
+
+        /// <summary>
+        /// Create in process queue lock name
+        /// </summary>
+        public const string CreateInProcessQueueLockName = "SIXNET_LOAD_CREATE_IN_PROCESS_QUEUE_LOCK";
 
         /// <summary>
         /// Lock object expiration seconds
@@ -304,6 +310,31 @@ namespace Sixnet.Threading.Locking
         {
             var lockName = GetLoadLocalizationStringLockName(culture, resourceBaseName);
             return GetLock(LoadLocalizationStringLockName, lockName, GetLockValue(), expirationSeconds);
+        }
+
+        #endregion
+
+        #region Create in process queue lock
+
+        /// <summary>
+        /// Get create in process queue lock name
+        /// </summary>
+        /// <param name="server">Database server</param>
+        /// <returns></returns>
+        static string GetCreateInProcessQueueLockName(string queueName)
+        {
+            return $"sixnet:lock:cipq:queueName".ToLower();
+        }
+
+        /// <summary>
+        /// Get create in process queue lock
+        /// </summary>
+        /// <param name="queueName"></param>
+        /// <returns></returns>
+        public static LockInstance? GetCreateInProcessQueueLock(string queueName, int? expirationSeconds = null)
+        {
+            var lockName = GetCreateInProcessQueueLockName(queueName);
+            return GetLock(CreateInProcessQueueLockName, lockName, GetLockValue(), expirationSeconds);
         }
 
         #endregion

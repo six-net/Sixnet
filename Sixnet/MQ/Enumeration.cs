@@ -29,10 +29,29 @@
     public enum MessageQueueType
     {
         /// <summary>
+        /// Internal
+        /// </summary>
+        Internal = 200,
+        /// <summary>
         /// RabbmitMQ
         /// </summary>
         RabbmitMQ = 210,
+        /// <summary>
+        /// Kafka
+        /// </summary>
         Kafka = 220,
-        Others
+        /// <summary>
+        /// Others
+        /// </summary>
+        Others = 500
+    }
+
+    /// <summary>
+    /// Queue scope
+    /// </summary>
+    public enum QueueScope
+    {
+        Server = 100,
+        Queues = 110
     }
 }

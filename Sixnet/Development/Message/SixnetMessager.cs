@@ -23,21 +23,6 @@ namespace Sixnet.Development.Message
         static readonly AsyncLocal<MessageBox> _messageBox = new();
         static readonly MessageOptions _defaultOptions = new();
         static readonly DefaultMessageProvider _defaultMessageProvider = new();
-        public const string EmailMessageTypeName = "SIXNET_DEV_MESSAGE_EMAIL";
-        public const string SmsMessageTypeName = "SIXNET_DEV_MESSAGE_SMS";
-        public const string NotificationMessageTypeName = "SIXNET_DEV_MESSAGE_NOTIFICATION";
-        static readonly Dictionary<string, ISixnetMessageHandler> _defaultMessageHandlers = new();
-
-        #endregion
-
-        #region Constructor
-
-        static SixnetMessager()
-        {
-            _defaultMessageHandlers.Add(EmailMessageTypeName, new EmailMessageHandler());
-            _defaultMessageHandlers.Add(SmsMessageTypeName, new SmsMessageHandler());
-            _defaultMessageHandlers.Add(NotificationMessageTypeName, new NotificationMessageHandler());
-        }
 
         #endregion
 
@@ -75,42 +60,129 @@ namespace Sixnet.Development.Message
 
         #endregion
 
-        #region Send message
+        #region Send
 
         /// <summary>
         /// Send message
         /// </summary>
         /// <param name="messages">Messages</param>
         /// <returns></returns>
-        public static void Send(params MessageInfo[] messages)
+        public static void Send(IEnumerable<MessageInfo> messages)
         {
             SixnetDirectThrower.ThrowArgNullIf(messages.IsNullOrEmpty(), nameof(messages));
 
-            var parameter = new SendMessageParameter()
+            var imdiateMessages = new List<MessageInfo>();
+            var workMessages = new List<MessageInfo>();
+            foreach (var msg in messages)
             {
-                Messages = new List<MessageInfo>(messages)
-            };
-            var messageProvider = GetMessageProvider();
-            messageProvider.Send(parameter);
+                if (msg.SendTime == MessageSendTime.Immediately)
+                {
+                    imdiateMessages.Add(msg);
+                }
+                else
+                {
+                    workMessages.Add(msg);
+                }
+            }
+
+            if (!imdiateMessages.IsNullOrEmpty())
+            {
+                var parameter = new SendMessageParameter()
+                {
+                    Messages = imdiateMessages
+                };
+                var messageProvider = GetMessageProvider();
+                messageProvider.Send(parameter);
+            }
+
+            if (!workMessages.IsNullOrEmpty())
+            {
+                SixnetDirectThrower.ThrowArgNullIf(MessageBox == null, $"Please call {nameof(Init)} method first to initialize the message box");
+                MessageBox.Store(workMessages);
+            }
         }
-
-        #endregion
-
-        #region Store message
 
         /// <summary>
-        /// Store messages to message box
+        /// Send message
+        /// </summary>
+        /// <param name="subject">Message subject</param>
+        /// <param name="data">Message data</param>
+        /// <param name="sendTime">Send time</param>
+        public static void Send(string subject, object data, MessageSendTime sendTime = MessageSendTime.WorkCompleted)
+        {
+            Send(new List<MessageInfo>(1) {
+                new MessageInfo()
+                {
+                    Subject = subject,
+                    Data = data,
+                    SendTime = sendTime
+                }
+            });
+        }
+
+        /// <summary>
+        /// Send message
         /// </summary>
         /// <param name="messages">Messages</param>
-        public static void Store(params MessageInfo[] messages)
+        /// <returns></returns>
+        public static Task SendAsync(IEnumerable<MessageInfo> messages)
         {
-            SixnetDirectThrower.ThrowArgNullIf(MessageBox == null, $"Please call {nameof(Init)} method first to initialize the message box");
-            MessageBox.Add(messages);
+            SixnetDirectThrower.ThrowArgNullIf(messages.IsNullOrEmpty(), nameof(messages));
+
+            var imdiateMessages = new List<MessageInfo>();
+            var workMessages = new List<MessageInfo>();
+            foreach (var msg in messages)
+            {
+                if (msg.SendTime == MessageSendTime.Immediately)
+                {
+                    imdiateMessages.Add(msg);
+                }
+                else
+                {
+                    workMessages.Add(msg);
+                }
+            }
+
+            Task sendTask = null;
+
+            if (!workMessages.IsNullOrEmpty())
+            {
+                SixnetDirectThrower.ThrowArgNullIf(MessageBox == null, $"Please call {nameof(Init)} method first to initialize the message box");
+                MessageBox.Store(workMessages);
+            }
+            if (!imdiateMessages.IsNullOrEmpty())
+            {
+                var parameter = new SendMessageParameter()
+                {
+                    Messages = imdiateMessages
+                };
+                var messageProvider = GetMessageProvider();
+                sendTask = messageProvider.SendAsync(parameter);
+            }
+            return sendTask ?? Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Send message
+        /// </summary>
+        /// <param name="subject">Message subject</param>
+        /// <param name="data">Message data</param>
+        /// <param name="sendTime">Send time</param>
+        public static Task SendAsync(string subject, object data, MessageSendTime sendTime = MessageSendTime.WorkCompleted)
+        {
+            return SendAsync(new List<MessageInfo>(1) {
+                new MessageInfo()
+                {
+                    Subject = subject,
+                    Data = data,
+                    SendTime = sendTime
+                }
+            });
         }
 
         #endregion
 
-        #region Commit message
+        #region Commit
 
         /// <summary>
         /// Commit stored message
@@ -123,16 +195,16 @@ namespace Sixnet.Development.Message
                 return;
             }
             var messageProvider = GetMessageProvider();
-            messageProvider.Send(new SendMessageParameter()
+            _ = messageProvider.SendAsync(new SendMessageParameter()
             {
-                Messages = MessageBox.Messages
+                Messages = new List<MessageInfo>(MessageBox.Messages)
             });
             MessageBox.Clear();
         }
 
         #endregion
 
-        #region Clear message
+        #region Clear
 
         /// <summary>
         /// Remove all stored messages
@@ -147,22 +219,13 @@ namespace Sixnet.Development.Message
         #region Util
 
         /// <summary>
-        /// Get message handler
+        /// Get keyword match regex
         /// </summary>
-        /// <param name="messageType">Message type</param>
-        /// <returns>Return message handler</returns>
-        public static ISixnetMessageHandler GetMessageHandler(string messageType)
+        /// <returns></returns>
+        static Regex GetKeywordMatchRegex()
         {
             var options = GetMessageOptions();
-            var handler = options.GetMessageHandler(messageType);
-            if(handler == null)
-            {
-                _defaultMessageHandlers.TryGetValue(messageType, out handler);
-            }
-
-            SixnetDirectThrower.ThrowArgNullIf(handler == null, $"Not set message handler for:{messageType}");
-
-            return handler;
+            return new Regex(options.KeywordMatchPattern);
         }
 
         /// <summary>
@@ -230,16 +293,6 @@ namespace Sixnet.Development.Message
         {
             var options = GetMessageOptions();
             return options?.HandleParameterName?.Invoke(parameterName) ?? parameterName ?? string.Empty;
-        }
-
-        /// <summary>
-        /// Get keyword match regex
-        /// </summary>
-        /// <returns></returns>
-        static Regex GetKeywordMatchRegex()
-        {
-            var options = GetMessageOptions();
-            return new Regex(options.KeywordMatchPattern);
         }
 
         /// <summary>

@@ -1,11 +1,13 @@
-﻿using Sixnet.DependencyInjection;
-using Sixnet.Development.Data;
-using Sixnet.Exceptions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
-using static Sixnet.Cache.SixnetCacher;
+using Sixnet.DependencyInjection;
+using Sixnet.Exceptions;
+using Sixnet.MQ.InProcess;
 
 namespace Sixnet.MQ
 {
@@ -14,268 +16,282 @@ namespace Sixnet.MQ
     /// </summary>
     public static class SixnetMQ
     {
-        #region Send message
+        #region Fields
+
+        static readonly InternalMessageQueueProvider _inProcessProvider = new();
+        static readonly MessageQueueOptions _defaultMessageQueueOptions = new();
+        static readonly MessageQueueServer _defaultInProcessServer = new() { Type = MessageQueueType.Internal };
+
+        #endregion
+
+        #region Enqueue
 
         /// <summary>
-        /// Send message
+        /// Enqueue message
         /// </summary>
-        /// <param name="messages">Send message options</param>
+        /// <param name="messages">Messages</param>
         /// <returns></returns>
-        public static Task SendAsync(params ISixnetQueueMessage[] messages)
+        public static Task EnqueueAsync(params SixnetQueueMessage[] messages)
         {
-            IEnumerable<ISixnetQueueMessage> messageCollection = messages;
-            return SendAsync(messageCollection);
+            IEnumerable<SixnetQueueMessage> messageCollection = messages;
+            return EnqueueAsync(messageCollection);
         }
 
         /// <summary>
-        /// Send message
+        /// Enqueue message
         /// </summary>
-        /// <param name="messages">Send message options</param>
+        /// <param name="messages">Messages</param>
         /// <returns></returns>
-        public static Task SendAsync(IEnumerable<ISixnetQueueMessage> messages)
+        public static Task EnqueueAsync(IEnumerable<SixnetQueueMessage> messages)
         {
             SixnetDirectThrower.ThrowArgNullIf(messages.IsNullOrEmpty(), nameof(messages));
 
-            var serverMessageTasks = new List<Task>();
+            var messageTasks = new List<Task>();
             foreach (var message in messages)
             {
-                if (message is InProcessQueueMessage inProcessQueueMessage)
-                {
-                    var queue = InProcessQueueManager.GetQueue(inProcessQueueMessage.QueueName);
-                    queue.Enqueue(inProcessQueueMessage);
-                }
-                if (message is ServerQueueMessage serverQueueMessage)
-                {
-                    var messageServer = GetMessageQueueServer(serverQueueMessage);
-                    if (messageServer != null)
-                    {
-                        var provider = GetMessageQueueProvider(messageServer.Type);
+                var endpoint = GetMessageQueueEndpoint(message);
+                var provider = GetMessageQueueProvider(endpoint.Server.Type);
 
-                        SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"Not set provider for {messageServer.Type}");
+                SixnetDirectThrower.ThrowSixnetExceptionIf(provider != null, $"Not set message queue provider for {endpoint.Server.Type}");
 
-                        serverMessageTasks.Add(provider.SendAsync(messageServer, serverQueueMessage));
-                    }
-                }
+                messageTasks.Add(provider.EnqueueAsync(new EnqueueParameter()
+                {
+                    Endpoint = endpoint,
+                    Message = message
+                }));
             }
-            return Task.WhenAll(serverMessageTasks);
+            return Task.WhenAll(messageTasks);
         }
 
         /// <summary>
-        /// Send message
+        /// Enqueue message
         /// </summary>
         /// <param name="messages">Messages</param>
-        /// <returns>response</returns>
-        public static void Send(params ISixnetQueueMessage[] messages)
+        /// <returns></returns>
+        public static void Enqueue(params SixnetQueueMessage[] messages)
         {
-            IEnumerable<ISixnetQueueMessage> messageCollection = messages;
-            Send(messageCollection);
+            IEnumerable<SixnetQueueMessage> messageCollection = messages;
+            Enqueue(messageCollection);
         }
 
         /// <summary>
-        /// Send message
+        /// Enqueue message
         /// </summary>
         /// <param name="messages">Messages</param>
-        /// <returns>response</returns>
-        public static void Send(IEnumerable<ISixnetQueueMessage> messages)
+        /// <returns></returns>
+        public static void Enqueue(IEnumerable<SixnetQueueMessage> messages)
         {
             SixnetDirectThrower.ThrowArgNullIf(messages.IsNullOrEmpty(), nameof(messages));
 
             foreach (var message in messages)
             {
-                if (message is InProcessQueueMessage inProcessQueueMessage)
+                var endpoint = GetMessageQueueEndpoint(message);
+                var provider = GetMessageQueueProvider(endpoint.Server.Type);
+
+                provider.Enqueue(new EnqueueParameter()
                 {
-                    var queue = InProcessQueueManager.GetQueue(inProcessQueueMessage.QueueName);
-                    queue.Enqueue(inProcessQueueMessage);
-                }
-                if (message is ServerQueueMessage serverQueueMessage)
-                {
-                    var messageServer = GetMessageQueueServer(serverQueueMessage);
-                    if (messageServer != null)
-                    {
-                        var provider = GetMessageQueueProvider(messageServer.Type);
-                        SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"Not set provider for {messageServer.Type}");
-                        provider.Send(messageServer, serverQueueMessage);
-                    }
-                }
+                    Endpoint = endpoint,
+                    Message = message
+                });
             }
         }
 
         #endregion
 
-        #region Listen
+        #region Consume
 
         /// <summary>
-        /// Listen message queue
+        /// Consume message queue
         /// </summary>
-        /// <param name="server">Server</param>
-        /// <param name="listenOptions">Listen options</param>
-        public static Task ListenAsync(MessageQueueServer server, ListenMessageQueueOptions listenOptions)
+        /// <param name="parameter">Consume parameter</param>
+        public static Task ConsumeAsync(ConsumeParameter parameter)
         {
-            SixnetDirectThrower.ThrowArgNullIf(server == null, nameof(server));
-            SixnetDirectThrower.ThrowArgNullIf(listenOptions == null, nameof(listenOptions));
+            SixnetDirectThrower.ThrowArgNullIf(parameter?.Server == null, nameof(ConsumeParameter.Server));
 
-            var provider = GetMessageQueueProvider(server.Type);
+            var provider = GetMessageQueueProvider(parameter.Server.Type);
 
-            SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"{server.Type} not set queue provider");
+            SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"Not set message queue provider for {parameter.Server.Type}");
 
-            return provider.ListenAsync(server, listenOptions);
+            return provider.ConsumeAsync(parameter);
         }
 
         /// <summary>
-        /// Listen message queue
+        /// Consume message queue
         /// </summary>
-        /// <param name="server">Server</param>
-        /// <param name="listenOptions">Listen options</param>
-        public static void Listen(MessageQueueServer server, ListenMessageQueueOptions listenOptions)
+        /// <param name="parameter">Consume parameter</param>
+        public static void Consume(ConsumeParameter parameter)
         {
-            SixnetDirectThrower.ThrowArgNullIf(server == null, nameof(server));
-            SixnetDirectThrower.ThrowArgNullIf(listenOptions == null, nameof(listenOptions));
+            SixnetDirectThrower.ThrowArgNullIf(parameter?.Server == null, nameof(ConsumeParameter.Server));
 
-            var provider = GetMessageQueueProvider(server.Type);
+            var provider = GetMessageQueueProvider(parameter.Server.Type);
 
-            SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"{server.Type} not set queue provider");
+            SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"Not set message queue provider for {parameter.Server.Type}");
 
-            provider.Listen(server, listenOptions);
+            provider.Consume(parameter);
         }
 
         #endregion
 
-        #region Unlisten server
+        #region Abort Consume
 
         /// <summary>
-        /// Unlisten server
+        /// Abort consume message queue
         /// </summary>
-        /// <param name="servers">Servers</param>
-        public static Task UnlistenServerAsync(IEnumerable<MessageQueueServer> servers)
+        /// <param name="parameter">Consume parameter</param>
+        public static Task AbortConsumeAsync(AbortConsumeParameter parameter)
         {
-            SixnetDirectThrower.ThrowArgErrorIf(servers.IsNullOrEmpty(), "Message queue servers is null or empty");
+            SixnetDirectThrower.ThrowArgNullIf(parameter?.Server == null, nameof(ConsumeParameter.Server));
 
-            var serverTypes = servers.Select(c => c.Type).Distinct().ToList();
-            var serverTasks = new List<Task>(serverTypes.Count);
-            foreach (var databaseType in serverTypes)
+            var provider = GetMessageQueueProvider(parameter.Server.Type);
+
+            SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"Not set message queue provider for {parameter.Server.Type}");
+
+            return provider.AbortConsumeAsync(parameter);
+        }
+
+        /// <summary>
+        /// Abort consume message queue
+        /// </summary>
+        /// <param name="parameter">Consume parameter</param>
+        public static void AbortConsume(AbortConsumeParameter parameter)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(parameter?.Server == null, nameof(ConsumeParameter.Server));
+
+            var provider = GetMessageQueueProvider(parameter.Server.Type);
+
+            SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"Not set message queue provider for {parameter.Server.Type}");
+
+            provider.AbortConsume(parameter);
+        }
+
+        #endregion
+
+        #region Add queue
+
+        /// <summary>
+        /// Add queue
+        /// </summary>
+        /// <param name="parameter">Add queue parameter</param>
+        /// <returns></returns>
+        public static Task AddQueueAsync(AddQueueParameter parameter)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(parameter?.Server == null, nameof(ConsumeParameter.Server));
+
+            var provider = GetMessageQueueProvider(parameter.Server.Type);
+
+            SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"Not set message queue provider for {parameter.Server.Type}");
+
+            return provider.AddQueueAsync(parameter);
+        }
+
+        /// <summary>
+        /// Add queue
+        /// </summary>
+        /// <param name="parameter">Add queue parameter</param>
+        /// <returns></returns>
+        public static void AddQueue(AddQueueParameter parameter)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(parameter?.Server == null, nameof(ConsumeParameter.Server));
+
+            var provider = GetMessageQueueProvider(parameter.Server.Type);
+
+            SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"Not set message queue provider for {parameter.Server.Type}");
+
+            provider.AddQueue(parameter);
+        }
+
+        #endregion
+
+        #region Delete queue
+
+        /// <summary>
+        /// Delete queue
+        /// </summary>
+        /// <param name="parameter">Delete queue parameter</param>
+        /// <returns></returns>
+        public static Task DeleteQueueAsync(DeleteQueueParameter parameter)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(parameter?.Server == null, nameof(ConsumeParameter.Server));
+
+            var provider = GetMessageQueueProvider(parameter.Server.Type);
+
+            SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"Not set message queue provider for {parameter.Server.Type}");
+
+            return provider.DeleteQueueAsync(parameter);
+        }
+
+        /// <summary>
+        /// Delete queue
+        /// </summary>
+        /// <param name="parameter">Delete queue parameter</param>
+        /// <returns></returns>
+        public static void DeleteQueue(DeleteQueueParameter parameter)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(parameter?.Server == null, nameof(ConsumeParameter.Server));
+
+            var provider = GetMessageQueueProvider(parameter.Server.Type);
+
+            SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"Not set message queue provider for {parameter.Server.Type}");
+
+            provider.DeleteQueue(parameter);
+        }
+
+        #endregion
+
+        #region Handle message
+
+        /// <summary>
+        /// Handle message
+        /// </summary>
+        /// <param name="message">message</param>
+        /// <returns></returns>
+        internal static Task<bool> HandleMessageAsync(SixnetQueueMessage message)
+        {
+            if (message == null)
             {
-                var provider = GetMessageQueueProvider(databaseType);
-
-                SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"{databaseType} not set queue provider");
-
-                var currentServers = servers.Where(c => c.Type == databaseType);
-                serverTasks.Add(provider.UnlistenServerAsync(currentServers.ToArray()));
+                return Task.FromResult(false);
             }
-            return Task.WhenAll(serverTasks);
-        }
-
-        /// <summary>
-        /// Unlisten server
-        /// </summary>
-        /// <param name="servers">Servers</param>
-        public static void UnlistenServer(params MessageQueueServer[] servers)
-        {
-            SixnetDirectThrower.ThrowArgErrorIf(servers.IsNullOrEmpty(), "Message queue servers is null or empty");
-
-            var serverTypes = servers.Select(c => c.Type).Distinct().ToList();
-            var serverTasks = new List<Task>(serverTypes.Count);
-            foreach (var databaseType in serverTypes)
+            if (message is IInternalQueueMessage executableMessage)
             {
-                var provider = GetMessageQueueProvider(databaseType);
-
-                SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"{databaseType} not set queue provider");
-
-                var currentServers = servers.Where(c => c.Type == databaseType);
-                provider.UnlistenServer(currentServers.ToArray());
+                return executableMessage.ExecuteAsync();
             }
+            var options = GetMessageQueueOptions();
+            var handler = options?.GetHandler(message.Topic);
+            return handler?.Invoke(message) ?? Task.FromResult(false);
         }
 
         #endregion
 
-        #region Unlisten queue
+        #region Get message queue endpoint
 
         /// <summary>
-        /// Unlisten queue
-        /// </summary>
-        /// <param name="server">Server</param>
-        /// <param name="queueNames">Queue names</param>
-        public static Task UnlistenQueueAsync(MessageQueueServer server, params string[] queueNames)
-        {
-            SixnetDirectThrower.ThrowArgNullIf(server == null, nameof(server));
-            SixnetDirectThrower.ThrowArgErrorIf(queueNames.IsNullOrEmpty(), "Queue names is null or empty");
-
-            var provider = GetMessageQueueProvider(server.Type);
-
-            SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"{server.Type} not set queue provider");
-
-            return provider.UnlistenQueueAsync(server, queueNames);
-        }
-
-        /// <summary>
-        /// Unlisten queue
-        /// </summary>
-        /// <param name="server">Server</param>
-        /// <param name="queueNames">Queue names</param>
-        public static void UnlistenQueue(MessageQueueServer server, params string[] queueNames)
-        {
-            SixnetDirectThrower.ThrowArgNullIf(server == null, nameof(server));
-            SixnetDirectThrower.ThrowArgErrorIf(queueNames.IsNullOrEmpty(), "Queue names is null or empty");
-
-            var provider = GetMessageQueueProvider(server.Type);
-
-            SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"{server.Type} not set queue provider");
-
-            provider.UnlistenQueue(server, queueNames);
-        }
-
-        #endregion
-
-        #region Unlisten all queue
-
-        /// <summary>
-        /// Unlisten all queue
-        /// </summary>
-        public static Task UnlistenAllAsync()
-        {
-            var providers = GetMessageQueueOptions()?.GetAllProviders();
-            if (!providers.IsNullOrEmpty())
-            {
-                var queueTasks = new List<Task>();
-                foreach (var provider in providers)
-                {
-                    queueTasks.Add(provider.UnlistenAllAsync());
-                }
-                return Task.WhenAll(queueTasks);
-            }
-            return Task.CompletedTask;
-        }
-
-        /// <summary>
-        /// Unlisten all queue
-        /// </summary>
-        public static void UnlistenAll()
-        {
-            var providers = GetMessageQueueOptions()?.GetAllProviders();
-            if (!providers.IsNullOrEmpty())
-            {
-                foreach (var provider in providers)
-                {
-                    provider.UnlistenAll();
-                }
-            }
-        }
-
-        #endregion
-
-        #region Get message server
-
-        /// <summary>
-        /// Get message queue server
+        /// Get message queue endpoint
         /// </summary>
         /// <param name="message">Message</param>
         /// <returns></returns>
-        static MessageQueueServer GetMessageQueueServer(ServerQueueMessage message)
+        static MessageQueueEndpoint GetMessageQueueEndpoint(SixnetQueueMessage message)
         {
-            var server = GetMessageQueueOptions()?.GetServer(message);
+            if (message is IInternalQueueMessage inProcessMessage)
+            {
+                return new MessageQueueEndpoint()
+                {
+                    Server = _defaultInProcessServer,
+                    QueueNames = new List<string>() { inProcessMessage.QueueName }
+                };
+            }
+            var endpoint = GetMessageQueueOptions()?.GetEndpoint(message);
+            if(endpoint == null && message?.Group == QueueMessageGroupNames.DomainMessage)
+            {
+                return new MessageQueueEndpoint()
+                {
+                    Server = _defaultInProcessServer,
+                    QueueNames = new List<string>() { InternalQueueNames.DomainMessage }
+                };
+            }
 
-            SixnetDirectThrower.ThrowSixnetExceptionIf(server == null, "Not set message queue server");
+            SixnetDirectThrower.ThrowSixnetExceptionIf(endpoint?.Server == null, $"Not set message queue server for:{message.Group}-{message.Topic}");
 
-            return server;
+            return endpoint;
         }
 
         #endregion
@@ -288,7 +304,7 @@ namespace Sixnet.MQ
         /// <returns></returns>
         internal static MessageQueueOptions GetMessageQueueOptions()
         {
-            return SixnetContainer.GetOptions<MessageQueueOptions>();
+            return SixnetContainer.GetOptions<MessageQueueOptions>() ?? _defaultMessageQueueOptions;
         }
 
         #endregion
@@ -302,31 +318,54 @@ namespace Sixnet.MQ
         /// <returns></returns>
         internal static ISixnetMessageQueueProvider GetMessageQueueProvider(MessageQueueType messageQueueType)
         {
+            if (messageQueueType == MessageQueueType.Internal)
+            {
+                return _inProcessProvider;
+            }
             var mqOptions = GetMessageQueueOptions();
-            return mqOptions?.GetProvider(messageQueueType);
+            var provider = mqOptions?.GetProvider(messageQueueType);
+
+            SixnetDirectThrower.ThrowSixnetExceptionIf(provider != null, $"Not set message queue provider for {messageQueueType}");
+
+            return provider;
         }
 
         #endregion
 
-        #region InProcessQueueNames
+        #region Internal queue names
 
         /// <summary>
-        /// In process queue names
+        /// Internal queue names
         /// </summary>
-        public static class InProcessQueueNames
+        public static class InternalQueueNames
         {
             /// <summary>
             /// Data cache queue name
             /// </summary>
-            public const string DataCache = "SIXNET_DATA_CACHE";
+            public const string DataCache = "SIXNET_DATA_CACHE_QUEUE_NAME";
             /// <summary>
             /// Logging queue name
             /// </summary>
-            public const string Logging = "SIXNET_LOGGING";
+            public const string Logging = "SIXNET_LOGGING_QUEUE_NAME";
             /// <summary>
-            /// Message queue name
+            /// DomainMessage queue name
             /// </summary>
-            public const string Message = "SIXNET_MESSAGE";
+            public const string DomainMessage = "SIXNET_DOMAIN_MESSAGE_QUEUE_NAME";
+            /// <summary>
+            /// Default queue name
+            /// </summary>
+            public const string Default = "SIXNET_DEFAULT_QUEUE_NAME";
+        }
+
+        /// <summary>
+        /// Queue message group names
+        /// </summary>
+        public static class QueueMessageGroupNames
+        {
+            /// <summary>
+            /// Domain message group
+            /// </summary>
+            public const string DomainMessage = "SIXNET_DOMAIN_MESSAGE_GROUP";
         }
 
         #endregion

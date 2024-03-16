@@ -1,29 +1,27 @@
-﻿using System;
-
-namespace Sixnet.MQ
+﻿namespace Sixnet.MQ
 {
     /// <summary>
-    /// Defines sixnet server queue message
+    /// Queue message
     /// </summary>
-    public class ServerQueueMessage : ISixnetQueueMessage
+    public class SixnetQueueMessage
     {
         /// <summary>
-        /// Gets or sets message id
+        /// Gets or sets the message id
         /// </summary>
         public string Id { get; set; }
 
         /// <summary>
-        /// Gets or sets subject group
+        /// Gets or sets the message group
         /// </summary>
         public string Group { get; set; }
 
         /// <summary>
-        /// Gets or sets subject
+        /// Gets or sets the message topic
         /// </summary>
-        public string Subject { get; set; }
+        public string Topic { get; set; }
 
         /// <summary>
-        /// Gets or sets content
+        /// Gets or sets the message content
         /// </summary>
         public string Content { get; set; }
 
@@ -36,10 +34,5 @@ namespace Sixnet.MQ
         /// Whether mandatory
         /// </summary>
         public bool Mandatory { get; set; }
-
-        /// <summary>
-        /// Return callback（must be set value if Mandatory value is True）
-        /// </summary>
-        public Func<MessageReturnRequest, MessageReturnResponse> ReturnCallback { get; set; }
     }
 }

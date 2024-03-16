@@ -3,9 +3,9 @@
 namespace Sixnet.MQ
 {
     /// <summary>
-    /// Defines listen entry
+    /// Listen queue entry
     /// </summary>
-    public class ListenEntry
+    public class ConsumeQueueEntry
     {
         /// <summary>
         /// Gets or sets the queue name
@@ -28,8 +28,8 @@ namespace Sixnet.MQ
         public bool Recover { get; set; }
 
         /// <summary>
-        /// Gets or sets the message processer
+        /// Gets or sets the message handler
         /// </summary>
-        public Func<string, bool> MessageProcesser { get; set; }
+        public Func<string, bool> MessageHandler { get; set; }
     }
 }

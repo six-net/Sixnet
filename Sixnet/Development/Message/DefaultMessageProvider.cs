@@ -1,9 +1,6 @@
-﻿using Sixnet.Exceptions;
-using Sixnet.Logging;
-using Sixnet.Threading.Locking;
-using System;
+﻿using Sixnet.MQ;
+using Sixnet.Serialization;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -21,22 +18,21 @@ namespace Sixnet.Development.Message
         /// <returns>Return send result</returns>
         public void Send(SendMessageParameter parameter)
         {
-            var messageGroup = GroupMessage(parameter);
-            foreach (var msgGroupItem in messageGroup)
+            if (parameter?.Messages.IsNullOrEmpty() ?? true)
             {
-                try
-                {
-                    var messageHandler = SixnetMessager.GetMessageHandler(msgGroupItem.Key);
-                    messageHandler.Send(new SendMessageContext()
-                    {
-                        Messages = msgGroupItem.Value
-                    });
-                }
-                catch (Exception ex)
-                {
-                    SixnetLogger.LogError(ex, ex.Message);
-                }
+                return;
             }
+            var queueMessages = parameter.Messages.Select(msg =>
+            {
+                return new SixnetQueueMessage()
+                {
+                    Topic = msg.Subject,
+                    Group = SixnetMQ.QueueMessageGroupNames.DomainMessage,
+                    Id = msg.Id,
+                    Content = SixnetJsonSerializer.Serialize(msg),
+                };
+            }).ToList();
+            SixnetMQ.Enqueue(queueMessages);
         }
 
         /// <summary>
@@ -44,83 +40,23 @@ namespace Sixnet.Development.Message
         /// </summary>
         /// <param name="options">Send message options</param>
         /// <returns>Return send result</returns>
-        public async Task SendAsync(SendMessageParameter parameter)
+        public Task SendAsync(SendMessageParameter parameter)
         {
-            var messageGroup = GroupMessage(parameter);
-            foreach (var msgGroupItem in messageGroup)
+            if (parameter?.Messages.IsNullOrEmpty() ?? true)
             {
-                try
-                {
-                    var messageHandler = SixnetMessager.GetMessageHandler(msgGroupItem.Key);
-                    await messageHandler.SendAsync(new SendMessageContext()
-                    {
-                        Messages = msgGroupItem.Value
-                    }).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    SixnetLogger.LogError(ex, ex.Message);
-                }
+                return Task.CompletedTask;
             }
-        }
-
-        /// <summary>
-        /// Group message
-        /// Key => message type
-        /// Value => subject entry
-        /// </summary>
-        /// <param name="parameter"></param>
-        /// <returns></returns>
-        Dictionary<string, List<SubjectMessageEntry>> GroupMessage(SendMessageParameter parameter)
-        {
-            SixnetDirectThrower.ThrowArgNullIf(parameter == null, nameof(parameter));
-            SixnetDirectThrower.ThrowArgNullIf(parameter.Messages.IsNullOrEmpty(), nameof(SendMessageParameter.Messages));
-
-            var messageGroups = new Dictionary<string, List<SubjectMessageEntry>>();
-            var messageOptions = SixnetMessager.GetMessageOptions();
-            foreach (var msg in parameter.Messages)
+            var queueMessages = parameter.Messages.Select(msg =>
             {
-                if (string.IsNullOrWhiteSpace(msg.Subject))
+                return new SixnetQueueMessage()
                 {
-                    continue;
-                }
-                var supportMessageTypes = messageOptions.GetSupportMessageTypes(msg.Subject);
-                if (supportMessageTypes.IsNullOrEmpty())
-                {
-                    continue;
-                }
-                foreach (var msgType in supportMessageTypes)
-                {
-                    if (messageGroups.ContainsKey(msgType))
-                    {
-                        var subjectMessageEntry = messageGroups[msgType].FirstOrDefault(c => c.Subject == msg.Subject);
-                        if (subjectMessageEntry != null)
-                        {
-                            subjectMessageEntry.MessageInfos.Add(msg);
-                        }
-                        else
-                        {
-                            messageGroups[msgType].Add(new SubjectMessageEntry()
-                            {
-                                Subject = msg.Subject,
-                                MessageInfos = new List<MessageInfo>() { msg }
-                            });
-                        }
-                    }
-                    else
-                    {
-                        messageGroups.Add(msgType, new List<SubjectMessageEntry>()
-                        {
-                            new()
-                            {
-                                Subject = msg.Subject,
-                                MessageInfos = new List<MessageInfo>(){ msg }
-                            }
-                        });
-                    }
-                }
-            }
-            return messageGroups;
+                    Topic = msg.Subject,
+                    Group = string.Empty,
+                    Id = msg.Id,
+                    Content = SixnetJsonSerializer.Serialize(msg),
+                };
+            }).ToList();
+            return SixnetMQ.EnqueueAsync(queueMessages);
         }
     }
 }

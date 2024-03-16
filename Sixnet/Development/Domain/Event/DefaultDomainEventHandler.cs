@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Sixnet.Development.Data.Event;
 using Sixnet.Development.Event;
-using Sixnet.Exceptions;
 
 namespace Sixnet.Development.Domain.Event
 {

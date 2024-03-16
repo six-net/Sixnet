@@ -1,13 +1,15 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Sixnet.MQ;
+using Sixnet.MQ.InProcess;
 
 namespace Sixnet.Logging
 {
     /// <summary>
     /// Defines log internal queue task
     /// </summary>
-    public class InProcessLoggingMessage : InProcessQueueMessage
+    internal class InProcessLoggingMessage : SixnetQueueMessage, IInternalQueueMessage
     {
         /// <summary>
         /// Gets or sets the log category name
@@ -40,8 +42,14 @@ namespace Sixnet.Logging
         public object[] Args { get; set; }
 
         /// <summary>
-        /// Execute write log
+        /// Gets or sets the queue name
         /// </summary>
-        public override void Execute() => SixnetLogger.LogProvider?.WriteLog(CategoryName, Level, EventId, Exception, Message, Args);
+        public string QueueName { get; set; } = SixnetMQ.InternalQueueNames.Logging;
+
+        public Task<bool> ExecuteAsync()
+        {
+            SixnetLogger.LogProvider?.WriteLog(CategoryName, Level, EventId, Exception, Message, Args);
+            return Task.FromResult(true);
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Sixnet.DependencyInjection;
+using Sixnet.Development.Message;
 using Sixnet.Exceptions;
 using Sixnet.Model;
 using Sixnet.MQ;
@@ -232,6 +233,16 @@ namespace Sixnet.Net.Email
             return Send(account, string.Empty, title, content, addresses);
         }
 
+        /// <summary>
+        /// Send template message
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public static SendEmailResult SendTemplateMessage(SendMessageContext context)
+        {
+            return Send(GetEmailInfo(context.Template, context.Message, context.Receivers))?.FirstOrDefault();
+        }
+
         #endregion
 
         #region Util
@@ -274,6 +285,51 @@ namespace Sixnet.Net.Email
         static EmailOptions GetEmailOptions()
         {
             return SixnetContainer.GetOptions<EmailOptions>() ?? _defaultEmailOptions;
+        }
+
+        /// <summary>
+        /// Get email info
+        /// </summary>
+        /// <returns></returns>
+        static EmailInfo GetEmailInfo(MessageTemplate template, MessageInfo message, IEnumerable<string> emails)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(template.Title), "Message template title is null or empty");
+            SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(template.Content), "Message template content is null or empty");
+            SixnetDirectThrower.ThrowArgNullIf(message == null, nameof(message));
+            SixnetDirectThrower.ThrowArgNullIf(emails.IsNullOrEmpty(), nameof(emails));
+
+            // Parameters
+            var parameterDict = message.Data?.ToStringDictionary();
+            var templateParameters = SixnetMessager.GetTemplateParameters(parameterDict);
+
+            // Title
+            var titleResolveResult = SixnetMessager.ResolveTemplate(template.Title, templateParameters);
+            if (!titleResolveResult.Success || string.IsNullOrWhiteSpace(titleResolveResult.ErrorParameterName))
+            {
+                SixnetDirectThrower.ThrowInvalidOperationIf(!string.IsNullOrWhiteSpace(titleResolveResult.ErrorParameterName)
+                    , $"Not set '{titleResolveResult.ErrorParameterName}' value in the email title template");
+            }
+
+            // Content
+            var contentResolveResult = SixnetMessager.ResolveTemplate(template.Content, templateParameters);
+            if (!contentResolveResult.Success || string.IsNullOrWhiteSpace(contentResolveResult.ErrorParameterName))
+            {
+                SixnetDirectThrower.ThrowInvalidOperationIf(!string.IsNullOrWhiteSpace(contentResolveResult.ErrorParameterName)
+                    , $"Not set '{contentResolveResult.ErrorParameterName}' value in the email body template");
+            }
+
+            // Email info
+            var email = new EmailInfo()
+            {
+                Subject = message.Subject,
+                Content = contentResolveResult.NewContent,
+                Title = titleResolveResult.NewContent,
+                Emails = emails,
+                Properties = parameterDict
+            };
+            email.AddWorkId(message.WorkId);
+            email.AddTemplateMessageId(message.Id);
+            return email;
         }
 
         #endregion

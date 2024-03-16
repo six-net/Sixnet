@@ -29,7 +29,7 @@ namespace Sixnet.Development.Event
         /// <summary>
         /// Handle data event
         /// </summary>
-        /// <param name="dataEvent">Data event</param>
+        /// <param name="eventData">Data event</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns></returns>
         public virtual Task Handle(ISixnetEvent eventData, CancellationToken cancellationToken)

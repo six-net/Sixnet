@@ -8,8 +8,18 @@ namespace Sixnet.Development.Message
     public class SendMessageContext
     {
         /// <summary>
-        /// Gets or sets the messages
+        /// Gets or sets the message template
         /// </summary>
-        public List<SubjectMessageEntry> Messages { get; set;}
+        public MessageTemplate Template { get; set; }
+
+        /// <summary>
+        /// Gets or sets the message
+        /// </summary>
+        public MessageInfo Message { get; set; }
+
+        /// <summary>
+        /// Gets or sets the receivers
+        /// </summary>
+        public List<string> Receivers { get; set; }
     }
 }

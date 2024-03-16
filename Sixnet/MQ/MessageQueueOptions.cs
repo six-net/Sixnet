@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Sixnet.MQ
 {
@@ -16,20 +17,42 @@ namespace Sixnet.MQ
         /// Message queue providers
         /// </summary>
         readonly Dictionary<MessageQueueType, ISixnetMessageQueueProvider> _providers = new();
+        readonly Dictionary<string, Func<SixnetQueueMessage, Task<bool>>> _messageHandlers = new();
 
         #endregion
 
         #region Properties
 
         /// <summary>
-        /// Get message queue server func
+        /// Get message queue endpoint
         /// </summary>
-        public Func<ServerQueueMessage, MessageQueueServer> GetMessageQueueServer { get; set; }
+        public Func<SixnetQueueMessage, MessageQueueEndpoint> GetMessageQueueEndpoint { get; set; }
 
         /// <summary>
-        /// Gets or sets the default message server
+        /// Gets or sets the default message queue endpoint
         /// </summary>
-        public MessageQueueServer Server { get; set; }
+        public MessageQueueEndpoint Endpoint { get; set; }
+
+        /// <summary>
+        /// Whether auto consome internal queue.
+        /// Default is true.
+        /// </summary>
+        public bool AutoConsumeInternalQueue { get; set; } = true;
+
+        /// <summary>
+        /// Whether create internal queue
+        /// </summary>
+        public bool AutoCreateInternalQueue { get; set; } = true;
+
+        /// <summary>
+        /// Whether enable default domain message internal queue
+        /// </summary>
+        public bool EnableDefaultDomainMessageInternalQueue { get; set; } = true;
+
+        /// <summary>
+        /// Gets or sets the mandatory callback
+        /// </summary>
+        public Func<SixnetQueueMessage, bool> MandatoryCallback { get; set; }
 
         #endregion
 
@@ -61,14 +84,13 @@ namespace Sixnet.MQ
         }
 
         /// <summary>
-        /// Get server
+        /// Get endpoint
         /// </summary>
         /// <param name="message">Message</param>
         /// <returns></returns>
-        public MessageQueueServer GetServer(ServerQueueMessage message)
+        public MessageQueueEndpoint GetEndpoint(SixnetQueueMessage message)
         {
-            var server = GetMessageQueueServer(message);
-            return server ?? Server;
+            return GetMessageQueueEndpoint(message) ?? Endpoint;
         }
 
         /// <summary>
@@ -78,6 +100,54 @@ namespace Sixnet.MQ
         internal IEnumerable<ISixnetMessageQueueProvider> GetAllProviders()
         {
             return _providers.Values;
+        }
+
+        /// <summary>
+        /// Add message handler
+        /// </summary>
+        /// <param name="topic">Message topic</param>
+        /// <param name="handler">Message handler</param>
+        public void AddHandler(string topic, Func<SixnetQueueMessage, Task<bool>> handler)
+        {
+            if (string.IsNullOrWhiteSpace(topic) || handler == null)
+            {
+                return;
+            }
+            _messageHandlers[topic] = handler;
+        }
+
+        /// <summary>
+        /// Add message handler
+        /// </summary>
+        /// <param name="topic">Message topic</param>
+        /// <param name="handler">Message handler</param>
+        public void AddHandler(string topic, Func<SixnetQueueMessage, bool> handler)
+        {
+            if (string.IsNullOrWhiteSpace(topic) || handler == null)
+            {
+                return;
+            }
+            Task<bool> asyncHandler(SixnetQueueMessage msg)
+            {
+                var result = handler(msg);
+                return Task.FromResult(result);
+            }
+            AddHandler(topic, asyncHandler);
+        }
+
+        /// <summary>
+        /// Get handler
+        /// </summary>
+        /// <param name="topic">Message topic</param>
+        /// <returns></returns>
+        public Func<SixnetQueueMessage, Task<bool>> GetHandler(string topic)
+        {
+            if(string.IsNullOrWhiteSpace(topic))
+            {
+                return null;
+            }
+            _messageHandlers.TryGetValue(topic, out var handler);
+            return handler;
         }
 
         #endregion

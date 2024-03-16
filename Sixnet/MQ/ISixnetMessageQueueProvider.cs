@@ -9,97 +9,71 @@ namespace Sixnet.MQ
     public interface ISixnetMessageQueueProvider
     {
         /// <summary>
-        /// Send message
+        /// Add queue
         /// </summary>
-        /// <param name="server">Server</param>
-        /// <param name="messages">Messages</param>
+        /// <param name="parameter">Add queue parameter</param>
         /// <returns></returns>
-        Task SendAsync(MessageQueueServer server, params ServerQueueMessage[] messages);
+        Task AddQueueAsync(AddQueueParameter parameter);
 
         /// <summary>
-        /// Send message
+        /// Add queue
         /// </summary>
-        /// <param name="server">Server</param>
-        /// <param name="messages">Messages</param>
+        /// <param name="parameter">Add queue parameter</param>
         /// <returns></returns>
-        Task SendAsync(MessageQueueServer server, IEnumerable<ServerQueueMessage> messages);
+        void AddQueue(AddQueueParameter parameter);
 
         /// <summary>
-        /// Send message
+        /// Delete queue
         /// </summary>
-        /// <param name="server">Server</param>
-        /// <param name="messages">Messages</param>
+        /// <param name="parameter">Delete queue parameter</param>
         /// <returns></returns>
-        void Send(MessageQueueServer server, params ServerQueueMessage[] messages);
+        Task DeleteQueueAsync(DeleteQueueParameter parameter);
 
         /// <summary>
-        /// Send message
+        /// Delete queue
         /// </summary>
-        /// <param name="server">Server</param>
-        /// <param name="messages">Messages</param>
+        /// <param name="parameter">Delete queue parameter</param>
         /// <returns></returns>
-        void Send(MessageQueueServer server, IEnumerable<ServerQueueMessage> messages);
+        void DeleteQueue(DeleteQueueParameter parameter);
 
         /// <summary>
-        /// Listen message queue
+        /// Enqueue
         /// </summary>
-        /// <param name="server">Server</param>
-        /// <param name="listenOptions">Listen options</param>
-        Task ListenAsync(MessageQueueServer server, ListenMessageQueueOptions listenOptions);
+        /// <param name="parameter">Enqueue parameter</param>
+        /// <returns></returns>
+        Task EnqueueAsync(EnqueueParameter parameter);
 
         /// <summary>
-        /// Listen message queue
+        /// Enqueue
         /// </summary>
-        /// <param name="server">Server</param>
-        /// <param name="listenOptions">Listen options</param>
-        void Listen(MessageQueueServer server, ListenMessageQueueOptions listenOptions);
+        /// <param name="parameter">Enqueue parameter</param>
+        /// <returns></returns>
+        void Enqueue(EnqueueParameter parameter);
 
         /// <summary>
-        /// Unlisten server
+        /// Consume
         /// </summary>
-        /// <param name="servers">Servers</param>
-        Task UnlistenServerAsync(params MessageQueueServer[] servers);
+        /// <param name="parameter">Consume parameter</param>
+        /// <returns></returns>
+        Task ConsumeAsync(ConsumeParameter parameter);
 
         /// <summary>
-        /// Unlisten server
+        /// Consume
         /// </summary>
-        /// <param name="servers">Servers</param>
-        Task UnlistenServerAsync(IEnumerable<MessageQueueServer> servers);
+        /// <param name="parameter">Consume parameter</param>
+        /// <returns></returns>
+        void Consume(ConsumeParameter parameter);
 
         /// <summary>
-        /// Unlisten server
+        /// Abort consume
         /// </summary>
-        /// <param name="servers">Servers</param>
-        void UnlistenServer(params MessageQueueServer[] servers);
+        /// <param name="parameter">Abort consume parameter</param>
+        Task AbortConsumeAsync(AbortConsumeParameter parameter);
 
         /// <summary>
-        /// Unlisten server
+        /// Abort consume
         /// </summary>
-        /// <param name="servers">Servers</param>
-        void UnlistenServer(IEnumerable<MessageQueueServer> servers);
-
-        /// <summary>
-        /// Unlisten queue
-        /// </summary>
-        /// <param name="server">Server</param>
-        /// <param name="queueNames">Queue names</param>
-        Task UnlistenQueueAsync(MessageQueueServer server, params string[] queueNames);
-
-        /// <summary>
-        /// Unlisten queue
-        /// </summary>
-        /// <param name="server">Server</param>
-        /// <param name="queueNames">Queue names</param>
-        void UnlistenQueue(MessageQueueServer server, params string[] queueNames);
-
-        /// <summary>
-        /// Unlisten all queue
-        /// </summary>
-        Task UnlistenAllAsync();
-
-        /// <summary>
-        /// Unlisten all queue
-        /// </summary>
-        void UnlistenAll();
+        /// <param name="parameter">Abort consume parameter</param>
+        void AbortConsume(AbortConsumeParameter parameter);
     }
 }

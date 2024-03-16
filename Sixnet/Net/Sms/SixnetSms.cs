@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using Sixnet.DependencyInjection;
+using Sixnet.Development.Message;
 using Sixnet.Exceptions;
+using Sixnet.Model;
+using Sixnet.Net.Email;
 
 namespace Sixnet.Net.Sms
 {
@@ -303,7 +306,51 @@ namespace Sixnet.Net.Sms
 
         #endregion
 
+        #region Send template message
+
+        /// <summary>
+        /// Send template message
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public static SendSmsResult SendTemplateMessage(SendMessageContext context)
+        {
+            return Send(GetSmsParameter(context.Template, context.Message, context.Receivers));
+        }
+
+        #endregion
+
         #region Util
+
+        static SendSmsParameter GetSmsParameter(MessageTemplate template, MessageInfo message, IEnumerable<string> mobiles)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(message == null, nameof(message));
+            SixnetDirectThrower.ThrowArgNullIf(mobiles.IsNullOrEmpty(), nameof(mobiles));
+
+            // Parameters
+            var parameterDict = message.Data?.ToStringDictionary();
+            var templateParameters = SixnetMessager.GetTemplateParameters(parameterDict);
+
+            // Content
+            var contentResolveResult = SixnetMessager.ResolveTemplate(template.Content, templateParameters);
+            if (!contentResolveResult.Success || string.IsNullOrWhiteSpace(contentResolveResult.ErrorParameterName))
+            {
+                SixnetDirectThrower.ThrowInvalidOperationIf(!string.IsNullOrWhiteSpace(contentResolveResult.ErrorParameterName)
+                    , $"Not set '{contentResolveResult.ErrorParameterName}' value in the sms template");
+            }
+
+            // Sms parameter
+            var smsParameter = new SendSmsParameter()
+            {
+                Subject = message.Subject,
+                Content = contentResolveResult.NewContent,
+                Mobiles = mobiles,
+                Properties = parameterDict
+            };
+            smsParameter.AddWorkId(message.WorkId);
+            smsParameter.AddTemplateMessageId(message.Id);
+            return smsParameter;
+        }
 
         /// <summary>
         /// Execute sms operation

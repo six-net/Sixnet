@@ -8,7 +8,7 @@ namespace Sixnet.Development.Message
     /// </summary>
     internal class MessageBox
     {
-        readonly List<MessageInfo> _messages = new List<MessageInfo>();
+        readonly List<MessageInfo> _messages = new();
 
         private MessageBox()
         {
@@ -16,24 +16,27 @@ namespace Sixnet.Development.Message
             SixnetMessager.MessageBox = this;
         }
 
+        /// <summary>
+        /// Gets or sets the messages
+        /// </summary>
         public IEnumerable<MessageInfo> Messages => _messages;
 
         /// <summary>
-        /// Add message
+        /// Store message
         /// </summary>
-        /// <param name="newMessages">new messages</param>
-        public void Add(params MessageInfo[] newMessages)
+        /// <param name="messages">Messages</param>
+        public void Store(IEnumerable<MessageInfo> messages)
         {
-            if (!newMessages.IsNullOrEmpty())
+            if (!messages.IsNullOrEmpty())
             {
-                foreach (MessageInfo message in newMessages)
+                foreach (MessageInfo message in messages)
                 {
                     if (string.IsNullOrWhiteSpace(message.WorkId))
                     {
                         message.WorkId = UnitOfWork.Current?.WorkId;
                     }
                 }
-                _messages.AddRange(newMessages);
+                _messages.AddRange(messages);
             }
         }
 

@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Sixnet.DependencyInjection;
 using Sixnet.MQ;
+using Sixnet.MQ.InProcess;
 
 namespace Sixnet.Logging
 {
@@ -13,25 +14,19 @@ namespace Sixnet.Logging
         #region Fields
 
         /// <summary>
-        /// Gets or sets the default logger catgory name.
-        /// Default value is empty
+        /// Default logger category name
         /// </summary>
-        public static string DefaultLoggerCategoryName { get; set; } = "Sixnet";
+        internal static readonly string DefaultLoggerCategoryName = "Sixnet";
+
+        /// <summary>
+        /// Default log provider
+        /// </summary>
+        static readonly DefaultLogProvider _defaultLogProvider = new();
 
         /// <summary>
         /// Log provider
         /// </summary>
-        internal static readonly ISixnetLogProvider LogProvider = null;
-
-        #endregion
-
-        #region Constructor
-
-        static SixnetLogger()
-        {
-            LogProvider = SixnetContainer.GetService<ISixnetLogProvider>();
-            LogProvider ??= new DefaultLogProvider();
-        } 
+        internal static ISixnetLogProvider LogProvider => SixnetContainer.GetService<ISixnetLogProvider>() ?? _defaultLogProvider;
 
         #endregion
 
@@ -62,7 +57,7 @@ namespace Sixnet.Logging
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         static void WriteLog(string categoryName, LogLevel level, EventId eventId, Exception exception, string message, params object[] args)
         {
-            var writeLogCommand = new InProcessLoggingMessage()
+            var logMessage = new InProcessLoggingMessage()
             {
                 CategoryName = categoryName,
                 Level = level,
@@ -71,7 +66,7 @@ namespace Sixnet.Logging
                 Message = message,
                 Args = args
             };
-            InProcessQueueManager.GetQueue(SixnetMQ.InProcessQueueNames.Logging).Enqueue(writeLogCommand);
+            _ = SixnetMQ.EnqueueAsync(logMessage);
         }
 
         #endregion
