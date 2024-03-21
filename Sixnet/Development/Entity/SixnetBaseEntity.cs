@@ -45,7 +45,7 @@ namespace Sixnet.Development.Entity
         /// <returns>Return whether allow to save</returns>
         protected virtual bool SaveValidation()
         {
-            this.Validate(false, "", UseCaseNames.Domain);
+            this.Validate("", false, UseCaseNames.Domain);
             return true;
         }
 

@@ -297,7 +297,7 @@ namespace System
         /// </summary>
         /// <param name="obj"></param>
         /// <param name="useCase"></param>
-        public static void Validate(this object obj, bool allowNull = false, string nullMsg = "", string useCase = UseCaseNames.Domain)
+        public static void Validate(this object obj, string nullMsg = "", bool allowNull = false, string useCase = UseCaseNames.Domain)
         {
             SixnetDirectThrower.ThrowArgNullIf(obj == null && !allowNull, string.IsNullOrEmpty(nullMsg) ? nameof(obj) : nullMsg);
             if (obj != null)
