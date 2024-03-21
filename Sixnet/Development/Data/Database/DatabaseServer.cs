@@ -17,7 +17,7 @@ namespace Sixnet.Development.Data.Database
         /// <summary>
         /// Gets or sets the database server role
         /// </summary>
-        public DatabaseServerRole Role { get; set; }
+        public DatabaseServerRole Role { get; set; } = DatabaseServerRole.Default;
 
         /// <summary>
         /// Gets or sets connection string

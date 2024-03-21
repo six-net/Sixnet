@@ -1,6 +1,7 @@
 ﻿using Sixnet.DependencyInjection;
 using Sixnet.Development.Entity;
 using Sixnet.Logging;
+using Sixnet.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,9 +32,14 @@ namespace Sixnet.App
         static readonly Type _entityContractType = typeof(ISixnetEntity);
 
         /// <summary>
-        /// Module contract contract
+        /// Module contract
         /// </summary>
         static readonly Type _moduleContractType = typeof(ISixnetModule);
+
+        /// <summary>
+        /// Configurable contract 
+        /// </summary>
+        static readonly Type _configurableContractType = typeof(ISixnetConfigurable);
 
         /// <summary>
         /// Convention service patterns
@@ -118,10 +124,15 @@ namespace Sixnet.App
                     }
                     else if (!type.IsAbstract)
                     {
-                        if (_moduleContractType.IsAssignableFrom(type)) // module configuration
+                        if (_moduleContractType.IsAssignableFrom(type)) // init module
                         {
                             var moduleConfiguration = Activator.CreateInstance(type) as ISixnetModule;
                             SixnetApplication.AddModule(moduleConfiguration);
+                        }
+                        if (!_configurableContractType.IsAssignableFrom(type))
+                        {
+                            var configModel = Activator.CreateInstance(type) as ISixnetConfigurable;
+                            SixnetApplication.AddConfigurable(configModel);
                         }
                     }
                 }

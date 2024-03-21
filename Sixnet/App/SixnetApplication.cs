@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Sixnet.Logging;
+using Sixnet.Model;
 
 namespace Sixnet.App
 {
@@ -53,6 +54,11 @@ namespace Sixnet.App
         /// modules
         /// </summary>
         static List<ISixnetModule> _modules = null;
+
+        /// <summary>
+        /// Config models
+        /// </summary>
+        static List<ISixnetConfigurable> _configModels = null;
 
         /// <summary>
         /// Default application options
@@ -234,7 +240,36 @@ namespace Sixnet.App
                 {
                     configration?.Init();
                 }
+                _modules?.Clear();
                 _modules = null;
+            }
+        }
+
+        /// <summary>
+        /// Add Configurable model
+        /// <param name="module"></param>
+        internal static void AddConfigurable(ISixnetConfigurable configurable)
+        {
+            if (configurable != null)
+            {
+                _configModels ??= new List<ISixnetConfigurable>();
+                _configModels.Add(configurable);
+            }
+        }
+
+        /// <summary>
+        /// Execute configurable
+        /// </summary>
+        internal static void ExecuteConfigurable()
+        {
+            if (!_configModels.IsNullOrEmpty())
+            {
+                foreach (var configurable in _configModels)
+                {
+                    configurable?.Configure();
+                }
+                _configModels?.Clear();
+                _configModels = null;
             }
         }
 

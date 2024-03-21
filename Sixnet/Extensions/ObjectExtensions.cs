@@ -3,10 +3,13 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
+using Sixnet.Exceptions;
 using Sixnet.Mapper;
 using Sixnet.Model;
 using Sixnet.Serialization;
 using Sixnet.Serialization.Json;
+using Sixnet.Validation;
+using static Sixnet.Validation.ValidationConstants;
 
 namespace System
 {
@@ -283,6 +286,26 @@ namespace System
                 return Convert.ChangeType(data, targetType);
             }
             return null;
+        }
+
+        #endregion
+
+        #region Validate
+
+        /// <summary>
+        /// Validate object
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="useCase"></param>
+        public static void Validate(this object obj, bool allowNull = false, string nullMsg = "", string useCase = UseCaseNames.Domain)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(obj == null && !allowNull, string.IsNullOrEmpty(nullMsg) ? nameof(obj) : nullMsg);
+            if (obj != null)
+            {
+                var verifyResults = SixnetValidations.Validate(obj, useCase);
+                var errorMessages = verifyResults.GetErrorMessages(true);
+                SixnetDirectThrower.ThrowSixnetExceptionIf(!errorMessages.IsNullOrEmpty(), SixnetJsonSerializer.Serialize(errorMessages));
+            }
         }
 
         #endregion

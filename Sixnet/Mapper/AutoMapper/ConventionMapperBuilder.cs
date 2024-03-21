@@ -54,7 +54,6 @@ namespace AutoMapper
             {
                 var mappableModelContract = typeof(ISixnetMappable);
                 var entityContract = typeof(ISixnetEntity);
-                var domainParameterContract = typeof(SixnetDomainParameter);
                 var defaultMemberValidation = MemberList.None;
                 var stringComparison = StringComparison.OrdinalIgnoreCase;
                 //Mappable models
@@ -66,7 +65,7 @@ namespace AutoMapper
                     {
                         mappableModelName = mappableModelName.LSplit("Entity")[0];
                     }
-                    if (domainParameterContract.IsAssignableFrom(mappableModelType) && mappableModelName.EndsWith("Parameter"))
+                    if (mappableModelName.EndsWith("Parameter"))
                     {
                         mappableModelName = mappableModelName.LSplit("Parameter")[0];
                     }

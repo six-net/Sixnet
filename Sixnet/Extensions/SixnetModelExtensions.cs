@@ -65,20 +65,5 @@ namespace Sixnet.Model
         }
 
         #endregion
-
-        #region Check
-
-        /// <summary>
-        /// Check
-        /// </summary>
-        /// <param name="data">Data</param>
-        /// <param name="nullMessage">Message when data is null</param>
-        public static void Check(this ISixnetCheckable data, string nullMessage = "")
-        {
-            SixnetDirectThrower.ThrowArgNullIf(data == null, nullMessage);
-            data.Check();
-        }
-
-        #endregion
     }
 }

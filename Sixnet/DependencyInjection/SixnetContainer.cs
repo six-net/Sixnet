@@ -125,6 +125,9 @@ namespace Sixnet.DependencyInjection
             //Init module
             SixnetApplication.InitModules();
 
+            //Configurable
+            SixnetApplication.ExecuteConfigurable();
+
             //Object mapper
             SixnetMapper.BuildMapper();
 

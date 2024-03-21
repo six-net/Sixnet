@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using Sixnet.Validation;
 using Sixnet.Expressions.Regular;
+using Sixnet.Localization;
 
 namespace System
 {
@@ -849,7 +850,7 @@ namespace System
         /// </summary>
         /// <param name="results">Results</param>
         /// <returns>Return the error messages</returns>
-        public static List<string> GetErrorMessages(this IEnumerable<Sixnet.Validation.ValidationResult> results)
+        public static List<string> GetErrorMessages(this IEnumerable<Sixnet.Validation.ValidationResult> results, bool local = true)
         {
             if (results == null)
             {
@@ -860,7 +861,7 @@ namespace System
             {
                 if (!result.Success)
                 {
-                    errorMessages.Add($"{result.FieldName}{SixnetValidations.FieldErrorMessageSeparator}{result.ErrorMessage}");
+                    errorMessages.Add($"{result.FieldName}{SixnetValidations.FieldErrorMessageSeparator}{(local ? SixnetLocalizer.GetString(result.ErrorMessage) : result.ErrorMessage)}");
                 }
             }
             return errorMessages;

@@ -279,9 +279,9 @@ namespace System
         /// <param name="value">Value</param>
         /// <param name="args">Args</param>
         /// <returns></returns>
-        public static string Localize(this string value,params string[] args)
+        public static string Localize(this string value, params string[] args)
         {
-            return SixnetLocalizer.GetString(value,args);
+            return SixnetLocalizer.GetString(value, args);
         }
 
         /// <summary>
@@ -293,7 +293,27 @@ namespace System
         public static string Localize<TResourceSource>(this string value, params string[] args)
         {
             return SixnetLocalizer.GetString<TResourceSource>(value, args);
-        }        
+        }
+
+        #endregion
+
+        #region Split by capital
+
+        /// <summary>
+        /// Split by capital
+        /// </summary>
+        /// <param name="value">Value</param>
+        /// <param name="joinString">Join string</param>
+        /// <returns></returns>
+        public static string SplitByCapital(this string value, string joinString = "_")
+        {
+            if (string.IsNullOrWhiteSpace(value) || string.IsNullOrWhiteSpace(joinString))
+            {
+                return string.Empty;
+            }
+            var vals = Regex.Split(value, @"(?<!^)(?=[A-Z])");
+            return string.Join(joinString, vals);
+        }
 
         #endregion
     }
