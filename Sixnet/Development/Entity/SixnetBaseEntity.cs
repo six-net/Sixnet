@@ -6,6 +6,7 @@ using Sixnet.Validation;
 using Sixnet.Development.Data.Field;
 using Sixnet.Exceptions;
 using Sixnet.Serialization;
+using static Sixnet.Validation.ValidationConstants;
 
 namespace Sixnet.Development.Entity
 {
@@ -44,9 +45,7 @@ namespace Sixnet.Development.Entity
         /// <returns>Return whether allow to save</returns>
         protected virtual bool SaveValidation()
         {
-            var verifyResults = SixnetValidations.Validate(this, ValidationConstants.UseCaseNames.Domain);
-            var errorMessages = verifyResults.GetErrorMessages();
-            SixnetDirectThrower.ThrowSixnetExceptionIf(!errorMessages.IsNullOrEmpty(), SixnetJsonSerializer.Serialize(errorMessages));
+            this.Validate(false, "", UseCaseNames.Domain);
             return true;
         }
 
