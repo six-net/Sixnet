@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Text;
 using Sixnet.Development.Command;
 using Sixnet.Exceptions;
+using Sixnet.Expressions.Linq;
 using Sixnet.Model;
 
 namespace Sixnet.Development.Data.Field
@@ -44,6 +46,19 @@ namespace Sixnet.Development.Data.Field
             if (!string.IsNullOrWhiteSpace(propertyName))
             {
                 newValues[propertyName] = newValue;
+            }
+        }
+
+        /// <summary>
+        /// Set new value
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="updateExpression">Update expression</param>
+        public void SetNewValue<T>(Expression<Func<T, bool>> updateExpression)
+        {
+            if (updateExpression != null)
+            {
+                SixnetExpressionHelper.AppendToFieldsAssignment(this, updateExpression);
             }
         }
 
@@ -116,6 +131,20 @@ namespace Sixnet.Development.Data.Field
         public static FieldsAssignment Create()
         {
             return new FieldsAssignment();
+        }
+
+        /// <summary>
+        /// Create a fields assignment
+        /// </summary>
+        /// <returns></returns>
+        public static FieldsAssignment Create<T>(Expression<Func<T, bool>> updateExpression)
+        {
+            var fieldsAssignment = Create();
+            if (updateExpression != null)
+            {
+                SixnetExpressionHelper.AppendToFieldsAssignment(fieldsAssignment, updateExpression);
+            }
+            return fieldsAssignment;
         }
 
         #endregion

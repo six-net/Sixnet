@@ -1283,6 +1283,18 @@ namespace Sixnet.Expressions.Linq
             return fieldsAssignment;
         }
 
+        internal static FieldsAssignment AppendToFieldsAssignment(FieldsAssignment fieldsAssignment, Expression updateExpression)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(updateExpression == null, nameof(updateExpression));
+            SixnetDirectThrower.ThrowNotSupportIf(updateExpression.NodeType != ExpressionType.Lambda, updateExpression.NodeType.ToString());
+
+            var lambdaExp = updateExpression as LambdaExpression;
+            var parameterIndexes = GetLambdaParameterIndexes(lambdaExp);
+
+            GenerateFieldsAssignmentCore(fieldsAssignment, parameterIndexes, lambdaExp.Body);
+            return fieldsAssignment;
+        }
+
         static void GenerateFieldsAssignmentCore(FieldsAssignment fieldsAssignment, Dictionary<string, int> parameterIndexes, Expression updateExpression)
         {
             var binaryExp = updateExpression as BinaryExpression;
