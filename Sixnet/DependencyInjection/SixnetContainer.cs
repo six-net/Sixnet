@@ -15,6 +15,7 @@ using Sixnet.Exceptions;
 using Sixnet.IO.FileAccess;
 using Sixnet.Mapper;
 using Sixnet.MQ;
+using Sixnet.MQ.InProcess;
 using Sixnet.Net.Email;
 using Sixnet.Net.Sms;
 using Sixnet.Net.Upload;
@@ -119,16 +120,16 @@ namespace Sixnet.DependencyInjection
             }
             Container = container;
 
-            //Build service provider
+            // Build service provider
             BuildServiceProvider(true);
 
             //Init module
             SixnetApplication.InitModules();
 
-            //Configurable
+            // Configurable
             SixnetApplication.ExecuteConfigurable();
 
-            //Object mapper
+            // Object mapper
             SixnetMapper.BuildMapper();
 
             GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
@@ -457,9 +458,6 @@ namespace Sixnet.DependencyInjection
             services.AddSingleton<ISixnetMessageProvider, DefaultMessageProvider>();
             services.AddSingleton(typeof(ISixnetDataAccess<>), typeof(DefaultDataAccess<>));
             services.AddSingleton(typeof(ISixnetRepository<>), typeof(DefaultRepository<>));
-            //services.AddLogging(sixnetOptions?.ConfigureLogging == null
-            //? builder => { }
-            //: sixnetOptions.ConfigureLogging);
             services.AddSixnetLocalization(sixnetOptions?.ConfigureLocalization);
         }
 

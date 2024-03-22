@@ -129,7 +129,7 @@ namespace Sixnet.Threading.Locking
         {
             SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(lockName), nameof(lockName));
             SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(lockValue), nameof(lockValue));
-            var lockOptions = new StringSetParameter()
+            var lockParameter = new StringSetParameter()
             {
                 CacheObject = new CacheObject()
                 {
@@ -146,12 +146,12 @@ namespace Sixnet.Threading.Locking
                     }
                 }
             };
-            HandleLockParameter(lockOptions);
+            HandleLockParameter(lockParameter);
             var expSeconds = GetExpirationSeconds(lockObject, expirationSeconds);
 
             if (SpinWait.SpinUntil(() =>
             {
-                lockOptions.Items.ForEach(ce =>
+                lockParameter.Items.ForEach(ce =>
                 {
                     ce.Expiration = expSeconds > 0 ? new CacheExpiration()
                     {
@@ -159,7 +159,7 @@ namespace Sixnet.Threading.Locking
                         AbsoluteExpiration = DateTimeOffset.Now.AddSeconds(expSeconds)
                     } : null;
                 });
-                var setResponse = SixnetCacher.String.Set(lockOptions);
+                var setResponse = SixnetCacher.String.Set(lockParameter);
                 return setResponse?.Results?.FirstOrDefault()?.Key == lockName;
             }, expSeconds < 1 ? -1 : (expSeconds + 1) * 1000))
             {
@@ -314,26 +314,26 @@ namespace Sixnet.Threading.Locking
 
         #endregion
 
-        #region Create in process queue lock
+        #region Create internal queue lock
 
         /// <summary>
-        /// Get create in process queue lock name
+        /// Get create internal queue lock name
         /// </summary>
-        /// <param name="server">Database server</param>
+        /// <param name="queueName">Queue name</param>
         /// <returns></returns>
-        static string GetCreateInProcessQueueLockName(string queueName)
+        static string GetCreateInternalQueueLockName(string queueName)
         {
-            return $"sixnet:lock:cipq:queueName".ToLower();
+            return $"sixnet:lock:cipq:{queueName}".ToLower();
         }
 
         /// <summary>
-        /// Get create in process queue lock
+        /// Get create internal queue lock
         /// </summary>
         /// <param name="queueName"></param>
         /// <returns></returns>
-        public static LockInstance? GetCreateInProcessQueueLock(string queueName, int? expirationSeconds = null)
+        public static LockInstance? GetCreateInternalQueueLock(string queueName, int? expirationSeconds = null)
         {
-            var lockName = GetCreateInProcessQueueLockName(queueName);
+            var lockName = GetCreateInternalQueueLockName(queueName);
             return GetLock(CreateInProcessQueueLockName, lockName, GetLockValue(), expirationSeconds);
         }
 

@@ -46,7 +46,8 @@ namespace Sixnet.Token.Jwt
         public static JwtToken CreateToken(IEnumerable<Claim> claims, JwtOptions jwtOptions = null)
         {
             SixnetDirectThrower.ThrowArgNullIf(claims == null, nameof(claims));
-            jwtOptions ??= SixnetContainer.GetService<IOptionsMonitor<JwtOptions>>()?.CurrentValue;
+
+            jwtOptions ??= SixnetContainer.GetOptions<JwtOptions>();
             SixnetDirectThrower.ThrowArgNullIf(jwtOptions == null, nameof(jwtOptions));
 
             var tokenHandler = new JwtSecurityTokenHandler();

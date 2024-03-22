@@ -18,7 +18,7 @@ namespace Sixnet.MQ
     {
         #region Fields
 
-        static readonly InternalMessageQueueProvider _inProcessProvider = new();
+        static readonly InternalMessageQueueProvider _internalProvider = new();
         static readonly MessageQueueOptions _defaultMessageQueueOptions = new();
         static readonly MessageQueueServer _defaultInProcessServer = new() { Type = MessageQueueType.Internal };
 
@@ -51,8 +51,6 @@ namespace Sixnet.MQ
             {
                 var endpoint = GetMessageQueueEndpoint(message);
                 var provider = GetMessageQueueProvider(endpoint.Server.Type);
-
-                SixnetDirectThrower.ThrowSixnetExceptionIf(provider != null, $"Not set message queue provider for {endpoint.Server.Type}");
 
                 messageTasks.Add(provider.EnqueueAsync(new EnqueueParameter()
                 {
@@ -109,9 +107,6 @@ namespace Sixnet.MQ
             SixnetDirectThrower.ThrowArgNullIf(parameter?.Server == null, nameof(ConsumeParameter.Server));
 
             var provider = GetMessageQueueProvider(parameter.Server.Type);
-
-            SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"Not set message queue provider for {parameter.Server.Type}");
-
             return provider.ConsumeAsync(parameter);
         }
 
@@ -124,9 +119,6 @@ namespace Sixnet.MQ
             SixnetDirectThrower.ThrowArgNullIf(parameter?.Server == null, nameof(ConsumeParameter.Server));
 
             var provider = GetMessageQueueProvider(parameter.Server.Type);
-
-            SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"Not set message queue provider for {parameter.Server.Type}");
-
             provider.Consume(parameter);
         }
 
@@ -143,9 +135,6 @@ namespace Sixnet.MQ
             SixnetDirectThrower.ThrowArgNullIf(parameter?.Server == null, nameof(ConsumeParameter.Server));
 
             var provider = GetMessageQueueProvider(parameter.Server.Type);
-
-            SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"Not set message queue provider for {parameter.Server.Type}");
-
             return provider.AbortConsumeAsync(parameter);
         }
 
@@ -158,9 +147,6 @@ namespace Sixnet.MQ
             SixnetDirectThrower.ThrowArgNullIf(parameter?.Server == null, nameof(ConsumeParameter.Server));
 
             var provider = GetMessageQueueProvider(parameter.Server.Type);
-
-            SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"Not set message queue provider for {parameter.Server.Type}");
-
             provider.AbortConsume(parameter);
         }
 
@@ -178,9 +164,6 @@ namespace Sixnet.MQ
             SixnetDirectThrower.ThrowArgNullIf(parameter?.Server == null, nameof(ConsumeParameter.Server));
 
             var provider = GetMessageQueueProvider(parameter.Server.Type);
-
-            SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"Not set message queue provider for {parameter.Server.Type}");
-
             return provider.AddQueueAsync(parameter);
         }
 
@@ -194,9 +177,6 @@ namespace Sixnet.MQ
             SixnetDirectThrower.ThrowArgNullIf(parameter?.Server == null, nameof(ConsumeParameter.Server));
 
             var provider = GetMessageQueueProvider(parameter.Server.Type);
-
-            SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"Not set message queue provider for {parameter.Server.Type}");
-
             provider.AddQueue(parameter);
         }
 
@@ -214,9 +194,6 @@ namespace Sixnet.MQ
             SixnetDirectThrower.ThrowArgNullIf(parameter?.Server == null, nameof(ConsumeParameter.Server));
 
             var provider = GetMessageQueueProvider(parameter.Server.Type);
-
-            SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"Not set message queue provider for {parameter.Server.Type}");
-
             return provider.DeleteQueueAsync(parameter);
         }
 
@@ -230,9 +207,6 @@ namespace Sixnet.MQ
             SixnetDirectThrower.ThrowArgNullIf(parameter?.Server == null, nameof(ConsumeParameter.Server));
 
             var provider = GetMessageQueueProvider(parameter.Server.Type);
-
-            SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"Not set message queue provider for {parameter.Server.Type}");
-
             provider.DeleteQueue(parameter);
         }
 
@@ -320,7 +294,7 @@ namespace Sixnet.MQ
         {
             if (messageQueueType == MessageQueueType.Internal)
             {
-                return _inProcessProvider;
+                return _internalProvider;
             }
             var mqOptions = GetMessageQueueOptions();
             var provider = mqOptions?.GetProvider(messageQueueType);
@@ -351,10 +325,6 @@ namespace Sixnet.MQ
             /// DomainMessage queue name
             /// </summary>
             public const string DomainMessage = "SIXNET_DOMAIN_MESSAGE_QUEUE_NAME";
-            /// <summary>
-            /// Default queue name
-            /// </summary>
-            public const string Default = "SIXNET_DEFAULT_QUEUE_NAME";
         }
 
         /// <summary>

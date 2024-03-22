@@ -7,9 +7,9 @@ using Sixnet.MQ.InProcess;
 namespace Sixnet.Logging
 {
     /// <summary>
-    /// Defines log internal queue task
+    /// Defines log internal queue message
     /// </summary>
-    internal class InProcessLoggingMessage : SixnetQueueMessage, IInternalQueueMessage
+    internal class LoggingInternalQueueMessage : SixnetQueueMessage, IInternalQueueMessage
     {
         /// <summary>
         /// Gets or sets the log category name

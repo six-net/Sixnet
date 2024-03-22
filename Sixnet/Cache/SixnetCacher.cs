@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using static Sixnet.Cache.SixnetCacher;
 
 namespace Sixnet.Cache
 {
@@ -1645,7 +1646,11 @@ namespace Sixnet.Cache
         /// <returns>Return cache provider</returns>
         internal static ISixnetCacheProvider GetCacheProvider(CacheServerType databaseType)
         {
-            return Options?.GetCacheProvider(databaseType);
+            var provider =  Options?.GetCacheProvider(databaseType);
+
+            SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"Not set provider for: {databaseType}");
+
+            return provider;
         }
 
         #endregion
@@ -1668,7 +1673,7 @@ namespace Sixnet.Cache
         /// <returns></returns>
         internal static CacheServer GetDefaultInMemoryServer()
         {
-            return Options?.DefaultInMemoryServer;
+            return CacheOptions.DefaultInMemoryServer;
         }
 
         #endregion

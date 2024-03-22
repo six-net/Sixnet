@@ -16,11 +16,6 @@ namespace Sixnet.MQ.InProcess
         /// </summary>
         static readonly ConcurrentDictionary<string, InternalQueue> _queues = new();
 
-        static InternalQueueManager()
-        {
-            AddQueue(SixnetMQ.InternalQueueNames.Default);
-        }
-
         /// <summary>
         /// Add a new internal queue
         /// No new queues are created when they already exist
@@ -30,12 +25,18 @@ namespace Sixnet.MQ.InProcess
         {
             if (!_queues.ContainsKey(name))
             {
-                var queueLock = SixnetLocker.GetCreateInProcessQueueLock(name);
+                var queueLock = SixnetLocker.GetCreateInternalQueueLock(name);
                 try
                 {
                     if (!_queues.ContainsKey(name))
                     {
-                        _queues[name] = InternalQueue.Create(name);
+                        var newQueue = InternalQueue.Create(name);
+                        var mqOptions = SixnetMQ.GetMessageQueueOptions();
+                        if(mqOptions.AutoConsumeInternalQueue)
+                        {
+                            newQueue.Consume();
+                        }
+                        _queues[name] = newQueue;
                     }
                 }
                 catch (Exception ex)
@@ -70,14 +71,6 @@ namespace Sixnet.MQ.InProcess
         public static void AddDataCacheQueue()
         {
             AddQueue(SixnetMQ.InternalQueueNames.DataCache);
-        }
-
-        /// <summary>
-        /// Add a internal queue for logging
-        /// </summary>
-        public static void AddLoggingQueue()
-        {
-            AddQueue(SixnetMQ.InternalQueueNames.Logging);
         }
 
         /// <summary>

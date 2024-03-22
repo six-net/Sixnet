@@ -57,7 +57,7 @@ namespace Sixnet.Logging
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         static void WriteLog(string categoryName, LogLevel level, EventId eventId, Exception exception, string message, params object[] args)
         {
-            var logMessage = new InProcessLoggingMessage()
+            var logMessage = new LoggingInternalQueueMessage()
             {
                 CategoryName = categoryName,
                 Level = level,

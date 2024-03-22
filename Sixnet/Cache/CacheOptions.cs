@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Sixnet.Cache.Provider.Memory;
 
 namespace Sixnet.Cache
 {
@@ -12,11 +13,12 @@ namespace Sixnet.Cache
         #region Fields
 
         readonly Dictionary<CacheServerType, ISixnetCacheProvider> _providers = new();
-        internal CacheServer DefaultInMemoryServer = new()
+        internal static CacheServer DefaultInMemoryServer = new()
         {
             Name = "SIXNET_DEFAULT_IN_MEMORY_SERVER_NAME",
             Type = CacheServerType.InMemory
         };
+        internal static MemoryProvider _defaultMemoryProvider = new();
 
         #endregion
 
@@ -71,24 +73,28 @@ namespace Sixnet.Cache
         /// <summary>
         /// Add cache provider
         /// </summary>
-        /// <param name="databaseType">Cache server type</param>
+        /// <param name="serverType">Cache server type</param>
         /// <param name="cacheProvider">Cache provider</param>
-        public void AddCacheProvider(CacheServerType databaseType, ISixnetCacheProvider cacheProvider)
+        public void AddCacheProvider(CacheServerType serverType, ISixnetCacheProvider cacheProvider)
         {
             if (cacheProvider != null)
             {
-                _providers[databaseType] = cacheProvider;
+                _providers[serverType] = cacheProvider;
             }
         }
 
         /// <summary>
         /// Get cache provider
         /// </summary>
-        /// <param name="databaseType">Server type</param>
+        /// <param name="serverType">Server type</param>
         /// <returns>Return cache provider</returns>
-        public ISixnetCacheProvider GetCacheProvider(CacheServerType databaseType)
+        public ISixnetCacheProvider GetCacheProvider(CacheServerType serverType)
         {
-            _providers.TryGetValue(databaseType, out var provider);
+            _providers.TryGetValue(serverType, out var provider);
+            if (provider == null && serverType == CacheServerType.InMemory)
+            {
+                provider = _defaultMemoryProvider;
+            }
             return provider;
         }
 
@@ -99,11 +105,11 @@ namespace Sixnet.Cache
         /// <summary>
         /// Get cache server
         /// </summary>
-        /// <param name="operationOptions">Cache operation options</param>
+        /// <param name="parameter">Cache parameter</param>
         /// <returns>Return cache server</returns>
-        public CacheServer GetCacheServer<T>(CacheParameter<T> operationOptions) where T : CacheResult, new()
+        public CacheServer GetCacheServer<T>(CacheParameter<T> parameter) where T : CacheResult, new()
         {
-            return GetCacheServersFunc?.Invoke(operationOptions) ?? Server;
+            return GetCacheServersFunc?.Invoke(parameter) ?? Server;
         }
 
         #endregion

@@ -47,9 +47,7 @@ namespace Sixnet.Cache
         {
             var server = GetCacheServer();
             var provider = SixnetCacher.GetCacheProvider(server.Type);
-            return provider == null
-                ? throw new SixnetException($"Not set provider for: {server.Type}")
-                : await ExecuteCacheOperationAsync(provider, server).ConfigureAwait(false);
+            return await ExecuteCacheOperationAsync(provider, server).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -60,7 +58,7 @@ namespace Sixnet.Cache
         {
             var server = GetCacheServer();
             var provider = SixnetCacher.GetCacheProvider(server.Type);
-            return provider == null ? throw new SixnetException($"Not set provider for: {server.Type}") : ExecuteCacheOperation(provider, server);
+            return ExecuteCacheOperation(provider, server);
         }
 
         /// <summary>
@@ -73,9 +71,7 @@ namespace Sixnet.Cache
             SixnetDirectThrower.ThrowArgNullIf(server == null, nameof(server));
 
             var provider = SixnetCacher.GetCacheProvider(server.Type);
-            return provider == null
-                ? throw new SixnetException($"Not set provider for: {server.Type}")
-                : await ExecuteCacheOperationAsync(provider, server).ConfigureAwait(false);
+            return await ExecuteCacheOperationAsync(provider, server).ConfigureAwait(false);
         }
 
         /// <summary>

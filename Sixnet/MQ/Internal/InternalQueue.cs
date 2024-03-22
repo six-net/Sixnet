@@ -1,6 +1,8 @@
-﻿using Sixnet.Logging;
+﻿using Microsoft.Extensions.Logging;
+using Sixnet.Logging;
 using Sixnet.Serialization;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Channels;
@@ -49,13 +51,7 @@ namespace Sixnet.MQ.InProcess
         /// <returns></returns>
         public static InternalQueue Create(string name)
         {
-            var queue = new InternalQueue(name);
-            var mqOptions = SixnetMQ.GetMessageQueueOptions();
-            if (mqOptions.AutoConsumeInternalQueue)
-            {
-                queue.Consume(1);
-            }
-            return queue;
+            return new InternalQueue(name);
         }
 
         #endregion
@@ -92,12 +88,13 @@ namespace Sixnet.MQ.InProcess
                     }
                     if (!_writer.TryWrite(item))
                     {
-                        SixnetLogger.LogError<InternalQueue>(SixnetLogEvents.Framework.InternalQueueEnqueueError, $"Internal queue failure: {SixnetJsonSerializer.Serialize(item)}");
+                        SixnetLogger.LogProvider?.WriteLog(typeof(InternalQueue).FullName, LogLevel.Information, SixnetLogEvents.Framework.InternalQueueEnqueueError
+                            , null, $"Internal queue write failure: {SixnetJsonSerializer.Serialize(item)}");
                     }
                 }
                 catch (Exception ex)
                 {
-                    SixnetLogger.LogError<InternalQueue>(SixnetLogEvents.Framework.InternalQueueEnqueueError, ex, ex.Message);
+                    SixnetLogger.LogProvider?.WriteLog(typeof(InternalQueue).FullName, LogLevel.Error, SixnetLogEvents.Framework.InternalQueueEnqueueError, ex, ex.Message);
                 }
             }
         }
@@ -137,9 +134,9 @@ namespace Sixnet.MQ.InProcess
                     _consumeTokenSource ??= new CancellationTokenSource();
                     for (int i = 0; i < count; i++)
                     {
-                        ThreadPool.QueueUserWorkItem(async s => await ConsumeAction(_consumeTokenSource.Token));
-                        SixnetLogger.LogDebug<InternalQueue>(SixnetLogEvents.Framework.InternalQueueStartConsumer
-                            , $"Open a new consumer at {DateTimeOffset.Now} for: {Name}");
+                        ThreadPool.QueueUserWorkItem(async s => await ConsumeAction(_consumeTokenSource.Token).ConfigureAwait(false));
+                        SixnetLogger.LogProvider?.WriteLog(typeof(InternalQueue).FullName, LogLevel.Information, SixnetLogEvents.Framework.InternalQueueStartConsumer
+                            , null, $"Open a new consumer at {DateTimeOffset.Now} for: {Name}");
                         _consumerCount++;
                     }
                 }
@@ -166,8 +163,8 @@ namespace Sixnet.MQ.InProcess
                     SixnetLogger.LogError<InternalQueue>(SixnetLogEvents.Framework.InternalQueueConsumeError, ex, ex.Message);
                 }
             }
-            SixnetLogger.LogDebug<InternalQueue>(SixnetLogEvents.Framework.InternalQueueCloseConsumer
-                , $"[Internal Queue {Name}] Closed a consumer at {DateTimeOffset.Now} for: {Name}");
+            SixnetLogger.LogProvider?.WriteLog(typeof(InternalQueue).FullName, LogLevel.Information, SixnetLogEvents.Framework.InternalQueueCloseConsumer
+                , null, $"[Internal Queue {Name}] Closed a consumer at {DateTimeOffset.Now} for: {Name}");
         }
 
         #endregion
