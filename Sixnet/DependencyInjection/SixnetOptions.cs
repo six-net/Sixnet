@@ -80,9 +80,9 @@ namespace Sixnet.DependencyInjection
         public Action<FileAccessOptions> ConfigureFileAccess { get; set; }
 
         /// <summary>
-        /// Configure rsa key
+        /// Configure rsa
         /// </summary>
-        public Action<RSAKeyOptions> ConfigureRSAKey { get; set; }
+        public Action<RSAOptions> ConfigureRSA { get; set; }
 
         /// <summary>
         /// Configure jwt

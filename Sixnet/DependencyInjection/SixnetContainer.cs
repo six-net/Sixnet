@@ -396,7 +396,7 @@ namespace Sixnet.DependencyInjection
             // File access
             services.ConfigureIfNotNull<FileAccessOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.FileAccess)));
             // Rsa key
-            services.ConfigureIfNotNull<RSAKeyOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.RSAKey)));
+            services.ConfigureIfNotNull<RSAOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Rsa)));
             // Jwt
             services.ConfigureIfNotNull<JwtOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Jwt)));
             // Database
@@ -415,7 +415,7 @@ namespace Sixnet.DependencyInjection
             // Post config options
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureUpload);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureFileAccess);
-            services.PostConfigureIfNotNull(sixnetOptions.ConfigureRSAKey);
+            services.PostConfigureIfNotNull(sixnetOptions.ConfigureRSA);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureJwt);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureEmail);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureSms);

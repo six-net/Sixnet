@@ -61,7 +61,7 @@ namespace Sixnet.Development.Data.Field
                 SixnetExpressionHelper.AppendToFieldsAssignment(this, updateExpression);
             }
         }
-
+        
         /// <summary>
         /// Whether has new value
         /// </summary>

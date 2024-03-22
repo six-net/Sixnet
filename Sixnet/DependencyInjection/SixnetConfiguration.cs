@@ -27,9 +27,9 @@ namespace Sixnet.DependencyInjection
         public FileAccessOptions FileAccess { get; set; }
 
         /// <summary>
-        /// Gets or sets rsa key options
+        /// Gets or sets rsa options
         /// </summary>
-        public RSAKeyOptions RSAKey { get; set; }
+        public RSAOptions Rsa { get; set; }
 
         /// <summary>
         /// Gets or sets jwt options
