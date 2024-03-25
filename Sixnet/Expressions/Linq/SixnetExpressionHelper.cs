@@ -1058,7 +1058,7 @@ namespace Sixnet.Expressions.Linq
                 {
                     case ExpressionType.MemberAccess:
                         var memberExpression = childExpression as MemberExpression;
-                        if (memberExpression.Expression.NodeType == ExpressionType.Parameter)
+                        if (memberExpression.Expression?.NodeType == ExpressionType.Parameter)
                         {
                             var parameterExp = memberExpression.Expression as ParameterExpression;
                             var propertyName = memberExpression.Member.Name;
@@ -1076,14 +1076,14 @@ namespace Sixnet.Expressions.Linq
                             isEnd = true;
                         }
                         break;
-                    case ExpressionType.Constant:
-                        var value = Expression.Lambda(childExpression).Compile().DynamicInvoke();
-                        if (value != null)
-                        {
-                            criterionField = ConstantField.Create(value);
-                        }
-                        isEnd = true;
-                        break;
+                    //case ExpressionType.Constant:
+                    //    var value = Expression.Lambda(fieldExpression).Compile().DynamicInvoke();
+                    //    if (value != null)
+                    //    {
+                    //        criterionField = ConstantField.Create(value);
+                    //    }
+                    //    isEnd = true;
+                    //    break;
                     default:
                         break;
                 }
@@ -1108,7 +1108,22 @@ namespace Sixnet.Expressions.Linq
                 }
             } while (childExpression != null);
 
-            if (criterionField != null)
+            if (criterionField == null)
+            {
+                try
+                {
+                    var value = Expression.Lambda(fieldExpression).Compile().DynamicInvoke();
+                    if(value != null)
+                    {
+                        criterionField = ConstantField.Create(value);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    SixnetDirectThrower.ThrowNotSupportIf(true, $"Not support for node type:{fieldExpression.NodeType}");
+                }
+            }
+            else
             {
                 criterionField.FormatSetting = fieldFormatSetting;
             }
