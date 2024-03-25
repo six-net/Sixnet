@@ -95,7 +95,6 @@ namespace Sixnet.App
                 {
                     if (type.IsInterface)
                     {
-                        var ignoreCaseComparison = StringComparison.OrdinalIgnoreCase;
                         var typeName = type.FullName;
 
                         #region Default service
@@ -109,16 +108,6 @@ namespace Sixnet.App
                                 SixnetContainer.AddProjectService(type, implementType);
                             }
                         }
-                        if (typeName.EndsWith("DataAccess", ignoreCaseComparison))
-                        {
-                            var relateTypes = allConventionTypes.Where(t => t.FullName != typeName && !t.IsInterface && !t.IsAbstract && type.IsAssignableFrom(t));
-                            if (relateTypes.Any())
-                            {
-                                var providerType = relateTypes.FirstOrDefault(c => c.Name.EndsWith("CacheDataAccess", ignoreCaseComparison));
-                                providerType ??= relateTypes.First();
-                                SixnetContainer.AddProjectService(type, providerType);
-                            }
-                        }
 
                         #endregion
                     }
@@ -129,7 +118,7 @@ namespace Sixnet.App
                             var moduleConfiguration = Activator.CreateInstance(type) as ISixnetModule;
                             SixnetApplication.AddModule(moduleConfiguration);
                         }
-                        if (!_configurableContractType.IsAssignableFrom(type))
+                        if (_configurableContractType.IsAssignableFrom(type))
                         {
                             var configModel = Activator.CreateInstance(type) as ISixnetConfigurable;
                             SixnetApplication.AddConfigurable(configModel);
