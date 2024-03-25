@@ -31,23 +31,7 @@ namespace Sixnet.App
         /// </summary>
         static readonly List<string> _conventionFileNamePatterns = new()
         {
-            @"\.Entity\.",
-            @"\.QueryModel\.",
-            @"\.ModuleConfig\.",
-            @"\.Domain\.",
-            @"\.DataAccess",
-            @"\.CacheDataAccess\.",
-            @"\.Business",
-            @"\.Repository\.",
-            @"\.Service\.",
-            @"\.AppService",
-            @"\.Domain\.",
-            @"\.Dto\.",
-            @"\.ViewModel\.",
-            @"\.Module\.",
-            @"\.ApiModel\.",
-            @"\.WebApi\.",
-            @"AppConfig\."
+            @"\.Modules\."
         };
 
         /// <summary>
@@ -112,8 +96,6 @@ namespace Sixnet.App
         internal static string GetRootPath()
         {
             var appPath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-            //SixnetLogger.LogInformation(typeof(SixnetApplication).FullName, SixnetLogEvents.Application.GetApplicationRootPath
-            //    , LocalMessages.sixnet_app_root_path.GetLocalString(appPath));
             return appPath;
         }
 
