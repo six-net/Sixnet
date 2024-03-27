@@ -1,5 +1,6 @@
 ﻿using Sixnet.App;
 using Sixnet.Localization;
+using Sixnet.Serialization.Json;
 using System;
 
 namespace Sixnet.Model
@@ -42,6 +43,7 @@ namespace Sixnet.Model
         /// <summary>
         /// Gets or sets the operation response message
         /// </summary>
+        [LocalString]
         public string Message { get; set; }
 
         /// <summary>
@@ -144,6 +146,7 @@ namespace Sixnet.Model
         /// <summary>
         /// Gets or sets the operation response message
         /// </summary>
+        [LocalString]
         public string Message { get; set; }
 
         /// <summary>
@@ -251,7 +254,7 @@ namespace Sixnet.Model
     /// <summary>
     /// Define result options
     /// </summary>
-    public static class SixnetResultOptions
+    internal static class SixnetResultOptions
     {
         #region message
 
