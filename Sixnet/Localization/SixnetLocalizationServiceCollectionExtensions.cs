@@ -40,6 +40,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddSingleton<ISixnetResourceManagerFactory, SixnetResourceManagerFactory>();
             services.TryAddSingleton<ISixnetStringLocalizer, SixnetStringLocalizer>();
             services.TryAddSingleton(typeof(ISixnetStringLocalizer<>), typeof(SixnetStringLocalizer<>));
+            services.Configure(configure);
 
             return services;
         }

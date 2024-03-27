@@ -1,5 +1,5 @@
 ﻿using Sixnet.MQ;
-using Sixnet.Serialization;
+using Sixnet.Serialization.Json;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;

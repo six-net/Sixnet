@@ -1076,14 +1076,6 @@ namespace Sixnet.Expressions.Linq
                             isEnd = true;
                         }
                         break;
-                    //case ExpressionType.Constant:
-                    //    var value = Expression.Lambda(fieldExpression).Compile().DynamicInvoke();
-                    //    if (value != null)
-                    //    {
-                    //        criterionField = ConstantField.Create(value);
-                    //    }
-                    //    isEnd = true;
-                    //    break;
                     default:
                         break;
                 }

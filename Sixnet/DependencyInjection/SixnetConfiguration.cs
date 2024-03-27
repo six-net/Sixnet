@@ -7,6 +7,7 @@ using Sixnet.Net.Email;
 using Sixnet.Net.Sms;
 using Sixnet.Net.Upload;
 using Sixnet.Security.Cryptography;
+using Sixnet.Serialization.Json;
 using Sixnet.Token.Jwt;
 
 namespace Sixnet.DependencyInjection
@@ -65,5 +66,10 @@ namespace Sixnet.DependencyInjection
         /// Gets or sets the message queue options
         /// </summary>
         public MessageQueueOptions MessageQueue { get; set; }
+
+        /// <summary>
+        /// Gets or sets the json options
+        /// </summary>
+        public SixnetJsonSerializationOptions Json { get; set; }
     }
 }

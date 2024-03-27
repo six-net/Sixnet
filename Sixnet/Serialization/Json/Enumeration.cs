@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Sixnet.Serialization
+namespace Sixnet.Serialization.Json
 {
     #region Json naming policy
 

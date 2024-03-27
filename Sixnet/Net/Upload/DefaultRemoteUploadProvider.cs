@@ -1,6 +1,6 @@
 ﻿using Sixnet.Exceptions;
 using Sixnet.Net.Http;
-using Sixnet.Serialization;
+using Sixnet.Serialization.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;

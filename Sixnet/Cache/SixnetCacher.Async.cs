@@ -12,7 +12,7 @@ using Sixnet.Cache.SortedSet.Parameters;
 using Sixnet.Cache.SortedSet.Results;
 using Sixnet.Cache.String.Parameters;
 using Sixnet.Cache.String.Results;
-using Sixnet.Serialization;
+using Sixnet.Serialization.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;

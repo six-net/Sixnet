@@ -4,8 +4,8 @@ using Sixnet.Development.Data;
 using Sixnet.Development.Data.Database;
 using Sixnet.Development.Work;
 using Sixnet.Diagnostics;
-using Sixnet.Serialization;
 using Microsoft.Extensions.Logging;
+using Sixnet.Serialization.Json;
 
 namespace Sixnet.Logging
 {

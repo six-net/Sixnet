@@ -3,7 +3,7 @@ using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 
-namespace Sixnet.Serialization
+namespace Sixnet.Serialization.Binary
 {
     /// <summary>
     /// Binary serialization helper

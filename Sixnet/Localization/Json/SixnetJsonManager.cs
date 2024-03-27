@@ -15,7 +15,7 @@ namespace Sixnet.Localization.Json
     /// <summary>
     /// Defines json resource manager
     /// </summary>
-    public class SixnetJsonManager : ISixnetResourceManager
+    internal class SixnetJsonManager : ISixnetResourceManager
     {
         /// <summary>
         /// Resources cache
@@ -31,7 +31,7 @@ namespace Sixnet.Localization.Json
         {
             _resourcePrefix = resourcePrefix;
             _resourceBaseName = _resourcePrefix.JsonBaseName?.Trim('.');
-            _resourcePath = _resourcePrefix.ResourcePath?.Trim('.');
+            _resourcePath = _resourcePrefix.JsonResourcePath?.Trim('.');
         }
 
         /// <summary>
@@ -165,7 +165,7 @@ namespace Sixnet.Localization.Json
                     }
                 }
 
-                //files
+                // files
                 var resourceFiles = Directory.GetFiles(resourcePath, $"{_resourceBaseName}.{culture.Name}.json");
                 if (!resourceFiles.IsNullOrEmpty())
                 {

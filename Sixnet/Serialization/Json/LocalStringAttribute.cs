@@ -1,21 +1,18 @@
 ﻿using System;
 using System.Text.Json.Serialization;
+using Sixnet.Serialization.Json.Converter;
 
-namespace Sixnet.Localization
+namespace Sixnet.Serialization.Json
 {
     /// <summary>
     /// Local string
     /// </summary>
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
-    public class SixnetLocalStringAttribute : JsonConverterAttribute
+    public class LocalStringAttribute : JsonConverterAttribute
     {
-        public SixnetLocalStringAttribute()
-        {
-
-        }
         public override JsonConverter CreateConverter(Type typeToConvert)
         {
-            return null;//LanguageTranslateJsonConverter.Instance;
+            return LocalStringJsonConverter.Instance;
         }
     }
 }

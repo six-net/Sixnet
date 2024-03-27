@@ -25,6 +25,7 @@ namespace Sixnet.Localization
         private readonly IResourceNamesCache _resourceNamesCache = new ResourceNamesCache();
         private readonly ConcurrentDictionary<string, SixnetResourceStringLocalizer> _localizerCache = new();
         private readonly string _resourcesRelativePath;
+        private readonly string _jsonRelativePath;
         private readonly ILoggerFactory _loggerFactory;
         private readonly ISixnetResourceManagerFactory _resourceManagerFactory;
 
@@ -38,7 +39,7 @@ namespace Sixnet.Localization
         /// <param name="localizationOptions">The <see cref="IOptions{LocalizationOptions}"/>.</param>
         /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
         public SixnetResourceStringLocalizerFactory(
-            IOptions<LocalizationOptions> localizationOptions,
+            IOptions<SixnetLocalizationOptions> localizationOptions,
             ILoggerFactory loggerFactory,
             ISixnetResourceManagerFactory resourceManagerFactory)
         {
@@ -46,6 +47,7 @@ namespace Sixnet.Localization
             SixnetDirectThrower.ThrowArgNullIf(loggerFactory == null, nameof(loggerFactory));
 
             _resourcesRelativePath = localizationOptions.Value.ResourcesPath ?? string.Empty;
+            _jsonRelativePath = localizationOptions.Value.JsonResourcePath ?? string.Empty;
             _loggerFactory = loggerFactory;
             _resourceManagerFactory = resourceManagerFactory;
             if (!string.IsNullOrEmpty(_resourcesRelativePath))
@@ -200,7 +202,8 @@ namespace Sixnet.Localization
                 RootNamespace = baseNamespace,
                 ResourcePath = resourceLocation,
                 ResxBaseName = rootNamespace + "." + resourceLocation + resourceFilePrefix,
-                JsonBaseName = resourceFilePrefix
+                JsonBaseName = resourceFilePrefix,
+                JsonResourcePath = _jsonRelativePath
             };
         }
 

@@ -14,7 +14,7 @@ using Sixnet.Cache.String.Parameters;
 using Sixnet.Cache.String.Results;
 using Sixnet.DependencyInjection;
 using Sixnet.Exceptions;
-using Sixnet.Serialization;
+using Sixnet.Serialization.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;

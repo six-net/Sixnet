@@ -6,7 +6,7 @@ using System.Resources;
 
 namespace Sixnet.Localization.Resx
 {
-    public class SixnetResxManager : ISixnetResourceManager
+    internal class SixnetResxManager : ISixnetResourceManager
     {
         private readonly ResourceManager _resourceManager;
         readonly ResourcePrefix _resourcePrefix;

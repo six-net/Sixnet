@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Sixnet.Logging;
-using Sixnet.Serialization;
+using Sixnet.Serialization.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;

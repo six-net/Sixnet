@@ -102,7 +102,7 @@ namespace Sixnet.DependencyInjection
         /// <summary>
         /// Gets or sets configure json
         /// </summary>
-        public Action<JsonSerializationOptions> ConfigureJson { get; set; }
+        public Action<SixnetJsonSerializationOptions> ConfigureJson { get; set; }
 
         /// <summary>
         /// Configure message queue

@@ -6,7 +6,6 @@ using System.Runtime.Serialization.Formatters.Binary;
 using Sixnet.Exceptions;
 using Sixnet.Mapper;
 using Sixnet.Model;
-using Sixnet.Serialization;
 using Sixnet.Serialization.Json;
 using Sixnet.Validation;
 using static Sixnet.Validation.ValidationConstants;
@@ -124,86 +123,6 @@ namespace System
         public static TTarget MapTo<TTarget>(this object source)
         {
             return SixnetMapper.MapTo<TTarget>(source);
-        }
-
-        #endregion
-
-        #region Object deep clone
-
-        /// <summary>
-        /// Deep clone with field
-        /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
-        /// <param name="sourceObject">Source object</param>
-        /// <returns>Return the new object</returns>
-        public static T DeepCloneWithField<T>(this T sourceObject, ObjectCloneMethod cloneMethod = ObjectCloneMethod.Json)
-        {
-            return cloneMethod == ObjectCloneMethod.Binary
-                    ? DeepCloneByBinary(sourceObject)
-                    : FieldDeepCloneByJson(sourceObject);
-        }
-
-        /// <summary>
-        /// Deep clone
-        /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
-        /// <param name="sourceObject">Source object</param>
-        /// <returns>Return the new object</returns>
-        public static T DeepClone<T>(this T sourceObject, ObjectCloneMethod cloneMethod = ObjectCloneMethod.Json)
-        {
-            return cloneMethod == ObjectCloneMethod.Binary
-                    ? DeepCloneByBinary(sourceObject)
-                    : DeepCloneByJson(sourceObject);
-        }
-
-        static T FieldDeepCloneByJson<T>(T sourceObject)
-        {
-            if (sourceObject == null)
-            {
-                return default;
-            }
-            var objectString = SixnetJsonSerializer.Serialize(sourceObject, true);
-            return SixnetJsonSerializer.Deserialize<T>(objectString, new JsonSerializationOptions()
-            {
-                ResolveNonPublic = true,
-                DeserializeType = sourceObject.GetType()
-            });
-        }
-
-        static T DeepCloneByJson<T>(T sourceObject)
-        {
-            if (sourceObject == null)
-            {
-                return default(T);
-            }
-            var objectString = SixnetJsonSerializer.Serialize(sourceObject, false);
-            return SixnetJsonSerializer.Deserialize<T>(objectString, new JsonSerializationOptions()
-            {
-                ResolveNonPublic = false,
-                DeserializeType = sourceObject.GetType()
-            });
-        }
-
-        /// <summary>
-        /// Clone by binary
-        /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
-        /// <param name="sourceObject">Source object</param>
-        /// <returns>Return the new object</returns>
-        static T DeepCloneByBinary<T>(T sourceObject)
-        {
-            if (sourceObject == null)
-            {
-                return default;
-            }
-            using (MemoryStream memoryStream = new MemoryStream())
-            {
-                BinaryFormatter formatter = new BinaryFormatter();
-                formatter.Serialize(memoryStream, sourceObject);
-                memoryStream.Position = 0;
-                var data = (T)formatter.Deserialize(memoryStream);
-                return data;
-            }
         }
 
         #endregion

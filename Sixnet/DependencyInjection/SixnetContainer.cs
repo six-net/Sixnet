@@ -20,6 +20,7 @@ using Sixnet.Net.Email;
 using Sixnet.Net.Sms;
 using Sixnet.Net.Upload;
 using Sixnet.Security.Cryptography;
+using Sixnet.Serialization.Json;
 using Sixnet.Token.Jwt;
 
 namespace Sixnet.DependencyInjection
@@ -108,6 +109,9 @@ namespace Sixnet.DependencyInjection
             // Register default project service
             ConfigureProjectDefaultOptions(_serviceCollection, Options);
             AddProjectDefaultService(_serviceCollection, Options);
+
+            // Build service provider
+            BuildServiceProvider(true);
 
             // Configure service
             Options.ConfigureService?.Invoke(_serviceCollection);
@@ -412,6 +416,8 @@ namespace Sixnet.DependencyInjection
             services.ConfigureIfNotNull<MessageOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Message)));
             // Message queue
             services.ConfigureIfNotNull<MessageQueueOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.MessageQueue)));
+            // Json serialization
+            services.ConfigureIfNotNull<SixnetJsonSerializationOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Json)));
 
             // Post config options
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureUpload);
@@ -423,6 +429,7 @@ namespace Sixnet.DependencyInjection
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureMessage);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureData);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureMessageQueue);
+            services.PostConfigureIfNotNull(sixnetOptions.ConfigureJson);
             services.PostConfigureIfNotNull<CacheOptions>((options) =>
             {
                 options.AddCacheProvider(CacheServerType.InMemory, new MemoryProvider());

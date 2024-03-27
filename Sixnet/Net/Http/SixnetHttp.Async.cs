@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.IO;
 using System.Linq;
-using Sixnet.Serialization;
+using Sixnet.Serialization.Json;
 
 namespace Sixnet.Net.Http
 {

@@ -12,7 +12,7 @@
         /// <param name="data">Data</param>
         /// <param name="options">Json serialization options</param>
         /// <returns>Return the json string</returns>
-        string Serialize<T>(T data, JsonSerializationOptions options);
+        string Serialize<T>(T data, SixnetJsonSerializationOptions options);
 
         /// <summary>
         /// Deserialize json
@@ -20,6 +20,6 @@
         /// <param name="json">Json string</param>
         /// <param name="options">Json serialization options</param>
         /// <returns>Return object data</returns>
-        T Deserialize<T>(string json, JsonSerializationOptions options);
+        T Deserialize<T>(string json, SixnetJsonSerializationOptions options);
     }
 }

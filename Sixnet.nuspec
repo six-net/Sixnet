@@ -23,7 +23,6 @@
 		<dependency id="Microsoft.Extensions.Localization" version="6.0.0" />
 		<dependency id="Microsoft.Extensions.Logging" version="6.0.0" />
 		<dependency id="Microsoft.Extensions.Options.ConfigurationExtensions" version="6.0.0" />
-		<dependency id="Newtonsoft.Json" version="13.0.1" />
 		<dependency id="System.ComponentModel.Annotations" version="5.0.0" />
 		<dependency id="System.Drawing.Common" version="6.0.0" />
 		<dependency id="System.IdentityModel.Tokens.Jwt" version="7.3.0" />

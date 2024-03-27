@@ -25,5 +25,11 @@ namespace Sixnet.Localization
         /// Json resource base name
         /// </summary>
         public string JsonBaseName { get; set; }
+
+        /// <summary>
+        /// Json resource path
+        /// </summary>
+
+        public string JsonResourcePath { get; set; }
     }
 }

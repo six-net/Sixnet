@@ -5,8 +5,8 @@ using System.Linq.Expressions;
 using Sixnet.Validation.Validators;
 using Sixnet.Expressions.Linq;
 using Sixnet.Expressions.Regular;
-using Sixnet.Serialization;
 using Sixnet.App;
+using Sixnet.Serialization.Json;
 
 namespace Sixnet.Validation
 {

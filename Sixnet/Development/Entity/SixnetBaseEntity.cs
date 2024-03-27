@@ -5,8 +5,8 @@ using Sixnet.Code;
 using Sixnet.Validation;
 using Sixnet.Development.Data.Field;
 using Sixnet.Exceptions;
-using Sixnet.Serialization;
 using static Sixnet.Validation.ValidationConstants;
+using Sixnet.Serialization.Binary;
 
 namespace Sixnet.Development.Entity
 {

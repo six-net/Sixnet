@@ -9,7 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Sixnet.DependencyInjection;
 using Sixnet.Net.Upload;
-using Sixnet.Serialization;
+using Sixnet.Serialization.Json;
 
 namespace Sixnet.Net.Http
 {
