@@ -14,6 +14,7 @@ namespace Sixnet.Serialization.Json
 
         static readonly Dictionary<JsonPropertyNamingPolicy, JsonNamingPolicy> NamingPolicies = new Dictionary<JsonPropertyNamingPolicy, JsonNamingPolicy>
         {
+            {JsonPropertyNamingPolicy.Default, JsonNamingPolicy.CamelCase},
             {JsonPropertyNamingPolicy.Original, OriginalJsonNamingPolicy.Instance},
             {JsonPropertyNamingPolicy.CamelCase, JsonNamingPolicy.CamelCase},
             {JsonPropertyNamingPolicy.Uppercase, UppercaseJsonNamingPolicy.Instance},
@@ -54,7 +55,8 @@ namespace Sixnet.Serialization.Json
             SixnetDirectThrower.ThrowArgNullIf(jsonSerializerOptions == null, nameof(jsonSerializerOptions));
 
             //naming policy
-            if (sixnetJsonOptions.DefaultNamingPolicy != JsonPropertyNamingPolicy.Default)
+            if (sixnetJsonOptions.DefaultNamingPolicy != JsonPropertyNamingPolicy.Default
+                || jsonSerializerOptions.PropertyNamingPolicy == null)
             {
                 jsonSerializerOptions.PropertyNamingPolicy = GetJsonNamingPolicy(sixnetJsonOptions.DefaultNamingPolicy);
                 jsonSerializerOptions.DictionaryKeyPolicy = jsonSerializerOptions.PropertyNamingPolicy;
