@@ -52,93 +52,93 @@ namespace Sixnet.Localization
         }
 
         /// <summary>
-        /// Get local string
+        /// Get culture string
         /// </summary>
         /// <param name="culture">Culture</param>
         /// <param name="name">Name</param>
         /// <returns></returns>
-        public static string GetString(CultureInfo culture, string name)
+        public static string GetCultureString(CultureInfo culture, string name)
         {
             return GetSixnetStringLocalizer()[culture, name];
         }
 
         /// <summary>
-        /// Get local string
+        /// Get culture string
         /// </summary>
         /// <param name="culture">Culture</param>
         /// <param name="name">Name</param>
         /// <returns></returns>
-        public static string GetString<TResourceSource>(CultureInfo culture, string name)
+        public static string GetCultureString<TResourceSource>(CultureInfo culture, string name)
         {
             return GetSixnetStringLocalizer<TResourceSource>()[culture, name];
         }
 
         /// <summary>
-        /// Get local string
+        /// Get culture string
         /// </summary>
         /// <param name="culture">Culture</param>
         /// <param name="name">Name</param>
         /// <param name="arguments">Arguments</param>
         /// <returns></returns>
-        public static string GetString(CultureInfo culture, string name, params object[] arguments)
+        public static string GetCultureString(CultureInfo culture, string name, params object[] arguments)
         {
             return GetSixnetStringLocalizer()[culture, name, arguments];
         }
 
         /// <summary>
-        /// Get local string
+        /// Get culture string
         /// </summary>
         /// <param name="culture">Culture</param>
         /// <param name="name">Name</param>
         /// <param name="arguments">Arguments</param>
         /// <returns></returns>
-        public static string GetString<TResourceSource>(CultureInfo culture, string name, params object[] arguments)
+        public static string GetCultureString<TResourceSource>(CultureInfo culture, string name, params object[] arguments)
         {
             return GetSixnetStringLocalizer<TResourceSource>()[culture, name, arguments];
         }
 
         /// <summary>
-        /// Get local string
+        /// Get culture string
         /// </summary>
         /// <param name="cultureName">Culture name</param>
         /// <param name="name">Name</param>
         /// <returns></returns>
-        public static string GetString(string cultureName, string name)
+        public static string GetCultureString(string cultureName, string name)
         {
             return GetSixnetStringLocalizer()[cultureName, name];
         }
 
         /// <summary>
-        /// Get local string
+        /// Get culture string
         /// </summary>
         /// <param name="cultureName">Culture name</param>
         /// <param name="name">Name</param>
         /// <returns></returns>
-        public static string GetString<TResourceSource>(string cultureName, string name)
+        public static string GetCultureString<TResourceSource>(string cultureName, string name)
         {
             return GetSixnetStringLocalizer<TResourceSource>()[cultureName, name];
         }
 
         /// <summary>
-        /// Get local string
+        /// Get culture string
         /// </summary>
         /// <param name="cultureName">Culture name</param>
         /// <param name="name">Name</param>
         /// <param name="arguments">Arguments</param>
         /// <returns></returns>
-        public static string GetString(string cultureName, string name, params object[] arguments)
+        public static string GetCultureString(string cultureName, string name, params object[] arguments)
         {
             return GetSixnetStringLocalizer()[cultureName, name, arguments];
         }
 
         /// <summary>
-        /// Get local string
+        /// Get culture string
         /// </summary>
         /// <param name="cultureName">Culture name</param>
         /// <param name="name">Name</param>
         /// <param name="arguments">Arguments</param>
         /// <returns></returns>
-        public static string GetString<TResourceSource>(string cultureName, string name, params object[] arguments)
+        public static string GetCultureString<TResourceSource>(string cultureName, string name, params object[] arguments)
         {
             return GetSixnetStringLocalizer<TResourceSource>()[cultureName, name, arguments];
         }
