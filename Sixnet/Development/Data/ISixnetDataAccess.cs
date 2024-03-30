@@ -20,8 +20,8 @@ namespace Sixnet.Development.Data
         /// </summary>
         /// <param name="entities">Entities</param>
         /// <param name="configure">Confirure options </param>
-        /// <returns>Inserted entities</returns>
-        List<TEntity> Insert(IEnumerable<TEntity> entities, Action<DataOperationOptions> configure = null);
+        /// <returns>Affected data number</returns>
+        int Insert(IEnumerable<TEntity> entities, Action<DataOperationOptions> configure = null);
 
         /// <summary>
         /// Insert entities and return identities
@@ -41,8 +41,8 @@ namespace Sixnet.Development.Data
         /// </summary>
         /// <param name="entities">Entities</param>
         /// <param name="configure">Confirure options </param>
-        /// <returns>Updated entities</returns>
-        List<TEntity> Update(IEnumerable<TEntity> entities, Action<DataOperationOptions> configure = null);
+        /// <returns>Affected data number</returns>
+        int Update(IEnumerable<TEntity> entities, Action<DataOperationOptions> configure = null);
 
         /// <summary>
         /// Update

@@ -22,8 +22,8 @@ namespace Sixnet.Development.Data.Client
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="configure">Confirure options </param>
-        /// <returns>Inserted datas</returns>
-        public static async Task<List<T>> InsertAsync<T>(IEnumerable<T> datas, Action<DataOperationOptions> configure = null) where T : class
+        /// <returns>Affected data number</returns>
+        public static async Task<int> InsertAsync<T>(IEnumerable<T> datas, Action<DataOperationOptions> configure = null) where T : class
         {
             var options = GetDataOperationOptions(configure);
 
@@ -72,8 +72,8 @@ namespace Sixnet.Development.Data.Client
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="configure">Confirure options </param>
-        /// <returns>Updated datas</returns>
-        public static async Task<List<T>> UpdateAsync<T>(IEnumerable<T> datas, Action<DataOperationOptions> configure = null) where T : class, ISixnetEntity<T>
+        /// <returns>Affected data number</returns>
+        public static async Task<int> UpdateAsync<T>(IEnumerable<T> datas, Action<DataOperationOptions> configure = null) where T : class, ISixnetEntity<T>
         {
             var options = GetDataOperationOptions(configure);
 

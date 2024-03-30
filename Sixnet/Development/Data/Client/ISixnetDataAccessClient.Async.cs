@@ -386,7 +386,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="datas">Datas</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        Task<List<T>> InsertAsync<T>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class;
+        Task<int> InsertAsync<T>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class;
 
         /// <summary>
         /// Insert and return identities
@@ -405,7 +405,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="data">Data</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        Task<T> InsertAsync<T>(T data, DataOperationOptions options = null) where T : class;
+        Task<int> InsertAsync<T>(T data, DataOperationOptions options = null) where T : class;
 
         /// <summary>
         /// Insert and return identity
@@ -428,7 +428,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="datas">Datas</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        Task<List<T>> UpdateAsync<T>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class, ISixnetEntity<T>;
+        Task<int> UpdateAsync<T>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class, ISixnetEntity<T>;
 
         /// <summary>
         /// Update data
@@ -437,7 +437,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="data">Data</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        Task<T> UpdateAsync<T>(T data, DataOperationOptions options = null) where T : class, ISixnetEntity<T>;
+        Task<int> UpdateAsync<T>(T data, DataOperationOptions options = null) where T : class, ISixnetEntity<T>;
 
         /// <summary>
         /// Update

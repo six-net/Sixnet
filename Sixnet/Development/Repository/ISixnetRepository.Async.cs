@@ -168,8 +168,8 @@ namespace Sixnet.Development.Repository
         /// </summary>
         /// <param name="data">Data</param>
         /// <param name="configure">Confirure options </param>
-        /// <returns>Added data</returns>
-        Task<TModel> AddAsync(TModel data, Action<DataOperationOptions> configure = null);
+        /// <returns>Affected data number</returns>
+        Task<int> AddAsync(TModel data, Action<DataOperationOptions> configure = null);
 
         /// <summary>
         /// Add data and return identity
@@ -185,8 +185,8 @@ namespace Sixnet.Development.Repository
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="configure">Confirure options</param>
-        /// <returns>Added datas</returns>
-        Task<List<TModel>> AddAsync(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null);
+        /// <returns>Affected data number</returns>
+        Task<int> AddAsync(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null);
 
         /// <summary>
         /// Add datas and return identiies
@@ -206,16 +206,16 @@ namespace Sixnet.Development.Repository
         /// </summary>
         /// <param name="data">Data</param>
         /// <param name="configure">Confirure options </param>
-        /// <returns>Updated data</returns>
-        Task<TModel> UpdateAsync(TModel data, Action<DataOperationOptions> configure = null);
+        /// <returns>Affected data number</returns>
+        Task<int> UpdateAsync(TModel data, Action<DataOperationOptions> configure = null);
 
         /// <summary>
         /// Update datas
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="configure">Confirure options </param>
-        /// <returns>Updated datas</returns>
-        Task<List<TModel>> UpdateAsync(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null);
+        /// <returns>Affected data number</returns>
+        Task<int> UpdateAsync(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null);
 
         /// <summary>
         /// Update

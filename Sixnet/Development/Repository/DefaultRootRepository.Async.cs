@@ -27,10 +27,10 @@ namespace Sixnet.Development.Repository
         /// </summary>
         /// <param name="data">Data</param>
         /// <param name="configure">Confirure options </param>
-        /// <returns>Added data</returns>
-        public sealed override async Task<TModel> AddAsync(TModel data, Action<DataOperationOptions> configure = null)
+        /// <returns>Affected data number</returns>
+        public sealed override async Task<int> AddAsync(TModel data, Action<DataOperationOptions> configure = null)
         {
-            return (await AddAsync(new List<TModel>(1) { data }, configure).ConfigureAwait(false))?.FirstOrDefault();
+            return await AddAsync(new List<TModel>(1) { data }, configure).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -38,8 +38,8 @@ namespace Sixnet.Development.Repository
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="configure">Confirure options </param>
-        /// <returns>Added datas</returns>
-        public sealed override Task<List<TModel>> AddAsync(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null)
+        /// <returns>Affected data number</returns>
+        public sealed override Task<int> AddAsync(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null)
         {
             SixnetException.ThrowIf(datas.IsNullOrEmpty(), $"{nameof(datas)} is null or empty");
             foreach (var data in datas)
@@ -88,10 +88,10 @@ namespace Sixnet.Development.Repository
         /// </summary>
         /// <param name="data">Data</param>
         /// <param name="configure">Confirure options </param>
-        /// <returns>Updated data</returns>
-        public sealed override async Task<TModel> UpdateAsync(TModel data, Action<DataOperationOptions> configure = null)
+        /// <returns>Affected data number</returns>
+        public sealed override async Task<int> UpdateAsync(TModel data, Action<DataOperationOptions> configure = null)
         {
-            return (await UpdateAsync(new List<TModel>(1) { data }, configure).ConfigureAwait(false))?.FirstOrDefault();
+            return await UpdateAsync(new List<TModel>(1) { data }, configure).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -99,8 +99,8 @@ namespace Sixnet.Development.Repository
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="configure">Confirure options </param>
-        /// <returns>Updated datas</returns>
-        public sealed override async Task<List<TModel>> UpdateAsync(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null)
+        /// <returns>Affected data number</returns>
+        public sealed override async Task<int> UpdateAsync(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null)
         {
             SixnetException.ThrowIf(datas.IsNullOrEmpty(), $"{nameof(datas)} is null or empty");
 
@@ -821,8 +821,8 @@ namespace Sixnet.Development.Repository
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="configure">Confirure options </param>
-        /// <returns>Added datas</returns>
-        protected abstract Task<List<TModel>> AddDataAsync(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null);
+        /// <returns>Affected data number</returns>
+        protected abstract Task<int> AddDataAsync(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null);
 
         /// <summary>
         /// Add datas and return identiies
@@ -838,8 +838,8 @@ namespace Sixnet.Development.Repository
         /// </summary>
         /// <param name="newDatas">New datas</param>
         /// <param name="configure">Confirure options </param>
-        /// <returns>Updated datas</returns>
-        protected abstract Task<List<TModel>> UpdateDataAsync(IEnumerable<TModel> newDatas, Action<DataOperationOptions> configure = null);
+        /// <returns>Affected data number</returns>
+        protected abstract Task<int> UpdateDataAsync(IEnumerable<TModel> newDatas, Action<DataOperationOptions> configure = null);
 
         /// <summary>
         /// Update columns

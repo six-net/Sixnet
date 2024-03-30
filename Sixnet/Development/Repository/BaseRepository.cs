@@ -20,8 +20,8 @@ namespace Sixnet.Development.Repository
         /// </summary>
         /// <param name="data">Data</param>
         /// <param name="configure">Confirure options </param>
-        /// <returns>Added data</returns>
-        public abstract TModel Add(TModel data, Action<DataOperationOptions> configure = null);
+        /// <returns>Affected data number</returns>
+        public abstract int Add(TModel data, Action<DataOperationOptions> configure = null);
 
         /// <summary>
         /// Add data and return identity
@@ -37,8 +37,8 @@ namespace Sixnet.Development.Repository
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="configure">Confirure options </param>
-        /// <returns>Added datas</returns>
-        public abstract List<TModel> Add(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null);
+        /// <returns>Affected data number</returns>
+        public abstract int Add(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null);
 
         /// <summary>
         /// Add datas and return identiies
@@ -58,16 +58,16 @@ namespace Sixnet.Development.Repository
         /// </summary>
         /// <param name="data">Data</param>
         /// <param name="configure">Confirure options </param>
-        /// <returns>Updated data</returns>
-        public abstract TModel Update(TModel data, Action<DataOperationOptions> configure = null);
+        /// <returns>Affected data number</returns>
+        public abstract int Update(TModel data, Action<DataOperationOptions> configure = null);
 
         /// <summary>
         /// Update datas
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="configure">Confirure options </param>
-        /// <returns>Updated datas</returns>
-        public abstract List<TModel> Update(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null);
+        /// <returns>Affected data number</returns>
+        public abstract int Update(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null);
 
         /// <summary>
         /// Update

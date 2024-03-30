@@ -40,8 +40,8 @@ namespace Sixnet.Development.Repository
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="configure">Confirure options </param>
-        /// <returns>Added datas</returns>
-        protected override List<TModel> AddData(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null)
+        /// <returns>Affected data number</returns>
+        protected override int AddData(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null)
         {
             return dataAccess.Insert(datas, configure);
         }
@@ -63,8 +63,8 @@ namespace Sixnet.Development.Repository
         /// </summary>
         /// <param name="newDatas">New datas</param>
         /// <param name="configure">Confirure options </param>
-        /// <returns>Updated datas</returns>
-        protected override List<TModel> UpdateData(IEnumerable<TModel> newDatas, Action<DataOperationOptions> configure = null)
+        /// <returns>Affected data number</returns>
+        protected override int UpdateData(IEnumerable<TModel> newDatas, Action<DataOperationOptions> configure = null)
         {
             return dataAccess.Update(newDatas, configure);
         }

@@ -21,8 +21,8 @@ namespace Sixnet.Development.Data
         /// </summary>
         /// <param name="entities">Entities</param>
         /// <param name="configure">Confirure options </param>
-        /// <returns>Inserted entities</returns>
-        Task<List<TEntity>> InsertAsync(IEnumerable<TEntity> entities, Action<DataOperationOptions> configure = null);
+        /// <returns>Affected data number</returns>
+        Task<int> InsertAsync(IEnumerable<TEntity> entities, Action<DataOperationOptions> configure = null);
 
         /// <summary>
         /// Insert entities and return identities
@@ -42,8 +42,8 @@ namespace Sixnet.Development.Data
         /// </summary>
         /// <param name="entities">Entities</param>
         /// <param name="configure">Confirure options </param>
-        /// <returns>Updated entities</returns>
-        Task<List<TEntity>> UpdateAsync(IEnumerable<TEntity> entities, Action<DataOperationOptions> configure = null);
+        /// <returns>Affected data number</returns>
+        Task<int> UpdateAsync(IEnumerable<TEntity> entities, Action<DataOperationOptions> configure = null);
 
         /// <summary>
         /// Update

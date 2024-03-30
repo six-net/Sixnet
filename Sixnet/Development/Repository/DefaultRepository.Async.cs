@@ -22,8 +22,8 @@ namespace Sixnet.Development.Repository
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="configure">Confirure options </param>
-        /// <returns>Added datas</returns>
-        protected override async Task<List<TModel>> AddDataAsync(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null)
+        /// <returns>Affected data number</returns>
+        protected override async Task<int> AddDataAsync(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null)
         {
             return await dataAccess.InsertAsync(datas, configure).ConfigureAwait(false);
         }
@@ -45,8 +45,8 @@ namespace Sixnet.Development.Repository
         /// </summary>
         /// <param name="newDatas">New datas</param>
         /// <param name="configure">Confirure options </param>
-        /// <returns>Updated datas</returns>
-        protected override async Task<List<TModel>> UpdateDataAsync(IEnumerable<TModel> newDatas, Action<DataOperationOptions> configure = null)
+        /// <returns>Affected data number</returns>
+        protected override async Task<int> UpdateDataAsync(IEnumerable<TModel> newDatas, Action<DataOperationOptions> configure = null)
         {
             return await dataAccess.UpdateAsync(newDatas, configure).ConfigureAwait(false);
         }

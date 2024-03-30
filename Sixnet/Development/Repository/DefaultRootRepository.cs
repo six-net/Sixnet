@@ -27,10 +27,10 @@ namespace Sixnet.Development.Repository
         /// </summary>
         /// <param name="data">Data</param>
         /// <param name="configure">Confirure options </param>
-        /// <returns>Added data</returns>
-        public sealed override TModel Add(TModel data, Action<DataOperationOptions> configure = null)
+        /// <returns>Affected data number</returns>
+        public sealed override int Add(TModel data, Action<DataOperationOptions> configure = null)
         {
-            return (Add(new List<TModel>(1) { data }, configure))?.FirstOrDefault();
+            return Add(new List<TModel>(1) { data }, configure);
         }
 
         /// <summary>
@@ -38,8 +38,8 @@ namespace Sixnet.Development.Repository
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="configure">Confirure options </param>
-        /// <returns>Added datas</returns>
-        public sealed override List<TModel> Add(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null)
+        /// <returns>Affected data number</returns>
+        public sealed override int Add(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null)
         {
             SixnetException.ThrowIf(datas.IsNullOrEmpty(), $"{nameof(datas)} is null or empty");
             foreach (var data in datas)
@@ -88,10 +88,10 @@ namespace Sixnet.Development.Repository
         /// </summary>
         /// <param name="data">Data</param>
         /// <param name="configure">Confirure options </param>
-        /// <returns>Updated data</returns>
-        public sealed override TModel Update(TModel data, Action<DataOperationOptions> configure = null)
+        /// <returns>Affected data number</returns>
+        public sealed override int Update(TModel data, Action<DataOperationOptions> configure = null)
         {
-            return (Update(new List<TModel>(1) { data }, configure))?.FirstOrDefault();
+            return Update(new List<TModel>(1) { data }, configure);
         }
 
         /// <summary>
@@ -99,8 +99,8 @@ namespace Sixnet.Development.Repository
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="configure">Confirure options </param>
-        /// <returns>Updated datas</returns>
-        public sealed override List<TModel> Update(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null)
+        /// <returns>Affected data number</returns>
+        public sealed override int Update(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null)
         {
             SixnetException.ThrowIf(datas.IsNullOrEmpty(), $"{nameof(datas)} is null or empty");
 
@@ -854,8 +854,8 @@ namespace Sixnet.Development.Repository
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="configure">Confirure options </param>
-        /// <returns>Added datas</returns>
-        protected abstract List<TModel> AddData(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null);
+        /// <returns>Affected data number</returns>
+        protected abstract int AddData(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null);
 
         /// <summary>
         /// Add datas and return identiies
@@ -871,8 +871,8 @@ namespace Sixnet.Development.Repository
         /// </summary>
         /// <param name="newDatas">New datas</param>
         /// <param name="configure">Confirure options </param>
-        /// <returns>Updated datas</returns>
-        protected abstract List<TModel> UpdateData(IEnumerable<TModel> newDatas, Action<DataOperationOptions> configure = null);
+        /// <returns>Affected data number</returns>
+        protected abstract int UpdateData(IEnumerable<TModel> newDatas, Action<DataOperationOptions> configure = null);
 
         /// <summary>
         /// Update columns

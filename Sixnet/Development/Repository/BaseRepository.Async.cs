@@ -21,8 +21,8 @@ namespace Sixnet.Development.Repository
         /// </summary>
         /// <param name="data">Data</param>
         /// <param name="configure">Confirure options </param>
-        /// <returns>Added data</returns>
-        public abstract Task<TModel> AddAsync(TModel data, Action<DataOperationOptions> configure = null);
+        /// <returns>Affected data number</returns>
+        public abstract Task<int> AddAsync(TModel data, Action<DataOperationOptions> configure = null);
 
         /// <summary>
         /// Add data and return identity
@@ -38,8 +38,8 @@ namespace Sixnet.Development.Repository
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="configure">Confirure options </param>
-        /// <returns>Added datas</returns>
-        public abstract Task<List<TModel>> AddAsync(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null);
+        /// <returns>Affected data number</returns>
+        public abstract Task<int> AddAsync(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null);
 
         /// <summary>
         /// Add datas and return identiies
@@ -59,16 +59,16 @@ namespace Sixnet.Development.Repository
         /// </summary>
         /// <param name="data">Data</param>
         /// <param name="configure">Confirure options </param>
-        /// <returns>Updated data</returns>
-        public abstract Task<TModel> UpdateAsync(TModel data, Action<DataOperationOptions> configure = null);
+        /// <returns>Affected data number</returns>
+        public abstract Task<int> UpdateAsync(TModel data, Action<DataOperationOptions> configure = null);
 
         /// <summary>
         /// Update datas
         /// </summary>
         /// <param name="datas">Datas</param>
         /// <param name="configure">Confirure options </param>
-        /// <returns>Updated datas</returns>
-        public abstract Task<List<TModel>> UpdateAsync(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null);
+        /// <returns>Affected data number</returns>
+        public abstract Task<int> UpdateAsync(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null);
 
         /// <summary>
         /// Update

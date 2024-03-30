@@ -660,10 +660,10 @@ namespace Sixnet.Development.Data.Client
         /// <param name="datas">Datas</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public async Task<List<T>> InsertAsync<T>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class
+        public async Task<int> InsertAsync<T>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class
         {
-            await InsertReturnIdentitiesAsync<T, dynamic>(datas, options).ConfigureAwait(false);
-            return datas.ToList();
+            var insertResult = await InsertCoreAsync(datas, options).ConfigureAwait(false);
+            return insertResult?.Item1 ?? 0;
         }
 
         /// <summary>
@@ -676,26 +676,8 @@ namespace Sixnet.Development.Data.Client
         /// <returns></returns>
         public async Task<List<TIdentity>> InsertReturnIdentitiesAsync<T, TIdentity>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class
         {
-            if (datas.IsNullOrEmpty())
-            {
-                return new List<TIdentity>(0);
-            }
-
-            // Create data command
-            var commands = new List<SixnetDataCommand>();
-            var dataType = typeof(T);
-            var isEntity = typeof(ISixnetEntity).IsAssignableFrom(dataType);
-            foreach (var data in datas)
-            {
-                var addCommand = SixnetDataCommand.Create<T>(DataOperationType.Insert);
-                var valueDict = isEntity ? ((ISixnetEntity)data).GetAllValues() : data.ToDynamicDictionary();
-                addCommand.FieldsAssignment = valueDict?.GetFieldsAssignment();
-                addCommand.Data = data;
-                commands.Add(addCommand);
-            }
-            var incrementField = SixnetEntityManager.GetField(dataType, FieldRole.Increment);
-            var executeResult = await ExecuteCoreAsync(commands, incrementField != null, options).ConfigureAwait(false);
-            return executeResult.Item2?.Values.Cast<TIdentity>().ToList() ?? new List<TIdentity>(0);
+            var insertResult = await InsertCoreAsync(datas, options).ConfigureAwait(false);
+            return insertResult?.Item2?.Values.Cast<TIdentity>().ToList() ?? new List<TIdentity>(0);
         }
 
         /// <summary>
@@ -705,10 +687,9 @@ namespace Sixnet.Development.Data.Client
         /// <param name="data">Data</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public async Task<T> InsertAsync<T>(T data, DataOperationOptions options = null) where T : class
+        public async Task<int> InsertAsync<T>(T data, DataOperationOptions options = null) where T : class
         {
-            var datas = await InsertAsync<T>(new List<T>(1) { data }, options).ConfigureAwait(false);
-            return datas?.FirstOrDefault();
+            return await InsertAsync<T>(new List<T>(1) { data }, options).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -729,6 +710,35 @@ namespace Sixnet.Development.Data.Client
             return default;
         }
 
+        /// <summary>
+        /// Insert core
+        /// </summary>
+        /// <param name="datas">Datas</param>
+        /// <param name="options">Options</param>
+        /// <returns></returns>
+        async Task<Tuple<int, Dictionary<string, dynamic>>> InsertCoreAsync<T>(IEnumerable<T> datas, DataOperationOptions options = null)
+        {
+            if (datas.IsNullOrEmpty())
+            {
+                return null;
+            }
+
+            // Create data command
+            var commands = new List<SixnetDataCommand>();
+            var dataType = typeof(T);
+            var isEntity = typeof(ISixnetEntity).IsAssignableFrom(dataType);
+            foreach (var data in datas)
+            {
+                var addCommand = SixnetDataCommand.Create<T>(DataOperationType.Insert);
+                var valueDict = isEntity ? ((ISixnetEntity)data).GetAllValues() : data.ToDynamicDictionary();
+                addCommand.FieldsAssignment = valueDict?.GetFieldsAssignment();
+                addCommand.Data = data;
+                commands.Add(addCommand);
+            }
+            var incrementField = SixnetEntityManager.GetField(dataType, FieldRole.Increment);
+            return await ExecuteCoreAsync(commands, incrementField != null, options).ConfigureAwait(false);
+        }
+
         #endregion
 
         #region Update
@@ -740,11 +750,11 @@ namespace Sixnet.Development.Data.Client
         /// <param name="datas">Datas</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public async Task<List<T>> UpdateAsync<T>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class, ISixnetEntity<T>
+        public async Task<int> UpdateAsync<T>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class, ISixnetEntity<T>
         {
             if (datas.IsNullOrEmpty())
             {
-                return new List<T>(0);
+                return 0;
             }
             var commands = new List<SixnetDataCommand>();
             foreach (var newData in datas)
@@ -764,11 +774,11 @@ namespace Sixnet.Development.Data.Client
                 command.Data = newData;
                 commands.Add(command);
             }
-            if (!commands.IsNullOrEmpty())
+            if (commands.IsNullOrEmpty())
             {
-                await UpdateAsync(commands, options).ConfigureAwait(false);
+                return 0;
             }
-            return datas.ToList();
+            return await UpdateAsync(commands, options).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -778,9 +788,9 @@ namespace Sixnet.Development.Data.Client
         /// <param name="data">Data</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public async Task<T> UpdateAsync<T>(T data, DataOperationOptions options = null) where T : class, ISixnetEntity<T>
+        public async Task<int> UpdateAsync<T>(T data, DataOperationOptions options = null) where T : class, ISixnetEntity<T>
         {
-            return (await UpdateAsync(new List<T>() { data }, options).ConfigureAwait(false))?.FirstOrDefault();
+            return await UpdateAsync(new List<T>() { data }, options).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -824,7 +834,6 @@ namespace Sixnet.Development.Data.Client
             var command = GetUpdateCommand(fieldsAssignment, queryable, options);
             return await UpdateAsync(new List<SixnetDataCommand>(1) { command }, options).ConfigureAwait(false);
         }
-
 
         /// <summary>
         /// Update

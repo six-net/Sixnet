@@ -22,8 +22,8 @@ namespace Sixnet.Development.Data
         /// </summary>
         /// <param name="entities">Entities</param>
         /// <param name="configure">Confirure options </param>
-        /// <returns>Inserted entities</returns>
-        public async Task<List<TEntity>> InsertAsync(IEnumerable<TEntity> entities, Action<DataOperationOptions> configure = null)
+        /// <returns>Affected data number</returns>
+        public async Task<int> InsertAsync(IEnumerable<TEntity> entities, Action<DataOperationOptions> configure = null)
         {
             return await DataClientContext.InsertAsync(entities, configure).ConfigureAwait(false);
         }
@@ -49,8 +49,8 @@ namespace Sixnet.Development.Data
         /// </summary>
         /// <param name="entities">Entities</param>
         /// <param name="configure">Confirure options </param>
-        /// <returns>Updated entities</returns>
-        public async Task<List<TEntity>> UpdateAsync(IEnumerable<TEntity> entities, Action<DataOperationOptions> configure = null)
+        /// <returns>Affected data number</returns>
+        public async Task<int> UpdateAsync(IEnumerable<TEntity> entities, Action<DataOperationOptions> configure = null)
         {
             return await DataClientContext.UpdateAsync(entities, configure).ConfigureAwait(false);
         }

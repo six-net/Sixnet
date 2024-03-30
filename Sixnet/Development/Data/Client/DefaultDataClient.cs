@@ -5,6 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
+using System.Threading.Tasks;
 using Sixnet.Development.Command;
 using Sixnet.Development.Data.Command;
 using Sixnet.Development.Data.Database;
@@ -768,10 +769,10 @@ namespace Sixnet.Development.Data.Client
         /// <param name="datas">Datas</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public List<T> Insert<T>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class
+        public int Insert<T>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class
         {
-            InsertReturnIdentities<T, dynamic>(datas, options);
-            return datas.ToList();
+            var insertResult = InsertCore(datas, options);
+            return insertResult?.Item1 ?? 0;
         }
 
         /// <summary>
@@ -781,9 +782,9 @@ namespace Sixnet.Development.Data.Client
         /// <param name="data">Data</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public T Insert<T>(T data, DataOperationOptions options = null) where T : class
+        public int Insert<T>(T data, DataOperationOptions options = null) where T : class
         {
-            return Insert<T>(new T[1] { data }, options)?.FirstOrDefault();
+            return Insert<T>(new T[1] { data }, options);
         }
 
         /// <summary>
@@ -796,26 +797,8 @@ namespace Sixnet.Development.Data.Client
         /// <returns></returns>
         public List<TIdentity> InsertReturnIdentities<T, TIdentity>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class
         {
-            if (datas.IsNullOrEmpty())
-            {
-                return new List<TIdentity>(0);
-            }
-
-            // Create data command
-            var commands = new List<SixnetDataCommand>();
-            var dataType = typeof(T);
-            var isEntity = typeof(ISixnetEntity).IsAssignableFrom(dataType);
-            foreach (var data in datas)
-            {
-                var addCommand = SixnetDataCommand.Create<T>(DataOperationType.Insert);
-                var valueDict = isEntity ? ((ISixnetEntity)data).GetAllValues() : data.ToDynamicDictionary();
-                addCommand.FieldsAssignment = valueDict?.GetFieldsAssignment();
-                addCommand.Data = data;
-                commands.Add(addCommand);
-            }
-            var incrementField = SixnetEntityManager.GetField(dataType, FieldRole.Increment);
-            var executeResult = ExecuteCore(commands, incrementField != null, options);
-            return executeResult.Item2?.Values.Cast<TIdentity>().ToList() ?? new List<TIdentity>(0);
+            var insertResult = InsertCore(datas, options);
+            return insertResult?.Item2?.Values.Cast<TIdentity>().ToList() ?? new List<TIdentity>(0);
         }
 
         /// <summary>
@@ -836,6 +819,35 @@ namespace Sixnet.Development.Data.Client
             return default;
         }
 
+        /// <summary>
+        /// Insert core
+        /// </summary>
+        /// <param name="datas">Datas</param>
+        /// <param name="options">Options</param>
+        /// <returns></returns>
+        Tuple<int, Dictionary<string, dynamic>> InsertCore<T>(IEnumerable<T> datas, DataOperationOptions options = null)
+        {
+            if (datas.IsNullOrEmpty())
+            {
+                return null;
+            }
+
+            // Create data command
+            var commands = new List<SixnetDataCommand>();
+            var dataType = typeof(T);
+            var isEntity = typeof(ISixnetEntity).IsAssignableFrom(dataType);
+            foreach (var data in datas)
+            {
+                var addCommand = SixnetDataCommand.Create<T>(DataOperationType.Insert);
+                var valueDict = isEntity ? ((ISixnetEntity)data).GetAllValues() : data.ToDynamicDictionary();
+                addCommand.FieldsAssignment = valueDict?.GetFieldsAssignment();
+                addCommand.Data = data;
+                commands.Add(addCommand);
+            }
+            var incrementField = SixnetEntityManager.GetField(dataType, FieldRole.Increment);
+            return ExecuteCore(commands, incrementField != null, options);
+        }
+
         #endregion
 
         #region Update
@@ -847,11 +859,11 @@ namespace Sixnet.Development.Data.Client
         /// <param name="datas">Datas</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public List<T> Update<T>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class, ISixnetEntity<T>
+        public int Update<T>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class, ISixnetEntity<T>
         {
             if (datas.IsNullOrEmpty())
             {
-                return new List<T>(0);
+                return 0;
             }
             var commands = new List<SixnetDataCommand>();
             foreach (var newData in datas)
@@ -871,11 +883,11 @@ namespace Sixnet.Development.Data.Client
                 command.Data = newData;
                 commands.Add(command);
             }
-            if (!commands.IsNullOrEmpty())
+            if (commands.IsNullOrEmpty())
             {
-                Update(commands, options);
+                return 0;
             }
-            return datas.ToList();
+            return Update(commands, options);
         }
 
         /// <summary>
@@ -885,9 +897,9 @@ namespace Sixnet.Development.Data.Client
         /// <param name="data">Data</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public T Update<T>(T data, DataOperationOptions options = null) where T : class, ISixnetEntity<T>
+        public int Update<T>(T data, DataOperationOptions options = null) where T : class, ISixnetEntity<T>
         {
-            return Update(new T[1] { data }, options)?.FirstOrDefault();
+            return Update(new T[1] { data }, options);
         }
 
         /// <summary>
@@ -1585,14 +1597,11 @@ namespace Sixnet.Development.Data.Client
                 var newValue = newValueItem.Value;
                 if (newValue is ISixnetField)
                 {
-                    if (newValue is ConstantField constantField && !constantField.HasFormatter)
-                    {
-                        newValue = constantField.Value;
-                    }
-                    else
+                    if (newValue is not ConstantField constantField || constantField.HasFormatter)
                     {
                         continue;
                     }
+                    newValue = constantField.Value;
                 }
                 var propertyName = newValueItem.Key;
                 entity.SetValue(propertyName, newValue);

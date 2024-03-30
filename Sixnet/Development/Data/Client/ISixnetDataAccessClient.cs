@@ -386,7 +386,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="datas">Datas</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        List<T> Insert<T>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class;
+        int Insert<T>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class;
 
         /// <summary>
         /// Insert data
@@ -395,7 +395,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="data">Data</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        T Insert<T>(T data, DataOperationOptions options = null) where T : class;
+        int Insert<T>(T data, DataOperationOptions options = null) where T : class;
 
         /// <summary>
         /// Insert and return identities
@@ -428,7 +428,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="datas">Datas</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        List<T> Update<T>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class, ISixnetEntity<T>;
+        int Update<T>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class, ISixnetEntity<T>;
 
         /// <summary>
         /// Update data
@@ -437,7 +437,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="data">Data</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        T Update<T>(T data, DataOperationOptions options = null) where T : class, ISixnetEntity<T>;
+        int Update<T>(T data, DataOperationOptions options = null) where T : class, ISixnetEntity<T>;
 
         /// <summary>
         /// Update
