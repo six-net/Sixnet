@@ -7,7 +7,7 @@ namespace Sixnet.Localization
     /// <summary>
     /// Localizer
     /// </summary>
-    public static class SixnetLocalizer
+    public static partial class SixnetLocalizer
     {
         /// <summary>
         /// Get local string

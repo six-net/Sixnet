@@ -11,7 +11,7 @@ namespace Sixnet.Exceptions
     /// <summary>
     /// Throw helper
     /// </summary>
-    public static class SixnetThrower
+    public static partial class SixnetThrower
     {
         #region Fields
 
