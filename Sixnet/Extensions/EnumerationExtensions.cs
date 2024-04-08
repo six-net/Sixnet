@@ -11,11 +11,12 @@ namespace System
         /// </summary>
         /// <typeparam name="TEnum">Enum type</typeparam>
         /// <param name="enumValue">Enum value</param>
+        /// <param name="startWithEnumName">Whether start with enum name</param>
         /// <param name="displayFriendly">Display friendly</param>
         /// <returns>Return a dictionary</returns>
-        public static Dictionary<int, string> GetEnumDictionary<TEnum>(this TEnum enumValue, bool displayFriendly = true) where TEnum : struct, Enum
+        public static Dictionary<int, string> GetEnumDictionary<TEnum>(this TEnum enumValue, bool startWithEnumName = false, bool displayFriendly = true) where TEnum : struct, Enum
         {
-            return enumValue.GetType().GetEnumValueAndNames(displayFriendly);
+            return enumValue.GetType().GetEnumValueAndNames(startWithEnumName, displayFriendly);
         }
 
         /// <summary>
@@ -23,11 +24,12 @@ namespace System
         /// </summary>
         /// <typeparam name="TEnum">Enum type</typeparam>
         /// <param name="enumValue">Enum value</param>
+        /// <param name="startWithEnumName">Whether start with enum name</param>
         /// <param name="displayFriendly">Display friendly</param>
         /// <returns>Return a key&value collection</returns>
-        public static KeyValueCollection<int, string> GetEnumKeyValueCollection<TEnum>(this TEnum enumValue, bool displayFriendly = true) where TEnum : struct, Enum
+        public static KeyValueCollection<int, string> GetEnumKeyValueCollection<TEnum>(this TEnum enumValue, bool startWithEnumName = false, bool displayFriendly = true) where TEnum : struct, Enum
         {
-            return new KeyValueCollection<int, string>(enumValue.GetEnumDictionary(displayFriendly).Select(c => c));
+            return new KeyValueCollection<int, string>(enumValue.GetEnumDictionary(startWithEnumName, displayFriendly).Select(c => c));
         }
     }
 }

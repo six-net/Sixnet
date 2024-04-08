@@ -83,16 +83,17 @@ namespace System
         /// Generate dictionary by enum
         /// </summary>
         /// <param name="enumType">Enum type</param>
+        /// <param name="startWithEnumName">Whether start with enum name</param>
         /// <param name="displayFriendly">Display friendly</param>
         /// <returns>Return the dictionary value</returns>
-        public static Dictionary<int, string> GetEnumValueAndNames(this Type enumType, bool displayFriendly = true)
+        public static Dictionary<int, string> GetEnumValueAndNames(this Type enumType, bool startWithEnumName = false, bool displayFriendly = true)
         {
             if (enumType == null)
             {
                 return new Dictionary<int, string>(0);
             }
 
-            string formatedKey = $"{enumType.GUID}_{displayFriendly}";
+            string formatedKey = $"{enumType.GUID}_{startWithEnumName}_{displayFriendly}";
             if (CacheEnumValueAndNames.TryGetValue(formatedKey, out var valueAndNames))
             {
                 return valueAndNames ?? new Dictionary<int, string>(0);
@@ -113,7 +114,7 @@ namespace System
                         enumName = string.IsNullOrWhiteSpace(displayName) ? enumName : displayName;
                     }
                 }
-                enumValues.Add(val, enumName);
+                enumValues.Add(val, startWithEnumName ? $"{enumType.Name}{enumName}" : enumName);
             }
             CacheEnumValueAndNames[formatedKey] = enumValues;
             return enumValues;
@@ -131,7 +132,7 @@ namespace System
         public static string GetEnumDisplayName(this Enum enumValue)
         {
             var enumType = enumValue.GetType();
-            var valueAndNames = GetEnumValueAndNames(enumType, true);
+            var valueAndNames = GetEnumValueAndNames(enumType, false, true);
             valueAndNames.TryGetValue(Convert.ToInt32(enumValue), out string displayName);
             return displayName ?? enumValue.ToString();
         }
