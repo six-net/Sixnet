@@ -55,11 +55,13 @@ namespace Sixnet.Serialization.Json
             SixnetDirectThrower.ThrowArgNullIf(jsonSerializerOptions == null, nameof(jsonSerializerOptions));
 
             //naming policy
-            if (sixnetJsonOptions.DefaultNamingPolicy != JsonPropertyNamingPolicy.Default
-                || jsonSerializerOptions.PropertyNamingPolicy == null)
+            if (sixnetJsonOptions.PropertyNamingPolicy != JsonPropertyNamingPolicy.Default)
             {
-                jsonSerializerOptions.PropertyNamingPolicy = GetJsonNamingPolicy(sixnetJsonOptions.DefaultNamingPolicy);
-                jsonSerializerOptions.DictionaryKeyPolicy = jsonSerializerOptions.PropertyNamingPolicy;
+                jsonSerializerOptions.PropertyNamingPolicy = GetJsonNamingPolicy(sixnetJsonOptions.PropertyNamingPolicy);
+            }
+            if (sixnetJsonOptions.DictionaryKeyPolicy != JsonPropertyNamingPolicy.Default)
+            {
+                jsonSerializerOptions.DictionaryKeyPolicy = GetJsonNamingPolicy(sixnetJsonOptions.DictionaryKeyPolicy);
             }
 
             //converter

@@ -22,9 +22,14 @@ namespace Sixnet.Serialization.Json
         public bool ResolveNonPublic { get; set; }
 
         /// <summary>
-        /// Gets or sets the default naming policy
+        /// Gets or sets the property naming policy
         /// </summary>
-        public JsonPropertyNamingPolicy DefaultNamingPolicy { get; set; } = JsonPropertyNamingPolicy.Default;
+        public JsonPropertyNamingPolicy PropertyNamingPolicy { get; set; } = JsonPropertyNamingPolicy.Default;
+
+        /// <summary>
+        /// Gets or sets the dictionary key policy
+        /// </summary>
+        public JsonPropertyNamingPolicy DictionaryKeyPolicy { get; set; } = JsonPropertyNamingPolicy.Default;
 
         /// <summary>
         /// Gets or sets the deserialized data type
