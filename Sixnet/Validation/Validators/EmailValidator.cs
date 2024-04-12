@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using Sixnet.Expressions.Regular;
 
 namespace Sixnet.Validation.Validators
 {
@@ -40,6 +41,16 @@ namespace Sixnet.Validation.Validators
             {
                 ErrorMessage = FormatMessage(parameter.ErrorMessage)
             };
+        }
+
+        public override AsyncValidatorRule CreateAsyncValidatorRule(AsyncValidatorRuleParameter parameter)
+        {
+            var rule = base.CreateAsyncValidatorRule(parameter);
+
+            rule.Type = "string";
+            rule.Pattern = RegexPatterns.Email;
+
+            return rule;
         }
     }
 }

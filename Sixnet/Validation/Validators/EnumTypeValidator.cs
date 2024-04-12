@@ -46,5 +46,15 @@ namespace Sixnet.Validation.Validators
                 ErrorMessage = FormatMessage(parameter.ErrorMessage)
             };
         }
+
+        public override AsyncValidatorRule CreateAsyncValidatorRule(AsyncValidatorRuleParameter parameter)
+        {
+            var rule = base.CreateAsyncValidatorRule(parameter);
+
+            rule.Type = "enum";
+            rule.Enum = Enum.GetValues(enumType);
+
+            return rule;
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using Sixnet.Expressions.Regular;
 
 namespace Sixnet.Validation.Validators
 {
@@ -32,6 +33,16 @@ namespace Sixnet.Validation.Validators
             return ValidationExtensions.IsImageFileNullable(value)
                 ? ValidationResult.SuccessResult()
                 : ValidationResult.ErrorResult(errorMessage);
+        }
+
+        public override AsyncValidatorRule CreateAsyncValidatorRule(AsyncValidatorRuleParameter parameter)
+        {
+            var rule = base.CreateAsyncValidatorRule(parameter);
+
+            rule.Type = "string";
+            rule.Pattern = RegexPatterns.ImageFie;
+
+            return rule;
         }
     }
 }

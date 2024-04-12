@@ -155,6 +155,18 @@ namespace Sixnet.Validation
             return ignoreUseScenarios.Any(c => c.Equals(useScenario, StringComparison.OrdinalIgnoreCase));
         }
 
+        /// <summary>
+        /// Get async validator rule
+        /// </summary>
+        /// <returns></returns>
+        public AsyncValidatorRule GetAsyncValidatorRule()
+        {
+            return validator?.CreateAsyncValidatorRule(new AsyncValidatorRuleParameter()
+            {
+                ErrorMessage = errorMessage
+            });
+        }
+
         #endregion
     }
 }

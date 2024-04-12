@@ -7,6 +7,7 @@ using Sixnet.Expressions.Linq;
 using Sixnet.Expressions.Regular;
 using Sixnet.App;
 using Sixnet.Serialization.Json;
+using System.Linq;
 
 namespace Sixnet.Validation
 {
@@ -86,11 +87,11 @@ namespace Sixnet.Validation
                 return;
             }
             var rootPath = SixnetApplication.RootPath;
-            if(string.IsNullOrWhiteSpace(configPath))
+            if (string.IsNullOrWhiteSpace(configPath))
             {
                 configPath = rootPath;
             }
-            if(!Path.IsPathRooted(configPath))
+            if (!Path.IsPathRooted(configPath))
             {
                 configPath = Path.Combine(rootPath, configPath);
             }
@@ -897,6 +898,40 @@ namespace Sixnet.Validation
                 return new List<ISixnetValidation>(0);
             }
             return typeItem[propertyOrFieldName];
+        }
+
+        #endregion
+
+        #region Get async validator rules
+
+        /// <summary>
+        /// Get async validator rules
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static Dictionary<string, List<AsyncValidatorRule>> GetAsyncValidatorRules(Type type)
+        {
+            if (type != null && _typeValidations.TryGetValue(type.FullName, out var typeValidations)
+                && !typeValidations.IsNullOrEmpty())
+            {
+                var typeValidatorRules = new Dictionary<string, List<AsyncValidatorRule>>();
+                foreach (var propertyValidationItem in typeValidations)
+                {
+                    typeValidatorRules[propertyValidationItem.Key] = propertyValidationItem.Value.Select(c => c.GetAsyncValidatorRule()).Where(c => c != null).ToList();
+                }
+                return typeValidatorRules;
+            }
+            return new Dictionary<string, List<AsyncValidatorRule>>(0);
+        }
+
+        /// <summary>
+        /// Get async validator rules
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static Dictionary<string, List<AsyncValidatorRule>> GetAsyncValidatorRules<T>()
+        {
+            return GetAsyncValidatorRules(typeof(T));
         }
 
         #endregion

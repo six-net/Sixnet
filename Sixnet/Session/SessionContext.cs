@@ -16,21 +16,6 @@ namespace Sixnet.Session
         static readonly AsyncLocal<SixnetSession> current = new();
 
         /// <summary>
-        /// Isolation id key
-        /// </summary>
-        public static string IsolationIdKey = "sixnet_tnt_id";
-
-        /// <summary>
-        /// Isolation code key
-        /// </summary>
-        public static string IsolationCodeKey = "sixnet_tnt_code";
-
-        /// <summary>
-        /// Isolation name key
-        /// </summary>
-        public static string IsolationNameKey = "sixnet_tnt_name";
-
-        /// <summary>
         /// User id key
         /// </summary>
         public static string UserIdKey = "sixnet_usr_id";

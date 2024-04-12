@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sixnet.Expressions.Regular;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace Sixnet.Validation.Validators
@@ -30,6 +31,16 @@ namespace Sixnet.Validation.Validators
             {
                 ErrorMessage = FormatMessage(parameter.ErrorMessage)
             };
+        }
+
+        public override AsyncValidatorRule CreateAsyncValidatorRule(AsyncValidatorRuleParameter parameter)
+        {
+            var rule = base.CreateAsyncValidatorRule(parameter);
+
+            rule.Type = "string";
+            rule.Pattern = RegexPatterns.Phone;
+
+            return rule;
         }
     }
 }

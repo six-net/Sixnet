@@ -20,5 +20,11 @@ namespace Sixnet.Validation
         /// </summary>
         /// <returns>Return the validation attribute</returns>
         ValidationAttribute CreateValidationAttribute();
+
+        /// <summary>
+        /// Get async validator rule
+        /// </summary>
+        /// <returns></returns>
+        AsyncValidatorRule GetAsyncValidatorRule();
     }
 }

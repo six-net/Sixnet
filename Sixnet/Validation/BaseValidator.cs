@@ -51,6 +51,14 @@ namespace Sixnet.Validation
             return string.IsNullOrWhiteSpace(errorMessage) ? defaultErrorMessageValue : errorMessage;
         }
 
+        public virtual AsyncValidatorRule CreateAsyncValidatorRule(AsyncValidatorRuleParameter parameter)
+        {
+            return new AsyncValidatorRule()
+            {
+                Message = FormatMessage(parameter.ErrorMessage)
+            };
+        }
+
         #endregion
     }
 }

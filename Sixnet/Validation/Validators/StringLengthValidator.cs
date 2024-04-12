@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.FileSystemGlobbing.Internal;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace Sixnet.Validation.Validators
@@ -87,6 +88,17 @@ namespace Sixnet.Validation.Validators
                 MinimumLength = MinimumLength,
                 ErrorMessage = FormatMessage(parameter.ErrorMessage)
             };
+        }
+
+        public override AsyncValidatorRule CreateAsyncValidatorRule(AsyncValidatorRuleParameter parameter)
+        {
+            var rule = base.CreateAsyncValidatorRule(parameter);
+
+            rule.Type = "string";
+            rule.Min = MinimumLength;
+            rule.Max = MaximumLength;
+
+            return rule;
         }
 
         #endregion

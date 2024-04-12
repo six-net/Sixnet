@@ -90,5 +90,10 @@ namespace Sixnet.Validation.Validators
                 ErrorMessage = FormatMessage(parameter.ErrorMessage)
             };
         }
+
+        public override AsyncValidatorRule CreateAsyncValidatorRule(AsyncValidatorRuleParameter parameter)
+        {
+            return null;
+        }
     }
 }

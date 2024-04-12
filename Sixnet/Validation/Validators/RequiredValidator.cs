@@ -49,5 +49,12 @@ namespace Sixnet.Validation.Validators
                 AllowEmptyStrings = AllowEmptyString
             };
         }
+
+        public override AsyncValidatorRule CreateAsyncValidatorRule(AsyncValidatorRuleParameter parameter)
+        {
+            var rule = base.CreateAsyncValidatorRule(parameter);
+            rule.Required = true;
+            return rule;
+        }
     }
 }

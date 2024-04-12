@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.Extensions.FileSystemGlobbing.Internal;
+using Sixnet.Expressions.Regular;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Text.RegularExpressions;
@@ -81,6 +83,16 @@ namespace Sixnet.Validation.Validators
             {
                 ErrorMessage = FormatMessage(parameter.ErrorMessage)
             };
+        }
+
+        public override AsyncValidatorRule CreateAsyncValidatorRule(AsyncValidatorRuleParameter parameter)
+        {
+            var rule = base.CreateAsyncValidatorRule(parameter);
+
+            rule.Type = "string";
+            rule.Pattern = Pattern;
+
+            return rule;
         }
     }
 }

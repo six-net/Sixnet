@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.FileSystemGlobbing.Internal;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace Sixnet.Validation.Validators
@@ -26,6 +27,11 @@ namespace Sixnet.Validation.Validators
         public override ValidationResult Validate(dynamic value, string errorMessage)
         {
             throw new NotImplementedException();
+        }
+
+        public override AsyncValidatorRule CreateAsyncValidatorRule(AsyncValidatorRuleParameter parameter)
+        {
+            return null;
         }
     }
 }
