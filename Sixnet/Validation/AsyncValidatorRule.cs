@@ -21,7 +21,7 @@ namespace Sixnet.Validation
 
         public dynamic Max { get; set; }
 
-        public int Len { get; set; }
+        public dynamic Len { get; set; }
 
         public IEnumerable Enum { get; set; }
 
