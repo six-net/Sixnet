@@ -29,7 +29,7 @@ namespace Sixnet.Serialization.Json
         /// <summary>
         /// Gets or sets the dictionary key policy
         /// </summary>
-        public JsonPropertyNamingPolicy DictionaryKeyPolicy { get; set; } = JsonPropertyNamingPolicy.Default;
+        public JsonPropertyNamingPolicy DictionaryKeyNamingPolicy { get; set; } = JsonPropertyNamingPolicy.Default;
 
         /// <summary>
         /// Gets or sets the deserialized data type

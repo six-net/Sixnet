@@ -59,9 +59,9 @@ namespace Sixnet.Serialization.Json
             {
                 jsonSerializerOptions.PropertyNamingPolicy = GetJsonNamingPolicy(sixnetJsonOptions.PropertyNamingPolicy);
             }
-            if (sixnetJsonOptions.DictionaryKeyPolicy != JsonPropertyNamingPolicy.Default)
+            if (sixnetJsonOptions.DictionaryKeyNamingPolicy != JsonPropertyNamingPolicy.Default)
             {
-                jsonSerializerOptions.DictionaryKeyPolicy = GetJsonNamingPolicy(sixnetJsonOptions.DictionaryKeyPolicy);
+                jsonSerializerOptions.DictionaryKeyPolicy = GetJsonNamingPolicy(sixnetJsonOptions.DictionaryKeyNamingPolicy);
             }
 
             //converter
