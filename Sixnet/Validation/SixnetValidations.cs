@@ -908,8 +908,9 @@ namespace Sixnet.Validation
         /// Get async validator rules
         /// </summary>
         /// <param name="type"></param>
+        /// <param name="keyPrefixs">Key prefixs</param>
         /// <returns></returns>
-        public static Dictionary<string, List<AsyncValidatorRule>> GetAsyncValidatorRules(Type type)
+        public static Dictionary<string, List<AsyncValidatorRule>> GetAsyncValidatorRules(Type type, params string[] keyPrefixs)
         {
             if (type != null && _typeValidations.TryGetValue(type.FullName, out var typeValidations)
                 && !typeValidations.IsNullOrEmpty())
@@ -917,7 +918,7 @@ namespace Sixnet.Validation
                 var typeValidatorRules = new Dictionary<string, List<AsyncValidatorRule>>();
                 foreach (var propertyValidationItem in typeValidations)
                 {
-                    typeValidatorRules[propertyValidationItem.Key] = propertyValidationItem.Value.Select(c => c.GetAsyncValidatorRule()).Where(c => c != null).ToList();
+                    typeValidatorRules[$"{(keyPrefixs.IsNullOrEmpty() ? "" : string.Join(".", keyPrefixs) + ".")}{propertyValidationItem.Key}"] = propertyValidationItem.Value.Select(c => c.GetAsyncValidatorRule()).Where(c => c != null).ToList();
                 }
                 return typeValidatorRules;
             }
@@ -927,11 +928,11 @@ namespace Sixnet.Validation
         /// <summary>
         /// Get async validator rules
         /// </summary>
-        /// <param name="type"></param>
+        /// <param name="keyPrefixs">Key prefixs</param>
         /// <returns></returns>
-        public static Dictionary<string, List<AsyncValidatorRule>> GetAsyncValidatorRules<T>()
+        public static Dictionary<string, List<AsyncValidatorRule>> GetAsyncValidatorRules<T>(params string[] keyPrefixs)
         {
-            return GetAsyncValidatorRules(typeof(T));
+            return GetAsyncValidatorRules(typeof(T), keyPrefixs);
         }
 
         #endregion
