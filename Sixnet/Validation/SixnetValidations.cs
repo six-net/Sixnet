@@ -918,7 +918,7 @@ namespace Sixnet.Validation
                 var typeValidatorRules = new Dictionary<string, List<AsyncValidatorRule>>();
                 foreach (var propertyValidationItem in typeValidations)
                 {
-                    typeValidatorRules[$"{(keyPrefixs.IsNullOrEmpty() ? "" : string.Join(".", keyPrefixs) + ".")}{propertyValidationItem.Key}"] = propertyValidationItem.Value.Select(c => c.GetAsyncValidatorRule()).Where(c => c != null).ToList();
+                    typeValidatorRules[$"{(keyPrefixs.IsNullOrEmpty() ? "" : string.Join(".", keyPrefixs) + ".")}{propertyValidationItem.Key.ToCamelCase()}"] = propertyValidationItem.Value.Select(c => c.GetAsyncValidatorRule()).Where(c => c != null).ToList();
                 }
                 return typeValidatorRules;
             }
