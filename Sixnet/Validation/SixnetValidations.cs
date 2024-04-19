@@ -9,6 +9,7 @@ using Sixnet.App;
 using Sixnet.Serialization.Json;
 using System.Linq;
 using System.Collections.Concurrent;
+using Sixnet.Development.Data.Field;
 
 namespace Sixnet.Validation
 {
@@ -136,7 +137,12 @@ namespace Sixnet.Validation
             }
             foreach (ValidationField<T> property in fields)
             {
-                var propertyName = SixnetExpressionHelper.GetExpressionText(property.Field);
+                var field = SixnetExpressionHelper.GetDataField(property.Field);
+                if(field is not DataField dataField)
+                {
+                    continue;
+                }
+                var propertyName = field.PropertyName;
                 List<ISixnetValidation> validationList;
                 if (typeValidationItems.ContainsKey(propertyName))
                 {
@@ -147,7 +153,7 @@ namespace Sixnet.Validation
                     validationList = new List<ISixnetValidation>();
                     typeValidationItems.Add(propertyName, validationList);
                 }
-                validationList.Add(new DefaultValidation<T>(property, validator, propertyName));
+                validationList.Add(new DefaultValidation<T>(property, validator, dataField));
 
                 //set tip message
                 if (property.TipMessage && !string.IsNullOrWhiteSpace(property.ErrorMessage))

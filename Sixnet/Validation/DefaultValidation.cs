@@ -5,6 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using Sixnet.Validation.Validators;
 using Sixnet.Expressions.Linq;
+using Sixnet.Development.Data.Field;
 
 namespace Sixnet.Validation
 {
@@ -29,6 +30,11 @@ namespace Sixnet.Validation
         /// Field name
         /// </summary>
         readonly string fieldName = string.Empty;
+
+        /// <summary>
+        /// Field type
+        /// </summary>
+        readonly Type fieldType = null;
 
         /// <summary>
         /// Error message
@@ -60,11 +66,12 @@ namespace Sixnet.Validation
         /// <param name="field">Field</param>
         /// <param name="validator">Data validator</param>
         /// <param name="fieldName">Field name</param>
-        public DefaultValidation(ValidationField<T> field, BaseValidator validator, string fieldName)
+        public DefaultValidation(ValidationField<T> field, BaseValidator validator, DataField dataField)
         {
             valueMethod = field.Field.Compile();
             this.validator = validator;
-            this.fieldName = fieldName;
+            fieldName = dataField.PropertyName;
+            fieldType = dataField.GetDataType();
             errorMessage = field.ErrorMessage;
             ignoreUseScenarios = new List<string>(field.IgnoreUseScenarios ?? Array.Empty<string>());
             if (field.CompareValue is Expression<Func<T, dynamic>> compareExp)
@@ -161,11 +168,24 @@ namespace Sixnet.Validation
         /// <returns></returns>
         public AsyncValidatorRule GetAsyncValidatorRule(AsyncValidatorRuleOptions ruleOptions)
         {
-            return validator?.CreateAsyncValidatorRule(new AsyncValidatorRuleParameter()
+            var rule = validator?.CreateAsyncValidatorRule(new AsyncValidatorRuleParameter()
             {
                 ErrorMessage = errorMessage,
                 Required = ruleOptions.Required && !(ruleOptions.AllowNullFieldNames?.Contains(fieldName ?? string.Empty) ?? false),
+                FieldType = fieldType
             });
+            if (rule != null)
+            {
+                if (ruleOptions.FieldTriggers?.ContainsKey(fieldName) ?? false)
+                {
+                    rule.Trigger = ruleOptions.FieldTriggers[fieldName].ToString().ToCamelCase();
+                }
+                else
+                {
+                    rule.Trigger = ruleOptions.Trigger.ToString().ToCamelCase();
+                }
+            }
+            return rule;
         }
 
         #endregion

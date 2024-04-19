@@ -15,5 +15,10 @@ namespace Sixnet.Validation
         /// Ignore required
         /// </summary>
         public bool Required { get; set; }
+
+        /// <summary>
+        /// Field type
+        /// </summary>
+        public Type FieldType { get; set; }
     }
 }
