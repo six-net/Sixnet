@@ -159,11 +159,12 @@ namespace Sixnet.Validation
         /// Get async validator rule
         /// </summary>
         /// <returns></returns>
-        public AsyncValidatorRule GetAsyncValidatorRule()
+        public AsyncValidatorRule GetAsyncValidatorRule(AsyncValidatorRuleOptions ruleOptions)
         {
             return validator?.CreateAsyncValidatorRule(new AsyncValidatorRuleParameter()
             {
-                ErrorMessage = errorMessage
+                ErrorMessage = errorMessage,
+                Required = ruleOptions.Required && !(ruleOptions.AllowNullFieldNames?.Contains(fieldName ?? string.Empty) ?? false),
             });
         }
 

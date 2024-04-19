@@ -8,6 +8,7 @@ using Sixnet.Expressions.Regular;
 using Sixnet.App;
 using Sixnet.Serialization.Json;
 using System.Linq;
+using System.Collections.Concurrent;
 
 namespace Sixnet.Validation
 {
@@ -22,27 +23,27 @@ namespace Sixnet.Validation
         /// Type validations
         /// Key:type->property
         /// </summary>
-        static readonly Dictionary<string, Dictionary<string, List<ISixnetValidation>>> _typeValidations = new Dictionary<string, Dictionary<string, List<ISixnetValidation>>>();
-
+        static readonly Dictionary<string, Dictionary<string, List<ISixnetValidation>>> _typeValidations = new();
         /// <summary>
         /// Validators
         /// </summary>
-        static readonly Dictionary<string, BaseValidator> _validators = new Dictionary<string, BaseValidator>();
-
+        static readonly Dictionary<string, BaseValidator> _validators = new();
         /// <summary>
         /// Default validation top message
         /// </summary>
-        static readonly Dictionary<string, string> _defaultValidationTipMessage = new Dictionary<string, string>();
-
+        static readonly Dictionary<string, string> _defaultValidationTipMessage = new();
         /// <summary>
         /// Field error message separator
         /// </summary>
         public static string FieldErrorMessageSeparator = ":";
-
         /// <summary>
         /// Enable greed validation mode
         /// </summary>
         public static bool ModelGreedValidation = true;
+        /// <summary>
+        /// Async validator rules
+        /// </summary>
+        static readonly ConcurrentDictionary<string, Dictionary<string, List<AsyncValidatorRule>>> _asyncValidatorRules = new();
 
         #endregion
 
@@ -908,31 +909,64 @@ namespace Sixnet.Validation
         /// Get async validator rules
         /// </summary>
         /// <param name="type"></param>
+        /// <param name="required">Required</param>
         /// <param name="keyPrefixs">Key prefixs</param>
         /// <returns></returns>
-        public static Dictionary<string, List<AsyncValidatorRule>> GetAsyncValidatorRules(Type type, params string[] keyPrefixs)
+        public static Dictionary<string, List<AsyncValidatorRule>> GetAsyncValidatorRules(Action<AsyncValidatorRuleOptions> configure)
         {
-            if (type != null && _typeValidations.TryGetValue(type.FullName, out var typeValidations)
-                && !typeValidations.IsNullOrEmpty())
+            var ruleOptions = new AsyncValidatorRuleOptions();
+            configure?.Invoke(ruleOptions);
+            var optionsKey = ruleOptions.GetOptionsKey();
+            if (_asyncValidatorRules.ContainsKey(optionsKey))
             {
+                return _asyncValidatorRules[optionsKey] ?? new Dictionary<string, List<AsyncValidatorRule>>(0);
+            }
+            else
+            {
+                var type = ruleOptions.ModelType;
+                var keyPrefixs = ruleOptions.KeyPrefixs;
                 var typeValidatorRules = new Dictionary<string, List<AsyncValidatorRule>>();
-                foreach (var propertyValidationItem in typeValidations)
+                if (type != null && _typeValidations.TryGetValue(type.FullName, out var typeValidations)
+                && !typeValidations.IsNullOrEmpty())
                 {
-                    typeValidatorRules[$"{(keyPrefixs.IsNullOrEmpty() ? "" : string.Join(".", keyPrefixs) + ".")}{propertyValidationItem.Key.ToCamelCase()}"] = propertyValidationItem.Value.Select(c => c.GetAsyncValidatorRule()).Where(c => c != null).ToList();
+                    foreach (var propertyValidationItem in typeValidations)
+                    {
+                        typeValidatorRules[$"{(keyPrefixs.IsNullOrEmpty() ? "" : string.Join(".", keyPrefixs) + ".")}{propertyValidationItem.Key.ToCamelCase()}"]
+                            = propertyValidationItem.Value.Select(c => c.GetAsyncValidatorRule(ruleOptions)).Where(c => c != null).ToList();
+                    }
+                    return typeValidatorRules;
                 }
+                _asyncValidatorRules[optionsKey] = typeValidatorRules;
                 return typeValidatorRules;
             }
-            return new Dictionary<string, List<AsyncValidatorRule>>(0);
         }
 
         /// <summary>
         /// Get async validator rules
         /// </summary>
+        /// <param name="type"></param>
+        /// <param name="required">Required</param>
         /// <param name="keyPrefixs">Key prefixs</param>
         /// <returns></returns>
-        public static Dictionary<string, List<AsyncValidatorRule>> GetAsyncValidatorRules<T>(params string[] keyPrefixs)
+        public static Dictionary<string, List<AsyncValidatorRule>> GetAsyncValidatorRules(Type type, bool required = true, params string[] keyPrefixs)
         {
-            return GetAsyncValidatorRules(typeof(T), keyPrefixs);
+            return GetAsyncValidatorRules(options =>
+            {
+                options.ModelType = type;
+                options.Required = required;
+                options.KeyPrefixs = keyPrefixs?.ToList();
+            });
+        }
+
+        /// <summary>
+        /// Get async validator rules
+        /// </summary>
+        /// <param name="required">Required</param>
+        /// <param name="keyPrefixs">Key prefixs</param>
+        /// <returns></returns>
+        public static Dictionary<string, List<AsyncValidatorRule>> GetAsyncValidatorRules<T>(bool required = true, params string[] keyPrefixs)
+        {
+            return GetAsyncValidatorRules(typeof(T), required, keyPrefixs);
         }
 
         #endregion

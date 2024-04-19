@@ -10,5 +10,10 @@ namespace Sixnet.Validation
         /// Gets or sets the error message
         /// </summary>
         public string ErrorMessage { get; set; }
+
+        /// <summary>
+        /// Ignore required
+        /// </summary>
+        public bool Required { get; set; }
     }
 }
