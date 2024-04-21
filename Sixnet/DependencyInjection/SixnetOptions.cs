@@ -16,6 +16,7 @@ using Sixnet.Net.Upload;
 using Sixnet.Security.Cryptography;
 using Sixnet.Serialization.Json;
 using Sixnet.Token.Jwt;
+using Sixnet.Validation;
 
 namespace Sixnet.DependencyInjection
 {
@@ -108,6 +109,11 @@ namespace Sixnet.DependencyInjection
         /// Configure message queue
         /// </summary>
         public Action<MessageQueueOptions> ConfigureMessageQueue { get; set; }
+
+        /// <summary>
+        /// Configure validation
+        /// </summary>
+        public Action<ValidationOptions> ConfigureValidation { get; set; }
 
         /// <summary>
         /// Set options style

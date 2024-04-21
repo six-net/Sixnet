@@ -9,6 +9,7 @@ using Sixnet.Net.Upload;
 using Sixnet.Security.Cryptography;
 using Sixnet.Serialization.Json;
 using Sixnet.Token.Jwt;
+using Sixnet.Validation;
 
 namespace Sixnet.DependencyInjection
 {
@@ -71,5 +72,10 @@ namespace Sixnet.DependencyInjection
         /// Gets or sets the json options
         /// </summary>
         public SixnetJsonSerializationOptions Json { get; set; }
+
+        /// <summary>
+        /// Gets o sets t validation options
+        /// </summary>
+        public ValidationOptions Validation { get; set; }
     }
 }

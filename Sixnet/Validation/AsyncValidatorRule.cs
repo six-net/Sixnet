@@ -27,5 +27,7 @@ namespace Sixnet.Validation
 
         [LocalString]
         public string Message { get; set; }
+
+        public string Trigger { get; set; }
     }
 }

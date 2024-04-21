@@ -25,6 +25,6 @@ namespace Sixnet.Validation
         /// Get async validator rule
         /// </summary>
         /// <returns></returns>
-        AsyncValidatorRule GetAsyncValidatorRule();
+        AsyncValidatorRule GetAsyncValidatorRule(AsyncValidatorRuleOptions ruleOptions);
     }
 }

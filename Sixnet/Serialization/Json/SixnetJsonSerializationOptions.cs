@@ -24,12 +24,12 @@ namespace Sixnet.Serialization.Json
         /// <summary>
         /// Gets or sets the property naming policy
         /// </summary>
-        public JsonPropertyNamingPolicy PropertyNamingPolicy { get; set; } = JsonPropertyNamingPolicy.Default;
+        public JsonPropertyNamingPolicy PropertyNamingPolicy { get; set; } = JsonPropertyNamingPolicy.CamelCase;
 
         /// <summary>
         /// Gets or sets the dictionary key policy
         /// </summary>
-        public JsonPropertyNamingPolicy DictionaryKeyNamingPolicy { get; set; } = JsonPropertyNamingPolicy.Default;
+        public JsonPropertyNamingPolicy DictionaryKeyNamingPolicy { get; set; } = JsonPropertyNamingPolicy.CamelCase;
 
         /// <summary>
         /// Gets or sets the deserialized data type

@@ -22,6 +22,7 @@ using Sixnet.Net.Upload;
 using Sixnet.Security.Cryptography;
 using Sixnet.Serialization.Json;
 using Sixnet.Token.Jwt;
+using Sixnet.Validation;
 
 namespace Sixnet.DependencyInjection
 {
@@ -418,6 +419,8 @@ namespace Sixnet.DependencyInjection
             services.ConfigureIfNotNull<MessageQueueOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.MessageQueue)));
             // Json serialization
             services.ConfigureIfNotNull<SixnetJsonSerializationOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Json)));
+            // Validation
+            services.ConfigureIfNotNull<ValidationOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Validation)));
 
             // Post config options
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureUpload);
@@ -430,6 +433,7 @@ namespace Sixnet.DependencyInjection
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureData);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureMessageQueue);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureJson);
+            services.PostConfigureIfNotNull(sixnetOptions.ConfigureValidation);
             services.PostConfigureIfNotNull<CacheOptions>((options) =>
             {
                 options.AddCacheProvider(CacheServerType.InMemory, new MemoryProvider());

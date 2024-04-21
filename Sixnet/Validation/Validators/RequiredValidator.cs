@@ -52,6 +52,10 @@ namespace Sixnet.Validation.Validators
 
         public override AsyncValidatorRule CreateAsyncValidatorRule(AsyncValidatorRuleParameter parameter)
         {
+            if(!parameter.Required)
+            {
+                return null;
+            }
             var rule = base.CreateAsyncValidatorRule(parameter);
             rule.Required = true;
             return rule;
