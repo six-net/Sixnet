@@ -10,9 +10,6 @@ using Sixnet.Serialization.Json;
 using System.Linq;
 using System.Collections.Concurrent;
 using Sixnet.Development.Data.Field;
-using Sixnet.DependencyInjection;
-using Sixnet.Exceptions;
-using System.Reflection.Emit;
 
 namespace Sixnet.Validation
 {
@@ -28,10 +25,6 @@ namespace Sixnet.Validation
         /// Key:type->property
         /// </summary>
         static readonly Dictionary<string, Dictionary<string, List<ISixnetValidation>>> _typeValidations = new();
-        /// <summary>
-        /// Type full validation
-        /// </summary>
-        static readonly ConcurrentDictionary<string, Dictionary<string, List<ISixnetValidation>>> _typeFullValidations = new();
         /// <summary>
         /// Validators
         /// </summary>
@@ -61,11 +54,11 @@ namespace Sixnet.Validation
         /// Configure validation
         /// </summary>
         /// <param name="configure">Configure</param>
-        public static void Configure(Action<ValidationConfig> configure)
+        public static void Configure(Action<ValidationOptions> configure)
         {
-            var validationConfig = new ValidationConfig();
-            configure?.Invoke(validationConfig);
-            validationConfig?.BuildValidation();
+            var validationOptions = new ValidationOptions();
+            configure?.Invoke(validationOptions);
+            validationOptions?.BuildValidation();
         }
 
         /// <summary>
@@ -78,7 +71,7 @@ namespace Sixnet.Validation
             {
                 foreach (var value in jsonValues)
                 {
-                    var ruleCollection = SixnetJsonSerializer.Deserialize<ValidationConfig>(value);
+                    var ruleCollection = SixnetJsonSerializer.Deserialize<ValidationOptions>(value);
                     ruleCollection?.BuildValidation();
                 }
             }
@@ -145,7 +138,7 @@ namespace Sixnet.Validation
             foreach (ValidationField<T> property in fields)
             {
                 var field = SixnetExpressionHelper.GetDataField(property.Field);
-                if (field is not DataField dataField)
+                if(field is not DataField dataField)
                 {
                     continue;
                 }
@@ -858,58 +851,6 @@ namespace Sixnet.Validation
 
         #endregion
 
-        #region Get validation
-
-        /// <summary>
-        /// Get type validations
-        /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        public static Dictionary<string, List<ISixnetValidation>> GetTypeValidations(Type type)
-        {
-            SixnetDirectThrower.ThrowArgNullIf(type == null, nameof(type));
-
-            if (_typeFullValidations.TryGetValue(type.FullName, out var fullValidations))
-            {
-                return fullValidations ?? new Dictionary<string, List<ISixnetValidation>>(0);
-            }
-            else
-            {
-                _typeValidations.TryGetValue(type.FullName, out var validations);
-                validations ??= new Dictionary<string, List<ISixnetValidation>>();
-                var validationOptions = SixnetContainer.GetOptions<ValidationOptions>();
-                var useInheritance = validationOptions?.UseInheritance ?? true;
-                if (useInheritance && type.BaseType != null)
-                {
-                    var baseTypeValidations = GetTypeValidations(type.BaseType);
-                    if (!baseTypeValidations.IsNullOrEmpty())
-                    {
-                        foreach (var baseValidationItem in baseTypeValidations)
-                        {
-                            if (!validations.ContainsKey(baseValidationItem.Key))
-                            {
-                                validations[baseValidationItem.Key] = baseValidationItem.Value;
-                            }
-                        }
-                    }
-                }
-                _typeFullValidations[type.FullName] = validations;
-                return validations;
-            }
-        }
-
-        /// <summary>
-        /// Get type validation
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public static Dictionary<string, List<ISixnetValidation>> GetTypeValidations<T>()
-        {
-            return GetTypeValidations(typeof(T));
-        }
-
-        #endregion
-
         #region Validate
 
         /// <summary>
@@ -921,11 +862,12 @@ namespace Sixnet.Validation
         /// <returns>Return verify result</returns>
         public static List<ValidationResult> Validate<T>(T data, string useScenario = "")
         {
-            if (data == null)
+            var typeName = data?.GetType().FullName;
+            if (!_typeValidations.ContainsKey(typeName))
             {
                 return new List<ValidationResult>(0);
             }
-            var validationList = GetTypeValidations<T>();
+            var validationList = _typeValidations[typeName];
             var resultList = new List<ValidationResult>();
             foreach (var validation in validationList)
             {
@@ -953,12 +895,16 @@ namespace Sixnet.Validation
             {
                 return new List<ISixnetValidation>(0);
             }
-            var typeValidations = GetTypeValidations(type);
-            if (!typeValidations.ContainsKey(propertyOrFieldName))
+            if (!_typeValidations.ContainsKey(type.FullName))
             {
                 return new List<ISixnetValidation>(0);
             }
-            return typeValidations[propertyOrFieldName];
+            var typeItem = _typeValidations[type.FullName];
+            if (!typeItem.ContainsKey(propertyOrFieldName))
+            {
+                return new List<ISixnetValidation>(0);
+            }
+            return typeItem[propertyOrFieldName];
         }
 
         #endregion
@@ -986,8 +932,8 @@ namespace Sixnet.Validation
                 var type = ruleOptions.ModelType;
                 var keyPrefixs = ruleOptions.KeyPrefixs;
                 var typeValidatorRules = new Dictionary<string, List<AsyncValidatorRule>>();
-                var typeValidations = GetTypeValidations(type);
-                if (!typeValidations.IsNullOrEmpty())
+                if (type != null && _typeValidations.TryGetValue(type.FullName, out var typeValidations)
+                && !typeValidations.IsNullOrEmpty())
                 {
                     foreach (var propertyValidationItem in typeValidations)
                     {
