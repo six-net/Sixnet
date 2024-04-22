@@ -24,8 +24,8 @@ namespace Sixnet.Development.Data.Intercept
         /// <summary>
         /// default interceptor field role
         /// </summary>
-        static FieldRole defaultInterceptorFieldRole = FieldRole.CreateDate | FieldRole.CreateUserId
-            | FieldRole.UpdateDate | FieldRole.UpdateUserId | FieldRole.Revision | FieldRole.Isolation;
+        static FieldRole defaultInterceptorFieldRole = FieldRole.CreateDate | FieldRole.CreateUserId | FieldRole.CreateUserName
+            | FieldRole.UpdateDate | FieldRole.UpdateUserId | FieldRole.UpdateUserName | FieldRole.Revision | FieldRole.Isolation;
 
         #endregion
 
