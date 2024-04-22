@@ -113,8 +113,10 @@ namespace Sixnet.Development.Data.Intercept
             var operationType = context.GetDataOperationType();
             var createDateField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & FieldRole.CreateDate);
             var updateDateField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & FieldRole.UpdateDate);
-            var createUserField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & FieldRole.CreateUserId);
-            var updateUserField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & FieldRole.UpdateUserId);
+            var createUserIdField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & FieldRole.CreateUserId);
+            var updateUserIdField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & FieldRole.UpdateUserId);
+            var createUserNameField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & FieldRole.CreateUserName);
+            var updateUserNameField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & FieldRole.UpdateUserName);
             var versionField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & FieldRole.Revision);
             var isolationField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & FieldRole.Isolation);
             switch (operationType)
@@ -148,13 +150,21 @@ namespace Sixnet.Development.Data.Intercept
                     }
                     if (SessionContext.Current?.User != null)
                     {
-                        if (AllowSetInterceptorValue(context, createUserField))
+                        if (AllowSetInterceptorValue(context, createUserIdField))
                         {
-                            context.SetNewValue(createUserField.PropertyName, SessionContext.Current.User.Id.ConvertTo(createUserField.DataType));
+                            context.SetNewValue(createUserIdField.PropertyName, SessionContext.Current.User.Id.ConvertTo(createUserIdField.DataType));
                         }
-                        if (AllowSetInterceptorValue(context, updateUserField))
+                        if (AllowSetInterceptorValue(context, createUserNameField))
                         {
-                            context.SetNewValue(updateUserField.PropertyName, SessionContext.Current.User.Id.ConvertTo(updateUserField.DataType));
+                            context.SetNewValue(createUserNameField.PropertyName, SessionContext.Current.User.PersonName ?? string.Empty);
+                        }
+                        if (AllowSetInterceptorValue(context, updateUserIdField))
+                        {
+                            context.SetNewValue(updateUserIdField.PropertyName, SessionContext.Current.User.Id.ConvertTo(updateUserIdField.DataType));
+                        }
+                        if (AllowSetInterceptorValue(context, updateUserNameField))
+                        {
+                            context.SetNewValue(updateUserNameField.PropertyName, SessionContext.Current.User.PersonName ?? string.Empty);
                         }
                     }
                     if (SessionContext.Current?.Isolation != null && AllowSetInterceptorValue(context, isolationField))
@@ -168,9 +178,13 @@ namespace Sixnet.Development.Data.Intercept
                     {
                         context.SetNewValue(updateDateField.PropertyName, updateDateField.DataType.GetNowDateTime());
                     }
-                    if (SessionContext.Current?.User != null && AllowSetInterceptorValue(context, updateUserField))
+                    if (SessionContext.Current?.User != null && AllowSetInterceptorValue(context, updateUserIdField))
                     {
-                        context.SetNewValue(updateUserField.PropertyName, SessionContext.Current.User.Id.ConvertTo(updateUserField.DataType));
+                        context.SetNewValue(updateUserIdField.PropertyName, SessionContext.Current.User.Id.ConvertTo(updateUserIdField.DataType));
+                    }
+                    if (SessionContext.Current?.User != null && AllowSetInterceptorValue(context, updateUserNameField))
+                    {
+                        context.SetNewValue(updateUserNameField.PropertyName, SessionContext.Current.User.PersonName ?? string.Empty);
                     }
 
                     // version field
