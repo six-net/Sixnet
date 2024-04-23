@@ -112,6 +112,10 @@ namespace Sixnet.Development.Data.Intercept
                         return false;
                     }
                 }
+                if (valueType == typeof(DateTime) || valueType == typeof(DateTimeOffset))
+                {
+                    return true;
+                }
                 return TypeExtensions.IsDefaultValue(valueType, realValue);
             }
             return true;

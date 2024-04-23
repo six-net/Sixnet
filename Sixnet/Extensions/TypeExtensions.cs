@@ -56,23 +56,6 @@ namespace System
                 [typeof(DateTimeOffset)] = DbType.DateTimeOffset,
                 [typeof(TimeSpan)] = DbType.Time,
                 [typeof(byte[])] = DbType.Binary,
-                //[typeof(byte?)] = DbType.Byte,
-                //[typeof(sbyte?)] = DbType.SByte,
-                //[typeof(short?)] = DbType.Int16,
-                //[typeof(ushort?)] = DbType.UInt16,
-                //[typeof(int?)] = DbType.Int32,
-                //[typeof(uint?)] = DbType.UInt32,
-                //[typeof(long?)] = DbType.Int64,
-                //[typeof(ulong?)] = DbType.UInt64,
-                //[typeof(float?)] = DbType.Single,
-                //[typeof(double?)] = DbType.Double,
-                //[typeof(decimal?)] = DbType.Decimal,
-                //[typeof(bool?)] = DbType.Boolean,
-                //[typeof(char?)] = DbType.StringFixedLength,
-                //[typeof(Guid?)] = DbType.Guid,
-                //[typeof(DateTime?)] = DbType.DateTime,
-                //[typeof(DateTimeOffset?)] = DbType.DateTimeOffset,
-                //[typeof(TimeSpan?)] = DbType.Time,
                 [typeof(object)] = DbType.Object
             };
         }
@@ -185,77 +168,29 @@ namespace System
                 throw new ArgumentNullException(nameof(dataType));
             }
             var dbType = dataType.GetDbType();
-            dynamic defaultValue;
-            switch (dbType)
+            dynamic defaultValue = dbType switch
             {
-                case DbType.Byte:
-                    defaultValue = default(byte);
-                    break;
-                case DbType.SByte:
-                    defaultValue = default(sbyte);
-                    break;
-                case DbType.Int16:
-                    defaultValue = default(short);
-                    break;
-                case DbType.UInt16:
-                    defaultValue = default(ushort);
-                    break;
-                case DbType.Int32:
-                case DbType.VarNumeric:
-                    defaultValue = default(int);
-                    break;
-                case DbType.UInt32:
-                    defaultValue = default(uint);
-                    break;
-                case DbType.Int64:
-                    defaultValue = default(long);
-                    break;
-                case DbType.UInt64:
-                    defaultValue = default(ulong);
-                    break;
-                case DbType.Double:
-                    defaultValue = default(double);
-                    break;
-                case DbType.Single:
-                    defaultValue = default(float);
-                    break;
-                case DbType.Decimal:
-                case DbType.Currency:
-                    defaultValue = default(decimal);
-                    break;
-                case DbType.String:
-                case DbType.AnsiString:
-                case DbType.Xml:
-                    defaultValue = default(string);
-                    break;
-                case DbType.StringFixedLength:
-                case DbType.AnsiStringFixedLength:
-                    defaultValue = default(char);
-                    break;
-                case DbType.Boolean:
-                    defaultValue = default(bool);
-                    break;
-                case DbType.DateTime:
-                case DbType.Date:
-                case DbType.DateTime2:
-                    defaultValue = default(DateTime);
-                    break;
-                case DbType.DateTimeOffset:
-                    defaultValue = default(DateTimeOffset);
-                    break;
-                case DbType.Guid:
-                    defaultValue = default(Guid);
-                    break;
-                case DbType.Time:
-                    defaultValue = default(TimeSpan);
-                    break;
-                case DbType.Binary:
-                    defaultValue = default(byte[]);
-                    break;
-                default:
-                    defaultValue = null;
-                    break;
-            }
+                DbType.Byte => default(byte),
+                DbType.SByte => default(sbyte),
+                DbType.Int16 => default(short),
+                DbType.UInt16 => default(ushort),
+                DbType.Int32 or DbType.VarNumeric => default(int),
+                DbType.UInt32 => default(uint),
+                DbType.Int64 => default(long),
+                DbType.UInt64 => default(ulong),
+                DbType.Double => default(double),
+                DbType.Single => default(float),
+                DbType.Decimal or DbType.Currency => default(decimal),
+                DbType.String or DbType.AnsiString or DbType.Xml => default(string),
+                DbType.StringFixedLength or DbType.AnsiStringFixedLength => default(char),
+                DbType.Boolean => default(bool),
+                DbType.DateTime or DbType.Date or DbType.DateTime2 => default(DateTime),
+                DbType.DateTimeOffset => default(DateTimeOffset),
+                DbType.Guid => default(Guid),
+                DbType.Time => default(TimeSpan),
+                DbType.Binary => default(byte[]),
+                _ => null,
+            };
             return defaultValue;
         }
 
