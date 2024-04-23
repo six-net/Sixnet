@@ -56,23 +56,23 @@ namespace System
                 [typeof(DateTimeOffset)] = DbType.DateTimeOffset,
                 [typeof(TimeSpan)] = DbType.Time,
                 [typeof(byte[])] = DbType.Binary,
-                [typeof(byte?)] = DbType.Byte,
-                [typeof(sbyte?)] = DbType.SByte,
-                [typeof(short?)] = DbType.Int16,
-                [typeof(ushort?)] = DbType.UInt16,
-                [typeof(int?)] = DbType.Int32,
-                [typeof(uint?)] = DbType.UInt32,
-                [typeof(long?)] = DbType.Int64,
-                [typeof(ulong?)] = DbType.UInt64,
-                [typeof(float?)] = DbType.Single,
-                [typeof(double?)] = DbType.Double,
-                [typeof(decimal?)] = DbType.Decimal,
-                [typeof(bool?)] = DbType.Boolean,
-                [typeof(char?)] = DbType.StringFixedLength,
-                [typeof(Guid?)] = DbType.Guid,
-                [typeof(DateTime?)] = DbType.DateTime,
-                [typeof(DateTimeOffset?)] = DbType.DateTimeOffset,
-                [typeof(TimeSpan?)] = DbType.Time,
+                //[typeof(byte?)] = DbType.Byte,
+                //[typeof(sbyte?)] = DbType.SByte,
+                //[typeof(short?)] = DbType.Int16,
+                //[typeof(ushort?)] = DbType.UInt16,
+                //[typeof(int?)] = DbType.Int32,
+                //[typeof(uint?)] = DbType.UInt32,
+                //[typeof(long?)] = DbType.Int64,
+                //[typeof(ulong?)] = DbType.UInt64,
+                //[typeof(float?)] = DbType.Single,
+                //[typeof(double?)] = DbType.Double,
+                //[typeof(decimal?)] = DbType.Decimal,
+                //[typeof(bool?)] = DbType.Boolean,
+                //[typeof(char?)] = DbType.StringFixedLength,
+                //[typeof(Guid?)] = DbType.Guid,
+                //[typeof(DateTime?)] = DbType.DateTime,
+                //[typeof(DateTimeOffset?)] = DbType.DateTimeOffset,
+                //[typeof(TimeSpan?)] = DbType.Time,
                 [typeof(object)] = DbType.Object
             };
         }
@@ -184,43 +184,76 @@ namespace System
             {
                 throw new ArgumentNullException(nameof(dataType));
             }
-            var valueType = dataType.GetRealValueType();
-            var typeCode = Type.GetTypeCode(valueType);
+            var dbType = dataType.GetDbType();
             dynamic defaultValue;
-            switch (typeCode)
+            switch (dbType)
             {
-                case TypeCode.Byte:
-                case TypeCode.SByte:
-                case TypeCode.Int16:
-                case TypeCode.UInt16:
-                case TypeCode.Int32:
-                case TypeCode.UInt32:
-                case TypeCode.Int64:
-                case TypeCode.UInt64:
-                case TypeCode.Double:
-                case TypeCode.Single:
-                case TypeCode.Decimal:
-                    defaultValue = 0;
+                case DbType.Byte:
+                    defaultValue = default(byte);
                     break;
-                case TypeCode.String:
-                    defaultValue = string.Empty;
+                case DbType.SByte:
+                    defaultValue = default(sbyte);
                     break;
-                case TypeCode.DateTime:
-                    defaultValue = DateTime.MinValue;
+                case DbType.Int16:
+                    defaultValue = default(short);
+                    break;
+                case DbType.UInt16:
+                    defaultValue = default(ushort);
+                    break;
+                case DbType.Int32:
+                case DbType.VarNumeric:
+                    defaultValue = default(int);
+                    break;
+                case DbType.UInt32:
+                    defaultValue = default(uint);
+                    break;
+                case DbType.Int64:
+                    defaultValue = default(long);
+                    break;
+                case DbType.UInt64:
+                    defaultValue = default(ulong);
+                    break;
+                case DbType.Double:
+                    defaultValue = default(double);
+                    break;
+                case DbType.Single:
+                    defaultValue = default(float);
+                    break;
+                case DbType.Decimal:
+                case DbType.Currency:
+                    defaultValue = default(decimal);
+                    break;
+                case DbType.String:
+                case DbType.AnsiString:
+                case DbType.Xml:
+                    defaultValue = default(string);
+                    break;
+                case DbType.StringFixedLength:
+                case DbType.AnsiStringFixedLength:
+                    defaultValue = default(char);
+                    break;
+                case DbType.Boolean:
+                    defaultValue = default(bool);
+                    break;
+                case DbType.DateTime:
+                case DbType.Date:
+                case DbType.DateTime2:
+                    defaultValue = default(DateTime);
+                    break;
+                case DbType.DateTimeOffset:
+                    defaultValue = default(DateTimeOffset);
+                    break;
+                case DbType.Guid:
+                    defaultValue = default(Guid);
+                    break;
+                case DbType.Time:
+                    defaultValue = default(TimeSpan);
+                    break;
+                case DbType.Binary:
+                    defaultValue = default(byte[]);
                     break;
                 default:
-                    if (valueType == typeof(Guid))
-                    {
-                        defaultValue = Guid.Empty;
-                    }
-                    else if (valueType == typeof(DateTimeOffset))
-                    {
-                        defaultValue = DateTimeOffset.MinValue;
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException($"Not support get default value for {valueType}");
-                    }
+                    defaultValue = null;
                     break;
             }
             return defaultValue;
@@ -272,12 +305,13 @@ namespace System
         public static DbType GetDbType(this Type type)
         {
             SixnetDirectThrower.ThrowArgNullIf(type == null, nameof(type));
-            if (type.IsEnum)
+            var valueType = type.GetRealValueType();
+            if (valueType.IsEnum)
             {
                 return DbType.Int32;
             }
-            SixnetDirectThrower.ThrowNotSupportIf(!dbTypeMapping.ContainsKey(type), type.FullName);
-            return dbTypeMapping[type];
+            SixnetDirectThrower.ThrowNotSupportIf(!dbTypeMapping.ContainsKey(valueType), valueType.FullName);
+            return dbTypeMapping[valueType];
         }
 
         #endregion
