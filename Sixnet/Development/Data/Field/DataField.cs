@@ -271,14 +271,19 @@ namespace Sixnet.Development.Data.Field
         }
 
         /// <summary>
-        /// Whether is creation field
+        /// Whether is unmodifiable field
         /// </summary>
         /// <returns></returns>
-        internal bool IsCreationField()
+        internal bool IsUnmodifiableField()
         {
             return InRole(FieldRole.CreateDate)
                 || InRole(FieldRole.CreateUserId)
-                || InRole(FieldRole.CreateUserName);
+                || InRole(FieldRole.CreateUserName)
+                || InRole(FieldRole.PrimaryKey)
+                || InRole(FieldRole.Increment)
+                || InRole(FieldRole.Version)
+                || InRole(FieldRole.SplitValue)
+                || InRole(FieldRole.Archive);
         }
 
         #endregion

@@ -265,22 +265,22 @@ namespace Sixnet.Development.Entity
         }
 
         /// <summary>
-        /// Update from new data
+        /// Modify from new data
         /// </summary>
         /// <param name="newData">New data</param>
         /// <param name="configure">Configure</param>
-        public virtual void UpdateFrom(T newData, Action<UpdateFromOptions> configure = null)
+        public virtual void ModifyFrom(T newData, Action<ModifyFromOptions> configure = null)
         {
             if (newData == null)
             {
                 return;
             }
-            var updateOptions = new UpdateFromOptions();
-            configure?.Invoke(updateOptions);
+            var modifyOptions = new ModifyFromOptions();
+            configure?.Invoke(modifyOptions);
             foreach (var item in newData.GetAllValues())
             {
                 var field = SixnetEntityManager.GetField(typeof(T), item.Key);
-                if (!updateOptions.IsIgnoreField(field))
+                if (!modifyOptions.IsIgnoreField(field))
                 {
                     SetValue(item.Key, item.Value);
                 }

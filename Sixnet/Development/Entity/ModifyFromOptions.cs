@@ -6,19 +6,14 @@ using System.Text;
 namespace Sixnet.Development.Entity
 {
     /// <summary>
-    /// Update from options
+    /// Modify from options
     /// </summary>
-    public class UpdateFromOptions
+    public class ModifyFromOptions
     {
         /// <summary>
-        /// Whether include creation field
+        /// Whether include unmodifiable field
         /// </summary>
-        public bool IncludeCreationField { get; set; }
-
-        /// <summary>
-        /// Whether include version field
-        /// </summary>
-        public bool IncludeVersionField { get; set; }
+        public bool IncludeUnmodifiableField { get; set; }
 
         /// <summary>
         /// Ignore field names
@@ -45,8 +40,7 @@ namespace Sixnet.Development.Entity
         internal bool IsIgnoreField(DataField field)
         {
             return field == null
-                || (field.IsCreationField() && !IncludeCreationField)
-                || (field.InRole(FieldRole.Version) && !IncludeVersionField)
+                || (field.IsUnmodifiableField() && !IncludeUnmodifiableField)
                 || (_ignoreFieldNames?.Contains(field.PropertyName) ?? false);
 
         }

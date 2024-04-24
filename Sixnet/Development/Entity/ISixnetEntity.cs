@@ -96,10 +96,10 @@ namespace Sixnet.Development.Entity
         void OnDataAdding();
 
         /// <summary>
-        /// Update from new data
+        /// Modify from new data
         /// </summary>
         /// <param name="newData">New data</param>
         /// <param name="configure">Configure</param>
-        void UpdateFrom(T newData,Action<UpdateFromOptions> configure = null);
+        void ModifyFrom(T newData,Action<ModifyFromOptions> configure = null);
     }
 }
