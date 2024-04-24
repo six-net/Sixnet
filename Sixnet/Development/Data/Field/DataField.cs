@@ -384,7 +384,7 @@ namespace Sixnet.Development.Data.Field
         /// <returns></returns>
         public bool IsNecessaryField()
         {
-            return InRole(FieldRole.PrimaryKey) || InRole(FieldRole.Revision);
+            return InRole(FieldRole.PrimaryKey) || InRole(FieldRole.Version);
         }
 
         #endregion

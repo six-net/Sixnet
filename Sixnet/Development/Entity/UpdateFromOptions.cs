@@ -16,9 +16,14 @@ namespace Sixnet.Development.Entity
         public bool IncludeCreationField { get; set; }
 
         /// <summary>
+        /// Whether include version field
+        /// </summary>
+        public bool IncludeVersionField { get; set; }
+
+        /// <summary>
         /// Ignore field names
         /// </summary>
-        HashSet<string> _ignoreFieldNames { get; set; }
+        HashSet<string> _ignoreFieldNames;
 
         /// <summary>
         /// Ignore fields
@@ -39,8 +44,9 @@ namespace Sixnet.Development.Entity
 
         internal bool IsIgnoreField(DataField field)
         {
-            return field == null 
-                || (field.IsCreationField() && !IncludeCreationField) 
+            return field == null
+                || (field.IsCreationField() && !IncludeCreationField)
+                || (field.InRole(FieldRole.Version) && !IncludeVersionField)
                 || (_ignoreFieldNames?.Contains(field.PropertyName) ?? false);
 
         }

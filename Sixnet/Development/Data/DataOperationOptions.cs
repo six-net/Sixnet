@@ -29,7 +29,7 @@ namespace Sixnet.Development.Data
         /// <summary>
         /// Not overwrite fields
         /// </summary>
-        internal HashSet<string> NotOverwriteFieldNames { get; set; }
+        HashSet<string> _notOverwriteFieldNames;
 
         /// <summary>
         /// Whether not overwrite all field
@@ -63,17 +63,17 @@ namespace Sixnet.Development.Data
         {
             if (!fieldNames.IsNullOrEmpty())
             {
-                NotOverwriteFieldNames ??= new HashSet<string>();
+                _notOverwriteFieldNames ??= new HashSet<string>();
                 foreach (var name in fieldNames)
                 {
-                    NotOverwriteFieldNames.Add(name);
+                    _notOverwriteFieldNames.Add(name);
                 }
             }
         }
 
         internal bool IsNotNotOverwriteField(string fieldName)
         {
-            return !string.IsNullOrWhiteSpace(fieldName) && (NotOverwriteFieldNames?.Contains(fieldName) ?? false);
+            return !string.IsNullOrWhiteSpace(fieldName) && (_notOverwriteFieldNames?.Contains(fieldName) ?? false);
         }
     }
 }

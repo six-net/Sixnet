@@ -25,7 +25,7 @@ namespace Sixnet.Development.Data.Intercept
         /// default interceptor field role
         /// </summary>
         static FieldRole defaultInterceptorFieldRole = FieldRole.CreateDate | FieldRole.CreateUserId | FieldRole.CreateUserName
-            | FieldRole.UpdateDate | FieldRole.UpdateUserId | FieldRole.UpdateUserName | FieldRole.Revision | FieldRole.Isolation;
+            | FieldRole.UpdateDate | FieldRole.UpdateUserId | FieldRole.UpdateUserName | FieldRole.Version | FieldRole.Isolation;
 
         #endregion
 
@@ -117,7 +117,7 @@ namespace Sixnet.Development.Data.Intercept
             var updateUserIdField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & FieldRole.UpdateUserId);
             var createUserNameField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & FieldRole.CreateUserName);
             var updateUserNameField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & FieldRole.UpdateUserName);
-            var versionField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & FieldRole.Revision);
+            var versionField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & FieldRole.Version);
             var isolationField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & FieldRole.Isolation);
             switch (operationType)
             {
