@@ -17,9 +17,9 @@ namespace Sixnet.Development.Data.ParameterHandler.Handler
                     List<DateTime> dateTimeValues = new();
                     foreach (var val in values)
                     {
-                        if (val is DateTimeOffset)
+                        if (val is DateTimeOffset offsetVal)
                         {
-                            dateTimeValues.Add(((DateTimeOffset)val).DateTime);
+                            dateTimeValues.Add(offsetVal.DateTime);
                         }
                         else
                         {

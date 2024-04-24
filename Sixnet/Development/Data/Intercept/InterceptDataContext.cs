@@ -96,29 +96,15 @@ namespace Sixnet.Development.Data.Intercept
         /// <returns></returns>
         internal bool AllowUpdateNewValue(Type valueType, string fieldName)
         {
-            var hasValue = HasNewValue(fieldName);
-            if (hasValue)
+            var dataOperationOptions = DataCommand.Options;
+            if ((dataOperationOptions?.NotOverwrite ?? false)
+                || (dataOperationOptions?.IsNotNotOverwriteField(fieldName) ?? false))
             {
-                var value = GetNewValue(fieldName);
-                var realValue = value;
-                if (value is ISixnetField dataField)
-                {
-                    if (dataField is ConstantField constantField && constantField.IsSimpleConstant)
-                    {
-                        realValue = constantField.Value;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
-                if (valueType == typeof(DateTime) || valueType == typeof(DateTimeOffset))
-                {
-                    return true;
-                }
-                return TypeExtensions.IsDefaultValue(valueType, realValue);
+                return false;
             }
-            return true;
+            var value = GetNewValue(fieldName);
+            return !(value is ISixnetField dataField
+                && (dataField is not ConstantField constantField || !constantField.IsSimpleConstant));
         }
     }
 }

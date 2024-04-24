@@ -23,7 +23,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="datas">Datas</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        public static async Task<int> InsertAsync<T>(IEnumerable<T> datas, Action<DataOperationOptions> configure = null) where T : class
+        public static async Task<int> InsertAsync<T>(IEnumerable<T> datas, Action<DataOperationOptions> configure = null) where T : class, ISixnetEntity<T>
         {
             var options = GetDataOperationOptions(configure);
 
@@ -47,7 +47,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="datas">Datas</param>
         /// <param name="configure">Confirure options </param>
         /// <returns></returns>
-        public static async Task<List<TIdentity>> InsertReturnIdentitiesAsync<T, TIdentity>(IEnumerable<T> datas, Action<DataOperationOptions> configure = null) where T : class
+        public static async Task<List<TIdentity>> InsertReturnIdentitiesAsync<T, TIdentity>(IEnumerable<T> datas, Action<DataOperationOptions> configure = null) where T : class, ISixnetEntity<T>
         {
             var options = GetDataOperationOptions(configure);
 
@@ -201,26 +201,6 @@ namespace Sixnet.Development.Data.Client
             using (var dataClient = GetDataClient(true))
             {
                 return await dataClient.QueryAsync<T>(queryable, options).ConfigureAwait(false);
-            }
-        }
-
-        /// <summary>
-        /// Query by current
-        /// </summary>
-        /// <param name="currentDatas">Current datas</param>
-        /// <param name="configure">Confirure options </param>
-        /// <returns></returns>
-        public static async Task<List<T>> QueryByCurrentAsync<T>(IEnumerable<T> currentDatas, Action<DataOperationOptions> configure = null) where T : class, ISixnetEntity<T>
-        {
-            var options = GetDataOperationOptions(configure);
-
-            if (UnitOfWork.Current != null)
-            {
-                return await UnitOfWork.Current.DataClient.QueryByCurrentAsync<T>(currentDatas, options).ConfigureAwait(false);
-            }
-            using (var dataClient = GetDataClient(true))
-            {
-                return await dataClient.QueryByCurrentAsync<T>(currentDatas, options).ConfigureAwait(false);
             }
         }
 

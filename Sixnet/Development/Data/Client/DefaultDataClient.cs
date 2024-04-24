@@ -103,53 +103,6 @@ namespace Sixnet.Development.Data.Client
         #region Query
 
         /// <summary>
-        /// Get current datas and queryable
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="currentDatas"></param>
-        /// <returns></returns>
-        Tuple<List<T>, ISixnetQueryable> GetCurrentDatasAndQueryable<T>(IEnumerable<T> currentDatas) where T : class, ISixnetEntity<T>
-        {
-            var storedDatas = new List<T>();
-            if (currentDatas.IsNullOrEmpty())
-            {
-                return new Tuple<List<T>, ISixnetQueryable>(storedDatas, null);
-            }
-            var notStoredDatas = new List<T>();
-            foreach (var data in currentDatas)
-            {
-                var storedData = GetStoredEntity<T>(data.GetIdentityValue());
-                if (storedData != null)
-                {
-                    storedDatas.Add(storedData);
-                }
-                else
-                {
-                    notStoredDatas.Add(data);
-                }
-            }
-            var dataQueryable = notStoredDatas.IsNullOrEmpty() ? null : ConditionExtensions.IncludeEntities(null, notStoredDatas);
-            return new Tuple<List<T>, ISixnetQueryable>(storedDatas, dataQueryable);
-        }
-
-        /// <summary>
-        /// Query by current datas
-        /// </summary>
-        /// <param name="currentDatas">Current datas</param>
-        /// <param name="options">Options</param>
-        /// <returns></returns>
-        public List<T> QueryByCurrent<T>(IEnumerable<T> currentDatas, DataOperationOptions options = null) where T : class, ISixnetEntity<T>
-        {
-            var storedDatasAndQueryable = GetCurrentDatasAndQueryable(currentDatas);
-            if (storedDatasAndQueryable.Item2 == null)
-            {
-                return storedDatasAndQueryable.Item1;
-            }
-            storedDatasAndQueryable.Item1.AddRange(Query<T>(storedDatasAndQueryable.Item2, options) ?? new List<T>(0));
-            return storedDatasAndQueryable.Item1;
-        }
-
-        /// <summary>
         /// Query data list
         /// </summary>
         /// <param name="conditionExpression">Condition expression</param>
@@ -769,7 +722,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="datas">Datas</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public int Insert<T>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class
+        public int Insert<T>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class, ISixnetEntity<T>
         {
             var insertResult = InsertCore(datas, options);
             return insertResult?.Item1 ?? 0;
@@ -782,7 +735,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="data">Data</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public int Insert<T>(T data, DataOperationOptions options = null) where T : class
+        public int Insert<T>(T data, DataOperationOptions options = null) where T : class, ISixnetEntity<T>
         {
             return Insert<T>(new T[1] { data }, options);
         }
@@ -795,7 +748,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="datas">Datas</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public List<TIdentity> InsertReturnIdentities<T, TIdentity>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class
+        public List<TIdentity> InsertReturnIdentities<T, TIdentity>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class, ISixnetEntity<T>
         {
             var insertResult = InsertCore(datas, options);
             return insertResult?.Item2?.Values.Cast<TIdentity>().ToList() ?? new List<TIdentity>(0);
@@ -809,7 +762,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="data">Data</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public TIdentity InsertReturnIdentity<T, TIdentity>(T data, DataOperationOptions options = null) where T : class
+        public TIdentity InsertReturnIdentity<T, TIdentity>(T data, DataOperationOptions options = null) where T : class, ISixnetEntity<T>
         {
             var identities = InsertReturnIdentities<T, TIdentity>(new List<T>(1) { data }, options);
             if (!identities.IsNullOrEmpty())
@@ -825,7 +778,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="datas">Datas</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        Tuple<int, Dictionary<string, dynamic>> InsertCore<T>(IEnumerable<T> datas, DataOperationOptions options = null)
+        Tuple<int, Dictionary<string, dynamic>> InsertCore<T>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class, ISixnetEntity<T>
         {
             if (datas.IsNullOrEmpty())
             {
@@ -835,14 +788,20 @@ namespace Sixnet.Development.Data.Client
             // Create data command
             var commands = new List<SixnetDataCommand>();
             var dataType = typeof(T);
-            var isEntity = typeof(ISixnetEntity).IsAssignableFrom(dataType);
             foreach (var data in datas)
             {
-                var addCommand = SixnetDataCommand.Create<T>(DataOperationType.Insert);
-                var valueDict = isEntity ? ((ISixnetEntity)data).GetAllValues() : data.ToDynamicDictionary();
-                addCommand.FieldsAssignment = valueDict?.GetFieldsAssignment();
-                addCommand.Data = data;
-                commands.Add(addCommand);
+                if (data != null)
+                {
+                    data.OnDataAdding();
+
+                    SixnetException.ThrowIf(!data.AllowToSave(), $"{typeof(T).Name}: {data.GetIdentityValue()} cann't to be add");
+
+                    var addCommand = SixnetDataCommand.Create<T>(DataOperationType.Insert);
+                    var valueDict = data.GetAllValues();
+                    addCommand.FieldsAssignment = valueDict?.GetFieldsAssignment();
+                    addCommand.Data = data;
+                    commands.Add(addCommand);
+                }
             }
             var incrementField = SixnetEntityManager.GetField(dataType, FieldRole.Increment);
             return ExecuteCore(commands, incrementField != null, options);
@@ -868,20 +827,19 @@ namespace Sixnet.Development.Data.Client
             var commands = new List<SixnetDataCommand>();
             foreach (var newData in datas)
             {
-                if (newData == null)
+                if (newData != null)
                 {
-                    continue;
+                    var entityIdentity = newData.GetIdentityValue();
+                    newData.OnDataUpdating();
+
+                    SixnetException.ThrowIf(!newData.AllowToSave(), $"{typeof(T).Name}: {entityIdentity} cann't to be update");
+
+                    var updateQueryable = ConditionExtensions.IncludeEntity(null, newData);
+                    var fieldsAssignment = newData.GetFieldsAssignment();
+                    var command = GetUpdateCommand(fieldsAssignment, updateQueryable, options);
+                    command.Data = newData;
+                    commands.Add(command);
                 }
-                var updateQueryable = ConditionExtensions.IncludeEntity(null, newData);
-                var entityIdentity = newData.GetIdentityValue();
-
-                // get client stored data
-                var oldData = GetStoredEntity<T>(entityIdentity);
-                var fieldsAssignment = newData.GetFieldsAssignment(oldData?.GetAllValues());
-
-                var command = GetUpdateCommand(fieldsAssignment, updateQueryable, options);
-                command.Data = newData;
-                commands.Add(command);
             }
             if (commands.IsNullOrEmpty())
             {
@@ -1237,105 +1195,105 @@ namespace Sixnet.Development.Data.Client
 
         #endregion
 
-        #region Entity warehouse
+        //#region Entity warehouse
 
-        /// <summary>
-        /// Store entity
-        /// </summary>
-        /// <param name="entity">Entity</param>
-        internal void StoreEntity<TEntity>(TEntity entity) where TEntity : class, ISixnetEntity
-        {
-            if (entity == null)
-            {
-                return;
-            }
-            var entityKey = entity.GetIdentityValue();
-            if (!string.IsNullOrWhiteSpace(entityKey))
-            {
-                var entityTypeId = entity.GetType().GUID;
-                entityWarehouse.TryGetValue(entityTypeId, out var entityDict);
-                entityDict ??= new ConcurrentDictionary<string, object>();
-                entityDict[entityKey] = entity;
-                entityWarehouse[entityTypeId] = entityDict;
-            }
-        }
+        ///// <summary>
+        ///// Store entity
+        ///// </summary>
+        ///// <param name="entity">Entity</param>
+        //internal void StoreEntity<TEntity>(TEntity entity) where TEntity : class, ISixnetEntity
+        //{
+        //    if (entity == null)
+        //    {
+        //        return;
+        //    }
+        //    var entityKey = entity.GetIdentityValue();
+        //    if (!string.IsNullOrWhiteSpace(entityKey))
+        //    {
+        //        var entityTypeId = entity.GetType().GUID;
+        //        entityWarehouse.TryGetValue(entityTypeId, out var entityDict);
+        //        entityDict ??= new ConcurrentDictionary<string, object>();
+        //        entityDict[entityKey] = entity;
+        //        entityWarehouse[entityTypeId] = entityDict;
+        //    }
+        //}
 
-        /// <summary>
-        /// Get entity
-        /// </summary>
-        /// <param name="entityIdentity">Entity identity</param>
-        /// <returns></returns>
-        internal TEntity GetStoredEntity<TEntity>(string entityIdentity) where TEntity : class
-        {
-            if (string.IsNullOrWhiteSpace(entityIdentity))
-            {
-                return default;
-            }
-            var entityTypeId = typeof(TEntity).GUID;
-            if (entityWarehouse.TryGetValue(entityTypeId, out var entityDict) && entityDict.TryGetValue(entityIdentity, out var entity))
-            {
-                return (TEntity)entity;
-            }
-            return default;
-        }
+        ///// <summary>
+        ///// Get entity
+        ///// </summary>
+        ///// <param name="entityIdentity">Entity identity</param>
+        ///// <returns></returns>
+        //internal TEntity GetStoredEntity<TEntity>(string entityIdentity) where TEntity : class
+        //{
+        //    if (string.IsNullOrWhiteSpace(entityIdentity))
+        //    {
+        //        return default;
+        //    }
+        //    var entityTypeId = typeof(TEntity).GUID;
+        //    if (entityWarehouse.TryGetValue(entityTypeId, out var entityDict) && entityDict.TryGetValue(entityIdentity, out var entity))
+        //    {
+        //        return (TEntity)entity;
+        //    }
+        //    return default;
+        //}
 
-        /// <summary>
-        /// Delete stored entity
-        /// </summary>
-        /// <param name="entity">Entity</param>
-        internal void DeleteStoredEntity<TEntity>(TEntity entity) where TEntity : class, ISixnetEntity
-        {
-            if (entity == null)
-            {
-                return;
-            }
-            var entityIdentity = entity.GetIdentityValue();
-            var entityTypeId = entity.GetType().GUID;
-            if (!string.IsNullOrWhiteSpace(entityIdentity) && entityWarehouse.TryGetValue(entityTypeId, out var entityDict))
-            {
-                entityDict.TryRemove(entityIdentity, out var _);
-            }
-        }
+        ///// <summary>
+        ///// Delete stored entity
+        ///// </summary>
+        ///// <param name="entity">Entity</param>
+        //internal void DeleteStoredEntity<TEntity>(TEntity entity) where TEntity : class, ISixnetEntity
+        //{
+        //    if (entity == null)
+        //    {
+        //        return;
+        //    }
+        //    var entityIdentity = entity.GetIdentityValue();
+        //    var entityTypeId = entity.GetType().GUID;
+        //    if (!string.IsNullOrWhiteSpace(entityIdentity) && entityWarehouse.TryGetValue(entityTypeId, out var entityDict))
+        //    {
+        //        entityDict.TryRemove(entityIdentity, out var _);
+        //    }
+        //}
 
-        /// <summary>
-        /// Delete stored entity
-        /// </summary>
-        /// <param name="queryable">Queryable</param>
-        internal void DeleteStoredEntity<TEntity>(ISixnetQueryable queryable) where TEntity : class
-        {
-            if (queryable == null || queryable.Conditions.IsNullOrEmpty() || queryable.IsComplex)
-            {
-                ClearStoredEntity<TEntity>();
-            }
-            else
-            {
-                var entityTypeId = typeof(TEntity).GUID;
-                if (entityWarehouse.TryGetValue(entityTypeId, out var entityDict))
-                {
-                    var validationFunc = queryable.GetValidationFunction<TEntity>();
-                    var entityKeies = entityDict.Keys;
-                    foreach (var entityKey in entityKeies)
-                    {
-                        if (entityDict.TryGetValue(entityKey, out var data) && validationFunc(data as TEntity))
-                        {
-                            entityDict.TryRemove(entityKey, out var _);
-                        }
-                    }
-                }
-            }
-        }
+        ///// <summary>
+        ///// Delete stored entity
+        ///// </summary>
+        ///// <param name="queryable">Queryable</param>
+        //internal void DeleteStoredEntity<TEntity>(ISixnetQueryable queryable) where TEntity : class
+        //{
+        //    if (queryable == null || queryable.Conditions.IsNullOrEmpty() || queryable.IsComplex)
+        //    {
+        //        ClearStoredEntity<TEntity>();
+        //    }
+        //    else
+        //    {
+        //        var entityTypeId = typeof(TEntity).GUID;
+        //        if (entityWarehouse.TryGetValue(entityTypeId, out var entityDict))
+        //        {
+        //            var validationFunc = queryable.GetValidationFunction<TEntity>();
+        //            var entityKeies = entityDict.Keys;
+        //            foreach (var entityKey in entityKeies)
+        //            {
+        //                if (entityDict.TryGetValue(entityKey, out var data) && validationFunc(data as TEntity))
+        //                {
+        //                    entityDict.TryRemove(entityKey, out var _);
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
 
-        /// <summary>
-        /// Clear entity
-        /// </summary>
-        /// <typeparam name="TEntity">Entity type</typeparam>
-        internal void ClearStoredEntity<TEntity>() where TEntity : class
-        {
-            var entityTypeId = typeof(TEntity).GUID;
-            entityWarehouse.TryRemove(entityTypeId, out var _);
-        }
+        ///// <summary>
+        ///// Clear entity
+        ///// </summary>
+        ///// <typeparam name="TEntity">Entity type</typeparam>
+        //internal void ClearStoredEntity<TEntity>() where TEntity : class
+        //{
+        //    var entityTypeId = typeof(TEntity).GUID;
+        //    entityWarehouse.TryRemove(entityTypeId, out var _);
+        //}
 
-        #endregion
+        //#endregion
 
         #region Util
 

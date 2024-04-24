@@ -26,22 +26,6 @@ namespace Sixnet.Development.Data.Client
         #region Query
 
         /// <summary>
-        /// Query by current datas
-        /// </summary>
-        /// <param name="currentDatas">Current datas</param>
-        /// <param name="options">Options</param>
-        /// <returns></returns>
-        public async Task<List<T>> QueryByCurrentAsync<T>(IEnumerable<T> currentDatas, DataOperationOptions options = null) where T : class, ISixnetEntity<T>
-        {
-            var storedDatasAndQueryable = GetCurrentDatasAndQueryable(currentDatas);
-            if (storedDatasAndQueryable.Item2 != null)
-            {
-                storedDatasAndQueryable.Item1.AddRange((await QueryAsync<T>(storedDatasAndQueryable.Item2, options).ConfigureAwait(false)) ?? new List<T>(0));
-            }
-            return storedDatasAndQueryable.Item1;
-        }
-
-        /// <summary>
         /// Query data list
         /// </summary>
         /// <param name="conditionExpression">Condition expression</param>
@@ -660,7 +644,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="datas">Datas</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public async Task<int> InsertAsync<T>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class
+        public async Task<int> InsertAsync<T>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class, ISixnetEntity<T>
         {
             var insertResult = await InsertCoreAsync(datas, options).ConfigureAwait(false);
             return insertResult?.Item1 ?? 0;
@@ -674,7 +658,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="datas">Datas</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public async Task<List<TIdentity>> InsertReturnIdentitiesAsync<T, TIdentity>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class
+        public async Task<List<TIdentity>> InsertReturnIdentitiesAsync<T, TIdentity>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class, ISixnetEntity<T>
         {
             var insertResult = await InsertCoreAsync(datas, options).ConfigureAwait(false);
             return insertResult?.Item2?.Values.Cast<TIdentity>().ToList() ?? new List<TIdentity>(0);
@@ -687,7 +671,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="data">Data</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public async Task<int> InsertAsync<T>(T data, DataOperationOptions options = null) where T : class
+        public async Task<int> InsertAsync<T>(T data, DataOperationOptions options = null) where T : class, ISixnetEntity<T>
         {
             return await InsertAsync<T>(new List<T>(1) { data }, options).ConfigureAwait(false);
         }
@@ -700,7 +684,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="data">Data</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public async Task<TIdentity> InsertReturnIdentityAsync<T, TIdentity>(T data, DataOperationOptions options = null) where T : class
+        public async Task<TIdentity> InsertReturnIdentityAsync<T, TIdentity>(T data, DataOperationOptions options = null) where T : class, ISixnetEntity<T>
         {
             var identities = await InsertReturnIdentitiesAsync<T, TIdentity>(new List<T>(1) { data }, options).ConfigureAwait(false);
             if (!identities.IsNullOrEmpty())
@@ -716,7 +700,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="datas">Datas</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        async Task<Tuple<int, Dictionary<string, dynamic>>> InsertCoreAsync<T>(IEnumerable<T> datas, DataOperationOptions options = null)
+        async Task<Tuple<int, Dictionary<string, dynamic>>> InsertCoreAsync<T>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class, ISixnetEntity<T>
         {
             if (datas.IsNullOrEmpty())
             {
@@ -729,11 +713,18 @@ namespace Sixnet.Development.Data.Client
             var isEntity = typeof(ISixnetEntity).IsAssignableFrom(dataType);
             foreach (var data in datas)
             {
-                var addCommand = SixnetDataCommand.Create<T>(DataOperationType.Insert);
-                var valueDict = isEntity ? ((ISixnetEntity)data).GetAllValues() : data.ToDynamicDictionary();
-                addCommand.FieldsAssignment = valueDict?.GetFieldsAssignment();
-                addCommand.Data = data;
-                commands.Add(addCommand);
+                if (data != null)
+                {
+                    data.OnDataAdding();
+
+                    SixnetException.ThrowIf(!data.AllowToSave(), $"{typeof(T).Name}: {data.GetIdentityValue()} cann't to be add");
+
+                    var addCommand = SixnetDataCommand.Create<T>(DataOperationType.Insert);
+                    var valueDict = data.GetAllValues();
+                    addCommand.FieldsAssignment = valueDict?.GetFieldsAssignment();
+                    addCommand.Data = data;
+                    commands.Add(addCommand);
+                }
             }
             var incrementField = SixnetEntityManager.GetField(dataType, FieldRole.Increment);
             return await ExecuteCoreAsync(commands, incrementField != null, options).ConfigureAwait(false);
@@ -759,20 +750,19 @@ namespace Sixnet.Development.Data.Client
             var commands = new List<SixnetDataCommand>();
             foreach (var newData in datas)
             {
-                if (newData == null)
+                if (newData != null)
                 {
-                    continue;
+                    var entityIdentity = newData.GetIdentityValue();
+                    newData.OnDataUpdating();
+
+                    SixnetException.ThrowIf(!newData.AllowToSave(), $"{typeof(T).Name}: {entityIdentity} cann't to be update");
+
+                    var updateQueryable = ConditionExtensions.IncludeEntity(null, newData);
+                    var fieldsAssignment = newData.GetFieldsAssignment();
+                    var command = GetUpdateCommand(fieldsAssignment, updateQueryable, options);
+                    command.Data = newData;
+                    commands.Add(command);
                 }
-                var updateQueryable = ConditionExtensions.IncludeEntity(null, newData);
-                var entityIdentity = newData.GetIdentityValue();
-
-                // get client stored data
-                var oldData = GetStoredEntity<T>(entityIdentity);
-                var fieldsAssignment = newData.GetFieldsAssignment(oldData?.GetAllValues());
-
-                var command = GetUpdateCommand(fieldsAssignment, updateQueryable, options);
-                command.Data = newData;
-                commands.Add(command);
             }
             if (commands.IsNullOrEmpty())
             {

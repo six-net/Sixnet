@@ -42,11 +42,6 @@ namespace Sixnet.Development.Repository
         public sealed override Task<int> AddAsync(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null)
         {
             SixnetException.ThrowIf(datas.IsNullOrEmpty(), $"{nameof(datas)} is null or empty");
-            foreach (var data in datas)
-            {
-                data.OnDataAdding();
-                SixnetException.ThrowIf(!data.AllowToSave(), $"{typeof(TModel).Name}: {data.GetIdentityValue()} cann't to be add");
-            }
             return AddDataAsync(datas, configure);
         }
 
@@ -103,14 +98,6 @@ namespace Sixnet.Development.Repository
         public sealed override async Task<int> UpdateAsync(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null)
         {
             SixnetException.ThrowIf(datas.IsNullOrEmpty(), $"{nameof(datas)} is null or empty");
-
-            var currentDatas = await GetDataListByCurrentAsync(datas, configure).ConfigureAwait(false);
-            foreach (var data in datas)
-            {
-                data.OnDataUpdating(currentDatas?.FirstOrDefault());
-                SixnetException.ThrowIf(!data.AllowToSave(), $"{typeof(TModel).Name}: {data.GetIdentityValue()} cann't to be update");
-            }
-
             return await UpdateDataAsync(datas, configure).ConfigureAwait(false);
         }
 
@@ -971,14 +958,6 @@ namespace Sixnet.Development.Repository
         /// <param name="configure">Confirure options </param>
         /// <returns>Data paging</returns>
         protected abstract Task<PagingInfo<TModel>> GetDataPagingAsync(ISixnetQueryable queryable, PagingFilter pagingFilter, Action<DataOperationOptions> configure = null);
-
-        /// <summary>
-        /// Get data list by current datas
-        /// </summary>
-        /// <param name="currentDatas">Current datas</param>
-        /// <param name="configure">Confirure options </param>
-        /// <returns></returns>
-        protected abstract Task<List<TModel>> GetDataListByCurrentAsync(IEnumerable<TModel> currentDatas, Action<DataOperationOptions> configure = null);
 
         /// <summary>
         /// Whether has data

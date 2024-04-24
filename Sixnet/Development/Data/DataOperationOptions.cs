@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using Sixnet.Localization;
 
@@ -26,6 +27,17 @@ namespace Sixnet.Development.Data
         public bool DisableLogicalDelete { get; set; }
 
         /// <summary>
+        /// Not overwrite fields
+        /// </summary>
+        internal HashSet<string> NotOverwriteFieldNames { get; set; }
+
+        /// <summary>
+        /// Whether not overwrite all field
+        /// Priority greater  than NotOverwriteFieldNames
+        /// </summary>
+        public bool NotOverwrite { get; set; }
+
+        /// <summary>
         /// Create data operation options
         /// </summary>
         /// <param name="cancellationToken">Cancellation token</param>
@@ -41,6 +53,27 @@ namespace Sixnet.Development.Data
                 CancellationToken = cancellationToken,
                 MustAffectData = mustAffectData
             };
+        }
+
+        /// <summary>
+        /// Not overwrite fields
+        /// </summary>
+        /// <param name="fieldNames"></param>
+        public void NotOverwriteFields(params string[] fieldNames)
+        {
+            if (!fieldNames.IsNullOrEmpty())
+            {
+                NotOverwriteFieldNames ??= new HashSet<string>();
+                foreach (var name in fieldNames)
+                {
+                    NotOverwriteFieldNames.Add(name);
+                }
+            }
+        }
+
+        internal bool IsNotNotOverwriteField(string fieldName)
+        {
+            return !string.IsNullOrWhiteSpace(fieldName) && (NotOverwriteFieldNames?.Contains(fieldName) ?? false);
         }
     }
 }

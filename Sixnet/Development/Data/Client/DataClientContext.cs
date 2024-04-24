@@ -22,7 +22,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="datas">Datas</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        public static int Insert<T>(IEnumerable<T> datas, Action<DataOperationOptions> configure = null) where T : class
+        public static int Insert<T>(IEnumerable<T> datas, Action<DataOperationOptions> configure = null) where T : class, ISixnetEntity<T>
         {
             var options = GetDataOperationOptions(configure);
 
@@ -46,7 +46,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="datas">Datas</param>
         /// <param name="configure">Confirure options </param>
         /// <returns></returns>
-        public static List<TIdentity> InsertReturnIdentities<T, TIdentity>(IEnumerable<T> datas, Action<DataOperationOptions> configure = null) where T : class
+        public static List<TIdentity> InsertReturnIdentities<T, TIdentity>(IEnumerable<T> datas, Action<DataOperationOptions> configure = null) where T : class, ISixnetEntity<T>
         {
             var options = GetDataOperationOptions(configure);
 
@@ -200,26 +200,6 @@ namespace Sixnet.Development.Data.Client
             using (var dataClient = GetDataClient(true))
             {
                 return dataClient.Query<T>(queryable, options);
-            }
-        }
-
-        /// <summary>
-        /// Query by current
-        /// </summary>
-        /// <param name="currentDatas">Current datas</param>
-        /// <param name="configure">Confirure options </param>
-        /// <returns></returns>
-        public static List<T> QueryByCurrent<T>(IEnumerable<T> currentDatas, Action<DataOperationOptions> configure = null) where T : class, ISixnetEntity<T>
-        {
-            var options = GetDataOperationOptions(configure);
-
-            if (UnitOfWork.Current != null)
-            {
-                return UnitOfWork.Current.DataClient.QueryByCurrent(currentDatas, options);
-            }
-            using (var dataClient = GetDataClient(true))
-            {
-                return dataClient.QueryByCurrent(currentDatas, options);
             }
         }
 

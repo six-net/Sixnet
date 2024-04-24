@@ -36,14 +36,6 @@ namespace Sixnet.Development.Data.Client
         Task<List<T>> QueryAsync<T>(ISixnetQueryable queryable, DataOperationOptions options = null);
 
         /// <summary>
-        /// Query by current datas
-        /// </summary>
-        /// <param name="currentDatas">Current datas</param>
-        /// <param name="options">Options</param>
-        /// <returns></returns>
-        Task<List<T>> QueryByCurrentAsync<T>(IEnumerable<T> currentDatas, DataOperationOptions options = null) where T : class, ISixnetEntity<T>;
-
-        /// <summary>
         /// Query the first data
         /// </summary>
         /// <param name="conditionExpression">Condition expression</param>
@@ -386,7 +378,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="datas">Datas</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        Task<int> InsertAsync<T>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class;
+        Task<int> InsertAsync<T>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class, ISixnetEntity<T>;
 
         /// <summary>
         /// Insert and return identities
@@ -396,7 +388,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="datas">Datas</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        Task<List<TIdentity>> InsertReturnIdentitiesAsync<T, TIdentity>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class;
+        Task<List<TIdentity>> InsertReturnIdentitiesAsync<T, TIdentity>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class, ISixnetEntity<T>;
 
         /// <summary>
         /// Insert data
@@ -405,7 +397,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="data">Data</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        Task<int> InsertAsync<T>(T data, DataOperationOptions options = null) where T : class;
+        Task<int> InsertAsync<T>(T data, DataOperationOptions options = null) where T : class, ISixnetEntity<T>;
 
         /// <summary>
         /// Insert and return identity
@@ -415,7 +407,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="data">Data</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        Task<TIdentity> InsertReturnIdentityAsync<T, TIdentity>(T data, DataOperationOptions options = null) where T : class;
+        Task<TIdentity> InsertReturnIdentityAsync<T, TIdentity>(T data, DataOperationOptions options = null) where T : class, ISixnetEntity<T>;
 
         #endregion
 

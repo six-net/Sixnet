@@ -181,14 +181,6 @@ namespace Sixnet.Development.Data
         List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> dataMappingFunc, Action<DataOperationOptions> configure = null);
 
         /// <summary>
-        /// Query by current
-        /// </summary>
-        /// <param name="currentEntities">Current entities</param>
-        /// <param name="configure">Confirure options </param>
-        /// <returns></returns>
-        List<TEntity> QueryByCurrent(IEnumerable<TEntity> currentEntities, Action<DataOperationOptions> configure = null);
-
-        /// <summary>
         /// Query entity paging
         /// </summary>
         /// <param name="queryable">Queryable</param>

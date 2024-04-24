@@ -118,17 +118,6 @@ namespace Sixnet.Development.Data
         }
 
         /// <summary>
-        /// Query by current
-        /// </summary>
-        /// <param name="currentEntities">Current entities</param>
-        /// <param name="configure">Confirure options </param>
-        /// <returns></returns>
-        public List<TEntity> QueryByCurrent(IEnumerable<TEntity> currentEntities, Action<DataOperationOptions> configure = null)
-        {
-            return DataClientContext.QueryByCurrent(currentEntities, configure);
-        }
-
-        /// <summary>
         /// Query datas
         /// </summary>
         /// <typeparam name="TFirst">First data type</typeparam>

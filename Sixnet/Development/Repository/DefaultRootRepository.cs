@@ -42,11 +42,6 @@ namespace Sixnet.Development.Repository
         public sealed override int Add(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null)
         {
             SixnetException.ThrowIf(datas.IsNullOrEmpty(), $"{nameof(datas)} is null or empty");
-            foreach (var data in datas)
-            {
-                data.OnDataAdding();
-                SixnetException.ThrowIf(!data.AllowToSave(), $"{typeof(TModel).Name}: {data.GetIdentityValue()} cann't to be add");
-            }
             return AddData(datas, configure);
         }
 
@@ -103,14 +98,6 @@ namespace Sixnet.Development.Repository
         public sealed override int Update(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null)
         {
             SixnetException.ThrowIf(datas.IsNullOrEmpty(), $"{nameof(datas)} is null or empty");
-
-            var currentDatas = GetDataListByCurrent(datas, configure);
-            foreach (var data in datas)
-            {
-                data.OnDataUpdating(currentDatas?.FirstOrDefault());
-                SixnetException.ThrowIf(!data.AllowToSave(), $"{typeof(TModel).Name}: {data.GetIdentityValue()} cann't to be update");
-            }
-
             return UpdateData(datas, configure);
         }
 
@@ -1004,14 +991,6 @@ namespace Sixnet.Development.Repository
         /// <param name="configure">Confirure options </param>
         /// <returns>Data paging</returns>
         protected abstract PagingInfo<TModel> GetDataPaging(ISixnetQueryable queryable, PagingFilter pagingFilter, Action<DataOperationOptions> configure = null);
-
-        /// <summary>
-        /// Get data list by current datas
-        /// </summary>
-        /// <param name="currentDatas">Current datas</param>
-        /// <param name="configure">Confirure options </param>
-        /// <returns></returns>
-        protected abstract List<TModel> GetDataListByCurrent(IEnumerable<TModel> currentDatas, Action<DataOperationOptions> configure = null);
 
         /// <summary>
         /// Whether has data

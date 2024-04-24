@@ -242,21 +242,6 @@ namespace Sixnet.Development.Repository
         }
 
         /// <summary>
-        /// Get data list by current datas
-        /// </summary>
-        /// <param name="currentDatas">Current datas</param>
-        /// <param name="configure">Confirure options </param>
-        /// <returns>Data list</returns>
-        protected override List<TModel> GetDataListByCurrent(IEnumerable<TModel> currentDatas, Action<DataOperationOptions> configure = null)
-        {
-            if (currentDatas.IsNullOrEmpty())
-            {
-                return new List<TModel>(0);
-            }
-            return dataAccess.QueryByCurrent(currentDatas, configure);
-        }
-
-        /// <summary>
         /// Whether has data
         /// </summary>
         /// <param name="queryable">Queryable</param>

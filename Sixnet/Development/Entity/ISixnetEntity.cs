@@ -85,9 +85,8 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Update data
         /// </summary>
-        /// <param name="newEntity">New entity</param>
         /// <returns></returns>
-        void OnDataUpdating(T newEntity);
+        void OnDataUpdating();
 
         /// <summary>
         /// Add data

@@ -120,17 +120,6 @@ namespace Sixnet.Development.Data
         }
 
         /// <summary>
-        /// Query by current
-        /// </summary>
-        /// <param name="currentEntities">Current entities</param>
-        /// <param name="configure">Confirure options </param>
-        /// <returns></returns>
-        public async Task<List<TEntity>> QueryByCurrentAsync(IEnumerable<TEntity> currentEntities, Action<DataOperationOptions> configure = null)
-        {
-            return await DataClientContext.QueryByCurrentAsync<TEntity>(currentEntities, configure).ConfigureAwait(false);
-        }
-
-        /// <summary>
         /// Query entity paging
         /// </summary>
         /// <param name="queryable">Queryable</param>

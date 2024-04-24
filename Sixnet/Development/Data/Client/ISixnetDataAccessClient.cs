@@ -19,14 +19,6 @@ namespace Sixnet.Development.Data.Client
         #region Query
 
         /// <summary>
-        /// Query by current
-        /// </summary>
-        /// <param name="currentDatas">Current datas</param>
-        /// <param name="options">Options</param>
-        /// <returns></returns>
-        List<T> QueryByCurrent<T>(IEnumerable<T> currentDatas, DataOperationOptions options = null) where T : class, ISixnetEntity<T>;
-
-        /// <summary>
         /// Query data list
         /// </summary>
         /// <param name="conditionExpression">Condition expression</param>
@@ -386,7 +378,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="datas">Datas</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        int Insert<T>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class;
+        int Insert<T>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class, ISixnetEntity<T>;
 
         /// <summary>
         /// Insert data
@@ -395,7 +387,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="data">Data</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        int Insert<T>(T data, DataOperationOptions options = null) where T : class;
+        int Insert<T>(T data, DataOperationOptions options = null) where T : class, ISixnetEntity<T>;
 
         /// <summary>
         /// Insert and return identities
@@ -405,7 +397,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="datas">Datas</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        List<TIdentity> InsertReturnIdentities<T, TIdentity>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class;
+        List<TIdentity> InsertReturnIdentities<T, TIdentity>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class, ISixnetEntity<T>;
 
         /// <summary>
         /// Insert and return identity
@@ -415,7 +407,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="data">Data</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        TIdentity InsertReturnIdentity<T, TIdentity>(T data, DataOperationOptions options = null) where T : class;
+        TIdentity InsertReturnIdentity<T, TIdentity>(T data, DataOperationOptions options = null) where T : class, ISixnetEntity<T>;
 
         #endregion
 

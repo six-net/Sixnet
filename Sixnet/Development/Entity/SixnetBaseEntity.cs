@@ -249,11 +249,10 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Update data
         /// </summary>
-        /// <param name="newEntity">New entity</param>
         /// <returns></returns>
-        public void OnDataUpdating(T newEntity)
+        public void OnDataUpdating()
         {
-            OnUpdating(newEntity);
+            OnUpdating();
         }
 
         /// <summary>
@@ -261,16 +260,8 @@ namespace Sixnet.Development.Entity
         /// </summary>
         /// <param name="newEntity">New entity</param>
         /// <returns></returns>
-        internal protected virtual void OnUpdating(T newEntity)
+        internal protected virtual void OnUpdating()
         {
-            var entityConfig = SixnetEntityManager.GetEntityConfig<T>();
-            if (!(entityConfig?.AllFields.IsNullOrEmpty() ?? true))
-            {
-                foreach (var fieldItem in entityConfig.AllFields)
-                {
-                    SetValue(fieldItem.Key, newEntity.GetValue(fieldItem.Key));
-                }
-            }
         }
 
         #endregion
