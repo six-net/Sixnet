@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Sixnet.Development.Data.Field;
 using Sixnet.Model;
 using Sixnet.Serialization;
@@ -93,5 +94,12 @@ namespace Sixnet.Development.Entity
         /// </summary>
         /// <returns></returns>
         void OnDataAdding();
+
+        /// <summary>
+        /// Update from new data
+        /// </summary>
+        /// <param name="newData">New data</param>
+        /// <param name="configure">Configure</param>
+        void UpdateFrom(T newData,Action<UpdateFromOptions> configure = null);
     }
 }

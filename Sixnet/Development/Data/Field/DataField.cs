@@ -270,6 +270,17 @@ namespace Sixnet.Development.Data.Field
             return (Role & role) == role;
         }
 
+        /// <summary>
+        /// Whether is creation field
+        /// </summary>
+        /// <returns></returns>
+        internal bool IsCreationField()
+        {
+            return InRole(FieldRole.CreateDate)
+                || InRole(FieldRole.CreateUserId)
+                || InRole(FieldRole.CreateUserName);
+        }
+
         #endregion
 
         #region Cache role

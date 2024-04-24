@@ -264,6 +264,29 @@ namespace Sixnet.Development.Entity
         {
         }
 
+        /// <summary>
+        /// Update from new data
+        /// </summary>
+        /// <param name="newData">New data</param>
+        /// <param name="configure">Configure</param>
+        public virtual void UpdateFrom(T newData, Action<UpdateFromOptions> configure = null)
+        {
+            if (newData == null)
+            {
+                return;
+            }
+            var updateOptions = new UpdateFromOptions();
+            configure?.Invoke(updateOptions);
+            foreach (var item in newData.GetAllValues())
+            {
+                var field = SixnetEntityManager.GetField(typeof(T), item.Key);
+                if (!updateOptions.IsIgnoreField(field))
+                {
+                    SetValue(item.Key, item.Value);
+                }
+            }
+        }
+
         #endregion
 
         #region Adding
