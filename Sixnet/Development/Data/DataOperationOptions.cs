@@ -71,7 +71,7 @@ namespace Sixnet.Development.Data
             }
         }
 
-        internal bool IsNotNotOverwriteField(string fieldName)
+        internal bool IsNotOverwriteField(string fieldName)
         {
             return !string.IsNullOrWhiteSpace(fieldName) && (_notOverwriteFieldNames?.Contains(fieldName) ?? false);
         }

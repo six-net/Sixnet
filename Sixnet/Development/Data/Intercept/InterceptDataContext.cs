@@ -98,7 +98,7 @@ namespace Sixnet.Development.Data.Intercept
         {
             var dataOperationOptions = DataCommand.Options;
             if ((dataOperationOptions?.NotOverwrite ?? false)
-                || (dataOperationOptions?.IsNotNotOverwriteField(fieldName) ?? false))
+                || (dataOperationOptions?.IsNotOverwriteField(fieldName) ?? false))
             {
                 return false;
             }
