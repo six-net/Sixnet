@@ -6,9 +6,9 @@ using System.Text;
 namespace Sixnet.Development.Entity
 {
     /// <summary>
-    /// Modify from options
+    /// Modify entity options
     /// </summary>
-    public class ModifyFromOptions
+    public class ModifyEntityOptions
     {
         /// <summary>
         /// Whether include unmodifiable field

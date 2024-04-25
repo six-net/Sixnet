@@ -269,22 +269,73 @@ namespace Sixnet.Development.Entity
         /// </summary>
         /// <param name="newData">New data</param>
         /// <param name="configure">Configure</param>
-        public virtual void ModifyFrom(T newData, Action<ModifyFromOptions> configure = null)
+        public virtual void ModifyFrom(T newData, Action<ModifyEntityOptions> configure = null)
         {
-            if (newData == null)
+            if (newData != null)
             {
-                return;
-            }
-            var modifyOptions = new ModifyFromOptions();
-            configure?.Invoke(modifyOptions);
-            foreach (var item in newData.GetAllValues())
-            {
-                var field = SixnetEntityManager.GetField(typeof(T), item.Key);
-                if (!modifyOptions.IsIgnoreField(field))
+                var modificationValues = GetModificationValues(newData.GetAllValues(), configure, out _);
+                foreach (var valueItem in modificationValues)
                 {
-                    SetValue(item.Key, item.Value);
+                    SetValue(valueItem.Key, valueItem.Value);
                 }
             }
+        }
+
+        /// <summary>
+        /// Get modification assignment
+        /// </summary>
+        /// <param name="newData">New data</param>
+        /// <param name="configure">Configure</param>
+        public virtual FieldsAssignment GetModificationAssignment(T newData, Action<ModifyEntityOptions> configure = null)
+        {
+            var fieldsAssignment = FieldsAssignment.Create();
+            var modificationValues = GetModificationValues(newData?.GetAllValues(), configure, out var oldValues);
+            foreach (var valueItem in modificationValues)
+            {
+                fieldsAssignment.SetNewValue(valueItem.Key, valueItem.Value);
+            }
+            fieldsAssignment.OldValues = oldValues;
+            return fieldsAssignment;
+        }
+
+        Dictionary<string, dynamic> GetModificationValues(Dictionary<string, dynamic> newValues, Action<ModifyEntityOptions> configure
+            , out Dictionary<string, dynamic> oldValues)
+        {
+            oldValues = GetAllValues();
+            if (newValues.IsNullOrEmpty())
+            {
+                return new Dictionary<string, dynamic>(0);
+            }
+            var modifyOptions = new ModifyEntityOptions();
+            configure?.Invoke(modifyOptions);
+            var modificationValues = new Dictionary<string, dynamic>();
+            foreach (var valueItem in newValues)
+            {
+                var field = SixnetEntityManager.GetField(entityType, valueItem.Key);
+                if (!modifyOptions.IsIgnoreField(field))
+                {
+                    if (!(oldValues?.ContainsKey(valueItem.Key) ?? false))
+                    {
+                        modificationValues[valueItem.Key] = valueItem.Value;
+                    }
+                    else
+                    {
+                        var oldValue = oldValues[valueItem.Key];
+                        var newValue = valueItem.Value;
+                        bool isValueType = field.DataType.IsValueType || typeof(string).IsAssignableFrom(field.DataType);
+                        bool isUpdated = isValueType
+                            ? oldValue != newValue
+                            : field.DataType.IsSerializable
+                                            ? SixnetBinarySerializer.SerializeObjectToString(oldValue) != SixnetBinarySerializer.SerializeObjectToString(newValue)
+                                            : oldValue != newValue;
+                        if (isUpdated)
+                        {
+                            modificationValues[valueItem.Key] = valueItem.Value;
+                        }
+                    }
+                }
+            }
+            return modificationValues;
         }
 
         #endregion
@@ -429,46 +480,6 @@ namespace Sixnet.Development.Entity
                 allValues[field.Key] = field.Value.ValueProvider.Get(this);
             }
             return allValues;
-        }
-
-        /// <summary>
-        /// Get fields assignment
-        /// </summary>
-        /// <param name="oldValues">Old values</param>
-        /// <returns></returns>
-        public FieldsAssignment GetFieldsAssignment(Dictionary<string, dynamic> oldValues = null)
-        {
-            var valueDict = GetAllValues();
-            var fieldsAssignment = FieldsAssignment.Create();
-            foreach (var valueItem in valueDict)
-            {
-                var field = SixnetEntityManager.GetField(entityType, valueItem.Key);
-                if (field?.DataType == null)
-                {
-                    continue;
-                }
-                if (!(oldValues?.ContainsKey(valueItem.Key) ?? false))
-                {
-                    fieldsAssignment.SetNewValue(valueItem.Key, valueItem.Value);
-                }
-                else
-                {
-                    var oldValue = oldValues[valueItem.Key];
-                    var newValue = valueItem.Value;
-                    bool isValueType = field.DataType.IsValueType || typeof(string).IsAssignableFrom(field.DataType);
-                    bool isUpdated = isValueType
-                        ? oldValue != newValue
-                        : field.DataType.IsSerializable
-                                        ? SixnetBinarySerializer.SerializeObjectToString(oldValue) != SixnetBinarySerializer.SerializeObjectToString(newValue)
-                                        : oldValue != newValue;
-                    if (isUpdated)
-                    {
-                        fieldsAssignment.SetNewValue(valueItem.Key, valueItem.Value);
-                    }
-                }
-            }
-            fieldsAssignment.OldValues = oldValues;
-            return fieldsAssignment;
         }
 
         #endregion

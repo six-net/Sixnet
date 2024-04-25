@@ -62,13 +62,6 @@ namespace Sixnet.Development.Entity
         /// </summary>
         /// <returns>Return identity value</returns>
         string GetIdentityValue();
-
-        /// <summary>
-        /// Get fields assignment
-        /// </summary>
-        /// <param name="oldValues">Old values</param>
-        /// <returns></returns>
-        FieldsAssignment GetFieldsAssignment(Dictionary<string, dynamic> oldValues = null);
     }
 
     /// <summary>
@@ -100,6 +93,13 @@ namespace Sixnet.Development.Entity
         /// </summary>
         /// <param name="newData">New data</param>
         /// <param name="configure">Configure</param>
-        void ModifyFrom(T newData,Action<ModifyFromOptions> configure = null);
+        void ModifyFrom(T newData, Action<ModifyEntityOptions> configure = null);
+
+        /// <summary>
+        /// Get modification assignment
+        /// </summary>
+        /// <param name="newData">New data</param>
+        /// <param name="configure">Configure</param>
+        FieldsAssignment GetModificationAssignment(T newData, Action<ModifyEntityOptions> configure = null);
     }
 }
