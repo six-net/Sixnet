@@ -61,7 +61,6 @@ namespace Sixnet.Development.Data.Intercept
         /// <returns></returns>
         public dynamic GetNewValue(string fieldName)
         {
-            SixnetDirectThrower.ThrowSixnetExceptionIf(!HasNewValue(fieldName), $"Not set new value for {fieldName}");
             return DataCommand.FieldsAssignment?.GetNewValue(fieldName);
         }
 
@@ -72,7 +71,6 @@ namespace Sixnet.Development.Data.Intercept
         /// <returns></returns>
         public dynamic GetOldValue(string fieldName)
         {
-            SixnetDirectThrower.ThrowSixnetExceptionIf(!HasOldValue(fieldName), $"Not has original value for {fieldName}");
             return DataCommand.FieldsAssignment?.GetOldValue(fieldName);
         }
 
