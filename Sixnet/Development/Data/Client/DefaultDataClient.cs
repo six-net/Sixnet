@@ -835,7 +835,7 @@ namespace Sixnet.Development.Data.Client
                     SixnetException.ThrowIf(!newData.AllowToSave(), $"{typeof(T).Name}: {entityIdentity} cann't to be update");
 
                     var updateQueryable = ConditionExtensions.IncludeEntity(null, newData);
-                    var fieldsAssignment = newData.GetModificationAssignment(null);
+                    var fieldsAssignment = newData.GetModificationAssignment(newData);
                     var command = GetUpdateCommand(fieldsAssignment, updateQueryable, options);
                     command.Data = newData;
                     commands.Add(command);

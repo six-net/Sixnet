@@ -271,9 +271,9 @@ namespace Sixnet.Development.Entity
         /// <param name="configure">Configure</param>
         public virtual void ModifyFrom(T newData, Action<ModifyEntityOptions> configure = null)
         {
-            if (newData != null)
+            if (newData != null && newData != this)
             {
-                var modificationValues = GetModificationValues(newData.GetAllValues(), configure, out _);
+                var modificationValues = GetModificationValues(newData.GetAllValues(), configure, false, out _);
                 foreach (var valueItem in modificationValues)
                 {
                     SetValue(valueItem.Key, valueItem.Value);
@@ -289,7 +289,7 @@ namespace Sixnet.Development.Entity
         public virtual FieldsAssignment GetModificationAssignment(T newData, Action<ModifyEntityOptions> configure = null)
         {
             var fieldsAssignment = FieldsAssignment.Create();
-            var modificationValues = GetModificationValues(newData?.GetAllValues(), configure, out var oldValues);
+            var modificationValues = GetModificationValues(newData?.GetAllValues(), configure, newData == this, out var oldValues);
             foreach (var valueItem in modificationValues)
             {
                 fieldsAssignment.SetNewValue(valueItem.Key, valueItem.Value);
@@ -298,10 +298,18 @@ namespace Sixnet.Development.Entity
             return fieldsAssignment;
         }
 
+        /// <summary>
+        /// Get modification values
+        /// </summary>
+        /// <param name="newValues"></param>
+        /// <param name="configure"></param>
+        /// <param name="selfData"></param>
+        /// <param name="oldValues"></param>
+        /// <returns></returns>
         Dictionary<string, dynamic> GetModificationValues(Dictionary<string, dynamic> newValues, Action<ModifyEntityOptions> configure
-            , out Dictionary<string, dynamic> oldValues)
+            , bool selfData, out Dictionary<string, dynamic> oldValues)
         {
-            oldValues = GetAllValues();
+            oldValues = selfData ? newValues : GetAllValues();
             if (newValues.IsNullOrEmpty())
             {
                 return new Dictionary<string, dynamic>(0);
@@ -314,23 +322,30 @@ namespace Sixnet.Development.Entity
                 var field = SixnetEntityManager.GetField(entityType, valueItem.Key);
                 if (!modifyOptions.IsIgnoreField(field))
                 {
-                    if (!(oldValues?.ContainsKey(valueItem.Key) ?? false))
+                    if (selfData)
                     {
                         modificationValues[valueItem.Key] = valueItem.Value;
                     }
                     else
                     {
-                        var oldValue = oldValues[valueItem.Key];
-                        var newValue = valueItem.Value;
-                        bool isValueType = field.DataType.IsValueType || typeof(string).IsAssignableFrom(field.DataType);
-                        bool isUpdated = isValueType
-                            ? oldValue != newValue
-                            : field.DataType.IsSerializable
-                                            ? SixnetBinarySerializer.SerializeObjectToString(oldValue) != SixnetBinarySerializer.SerializeObjectToString(newValue)
-                                            : oldValue != newValue;
-                        if (isUpdated)
+                        if (!(oldValues?.ContainsKey(valueItem.Key) ?? false))
                         {
                             modificationValues[valueItem.Key] = valueItem.Value;
+                        }
+                        else
+                        {
+                            var oldValue = oldValues[valueItem.Key];
+                            var newValue = valueItem.Value;
+                            bool isValueType = field.DataType.IsValueType || typeof(string).IsAssignableFrom(field.DataType);
+                            bool isUpdated = isValueType
+                                ? oldValue != newValue
+                                : field.DataType.IsSerializable
+                                                ? SixnetBinarySerializer.SerializeObjectToString(oldValue) != SixnetBinarySerializer.SerializeObjectToString(newValue)
+                                                : oldValue != newValue;
+                            if (isUpdated)
+                            {
+                                modificationValues[valueItem.Key] = valueItem.Value;
+                            }
                         }
                     }
                 }
