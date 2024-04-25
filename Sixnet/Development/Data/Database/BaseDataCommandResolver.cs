@@ -409,10 +409,16 @@ namespace Sixnet.Development.Data.Database
                 switch (command.OperationType)
                 {
                     case DataOperationType.Insert:
-                        statements.AddRange(GenerateInsertStatements(context));
+                        if (!(command?.FieldsAssignment?.NewValues?.IsNullOrEmpty() ?? true))
+                        {
+                            statements.AddRange(GenerateInsertStatements(context));
+                        }
                         break;
                     case DataOperationType.Update:
-                        statements.AddRange(GenerateUpdateStatements(context));
+                        if (!(command?.FieldsAssignment?.NewValues?.IsNullOrEmpty() ?? true))
+                        {
+                            statements.AddRange(GenerateUpdateStatements(context));
+                        }
                         break;
                     case DataOperationType.Delete:
                         statements.AddRange(GenerateDeleteStatements(context));
