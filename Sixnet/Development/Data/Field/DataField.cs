@@ -175,7 +175,7 @@ namespace Sixnet.Development.Data.Field
             var propertyName = SixnetExpressionHelper.GetExpressionLastPropertyName(field);
             return Create(propertyName, typeof(TModel), modelTypeIndex, FieldFormatSetting.Create(formatterName), fieldName);
         }
-        
+
         string GetIdentity()
         {
             return $"{ModelType?.GUID}_{FieldName}_{PropertyName}";
@@ -283,7 +283,8 @@ namespace Sixnet.Development.Data.Field
                 || InRole(FieldRole.Increment)
                 || InRole(FieldRole.Version)
                 || InRole(FieldRole.SplitValue)
-                || InRole(FieldRole.Archive);
+                || InRole(FieldRole.Archive)
+                || InRole(FieldRole.Isolation);
         }
 
         #endregion
