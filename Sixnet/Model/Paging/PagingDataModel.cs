@@ -12,7 +12,7 @@ namespace Sixnet.Model.Paging
         /// <summary>
         /// Total data count
         /// </summary>
-        public int PagingTotalDataCount { get; set; }
+        public int SixnetPagingTotalDataCount { get; set; }
     }
 
     public class PagingTotalCountMappingModel<T>
@@ -37,7 +37,7 @@ namespace Sixnet.Model.Paging
         {
             return new PagingTotalCountMappingModel<T>()
             {
-                PagingTotalDataCount = totalCountModel.PagingTotalDataCount,
+                PagingTotalDataCount = totalCountModel.SixnetPagingTotalDataCount,
                 RealReturnData = data
             };
         }
