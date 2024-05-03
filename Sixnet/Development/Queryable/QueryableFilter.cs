@@ -7,7 +7,7 @@ namespace Sixnet.Development.Queryable
     /// Queryable filter
     /// </summary>
     [Serializable]
-    public abstract class QueryableFilter : ISixnetMappable
+    public abstract class QueryableFilter : SixnetLoadable, ISixnetMappable
     {
         /// <summary>
         /// Generate a IQueryable instance 

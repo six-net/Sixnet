@@ -5,7 +5,7 @@ using Sixnet.Development.Queryable;
 namespace Sixnet.Model.Paging
 {
     /// <summary>
-    /// Paging query condition
+    /// Paging filter
     /// </summary>
     [Serializable]
     public class PagingFilter : QueryableFilter
