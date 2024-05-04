@@ -294,6 +294,41 @@ namespace System
         }
 
         #endregion
+
+        #region As filter end date time
+
+        /// <summary>
+        /// As filter end date time
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="excludeTime"></param>
+        /// <returns></returns>
+        public static DateTime AsFilterEndDateTime(this DateTime value, bool excludeTime = true)
+        {
+            return excludeTime
+                ? value.Date
+                : value.AddMilliseconds(1);
+        }
+
+        /// <summary>
+        /// As filter end date time
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="excludeTime"></param>
+        /// <returns></returns>
+        public static DateTime? AsFilterEndDateTime(this DateTime? value, bool excludeTime = true)
+        {
+            if (!value.HasValue)
+            {
+                return null;
+            }
+            var dateValue = value.Value;
+            return excludeTime
+                ? dateValue.Date
+                : dateValue.AddMilliseconds(1);
+        }
+
+        #endregion
     }
 
     /// <summary>
@@ -579,6 +614,41 @@ namespace System
         {
             var constellDate = new DateTimeOffset(2000, date.Month, date.Day, 0, 0, 0, SixnetTimes.Zero);
             return SixnetTimes.Constellations.FirstOrDefault(c => c.Value.Item1 <= constellDate && c.Value.Item2 >= constellDate).Key;
+        }
+
+        #endregion
+
+        #region As filter end date time
+
+        /// <summary>
+        /// As filter end date time
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="excludeTime"></param>
+        /// <returns></returns>
+        public static DateTimeOffset AsFilterEndDateTime(this DateTimeOffset value, bool excludeTime = true)
+        {
+            return excludeTime
+                ? new DateTimeOffset(value.Date, value.Offset)
+                : value.AddMilliseconds(1);
+        }
+
+        /// <summary>
+        /// As filter end date time
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="excludeTime"></param>
+        /// <returns></returns>
+        public static DateTimeOffset? AsFilterEndDateTime(this DateTimeOffset? value, bool excludeTime = true)
+        {
+            if (!value.HasValue)
+            {
+                return null;
+            }
+            var dateValue = value.Value;
+            return excludeTime
+                ? new DateTimeOffset(dateValue.Date, dateValue.Offset)
+                : dateValue.AddMilliseconds(1);
         }
 
         #endregion
