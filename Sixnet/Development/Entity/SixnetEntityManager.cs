@@ -72,7 +72,7 @@ namespace Sixnet.Development.Entity
             {
                 return;
             }
-            var entityAttribute = entityType.GetCustomAttribute<EntityAttribute>();
+            var entityAttribute = entityType.GetCustomAttribute<EntityAttribute>(false);
             if (entityAttribute == null)
             {
                 return;
