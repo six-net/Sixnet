@@ -105,23 +105,6 @@ namespace System
 
         #endregion
 
-        #region Get enum display name
-
-        /// <summary>
-        /// Get enum display name
-        /// </summary>
-        /// <param name="enumValue">Enum value</param>
-        /// <returns></returns>
-        public static string GetEnumDisplayName(this Enum enumValue)
-        {
-            var enumType = enumValue.GetType();
-            var valueAndNames = GetEnumValueAndNames(enumType, false, true);
-            valueAndNames.TryGetValue(Convert.ToInt32(enumValue), out string displayName);
-            return displayName ?? enumValue.ToString();
-        }
-
-        #endregion
-
         #region Allow set null value
 
         /// <summary>

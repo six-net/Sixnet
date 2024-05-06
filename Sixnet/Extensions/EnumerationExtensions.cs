@@ -31,5 +31,42 @@ namespace System
         {
             return new KeyValueCollection<int, string>(enumValue.GetEnumDictionary(startWithEnumName, displayFriendly).Select(c => c));
         }
+
+        /// <summary>
+        /// Get enum value&code collection
+        /// </summary>
+        /// <typeparam name="TEnum">Enum type</typeparam>
+        /// <param name="enumValue">Enum value</param>
+        /// <param name="startWithEnumName">Whether start with enum name</param>
+        /// <param name="displayFriendly">Display friendly</param>
+        /// <returns>Return a name code & value collection</returns>
+        public static List<NameValue<int>> GetEnumNameValues<TEnum>(this TEnum enumValue, bool startWithEnumName = true, bool displayFriendly = false) where TEnum : struct, Enum
+        {
+            var enumDict = enumValue.GetEnumDictionary(startWithEnumName, displayFriendly);
+            return enumDict.Select(c => new NameValue<int>()
+            {
+                Value = c.Key,
+                Name = c.Value
+            }).ToList();
+        }
+
+        /// <summary>
+        /// Get enum 
+        /// </summary>
+        /// <typeparam name="TEnum">Enum type</typeparam>
+        /// <param name="enumValue">Enum value</param>
+        /// <param name="startWithEnumName">Whether start with enum name</param>
+        /// <param name="displayFriendly">Display friendly</param>
+        /// <returns></returns>
+        public static string GetEnumName<TEnum>(this TEnum enumValue, bool startWithEnumName = true, bool displayFriendly = false) where TEnum : struct, Enum
+        {
+            var intValue = Convert.ToInt32(enumValue);
+            var enumDict = enumValue.GetEnumDictionary(startWithEnumName, displayFriendly);
+            if (enumDict?.ContainsKey(intValue) ?? false)
+            {
+                return enumDict[intValue];
+            }
+            return enumValue.ToString();
+        }
     }
 }
