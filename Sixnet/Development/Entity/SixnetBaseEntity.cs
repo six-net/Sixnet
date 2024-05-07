@@ -88,27 +88,27 @@ namespace Sixnet.Development.Entity
             foreach (var pk in primaryKeys)
             {
                 var field = SixnetEntityManager.GetField(typeof(T), pk);
-                if (field != null)
+                if (field != null && !field.InRole(FieldRole.Increment))
                 {
                     var valueType = field.DataType?.GetRealValueType();
                     var typeCode = Type.GetTypeCode(valueType);
                     switch (typeCode)
                     {
                         case TypeCode.Byte:
-                            SetValue(pk, RandomNumberHelper.GetRandomNumber(byte.MaxValue, 1));
+                            SetValue(pk, RandomNumberHelper.GetRandomNumber(byte.MaxValue - 1, 1));
                             break;
                         case TypeCode.SByte:
-                            SetValue(pk, RandomNumberHelper.GetRandomNumber(sbyte.MaxValue, 1));
+                            SetValue(pk, RandomNumberHelper.GetRandomNumber(sbyte.MaxValue - 1, 1));
                             break;
                         case TypeCode.Int16:
-                            SetValue(pk, RandomNumberHelper.GetRandomNumber(short.MaxValue, 1));
+                            SetValue(pk, RandomNumberHelper.GetRandomNumber(short.MaxValue - 1, 1));
                             break;
                         case TypeCode.UInt16:
-                            SetValue(pk, RandomNumberHelper.GetRandomNumber(ushort.MaxValue, 1));
+                            SetValue(pk, RandomNumberHelper.GetRandomNumber(ushort.MaxValue - 1, 1));
                             break;
                         case TypeCode.Int32:
                         case TypeCode.UInt32:
-                            SetValue(pk, RandomNumberHelper.GetRandomNumber(int.MaxValue, 1));
+                            SetValue(pk, RandomNumberHelper.GetRandomNumber(int.MaxValue - 1, 1));
                             break;
                         case TypeCode.Int64:
                         case TypeCode.UInt64:
