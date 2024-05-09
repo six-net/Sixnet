@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -12,7 +13,7 @@ namespace Sixnet.Security.Cryptography
         /// <summary>
         /// md5 provider
         /// </summary>
-        static readonly MD5CryptoServiceProvider MD5CryptoServiceProvider = new MD5CryptoServiceProvider();
+        static readonly MD5CryptoServiceProvider MD5CryptoServiceProvider = new();
 
         #region Encrypts string
 
@@ -21,16 +22,19 @@ namespace Sixnet.Security.Cryptography
         /// </summary>
         /// <param name="originalValue">Original value</param>
         /// <returns>Return the encrypted value</returns>
-        public static string Encrypt(string originalValue)
+        public static string Encrypt(string originalValue, string salt = "")
         {
             if (string.IsNullOrWhiteSpace(originalValue))
             {
                 return string.Empty;
             }
-
-            byte[] valueBytes = Encoding.UTF8.GetBytes(originalValue);
-            byte[] md5Bytes = MD5CryptoServiceProvider.ComputeHash(valueBytes);
-            string encryptString = BitConverter.ToString(md5Bytes);
+            if (!string.IsNullOrWhiteSpace(salt))
+            {
+                originalValue = $"{originalValue}{salt}";
+            }
+            var valueBytes = Encoding.UTF8.GetBytes(originalValue);
+            var md5Bytes = MD5CryptoServiceProvider.ComputeHash(valueBytes);
+            var encryptString = BitConverter.ToString(md5Bytes);
             return encryptString.Replace("-", string.Empty).ToLower();
         }
 

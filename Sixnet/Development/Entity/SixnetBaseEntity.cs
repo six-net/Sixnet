@@ -367,6 +367,7 @@ namespace Sixnet.Development.Entity
             {
                 InitIdentityValue();
             }
+            OnAdding();
         }
 
         /// <summary>
