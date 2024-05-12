@@ -160,7 +160,10 @@ namespace Sixnet.Validation
                     validationList = new List<ISixnetValidation>();
                     typeValidationItems.Add(propertyName, validationList);
                 }
-                validationList.Add(new DefaultValidation<T>(property, validator, dataField));
+                if (!validationList.Any(dv => dv.EqualsValidator(validator)))
+                {
+                    validationList.Add(new DefaultValidation<T>(property, validator, dataField));
+                }
 
                 //set tip message
                 if (property.TipMessage && !string.IsNullOrWhiteSpace(property.ErrorMessage))

@@ -113,12 +113,12 @@ namespace Sixnet.App
                     }
                     else if (!type.IsAbstract)
                     {
-                        if (_moduleContractType.IsAssignableFrom(type)) // init module
+                        if (IsDirectFromInterface(_moduleContractType, type)) // init module
                         {
                             var moduleConfiguration = Activator.CreateInstance(type) as ISixnetModule;
                             SixnetApplication.AddModule(moduleConfiguration);
                         }
-                        if (_configurableContractType.IsAssignableFrom(type))
+                        if (IsDirectFromInterface(_configurableContractType, type))
                         {
                             var configModel = Activator.CreateInstance(type) as ISixnetConfigurable;
                             SixnetApplication.AddConfigurable(configModel);
@@ -135,6 +135,16 @@ namespace Sixnet.App
             {
                 SixnetLogger.LogError<ApplicationInitializer>(SixnetLogEvents.Application.InitializationFailure, ex, ex.Message);
             }
+        }
+
+        static bool IsDirectFromInterface(Type interfaceType, Type classType)
+        {
+            return classType != null
+                && interfaceType != null
+                && interfaceType.IsAssignableFrom(classType)
+                && (classType.BaseType == null
+                    || classType.BaseType == typeof(object)
+                    || !interfaceType.IsAssignableFrom(classType.BaseType));
         }
 
         #endregion

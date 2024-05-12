@@ -188,6 +188,18 @@ namespace Sixnet.Validation
             return rule;
         }
 
+        /// <summary>
+        /// Equals validator
+        /// </summary>
+        /// <param name="validator"></param>
+        /// <returns></returns>
+        public bool EqualsValidator(BaseValidator validator)
+        {
+            return validator != null && this.validator != null && (this.validator == validator
+                || this.validator?.GetType().GUID == validator?.GetType().GUID
+                );
+        }
+
         #endregion
     }
 }
