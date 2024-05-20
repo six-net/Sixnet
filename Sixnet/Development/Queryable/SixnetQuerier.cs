@@ -133,7 +133,7 @@ namespace Sixnet.Development.Queryable
         /// <typeparam name="T">Query model</typeparam>
         /// <param name="conditionExpression">Condition expression</param>
         /// <returns>Return query object</returns>
-        public static ISixnetQueryable Create<T>(Expression<Func<T, bool>> conditionExpression)
+        public static ISixnetQueryable<T> Create<T>(Expression<Func<T, bool>> conditionExpression)
         {
             var query = Create<T>();
             if (conditionExpression != null)
