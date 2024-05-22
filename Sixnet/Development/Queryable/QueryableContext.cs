@@ -995,6 +995,16 @@ namespace Sixnet.Development.Queryable
             return this;
         }
 
+        /// <summary>
+        /// Increment join index
+        /// </summary>
+        /// <returns></returns>
+        internal QueryableContext IncrementJoinIndex()
+        {
+            _joinIndex++;
+            return this;
+        }
+
         #endregion
 
         #region Combine
