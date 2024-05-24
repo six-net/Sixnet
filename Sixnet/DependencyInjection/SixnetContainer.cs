@@ -9,6 +9,7 @@ using Sixnet.App;
 using Sixnet.Cache;
 using Sixnet.Cache.Provider.Memory;
 using Sixnet.Development.Data;
+using Sixnet.Development.Data.Event;
 using Sixnet.Development.Message;
 using Sixnet.Development.Repository;
 using Sixnet.Exceptions;
@@ -136,6 +137,9 @@ namespace Sixnet.DependencyInjection
 
             // Object mapper
             SixnetMapper.BuildMapper();
+
+            // Event
+            SixnetDataEventBus.SubscribeDefaultDataEvent();
 
             GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
             GC.Collect();

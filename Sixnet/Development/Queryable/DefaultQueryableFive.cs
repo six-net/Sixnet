@@ -740,6 +740,10 @@ namespace Sixnet.Development.Queryable
                     Connection = joinQueryable
                 }, configure);
             }
+            else
+            {
+                queryableContext.IncrementJoinIndex();
+            }
             return SixnetQuerier.Create<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(this);
         }
 

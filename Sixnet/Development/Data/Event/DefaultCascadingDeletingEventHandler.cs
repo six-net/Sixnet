@@ -20,9 +20,9 @@ namespace Sixnet.Development.Data.Event
         /// <returns></returns>
         public Task Handle(ISixnetEvent eventData, CancellationToken cancellationToken)
         {
-            SixnetDirectThrower.ThrowSixnetExceptionIf(eventData is not DeletingDataEvent, "Event is not a deleting event");
+            SixnetDirectThrower.ThrowSixnetExceptionIf(eventData is not CascadingDeletingDataEvent, "Event is not a deleting event");
 
-            var deletingDataEvent = eventData as DeletingDataEvent;
+            var deletingDataEvent = eventData as CascadingDeletingDataEvent;
             var dataClient = deletingDataEvent.DataClient;
             var deleteRelationEntityQueryable = SixnetQuerier.Create<TRelationEntity>().Join(new JoinEntry()
             {
