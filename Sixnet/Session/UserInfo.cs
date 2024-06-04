@@ -18,17 +18,27 @@ namespace Sixnet.Session
         /// <summary>
         /// Admin tag key
         /// </summary>
-        const string ADMIN_TAG_KEY = "EZNEW_SUPER_ADMIN";
+        const string ADMIN_TAG_KEY = "SIXNET_SUPER_ADMIN";
 
         /// <summary>
         /// Virtual user tag key
         /// </summary>
-        const string VIRTUAL_TAG_KEY = "EZNEW_VIRTUAL_USER";
+        const string VIRTUAL_TAG_KEY = "SIXNET_VIRTUAL_USER";
 
         /// <summary>
-        /// Relation user tabke key
+        /// Relation user tag key
         /// </summary>
-        const string RELATIONUSER_TAG_KEY = "EZNEW_RELATION_USER";
+        const string RELATIONUSER_TAG_KEY = "SIXNET_RELATION_USER";
+
+        /// <summary>
+        /// Application tag key
+        /// </summary>
+        const string APPLICATION_TAG_KEY = "SIXNET_APP";
+
+        /// <summary>
+        /// Token tag key
+        /// </summary>
+        const string TOKEN_TAG_KEY = "SIXNET_TOKEN_";
 
         #endregion
 
@@ -79,6 +89,16 @@ namespace Sixnet.Session
         /// </summary>
         public string RelationUserId { get; set; }
 
+        /// <summary>
+        /// Gets or sets the app tag
+        /// </summary>
+        public string AppTag { get; set; }
+
+        /// <summary>
+        /// Gets or sets the token
+        /// </summary>
+        public string Token { get; set; }
+
         #endregion
 
         #region Methods
@@ -123,6 +143,8 @@ namespace Sixnet.Session
             var adminClaim = claims.FirstOrDefault(c => c.Type == ADMIN_TAG_KEY);
             var virtualClaim = claims.FirstOrDefault(c => c.Type == VIRTUAL_TAG_KEY);
             var relationUserClaim = claims.FirstOrDefault(c => c.Type == RELATIONUSER_TAG_KEY);
+            var appTagClaim = claims.FirstOrDefault(c => c.Type == APPLICATION_TAG_KEY);
+            var tokenTagClaim = claims.FirstOrDefault(c => c.Type == TOKEN_TAG_KEY);
 
             if (idClaim == null)
             {
@@ -134,9 +156,11 @@ namespace Sixnet.Session
                 Name = nameClaim?.Value,
                 PersonName = givenNameClaim?.Value,
                 DisplayName = nickNameClaim?.Value,
-                IsAdmin = adminClaim?.Value == ADMIN_TAG_KEY,
-                IsVirual = virtualClaim?.Value == VIRTUAL_TAG_KEY,
-                RelationUserId = relationUserClaim?.Value ?? string.Empty
+                IsAdmin = adminClaim?.Value == $"{nameClaim?.Value}{ADMIN_TAG_KEY}".MD5(),
+                IsVirual = virtualClaim?.Value == $"{nameClaim?.Value}{VIRTUAL_TAG_KEY}".MD5(),
+                RelationUserId = relationUserClaim?.Value ?? string.Empty,
+                AppTag = appTagClaim?.Value ?? string.Empty,
+                Token = tokenTagClaim?.Value ?? string.Empty
             };
         }
 
@@ -152,9 +176,11 @@ namespace Sixnet.Session
                 new Claim(JwtClaimTypes.Name,Name??string.Empty),
                 new Claim(JwtClaimTypes.NickName,DisplayName??string.Empty),
                 new Claim(JwtClaimTypes.GivenName,PersonName??string.Empty),
-                new Claim(ADMIN_TAG_KEY,IsAdmin ? ADMIN_TAG_KEY : ""),
-                new Claim(VIRTUAL_TAG_KEY,IsVirual ? VIRTUAL_TAG_KEY : ""),
-                new Claim(RELATIONUSER_TAG_KEY,RelationUserId??string.Empty)
+                new Claim(ADMIN_TAG_KEY,IsAdmin ? $"{Name}{ADMIN_TAG_KEY}".MD5() : ""),
+                new Claim(VIRTUAL_TAG_KEY,IsVirual ? $"{Name}{VIRTUAL_TAG_KEY}".MD5() : ""),
+                new Claim(RELATIONUSER_TAG_KEY,RelationUserId??string.Empty),
+                new Claim(APPLICATION_TAG_KEY,AppTag??string.Empty),
+                new Claim(TOKEN_TAG_KEY,Token??string.Empty)
             };
         }
 

@@ -1993,14 +1993,14 @@ namespace Sixnet.Cache.Provider.Memory
             var database = GetDatabase(server);
             var removeCount = 0;
             SetRemoveResult response;
-            if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null && !parameter.RemoveMembers.IsNullOrEmpty())
+            if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null && !parameter.Members.IsNullOrEmpty())
             {
                 if (entry.Value is not ConcurrentDictionary<string, byte> dict)
                 {
                     response = CacheResult.FailResponse<SetRemoveResult>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
                     return response;
                 }
-                foreach (var member in parameter.RemoveMembers)
+                foreach (var member in parameter.Members)
                 {
                     if (dict.TryRemove(member, out var value))
                     {
