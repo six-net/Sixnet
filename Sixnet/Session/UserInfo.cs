@@ -101,7 +101,7 @@ namespace Sixnet.Session
         /// <summary>
         /// Gets or sets the roles
         /// </summary>
-        public List<string> Roles { get; set; }
+        public HashSet<string> Roles { get; set; }
 
         #endregion
 
@@ -132,17 +132,20 @@ namespace Sixnet.Session
             {
                 return null;
             }
-            var idClaim = claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
-            idClaim ??= claims.FirstOrDefault(c => c.Type == JwtClaimTypes.Subject);
+            var idClaim = claims.FirstOrDefault(c => c.Type == JwtClaimTypes.Subject);
+            idClaim ??= claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
 
-            var nameClaim = claims.FirstOrDefault(c => c.Type == ClaimTypes.Name);
-            nameClaim ??= claims.FirstOrDefault(c => c.Type == JwtClaimTypes.Name);
+            var nameClaim = claims.FirstOrDefault(c => c.Type == JwtClaimTypes.Name);
+            nameClaim ??= claims.FirstOrDefault(c => c.Type == ClaimTypes.Name);
 
-            var givenNameClaim = claims.FirstOrDefault(c => c.Type == ClaimTypes.GivenName);
-            givenNameClaim ??= claims.FirstOrDefault(c => c.Type == JwtClaimTypes.GivenName);
+            var givenNameClaim = claims.FirstOrDefault(c => c.Type == JwtClaimTypes.GivenName);
+            givenNameClaim ??= claims.FirstOrDefault(c => c.Type == ClaimTypes.GivenName);
 
-            var nickNameClaim = claims.FirstOrDefault(c => c.Type == ClaimTypes.Surname);
-            nickNameClaim ??= claims.FirstOrDefault(c => c.Type == JwtClaimTypes.NickName);
+            var nickNameClaim = claims.FirstOrDefault(c => c.Type == JwtClaimTypes.NickName);
+            nickNameClaim ??= claims.FirstOrDefault(c => c.Type == ClaimTypes.Surname);
+
+            var roleClaim = claims.FirstOrDefault(c => c.Type == JwtClaimTypes.Role);
+            roleClaim ??= claims.FirstOrDefault(c => c.Type == ClaimTypes.Role);
 
             var adminClaim = claims.FirstOrDefault(c => c.Type == ADMIN_TAG_KEY);
             var virtualClaim = claims.FirstOrDefault(c => c.Type == VIRTUAL_TAG_KEY);
@@ -164,7 +167,8 @@ namespace Sixnet.Session
                 IsVirual = virtualClaim?.Value == $"{idClaim?.Value}{nameClaim?.Value}{nameof(VIRTUAL_TAG_KEY)}{tokenTagClaim?.Value}".MD5(),
                 RelationUserId = relationUserClaim?.Value ?? string.Empty,
                 AppTag = appTagClaim?.Value ?? string.Empty,
-                Token = tokenTagClaim?.Value ?? string.Empty
+                Token = tokenTagClaim?.Value ?? string.Empty,
+                Roles = new HashSet<string>(roleClaim?.Value?.LSplit(",") ?? Array.Empty<string>()),
             };
         }
 
@@ -184,7 +188,8 @@ namespace Sixnet.Session
                 new Claim(VIRTUAL_TAG_KEY,IsVirual ? $"{Id}{Name}{nameof(VIRTUAL_TAG_KEY)}{Token}".MD5() : ""),
                 new Claim(RELATIONUSER_TAG_KEY,RelationUserId??string.Empty),
                 new Claim(APPLICATION_TAG_KEY,AppTag??string.Empty),
-                new Claim(TOKEN_TAG_KEY,Token??string.Empty)
+                new Claim(TOKEN_TAG_KEY,Token??string.Empty),
+                new Claim(JwtClaimTypes.Role,Roles.IsNullOrEmpty()? "": string.Join(',',Roles))
             };
         }
 
