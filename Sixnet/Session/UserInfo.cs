@@ -17,27 +17,27 @@ namespace Sixnet.Session
         /// <summary>
         /// Admin tag key
         /// </summary>
-        const string ADMIN_TAG_KEY = "SIXNET_SUPER_ADMIN";
+        const string ADMIN_TAG_KEY = "ssupadm";
 
         /// <summary>
         /// Virtual user tag key
         /// </summary>
-        const string VIRTUAL_TAG_KEY = "SIXNET_VIRTUAL_USER";
+        const string VIRTUAL_TAG_KEY = "svirusr";
 
         /// <summary>
         /// Relation user tag key
         /// </summary>
-        const string RELATIONUSER_TAG_KEY = "SIXNET_RELATION_USER";
+        const string RELATIONUSER_TAG_KEY = "sralusr";
 
         /// <summary>
         /// Application tag key
         /// </summary>
-        const string APPLICATION_TAG_KEY = "SIXNET_APP";
+        const string APPLICATION_TAG_KEY = "sapptg";
 
         /// <summary>
         /// Token tag key
         /// </summary>
-        const string TOKEN_TAG_KEY = "SIXNET_TOKEN_";
+        const string TOKEN_TAG_KEY = "sauentkn";
 
         #endregion
 
@@ -160,8 +160,8 @@ namespace Sixnet.Session
                 Name = nameClaim?.Value,
                 PersonName = givenNameClaim?.Value,
                 DisplayName = nickNameClaim?.Value,
-                IsAdmin = adminClaim?.Value == $"{nameClaim?.Value}{ADMIN_TAG_KEY}".MD5(),
-                IsVirual = virtualClaim?.Value == $"{nameClaim?.Value}{VIRTUAL_TAG_KEY}".MD5(),
+                IsAdmin = adminClaim?.Value == $"{idClaim?.Value}{nameClaim?.Value}{nameof(ADMIN_TAG_KEY)}{tokenTagClaim?.Value}".MD5(),
+                IsVirual = virtualClaim?.Value == $"{idClaim?.Value}{nameClaim?.Value}{nameof(VIRTUAL_TAG_KEY)}{tokenTagClaim?.Value}".MD5(),
                 RelationUserId = relationUserClaim?.Value ?? string.Empty,
                 AppTag = appTagClaim?.Value ?? string.Empty,
                 Token = tokenTagClaim?.Value ?? string.Empty
@@ -180,8 +180,8 @@ namespace Sixnet.Session
                 new Claim(JwtClaimTypes.Name,Name??string.Empty),
                 new Claim(JwtClaimTypes.NickName,DisplayName??string.Empty),
                 new Claim(JwtClaimTypes.GivenName,PersonName??string.Empty),
-                new Claim(ADMIN_TAG_KEY,IsAdmin ? $"{Name}{ADMIN_TAG_KEY}".MD5() : ""),
-                new Claim(VIRTUAL_TAG_KEY,IsVirual ? $"{Name}{VIRTUAL_TAG_KEY}".MD5() : ""),
+                new Claim(ADMIN_TAG_KEY,IsAdmin ? $"{Id}{Name}{nameof(ADMIN_TAG_KEY)}{Token}".MD5() : ""),
+                new Claim(VIRTUAL_TAG_KEY,IsVirual ? $"{Id}{Name}{nameof(VIRTUAL_TAG_KEY)}{Token}".MD5() : ""),
                 new Claim(RELATIONUSER_TAG_KEY,RelationUserId??string.Empty),
                 new Claim(APPLICATION_TAG_KEY,AppTag??string.Empty),
                 new Claim(TOKEN_TAG_KEY,Token??string.Empty)

@@ -28,14 +28,19 @@ namespace Sixnet.Security.Authorization
         public bool Remote { get; set; }
 
         /// <summary>
-        /// Whether ingore authentication
+        /// Whether ignore authentication
         /// </summary>
-        public bool IngoreAuthentication { get; set; }
+        public bool IgnoreAuthentication { get; set; }
 
         /// <summary>
-        /// Whether ingore default authorize
+        /// Whether ignore default authorize
         /// </summary>
-        public bool IngoreDefaultAuthorize { get; set; }
+        public bool IgnoreDefaultAuthorize { get; set; }
+
+        /// <summary>
+        /// Admin authorize
+        /// </summary>
+        public bool AdminAuthorize { get; set; }
 
         /// <summary>
         /// Gets or sets the authorize delegate
