@@ -2,17 +2,17 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Sixnet.Security.Authorization
+namespace Sixnet.Security.Permission
 {
     /// <summary>
-    /// Sixnet permission authorization
+    /// Sixnet object permission
     /// </summary>
-    public class SixnetPermissionAuthorization
+    public class SixnetObjectPermission
     {
         /// <summary>
-        /// Object id
+        /// Object value
         /// </summary>
-        public string AuthObjectId { get; set; }
+        public string ObjectValue { get; set; }
 
         /// <summary>
         /// Permissions

@@ -6,6 +6,7 @@ using Sixnet.MQ;
 using Sixnet.Net.Email;
 using Sixnet.Net.Sms;
 using Sixnet.Net.Upload;
+using Sixnet.Security.Authorization;
 using Sixnet.Security.Cryptography;
 using Sixnet.Serialization.Json;
 using Sixnet.Token.Jwt;
@@ -74,8 +75,13 @@ namespace Sixnet.DependencyInjection
         public SixnetJsonSerializationOptions Json { get; set; }
 
         /// <summary>
-        /// Gets o sets t validation options
+        /// Gets or sets the validation options
         /// </summary>
         public ValidationOptions Validation { get; set; }
+
+        /// <summary>
+        /// Gets or sets the authorization options 
+        /// </summary>
+        public SixnetAuthorizationOptions Authorization { get; set; }
     }
 }

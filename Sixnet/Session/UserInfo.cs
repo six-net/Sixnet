@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Principal;
-using Sixnet.Model;
 using Sixnet.Token.Jwt;
 
 namespace Sixnet.Session
@@ -98,6 +97,11 @@ namespace Sixnet.Session
         /// Gets or sets the token
         /// </summary>
         public string Token { get; set; }
+
+        /// <summary>
+        /// Gets or sets the roles
+        /// </summary>
+        public List<string> Roles { get; set; }
 
         #endregion
 

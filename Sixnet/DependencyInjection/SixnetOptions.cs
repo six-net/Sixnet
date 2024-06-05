@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Sixnet.App;
 using Sixnet.Cache;
@@ -13,10 +11,13 @@ using Sixnet.MQ;
 using Sixnet.Net.Email;
 using Sixnet.Net.Sms;
 using Sixnet.Net.Upload;
+using Sixnet.Security.Authorization;
 using Sixnet.Security.Cryptography;
 using Sixnet.Serialization.Json;
 using Sixnet.Token.Jwt;
 using Sixnet.Validation;
+using System;
+using System.Collections.Generic;
 
 namespace Sixnet.DependencyInjection
 {
@@ -114,6 +115,11 @@ namespace Sixnet.DependencyInjection
         /// Configure validation
         /// </summary>
         public Action<ValidationOptions> ConfigureValidation { get; set; }
+
+        /// <summary>
+        /// Configure authorization
+        /// </summary>
+        public Action<SixnetAuthorizationOptions> ConfigureAuthorization { get; set; }
 
         /// <summary>
         /// Set options style

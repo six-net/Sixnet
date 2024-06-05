@@ -7,7 +7,7 @@ using Sixnet.Cache;
 using Sixnet.Cache.Keys.Parameters;
 using Sixnet.Cache.Set.Parameters;
 using Sixnet.Cache.String.Parameters;
-using Sixnet.Security.Authorization;
+using Sixnet.Security.Permission;
 using Sixnet.Session;
 
 namespace Sixnet.Security.Authentication
@@ -176,7 +176,7 @@ namespace Sixnet.Security.Authentication
         static string GetUserKey(AuthenticationTokenSetting setting)
         {
             var keyNameSplitChar = SixnetCacher.GetKeyNameSplitChar();
-            var authorizationObject = AuthorizationObject.User;
+            var authorizationObject = PermissionObjectType.User;
             var appTag = setting.Score == AuthenticationScore.Application ? setting.AppTag : "";
             var userId = setting.UserId;
             return string.IsNullOrWhiteSpace(appTag)
