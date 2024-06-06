@@ -38,9 +38,9 @@ namespace Sixnet.Security.Authorization
         public bool IgnoreDefaultAuthorize { get; set; }
 
         /// <summary>
-        /// Admin authorize
+        /// Whether validation admin
         /// </summary>
-        public bool AdminAuthorize { get; set; }
+        public bool ValidationAdmin { get; set; }
 
         /// <summary>
         /// Gets or sets the authorize delegate
@@ -54,8 +54,8 @@ namespace Sixnet.Security.Authorization
 
         static async Task<SixnetAuthorizationResult> DefaultPermissionAuthorizeAsync(SixnetAuthorizationContext context)
         {
-            var user = context.User;
-            var operation = context.Operation;
+            var user = context?.User;
+            var operation = context?.Operation;
             if (user == null)
             {
                 return SixnetAuthorizationResult.ChallengeResult();
@@ -64,12 +64,7 @@ namespace Sixnet.Security.Authorization
             {
                 return SixnetAuthorizationResult.ForbidResult();
             }
-            var permissionObjects = new Dictionary<PermissionObjectType, List<string>>();
-            permissionObjects[PermissionObjectType.User] = new List<string>(1) { user.Id };
-            if (!user.Roles.IsNullOrEmpty())
-            {
-                permissionObjects[PermissionObjectType.Role] = new List<string>(user.Roles);
-            }
+            var permissionObjects = GetPermissionObjects(context);
             var hasPermission = await SixnetPermissionManager.ValidateOperationAsync(context?.User?.AppTag, context.Operation, permissionObjects).ConfigureAwait(false);
             return hasPermission
                    ? SixnetAuthorizationResult.SuccessResult()
@@ -88,16 +83,22 @@ namespace Sixnet.Security.Authorization
             {
                 return SixnetAuthorizationResult.ForbidResult();
             }
-            var permissionObjects = new Dictionary<PermissionObjectType, List<string>>();
-            permissionObjects[PermissionObjectType.User] = new List<string>(1) { user.Id };
-            if (!user.Roles.IsNullOrEmpty())
-            {
-                permissionObjects[PermissionObjectType.Role] = new List<string>(user.Roles);
-            }
+            var permissionObjects = GetPermissionObjects(context);
             var hasPermission = SixnetPermissionManager.ValidateOperation(context?.User?.AppTag, context.Operation, permissionObjects);
             return hasPermission
                    ? SixnetAuthorizationResult.SuccessResult()
                    : SixnetAuthorizationResult.ForbidResult();
+        }
+
+        static Dictionary<PermissionObjectType, List<string>> GetPermissionObjects(SixnetAuthorizationContext context)
+        {
+            if (context == null)
+            {
+                return new Dictionary<PermissionObjectType, List<string>>(0);
+            }
+            var permissionObjects = new Dictionary<PermissionObjectType, List<string>>();
+            permissionObjects[PermissionObjectType.User] = new List<string>(1) { context.User.Id };
+            return permissionObjects;
         }
     }
 }
