@@ -89,7 +89,6 @@ namespace Sixnet.Security.Authorization
                 return SixnetAuthorizationResult.ForbidResult();
             }
             var permissionObjects = new Dictionary<PermissionObjectType, List<string>>();
-            permissionObjects[PermissionObjectType.Operation] = new List<string>(1) { context.Operation };
             permissionObjects[PermissionObjectType.User] = new List<string>(1) { user.Id };
             if (!user.Roles.IsNullOrEmpty())
             {
