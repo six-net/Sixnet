@@ -1,28 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Sixnet.App;
 using Sixnet.Cache;
 using Sixnet.Cache.Provider.Memory;
 using Sixnet.Development.Data;
+using Sixnet.Development.Data.Event;
 using Sixnet.Development.Message;
 using Sixnet.Development.Repository;
 using Sixnet.Exceptions;
 using Sixnet.IO.FileAccess;
 using Sixnet.Mapper;
 using Sixnet.MQ;
-using Sixnet.MQ.InProcess;
 using Sixnet.Net.Email;
 using Sixnet.Net.Sms;
 using Sixnet.Net.Upload;
+using Sixnet.Security.Authorization;
 using Sixnet.Security.Cryptography;
 using Sixnet.Serialization.Json;
 using Sixnet.Token.Jwt;
 using Sixnet.Validation;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime;
 
 namespace Sixnet.DependencyInjection
 {
@@ -136,6 +137,9 @@ namespace Sixnet.DependencyInjection
 
             // Object mapper
             SixnetMapper.BuildMapper();
+
+            // Event
+            SixnetDataEventBus.SubscribeDefaultDataEvent();
 
             GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
             GC.Collect();
@@ -421,6 +425,8 @@ namespace Sixnet.DependencyInjection
             services.ConfigureIfNotNull<SixnetJsonSerializationOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Json)));
             // Validation
             services.ConfigureIfNotNull<ValidationOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Validation)));
+            // Authorization
+            services.ConfigureIfNotNull<SixnetAuthorizationOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Authorization)));
 
             // Post config options
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureUpload);
@@ -439,6 +445,7 @@ namespace Sixnet.DependencyInjection
                 options.AddCacheProvider(CacheServerType.InMemory, new MemoryProvider());
                 sixnetOptions.ConfigureCache?.Invoke(options);
             });
+            services.PostConfigureIfNotNull(sixnetOptions.ConfigureAuthorization);
         }
 
         #endregion

@@ -1,0 +1,216 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using Sixnet.Cache;
+using Sixnet.Cache.Keys.Parameters;
+using Sixnet.Cache.Set.Parameters;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace Sixnet.Security.Permission
+{
+    /// <summary>
+    /// Permission manager
+    /// </summary>
+    public static class SixnetPermissionManager
+    {
+        /// <summary>
+        ///  Init permission
+        /// </summary>
+        public static void InitPermission(Action<SixnetPermissionSetting> configure)
+        {
+            var authSetting = new SixnetPermissionSetting();
+            configure?.Invoke(authSetting);
+
+            // permission
+            var allPermissions = authSetting.GetPermissionFunc?.Invoke();
+            if (!allPermissions.IsNullOrEmpty())
+            {
+                foreach (var objPermission in allPermissions)
+                {
+                    if (objPermission.Value.IsNullOrEmpty())
+                    {
+                        continue;
+                    }
+                    foreach (var authObjItem in objPermission.Value)
+                    {
+                        if (string.IsNullOrWhiteSpace(authObjItem?.ObjectValue))
+                        {
+                            continue;
+                        }
+                        var objectAuthKey = GetObjectPermissionKey(authSetting.AppTag, objPermission.Key, authObjItem.ObjectValue);
+                        DeleteObjectPermission(objectAuthKey);
+                        if (!authObjItem.Permissions.IsNullOrEmpty())
+                        {
+                            SetObjectPermission(objectAuthKey, authObjItem.Permissions);
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Set object permission
+        /// </summary>
+        /// <param name="appTag">App tag</param>
+        /// <param name="permissionObjectType">Authorization object</param>
+        /// <param name="objectValue">Object value</param>
+        /// <param name="permissions">Permissions</param>
+        public static void SetObjectPermission(string appTag, PermissionObjectType permissionObjectType, string objectValue, List<string> permissions)
+        {
+            if (string.IsNullOrWhiteSpace(objectValue))
+            {
+                return;
+            }
+            var cacheObject = GetCacheObject();
+            var operationKey = GetObjectPermissionKey(appTag, permissionObjectType, objectValue);
+            if (permissions.IsNullOrEmpty())
+            {
+                SixnetCacher.Keys.Delete(new DeleteParameter()
+                {
+                    CacheObject = cacheObject,
+                    Keys = new List<CacheKey> { operationKey }
+                });
+            }
+            else
+            {
+                var currentPermissions = SixnetCacher.Set.Members(new SetMembersParameter()
+                {
+                    CacheObject = cacheObject,
+                    Key = operationKey,
+                })?.Members ?? new List<string>();
+                SixnetCacher.Set.Add(new SetAddParameter()
+                {
+                    CacheObject = cacheObject,
+                    Key = operationKey,
+                    Members = permissions
+                });
+                var removeMembers = currentPermissions.Except(permissions).ToList();
+                if (!removeMembers.IsNullOrEmpty())
+                {
+                    SixnetCacher.Set.Remove(new SetRemoveParameter()
+                    {
+                        CacheObject = cacheObject,
+                        Key = operationKey,
+                        Members = removeMembers
+                    });
+                }
+            }
+        }
+
+        /// <summary>
+        /// Validate operation
+        /// </summary>
+        /// <param name="appTag">App tag</param>
+        /// <param name="operation">Operation</param>
+        /// <param name="objects">Auth objects</param>
+        /// <returns></returns>
+        public static async Task<bool> ValidateOperationAsync(string appTag, string operation, Dictionary<PermissionObjectType, List<string>> objects)
+        {
+            if (string.IsNullOrWhiteSpace(operation) || objects.IsNullOrEmpty())
+            {
+                return false;
+            }
+            var operationAuthKey = GetObjectPermissionKey(appTag, PermissionObjectType.Operation, operation);
+            var authObjectAuthKeys = new List<CacheKey>() { operationAuthKey };
+            foreach (var authObj in objects)
+            {
+                if (authObj.Value.IsNullOrEmpty())
+                {
+                    continue;
+                }
+                foreach (var authObjId in authObj.Value)
+                {
+                    authObjectAuthKeys.Add(GetObjectPermissionKey(appTag, authObj.Key, authObjId));
+                }
+            }
+            var combineResult = await SixnetCacher.Set.CombineAsync(new SetCombineParameter()
+            {
+                CacheObject = GetCacheObject(),
+                CombineOperation = CombineOperation.Intersect,
+                Keys = authObjectAuthKeys
+            }).ConfigureAwait(false);
+            return !(combineResult?.CombineValues?.IsNullOrEmpty() ?? true);
+        }
+
+        /// <summary>
+        /// Validate operation
+        /// </summary>
+        /// <param name="appTag">App tag</param>
+        /// <param name="operation">Operation</param>
+        /// <param name="objects">Auth objects</param>
+        /// <returns></returns>
+        public static bool ValidateOperation(string appTag, string operation, Dictionary<PermissionObjectType, List<string>> objects)
+        {
+            if (string.IsNullOrWhiteSpace(operation) || objects.IsNullOrEmpty())
+            {
+                return false;
+            }
+            var operationAuthKey = GetObjectPermissionKey(appTag, PermissionObjectType.Operation, operation);
+            var authObjectAuthKeys = new List<CacheKey>() { operationAuthKey };
+            foreach (var authObj in objects)
+            {
+                if (authObj.Value.IsNullOrEmpty())
+                {
+                    continue;
+                }
+                foreach (var authObjId in authObj.Value)
+                {
+                    authObjectAuthKeys.Add(GetObjectPermissionKey(appTag, authObj.Key, authObjId));
+                }
+            }
+            var combineResult = SixnetCacher.Set.Combine(new SetCombineParameter()
+            {
+                CacheObject = GetCacheObject(),
+                CombineOperation = CombineOperation.Intersect,
+                Keys = authObjectAuthKeys
+            });
+            return !(combineResult?.CombineValues?.IsNullOrEmpty() ?? true);
+        }
+
+        static void DeleteObjectPermission(string objectPermissionKey)
+        {
+            SixnetCacher.Keys.Delete(new DeleteParameter()
+            {
+                CacheObject = GetCacheObject(),
+                Keys = new List<CacheKey> { objectPermissionKey }
+            });
+        }
+
+        static void SetObjectPermission(string objectPermissionKey, List<string> permissions)
+        {
+            if (!string.IsNullOrWhiteSpace(objectPermissionKey) && !permissions.IsNullOrEmpty())
+            {
+                SixnetCacher.Set.Add(new SetAddParameter()
+                {
+                    CacheObject = GetCacheObject(),
+                    Key = objectPermissionKey,
+                    Members = permissions
+                });
+            }
+        }
+
+        static CacheObject GetCacheObject()
+        {
+            return new CacheObject { ObjectName = nameof(SixnetPermissionManager) };
+        }
+
+        static string GetObjectPermissionKey(string appTag, PermissionObjectType permissionObjectType, string objectValue)
+        {
+            var keyNameSplitChar = SixnetCacher.GetKeyNameSplitChar();
+            return string.IsNullOrWhiteSpace(appTag)
+                        ? $"{permissionObjectType}{keyNameSplitChar}{objectValue}{keyNameSplitChar}Auth"
+                        : $"{appTag}{keyNameSplitChar}{permissionObjectType}{keyNameSplitChar}{objectValue}{keyNameSplitChar}Auth";
+        }
+    }
+
+    /// <summary>
+    /// Permission object type
+    /// </summary>
+    public enum PermissionObjectType
+    {
+        Operation = 1,
+        Role = 2,
+        User = 3
+    }
+}

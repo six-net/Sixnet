@@ -17,7 +17,7 @@ namespace Sixnet.Cache.Set.Parameters
         /// <summary>
         /// Gets or sets the remove members
         /// </summary>
-        public List<string> RemoveMembers { get; set; }
+        public List<string> Members { get; set; }
 
         /// <summary>
         /// Execute cache operation
