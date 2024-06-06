@@ -15,41 +15,6 @@ namespace Sixnet.Security.Permission
     public static class SixnetPermissionManager
     {
         /// <summary>
-        ///  Init permission
-        /// </summary>
-        public static void InitPermission(Action<SixnetPermissionSetting> configure)
-        {
-            var authSetting = new SixnetPermissionSetting();
-            configure?.Invoke(authSetting);
-
-            // permission
-            var allPermissions = authSetting.GetPermissionFunc?.Invoke();
-            if (!allPermissions.IsNullOrEmpty())
-            {
-                foreach (var objPermission in allPermissions)
-                {
-                    if (objPermission.Value.IsNullOrEmpty())
-                    {
-                        continue;
-                    }
-                    foreach (var authObjItem in objPermission.Value)
-                    {
-                        if (string.IsNullOrWhiteSpace(authObjItem?.ObjectValue))
-                        {
-                            continue;
-                        }
-                        var objectAuthKey = GetObjectPermissionKey(authSetting.AppTag, objPermission.Key, authObjItem.ObjectValue);
-                        DeleteObjectPermission(objectAuthKey);
-                        if (!authObjItem.Permissions.IsNullOrEmpty())
-                        {
-                            SetObjectPermission(objectAuthKey, authObjItem.Permissions);
-                        }
-                    }
-                }
-            }
-        }
-
-        /// <summary>
         /// Set object permission
         /// </summary>
         /// <param name="appTag">App tag</param>
@@ -94,6 +59,55 @@ namespace Sixnet.Security.Permission
                         Key = operationKey,
                         Members = removeMembers
                     });
+                }
+            }
+        }
+
+        /// <summary>
+        /// Set object permission
+        /// </summary>
+        /// <param name="appTag">App tag</param>
+        /// <param name="permissionObjectType">Authorization object</param>
+        /// <param name="objectValue">Object value</param>
+        /// <param name="permissions">Permissions</param>
+        public static async Task SetObjectPermissionAsync(string appTag, PermissionObjectType permissionObjectType, string objectValue, List<string> permissions)
+        {
+            if (string.IsNullOrWhiteSpace(objectValue))
+            {
+                return;
+            }
+            var cacheObject = GetCacheObject();
+            var operationKey = GetObjectPermissionKey(appTag, permissionObjectType, objectValue);
+            if (permissions.IsNullOrEmpty())
+            {
+                await SixnetCacher.Keys.DeleteAsync(new DeleteParameter()
+                {
+                    CacheObject = cacheObject,
+                    Keys = new List<CacheKey> { operationKey }
+                }).ConfigureAwait(false);
+            }
+            else
+            {
+                var currentPermissions = (await SixnetCacher.Set.MembersAsync(new SetMembersParameter()
+                {
+                    CacheObject = cacheObject,
+                    Key = operationKey,
+                }).ConfigureAwait(false))?.Members ?? new List<string>();
+                await SixnetCacher.Set.AddAsync(new SetAddParameter()
+                {
+                    CacheObject = cacheObject,
+                    Key = operationKey,
+                    Members = permissions
+                }).ConfigureAwait(false);
+                var removeMembers = currentPermissions.Except(permissions).ToList();
+                if (!removeMembers.IsNullOrEmpty())
+                {
+                    await SixnetCacher.Set.RemoveAsync(new SetRemoveParameter()
+                    {
+                        CacheObject = cacheObject,
+                        Key = operationKey,
+                        Members = removeMembers
+                    }).ConfigureAwait(false);
                 }
             }
         }
