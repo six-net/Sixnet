@@ -113,6 +113,52 @@ namespace Sixnet.Security.Permission
         }
 
         /// <summary>
+        /// Add object permission
+        /// </summary>
+        /// <param name="appTag">App tag</param>
+        /// <param name="permissionObjectType">Authorization object</param>
+        /// <param name="objectValue">Object value</param>
+        /// <param name="permissions">Permissions</param>
+        public static async Task AddObjectPermissionAsync(string appTag, PermissionObjectType permissionObjectType, string objectValue, List<string> permissions)
+        {
+            if (string.IsNullOrWhiteSpace(objectValue) || permissions.IsNullOrEmpty())
+            {
+                return;
+            }
+            var cacheObject = GetCacheObject();
+            var operationKey = GetObjectPermissionKey(appTag, permissionObjectType, objectValue);
+            await SixnetCacher.Set.AddAsync(new SetAddParameter()
+            {
+                CacheObject = cacheObject,
+                Key = operationKey,
+                Members = permissions
+            }).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Add object permission
+        /// </summary>
+        /// <param name="appTag">App tag</param>
+        /// <param name="permissionObjectType">Authorization object</param>
+        /// <param name="objectValue">Object value</param>
+        /// <param name="permissions">Permissions</param>
+        public static void AddObjectPermission(string appTag, PermissionObjectType permissionObjectType, string objectValue, List<string> permissions)
+        {
+            if (string.IsNullOrWhiteSpace(objectValue) || permissions.IsNullOrEmpty())
+            {
+                return;
+            }
+            var cacheObject = GetCacheObject();
+            var operationKey = GetObjectPermissionKey(appTag, permissionObjectType, objectValue);
+            SixnetCacher.Set.Add(new SetAddParameter()
+            {
+                CacheObject = cacheObject,
+                Key = operationKey,
+                Members = permissions
+            });
+        }
+
+        /// <summary>
         /// Validate operation
         /// </summary>
         /// <param name="appTag">App tag</param>
@@ -182,33 +228,112 @@ namespace Sixnet.Security.Permission
             return !(combineResult?.CombineValues?.IsNullOrEmpty() ?? true);
         }
 
-        static void DeleteObjectPermission(string objectPermissionKey)
+        /// <summary>
+        /// Delete object permission
+        /// </summary>
+        /// <param name="appTag">App tag</param>
+        /// <param name="permissionObjectType">Permission object type</param>
+        /// <param name="objectValue">Object value</param>
+        /// <returns></returns>
+        public static async Task DeleteObjectPermissionAsync(string appTag, PermissionObjectType permissionObjectType, string objectValue)
         {
+            if (string.IsNullOrWhiteSpace(objectValue))
+            {
+                return;
+            }
+            var cacheObject = GetCacheObject();
+            var objectKey = GetObjectPermissionKey(appTag, permissionObjectType, objectValue);
+            await SixnetCacher.Keys.DeleteAsync(new DeleteParameter()
+            {
+                CacheObject = cacheObject,
+                Keys = new List<CacheKey> { objectKey }
+            }).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Delete object permission
+        /// </summary>
+        /// <param name="appTag">App tag</param>
+        /// <param name="permissionObjectType">Permission object type</param>
+        /// <param name="objectValue">Object value</param>
+        /// <returns></returns>
+        public static void DeleteObjectPermission(string appTag, PermissionObjectType permissionObjectType, string objectValue)
+        {
+            if (string.IsNullOrWhiteSpace(objectValue))
+            {
+                return;
+            }
+            var cacheObject = GetCacheObject();
+            var objectKey = GetObjectPermissionKey(appTag, permissionObjectType, objectValue);
             SixnetCacher.Keys.Delete(new DeleteParameter()
             {
-                CacheObject = GetCacheObject(),
-                Keys = new List<CacheKey> { objectPermissionKey }
+                CacheObject = cacheObject,
+                Keys = new List<CacheKey> { objectKey }
             });
         }
 
-        static void SetObjectPermission(string objectPermissionKey, List<string> permissions)
+        /// <summary>
+        /// Delete object permission
+        /// </summary>
+        /// <param name="appTag">App tag</param>
+        /// <param name="permissionObjectType">Permission object type</param>
+        /// <param name="objectValue">Object value</param>
+        /// <returns></returns>
+        public static async Task DeleteObjectPermissionAsync(string appTag, PermissionObjectType permissionObjectType, string objectValue, List<string> permissions)
         {
-            if (!string.IsNullOrWhiteSpace(objectPermissionKey) && !permissions.IsNullOrEmpty())
+            if (string.IsNullOrWhiteSpace(objectValue) || permissions.IsNullOrEmpty())
             {
-                SixnetCacher.Set.Add(new SetAddParameter()
-                {
-                    CacheObject = GetCacheObject(),
-                    Key = objectPermissionKey,
-                    Members = permissions
-                });
+                return;
             }
+            var cacheObject = GetCacheObject();
+            var objectKey = GetObjectPermissionKey(appTag, permissionObjectType, objectValue);
+            await SixnetCacher.Set.RemoveAsync(new SetRemoveParameter()
+            {
+                CacheObject = cacheObject,
+                Key = objectKey,
+                Members = permissions
+            }).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Delete object permission
+        /// </summary>
+        /// <param name="appTag">App tag</param>
+        /// <param name="permissionObjectType">Permission object type</param>
+        /// <param name="objectValue">Object value</param>
+        /// <returns></returns>
+        public static void DeleteObjectPermission(string appTag, PermissionObjectType permissionObjectType, string objectValue, List<string> permissions)
+        {
+            if (string.IsNullOrWhiteSpace(objectValue) || permissions.IsNullOrEmpty())
+            {
+                return;
+            }
+            var cacheObject = GetCacheObject();
+            var objectKey = GetObjectPermissionKey(appTag, permissionObjectType, objectValue);
+            SixnetCacher.Set.Remove(new SetRemoveParameter()
+            {
+                CacheObject = cacheObject,
+                Key = objectKey,
+                Members = permissions
+            });
+        }
+
+        /// <summary>
+        /// Get cache object
+        /// </summary>
+        /// <returns></returns>
         static CacheObject GetCacheObject()
         {
             return new CacheObject { ObjectName = nameof(SixnetPermissionManager) };
         }
 
+        /// <summary>
+        /// Get object permission key
+        /// </summary>
+        /// <param name="appTag"></param>
+        /// <param name="permissionObjectType"></param>
+        /// <param name="objectValue"></param>
+        /// <returns></returns>
         static string GetObjectPermissionKey(string appTag, PermissionObjectType permissionObjectType, string objectValue)
         {
             var keyNameSplitChar = SixnetCacher.GetKeyNameSplitChar();
