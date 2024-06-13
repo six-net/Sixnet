@@ -7,7 +7,7 @@ namespace Sixnet.Validation
     /// <summary>
     /// Validation options
     /// </summary>
-    public class ValidationOptions
+    public class SixnetValidationOptions
     {
         /// <summary>
         /// Whether use the base type's validation rules

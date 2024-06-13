@@ -7,7 +7,7 @@ namespace Sixnet.Validation
     /// <summary>
     /// Validation field
     /// </summary>
-    public class ValidationField<T>
+    public class SixnetValidationField<T>
     {
         /// <summary>
         /// Gets or sets the field

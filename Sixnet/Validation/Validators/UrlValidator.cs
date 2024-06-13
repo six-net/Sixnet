@@ -7,7 +7,7 @@ namespace Sixnet.Validation.Validators
     /// <summary>
     /// Url validator
     /// </summary>
-    public class UrlValidator : BaseValidator
+    public class UrlValidator : SixnetBaseValidator
     {
         /// <summary>
         /// Initialize a url validator
@@ -22,24 +22,24 @@ namespace Sixnet.Validation.Validators
         /// </summary>
         /// <param name="value">Value</param>
         /// <param name="errorMessage">Error message</param>
-        public override ValidationResult Validate(dynamic value, string errorMessage)
+        public override SixnetValidationResult Validate(dynamic value, string errorMessage)
         {
             var stringValue = value as string;
             return ValidationExtensions.IsUrlNullable(stringValue)
-                ? ValidationResult.SuccessResult()
-                : ValidationResult.ErrorResult(errorMessage);
+                ? SixnetValidationResult.SuccessResult()
+                : SixnetValidationResult.ErrorResult(errorMessage);
         }
 
         /// <summary>
         /// Create validation attribute
         /// </summary>
         /// <returns>Return the validation attribute</returns>
-        public override ValidationAttribute CreateValidationAttribute(ValidationAttributeParameter parameter)
+        public override ValidationAttribute CreateValidationAttribute(SixnetValidationAttributeParameter parameter)
         {
-            return new UrlAttribute()
+            return new SixnetNullOrEmptyValidationAttribute(new UrlAttribute()
             {
                 ErrorMessage = FormatMessage(parameter.ErrorMessage)
-            };
+            });
         }
 
         public override AsyncValidatorRule CreateAsyncValidatorRule(AsyncValidatorRuleParameter parameter)

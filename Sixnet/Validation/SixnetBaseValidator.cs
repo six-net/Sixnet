@@ -6,7 +6,7 @@ namespace Sixnet.Validation
     /// <summary>
     /// Base validator
     /// </summary>
-    public abstract class BaseValidator
+    public abstract class SixnetBaseValidator
     {
         #region Fields
 
@@ -33,14 +33,14 @@ namespace Sixnet.Validation
         /// </summary>
         /// <param name="data">Data</param>
         /// <param name="errorMessage">Error message</param>
-        public abstract ValidationResult Validate(object data, string errorMessage);
+        public abstract SixnetValidationResult Validate(object data, string errorMessage);
 
         /// <summary>
         /// Create validation attribute
         /// </summary>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return the validation attribute</returns>
-        public abstract ValidationAttribute CreateValidationAttribute(ValidationAttributeParameter parameter);
+        public abstract ValidationAttribute CreateValidationAttribute(SixnetValidationAttributeParameter parameter);
 
         /// <summary>
         /// Format message

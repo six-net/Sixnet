@@ -4,9 +4,9 @@ using System.Collections.Generic;
 namespace Sixnet.Validation
 {
     /// <summary>
-    /// Validator options
+    /// Validator setting
     /// </summary>
-    public class ValidatorSetting
+    public class SixnetValidatorSetting
     {
         /// <summary>
         /// Gets or sets the validate type

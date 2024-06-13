@@ -114,7 +114,7 @@ namespace Sixnet.DependencyInjection
         /// <summary>
         /// Configure validation
         /// </summary>
-        public Action<ValidationOptions> ConfigureValidation { get; set; }
+        public Action<SixnetValidationOptions> ConfigureValidation { get; set; }
 
         /// <summary>
         /// Configure authorization

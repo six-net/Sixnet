@@ -15,6 +15,6 @@ namespace Sixnet.Validation
         /// <summary>
         /// Gets or sets the rules
         /// </summary>
-        public List<ValidatorSetting> Rules { get; set; }
+        public List<SixnetValidatorSetting> Rules { get; set; }
     }
 }

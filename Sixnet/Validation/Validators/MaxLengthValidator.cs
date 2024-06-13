@@ -7,7 +7,7 @@ namespace Sixnet.Validation.Validators
     /// <summary>
     /// Max length validator
     /// </summary>
-    public class MaxLengthValidator : BaseValidator
+    public class MaxLengthValidator : SixnetBaseValidator
     {
         /// <summary>
         /// Gets the length
@@ -29,18 +29,18 @@ namespace Sixnet.Validation.Validators
         /// </summary>
         /// <param name="value">Value</param>
         /// <param name="errorMessage">Error message</param>
-        public override ValidationResult Validate(dynamic value, string errorMessage)
+        public override SixnetValidationResult Validate(dynamic value, string errorMessage)
         {
             return ValidationExtensions.MaxLength(value, Length)
-                ? ValidationResult.SuccessResult()
-                : ValidationResult.ErrorResult(errorMessage);
+                ? SixnetValidationResult.SuccessResult()
+                : SixnetValidationResult.ErrorResult(errorMessage);
         }
 
         /// <summary>
         /// Create validation attribute
         /// </summary>
         /// <returns>Return the validation attribute</returns>
-        public override ValidationAttribute CreateValidationAttribute(ValidationAttributeParameter parameter)
+        public override ValidationAttribute CreateValidationAttribute(SixnetValidationAttributeParameter parameter)
         {
             return new MaxLengthAttribute(Length)
             {

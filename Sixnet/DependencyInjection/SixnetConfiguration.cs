@@ -77,7 +77,7 @@ namespace Sixnet.DependencyInjection
         /// <summary>
         /// Gets or sets the validation options
         /// </summary>
-        public ValidationOptions Validation { get; set; }
+        public SixnetValidationOptions Validation { get; set; }
 
         /// <summary>
         /// Gets or sets the authorization options 

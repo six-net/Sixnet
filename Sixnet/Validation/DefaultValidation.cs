@@ -24,7 +24,7 @@ namespace Sixnet.Validation
         /// <summary>
         /// Data validator
         /// </summary>
-        readonly BaseValidator validator = null;
+        readonly SixnetBaseValidator validator = null;
 
         /// <summary>
         /// Field name
@@ -66,7 +66,7 @@ namespace Sixnet.Validation
         /// <param name="field">Field</param>
         /// <param name="validator">Data validator</param>
         /// <param name="fieldName">Field name</param>
-        public DefaultValidation(ValidationField<T> field, BaseValidator validator, DataField dataField)
+        public DefaultValidation(SixnetValidationField<T> field, SixnetBaseValidator validator, DataField dataField)
         {
             valueMethod = field.Field.Compile();
             this.validator = validator;
@@ -93,14 +93,14 @@ namespace Sixnet.Validation
         /// Validate data
         /// </summary>
         /// <returns>Return the verify result</returns>
-        public ValidationResult Validate(dynamic data, string useScenario = "")
+        public SixnetValidationResult Validate(dynamic data, string useScenario = "")
         {
             if (valueMethod == null || validator == null || IgnoreValidate(useScenario))
             {
-                return ValidationResult.SuccessResult();
+                return SixnetValidationResult.SuccessResult();
             }
             dynamic value = valueMethod(data);
-            ValidationResult result;
+            SixnetValidationResult result;
             if (validator is CompareValidator)
             {
                 var operatorValue = new CompareVerificationValue()
@@ -123,7 +123,7 @@ namespace Sixnet.Validation
         /// <returns>Return the validation attribute</returns>
         public ValidationAttribute CreateValidationAttribute()
         {
-            if (IgnoreValidate(ValidationConstants.UseCaseNames.Mvc))
+            if (IgnoreValidate(SixnetValidationConstants.UseCaseNames.Mvc))
             {
                 return null;
             }
@@ -131,7 +131,7 @@ namespace Sixnet.Validation
             {
                 if (compareValue is Func<T, dynamic>)
                 {
-                    return validator.CreateValidationAttribute(new ValidationAttributeParameter()
+                    return validator.CreateValidationAttribute(new SixnetValidationAttributeParameter()
                     {
                         ErrorMessage = errorMessage,
                         OtherProperty = comparePropertyName
@@ -141,7 +141,7 @@ namespace Sixnet.Validation
             }
             else
             {
-                return validator.CreateValidationAttribute(new ValidationAttributeParameter()
+                return validator.CreateValidationAttribute(new SixnetValidationAttributeParameter()
                 {
                     ErrorMessage = errorMessage
                 });
@@ -193,7 +193,7 @@ namespace Sixnet.Validation
         /// </summary>
         /// <param name="validator"></param>
         /// <returns></returns>
-        public bool EqualsValidator(BaseValidator validator)
+        public bool EqualsValidator(SixnetBaseValidator validator)
         {
             return validator != null && this.validator != null && (this.validator == validator
                 || this.validator?.GetType().GUID == validator?.GetType().GUID

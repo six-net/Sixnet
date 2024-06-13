@@ -5,7 +5,7 @@ namespace Sixnet.Validation
     /// <summary>
     /// Validation constants
     /// </summary>
-    public static class ValidationConstants
+    public static class SixnetValidationConstants
     {
         /// <summary>
         /// File extensions

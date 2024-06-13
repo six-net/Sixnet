@@ -10,7 +10,7 @@ namespace Sixnet.Validation
     /// <summary>
     /// Validation config
     /// </summary>
-    public class ValidationConfig
+    public class SixnetValidationConfig
     {
         #region Fields
 
@@ -36,13 +36,13 @@ namespace Sixnet.Validation
         /// <summary>
         /// Gets or sets the type validation rules
         /// </summary>
-        public List<TypeValidationSetting> Types { get; set; }
+        public List<SixnetTypeValidationSetting> Types { get; set; }
 
         #endregion
 
         #region Constructor
 
-        static ValidationConfig()
+        static SixnetValidationConfig()
         {
             var baseExpressMethods = _expressionType.GetMethods(BindingFlags.Public | BindingFlags.Static);
             _lambdaMethod = baseExpressMethods.FirstOrDefault(c => c.Name == "Lambda" && c.IsGenericMethod && c.GetParameters()[1].ParameterType.FullName == typeof(ParameterExpression[]).FullName);
@@ -78,7 +78,7 @@ namespace Sixnet.Validation
                 ParameterExpression parameterExpression = Expression.Parameter(modelType);
                 Array parameterArray = Array.CreateInstance(typeof(ParameterExpression), 1);
                 parameterArray.SetValue(parameterExpression, 0);
-                Type valFieldType = typeof(ValidationField<>).MakeGenericType(modelType);
+                Type valFieldType = typeof(SixnetValidationField<>).MakeGenericType(modelType);
                 foreach (var propertyRule in typeRule.Properties)
                 {
                     if (propertyRule == null || propertyRule.Rules == null)

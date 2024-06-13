@@ -13,7 +13,7 @@ namespace Sixnet.Validation
         /// <param name="data">Data</param>
         /// <param name="useScenario">Use scenario</param>
         /// <returns>Return the verify result</returns>
-        ValidationResult Validate(dynamic data, string useScenario = "");
+        SixnetValidationResult Validate(dynamic data, string useScenario = "");
 
         /// <summary>
         /// Create validation attribute
@@ -32,6 +32,6 @@ namespace Sixnet.Validation
         /// </summary>
         /// <param name="validator"></param>
         /// <returns></returns>
-        bool EqualsValidator(BaseValidator validator);
+        bool EqualsValidator(SixnetBaseValidator validator);
     }
 }

@@ -6,7 +6,7 @@ namespace Sixnet.Validation
     /// Validation result
     /// </summary>
     [Serializable]
-    public class ValidationResult
+    public class SixnetValidationResult
     {
         #region Properties
 
@@ -34,9 +34,9 @@ namespace Sixnet.Validation
         /// </summary>
         /// <param name="errorMessage">Error message</param>
         /// <returns>Return verify result</returns>
-        public static ValidationResult ErrorResult(string errorMessage = "")
+        public static SixnetValidationResult ErrorResult(string errorMessage = "")
         {
-            return new ValidationResult()
+            return new SixnetValidationResult()
             {
                 Success = false,
                 ErrorMessage = errorMessage
@@ -48,9 +48,9 @@ namespace Sixnet.Validation
         /// </summary>
         /// <param name="successMessage">Success message</param>
         /// <returns>Return verify result</returns>
-        public static ValidationResult SuccessResult(string successMessage = "")
+        public static SixnetValidationResult SuccessResult(string successMessage = "")
         {
-            return new ValidationResult()
+            return new SixnetValidationResult()
             {
                 Success = true,
                 ErrorMessage = successMessage

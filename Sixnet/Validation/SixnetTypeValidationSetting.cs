@@ -5,7 +5,7 @@ namespace Sixnet.Validation
     /// <summary>
     /// Type validation setting
     /// </summary>
-    public class TypeValidationSetting
+    public class SixnetTypeValidationSetting
     {
         /// <summary>
         /// Gets or sets the type full name

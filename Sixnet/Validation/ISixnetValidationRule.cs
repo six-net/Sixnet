@@ -9,6 +9,6 @@
         /// <summary>
         /// Gets or sets the field
         /// </summary>
-        ValidationField<T> Field { get; set; }
+        SixnetValidationField<T> Field { get; set; }
     }
 }

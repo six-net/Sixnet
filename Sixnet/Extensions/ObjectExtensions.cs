@@ -8,7 +8,7 @@ using Sixnet.Mapper;
 using Sixnet.Model;
 using Sixnet.Serialization.Json;
 using Sixnet.Validation;
-using static Sixnet.Validation.ValidationConstants;
+using static Sixnet.Validation.SixnetValidationConstants;
 
 namespace System
 {

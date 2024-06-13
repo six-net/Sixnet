@@ -35,7 +35,7 @@ namespace Sixnet.Validation
         /// <summary>
         /// Validators
         /// </summary>
-        static readonly Dictionary<string, BaseValidator> _validators = new();
+        static readonly Dictionary<string, SixnetBaseValidator> _validators = new();
         /// <summary>
         /// Default validation top message
         /// </summary>
@@ -61,9 +61,9 @@ namespace Sixnet.Validation
         /// Configure validation
         /// </summary>
         /// <param name="configure">Configure</param>
-        public static void Configure(Action<ValidationConfig> configure)
+        public static void Configure(Action<SixnetValidationConfig> configure)
         {
-            var validationConfig = new ValidationConfig();
+            var validationConfig = new SixnetValidationConfig();
             configure?.Invoke(validationConfig);
             validationConfig?.BuildValidation();
         }
@@ -78,7 +78,7 @@ namespace Sixnet.Validation
             {
                 foreach (var value in jsonValues)
                 {
-                    var ruleCollection = SixnetJsonSerializer.Deserialize<ValidationConfig>(value);
+                    var ruleCollection = SixnetJsonSerializer.Deserialize<SixnetValidationConfig>(value);
                     ruleCollection?.BuildValidation();
                 }
             }
@@ -124,7 +124,7 @@ namespace Sixnet.Validation
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="validator">Validator</param>
         /// <param name="fields">Fields</param>
-        static void SetValidation<T>(BaseValidator validator, params ValidationField<T>[] fields)
+        static void SetValidation<T>(SixnetBaseValidator validator, params SixnetValidationField<T>[] fields)
         {
             if (validator == null || fields.IsNullOrEmpty())
             {
@@ -142,7 +142,7 @@ namespace Sixnet.Validation
                 typeValidationItems = new Dictionary<string, List<ISixnetValidation>>();
                 _typeValidations.Add(typeKey, typeValidationItems);
             }
-            foreach (ValidationField<T> property in fields)
+            foreach (SixnetValidationField<T> property in fields)
             {
                 var field = SixnetExpressionHelper.GetDataField(property.Field);
                 if (field is not DataField dataField)
@@ -181,10 +181,10 @@ namespace Sixnet.Validation
         /// <param name="maxLength">Max length</param>
         /// <param name="minLength">Min length</param>
         /// <param name="fields">Fields</param>
-        public static void Length<T>(int maxLength, int minLength = 0, params ValidationField<T>[] fields)
+        public static void Length<T>(int maxLength, int minLength = 0, params SixnetValidationField<T>[] fields)
         {
             var validatorKey = string.Format("{0}/{1}_{2}", typeof(StringLengthValidator).FullName, maxLength, minLength);
-            BaseValidator validator;
+            SixnetBaseValidator validator;
             if (_validators.ContainsKey(validatorKey))
             {
                 validator = _validators[validatorKey];
@@ -202,10 +202,10 @@ namespace Sixnet.Validation
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="fields">Fields</param>
-        public static void Email<T>(params ValidationField<T>[] fields)
+        public static void Email<T>(params SixnetValidationField<T>[] fields)
         {
             var validatorKey = typeof(EmailValidator).FullName;
-            BaseValidator validator;
+            SixnetBaseValidator validator;
             if (_validators.ContainsKey(validatorKey))
             {
                 validator = _validators[validatorKey];
@@ -225,10 +225,10 @@ namespace Sixnet.Validation
         /// <param name="compareOperator">Compare operator</param>
         /// <param name="value">Value</param>
         /// <param name="field">Field</param>
-        public static void SetCompareValidation<T>(CompareOperator compareOperator, dynamic value, ValidationField<T> field)
+        public static void SetCompareValidation<T>(CompareOperator compareOperator, dynamic value, SixnetValidationField<T> field)
         {
             var validatorKey = string.Format("{0}/{1}", typeof(CompareValidator).FullName, (int)compareOperator);
-            BaseValidator validator;
+            SixnetBaseValidator validator;
             if (_validators.ContainsKey(validatorKey))
             {
                 validator = _validators[validatorKey];
@@ -248,7 +248,7 @@ namespace Sixnet.Validation
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="value">Value</param>
         /// <param name="field">Field</param>
-        public static void Equal<T>(dynamic value, ValidationField<T> field)
+        public static void Equal<T>(dynamic value, SixnetValidationField<T> field)
         {
             SetCompareValidation(CompareOperator.Equal, value, field);
         }
@@ -259,7 +259,7 @@ namespace Sixnet.Validation
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="value">Value</param>
         /// <param name="field">Field</param>
-        public static void Equal<T>(Expression<Func<T, dynamic>> value, ValidationField<T> field)
+        public static void Equal<T>(Expression<Func<T, dynamic>> value, SixnetValidationField<T> field)
         {
             SetCompareValidation(CompareOperator.Equal, value, field);
         }
@@ -270,7 +270,7 @@ namespace Sixnet.Validation
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="value">Value</param>
         /// <param name="field">Field</param>
-        public static void NotEqual<T>(dynamic value, ValidationField<T> field)
+        public static void NotEqual<T>(dynamic value, SixnetValidationField<T> field)
         {
             SetCompareValidation(CompareOperator.NotEqual, value, field);
         }
@@ -281,7 +281,7 @@ namespace Sixnet.Validation
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="value">Value</param>
         /// <param name="field">Field</param>
-        public static void NotEqual<T>(Expression<Func<T, dynamic>> value, ValidationField<T> field)
+        public static void NotEqual<T>(Expression<Func<T, dynamic>> value, SixnetValidationField<T> field)
         {
             SetCompareValidation(CompareOperator.NotEqual, value, field);
         }
@@ -292,7 +292,7 @@ namespace Sixnet.Validation
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="value">Value</param>
         /// <param name="field">Field</param>
-        public static void LessThanOrEqual<T>(dynamic value, ValidationField<T> field)
+        public static void LessThanOrEqual<T>(dynamic value, SixnetValidationField<T> field)
         {
             SetCompareValidation(CompareOperator.LessThanOrEqual, value, field);
         }
@@ -303,7 +303,7 @@ namespace Sixnet.Validation
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="value">Value</param>
         /// <param name="field">Field</param>
-        public static void LessThanOrEqual<T>(Expression<Func<T, dynamic>> value, ValidationField<T> field)
+        public static void LessThanOrEqual<T>(Expression<Func<T, dynamic>> value, SixnetValidationField<T> field)
         {
             SetCompareValidation(CompareOperator.LessThanOrEqual, value, field);
         }
@@ -314,7 +314,7 @@ namespace Sixnet.Validation
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="value">Value</param>
         /// <param name="field">Field</param>
-        public static void LessThan<T>(dynamic value, ValidationField<T> field)
+        public static void LessThan<T>(dynamic value, SixnetValidationField<T> field)
         {
             SetCompareValidation(CompareOperator.LessThan, value, field);
         }
@@ -325,7 +325,7 @@ namespace Sixnet.Validation
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="value">Value</param>
         /// <param name="field">Field</param>
-        public static void LessThan<T>(Expression<Func<T, dynamic>> value, ValidationField<T> field)
+        public static void LessThan<T>(Expression<Func<T, dynamic>> value, SixnetValidationField<T> field)
         {
             SetCompareValidation(CompareOperator.LessThan, value, field);
         }
@@ -336,7 +336,7 @@ namespace Sixnet.Validation
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="value">Value</param>
         /// <param name="field">Field</param>
-        public static void GreaterThan<T>(dynamic value, ValidationField<T> field)
+        public static void GreaterThan<T>(dynamic value, SixnetValidationField<T> field)
         {
             SetCompareValidation(CompareOperator.GreaterThan, value, field);
         }
@@ -347,7 +347,7 @@ namespace Sixnet.Validation
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="value">Value</param>
         /// <param name="field">Field</param>
-        public static void GreaterThan<T>(Expression<Func<T, dynamic>> value, ValidationField<T> field)
+        public static void GreaterThan<T>(Expression<Func<T, dynamic>> value, SixnetValidationField<T> field)
         {
             SetCompareValidation(CompareOperator.GreaterThan, value, field);
         }
@@ -358,7 +358,7 @@ namespace Sixnet.Validation
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="value">Value</param>
         /// <param name="field">Field</param>
-        public static void GreaterThanOrEqual<T>(dynamic value, ValidationField<T> field)
+        public static void GreaterThanOrEqual<T>(dynamic value, SixnetValidationField<T> field)
         {
             SetCompareValidation(CompareOperator.GreaterThanOrEqual, value, field);
         }
@@ -369,7 +369,7 @@ namespace Sixnet.Validation
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="value">Value</param>
         /// <param name="field">Field</param>
-        public static void GreaterThanOrEqual<T>(Expression<Func<T, dynamic>> value, ValidationField<T> field)
+        public static void GreaterThanOrEqual<T>(Expression<Func<T, dynamic>> value, SixnetValidationField<T> field)
         {
             SetCompareValidation(CompareOperator.GreaterThanOrEqual, value, field);
         }
@@ -380,7 +380,7 @@ namespace Sixnet.Validation
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="values">Value</param>
         /// <param name="field">Field</param>
-        public static void In<T>(IEnumerable<dynamic> values, ValidationField<T> field)
+        public static void In<T>(IEnumerable<dynamic> values, SixnetValidationField<T> field)
         {
             SetCompareValidation(CompareOperator.In, values, field);
         }
@@ -391,7 +391,7 @@ namespace Sixnet.Validation
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="values">Value</param>
         /// <param name="field">Field</param>
-        public static void NotIn<T>(IEnumerable<dynamic> values, ValidationField<T> field)
+        public static void NotIn<T>(IEnumerable<dynamic> values, SixnetValidationField<T> field)
         {
             SetCompareValidation(CompareOperator.NotIn, values, field);
         }
@@ -402,10 +402,10 @@ namespace Sixnet.Validation
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="enumType">Enum type</param>
         /// <param name="fields">Fields</param>
-        public static void EnumType<T>(Type enumType, params ValidationField<T>[] fields)
+        public static void EnumType<T>(Type enumType, params SixnetValidationField<T>[] fields)
         {
             var validatorKey = string.Format("{0}/{1}", typeof(EnumTypeValidator).FullName, enumType.FullName);
-            BaseValidator validator;
+            SixnetBaseValidator validator;
             if (_validators.ContainsKey(validatorKey))
             {
                 validator = _validators[validatorKey];
@@ -424,10 +424,10 @@ namespace Sixnet.Validation
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="enumType">Enum type</param>
         /// <param name="fields">Fields</param>
-        public static void MaxLength<T>(int length, params ValidationField<T>[] fields)
+        public static void MaxLength<T>(int length, params SixnetValidationField<T>[] fields)
         {
             var validatorKey = string.Format("{0}/{1}", typeof(MaxLengthValidator).FullName, length);
-            BaseValidator validator;
+            SixnetBaseValidator validator;
             if (_validators.ContainsKey(validatorKey))
             {
                 validator = _validators[validatorKey];
@@ -446,10 +446,10 @@ namespace Sixnet.Validation
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="enumType">Enum type</param>
         /// <param name="fields">Fields</param>
-        public static void MinLength<T>(int length, params ValidationField<T>[] fields)
+        public static void MinLength<T>(int length, params SixnetValidationField<T>[] fields)
         {
             var validatorKey = string.Format("{0}/{1}", typeof(MinLengthValidator).FullName, length);
-            BaseValidator validator;
+            SixnetBaseValidator validator;
             if (_validators.ContainsKey(validatorKey))
             {
                 validator = _validators[validatorKey];
@@ -466,10 +466,10 @@ namespace Sixnet.Validation
         /// Phone
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
-        public static void Phone<T>(params ValidationField<T>[] fields)
+        public static void Phone<T>(params SixnetValidationField<T>[] fields)
         {
             var validatorKey = string.Format("{0}", typeof(PhoneValidator).FullName);
-            BaseValidator validator;
+            SixnetBaseValidator validator;
             if (_validators.ContainsKey(validatorKey))
             {
                 validator = _validators[validatorKey];
@@ -490,10 +490,10 @@ namespace Sixnet.Validation
         /// <param name="minimum">Minimum</param>
         /// <param name="maximum">Maxium</param>
         /// <param name="fields">Fields</param>
-        public static void Range<T>(Type valueType, object minimum, object maximum, params ValidationField<T>[] fields)
+        public static void Range<T>(Type valueType, object minimum, object maximum, params SixnetValidationField<T>[] fields)
         {
             var validatorKey = string.Format("{0}/{1}_{2}_{3}", typeof(RangeValidator).FullName, valueType.FullName, minimum, maximum);
-            BaseValidator validator;
+            SixnetBaseValidator validator;
             if (_validators.ContainsKey(validatorKey))
             {
                 validator = _validators[validatorKey];
@@ -510,10 +510,10 @@ namespace Sixnet.Validation
         /// Required
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
-        public static void Required<T>(params ValidationField<T>[] fields)
+        public static void Required<T>(params SixnetValidationField<T>[] fields)
         {
             var validatorKey = string.Format("{0}", typeof(RequiredValidator).FullName);
-            BaseValidator validator;
+            SixnetBaseValidator validator;
             if (_validators.ContainsKey(validatorKey))
             {
                 validator = _validators[validatorKey];
@@ -530,10 +530,10 @@ namespace Sixnet.Validation
         /// Url
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
-        public static void Url<T>(params ValidationField<T>[] fields)
+        public static void Url<T>(params SixnetValidationField<T>[] fields)
         {
             var validatorKey = string.Format("{0}", typeof(UrlValidator).FullName);
-            BaseValidator validator;
+            SixnetBaseValidator validator;
             if (_validators.ContainsKey(validatorKey))
             {
                 validator = _validators[validatorKey];
@@ -550,10 +550,10 @@ namespace Sixnet.Validation
         /// Credit card
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
-        public static void CreditCard<T>(params ValidationField<T>[] fields)
+        public static void CreditCard<T>(params SixnetValidationField<T>[] fields)
         {
             var validatorKey = string.Format("{0}", typeof(CreditCardValidator).FullName);
-            BaseValidator validator;
+            SixnetBaseValidator validator;
             if (_validators.ContainsKey(validatorKey))
             {
                 validator = _validators[validatorKey];
@@ -570,10 +570,10 @@ namespace Sixnet.Validation
         /// Regular expression
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
-        public static void RegularExpression<T>(string pattern, params ValidationField<T>[] fields)
+        public static void RegularExpression<T>(string pattern, params SixnetValidationField<T>[] fields)
         {
             var validatorKey = string.Format("{0}/{1}", typeof(RegularExpressionValidator).FullName, pattern);
-            BaseValidator validator;
+            SixnetBaseValidator validator;
             if (_validators.ContainsKey(validatorKey))
             {
                 validator = _validators[validatorKey];
@@ -591,7 +591,7 @@ namespace Sixnet.Validation
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="fields">Fields</param>
-        public static void Integer<T>(params ValidationField<T>[] fields)
+        public static void Integer<T>(params SixnetValidationField<T>[] fields)
         {
             RegularExpression(RegexPatterns.Integer, fields);
         }
@@ -601,7 +601,7 @@ namespace Sixnet.Validation
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="fields">Fields</param>
-        public static void PositiveInteger<T>(params ValidationField<T>[] fields)
+        public static void PositiveInteger<T>(params SixnetValidationField<T>[] fields)
         {
             RegularExpression(RegexPatterns.PositiveInteger, fields);
         }
@@ -611,7 +611,7 @@ namespace Sixnet.Validation
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="fields">Fields</param>
-        public static void PositiveIntegerOrZero<T>(params ValidationField<T>[] fields)
+        public static void PositiveIntegerOrZero<T>(params SixnetValidationField<T>[] fields)
         {
             RegularExpression(RegexPatterns.PositiveIntegerOrZero, fields);
         }
@@ -621,7 +621,7 @@ namespace Sixnet.Validation
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="fields">Fields</param>
-        public static void NegativeInteger<T>(params ValidationField<T>[] fields)
+        public static void NegativeInteger<T>(params SixnetValidationField<T>[] fields)
         {
             RegularExpression(RegexPatterns.NegativeInteger, fields);
         }
@@ -631,7 +631,7 @@ namespace Sixnet.Validation
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="fields">Fields</param>
-        public static void NegativeIntegerOrZero<T>(params ValidationField<T>[] fields)
+        public static void NegativeIntegerOrZero<T>(params SixnetValidationField<T>[] fields)
         {
             RegularExpression(RegexPatterns.NegativeIntegerOrZero, fields);
         }
@@ -641,7 +641,7 @@ namespace Sixnet.Validation
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="fields">Fields</param>
-        public static void Fraction<T>(params ValidationField<T>[] fields)
+        public static void Fraction<T>(params SixnetValidationField<T>[] fields)
         {
             RegularExpression(RegexPatterns.Fraction, fields);
         }
@@ -651,7 +651,7 @@ namespace Sixnet.Validation
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="fields">Fields</param>
-        public static void PositiveFraction<T>(params ValidationField<T>[] fields)
+        public static void PositiveFraction<T>(params SixnetValidationField<T>[] fields)
         {
             RegularExpression(RegexPatterns.PositiveFraction, fields);
         }
@@ -661,7 +661,7 @@ namespace Sixnet.Validation
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="fields">Fields</param>
-        public static void NegativeFraction<T>(params ValidationField<T>[] fields)
+        public static void NegativeFraction<T>(params SixnetValidationField<T>[] fields)
         {
             RegularExpression(RegexPatterns.NegativeFraction, fields);
         }
@@ -671,7 +671,7 @@ namespace Sixnet.Validation
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="fields">Fields</param>
-        public static void PositiveFractionOrZero<T>(params ValidationField<T>[] fields)
+        public static void PositiveFractionOrZero<T>(params SixnetValidationField<T>[] fields)
         {
             RegularExpression(RegexPatterns.PositiveFractionOrZero, fields);
         }
@@ -681,7 +681,7 @@ namespace Sixnet.Validation
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="fields">Fields</param>
-        public static void NegativeFractionOrZero<T>(params ValidationField<T>[] fields)
+        public static void NegativeFractionOrZero<T>(params SixnetValidationField<T>[] fields)
         {
             RegularExpression(RegexPatterns.NegativeFractionOrZero, fields);
         }
@@ -691,7 +691,7 @@ namespace Sixnet.Validation
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="fields">Fields</param>
-        public static void Number<T>(params ValidationField<T>[] fields)
+        public static void Number<T>(params SixnetValidationField<T>[] fields)
         {
             RegularExpression(RegexPatterns.Number, fields);
         }
@@ -701,7 +701,7 @@ namespace Sixnet.Validation
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="fields">Fields</param>
-        public static void Color<T>(params ValidationField<T>[] fields)
+        public static void Color<T>(params SixnetValidationField<T>[] fields)
         {
             RegularExpression(RegexPatterns.Color, fields);
         }
@@ -711,7 +711,7 @@ namespace Sixnet.Validation
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="fields">Fields</param>
-        public static void Chinese<T>(params ValidationField<T>[] fields)
+        public static void Chinese<T>(params SixnetValidationField<T>[] fields)
         {
             RegularExpression(RegexPatterns.AllChinese, fields);
         }
@@ -721,7 +721,7 @@ namespace Sixnet.Validation
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="fields">Fields</param>
-        public static void PostCode<T>(params ValidationField<T>[] fields)
+        public static void PostCode<T>(params SixnetValidationField<T>[] fields)
         {
             RegularExpression(RegexPatterns.PostCode, fields);
         }
@@ -731,7 +731,7 @@ namespace Sixnet.Validation
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="fields">Fields</param>
-        public static void Mobile<T>(params ValidationField<T>[] fields)
+        public static void Mobile<T>(params SixnetValidationField<T>[] fields)
         {
             RegularExpression(RegexPatterns.Mobile, fields);
         }
@@ -741,7 +741,7 @@ namespace Sixnet.Validation
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="fields">Fields</param>
-        public static void IPV4<T>(params ValidationField<T>[] fields)
+        public static void IPV4<T>(params SixnetValidationField<T>[] fields)
         {
             RegularExpression(RegexPatterns.IPV4, fields);
         }
@@ -751,7 +751,7 @@ namespace Sixnet.Validation
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="fields">Fields</param>
-        public static void Date<T>(params ValidationField<T>[] fields)
+        public static void Date<T>(params SixnetValidationField<T>[] fields)
         {
             RegularExpression(RegexPatterns.Date, fields);
         }
@@ -761,7 +761,7 @@ namespace Sixnet.Validation
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="fields">Fields</param>
-        public static void DateTime<T>(params ValidationField<T>[] fields)
+        public static void DateTime<T>(params SixnetValidationField<T>[] fields)
         {
             RegularExpression(RegexPatterns.DateTime, fields);
         }
@@ -771,7 +771,7 @@ namespace Sixnet.Validation
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="fields">Fields</param>
-        public static void Letter<T>(params ValidationField<T>[] fields)
+        public static void Letter<T>(params SixnetValidationField<T>[] fields)
         {
             RegularExpression(RegexPatterns.Letter, fields);
         }
@@ -781,7 +781,7 @@ namespace Sixnet.Validation
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="fields">Fields</param>
-        public static void UpperLetter<T>(params ValidationField<T>[] fields)
+        public static void UpperLetter<T>(params SixnetValidationField<T>[] fields)
         {
             RegularExpression(RegexPatterns.UpperLetter, fields);
         }
@@ -791,7 +791,7 @@ namespace Sixnet.Validation
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="fields">Fields</param>
-        public static void LowerLetter<T>(params ValidationField<T>[] fields)
+        public static void LowerLetter<T>(params SixnetValidationField<T>[] fields)
         {
             RegularExpression(RegexPatterns.LowerLetter, fields);
         }
@@ -801,7 +801,7 @@ namespace Sixnet.Validation
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="fields">Fields</param>
-        public static void IdentityCard<T>(params ValidationField<T>[] fields)
+        public static void IdentityCard<T>(params SixnetValidationField<T>[] fields)
         {
             RegularExpression(RegexPatterns.IdentityCard, fields);
         }
@@ -811,10 +811,10 @@ namespace Sixnet.Validation
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="fields">Fields</param>
-        public static void ImageFile<T>(params ValidationField<T>[] fields)
+        public static void ImageFile<T>(params SixnetValidationField<T>[] fields)
         {
             var validatorKey = typeof(ImageFileValidator).FullName;
-            BaseValidator validator;
+            SixnetBaseValidator validator;
             if (_validators.ContainsKey(validatorKey))
             {
                 validator = _validators[validatorKey];
@@ -832,10 +832,10 @@ namespace Sixnet.Validation
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="fields">Fields</param>
-        public static void CompressFile<T>(params ValidationField<T>[] fields)
+        public static void CompressFile<T>(params SixnetValidationField<T>[] fields)
         {
             var validatorKey = typeof(CompressFileValidator).FullName;
-            BaseValidator validator;
+            SixnetBaseValidator validator;
             if (_validators.ContainsKey(validatorKey))
             {
                 validator = _validators[validatorKey];
@@ -880,7 +880,7 @@ namespace Sixnet.Validation
             {
                 _typeValidations.TryGetValue(type.FullName, out var validations);
                 validations ??= new Dictionary<string, List<ISixnetValidation>>();
-                var validationOptions = SixnetContainer.GetOptions<ValidationOptions>();
+                var validationOptions = SixnetContainer.GetOptions<SixnetValidationOptions>();
                 var useInheritance = validationOptions?.UseInheritance ?? true;
                 if (useInheritance && type.BaseType != null)
                 {
@@ -922,14 +922,14 @@ namespace Sixnet.Validation
         /// <param name="data">Data</param>
         /// <param name="useScenario">Use scenario</param>
         /// <returns>Return verify result</returns>
-        public static List<ValidationResult> Validate<T>(T data, string useScenario = "")
+        public static List<SixnetValidationResult> Validate<T>(T data, string useScenario = "")
         {
             if (data == null)
             {
-                return new List<ValidationResult>(0);
+                return new List<SixnetValidationResult>(0);
             }
             var validationList = GetTypeValidations<T>();
-            var resultList = new List<ValidationResult>();
+            var resultList = new List<SixnetValidationResult>();
             foreach (var validation in validationList)
             {
                 foreach (var verifyItem in validation.Value)

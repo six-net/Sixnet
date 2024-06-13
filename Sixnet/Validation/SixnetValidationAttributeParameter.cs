@@ -6,7 +6,7 @@ namespace Sixnet.Validation
     /// Validation attribute parameter
     /// </summary>
     [Serializable]
-    public class ValidationAttributeParameter
+    public class SixnetValidationAttributeParameter
     {
         /// <summary>
         /// Gets or sets the error message

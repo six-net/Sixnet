@@ -10,7 +10,7 @@ namespace Sixnet.Validation.Validators
     /// <summary>
     /// Regular expression validator
     /// </summary>
-    public class RegularExpressionValidator : BaseValidator
+    public class RegularExpressionValidator : SixnetBaseValidator
     {
         /// <summary>
         /// Gets the mathc pattern
@@ -41,18 +41,18 @@ namespace Sixnet.Validation.Validators
         /// </summary>
         /// <param name="value">Value</param>
         /// <param name="errorMessage">Error message</param>
-        public override ValidationResult Validate(dynamic value, string errorMessage)
+        public override SixnetValidationResult Validate(dynamic value, string errorMessage)
         {
             SetupRegex();
             var stringValue = value as string;
             if (string.IsNullOrEmpty(stringValue))
             {
-                return ValidationResult.ErrorResult(stringValue);
+                return SixnetValidationResult.SuccessResult(errorMessage);
             }
             var matchResult = Regex.Match(stringValue);
             return matchResult.Success && matchResult.Index == 0 && matchResult.Length == stringValue.Length
-                ? ValidationResult.SuccessResult()
-                : ValidationResult.ErrorResult(errorMessage);
+                ? SixnetValidationResult.SuccessResult()
+                : SixnetValidationResult.ErrorResult(errorMessage);
         }
 
         /// <summary>
@@ -77,12 +77,9 @@ namespace Sixnet.Validation.Validators
         /// Create validation attribute
         /// </summary>
         /// <returns>Return the validation attribute</returns>
-        public override ValidationAttribute CreateValidationAttribute(ValidationAttributeParameter parameter)
+        public override ValidationAttribute CreateValidationAttribute(SixnetValidationAttributeParameter parameter)
         {
-            return new RegularExpressionAttribute(Pattern)
-            {
-                ErrorMessage = FormatMessage(parameter.ErrorMessage)
-            };
+            return new SixnetNullOrEmptyValidationAttribute(new RegularExpressionAttribute(Pattern) { ErrorMessage = FormatMessage(parameter.ErrorMessage) });
         }
 
         public override AsyncValidatorRule CreateAsyncValidatorRule(AsyncValidatorRuleParameter parameter)

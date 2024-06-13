@@ -263,7 +263,7 @@ namespace System
         /// <returns>Return whether the verification has passed</returns>
         public static bool IsEmail(this string value)
         {
-            return !string.IsNullOrEmpty(value) && ValidationConstants.DefaultAttributes.Email.IsValid(value);
+            return !string.IsNullOrEmpty(value) && SixnetValidationConstants.DefaultAttributes.Email.IsValid(value);
         }
 
         /// <summary>
@@ -618,7 +618,7 @@ namespace System
         /// <returns>Return whether the verification has passed</returns>
         public static bool IsCreditCard(this string value)
         {
-            return !string.IsNullOrEmpty(value) && ValidationConstants.DefaultAttributes.CreditCard.IsValid(value);
+            return !string.IsNullOrEmpty(value) && SixnetValidationConstants.DefaultAttributes.CreditCard.IsValid(value);
         }
 
         /// <summary>
@@ -714,7 +714,7 @@ namespace System
         /// <returns>Return whether the verification has passed</returns>
         public static bool IsPhone(this string value)
         {
-            return !string.IsNullOrEmpty(value) && ValidationConstants.DefaultAttributes.Phone.IsValid(value);
+            return !string.IsNullOrEmpty(value) && SixnetValidationConstants.DefaultAttributes.Phone.IsValid(value);
         }
 
         /// <summary>
@@ -775,7 +775,7 @@ namespace System
         /// <returns>Return whether the verification has passed</returns>
         public static bool IsImageFile(this string path)
         {
-            return !string.IsNullOrEmpty(path) && ValidationConstants.DefaultAttributes.ImageFile.IsValid(path);
+            return !string.IsNullOrEmpty(path) && SixnetValidationConstants.DefaultAttributes.ImageFile.IsValid(path);
         }
 
         /// <summary>
@@ -800,7 +800,7 @@ namespace System
         /// <returns>Return whether the verification has passed</returns>
         public static bool IsCompressFile(this string path)
         {
-            return !string.IsNullOrEmpty(path) && ValidationConstants.DefaultAttributes.CompressFile.IsValid(path);
+            return !string.IsNullOrEmpty(path) && SixnetValidationConstants.DefaultAttributes.CompressFile.IsValid(path);
         }
 
         /// <summary>
@@ -827,7 +827,7 @@ namespace System
         /// <returns>Return whether the verification has passed</returns>
         public static bool IsUrl(this string value)
         {
-            return !string.IsNullOrEmpty(value) && ValidationConstants.DefaultAttributes.Url.IsValid(value);
+            return !string.IsNullOrEmpty(value) && SixnetValidationConstants.DefaultAttributes.Url.IsValid(value);
         }
 
         /// <summary>
@@ -850,7 +850,7 @@ namespace System
         /// </summary>
         /// <param name="results">Results</param>
         /// <returns>Return the error messages</returns>
-        public static List<string> GetErrorMessages(this IEnumerable<Sixnet.Validation.ValidationResult> results, bool local = true)
+        public static List<string> GetErrorMessages(this IEnumerable<Sixnet.Validation.SixnetValidationResult> results, bool local = true)
         {
             if (results == null)
             {

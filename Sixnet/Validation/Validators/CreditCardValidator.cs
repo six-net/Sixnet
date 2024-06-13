@@ -7,7 +7,7 @@ namespace Sixnet.Validation.Validators
     /// <summary>
     /// Credit card validator
     /// </summary>
-    public class CreditCardValidator : BaseValidator
+    public class CreditCardValidator : SixnetBaseValidator
     {
         /// <summary>
         /// Initialize a credit card validator 
@@ -22,24 +22,24 @@ namespace Sixnet.Validation.Validators
         /// </summary>
         /// <param name="value">Value</param>
         /// <param name="errorMessage">Error message</param>
-        public override ValidationResult Validate(dynamic value, string errorMessage)
+        public override SixnetValidationResult Validate(dynamic value, string errorMessage)
         {
             var stringValue = value as string;
-            return stringValue.IsCreditCardNullable() 
-                ? ValidationResult.SuccessResult() 
-                : ValidationResult.ErrorResult(errorMessage);
+            return stringValue.IsCreditCardNullable()
+                ? SixnetValidationResult.SuccessResult()
+                : SixnetValidationResult.ErrorResult(errorMessage);
         }
 
         /// <summary>
         /// Create validation attribute
         /// </summary>
         /// <returns>Return the validation attribute</returns>
-        public override ValidationAttribute CreateValidationAttribute(ValidationAttributeParameter parameter)
+        public override ValidationAttribute CreateValidationAttribute(SixnetValidationAttributeParameter parameter)
         {
-            return new CreditCardAttribute()
+            return new SixnetNullOrEmptyValidationAttribute(new CreditCardAttribute()
             {
                 ErrorMessage = FormatMessage(parameter.ErrorMessage)
-            };
+            });
         }
 
         public override AsyncValidatorRule CreateAsyncValidatorRule(AsyncValidatorRuleParameter parameter)

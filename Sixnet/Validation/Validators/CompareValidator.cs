@@ -7,7 +7,7 @@ namespace Sixnet.Validation.Validators
     /// <summary>
     /// Compare validator
     /// </summary>
-    public class CompareValidator : BaseValidator
+    public class CompareValidator : SixnetBaseValidator
     {
         /// <summary>
         /// Compare operator
@@ -28,12 +28,12 @@ namespace Sixnet.Validation.Validators
         /// </summary>
         /// <param name="value">Value</param>
         /// <param name="errorMessage">Error message</param>
-        public override ValidationResult Validate(dynamic value, string errorMessage)
+        public override SixnetValidationResult Validate(dynamic value, string errorMessage)
         {
             errorMessage = string.IsNullOrWhiteSpace(errorMessage) ? DefaultErrorMessage : errorMessage;
             if (value is not CompareVerificationValue compareValue)
             {
-                return ValidationResult.ErrorResult(errorMessage);
+                return SixnetValidationResult.ErrorResult(errorMessage);
             }
             var isValid = false;
             switch (_compareOperator)
@@ -72,14 +72,14 @@ namespace Sixnet.Validation.Validators
                     }
                     break;
             }
-            return isValid ? ValidationResult.SuccessResult() : ValidationResult.ErrorResult(errorMessage);
+            return isValid ? SixnetValidationResult.SuccessResult() : SixnetValidationResult.ErrorResult(errorMessage);
         }
 
         /// <summary>
         /// Create validation attribute
         /// </summary>
         /// <returns>Return the validation attribute</returns>
-        public override ValidationAttribute CreateValidationAttribute(ValidationAttributeParameter parameter)
+        public override ValidationAttribute CreateValidationAttribute(SixnetValidationAttributeParameter parameter)
         {
             if (_compareOperator != CompareOperator.Equal || string.IsNullOrWhiteSpace(parameter.OtherProperty))
             {

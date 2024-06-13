@@ -424,7 +424,7 @@ namespace Sixnet.DependencyInjection
             // Json serialization
             services.ConfigureIfNotNull<SixnetJsonSerializationOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Json)));
             // Validation
-            services.ConfigureIfNotNull<ValidationOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Validation)));
+            services.ConfigureIfNotNull<SixnetValidationOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Validation)));
             // Authorization
             services.ConfigureIfNotNull<SixnetAuthorizationOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Authorization)));
 
