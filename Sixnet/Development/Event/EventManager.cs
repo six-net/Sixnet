@@ -753,23 +753,28 @@ namespace Sixnet.Development.Event
         /// <param name="cancellationToken">Cancellation token</param>
         /// <param name="modelType">Model type</param>
         /// <returns></returns>
-        Task TriggerEvent<TEvent>(IEnumerable<TEvent> events, CancellationToken cancellationToken, Type modelType = null) where TEvent : ISixnetEvent
+        async Task TriggerEvent<TEvent>(IEnumerable<TEvent> events, CancellationToken cancellationToken, Type modelType = null) where TEvent : ISixnetEvent
         {
             if (events.IsNullOrEmpty())
             {
-                return Task.CompletedTask;
+                return;
             }
-            var eventTasks = new List<Task>();
             foreach (var eventData in events)
             {
                 //overall
-                eventTasks.AddRange(overallEventHandlers.Select(h => h.Handle(eventData, cancellationToken)));
+                foreach (var h in overallEventHandlers)
+                {
+                    await h.Handle(eventData, cancellationToken).ConfigureAwait(false);
+                }
 
                 //specific event
                 var eventType = eventData.GetType();
                 if (specificEventHandlers.TryGetValue(eventType.GUID, out var currentSpecificEventHandlers) && !currentSpecificEventHandlers.IsNullOrEmpty())
                 {
-                    eventTasks.AddRange(currentSpecificEventHandlers.Select(h => h.Handle(eventData, cancellationToken)));
+                    foreach (var h in currentSpecificEventHandlers)
+                    {
+                        await h.Handle(eventData, cancellationToken).ConfigureAwait(false);
+                    }
                 }
 
                 if (modelType != null)
@@ -777,21 +782,24 @@ namespace Sixnet.Development.Event
                     //model overall
                     if (modelOverallEventHandlers.TryGetValue(modelType.GUID, out var modelOverallHandlers) && !modelOverallHandlers.IsNullOrEmpty())
                     {
-                        eventTasks.AddRange(modelOverallHandlers.Select(h => h.Handle(eventData, cancellationToken)));
+                        foreach (var h in modelOverallHandlers)
+                        {
+                            await h.Handle(eventData, cancellationToken).ConfigureAwait(false);
+                        }
                     }
                     //model specitic event
                     if (modelSpecificEventHandlers.TryGetValue(modelType.GUID, out var currentModelSpecificHandlers) && !currentModelSpecificHandlers.IsNullOrEmpty())
                     {
                         if (currentModelSpecificHandlers.TryGetValue(eventType.GUID, out var modelSpecificEventHandlers) && !modelSpecificEventHandlers.IsNullOrEmpty())
                         {
-                            eventTasks.AddRange(modelSpecificEventHandlers.Select(h => h.Handle(eventData, cancellationToken)));
+                            foreach (var h in modelSpecificEventHandlers)
+                            {
+                                await h.Handle(eventData, cancellationToken).ConfigureAwait(false);
+                            }
                         }
                     }
                 }
             }
-            return eventTasks.IsNullOrEmpty()
-                ? Task.CompletedTask
-                : Task.WhenAll(eventTasks);
         }
 
         #endregion
