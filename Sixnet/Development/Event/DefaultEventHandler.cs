@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Sixnet.Development.Work;
 using Sixnet.Exceptions;
 
 namespace Sixnet.Development.Event
@@ -37,8 +38,20 @@ namespace Sixnet.Development.Event
             SixnetDirectThrower.ThrowSixnetExceptionIf(HandlerExecutor == null, "Event handler excutor is null");
             SixnetDirectThrower.ThrowSixnetExceptionIf(eventData is not TEvent, $"Event is not {typeof(TEvent).FullName}");
 
-            var executorTask = HandlerExecutor((TEvent)eventData, cancellationToken);
-            return (Options?.Async ?? false) ? Task.CompletedTask : executorTask;
+            var isAsync = Options?.Async ?? false;
+            if (isAsync)
+            {
+                ThreadPool.QueueUserWorkItem(s =>
+                {
+                    UnitOfWork.Current = null;
+                    HandlerExecutor((TEvent)eventData, cancellationToken);
+                });
+                return Task.CompletedTask;
+            }
+            else
+            {
+                return HandlerExecutor((TEvent)eventData, cancellationToken);
+            }
         }
     }
 }
