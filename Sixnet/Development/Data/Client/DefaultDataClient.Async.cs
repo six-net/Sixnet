@@ -1097,7 +1097,7 @@ namespace Sixnet.Development.Data.Client
             }
 
             // publish starting data event
-            await SixnetDataEventBus.PublishStartingDataEvent(this, dataCommand, true, cancellationToken).ConfigureAwait(false);
+            await SixnetDataEventBus.PublishStartingDataEventAsync(this, dataCommand, true, cancellationToken).ConfigureAwait(false);
 
             if (dataCommand.ExecutionMode == CommandExecutionMode.Transform)
             {
@@ -1141,7 +1141,7 @@ namespace Sixnet.Development.Data.Client
         async Task HandleQueryCallbackAsync<T>(SixnetDataCommand command, IEnumerable<T> datas, CancellationToken cancellationToken)
         {
             // data queried event
-            await SixnetDataEventBus.PublishQueriedEvent(this, command, datas, cancellationToken).ConfigureAwait(false);
+            await SixnetDataEventBus.PublishQueriedEventAsync(this, command, datas, cancellationToken).ConfigureAwait(false);
 
             // command callback event
             SixnetDataManager.TriggerDataCommandCallbackEvent(command);
@@ -1155,7 +1155,7 @@ namespace Sixnet.Development.Data.Client
         async Task HandleCheckCallbackAsync(SixnetDataCommand command, bool hasValue, CancellationToken cancellationToken)
         {
             // checked event
-            await SixnetDataEventBus.PublishCheckedEvent(this, command, hasValue, cancellationToken).ConfigureAwait(false);
+            await SixnetDataEventBus.PublishCheckedEventAsync(this, command, hasValue, cancellationToken).ConfigureAwait(false);
 
             // command callback event
             SixnetDataManager.TriggerDataCommandCallbackEvent(command);
@@ -1169,7 +1169,7 @@ namespace Sixnet.Development.Data.Client
         async Task HandleGotValueCallbackAsync(SixnetDataCommand command, dynamic value, CancellationToken cancellationToken)
         {
             // Got event
-            await SixnetDataEventBus.PublishGotValueEvent(this, command, value, cancellationToken).ConfigureAwait(false);
+            await SixnetDataEventBus.PublishGotValueEventAsync(this, command, value, cancellationToken).ConfigureAwait(false);
 
             // command callback event
             SixnetDataManager.TriggerDataCommandCallbackEvent(command);
@@ -1239,7 +1239,7 @@ namespace Sixnet.Development.Data.Client
         async Task ExecuteDataCommandCallbackAsync(SixnetDataCommand command, CancellationToken cancellationToken = default)
         {
             // callback data event
-            await SixnetDataEventBus.PublishExecutedDataEvent(this, command, cancellationToken).ConfigureAwait(false);
+            await SixnetDataEventBus.PublishExecutedDataEventAsync(this, command, cancellationToken).ConfigureAwait(false);
 
             // command callback event
             SixnetDataManager.TriggerDataCommandCallbackEvent(command);

@@ -28,9 +28,9 @@ namespace Sixnet.Development.Domain.Event
         /// <param name="domainEvent">Domain event</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns></returns>
-        public static Task Publish(ISixnetDomainEvent domainEvent, CancellationToken cancellationToken = default)
+        public static Task PublishAsync(ISixnetDomainEvent domainEvent, CancellationToken cancellationToken = default)
         {
-            return Publish(new ISixnetDomainEvent[1] { domainEvent }, cancellationToken);
+            return PublishAsync(new ISixnetDomainEvent[1] { domainEvent }, cancellationToken);
         }
 
         /// <summary>
@@ -39,11 +39,44 @@ namespace Sixnet.Development.Domain.Event
         /// <param name="domainEvents">Domain events</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns></returns>
-        public static Task Publish(IEnumerable<ISixnetDomainEvent> domainEvents, CancellationToken cancellationToken = default)
+        public static Task PublishAsync(IEnumerable<ISixnetDomainEvent> domainEvents, CancellationToken cancellationToken = default)
         {
-            var publishTask = _timeDomainEventManager.Publish(domainEvents, cancellationToken);
+            var publishTask = _timeDomainEventManager.PublishAsync(domainEvents, cancellationToken);
             UnitOfWork.PublishDomainEvent(domainEvents);
             return publishTask;
+        }
+
+        /// <summary>
+        /// Publish domain event
+        /// </summary>
+        /// <param name="domainEvent">Domain event</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns></returns>
+        public static void Publish(ISixnetDomainEvent domainEvent, CancellationToken cancellationToken = default)
+        {
+            Publish(new ISixnetDomainEvent[1] { domainEvent }, cancellationToken);
+        }
+
+        /// <summary>
+        /// Publish
+        /// </summary>
+        /// <param name="domainEvents">Domain events</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns></returns>
+        public static void Publish(IEnumerable<ISixnetDomainEvent> domainEvents, CancellationToken cancellationToken = default)
+        {
+            _timeDomainEventManager.PublishAsync(domainEvents, cancellationToken).Wait();
+            UnitOfWork.PublishDomainEvent(domainEvents);
+        }
+
+        /// <summary>
+        /// Publish work completed events
+        /// </summary>
+        /// <param name="eventDatas">Event datas</param>
+        /// <returns></returns>
+        internal static Task PublishWorkCompletedEventAsync(IEnumerable<ISixnetDomainEvent> eventDatas, CancellationToken cancellationToken = default)
+        {
+            return _timeDomainEventManager.PublishWorkCompletedEventAsync(eventDatas, cancellationToken);
         }
 
         #endregion
@@ -213,20 +246,6 @@ namespace Sixnet.Development.Domain.Event
         }
 
         #endregion
-
-        #endregion
-
-        #region Handle
-
-        /// <summary>
-        /// Handle work completed handler
-        /// </summary>
-        /// <param name="eventDatas">Event datas</param>
-        /// <returns></returns>
-        internal static Task HandleWorkCompleted(IEnumerable<ISixnetDomainEvent> eventDatas, CancellationToken cancellationToken = default)
-        {
-            return _timeDomainEventManager.HandleWorkCompleted(eventDatas, cancellationToken);
-        }
 
         #endregion
 

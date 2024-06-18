@@ -39,9 +39,9 @@ namespace Sixnet.Development.Data.Event
         /// Publish data event
         /// </summary>
         /// <param name="dataEvents">Data events</param>
-        public static Task Publish(ISixnetDataEvent dataEvent, CancellationToken cancellationToken = default, Type entityType = null)
+        public static Task PublishAsync(ISixnetDataEvent dataEvent, CancellationToken cancellationToken = default, Type entityType = null)
         {
-            return timeDataEventManager.Publish(dataEvent, cancellationToken, entityType);
+            return timeDataEventManager.PublishAsync(dataEvent, cancellationToken, entityType);
         }
 
         /// <summary>
@@ -51,9 +51,30 @@ namespace Sixnet.Development.Data.Event
         /// <param name="cancellationToken">Cancellation token</param>
         /// <param name="entityType">Entity type</param>
         /// <returns></returns>
-        public static Task Publish(IEnumerable<ISixnetDataEvent> dataEvents, CancellationToken cancellationToken = default, Type entityType = null)
+        public static Task PublishAsync(IEnumerable<ISixnetDataEvent> dataEvents, CancellationToken cancellationToken = default, Type entityType = null)
         {
-            return timeDataEventManager.Publish(dataEvents, cancellationToken, entityType);
+            return timeDataEventManager.PublishAsync(dataEvents, cancellationToken, entityType);
+        }
+
+        /// <summary>
+        /// Publish data event
+        /// </summary>
+        /// <param name="dataEvents">Data events</param>
+        public static void Publish(ISixnetDataEvent dataEvent, CancellationToken cancellationToken = default, Type entityType = null)
+        {
+            timeDataEventManager.PublishAsync(dataEvent, cancellationToken, entityType).Wait();
+        }
+
+        /// <summary>
+        /// Publish
+        /// </summary>
+        /// <param name="dataEvents">Data events</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <param name="entityType">Entity type</param>
+        /// <returns></returns>
+        public static void Publish(IEnumerable<ISixnetDataEvent> dataEvents, CancellationToken cancellationToken = default, Type entityType = null)
+        {
+            timeDataEventManager.PublishAsync(dataEvents, cancellationToken, entityType).Wait();
         }
 
         /// <summary>
@@ -61,7 +82,7 @@ namespace Sixnet.Development.Data.Event
         /// </summary>
         /// <param name="dataClient">Data client</param>
         /// <param name="dataCommand">Data command</param>
-        internal static Task PublishStartingDataEvent(ISixnetDataClient dataClient, SixnetDataCommand dataCommand, bool async, CancellationToken cancellationToken)
+        internal static Task PublishStartingDataEventAsync(ISixnetDataClient dataClient, SixnetDataCommand dataCommand, bool async, CancellationToken cancellationToken)
         {
             var dataEvents = new List<ISixnetDataEvent>();
             if (dataClient != null && dataCommand != null)
@@ -96,7 +117,7 @@ namespace Sixnet.Development.Data.Event
                         break;
                 }
             }
-            return Publish(dataEvents, cancellationToken, dataCommand.GetEntityType());
+            return PublishAsync(dataEvents, cancellationToken, dataCommand.GetEntityType());
         }
 
         /// <summary>
@@ -104,7 +125,7 @@ namespace Sixnet.Development.Data.Event
         /// </summary>
         /// <param name="dataClient">Data client</param>
         /// <param name="dataCommand">Data command</param>
-        internal static Task PublishExecutedDataEvent(ISixnetDataClient dataClient, SixnetDataCommand dataCommand, CancellationToken cancellationToken)
+        internal static Task PublishExecutedDataEventAsync(ISixnetDataClient dataClient, SixnetDataCommand dataCommand, CancellationToken cancellationToken)
         {
             var dataEvents = new List<ISixnetDataEvent>();
             if (dataClient != null && dataCommand != null)
@@ -122,7 +143,7 @@ namespace Sixnet.Development.Data.Event
                         break;
                 }
             }
-            return Publish(dataEvents, cancellationToken, dataCommand.GetEntityType());
+            return PublishAsync(dataEvents, cancellationToken, dataCommand.GetEntityType());
         }
 
         /// <summary>
@@ -132,9 +153,9 @@ namespace Sixnet.Development.Data.Event
         /// <param name="dataClient">Data client</param>
         /// <param name="dataCommand">Data command</param>
         /// <param name="datas">Datas</param>
-        internal static Task PublishQueriedEvent<TData>(ISixnetDataClient dataClient, SixnetDataCommand dataCommand, IEnumerable<TData> datas, CancellationToken cancellationToken)
+        internal static Task PublishQueriedEventAsync<TData>(ISixnetDataClient dataClient, SixnetDataCommand dataCommand, IEnumerable<TData> datas, CancellationToken cancellationToken)
         {
-            return Publish(QueriedDataEvent<TData>.Create(dataClient, dataCommand, datas), cancellationToken);
+            return PublishAsync(QueriedDataEvent<TData>.Create(dataClient, dataCommand, datas), cancellationToken);
         }
 
         /// <summary>
@@ -143,9 +164,9 @@ namespace Sixnet.Development.Data.Event
         /// <param name="dataClient">Data client</param>
         /// <param name="dataCommand">Data command</param>
         /// <param name="value">Value</param>
-        internal static Task PublishGotValueEvent(ISixnetDataClient dataClient, SixnetDataCommand dataCommand, dynamic value, CancellationToken cancellationToken)
+        internal static Task PublishGotValueEventAsync(ISixnetDataClient dataClient, SixnetDataCommand dataCommand, dynamic value, CancellationToken cancellationToken)
         {
-            return Publish(GotValueEvent.Create(dataClient, dataCommand, value), cancellationToken);
+            return PublishAsync(GotValueEvent.Create(dataClient, dataCommand, value), cancellationToken);
         }
 
         /// <summary>
@@ -154,9 +175,19 @@ namespace Sixnet.Development.Data.Event
         /// <param name="dataClient">Data client</param>
         /// <param name="dataCommand">Data command</param>
         /// <param name="hasValue">Has value</param>
-        internal static Task PublishCheckedEvent(ISixnetDataClient dataClient, SixnetDataCommand dataCommand, bool hasValue, CancellationToken cancellationToken)
+        internal static Task PublishCheckedEventAsync(ISixnetDataClient dataClient, SixnetDataCommand dataCommand, bool hasValue, CancellationToken cancellationToken)
         {
-            return Publish(CheckedDataEvent.Create(dataClient, dataCommand, hasValue), cancellationToken);
+            return PublishAsync(CheckedDataEvent.Create(dataClient, dataCommand, hasValue), cancellationToken);
+        }
+
+        /// <summary>
+        /// Handle work completed handler
+        /// </summary>
+        /// <param name="eventDatas">Event datas</param>
+        /// <returns></returns>
+        internal static Task PublishWorkCompletedEventAsync(IEnumerable<ISixnetDataEvent> eventDatas, CancellationToken cancellationToken = default)
+        {
+            return timeDataEventManager.PublishWorkCompletedEventAsync(eventDatas, cancellationToken);
         }
 
         #endregion
@@ -635,20 +666,6 @@ namespace Sixnet.Development.Data.Event
         }
 
         #endregion
-
-        #endregion
-
-        #region Handle
-
-        /// <summary>
-        /// Handle work completed handler
-        /// </summary>
-        /// <param name="eventDatas">Event datas</param>
-        /// <returns></returns>
-        internal static Task HandleWorkCompleted(IEnumerable<ISixnetDataEvent> eventDatas, CancellationToken cancellationToken = default)
-        {
-            return timeDataEventManager.HandleWorkCompleted(eventDatas, cancellationToken);
-        }
 
         #endregion
 

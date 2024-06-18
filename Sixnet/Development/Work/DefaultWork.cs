@@ -38,17 +38,17 @@ namespace Sixnet.Development.Work
         /// <summary>
         /// commit success event handler
         /// </summary>
-        readonly ConcurrentQueue<Action<ISixnetWork>> commitSuccessEventHandlerCollection = new();
+        readonly ConcurrentQueue<Action<ISixnetWork>> commitSuccessEventHandlers = new();
 
         /// <summary>
         /// domain events
         /// </summary>
-        readonly ConcurrentQueue<ISixnetDomainEvent> domainEventCollection = new();
+        readonly ConcurrentQueue<ISixnetDomainEvent> domainEvents = new();
 
         /// <summary>
         /// data events
         /// </summary>
-        readonly ConcurrentQueue<ISixnetDataEvent> dataEventCollection = new();
+        readonly ConcurrentQueue<ISixnetDataEvent> dataEvents = new();
 
         /// <summary>
         /// Data client
@@ -81,35 +81,28 @@ namespace Sixnet.Development.Work
         /// <returns></returns>
         public bool Commit()
         {
+            var success = false;
             try
             {
                 FrameworkLogManager.LogWorkStartSubmitting(this);
 
-                // commit data client
                 dataClient.Commit();
-
-                // Data event
-                HandleDataEvent();
-
-                //Trigger work local commit success event
-                TriggerCommitSuccessEvent();
-
-                //Trigger work global commit success event
-                UnitOfWork.TriggerWorkSuccessEvent(this);
-
-                //Domain event
-                HandleDomainEvent();
 
                 FrameworkLogManager.LogWorkSubmittedSuccessfully(this);
 
-                return true;
+                success = true;
             }
             catch (Exception ex)
             {
-                UnitOfWork.TriggerWorkFailEvent(this);
                 FrameworkLogManager.LogWorkSubmittedException(this, ex);
+                success = false;
                 throw ex;
             }
+            finally
+            {
+                TriggerWorkEvent(success);
+            }
+            return success;
         }
 
         /// <summary>
@@ -118,35 +111,92 @@ namespace Sixnet.Development.Work
         /// <returns>Return work commit result</returns>
         public async Task<bool> CommitAsync(CancellationToken cancellationToken = default)
         {
+            var success = false;
             try
             {
                 FrameworkLogManager.LogWorkStartSubmitting(this);
 
-                // commit data client
                 await dataClient.CommitAsync(cancellationToken).ConfigureAwait(false);
-
-                // Data event
-                await HandleDataEvent().ConfigureAwait(false);
-
-                //Trigger work local commit success event
-                TriggerCommitSuccessEvent();
-
-                //Trigger work global commit success event
-                UnitOfWork.TriggerWorkSuccessEvent(this);
-
-                //Domain event
-                await HandleDomainEvent(cancellationToken).ConfigureAwait(false);
 
                 FrameworkLogManager.LogWorkSubmittedSuccessfully(this);
 
-                return true;
+                success = true;
             }
             catch (Exception ex)
             {
-                UnitOfWork.TriggerWorkFailEvent(this);
                 FrameworkLogManager.LogWorkSubmittedException(this, ex);
+                success = false;
                 throw ex;
             }
+            finally
+            {
+                TriggerWorkEvent(success);
+            }
+            return success;
+        }
+
+        /// <summary>
+        /// Trigger success event
+        /// </summary>
+        /// <returns></returns>
+        void TriggerSuccessEvent()
+        {
+            var workDataEvents = new List<ISixnetDataEvent>(dataEvents);
+            var workDomainEvents = new List<ISixnetDomainEvent>(domainEvents);
+            ThreadPool.QueueUserWorkItem(s =>
+            {
+                ISixnetWork work = s as ISixnetWork;
+
+                // clear unit work context
+                UnitOfWork.Current = null;
+
+                // Data event
+                SixnetDataEventBus.PublishWorkCompletedEventAsync(workDataEvents);
+
+                //Domain event
+                SixnetDomainEventBus.PublishWorkCompletedEventAsync(workDomainEvents);
+
+                //Trigger work local commit success event
+                TriggerCommitSuccessEvent(work);
+
+                //Trigger work global commit success event
+                UnitOfWork.TriggerWorkSuccessEvent(work);
+
+            }, this);
+        }
+
+        /// <summary>
+        /// Trigger fail event
+        /// </summary>
+        void TriggerFailEvent()
+        {
+            UnitOfWork.TriggerWorkFailEvent(this);
+        }
+
+        /// <summary>
+        /// Trigger work event
+        /// </summary>
+        /// <param name="success"></param>
+        void TriggerWorkEvent(bool success)
+        {
+            if (success)
+            {
+                TriggerSuccessEvent();
+            }
+            else
+            {
+                TriggerFailEvent();
+            }
+            ClearEvent();
+        }
+
+        /// <summary>
+        /// Clear event
+        /// </summary>
+        void ClearEvent()
+        {
+            domainEvents?.Clear();
+            dataEvents?.Clear();
         }
 
         #endregion
@@ -193,7 +243,7 @@ namespace Sixnet.Development.Work
             {
                 foreach (var handler in eventHandlers)
                 {
-                    commitSuccessEventHandlerCollection.Enqueue(handler);
+                    commitSuccessEventHandlers.Enqueue(handler);
                 }
             }
         }
@@ -205,12 +255,12 @@ namespace Sixnet.Development.Work
         /// <summary>
         /// Trigger commit success event
         /// </summary>
-        void TriggerCommitSuccessEvent()
+        void TriggerCommitSuccessEvent(ISixnetWork work)
         {
-            foreach (var handler in commitSuccessEventHandlerCollection)
+            foreach (var handler in commitSuccessEventHandlers)
             {
                 var eventHandler = handler;
-                ThreadPool.QueueUserWorkItem(s => { eventHandler(this); });
+                ThreadPool.QueueUserWorkItem(s => { eventHandler(work); });
             }
         }
 
@@ -240,19 +290,9 @@ namespace Sixnet.Development.Work
             {
                 foreach (var domainEvent in domainEvents)
                 {
-                    domainEventCollection.Enqueue(domainEvent);
+                    this.domainEvents.Enqueue(domainEvent);
                 }
             }
-        }
-
-        /// <summary>
-        /// Handle domain event
-        /// </summary>
-        Task HandleDomainEvent(CancellationToken cancellationToken = default)
-        {
-            var handleWorkTask = SixnetDomainEventBus.HandleWorkCompleted(domainEventCollection, cancellationToken);
-            domainEventCollection?.Clear();
-            return handleWorkTask;
         }
 
         #endregion
@@ -279,19 +319,9 @@ namespace Sixnet.Development.Work
             {
                 foreach (var dataEvent in dataEvents)
                 {
-                    dataEventCollection.Enqueue(dataEvent);
+                    this.dataEvents.Enqueue(dataEvent);
                 }
             }
-        }
-
-        /// <summary>
-        /// Handle data event
-        /// </summary>
-        Task HandleDataEvent(CancellationToken cancellationToken = default)
-        {
-            var handleWorkTask = SixnetDataEventBus.HandleWorkCompleted(dataEventCollection, cancellationToken);
-            dataEventCollection?.Clear();
-            return handleWorkTask;
         }
 
         #endregion
@@ -304,11 +334,12 @@ namespace Sixnet.Development.Work
         public void Dispose()
         {
             UnitOfWork.Current = null;
+            dataClient?.Dispose();
+
             FrameworkLogManager.LogWorkDispose(this);
 
-            domainEventCollection?.Clear();
-            commitSuccessEventHandlerCollection?.Clear();
-            dataClient?.Dispose();
+            ClearEvent();
+            commitSuccessEventHandlers?.Clear();
         }
 
         #endregion

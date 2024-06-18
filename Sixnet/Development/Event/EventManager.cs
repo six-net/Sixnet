@@ -49,9 +49,9 @@ namespace Sixnet.Development.Event
         /// <param name="eventData">Event data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <param name="modelType">Model type</param>
-        public Task Publish<TEvent>(TEvent eventData, CancellationToken cancellationToken = default, Type modelType = null) where TEvent : ISixnetEvent
+        public Task PublishAsync<TEvent>(TEvent eventData, CancellationToken cancellationToken = default, Type modelType = null) where TEvent : ISixnetEvent
         {
-            return Publish(new TEvent[1] { eventData }, cancellationToken, modelType);
+            return PublishAsync(new TEvent[1] { eventData }, cancellationToken, modelType);
         }
 
         /// <summary>
@@ -61,9 +61,9 @@ namespace Sixnet.Development.Event
         /// <param name="cancellationToken">Cancellation token</param>
         /// <param name="modelType">Model type</param>
         /// <returns></returns>
-        public Task Publish<TEvent>(IEnumerable<TEvent> eventDatas, CancellationToken cancellationToken = default, Type modelType = null) where TEvent : ISixnetEvent
+        public Task PublishAsync<TEvent>(IEnumerable<TEvent> eventDatas, CancellationToken cancellationToken = default, Type modelType = null) where TEvent : ISixnetEvent
         {
-            return TriggerEvent(eventDatas, cancellationToken, modelType);
+            return TriggerEventAsync(eventDatas, cancellationToken, modelType);
         }
 
         #endregion
@@ -753,7 +753,7 @@ namespace Sixnet.Development.Event
         /// <param name="cancellationToken">Cancellation token</param>
         /// <param name="modelType">Model type</param>
         /// <returns></returns>
-        async Task TriggerEvent<TEvent>(IEnumerable<TEvent> events, CancellationToken cancellationToken, Type modelType = null) where TEvent : ISixnetEvent
+        async Task TriggerEventAsync<TEvent>(IEnumerable<TEvent> events, CancellationToken cancellationToken, Type modelType = null) where TEvent : ISixnetEvent
         {
             if (events.IsNullOrEmpty())
             {

@@ -30,9 +30,9 @@ namespace Sixnet.Development.Event
         /// <param name="cancellationToken">Cancellation token</param>
         /// <param name="modelType">Model type</param>
         /// <returns></returns>
-        public Task Publish(ISixnetEvent eventData, CancellationToken cancellationToken = default, Type modelType = null)
+        public Task PublishAsync(ISixnetEvent eventData, CancellationToken cancellationToken = default, Type modelType = null)
         {
-            return Publish(new ISixnetEvent[1] { eventData }, cancellationToken, modelType);
+            return PublishAsync(new ISixnetEvent[1] { eventData }, cancellationToken, modelType);
         }
 
         /// <summary>
@@ -42,10 +42,25 @@ namespace Sixnet.Development.Event
         /// <param name="cancellationToken">Cancellation token</param>
         /// <param name="modelType">Model type</param>
         /// <returns></returns>
-        public Task Publish(IEnumerable<ISixnetEvent> eventDatas, CancellationToken cancellationToken = default, Type modelType = null)
+        public Task PublishAsync(IEnumerable<ISixnetEvent> eventDatas, CancellationToken cancellationToken = default, Type modelType = null)
         {
             var eventManager = GetSixnetEventManager(EventTriggerTime.Immediately);
-            return eventManager.Publish(eventDatas, cancellationToken, modelType);
+            return eventManager.PublishAsync(eventDatas, cancellationToken, modelType);
+        }
+
+        /// <summary>
+        /// Publish work completed event
+        /// </summary>
+        /// <param name="eventDatas">Event datas</param>
+        /// <returns></returns>
+        internal Task PublishWorkCompletedEventAsync(IEnumerable<ISixnetEvent> eventDatas, CancellationToken cancellationToken = default)
+        {
+            if (!eventDatas.IsNullOrEmpty())
+            {
+                var workCompletedEventManager = GetSixnetEventManager(EventTriggerTime.WorkCompleted);
+                return workCompletedEventManager.PublishAsync(eventDatas, cancellationToken);
+            }
+            return Task.CompletedTask;
         }
 
         #endregion
@@ -578,25 +593,6 @@ namespace Sixnet.Development.Event
         #endregion
 
         #endregion
-
-        #region Handle
-
-        /// <summary>
-        /// Handle work completed handler
-        /// </summary>
-        /// <param name="eventDatas">Event datas</param>
-        /// <returns></returns>
-        internal Task HandleWorkCompleted(IEnumerable<ISixnetEvent> eventDatas, CancellationToken cancellationToken = default)
-        {
-            if (!eventDatas.IsNullOrEmpty())
-            {
-                var workCompletedEventManager = GetSixnetEventManager(EventTriggerTime.WorkCompleted);
-                return workCompletedEventManager.Publish(eventDatas, cancellationToken);
-            }
-            return Task.CompletedTask;
-        }
-
-        #endregion event
 
         #region Util
 

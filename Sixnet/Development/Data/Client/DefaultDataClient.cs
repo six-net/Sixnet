@@ -1254,7 +1254,7 @@ namespace Sixnet.Development.Data.Client
             }
 
             // publish starting data event
-            SixnetDataEventBus.PublishStartingDataEvent(this, dataCommand, false, default(CancellationToken));
+            SixnetDataEventBus.PublishStartingDataEventAsync(this, dataCommand, false, default(CancellationToken));
 
             if (dataCommand.ExecutionMode == CommandExecutionMode.Transform)
             {
@@ -1298,7 +1298,7 @@ namespace Sixnet.Development.Data.Client
         void HandleQueryCallback<T>(SixnetDataCommand command, IEnumerable<T> datas)
         {
             // data queried event
-            SixnetDataEventBus.PublishQueriedEvent<T>(this, command, datas, default(CancellationToken));
+            SixnetDataEventBus.PublishQueriedEventAsync<T>(this, command, datas, default(CancellationToken));
 
             // command callback event
             SixnetDataManager.TriggerDataCommandCallbackEvent(command);
@@ -1312,7 +1312,7 @@ namespace Sixnet.Development.Data.Client
         void HandleCheckCallback(SixnetDataCommand command, bool hasValue, CancellationToken cancellationToken)
         {
             // checked event
-            SixnetDataEventBus.PublishCheckedEvent(this, command, hasValue, cancellationToken);
+            SixnetDataEventBus.PublishCheckedEventAsync(this, command, hasValue, cancellationToken);
 
             // command callback event
             SixnetDataManager.TriggerDataCommandCallbackEvent(command);
@@ -1326,7 +1326,7 @@ namespace Sixnet.Development.Data.Client
         void HandleGotValueCallback(SixnetDataCommand command, dynamic value)
         {
             // Got event
-            SixnetDataEventBus.PublishGotValueEvent(this, command, value, default(CancellationToken));
+            SixnetDataEventBus.PublishGotValueEventAsync(this, command, value, default(CancellationToken));
 
             // command callback event
             SixnetDataManager.TriggerDataCommandCallbackEvent(command);
@@ -1392,7 +1392,7 @@ namespace Sixnet.Development.Data.Client
         void ExecuteDataCommandCallback(SixnetDataCommand command)
         {
             // callback data event
-            SixnetDataEventBus.PublishExecutedDataEvent(this, command, default);
+            SixnetDataEventBus.PublishExecutedDataEventAsync(this, command, default);
 
             // command callback event
             SixnetDataManager.TriggerDataCommandCallbackEvent(command);
