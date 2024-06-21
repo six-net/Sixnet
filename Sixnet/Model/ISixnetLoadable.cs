@@ -22,5 +22,11 @@ namespace Sixnet.Model
         /// <param name="dataNames">Data names</param>
         /// <returns></returns>
         void Need(params string[] dataNames);
+
+        /// <summary>
+        /// Get data names
+        /// </summary>
+        /// <returns></returns>
+        List<string> GetDataNames();
     }
 }

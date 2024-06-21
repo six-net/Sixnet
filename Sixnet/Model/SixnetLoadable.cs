@@ -53,17 +53,31 @@ namespace Sixnet.Model
         /// Set need to load datas
         /// </summary>
         /// <param name="originalLoadable">Original loadable</param>
-        public void Need(SixnetLoadable originalLoadable)
+        public void Need(ISixnetLoadable originalLoadable)
         {
-            if (originalLoadable?.AllowedLoadDataNames.IsNullOrEmpty() ?? true)
+            var originalDataNames = originalLoadable?.GetDataNames();
+            if (originalDataNames?.IsNullOrEmpty() ?? true)
             {
                 return;
             }
             AllowedLoadDataNames ??= new HashSet<string>();
-            foreach (var name in originalLoadable.AllowedLoadDataNames)
+            foreach (var name in originalDataNames)
             {
                 AllowedLoadDataNames.Add(name);
             }
+        }
+
+        /// <summary>
+        /// Get data names
+        /// </summary>
+        /// <returns></returns>
+        public List<string> GetDataNames()
+        {
+            if (AllowedLoadDataNames.IsNullOrEmpty())
+            {
+                return new List<string>(0);
+            }
+            return new List<string>(AllowedLoadDataNames);
         }
     }
 }
