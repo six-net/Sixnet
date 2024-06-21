@@ -29,6 +29,16 @@ namespace Sixnet.Model
         /// <returns></returns>
         public void Need(params string[] dataNames)
         {
+            IEnumerable<string> dataNameCollection = dataNames;
+            Need(dataNameCollection);
+        }
+
+        /// <summary>
+        /// Set need to load datas
+        /// </summary>
+        /// <param name="dataNames">Data names</param>
+        public void Need(IEnumerable<string> dataNames)
+        {
             if (!dataNames.IsNullOrEmpty())
             {
                 AllowedLoadDataNames ??= new HashSet<string>();
@@ -36,6 +46,23 @@ namespace Sixnet.Model
                 {
                     AllowedLoadDataNames.Add(name);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Set need to load datas
+        /// </summary>
+        /// <param name="originalLoadable">Original loadable</param>
+        public void Need(SixnetLoadable originalLoadable)
+        {
+            if (originalLoadable?.AllowedLoadDataNames.IsNullOrEmpty() ?? true)
+            {
+                return;
+            }
+            AllowedLoadDataNames ??= new HashSet<string>();
+            foreach (var name in originalLoadable.AllowedLoadDataNames)
+            {
+                AllowedLoadDataNames.Add(name);
             }
         }
     }
