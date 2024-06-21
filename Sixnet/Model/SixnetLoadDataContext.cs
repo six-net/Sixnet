@@ -12,7 +12,7 @@ namespace Sixnet.Model
         /// <summary>
         /// Gets or sets the loadable
         /// </summary>
-        public SixnetLoadable Loadable { get; set; }
+        public ISixnetLoadable Loadable { get; set; }
 
         /// <summary>
         /// Gets or sets the source datas
