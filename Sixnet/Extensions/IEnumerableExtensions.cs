@@ -390,5 +390,34 @@ namespace System.Collections.Generic
         }
 
         #endregion
+
+        #region Get name values
+
+        /// <summary>
+        /// Get name values
+        /// </summary>
+        /// <typeparam name="TModel"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="datas"></param>
+        /// <param name="nameSelector"></param>
+        /// <param name="valueSelector"></param>
+        /// <returns></returns>
+        public static List<NameValue<TValue>> GetNameValues<TModel, TValue>(this IEnumerable<TModel> datas, Func<TModel, string> nameSelector, Func<TModel, TValue> valueSelector)
+        {
+            if (datas.IsNullOrEmpty())
+            {
+                return new List<NameValue<TValue>>(0);
+            }
+            SixnetDirectThrower.ThrowArgNullIf(nameSelector == null, nameof(nameSelector));
+            SixnetDirectThrower.ThrowArgNullIf(valueSelector == null, nameof(valueSelector));
+
+            return datas.Select(c => new NameValue<TValue>()
+            {
+                Name = nameSelector(c),
+                Value = valueSelector(c)
+            }).ToList();
+        }
+
+        #endregion
     }
 }
