@@ -2,9 +2,12 @@
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Xml;
 using Sixnet.Development.Data.Field;
+using Sixnet.Exceptions;
 using Sixnet.Model;
 
 namespace System.Collections.Generic
@@ -312,6 +315,78 @@ namespace System.Collections.Generic
             }
             var dataTable = datas.ToDataTable();
             return dataTable.WriteToCSVFile(savePath, fileName, ignoreTitle);
+        }
+
+        #endregion
+
+        #region Get cascading value
+
+        public static List<SixnetCascadingValue<TValue>> GetCascadingValues<TModel, TValue>(this IEnumerable<TModel> datas
+            , Func<TModel, bool> topDataFilter
+            , Func<TModel, string> labelSelector
+            , Func<TModel, TValue> valueSelector
+            , Func<TModel, TValue> parentValueSelector
+            , Func<TModel, double> sequenceSelector = null)
+        {
+            if (datas.IsNullOrEmpty())
+            {
+                return new List<SixnetCascadingValue<TValue>>(0);
+            }
+            SixnetDirectThrower.ThrowArgNullIf(topDataFilter == null, nameof(topDataFilter));
+            SixnetDirectThrower.ThrowArgNullIf(labelSelector == null, nameof(labelSelector));
+            SixnetDirectThrower.ThrowArgNullIf(valueSelector == null, nameof(valueSelector));
+            SixnetDirectThrower.ThrowArgNullIf(parentValueSelector == null, nameof(parentValueSelector));
+
+            var topDatas = datas.Where(topDataFilter).OrderBy(c => sequenceSelector?.Invoke(c) ?? 0).ToList();
+            if (topDatas.IsNullOrEmpty())
+            {
+                return new List<SixnetCascadingValue<TValue>>(0);
+            }
+            var values = new List<SixnetCascadingValue<TValue>>();
+            foreach (var data in topDatas)
+            {
+                var newCascadingValue = new SixnetCascadingValue<TValue>()
+                {
+                    Label = labelSelector(data),
+                    Value = valueSelector(data),
+                    Sequence = sequenceSelector?.Invoke(data) ?? 0,
+                    Level = 1
+                };
+                ResolveCascadingChildValues(2, newCascadingValue, datas, labelSelector, valueSelector, parentValueSelector, sequenceSelector);
+                values.Add(newCascadingValue);
+            }
+            return values;
+        }
+
+        static void ResolveCascadingChildValues<TModel, TValue>(int level, SixnetCascadingValue<TValue> parentValue, IEnumerable<TModel> datas
+            , Func<TModel, string> labelSelector
+            , Func<TModel, TValue> valueSelector
+            , Func<TModel, TValue> parentValueSelector
+            , Func<TModel, double> sequenceSelector = null)
+        {
+            if (parentValue == null || datas.IsNullOrEmpty())
+            {
+                return;
+            }
+            var childDatas = datas.Where(c => parentValueSelector(c).Equals(parentValue.Value)).OrderBy(c => sequenceSelector?.Invoke(c) ?? 0).ToList();
+            if (childDatas.IsNullOrEmpty())
+            {
+                return;
+            }
+            var childValues = new List<SixnetCascadingValue<TValue>>();
+            foreach (var data in childDatas)
+            {
+                var newCascadingValue = new SixnetCascadingValue<TValue>()
+                {
+                    Label = labelSelector(data),
+                    Value = valueSelector(data),
+                    Sequence = sequenceSelector?.Invoke(data) ?? 0,
+                    Level = level
+                };
+                ResolveCascadingChildValues(level++, newCascadingValue, datas, labelSelector, valueSelector, parentValueSelector, sequenceSelector);
+                childValues.Add(newCascadingValue);
+            }
+            parentValue.Children = childValues;
         }
 
         #endregion
