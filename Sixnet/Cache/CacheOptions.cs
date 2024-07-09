@@ -64,6 +64,11 @@ namespace Sixnet.Cache
         /// </summary>
         public CacheServer Server { get; set; }
 
+        /// <summary>
+        /// Whether lowercase key
+        /// </summary>
+        public bool LowercaseKey { get; set; } = true;
+
         #endregion
 
         #region Methods

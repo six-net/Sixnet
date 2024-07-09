@@ -129,6 +129,7 @@ namespace Sixnet.Cache
             {
                 return actualCacheKey;
             }
+            var cacheOptions = SixnetCacher.Options;
             var allKeys = new List<string>();
 
             //global keys
@@ -148,6 +149,10 @@ namespace Sixnet.Cache
                 allKeys.AddRange(nameValues.Select(c => string.IsNullOrWhiteSpace(c.Value) ? c.Key : string.Format("{0}{1}{2}", c.Key, SixnetCacher.GetNameValueSplitChar(), c.Value)));
             }
             actualCacheKey = string.Join(SixnetCacher.GetKeyNameSplitChar(), allKeys);
+            if (cacheOptions.LowercaseKey)
+            {
+                actualCacheKey = actualCacheKey.ToLower();
+            }
             generatedActualKey = true;
             return actualCacheKey;
         }
