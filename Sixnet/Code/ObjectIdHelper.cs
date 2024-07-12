@@ -7,6 +7,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Sixnet.Cache;
 using Sixnet.Cache.String.Parameters;
+using Sixnet.Development.Data.Field.Formatting;
+using Sixnet.Development.Entity;
+using Sixnet.Development.Queryable;
 using Sixnet.Exceptions;
 
 namespace Sixnet.Code
@@ -19,12 +22,38 @@ namespace Sixnet.Code
         public string ObjectName { get; set; }
 
         /// <summary>
+        /// Gets or sets the field name
+        /// </summary>
+        public string FieldName { get; set; }
+
+        /// <summary>
         /// Gets or sets size
         /// </summary>
         public int Size { get; set; } = 1;
     }
 
-    public static class ObjectIdGenerator
+    /// <summary>
+    /// Object id entry
+    /// </summary>
+    public struct ObjectIdEntry
+    {
+        /// <summary>
+        /// Gets or sets the object name
+        /// </summary>
+        public string ObjectName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the field name
+        /// </summary>
+        public string FieldName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the value 
+        /// </summary>
+        public long Value { get; set; }
+    }
+
+    public static class ObjectIdHelper
     {
         static readonly CacheObject _idCacheObject = new();
 
@@ -43,7 +72,7 @@ namespace Sixnet.Code
             SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(objectName), nameof(ObjectIdOptions.ObjectName));
             SixnetDirectThrower.ThrowArgErrorIf(size < 1, nameof(ObjectIdOptions.Size));
 
-            var objectKey = GetObjectIdKey(objectIdOptions.ObjectName);
+            var objectKey = GetObjectIdKey(objectIdOptions.ObjectName, objectIdOptions.FieldName);
             var incrResponse = await SixnetCacher.String.IncrementAsync(new StringIncrementParameter()
             {
                 CacheObject = _idCacheObject,
@@ -67,13 +96,15 @@ namespace Sixnet.Code
         /// Get long ids
         /// </summary>
         /// <typeparam name="TObject"></typeparam>
+        /// <param name="fieldName">Field name</param>
         /// <param name="size"></param>
         /// <returns></returns>
-        public static Task<List<long>> GetLongIdsAsync<TObject>(int size = 1)
+        public static Task<List<long>> GetLongIdsAsync<TObject>(int size = 1, string fieldName = "")
         {
             return GetLongIdsAsync(options =>
             {
                 options.Size = size;
+                options.FieldName = fieldName;
                 options.ObjectName = GetObjectNameByType(typeof(TObject));
             });
         }
@@ -82,12 +113,14 @@ namespace Sixnet.Code
         /// Get long id
         /// </summary>
         /// <typeparam name="TObject"></typeparam>
+        /// <param name="fieldName">Field name</param>
         /// <returns></returns>
-        public static async Task<long> GetLongIdAsync<TObject>()
+        public static async Task<long> GetLongIdAsync<TObject>(string fieldName = "")
         {
             return (await GetLongIdsAsync(options =>
             {
                 options.Size = 1;
+                options.FieldName = fieldName;
                 options.ObjectName = GetObjectNameByType(typeof(TObject));
             }).ConfigureAwait(false)).FirstOrDefault();
         }
@@ -105,7 +138,7 @@ namespace Sixnet.Code
             SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(objectName), nameof(ObjectIdOptions.ObjectName));
             SixnetDirectThrower.ThrowArgErrorIf(size < 1, nameof(ObjectIdOptions.Size));
 
-            var objectKey = GetObjectIdKey(objectIdOptions.ObjectName);
+            var objectKey = GetObjectIdKey(objectIdOptions.ObjectName, objectIdOptions.FieldName);
             var incrResponse = SixnetCacher.String.Increment(new StringIncrementParameter()
             {
                 CacheObject = _idCacheObject,
@@ -129,13 +162,15 @@ namespace Sixnet.Code
         /// Get long ids
         /// </summary>
         /// <typeparam name="TObject"></typeparam>
+        /// <param name="fieldName">Field name</param>
         /// <param name="size"></param>
         /// <returns></returns>
-        public static List<long> GetLongIds<TObject>(int size = 1)
+        public static List<long> GetLongIds<TObject>(int size = 1, string fieldName = "")
         {
             return GetLongIds(options =>
             {
                 options.Size = size;
+                options.FieldName = fieldName;
                 options.ObjectName = GetObjectNameByType(typeof(TObject));
             });
         }
@@ -144,12 +179,14 @@ namespace Sixnet.Code
         /// Get long id
         /// </summary>
         /// <typeparam name="TObject"></typeparam>
+        /// <param name="fieldName">Field name</param>
         /// <returns></returns>
-        public static long GetLongId<TObject>()
+        public static long GetLongId<TObject>(string fieldName = "")
         {
             return GetLongIds(options =>
             {
                 options.Size = 1;
+                options.FieldName = fieldName;
                 options.ObjectName = GetObjectNameByType(typeof(TObject));
             }).FirstOrDefault();
         }
@@ -159,7 +196,7 @@ namespace Sixnet.Code
         #region Integer
 
         /// <summary>
-        /// Get long ids
+        /// Get int ids
         /// <returns></returns>
         public static async Task<List<int>> GetIntIdsAsync(Action<ObjectIdOptions> configure)
         {
@@ -171,7 +208,7 @@ namespace Sixnet.Code
             SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(objectName), nameof(ObjectIdOptions.ObjectName));
             SixnetDirectThrower.ThrowArgErrorIf(size < 1, nameof(ObjectIdOptions.Size));
 
-            var objectKey = GetObjectIdKey(objectIdOptions.ObjectName);
+            var objectKey = GetObjectIdKey(objectIdOptions.ObjectName, objectIdOptions.FieldName);
             var incrResponse = await SixnetCacher.String.IncrementAsync(new StringIncrementParameter()
             {
                 CacheObject = _idCacheObject,
@@ -193,36 +230,40 @@ namespace Sixnet.Code
         }
 
         /// <summary>
-        /// Get long ids
+        /// Get int ids
         /// </summary>
         /// <typeparam name="TObject"></typeparam>
+        /// <param name="fieldName">Field name</param>
         /// <param name="size"></param>
         /// <returns></returns>
-        public static Task<List<int>> GetIntIdsAsync<TObject>(int size = 1)
+        public static Task<List<int>> GetIntIdsAsync<TObject>(int size = 1, string fieldName = "")
         {
             return GetIntIdsAsync(options =>
             {
                 options.Size = size;
+                options.FieldName = fieldName;
                 options.ObjectName = GetObjectNameByType(typeof(TObject));
             });
         }
 
         /// <summary>
-        /// Get long id
+        /// Get int id
         /// </summary>
         /// <typeparam name="TObject"></typeparam>
+        /// <param name="fieldName">Field name</param>
         /// <returns></returns>
-        public static async Task<int> GetIntIdAsync<TObject>()
+        public static async Task<int> GetIntIdAsync<TObject>(string fieldName = "")
         {
             return (await GetIntIdsAsync(options =>
             {
                 options.Size = 1;
+                options.FieldName = fieldName;
                 options.ObjectName = GetObjectNameByType(typeof(TObject));
             }).ConfigureAwait(false)).FirstOrDefault();
         }
 
         /// <summary>
-        /// Get long ids
+        /// Get int ids
         /// <returns></returns>
         public static List<int> GetIntIds(Action<ObjectIdOptions> configure)
         {
@@ -234,7 +275,7 @@ namespace Sixnet.Code
             SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(objectName), nameof(ObjectIdOptions.ObjectName));
             SixnetDirectThrower.ThrowArgErrorIf(size < 1, nameof(ObjectIdOptions.Size));
 
-            var objectKey = GetObjectIdKey(objectIdOptions.ObjectName);
+            var objectKey = GetObjectIdKey(objectIdOptions.ObjectName, objectIdOptions.FieldName);
             var incrResponse = SixnetCacher.String.Increment(new StringIncrementParameter()
             {
                 CacheObject = _idCacheObject,
@@ -256,30 +297,34 @@ namespace Sixnet.Code
         }
 
         /// <summary>
-        /// Get long ids
+        /// Get int ids
         /// </summary>
         /// <typeparam name="TObject"></typeparam>
+        /// <param name="fieldName">Field name</param>
         /// <param name="size"></param>
         /// <returns></returns>
-        public static List<int> GetIntIds<TObject>(int size = 1)
+        public static List<int> GetIntIds<TObject>(int size = 1, string fieldName = "")
         {
             return GetIntIds(options =>
             {
                 options.Size = size;
+                options.FieldName = fieldName;
                 options.ObjectName = GetObjectNameByType(typeof(TObject));
             });
         }
 
         /// <summary>
-        /// Get long id
+        /// Get int id
         /// </summary>
         /// <typeparam name="TObject"></typeparam>
+        /// <param name="fieldName">Field name</param>
         /// <returns></returns>
-        public static int GetIntId<TObject>()
+        public static int GetIntId<TObject>(string fieldName = "")
         {
             return GetIntIds(options =>
             {
                 options.Size = 1;
+                options.FieldName = fieldName;
                 options.ObjectName = GetObjectNameByType(typeof(TObject));
             }).FirstOrDefault();
         }
@@ -292,18 +337,18 @@ namespace Sixnet.Code
         /// Init object ids
         /// </summary>
         /// <param name="objectIds">Object ids</param>
-        public static void InitObjectIds(Dictionary<string, long> objectIds)
+        public static void InitObjectIds(List<ObjectIdEntry> entries)
         {
-            if (objectIds.IsNullOrEmpty())
+            if (entries.IsNullOrEmpty())
             {
                 return;
             }
             var parameter = new StringSetParameter()
             {
                 CacheObject = _idCacheObject,
-                Items = objectIds.Select(c => new CacheEntry
+                Items = entries.Select(c => new CacheEntry
                 {
-                    Key = GetObjectIdKey(c.Key),
+                    Key = GetObjectIdKey(c.ObjectName, c.FieldName),
                     Value = c.Value.ToString()
                 }).ToList()
             };
@@ -311,23 +356,55 @@ namespace Sixnet.Code
         }
 
         /// <summary>
-        /// Init object ids
+        /// Init app object ids
         /// </summary>
-        /// <param name="objectIds">Object ids</param>
-        public static void InitObjectIds(Dictionary<Type, long> objectIds)
+        public static void InitAppObjectIds()
         {
-            InitObjectIds(objectIds?.ToDictionary(c => GetObjectNameByType(c.Key), c => c.Value));
+            var entityConfigs = SixnetEntityManager.GetAllEntityConfigs();
+            var objectIdEntries = new List<ObjectIdEntry>();
+            foreach (var entityConfig in entityConfigs)
+            {
+                var generadeIdFields = entityConfig.AllFields?.Where(c => c.Value.InRole(FieldRole.GeneratedId)).ToList();
+                if (generadeIdFields.IsNullOrEmpty())
+                {
+                    continue;
+                }
+                foreach (var fieldItem in generadeIdFields)
+                {
+                    var field = fieldItem.Value;
+                    var dataField = SixnetEntityManager.GetField(entityConfig.EntityType, field.PropertyName);
+                    dataField.FormatSetting = FieldFormatSetting.Create(FieldFormatterNames.MAX);
+                    var maxValue = SixnetQuerier.Create()
+                        .SetModelType(entityConfig.EntityType)
+                        .Select(dataField)
+                        .IgnoreIsolation()
+                        .Scalar<long>();
+                    maxValue = maxValue < field.StartValue ? field.StartValue : maxValue;
+                    objectIdEntries.Add(new ObjectIdEntry()
+                    {
+                        ObjectName = GetObjectNameByType(entityConfig.EntityType),
+                        FieldName = field.PropertyName,
+                        Value = maxValue
+                    });
+                }
+            }
+            InitObjectIds(objectIdEntries);
         }
 
         #endregion
 
         #region Utils
 
-        static string GetObjectIdKey(string objecName)
+        static string GetObjectIdKey(string objecName, string fieldName = "")
         {
             var cacheOptions = SixnetCacher.Options;
             var splitChar = cacheOptions.KeyNameSplitChar;
-            return $"{objecName}{splitChar}Id";
+            var idKey = $"{objecName}{splitChar}GId";
+            if (!string.IsNullOrWhiteSpace(fieldName))
+            {
+                idKey = $"{idKey}{splitChar}{fieldName}";
+            }
+            return idKey;
         }
 
         static string GetObjectNameByType(Type objectType)

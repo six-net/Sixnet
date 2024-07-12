@@ -137,7 +137,8 @@ namespace Sixnet.Development.Entity
                     DataType = memberType,
                     DbType = entityFieldAttribute?.DbType,
                     Length = entityFieldAttribute?.Length ?? 0,
-                    Description = entityFieldAttribute?.Description ?? string.Empty
+                    Description = entityFieldAttribute?.Description ?? string.Empty,
+                    StartValue = entityFieldAttribute?.StartValue ?? 0
                 };
 
                 //value provider

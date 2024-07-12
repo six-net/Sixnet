@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Sixnet.Development.Data.Field;
 using Sixnet.Model;
 using Sixnet.Serialization;
@@ -80,13 +81,13 @@ namespace Sixnet.Development.Entity
         /// Update data
         /// </summary>
         /// <returns></returns>
-        void OnDataUpdating();
+        Task OnDataUpdatingAsync();
 
         /// <summary>
         /// Add data
         /// </summary>
         /// <returns></returns>
-        void OnDataAdding();
+        Task OnDataAddingAsync();
 
         /// <summary>
         /// Modify from new data

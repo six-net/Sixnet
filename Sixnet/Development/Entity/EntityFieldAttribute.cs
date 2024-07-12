@@ -63,5 +63,10 @@ namespace Sixnet.Development.Entity
         /// Gets or sets default value
         /// </summary>
         public string DefaultValue { get; set; }
+
+        /// <summary>
+        /// Gets or sets the start value
+        /// </summary>
+        public long StartValue { get; set; } = 0;
     }
 }

@@ -116,6 +116,11 @@ namespace Sixnet.Development.Data.Field
         /// </summary>
         public bool IsSimpleConstant => false;
 
+        /// <summary>
+        /// Gets or sets the start value
+        /// </summary>
+        public long StartValue { get; set; }
+
         #endregion
 
         #region Methods
@@ -175,7 +180,7 @@ namespace Sixnet.Development.Data.Field
             var propertyName = SixnetExpressionHelper.GetExpressionLastPropertyName(field);
             return Create(propertyName, typeof(TModel), modelTypeIndex, FieldFormatSetting.Create(formatterName), fieldName);
         }
-        
+
         string GetIdentity()
         {
             return $"{ModelType?.GUID}_{FieldName}_{PropertyName}";

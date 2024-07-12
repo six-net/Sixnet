@@ -7,6 +7,7 @@ using Sixnet.Development.Data.Field;
 using Sixnet.Exceptions;
 using static Sixnet.Validation.SixnetValidationConstants;
 using Sixnet.Serialization.Binary;
+using System.Threading.Tasks;
 
 namespace Sixnet.Development.Entity
 {
@@ -250,9 +251,9 @@ namespace Sixnet.Development.Entity
         /// Update data
         /// </summary>
         /// <returns></returns>
-        public void OnDataUpdating()
+        public Task OnDataUpdatingAsync()
         {
-            OnUpdating();
+            return OnUpdatingAsync();
         }
 
         /// <summary>
@@ -260,8 +261,9 @@ namespace Sixnet.Development.Entity
         /// </summary>
         /// <param name="newEntity">New entity</param>
         /// <returns></returns>
-        internal protected virtual void OnUpdating()
+        internal protected virtual Task OnUpdatingAsync()
         {
+            return Task.CompletedTask;
         }
 
         /// <summary>
@@ -361,21 +363,61 @@ namespace Sixnet.Development.Entity
         /// Add data
         /// </summary>
         /// <returns></returns>
-        public void OnDataAdding()
+        public Task OnDataAddingAsync()
         {
-            if (IdentityValueIsNull())
-            {
-                InitIdentityValue();
-            }
-            OnAdding();
+            return OnAddingAsync();
         }
 
         /// <summary>
         /// Add data
         /// </summary>
         /// <returns></returns>
-        internal protected virtual void OnAdding()
+        internal protected virtual async Task OnAddingAsync()
         {
+            #region Generate id
+
+            var generatedIdFields = SixnetEntityManager.GetFields<T>(FieldRole.GeneratedId);
+            if (!generatedIdFields.IsNullOrEmpty())
+            {
+                foreach (var field in generatedIdFields)
+                {
+                    var fieldValue = GetValue(field.PropertyName);
+                    if (fieldValue == null || fieldValue <= field.StartValue)
+                    {
+                        var typeCode = Type.GetTypeCode(field.DataType);
+                        switch (typeCode)
+                        {
+                            case TypeCode.Int16:
+                            case TypeCode.UInt16:
+                            case TypeCode.Int32:
+                            case TypeCode.UInt32:
+                                SetValue(field.PropertyName, await ObjectIdHelper.GetIntIdAsync<T>(field.PropertyName).ConfigureAwait(false));
+                                break;
+                            case TypeCode.Int64:
+                            case TypeCode.UInt64:
+                            case TypeCode.Double:
+                            case TypeCode.Single:
+                            case TypeCode.Decimal:
+                                SetValue(field.PropertyName, await ObjectIdHelper.GetLongIdAsync<T>(field.PropertyName).ConfigureAwait(false));
+                                break;
+                            default:
+                                SixnetDirectThrower.ThrowIf<NotSupportedException>(true, typeCode.ToString());
+                                break;
+                        }
+                    }
+                }
+            }
+
+            #endregion
+
+            #region primary key
+
+            if (IdentityValueIsNull())
+            {
+                InitIdentityValue();
+            };
+
+            #endregion
         }
 
         #endregion

@@ -36,6 +36,7 @@ namespace Sixnet.Development.Entity
         UpdateUserId = 2048,
         UpdateUserName = 4096,
         SplitValue = 8192,
+        GeneratedId = 16384
     }
 
     /// <summary>
