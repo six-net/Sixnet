@@ -1247,6 +1247,58 @@ namespace Sixnet.Development.Queryable
 
         #endregion
 
+        #region Max
+
+        /// <summary>
+        /// Get max value
+        /// </summary>
+        /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="field">Field </param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Max value</returns>
+        TValue Max<TValue>(Expression<Func<TModel, TValue>> field, Action<DataOperationOptions> configure = null);
+
+        #endregion
+
+        #region Min
+
+        /// <summary>
+        /// Get min value
+        /// </summary>
+        /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="field">Field </param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Min value</returns>
+        TValue Min<TValue>(Expression<Func<TModel, TValue>> field, Action<DataOperationOptions> configure = null);
+
+        #endregion
+
+        #region Sum
+
+        /// <summary>
+        /// Get sum value
+        /// </summary>
+        /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="field">Field </param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Sum value</returns>
+        TValue Sum<TValue>(Expression<Func<TModel, TValue>> field, Action<DataOperationOptions> configure = null);
+
+        #endregion
+
+        #region Avg
+
+        /// <summary>
+        /// Get average value
+        /// </summary>
+        /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="field">Field </param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Average value</returns>
+        TValue Avg<TValue>(Expression<Func<TModel, TValue>> field, Action<DataOperationOptions> configure = null);
+
+        #endregion
+
         #endregion
     }
 

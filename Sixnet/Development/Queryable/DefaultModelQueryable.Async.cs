@@ -6,6 +6,8 @@ using Sixnet.Development.Repository;
 using Sixnet.Model.Paging;
 using System.Threading.Tasks;
 using System.Linq.Expressions;
+using Sixnet.Development.Data.Field.Formatting;
+using Sixnet.Expressions.Linq;
 
 namespace Sixnet.Development.Queryable
 {
@@ -98,6 +100,74 @@ namespace Sixnet.Development.Queryable
         public Task<int> UpdateAsync(Expression<Func<TModel, bool>> fieldsAssignmentExpression, Action<DataOperationOptions> configure = null)
         {
             return UpdateAsync(fieldsAssignmentExpression.GetFieldsAssignment(), configure);
+        }
+
+        #endregion
+
+        #region Max
+
+        /// <summary>
+        /// Get max value
+        /// </summary>
+        /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="field">Field </param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Max value</returns>
+        public Task<TValue> MaxAsync<TValue>(Expression<Func<TModel, TValue>> field, Action<DataOperationOptions> configure = null)
+        {
+            Select(SixnetExpressionHelper.GetOutputDataField(this, field, FieldFormatSetting.Create(FieldFormatterNames.MAX)));
+            return MaxAsync<TValue>(configure);
+        }
+
+        #endregion
+
+        #region Min
+
+        /// <summary>
+        /// Get min value
+        /// </summary>
+        /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="field">Field </param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Min value</returns>
+        public Task<TValue> MinAsync<TValue>(Expression<Func<TModel, TValue>> field, Action<DataOperationOptions> configure = null)
+        {
+            Select(SixnetExpressionHelper.GetOutputDataField(this, field, FieldFormatSetting.Create(FieldFormatterNames.MIN)));
+            return MinAsync<TValue>(configure);
+        }
+
+        #endregion
+
+        #region Sum
+
+        /// <summary>
+        /// Get sum value
+        /// </summary>
+        /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="field">Field </param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Sum value</returns>
+        public Task<TValue> SumAsync<TValue>(Expression<Func<TModel, TValue>> field, Action<DataOperationOptions> configure = null)
+        {
+            Select(SixnetExpressionHelper.GetOutputDataField(this, field, FieldFormatSetting.Create(FieldFormatterNames.SUM)));
+            return SumAsync<TValue>(configure);
+        }
+
+        #endregion
+
+        #region Avg
+
+        /// <summary>
+        /// Get average value
+        /// </summary>
+        /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="field">Field </param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Average value</returns>
+        public Task<TValue> AvgAsync<TValue>(Expression<Func<TModel, TValue>> field, Action<DataOperationOptions> configure = null)
+        {
+            Select(SixnetExpressionHelper.GetOutputDataField(this, field, FieldFormatSetting.Create(FieldFormatterNames.AVG)));
+            return AvgAsync<TValue>(configure);
         }
 
         #endregion

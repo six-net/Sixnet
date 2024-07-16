@@ -1142,7 +1142,7 @@ namespace Sixnet.Expressions.Linq
         /// <param name="queryable">Queryable</param>
         /// <param name="fieldExpression">Field expression</param>
         /// <returns></returns>
-        public static ISixnetField GetOutputDataField(ISixnetQueryable queryable, Expression fieldExpression)
+        public static ISixnetField GetOutputDataField(ISixnetQueryable queryable, Expression fieldExpression, FieldFormatSetting outFormatSetting = null)
         {
             #region Type index
 
@@ -1162,7 +1162,7 @@ namespace Sixnet.Expressions.Linq
 
             #endregion
 
-            return GetDataField(fieldExpression, typeIndexes);
+            return GetDataField(fieldExpression, typeIndexes, outFormatSetting);
         }
 
         /// <summary>
