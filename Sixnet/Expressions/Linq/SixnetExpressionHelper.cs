@@ -1026,7 +1026,7 @@ namespace Sixnet.Expressions.Linq
         /// </summary>
         /// <param name="fieldExpression">Field expression</param>
         /// <returns></returns>
-        public static ISixnetField GetDataField(Expression fieldExpression)
+        public static ISixnetField GetDataField(Expression fieldExpression, FieldFormatSetting formatSetting = null)
         {
             SixnetDirectThrower.ThrowArgNullIf(fieldExpression == null, $"{nameof(fieldExpression)} is null");
             Dictionary<string, int> parameterIndexes = null;
@@ -1035,7 +1035,7 @@ namespace Sixnet.Expressions.Linq
                 parameterIndexes = GetLambdaParameterIndexes(lambdaExp);
                 fieldExpression = lambdaExp.Body;
             }
-            return GetDataField(fieldExpression, parameterIndexes);
+            return GetDataField(fieldExpression, parameterIndexes, formatSetting);
         }
 
         /// <summary>
@@ -1043,7 +1043,7 @@ namespace Sixnet.Expressions.Linq
         /// </summary>
         /// <param name="fieldExpression">Field expression</param>
         /// <returns></returns>
-        public static ISixnetField GetDataField(Expression fieldExpression, Dictionary<string, int> parameterIndexes)
+        public static ISixnetField GetDataField(Expression fieldExpression, Dictionary<string, int> parameterIndexes, FieldFormatSetting outFormatSetting = null)
         {
             var childExpression = fieldExpression;
             SixnetDirectThrower.ThrowArgNullIf(childExpression == null, $"Not support expression:{fieldExpression?.GetType()}");
@@ -1068,7 +1068,10 @@ namespace Sixnet.Expressions.Linq
                             var entityField = SixnetEntityManager.GetField(modelType, propertyName);
                             if (entityField?.FormatSetting != null)
                             {
-                                innermostFieldFormatSetting.Child = entityField.FormatSetting;
+                                var fildOriginalFormattingSetting = entityField.FormatSetting.Clone();
+                                fildOriginalFormattingSetting.Child = fieldFormatSetting;
+                                fieldFormatSetting = fildOriginalFormattingSetting;
+                                innermostFieldFormatSetting ??= fildOriginalFormattingSetting;
                             }
                             var propertyField = DataField.Create(propertyName, modelType, modelTypeIndex, null, entityField?.FieldName);
                             propertyField.DataType = memberExpression.Type;
@@ -1105,18 +1108,29 @@ namespace Sixnet.Expressions.Linq
                 try
                 {
                     var value = Expression.Lambda(fieldExpression).Compile().DynamicInvoke();
-                    if(value != null)
+                    if (value != null)
                     {
                         criterionField = ConstantField.Create(value);
                     }
                 }
                 catch (Exception ex)
                 {
-                    SixnetDirectThrower.ThrowNotSupportIf(true, $"Not support for node type:{fieldExpression.NodeType}");
+                    SixnetDirectThrower.ThrowNotSupportIf(true, $"Not support for node type:{fieldExpression.NodeType},{ex.Message}");
                 }
             }
             else
             {
+                if (outFormatSetting != null)
+                {
+                    if (innermostFieldFormatSetting != null)
+                    {
+                        innermostFieldFormatSetting.Child = outFormatSetting;
+                    }
+                    else
+                    {
+                        fieldFormatSetting = outFormatSetting;
+                    }
+                }
                 criterionField.FormatSetting = fieldFormatSetting;
             }
             return criterionField;

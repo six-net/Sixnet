@@ -461,14 +461,14 @@ namespace Sixnet.Development.Queryable
                         finallyFields = finallyFields.Except(UnselectedFields, SixnetFieldComparer.DefaultComparer).ToList();
                     }
                 }
-                if (includeNecessary)
-                {
-                    var necessaryFields = SixnetEntityManager.GetNecessaryFields(modelType);
-                    if (!necessaryFields.IsNullOrEmpty())
-                    {
-                        finallyFields = finallyFields.Union(necessaryFields, SixnetFieldComparer.DefaultComparer).ToList();
-                    }
-                }
+                //if (includeNecessary)
+                //{
+                //    var necessaryFields = SixnetEntityManager.GetNecessaryFields(modelType);
+                //    if (!necessaryFields.IsNullOrEmpty())
+                //    {
+                //        finallyFields = finallyFields.Union(necessaryFields, SixnetFieldComparer.DefaultComparer).ToList();
+                //    }
+                //}
                 _finallyFieldsCache[fieldsCacheKey] = finallyFields;
             }
             return finallyFields;

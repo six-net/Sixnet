@@ -46,12 +46,8 @@ namespace System.Linq.Expressions
         /// <returns></returns>
         internal static ISixnetField GetDataField(this Expression expression, string formatterName = "")
         {
-            var dataField = SixnetExpressionHelper.GetDataField(expression);
-            if (dataField != null && !string.IsNullOrWhiteSpace(formatterName))
-            {
-                dataField.FormatSetting = FieldFormatSetting.Create(formatterName);
-            }
-            return dataField;
+            return SixnetExpressionHelper.GetDataField(expression, string.IsNullOrWhiteSpace(formatterName)
+                ? null : FieldFormatSetting.Create(formatterName));
         }
     }
 }

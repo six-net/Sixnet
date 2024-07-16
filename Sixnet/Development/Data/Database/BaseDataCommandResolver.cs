@@ -1362,7 +1362,7 @@ namespace Sixnet.Development.Data.Database
             var formatedFieldName = "";
             var fieldName = "";
             var propertyName = field.PropertyName;
-            var formatOption = field.FormatSetting;
+            var formatSetting = field.FormatSetting;
             // regular field
             if (field is DataField regularField)
             {
@@ -1419,7 +1419,7 @@ namespace Sixnet.Development.Data.Database
             }
             SixnetDirectThrower.ThrowInvalidOperationIf(string.IsNullOrWhiteSpace(formatedFieldName), $"Invalid for {field.GetType()}");
 
-            var hasFormat = formatOption != null;
+            var hasFormat = formatSetting != null;
             if (hasFormat)
             {
                 var formatContext = new FormatFieldContext()
@@ -1432,17 +1432,17 @@ namespace Sixnet.Development.Data.Database
                 };
                 do
                 {
-                    if (formatOption.Parameter is ISixnetField parameterField)
+                    if (formatSetting.Parameter is ISixnetField parameterField)
                     {
-                        formatOption.Parameter = FormatField(context, queryable, parameterField, queryableLocation, FieldLocation.FormatParameter, criterionOperator, tablePetName, formatOption.Name);
+                        formatSetting.Parameter = FormatField(context, queryable, parameterField, queryableLocation, FieldLocation.FormatParameter, criterionOperator, tablePetName, formatSetting.Name);
                     }
                     formatContext.FieldName = formatedFieldName;
-                    formatContext.FormatSetting = formatOption;
-                    var fieldFormatter = SixnetDataManager.GetFieldFormatter(formatOption.Name) ?? DefaultFieldFormatter;
+                    formatContext.FormatSetting = formatSetting;
+                    var fieldFormatter = SixnetDataManager.GetFieldFormatter(formatSetting.Name) ?? DefaultFieldFormatter;
                     formatedFieldName = fieldFormatter.Format(formatContext);
-                    formatOption = formatOption.Child;
+                    formatSetting = formatSetting.Child;
 
-                } while (formatOption != null);
+                } while (formatSetting != null);
             }
 
             var fieldPetName = queryableLocation == QueryableLocation.Top && fieldLocation == FieldLocation.Output && !string.IsNullOrWhiteSpace(propertyName)

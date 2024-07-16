@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Sixnet.Cache;
 using Sixnet.Cache.String.Parameters;
+using Sixnet.Development.Data.Field;
 using Sixnet.Development.Data.Field.Formatting;
 using Sixnet.Development.Entity;
 using Sixnet.Development.Queryable;
@@ -372,12 +373,13 @@ namespace Sixnet.Code
                 foreach (var fieldItem in generadeIdFields)
                 {
                     var field = fieldItem.Value;
-                    var dataField = SixnetEntityManager.GetField(entityConfig.EntityType, field.PropertyName);
+                    var dataField = DataField.Create(field.PropertyName, entityConfig.EntityType, 0, null, field.FieldName);
                     dataField.FormatSetting = FieldFormatSetting.Create(FieldFormatterNames.MAX);
                     var maxValue = SixnetQuerier.Create()
                         .SetModelType(entityConfig.EntityType)
                         .Select(dataField)
                         .IgnoreIsolation()
+                        .IncludeArchived()
                         .Scalar<long>();
                     maxValue = maxValue < field.StartValue ? field.StartValue : maxValue;
                     objectIdEntries.Add(new ObjectIdEntry()

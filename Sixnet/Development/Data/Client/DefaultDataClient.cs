@@ -442,8 +442,8 @@ namespace Sixnet.Development.Data.Client
         /// <returns></returns>
         public TValue Max<TValue>(ISixnetQueryable queryable, DataOperationOptions options = null)
         {
-            var firstField = queryable.SelectedFields?.FirstOrDefault();
-            SixnetException.ThrowIf(!FieldFormatterNames.MAX.Equals(firstField?.FormatSetting?.Name), "The field for which the maximum value is to be calculated is not specified");
+            //var firstField = queryable.SelectedFields?.FirstOrDefault();
+            //SixnetException.ThrowIf(!FieldFormatterNames.MAX.Equals(firstField?.FormatSetting?.Name), "The field for which the maximum value is to be calculated is not specified");
 
             return Scalar<TValue>(queryable, options);
         }
@@ -470,8 +470,8 @@ namespace Sixnet.Development.Data.Client
         /// <returns></returns>
         public TValue Min<TValue>(ISixnetQueryable queryable, DataOperationOptions options = null)
         {
-            var firstField = queryable.SelectedFields?.FirstOrDefault();
-            SixnetException.ThrowIf(!FieldFormatterNames.MIN.Equals(firstField?.FormatSetting?.Name), "The field for which the minimum value is to be calculated is not specified");
+            //var firstField = queryable.SelectedFields?.FirstOrDefault();
+            //SixnetException.ThrowIf(!FieldFormatterNames.MIN.Equals(firstField?.FormatSetting?.Name), "The field for which the minimum value is to be calculated is not specified");
 
             return Scalar<TValue>(queryable, options);
         }
@@ -498,8 +498,8 @@ namespace Sixnet.Development.Data.Client
         /// <returns></returns>
         public TValue Sum<TValue>(ISixnetQueryable queryable, DataOperationOptions options = null)
         {
-            var firstField = queryable.SelectedFields?.FirstOrDefault();
-            SixnetException.ThrowIf(!FieldFormatterNames.SUM.Equals(firstField?.FormatSetting?.Name), "The field for which the sum value is to be calculated is not specified");
+            //var firstField = queryable.SelectedFields?.FirstOrDefault();
+            //SixnetException.ThrowIf(!FieldFormatterNames.SUM.Equals(firstField?.FormatSetting?.Name), "The field for which the sum value is to be calculated is not specified");
 
             return Scalar<TValue>(queryable, options);
         }
@@ -526,8 +526,8 @@ namespace Sixnet.Development.Data.Client
         /// <returns></returns>
         public TValue Avg<TValue>(ISixnetQueryable queryable, DataOperationOptions options = null)
         {
-            var firstField = queryable.SelectedFields?.FirstOrDefault();
-            SixnetException.ThrowIf(!FieldFormatterNames.AVG.Equals(firstField?.FormatSetting?.Name), "The field for which the avg value is to be calculated is not specified");
+            //var firstField = queryable.SelectedFields?.FirstOrDefault();
+            //SixnetException.ThrowIf(!FieldFormatterNames.AVG.Equals(firstField?.FormatSetting?.Name), "The field for which the avg value is to be calculated is not specified");
 
             return Scalar<TValue>(queryable, options);
         }
