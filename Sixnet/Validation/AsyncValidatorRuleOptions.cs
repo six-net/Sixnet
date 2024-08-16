@@ -37,6 +37,11 @@ namespace Sixnet.Validation
         /// </summary>
         public Dictionary<string, AsyncValidatorRuleTriggerType> FieldTriggers { get; set; }
 
+        /// <summary>
+        /// Long as string
+        /// </summary>
+        public bool LongAsString { get; set; } = true;
+
         internal string GetOptionsKey()
         {
             var keyPrefixKey = KeyPrefixs.IsNullOrEmpty() ? string.Empty : string.Join("", KeyPrefixs.OrderBy(c => c));

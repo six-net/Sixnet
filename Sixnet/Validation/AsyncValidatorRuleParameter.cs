@@ -20,5 +20,10 @@ namespace Sixnet.Validation
         /// Field type
         /// </summary>
         public Type FieldType { get; set; }
+
+        /// <summary>
+        /// Long as string
+        /// </summary>
+        public bool LongAsString { get; set; } = true;
     }
 }

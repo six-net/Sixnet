@@ -64,13 +64,18 @@ namespace Sixnet.Validation
                         type = "boolean";
                         break;
                     case TypeCode.UInt64:
+                    case TypeCode.Int64:
+                        if (!parameter.LongAsString)
+                        {
+                            type = "integer";
+                        }
+                        break;
                     case TypeCode.UInt32:
                     case TypeCode.UInt16:
                     case TypeCode.Byte:
                     case TypeCode.SByte:
                     case TypeCode.Int16:
                     case TypeCode.Int32:
-                    case TypeCode.Int64:
                         type = "integer";
                         break;
                     case TypeCode.Single:

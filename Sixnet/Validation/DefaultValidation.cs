@@ -172,7 +172,8 @@ namespace Sixnet.Validation
             {
                 ErrorMessage = errorMessage,
                 Required = ruleOptions.Required && !(ruleOptions.AllowNullFieldNames?.Contains(fieldName ?? string.Empty) ?? false),
-                FieldType = fieldType
+                FieldType = fieldType,
+                LongAsString = ruleOptions.LongAsString
             });
             if (rule != null)
             {
