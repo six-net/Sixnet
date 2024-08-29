@@ -4,6 +4,7 @@ using Sixnet.App;
 using Sixnet.Cache;
 using Sixnet.Development.Data;
 using Sixnet.Development.Message;
+using Sixnet.Development.Work;
 using Sixnet.Exceptions;
 using Sixnet.IO.FileAccess;
 using Sixnet.Localization;
@@ -120,6 +121,11 @@ namespace Sixnet.DependencyInjection
         /// Configure authorization
         /// </summary>
         public Action<SixnetAuthorizationOptions> ConfigureAuthorization { get; set; }
+        
+        /// <summary>
+        /// Configure unitofwork
+        /// </summary>
+        public Action<UnitOfWorkOptions> ConfigureUnitOfWork { get; set; }
 
         /// <summary>
         /// Set options style

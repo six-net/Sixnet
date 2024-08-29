@@ -8,6 +8,7 @@ using Sixnet.Development.Data;
 using Sixnet.Development.Data.Event;
 using Sixnet.Development.Message;
 using Sixnet.Development.Repository;
+using Sixnet.Development.Work;
 using Sixnet.Exceptions;
 using Sixnet.IO.FileAccess;
 using Sixnet.Mapper;
@@ -427,6 +428,8 @@ namespace Sixnet.DependencyInjection
             services.ConfigureIfNotNull<SixnetValidationOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Validation)));
             // Authorization
             services.ConfigureIfNotNull<SixnetAuthorizationOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Authorization)));
+            // UnitOfWork
+            services.ConfigureIfNotNull<UnitOfWorkOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.UnitOfWork)));
 
             // Post config options
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureUpload);
@@ -446,6 +449,7 @@ namespace Sixnet.DependencyInjection
                 sixnetOptions.ConfigureCache?.Invoke(options);
             });
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureAuthorization);
+            services.PostConfigureIfNotNull(sixnetOptions.ConfigureUnitOfWork);
         }
 
         #endregion

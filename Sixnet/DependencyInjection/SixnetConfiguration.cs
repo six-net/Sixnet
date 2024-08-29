@@ -1,6 +1,7 @@
 ﻿using Sixnet.Cache;
 using Sixnet.Development.Data;
 using Sixnet.Development.Message;
+using Sixnet.Development.Work;
 using Sixnet.IO.FileAccess;
 using Sixnet.MQ;
 using Sixnet.Net.Email;
@@ -83,5 +84,10 @@ namespace Sixnet.DependencyInjection
         /// Gets or sets the authorization options 
         /// </summary>
         public SixnetAuthorizationOptions Authorization { get; set; }
+
+        /// <summary>
+        /// Gets or sets the unitofwork options
+        /// </summary>
+        public UnitOfWorkOptions UnitOfWork { get; set; }
     }
 }
