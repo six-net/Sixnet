@@ -24,14 +24,21 @@ namespace Sixnet.Development.Data.Database
         /// <returns>Affected data numbers</returns>
         public virtual async Task<int> ExecuteAsync(MultipleDatabaseCommand command)
         {
-            var dataCommandResolver = GetDataCommandResolver();
-            var statements = dataCommandResolver.GenerateDatabaseExecutionStatements(command);
-            var totalAffectedNumber = 0;
-            foreach (var statement in statements)
+            try
             {
-                totalAffectedNumber += await ExecuteDatabaseStatementAsync(command, statement).ConfigureAwait(false);
+                var dataCommandResolver = GetDataCommandResolver();
+                var statements = dataCommandResolver.GenerateDatabaseExecutionStatements(command);
+                var totalAffectedNumber = 0;
+                foreach (var statement in statements)
+                {
+                    totalAffectedNumber += await ExecuteDatabaseStatementAsync(command, statement).ConfigureAwait(false);
+                }
+                return totalAffectedNumber;
             }
-            return totalAffectedNumber;
+            catch (Exception ex)
+            {
+                throw GetSqlException(ex);
+            }
         }
 
         /// <summary>
@@ -414,27 +421,34 @@ namespace Sixnet.Development.Data.Database
         /// <returns>Added data identities,Key: command id, Value: identity value</returns>
         public virtual async Task<Dictionary<string, TIdentity>> InsertAndReturnIdentityAsync<TIdentity>(MultipleDatabaseCommand command)
         {
-            var dataCommandResolver = GetDataCommandResolver();
-            var statements = dataCommandResolver.GenerateDatabaseExecutionStatements(command);
-            var identityDict = new Dictionary<string, TIdentity>();
-            var dbConnection = command.Connection.DbConnection;
-            foreach (var statement in statements)
+            try
             {
-                using (var reader = await dbConnection.ExecuteReaderAsync(GetCommandDefinition(command, statement)).ConfigureAwait(false))
+                var dataCommandResolver = GetDataCommandResolver();
+                var statements = dataCommandResolver.GenerateDatabaseExecutionStatements(command);
+                var identityDict = new Dictionary<string, TIdentity>();
+                var dbConnection = command.Connection.DbConnection;
+                foreach (var statement in statements)
                 {
-                    var dataTable = new DataTable();
-                    dataTable.Load(reader);
-                    if (dataTable.Rows.Count > 0)
+                    using (var reader = await dbConnection.ExecuteReaderAsync(GetCommandDefinition(command, statement)).ConfigureAwait(false))
                     {
-                        var firstRow = dataTable.Rows[0];
-                        foreach (DataColumn col in dataTable.Columns)
+                        var dataTable = new DataTable();
+                        dataTable.Load(reader);
+                        if (dataTable.Rows.Count > 0)
                         {
-                            identityDict[col.ColumnName] = firstRow[col].ConvertTo<TIdentity>();
+                            var firstRow = dataTable.Rows[0];
+                            foreach (DataColumn col in dataTable.Columns)
+                            {
+                                identityDict[col.ColumnName] = firstRow[col].ConvertTo<TIdentity>();
+                            }
                         }
                     }
                 }
+                return identityDict;
             }
-            return identityDict;
+            catch (Exception ex)
+            {
+                throw GetSqlException(ex);
+            }
         }
 
         /// <summary>
@@ -454,11 +468,18 @@ namespace Sixnet.Development.Data.Database
         /// <returns></returns>
         public virtual async Task MigrateAsync(MigrationDatabaseCommand command)
         {
-            var dataCommandResolver = GetDataCommandResolver();
-            var statements = dataCommandResolver.GenerateDatabaseMigrationStatements(command);
-            foreach (var statement in statements)
+            try
             {
-                await ExecuteDatabaseStatementAsync(command, statement).ConfigureAwait(false);
+                var dataCommandResolver = GetDataCommandResolver();
+                var statements = dataCommandResolver.GenerateDatabaseMigrationStatements(command);
+                foreach (var statement in statements)
+                {
+                    await ExecuteDatabaseStatementAsync(command, statement).ConfigureAwait(false);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw GetSqlException(ex);
             }
         }
 

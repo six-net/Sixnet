@@ -1,11 +1,16 @@
-﻿using Sixnet.Development.Data;
+﻿using Sixnet.Component.Retry;
+using Sixnet.DependencyInjection;
+using Sixnet.Development.Data;
 using Sixnet.Development.Data.Database;
 using Sixnet.Development.Domain.Event;
 using Sixnet.Development.Message;
+using Sixnet.Development.Queryable;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
+using static System.Collections.Specialized.BitVector32;
 
 namespace Sixnet.Development.Work
 {
@@ -307,6 +312,339 @@ namespace Sixnet.Development.Work
         {
             IEnumerable<ISixnetDomainEvent> eventCollection = domainEvents;
             PublishDomainEvent(eventCollection);
+        }
+
+        #endregion
+
+        #region Execute
+
+        static RetryPipeline GetRetryPipeline(ISixnetWork work, UnitOfWorkOptions options, UnitOfWorkSetting setting)
+        {
+            var retryTimes = 0;
+            if (!options.NotRetry && !setting.NotRetry)
+            {
+                retryTimes = setting.RetryTimes.HasValue && setting.RetryTimes.Value > 0
+                    ? setting.RetryTimes.Value
+                    : options.RetryTimes;
+                if (retryTimes < 1)
+                {
+                    retryTimes = 1;
+                }
+            }
+            return new RetryPipeline()
+            {
+                Times = retryTimes,
+                When = options.AllowRetry,
+                OnBeforeRetry = ctx =>
+                {
+                    work.Rollback();
+                }
+            };
+        }
+
+        static RetryPipeline<T> GetRetryPipeline<T>(ISixnetWork work, UnitOfWorkOptions options, UnitOfWorkSetting setting)
+        {
+            var retryTimes = 0;
+            if (!options.NotRetry && !setting.NotRetry)
+            {
+                retryTimes = setting.RetryTimes.HasValue && setting.RetryTimes.Value > 0
+                    ? setting.RetryTimes.Value
+                    : options.RetryTimes;
+                if (retryTimes < 1)
+                {
+                    retryTimes = 1;
+                }
+            }
+            return new RetryPipeline<T>()
+            {
+                Times = retryTimes,
+                When = options.AllowRetry,
+                OnBeforeRetry = ctx =>
+                {
+                    work.Rollback();
+                }
+            };
+        }
+
+        /// <summary>
+        /// Execute
+        /// </summary>
+        /// <param name="action">Func</param>
+        /// <param name="configure">Configure</param>
+        public static void Execute(Action<UnitOfWorkExecutionContext> action, Action<UnitOfWorkSetting> configure = null)
+        {
+            var setting = UnitOfWorkSetting.GetDefaultSetting();
+            configure?.Invoke(setting);
+            using (var work = Create(setting.IsolationLevel))
+            {
+                ExecuteCore(work, action, setting);
+            }
+        }
+
+        /// <summary>
+        /// Execute
+        /// </summary>
+        /// <param name="databaseServerConfigNames">Database server config names</param>
+        /// <param name="action">Action</param>
+        /// <param name="configure">Configure</param>
+        public static void Execute(IEnumerable<string> databaseServerConfigNames, Action<UnitOfWorkExecutionContext> action, Action<UnitOfWorkSetting> configure = null)
+        {
+            var setting = UnitOfWorkSetting.GetDefaultSetting();
+            configure?.Invoke(setting);
+            using (var work = Create(databaseServerConfigNames, setting.IsolationLevel))
+            {
+                ExecuteCore(work, action, setting);
+            }
+        }
+
+        /// <summary>
+        /// Execute
+        /// </summary>
+        /// <param name="databaseServerConfigNames">Database server config names</param>
+        /// <param name="action">Action</param>
+        /// <param name="configure">Configure</param>
+        public static void Execute(IEnumerable<DatabaseServer> servers, Action<UnitOfWorkExecutionContext> action, Action<UnitOfWorkSetting> configure = null)
+        {
+            var setting = UnitOfWorkSetting.GetDefaultSetting();
+            configure?.Invoke(setting);
+            using (var work = Create(servers, setting.IsolationLevel))
+            {
+                ExecuteCore(work, action, setting);
+            }
+        }
+
+        static void ExecuteCore(ISixnetWork work, Action<UnitOfWorkExecutionContext> action, UnitOfWorkSetting setting)
+        {
+            var workOptions = SixnetContainer.GetOptions<UnitOfWorkOptions>();
+            var retryPipeline = GetRetryPipeline(work, workOptions, setting);
+            retryPipeline.Action = () =>
+            {
+                action?.Invoke(new UnitOfWorkExecutionContext()
+                {
+                    Work = work
+                });
+            };
+            // execute
+            retryPipeline.Execute();
+            // commit
+            if (setting.AutoCommit)
+            {
+                work.Commit();
+            }
+        }
+
+        /// <summary>
+        /// Execute
+        /// </summary>
+        /// <param name="func">Func</param>
+        /// <param name="configure">Configure</param>
+        public static async Task ExecuteAsync(Func<UnitOfWorkExecutionContext, Task> func, Action<UnitOfWorkSetting> configure = null)
+        {
+            var setting = UnitOfWorkSetting.GetDefaultSetting();
+            configure?.Invoke(setting);
+            using (var work = Create(setting.IsolationLevel))
+            {
+                await ExecuteCoreAsync(work, func, setting).ConfigureAwait(false);
+            }
+        }
+
+        /// <summary>
+        /// Execute
+        /// </summary>
+        /// <param name="databaseServerConfigNames">Database server config names</param>
+        /// <param name="func">Func</param>
+        /// <param name="configure">Configure</param>
+        public static async Task ExecuteAsync(IEnumerable<string> databaseServerConfigNames, Func<UnitOfWorkExecutionContext, Task> func, Action<UnitOfWorkSetting> configure = null)
+        {
+            var setting = UnitOfWorkSetting.GetDefaultSetting();
+            configure?.Invoke(setting);
+            using (var work = Create(databaseServerConfigNames, setting.IsolationLevel))
+            {
+                await ExecuteCoreAsync(work, func, setting).ConfigureAwait(false);
+            }
+        }
+
+        /// <summary>
+        /// Execute
+        /// </summary>
+        /// <param name="servers">Servers</param>
+        /// <param name="func">Func</param>
+        /// <param name="configure">Configure</param>
+        public static async Task ExecuteAsync(IEnumerable<DatabaseServer> servers, Func<UnitOfWorkExecutionContext, Task> func, Action<UnitOfWorkSetting> configure = null)
+        {
+            var setting = UnitOfWorkSetting.GetDefaultSetting();
+            configure?.Invoke(setting);
+            using (var work = Create(servers, setting.IsolationLevel))
+            {
+                await ExecuteCoreAsync(work, func, setting).ConfigureAwait(false);
+            }
+        }
+
+        static async Task ExecuteCoreAsync(ISixnetWork work, Func<UnitOfWorkExecutionContext, Task> func, UnitOfWorkSetting setting)
+        {
+            var workOptions = SixnetContainer.GetOptions<UnitOfWorkOptions>();
+            var retryPipeline = GetRetryPipeline(work, workOptions, setting);
+            retryPipeline.ActionAsync = async () =>
+            {
+                if (func != null)
+                {
+                    await func(new UnitOfWorkExecutionContext()
+                    {
+                        Work = work
+                    }).ConfigureAwait(false);
+                }
+            };
+            // execute
+            await retryPipeline.ExecuteAsync().ConfigureAwait(false);
+            // commit
+            if (setting.AutoCommit)
+            {
+                await work.CommitAsync().ConfigureAwait(false);
+            }
+        }
+
+        /// <summary>
+        /// Execute
+        /// </summary>
+        /// <param name="func">Func</param>
+        /// <param name="configure">Configure</param>
+        public static T Execute<T>(Func<UnitOfWorkExecutionContext, T> func, Action<UnitOfWorkSetting> configure = null)
+        {
+            var setting = UnitOfWorkSetting.GetDefaultSetting();
+            configure?.Invoke(setting);
+            using (var work = Create(setting.IsolationLevel))
+            {
+                return ExecuteCore(work, func, setting);
+            }
+        }
+
+        /// <summary>
+        /// Execute
+        /// </summary>
+        /// <param name="databaseServerConfigNames">Database server config names</param>
+        /// <param name="func">Func</param>
+        /// <param name="configure">Configure</param>
+        public static T Execute<T>(IEnumerable<string> databaseServerConfigNames, Func<UnitOfWorkExecutionContext, T> func, Action<UnitOfWorkSetting> configure = null)
+        {
+            var setting = UnitOfWorkSetting.GetDefaultSetting();
+            configure?.Invoke(setting);
+            using (var work = Create(databaseServerConfigNames, setting.IsolationLevel))
+            {
+                return ExecuteCore(work, func, setting);
+            }
+        }
+
+        /// <summary>
+        /// Execute
+        /// </summary>
+        /// <param name="servers">Servers</param>
+        /// <param name="func">Func</param>
+        /// <param name="configure">Configure</param>
+        public static T Execute<T>(IEnumerable<DatabaseServer> servers, Func<UnitOfWorkExecutionContext, T> func, Action<UnitOfWorkSetting> configure = null)
+        {
+            var setting = UnitOfWorkSetting.GetDefaultSetting();
+            configure?.Invoke(setting);
+            using (var work = Create(servers, setting.IsolationLevel))
+            {
+                return ExecuteCore(work, func, setting);
+            }
+        }
+
+        static T ExecuteCore<T>(ISixnetWork work, Func<UnitOfWorkExecutionContext, T> func, UnitOfWorkSetting setting)
+        {
+            var workOptions = SixnetContainer.GetOptions<UnitOfWorkOptions>();
+            var retryPipeline = GetRetryPipeline<T>(work, workOptions, setting);
+            retryPipeline.Func = () =>
+            {
+                if (func != null)
+                {
+                    return func(new UnitOfWorkExecutionContext()
+                    {
+                        Work = work
+                    });
+                }
+                return default;
+            };
+            // execute
+            var res = retryPipeline.Execute();
+            // commit
+            if (setting.AutoCommit)
+            {
+                work.Commit();
+            }
+            return res;
+        }
+
+        /// <summary>
+        /// Execute
+        /// </summary>
+        /// <param name="func">Func</param>
+        /// <param name="configure">Configure</param>
+        public static async Task<T> ExecuteAsync<T>(Func<UnitOfWorkExecutionContext, Task<T>> func, Action<UnitOfWorkSetting> configure = null)
+        {
+            var setting = UnitOfWorkSetting.GetDefaultSetting();
+            configure?.Invoke(setting);
+            using (var work = Create(setting.IsolationLevel))
+            {
+                return await ExecuteCoreAsync(work, func, setting).ConfigureAwait(false);
+            }
+        }
+
+        /// <summary>
+        /// Execute
+        /// </summary>
+        /// <param name="databaseServerConfigNames">Database server config names</param>
+        /// <param name="func">Func</param>
+        /// <param name="configure">Configure</param>
+        public static async Task<T> ExecuteAsync<T>(IEnumerable<string> databaseServerConfigNames, Func<UnitOfWorkExecutionContext, Task<T>> func, Action<UnitOfWorkSetting> configure = null)
+        {
+            var setting = UnitOfWorkSetting.GetDefaultSetting();
+            configure?.Invoke(setting);
+            using (var work = Create(databaseServerConfigNames, setting.IsolationLevel))
+            {
+                return await ExecuteCoreAsync(work, func, setting).ConfigureAwait(false);
+            }
+        }
+
+        /// <summary>
+        /// Execute
+        /// </summary>
+        /// <param name="servers">Servers</param>
+        /// <param name="func">Func</param>
+        /// <param name="configure">Configure</param>
+        public static async Task<T> ExecuteAsync<T>(IEnumerable<DatabaseServer> servers, Func<UnitOfWorkExecutionContext, Task<T>> func, Action<UnitOfWorkSetting> configure = null)
+        {
+            var setting = UnitOfWorkSetting.GetDefaultSetting();
+            configure?.Invoke(setting);
+            using (var work = Create(servers, setting.IsolationLevel))
+            {
+                return await ExecuteCoreAsync(work, func, setting).ConfigureAwait(false);
+            }
+        }
+
+        static async Task<T> ExecuteCoreAsync<T>(ISixnetWork work, Func<UnitOfWorkExecutionContext, Task<T>> func, UnitOfWorkSetting setting)
+        {
+            var workOptions = SixnetContainer.GetOptions<UnitOfWorkOptions>();
+            var retryPipeline = GetRetryPipeline<T>(work, workOptions, setting);
+            retryPipeline.FuncAsync = async () =>
+            {
+                if (func != null)
+                {
+                    return await func(new UnitOfWorkExecutionContext()
+                    {
+                        Work = work
+                    }).ConfigureAwait(false);
+                }
+                return default;
+            };
+            // execute
+            var res = await retryPipeline.ExecuteAsync().ConfigureAwait(false);
+            // commit
+            if (setting.AutoCommit)
+            {
+                await work.CommitAsync().ConfigureAwait(false);
+            }
+            return res;
         }
 
         #endregion

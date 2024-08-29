@@ -710,7 +710,6 @@ namespace Sixnet.Development.Data.Client
             // Create data command
             var commands = new List<SixnetDataCommand>();
             var dataType = typeof(T);
-            var isEntity = typeof(ISixnetEntity).IsAssignableFrom(dataType);
             foreach (var data in datas)
             {
                 if (data != null)

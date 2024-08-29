@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Sixnet.Development.Data.Field;
 using Sixnet.Model;
-using Sixnet.Serialization;
 
 namespace Sixnet.Development.Entity
 {

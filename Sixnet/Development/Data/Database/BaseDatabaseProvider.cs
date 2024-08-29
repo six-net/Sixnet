@@ -78,14 +78,21 @@ namespace Sixnet.Development.Data.Database
         /// <returns>Affected data numbers</returns>
         public virtual int Execute(MultipleDatabaseCommand command)
         {
-            var dataCommandResolver = GetDataCommandResolver();
-            var statements = dataCommandResolver.GenerateDatabaseExecutionStatements(command);
-            var totalAffectedNumber = 0;
-            foreach (var statement in statements)
+            try
             {
-                totalAffectedNumber += ExecuteDatabaseStatement(command, statement);
+                var dataCommandResolver = GetDataCommandResolver();
+                var statements = dataCommandResolver.GenerateDatabaseExecutionStatements(command);
+                var totalAffectedNumber = 0;
+                foreach (var statement in statements)
+                {
+                    totalAffectedNumber += ExecuteDatabaseStatement(command, statement);
+                }
+                return totalAffectedNumber;
             }
-            return totalAffectedNumber;
+            catch (Exception ex)
+            {
+                throw GetSqlException(ex);
+            }
         }
 
         /// <summary>
@@ -501,27 +508,34 @@ namespace Sixnet.Development.Data.Database
         /// <returns>Added data identities,Key: command id, Value: identity value</returns>
         public virtual Dictionary<string, TIdentity> InsertAndReturnIdentity<TIdentity>(MultipleDatabaseCommand command)
         {
-            var dataCommandResolver = GetDataCommandResolver();
-            var statements = dataCommandResolver.GenerateDatabaseExecutionStatements(command);
-            var identityDict = new Dictionary<string, TIdentity>();
-            var dbConnection = command.Connection.DbConnection;
-            foreach (var statement in statements)
+            try
             {
-                using (var reader = dbConnection.ExecuteReader(GetCommandDefinition(command, statement)))
+                var dataCommandResolver = GetDataCommandResolver();
+                var statements = dataCommandResolver.GenerateDatabaseExecutionStatements(command);
+                var identityDict = new Dictionary<string, TIdentity>();
+                var dbConnection = command.Connection.DbConnection;
+                foreach (var statement in statements)
                 {
-                    var dataTable = new DataTable();
-                    dataTable.Load(reader);
-                    if (dataTable.Rows.Count > 0)
+                    using (var reader = dbConnection.ExecuteReader(GetCommandDefinition(command, statement)))
                     {
-                        var firstRow = dataTable.Rows[0];
-                        foreach (DataColumn col in dataTable.Columns)
+                        var dataTable = new DataTable();
+                        dataTable.Load(reader);
+                        if (dataTable.Rows.Count > 0)
                         {
-                            identityDict[col.ColumnName] = firstRow[col].ConvertTo<TIdentity>();
+                            var firstRow = dataTable.Rows[0];
+                            foreach (DataColumn col in dataTable.Columns)
+                            {
+                                identityDict[col.ColumnName] = firstRow[col].ConvertTo<TIdentity>();
+                            }
                         }
                     }
                 }
+                return identityDict;
             }
-            return identityDict;
+            catch (Exception ex)
+            {
+                throw GetSqlException(ex);
+            }
         }
 
         /// <summary>
@@ -541,11 +555,18 @@ namespace Sixnet.Development.Data.Database
         /// <returns></returns>
         public virtual void Migrate(MigrationDatabaseCommand command)
         {
-            var dataCommandResolver = GetDataCommandResolver();
-            var statements = dataCommandResolver.GenerateDatabaseMigrationStatements(command);
-            foreach (var statement in statements)
+            try
             {
-                ExecuteDatabaseStatement(command, statement);
+                var dataCommandResolver = GetDataCommandResolver();
+                var statements = dataCommandResolver.GenerateDatabaseMigrationStatements(command);
+                foreach (var statement in statements)
+                {
+                    ExecuteDatabaseStatement(command, statement);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw GetSqlException(ex);
             }
         }
 
@@ -561,6 +582,15 @@ namespace Sixnet.Development.Data.Database
         public virtual List<SixnetDataTable> GetTables(DatabaseCommand command)
         {
             return command.Connection.DbConnection.Query<SixnetDataTable>(queryDatabaseTablesScript, transaction: command.Connection?.Transaction?.DbTransaction).ToList();
+        }
+
+        #endregion
+
+        #region Get exception
+
+        protected virtual Exception GetSqlException(Exception ex)
+        {
+            return ex;
         }
 
         #endregion

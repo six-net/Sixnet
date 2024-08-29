@@ -10,7 +10,6 @@ namespace Sixnet.Development.Data.Command.Event
         public void Handle(SixnetDataCommandStartingEvent dataCommandStartingEvent)
         {
             var dataCommand = dataCommandStartingEvent.Command;
-            var query = dataCommand.Queryable;
             var entityType = dataCommand.GetEntityType();
             if (entityType != null)
             {
