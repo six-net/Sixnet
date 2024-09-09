@@ -419,5 +419,56 @@ namespace System.Collections.Generic
         }
 
         #endregion
+
+        #region Get tree data
+
+        /// <summary>
+        /// Get tree data
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="datas"></param>
+        /// <returns></returns>
+        public static List<T> ToTreeDatas<T>(this IEnumerable<T> datas
+            , Func<IEnumerable<T>, IEnumerable<T>> levelOneDatasSelector
+            , Func<IEnumerable<T>, T, List<T>> childrenSelector) where T : ISixnetTreeModel<T>
+        {
+            if (datas.IsNullOrEmpty() || levelOneDatasSelector == null || childrenSelector == null)
+            {
+                return new List<T>(0);
+            }
+            var levelOneDatas = levelOneDatasSelector(datas);
+            if (levelOneDatas.IsNullOrEmpty())
+            {
+                return new List<T>(0);
+            }
+            var treeDatas = new List<T>();
+            foreach (var topData in levelOneDatas)
+            {
+                ResolveChildren(datas, topData, childrenSelector);
+                treeDatas.Add(topData);
+            }
+            return treeDatas;
+        }
+
+        static void ResolveChildren<T>(IEnumerable<T> datas, T parent
+            , Func<IEnumerable<T>, T, List<T>> childrenSelector) where T : ISixnetTreeModel<T>
+        {
+            if (datas.IsNullOrEmpty() || parent == null)
+            {
+                return;
+            }
+            var children = childrenSelector(datas, parent);
+            if (children.IsNullOrEmpty())
+            {
+                return;
+            }
+            parent.Children = children;
+            foreach (var child in children)
+            {
+                ResolveChildren(datas, child, childrenSelector);
+            }
+        }
+
+        #endregion
     }
 }
