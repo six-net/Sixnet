@@ -32,11 +32,13 @@ namespace Sixnet.Development.Entity
         CreateDate = 128,
         CreateUserId = 256,
         CreateUserName = 512,
-        UpdateDate = 1024,
-        UpdateUserId = 2048,
-        UpdateUserName = 4096,
-        SplitValue = 8192,
-        GeneratedId = 16384
+        CreateUserDisplayName = 1024,
+        UpdateDate = 2048,
+        UpdateUserId = 4096,
+        UpdateUserName = 8192,
+        UpdateUserDisplayName = 16384,
+        SplitValue = 32768,
+        GeneratedId = 65536
     }
 
     /// <summary>

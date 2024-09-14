@@ -284,6 +284,7 @@ namespace Sixnet.Development.Data.Field
             return InRole(FieldRole.CreateDate)
                 || InRole(FieldRole.CreateUserId)
                 || InRole(FieldRole.CreateUserName)
+                || InRole(FieldRole.CreateUserDisplayName)
                 || InRole(FieldRole.PrimaryKey)
                 || InRole(FieldRole.Increment)
                 || InRole(FieldRole.Version)
