@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Sixnet.Localization
 {
-    internal class SixnetResourceKeys
+    public class SixnetResourceKeys
     {
         /// <summary>
         /// Save data failed
