@@ -1,5 +1,6 @@
 ﻿using Sixnet.App;
 using Sixnet.Constants;
+using Sixnet.Localization;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -147,6 +148,63 @@ namespace Sixnet.Exceptions
         public static void ThrowNotSupportIf<TResource>(bool predicate, string message = "")
         {
             ThrowIf<TResource, NotSupportedException>(predicate, message);
+        }
+
+        #endregion
+
+        #region Update failed
+
+        /// <summary>
+        /// Throw update failed
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="predicate"></param>
+        /// <param name="message"></param>
+        public static void ThrowUpdateFailedIf<T>(bool predicate, string message = "")
+        {
+            if (predicate && string.IsNullOrWhiteSpace(message))
+            {
+                message = SixnetLocalizer.GetString(SixnetResourceKeys.UpdateDataFailed, SixnetLocalizer.GetString(typeof(T).Name));
+            }
+            ThrowAppExceptionIf(predicate, message);
+        }
+
+        #endregion
+
+        #region Unspecified data
+
+        /// <summary>
+        /// Throw unspecified data
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="predicate"></param>
+        /// <param name="message"></param>
+        public static void ThrowUnspecifiedIf<T>(bool predicate, string message = "")
+        {
+            if (predicate && string.IsNullOrWhiteSpace(message))
+            {
+                message = SixnetLocalizer.GetString(SixnetResourceKeys.UnspecifiedData, SixnetLocalizer.GetString(typeof(T).Name));
+            }
+            ThrowAppExceptionIf(predicate, message);
+        }
+
+        #endregion
+
+        #region Delete failed
+
+        /// <summary>
+        /// Throw delete failed
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="predicate"></param>
+        /// <param name="message"></param>
+        public static void ThrowDeleteFailedIf<T>(bool predicate, string message)
+        {
+            if (predicate && string.IsNullOrWhiteSpace(message))
+            {
+                message = SixnetLocalizer.GetString(SixnetResourceKeys.DeleteDataFailed, SixnetLocalizer.GetString(typeof(T).Name));
+            }
+            ThrowAppExceptionIf(predicate, message);
         }
 
         #endregion

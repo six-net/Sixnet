@@ -1,5 +1,6 @@
 ﻿using Sixnet.DependencyInjection;
 using Sixnet.Exceptions;
+using System;
 using System.Globalization;
 
 namespace Sixnet.Localization
