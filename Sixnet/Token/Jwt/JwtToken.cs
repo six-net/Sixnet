@@ -5,8 +5,10 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Sixnet.App;
 using Sixnet.DependencyInjection;
 using Sixnet.Exceptions;
+using Sixnet.Security.Authentication;
 using Sixnet.Session;
 
 namespace Sixnet.Token.Jwt
@@ -38,18 +40,13 @@ namespace Sixnet.Token.Jwt
         #region Methods
 
         /// <summary>
-        /// Create jwt token
+        /// Create token core
         /// </summary>
-        /// <param name="claims">Claims</param>
-        /// <param name="jwtOptions">Jwt options</param>
+        /// <param name="claims"></param>
+        /// <param name="jwtOptions"></param>
         /// <returns></returns>
-        public static JwtToken CreateToken(IEnumerable<Claim> claims, JwtOptions jwtOptions = null)
+        static JwtToken CreateTokenCore(IEnumerable<Claim> claims, JwtOptions jwtOptions)
         {
-            SixnetDirectThrower.ThrowArgNullIf(claims == null, nameof(claims));
-
-            jwtOptions ??= SixnetContainer.GetOptions<JwtOptions>();
-            SixnetDirectThrower.ThrowArgNullIf(jwtOptions == null, nameof(jwtOptions));
-
             var tokenHandler = new JwtSecurityTokenHandler();
             var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.IssuerSigningKey));
             var signingCredentials = new SigningCredentials(signingKey, string.IsNullOrWhiteSpace(jwtOptions.SecurityAlgorithms) ? SecurityAlgorithms.HmacSha256Signature : jwtOptions.SecurityAlgorithms);
@@ -69,8 +66,16 @@ namespace Sixnet.Token.Jwt
                 SigningCredentials = signingCredentials,
                 Subject = new ClaimsIdentity(claims)
             };
+            var userInfo = UserInfo.GetUserFromClaims(claims);
+            SixnetAuthenticationManager.SetAuthenticationToken(setting =>
+            {
+                setting.AppTag = userInfo.AppTag;
+                setting.Token = userInfo.Token;
+                setting.UserId = userInfo.Id;
+            });
             var accessToken = tokenHandler.WriteToken(tokenHandler.CreateToken(accessTokenDescriptor));
 
+            // refresh token
             accessTokenDescriptor.Expires = accessTokenExpiresAt.AddSeconds(accessTokenExpirSeconds);
             accessTokenDescriptor.Claims = new Dictionary<string, object>()
             {
@@ -87,24 +92,42 @@ namespace Sixnet.Token.Jwt
         }
 
         /// <summary>
+        /// Create jwt token
+        /// </summary>
+        /// <param name="claims">Claims</param>
+        /// <param name="configure">Configure jwt options</param>
+        /// <returns></returns>
+        public static JwtToken CreateToken(IEnumerable<Claim> claims, Action<JwtOptions> configure = null)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(claims == null, nameof(claims));
+
+            var jwtOptions = SixnetContainer.GetOptions<JwtOptions>();
+            configure?.Invoke(jwtOptions);
+            SixnetDirectThrower.ThrowArgNullIf(jwtOptions == null, nameof(jwtOptions));
+
+            return CreateTokenCore(claims, jwtOptions);
+        }
+
+        /// <summary>
         /// Create token
         /// </summary>
         /// <param name="user">User info</param>
-        /// <param name="jwtOptions">Jwt config</param>
+        /// <param name="configure">Configure jwt options</param>
         /// <returns></returns>
-        public static JwtToken CreateToken(UserInfo user, JwtOptions jwtOptions = null)
+        public static JwtToken CreateToken(UserInfo user, Action<JwtOptions> configure = null)
         {
             SixnetDirectThrower.ThrowArgNullIf(user == null, nameof(user));
-            return CreateToken(user.GetClaims(), jwtOptions);
+            return CreateToken(user.GetClaims(), configure);
         }
 
         /// <summary>
         /// Refresh token
         /// </summary>
         /// <returns></returns>
-        public JwtToken Refresh(JwtOptions jwtOptions = null)
+        public JwtToken Refresh(Action<JwtOptions> configure = null)
         {
-            jwtOptions ??= SixnetContainer.GetService<IOptionsMonitor<JwtOptions>>()?.CurrentValue;
+            var jwtOptions = SixnetContainer.GetOptions<JwtOptions>();
+            configure?.Invoke(jwtOptions);
             SixnetDirectThrower.ThrowArgNullIf(jwtOptions == null, nameof(jwtOptions));
 
             SixnetDirectThrower.ThrowArgErrorIf(string.IsNullOrWhiteSpace(AccessToken), "Access token is null or empty");
@@ -131,7 +154,7 @@ namespace Sixnet.Token.Jwt
             // Create new access token
             var jwtToken = validatedToken as JwtSecurityToken;
             var tokenUser = UserInfo.GetUserFromClaims(jwtToken.Claims);
-            return CreateToken(tokenUser.GetClaims(), jwtOptions);
+            return CreateTokenCore(tokenUser.GetClaims(), jwtOptions);
         }
 
         #endregion

@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Sixnet.Cache;
 using Sixnet.Cache.Keys.Parameters;
-using Sixnet.Cache.Set.Parameters;
 using Sixnet.Cache.String.Parameters;
 using Sixnet.Security.Permission;
-using Sixnet.Session;
 
 namespace Sixnet.Security.Authentication
 {
@@ -173,6 +170,11 @@ namespace Sixnet.Security.Authentication
             return token == setting.Token;
         }
 
+        /// <summary>
+        /// Get user key
+        /// </summary>
+        /// <param name="setting"></param>
+        /// <returns></returns>
         static string GetUserKey(AuthenticationTokenSetting setting)
         {
             var keyNameSplitChar = SixnetCacher.GetKeyNameSplitChar();
@@ -184,6 +186,10 @@ namespace Sixnet.Security.Authentication
                         : $"{appTag}{keyNameSplitChar}{authorizationObject}{keyNameSplitChar}{userId}{keyNameSplitChar}Token";
         }
 
+        /// <summary>
+        /// Get cache object
+        /// </summary>
+        /// <returns></returns>
         static CacheObject GetCacheObject()
         {
             return new CacheObject()
@@ -193,6 +199,9 @@ namespace Sixnet.Security.Authentication
         }
     }
 
+    /// <summary>
+    /// Sixnet authentication score
+    /// </summary>
     public enum AuthenticationScore
     {
         Single = 1,

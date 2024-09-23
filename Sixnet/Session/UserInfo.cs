@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Principal;
+using Sixnet.App;
 using Sixnet.Token.Jwt;
 
 namespace Sixnet.Session
@@ -91,12 +92,12 @@ namespace Sixnet.Session
         /// <summary>
         /// Gets or sets the app tag
         /// </summary>
-        public string AppTag { get; set; }
+        public string AppTag { get; set; } = $"{SixnetApplication.Current.Name}{SixnetApplication.Current.Env}";
 
         /// <summary>
         /// Gets or sets the token
         /// </summary>
-        public string Token { get; set; }
+        public string Token { get; set; } = Guid.NewGuid().ToString();
 
         /// <summary>
         /// Gets or sets the roles
