@@ -72,6 +72,8 @@ namespace Sixnet.Token.Jwt
                 setting.AppTag = userInfo.AppTag;
                 setting.Token = userInfo.Token;
                 setting.UserId = userInfo.Id;
+                setting.Score = jwtOptions.Score;
+                setting.ExpireSeconds = jwtOptions.TokenExpirationSeconds;
             });
             var accessToken = tokenHandler.WriteToken(tokenHandler.CreateToken(accessTokenDescriptor));
 

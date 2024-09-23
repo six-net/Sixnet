@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
+using Sixnet.Security.Authentication;
 
 namespace Sixnet.Token.Jwt
 {
@@ -39,6 +40,11 @@ namespace Sixnet.Token.Jwt
         /// Gets or sets the security algorithms
         /// </summary>
         public string SecurityAlgorithms { get; set; }
+
+        /// <summary>
+        /// Score
+        /// </summary>
+        public AuthenticationScore Score { get; set; } = AuthenticationScore.Single;
 
         /// <summary>
         /// Default token exp seconds
