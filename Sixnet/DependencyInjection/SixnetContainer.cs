@@ -17,6 +17,7 @@ using Sixnet.MQ;
 using Sixnet.Net.Email;
 using Sixnet.Net.Sms;
 using Sixnet.Net.Upload;
+using Sixnet.Security.Authentication;
 using Sixnet.Security.Authorization;
 using Sixnet.Security.Cryptography;
 using Sixnet.Serialization.Json;
@@ -412,8 +413,6 @@ namespace Sixnet.DependencyInjection
             services.ConfigureIfNotNull<FileAccessOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.FileAccess)));
             // Rsa key
             services.ConfigureIfNotNull<RSAOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Rsa)));
-            // Jwt
-            services.ConfigureIfNotNull<JwtOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Jwt)));
             // Database
             services.ConfigureIfNotNull<DataOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Data)));
             // Cache
@@ -432,6 +431,8 @@ namespace Sixnet.DependencyInjection
             services.ConfigureIfNotNull<SixnetValidationOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Validation)));
             // Authorization
             services.ConfigureIfNotNull<SixnetAuthorizationOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Authorization)));
+            // Authentication
+            services.ConfigureIfNotNull<SixnetAuthenticationOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Authentication)));
             // UnitOfWork
             services.ConfigureIfNotNull<UnitOfWorkOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.UnitOfWork)));
             // Logging
@@ -441,7 +442,6 @@ namespace Sixnet.DependencyInjection
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureUpload);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureFileAccess);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureRSA);
-            services.PostConfigureIfNotNull(sixnetOptions.ConfigureJwt);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureEmail);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureSms);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureMessage);
@@ -455,6 +455,7 @@ namespace Sixnet.DependencyInjection
                 sixnetOptions.ConfigureCache?.Invoke(options);
             });
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureAuthorization);
+            services.PostConfigureIfNotNull(sixnetOptions.ConfigureAuthentication);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureUnitOfWork);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureLoggingBuilder);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureLogging);

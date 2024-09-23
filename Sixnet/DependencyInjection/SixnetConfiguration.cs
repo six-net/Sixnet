@@ -8,6 +8,7 @@ using Sixnet.MQ;
 using Sixnet.Net.Email;
 using Sixnet.Net.Sms;
 using Sixnet.Net.Upload;
+using Sixnet.Security.Authentication;
 using Sixnet.Security.Authorization;
 using Sixnet.Security.Cryptography;
 using Sixnet.Serialization.Json;
@@ -35,11 +36,6 @@ namespace Sixnet.DependencyInjection
         /// Gets or sets rsa options
         /// </summary>
         public RSAOptions Rsa { get; set; }
-
-        /// <summary>
-        /// Gets or sets jwt options
-        /// </summary>
-        public JwtOptions Jwt { get; set; }
 
         /// <summary>
         /// Gets or sets data options
@@ -85,6 +81,11 @@ namespace Sixnet.DependencyInjection
         /// Gets or sets the authorization options 
         /// </summary>
         public SixnetAuthorizationOptions Authorization { get; set; }
+
+        /// <summary>
+        /// Gets or sets the authentication options 
+        /// </summary>
+        public SixnetAuthenticationOptions Authentication { get; set; }
 
         /// <summary>
         /// Gets or sets the unitofwork options

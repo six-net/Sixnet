@@ -7,9 +7,9 @@ using Sixnet.Security.Authentication;
 namespace Sixnet.Token.Jwt
 {
     /// <summary>
-    /// Jwt options
+    /// Jwt setting
     /// </summary>
-    public class JwtOptions
+    public class JwtSetting
     {
         /// <summary>
         /// Token expiration seconds
@@ -42,7 +42,7 @@ namespace Sixnet.Token.Jwt
         public string SecurityAlgorithms { get; set; }
 
         /// <summary>
-        /// Score
+        /// Authentication score
         /// </summary>
         public AuthenticationScore Score { get; set; } = AuthenticationScore.Single;
 
