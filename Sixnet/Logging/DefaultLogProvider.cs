@@ -9,15 +9,6 @@ namespace Sixnet.Logging
     /// </summary>
     internal class DefaultLogProvider : ISixnetLogProvider
     {
-        /// <summary>
-        /// Logger factory
-        /// </summary>
-        private static readonly ILoggerFactory LoggerFactory = null;
-
-        static DefaultLogProvider()
-        {
-            LoggerFactory = SixnetContainer.GetService<ILoggerFactory>();
-        }
 
         #region Gets logger
 
@@ -28,14 +19,15 @@ namespace Sixnet.Logging
         /// <returns>Return the logger</returns>
         static ILogger GetLogger(string loggerCategoryName)
         {
-            if (LoggerFactory == null)
+            var loggerFactory = SixnetContainer.GetService<ILoggerFactory>();
+            if (loggerFactory == null)
             {
                 return null;
             }
             loggerCategoryName = string.IsNullOrWhiteSpace(loggerCategoryName) 
                 ? SixnetLogger.DefaultLoggerCategoryName 
                 : loggerCategoryName;
-            return LoggerFactory.CreateLogger(loggerCategoryName);
+            return loggerFactory.CreateLogger(loggerCategoryName);
         }
 
         #endregion

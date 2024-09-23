@@ -8,6 +8,7 @@ using Sixnet.Development.Work;
 using Sixnet.Exceptions;
 using Sixnet.IO.FileAccess;
 using Sixnet.Localization;
+using Sixnet.Logging;
 using Sixnet.MQ;
 using Sixnet.Net.Email;
 using Sixnet.Net.Sms;
@@ -70,7 +71,12 @@ namespace Sixnet.DependencyInjection
         /// <summary>
         /// Configure logging
         /// </summary>
-        public Action<ILoggingBuilder> ConfigureLogging { get; set; }
+        public Action<SixnetLoggingOptions> ConfigureLogging { get; set; }
+
+        /// <summary>
+        /// Configure logging builder
+        /// </summary>
+        public Action<ILoggingBuilder> ConfigureLoggingBuilder { get; set; }
 
         /// <summary>
         /// Configure upload

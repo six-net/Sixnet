@@ -116,13 +116,22 @@ namespace Sixnet.App
         {
             var entryAssembly = Assembly.GetEntryAssembly();
             var assemblyName = entryAssembly.GetName().Name;
+            var machineName = string.Empty;
+            try
+            {
+                machineName = Environment.MachineName;
+            }
+            catch (Exception)
+            {
+            }
             return new ApplicationInfo()
             {
                 Code = "",
                 Name = assemblyName,
                 Title = assemblyName,
                 Type = SixnetApplicationType.Unknown,
-                Version = FileVersionInfo.GetVersionInfo(entryAssembly.Location).FileVersion
+                Version = FileVersionInfo.GetVersionInfo(entryAssembly.Location).FileVersion,
+                MachineName = machineName
             };
         }
 

@@ -11,6 +11,7 @@ using Sixnet.Development.Repository;
 using Sixnet.Development.Work;
 using Sixnet.Exceptions;
 using Sixnet.IO.FileAccess;
+using Sixnet.Logging;
 using Sixnet.Mapper;
 using Sixnet.MQ;
 using Sixnet.Net.Email;
@@ -106,12 +107,15 @@ namespace Sixnet.DependencyInjection
             // Build service provider
             BuildServiceProvider(true);
 
-            // Init application
-            SixnetApplication.Init();
-
             // Register default project service
             ConfigureProjectDefaultOptions(_serviceCollection, Options);
             AddProjectDefaultService(_serviceCollection, Options);
+
+            // Build service provider
+            BuildServiceProvider(true);
+
+            // Init application
+            SixnetApplication.Init();
 
             // Build service provider
             BuildServiceProvider(true);
@@ -430,6 +434,8 @@ namespace Sixnet.DependencyInjection
             services.ConfigureIfNotNull<SixnetAuthorizationOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Authorization)));
             // UnitOfWork
             services.ConfigureIfNotNull<UnitOfWorkOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.UnitOfWork)));
+            // Logging
+            services.ConfigureIfNotNull<SixnetLoggingOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Logging)));
 
             // Post config options
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureUpload);
@@ -450,6 +456,8 @@ namespace Sixnet.DependencyInjection
             });
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureAuthorization);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureUnitOfWork);
+            services.PostConfigureIfNotNull(sixnetOptions.ConfigureLoggingBuilder);
+            services.PostConfigureIfNotNull(sixnetOptions.ConfigureLogging);
         }
 
         #endregion

@@ -296,7 +296,7 @@ namespace Sixnet.Development.Data
                         }
                         catch (Exception ex)
                         {
-                            throw ex;
+                            throw;
                         }
                         finally
                         {

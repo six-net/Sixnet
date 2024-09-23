@@ -96,7 +96,7 @@ namespace Sixnet.Development.Work
             {
                 FrameworkLogManager.LogWorkSubmittedException(this, ex);
                 success = false;
-                throw ex;
+                throw;
             }
             finally
             {
@@ -126,7 +126,7 @@ namespace Sixnet.Development.Work
             {
                 FrameworkLogManager.LogWorkSubmittedException(this, ex);
                 success = false;
-                throw ex;
+                throw;
             }
             finally
             {

@@ -3,6 +3,7 @@ using Sixnet.Development.Data;
 using Sixnet.Development.Message;
 using Sixnet.Development.Work;
 using Sixnet.IO.FileAccess;
+using Sixnet.Logging;
 using Sixnet.MQ;
 using Sixnet.Net.Email;
 using Sixnet.Net.Sms;
@@ -89,5 +90,10 @@ namespace Sixnet.DependencyInjection
         /// Gets or sets the unitofwork options
         /// </summary>
         public UnitOfWorkOptions UnitOfWork { get; set; }
+
+        /// <summary>
+        /// Gets or sets the logging options
+        /// </summary>
+        public SixnetLoggingOptions Logging { get; set; }
     }
 }

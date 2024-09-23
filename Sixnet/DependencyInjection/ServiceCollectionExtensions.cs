@@ -16,7 +16,7 @@ namespace Microsoft.Extensions.DependencyInjection
             });
         }
 
-        internal static IServiceCollection ConfigureIfNotNull<TOptions>(this IServiceCollection services, IConfiguration configuration) where TOptions : class
+        public static IServiceCollection ConfigureIfNotNull<TOptions>(this IServiceCollection services, IConfiguration configuration) where TOptions : class
         {
             if (configuration != null)
             {
@@ -25,7 +25,7 @@ namespace Microsoft.Extensions.DependencyInjection
             return services;
         }
 
-        internal static IServiceCollection PostConfigureIfNotNull<TOptions>(this IServiceCollection services, Action<TOptions> configure) where TOptions : class
+        public static IServiceCollection PostConfigureIfNotNull<TOptions>(this IServiceCollection services, Action<TOptions> configure) where TOptions : class
         {
             if (configure != null)
             {

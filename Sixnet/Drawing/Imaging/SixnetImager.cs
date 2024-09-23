@@ -596,7 +596,7 @@ namespace Sixnet.Drawing.Imaging
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw;
             }
             finally
             {

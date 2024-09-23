@@ -8,6 +8,11 @@ namespace Sixnet.Session
     public class SixnetSession : IDisposable
     {
         /// <summary>
+        /// Gets or sets the create date
+        /// </summary>
+        public DateTimeOffset CreateDate { get; set; } = DateTimeOffset.Now;
+
+        /// <summary>
         /// Gets or sets the isolation info
         /// </summary>
         public IsolationInfo Isolation { get; set; }

@@ -26,9 +26,9 @@ namespace Sixnet.Component.Retry
         public int Times { get; set; }
 
         /// <summary>
-        /// Gets or sets when execute retry
+        /// Gets or sets whether to retry
         /// </summary>
-        public Func<RetryContext, bool> When { get; set; }
+        public Func<RetryContext, bool> ToRetry { get; set; }
 
         /// <summary>
         /// Before retry
@@ -53,10 +53,10 @@ namespace Sixnet.Component.Retry
                 catch (Exception ex)
                 {
                     ctx.Exception = ex;
-                    var retry = When?.Invoke(ctx) ?? false;
+                    var retry = ToRetry?.Invoke(ctx) ?? false;
                     if (!retry || retriedTimes >= allowTimes)
                     {
-                        throw ex;
+                        throw;
                     }
                     else
                     {
@@ -88,10 +88,10 @@ namespace Sixnet.Component.Retry
                 catch (Exception ex)
                 {
                     ctx.Exception = ex;
-                    var retry = When?.Invoke(ctx) ?? false;
+                    var retry = ToRetry?.Invoke(ctx) ?? false;
                     if (!retry || retriedTimes >= allowTimes)
                     {
-                        throw ex;
+                        throw;
                     }
                     else
                     {
@@ -158,7 +158,7 @@ namespace Sixnet.Component.Retry
                     var retry = When?.Invoke(ctx) ?? false;
                     if (!retry || retriedTimes >= allowTimes)
                     {
-                        throw ex;
+                        throw;
                     }
                     else
                     {
@@ -195,7 +195,7 @@ namespace Sixnet.Component.Retry
                     var retry = When?.Invoke(ctx) ?? false;
                     if (!retry || retriedTimes >= allowTimes)
                     {
-                        throw ex;
+                        throw;
                     }
                     else
                     {

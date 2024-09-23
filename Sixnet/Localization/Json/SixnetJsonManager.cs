@@ -184,7 +184,7 @@ namespace Sixnet.Localization.Json
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw;
             }
             finally
             {
@@ -340,7 +340,7 @@ namespace Sixnet.Localization.Json
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw;
             }
             finally
             {

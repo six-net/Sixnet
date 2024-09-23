@@ -334,7 +334,7 @@ namespace Sixnet.Development.Work
             return new RetryPipeline()
             {
                 Times = retryTimes,
-                When = options.AllowRetry,
+                ToRetry = options.AllowRetry,
                 OnBeforeRetry = ctx =>
                 {
                     work.Rollback();
