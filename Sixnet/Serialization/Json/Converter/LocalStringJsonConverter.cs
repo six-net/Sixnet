@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Sixnet.DependencyInjection;
 using Sixnet.Localization;
 
 namespace Sixnet.Serialization.Json.Converter
@@ -12,7 +13,12 @@ namespace Sixnet.Serialization.Json.Converter
     /// </summary>
     public sealed class LocalStringJsonConverter : JsonConverter<string>
     {
-        private LocalStringJsonConverter() { }
+        SixnetJsonSerializationOptions _jsonOptions;
+
+        private LocalStringJsonConverter()
+        {
+            _jsonOptions = SixnetContainer.GetOptions<SixnetJsonSerializationOptions>();
+        }
 
         public override string Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
@@ -21,7 +27,15 @@ namespace Sixnet.Serialization.Json.Converter
 
         public override void Write(Utf8JsonWriter writer, string value, JsonSerializerOptions options)
         {
-            writer.WriteStringValue(SixnetLocalizer.GetString(value));
+            _jsonOptions ??= SixnetContainer.GetOptions<SixnetJsonSerializationOptions>();
+            if (_jsonOptions.DisableLocalConverter)
+            {
+                writer.WriteStringValue(value);
+            }
+            else
+            {
+                writer.WriteStringValue(SixnetLocalizer.GetString(value));
+            }
         }
 
         public static LocalStringJsonConverter Instance = new();

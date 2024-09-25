@@ -41,5 +41,10 @@ namespace Sixnet.Serialization.Json
         /// Default value is true
         /// </summary>
         public bool ConvertBigNumberToString { get; set; } = true;
+
+        /// <summary>
+        /// Indicates whether disable localization converter
+        /// </summary>
+        public bool DisableLocalConverter {  get; set; }
     }
 }
