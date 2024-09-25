@@ -430,7 +430,8 @@ namespace System.Collections.Generic
         /// <returns></returns>
         public static List<T> ToTreeDatas<T>(this IEnumerable<T> datas
             , Func<IEnumerable<T>, IEnumerable<T>> levelOneDatasSelector
-            , Func<IEnumerable<T>, T, List<T>> childrenSelector) where T : ISixnetTreeModel<T>
+            , Func<IEnumerable<T>, T, List<T>> childrenSelector
+            , Func<T, bool> itemFilter = null) where T : ISixnetTreeModel<T>
         {
             if (datas.IsNullOrEmpty() || levelOneDatasSelector == null || childrenSelector == null)
             {
@@ -444,14 +445,18 @@ namespace System.Collections.Generic
             var treeDatas = new List<T>();
             foreach (var topData in levelOneDatas)
             {
-                ResolveChildren(datas, topData, childrenSelector);
-                treeDatas.Add(topData);
+                ResolveChildren(datas, topData, childrenSelector, itemFilter);
+                if (itemFilter?.Invoke(topData) ?? true)
+                {
+                    treeDatas.Add(topData);
+                }
             }
             return treeDatas;
         }
 
         static void ResolveChildren<T>(IEnumerable<T> datas, T parent
-            , Func<IEnumerable<T>, T, List<T>> childrenSelector) where T : ISixnetTreeModel<T>
+            , Func<IEnumerable<T>, T, List<T>> childrenSelector
+            , Func<T, bool> itemFilter = null) where T : ISixnetTreeModel<T>
         {
             if (datas.IsNullOrEmpty() || parent == null)
             {
@@ -462,11 +467,16 @@ namespace System.Collections.Generic
             {
                 return;
             }
-            parent.Children = children;
+            var childItems = new List<T>();
             foreach (var child in children)
             {
                 ResolveChildren(datas, child, childrenSelector);
+                if (itemFilter?.Invoke(child) ?? true)
+                {
+                    childItems.Add(child);
+                }
             }
+            parent.Children = childItems;
         }
 
         #endregion
