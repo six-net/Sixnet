@@ -61,5 +61,13 @@ namespace Sixnet.App
         /// </summary>
         public string Env { get; set; }
 
+        /// <summary>
+        /// Gets default app tag
+        /// </summary>
+        /// <returns></returns>
+        public string GetDefaultAppTag()
+        {
+            return $"{Name}{Env}";
+        }
     }
 }

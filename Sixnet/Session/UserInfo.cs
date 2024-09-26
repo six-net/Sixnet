@@ -92,7 +92,7 @@ namespace Sixnet.Session
         /// <summary>
         /// Gets or sets the app tag
         /// </summary>
-        public string AppTag { get; set; } = $"{SixnetApplication.Current.Name}{SixnetApplication.Current.Env}";
+        public string AppTag { get; set; } = SixnetApplication.Current.GetDefaultAppTag();
 
         /// <summary>
         /// Gets or sets the token
