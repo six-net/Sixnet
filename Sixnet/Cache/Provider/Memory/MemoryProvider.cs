@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Sixnet.Algorithm.Selection;
 using Sixnet.Cache.Hash.Parameters;
 using Sixnet.Cache.Hash.Results;
@@ -4232,6 +4233,28 @@ namespace Sixnet.Cache.Provider.Memory
             var response = CacheResult.SuccessResponse<ExistResult>(server, database);
             response.KeyCount = count;
             return response;
+        }
+
+        #endregion
+
+        #region KeyScan
+
+        /// <summary>
+        /// Key scan
+        /// </summary>
+        /// <param name="server">server</param>
+        /// <param name="parameter">parameter</param>
+        /// <returns></returns>
+        public ScanResult KeyScan(CacheServer server, ScanParameter parameter)
+        {
+            var database = GetDatabase(server);
+            var keyPattern = new Regex(parameter.Pattern);
+            var resultKeys = database.Store.GetAllKeys()?.Where(c=>keyPattern.IsMatch(c)).ToList();
+            return new ScanResult() 
+            {
+                Cursor = 0,
+                Keys = resultKeys?.Select(c => { CacheKey key = ConstantCacheKey.Create(c); return key; }).ToList()
+            };
         }
 
         #endregion

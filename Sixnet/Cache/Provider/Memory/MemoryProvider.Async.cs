@@ -23,6 +23,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Sixnet.Cache.Provider.Memory
@@ -4248,6 +4249,28 @@ namespace Sixnet.Cache.Provider.Memory
             var response = CacheResult.SuccessResponse<ExistResult>(server, database);
             response.KeyCount = count;
             return await Task.FromResult(response).ConfigureAwait(false);
+        }
+
+        #endregion
+
+        #region KeyScan
+
+        /// <summary>
+        /// Key scan
+        /// </summary>
+        /// <param name="server">server</param>
+        /// <param name="parameter">parameter</param>
+        /// <returns></returns>
+        public Task<ScanResult> KeyScanAsync(CacheServer server, ScanParameter parameter)
+        {
+            var database = GetDatabase(server);
+            var keyPattern = new Regex(parameter.Pattern);
+            var resultKeys = database.Store.GetAllKeys()?.Where(c => keyPattern.IsMatch(c)).ToList();
+            return Task.FromResult(new ScanResult()
+            {
+                Cursor = 0,
+                Keys = resultKeys?.Select(c => { CacheKey key = ConstantCacheKey.Create(c); return key; }).ToList()
+            });
         }
 
         #endregion

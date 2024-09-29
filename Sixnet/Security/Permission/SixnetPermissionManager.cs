@@ -6,6 +6,9 @@ using Sixnet.Cache.Keys.Parameters;
 using Sixnet.Cache.Set.Parameters;
 using System.Linq;
 using System.Threading.Tasks;
+using Sixnet.Cache.Keys;
+using Sixnet.DependencyInjection;
+using Sixnet.Cache.Keys.Results;
 
 namespace Sixnet.Security.Permission
 {
@@ -315,6 +318,46 @@ namespace Sixnet.Security.Permission
                 CacheObject = cacheObject,
                 Key = objectKey,
                 Members = permissions
+            });
+        }
+
+        /// <summary>
+        /// Clear object permission
+        /// </summary>
+        /// <param name="appTag">App tag</param>
+        /// <param name="permissionObjectType">Permission object type</param>
+        public static void ClearObjectPermission(string appTag, PermissionObjectType permissionObjectType)
+        {
+            var cacheOptions = SixnetContainer.GetOptions<CacheOptions>();
+            var keyPattern = GetObjectPermissionKey(appTag, permissionObjectType, "*");
+            if (cacheOptions.LowercaseKey)
+            {
+                keyPattern = keyPattern.ToLower();
+            }
+            SixnetCacher.Keys.DeleteByPattern(new DeleteByPatternParameter()
+            {
+                CacheObject = GetCacheObject(),
+                Pattern = keyPattern,
+            });
+        }
+
+        /// <summary>
+        /// Clear object permission
+        /// </summary>
+        /// <param name="appTag">App tag</param>
+        /// <param name="permissionObjectType">Permission object type</param>
+        public static Task ClearObjectPermissionAsync(string appTag, PermissionObjectType permissionObjectType)
+        {
+            var cacheOptions = SixnetContainer.GetOptions<CacheOptions>();
+            var keyPattern = GetObjectPermissionKey(appTag, permissionObjectType, "*");
+            if (cacheOptions.LowercaseKey)
+            {
+                keyPattern = keyPattern.ToLower();
+            }
+            return SixnetCacher.Keys.DeleteByPatternAsync(new DeleteByPatternParameter()
+            {
+                CacheObject = GetCacheObject(),
+                Pattern = keyPattern,
             });
         }
 

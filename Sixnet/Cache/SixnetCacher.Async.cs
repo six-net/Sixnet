@@ -1469,6 +1469,49 @@ namespace Sixnet.Cache
                 return await ExecuteCommandAsync(deleteParameter).ConfigureAwait(false);
             }
 
+            /// <summary>
+            /// Delete by pattern
+            /// </summary>
+            /// <param name="parameter">Parameter</param>
+            /// <returns></returns>
+            public static async Task<DeleteResult> DeleteByPatternAsync(DeleteByPatternParameter parameter)
+            {
+                if (string.IsNullOrWhiteSpace(parameter?.Pattern))
+                {
+                    return CacheResult.SuccessResponse<DeleteResult>();
+                }
+                long cursor = 0;
+                DeleteResult deleteResult = null;
+                var scanParameter = new ScanParameter()
+                {
+                    CacheObject = parameter.CacheObject,
+                    CommandFlags = parameter.CommandFlags,
+                    Cursor = cursor,
+                    Pattern = parameter.Pattern,
+                    UseInMemoryForDefault = parameter.UseInMemoryForDefault,
+                    StructurePattern = parameter.StructurePattern,
+                    Size = 100,
+                };
+                var deleteParameter = new DeleteParameter()
+                {
+                    CacheObject = parameter.CacheObject,
+                    CommandFlags = parameter.CommandFlags,
+                    UseInMemoryForDefault = parameter.UseInMemoryForDefault,
+                    StructurePattern = parameter.StructurePattern,
+                };
+                do
+                {
+                    var scanResult = await ScanAsync(scanParameter).ConfigureAwait(false);
+                    scanParameter.Cursor = cursor = scanResult.Cursor;
+                    if (!scanResult.Keys.IsNullOrEmpty())
+                    {
+                        deleteParameter.Keys = scanResult.Keys;
+                        deleteResult = await DeleteAsync(deleteParameter).ConfigureAwait(false);
+                    }
+                } while (cursor > 0);
+                return deleteResult ?? CacheResult.SuccessResponse<DeleteResult>();
+            }
+
             #endregion
 
             #region Get keys
@@ -1495,6 +1538,20 @@ namespace Sixnet.Cache
             public static async Task<ExistResult> ExistAsync(ExistParameter existParameter)
             {
                 return await ExecuteCommandAsync(existParameter).ConfigureAwait(false);
+            }
+
+            #endregion
+
+            #region Scan
+
+            /// <summary>
+            /// Scan key
+            /// </summary>
+            /// <param name="scanParameter">Scan parameter</param>
+            /// <returns>Return cache result</returns>
+            public static Task<ScanResult> ScanAsync(ScanParameter scanParameter)
+            {
+                return ExecuteCommandAsync(scanParameter);
             }
 
             #endregion

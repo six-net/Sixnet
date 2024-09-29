@@ -1193,6 +1193,18 @@ namespace Sixnet.Cache
 
         #endregion
 
+        #region KeyScan
+
+        /// <summary>
+        /// Key scan
+        /// </summary>
+        /// <param name="server">server</param>
+        /// <param name="parameter">parameter</param>
+        /// <returns></returns>
+        Task<ScanResult> KeyScanAsync(CacheServer server, ScanParameter parameter);
+
+        #endregion
+
         #endregion
 
         #region Server

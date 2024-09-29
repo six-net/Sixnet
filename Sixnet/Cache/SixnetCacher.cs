@@ -1504,6 +1504,49 @@ namespace Sixnet.Cache
                 return ExecuteCacheOperation(deleteParameter);
             }
 
+            /// <summary>
+            /// Delete by pattern
+            /// </summary>
+            /// <param name="parameter">Parameter</param>
+            /// <returns></returns>
+            public static DeleteResult DeleteByPattern(DeleteByPatternParameter parameter)
+            {
+                if (string.IsNullOrWhiteSpace(parameter?.Pattern))
+                {
+                    return CacheResult.SuccessResponse<DeleteResult>();
+                }
+                long cursor = 0;
+                DeleteResult deleteResult = null;
+                var scanParameter = new ScanParameter()
+                {
+                    CacheObject = parameter.CacheObject,
+                    CommandFlags = parameter.CommandFlags,
+                    Cursor = cursor,
+                    Pattern = parameter.Pattern,
+                    UseInMemoryForDefault = parameter.UseInMemoryForDefault,
+                    StructurePattern = parameter.StructurePattern,
+                    Size = 100,
+                };
+                var deleteParameter = new DeleteParameter()
+                {
+                    CacheObject = parameter.CacheObject,
+                    CommandFlags = parameter.CommandFlags,
+                    UseInMemoryForDefault = parameter.UseInMemoryForDefault,
+                    StructurePattern = parameter.StructurePattern,
+                };
+                do
+                {
+                    var scanResult = Scan(scanParameter);
+                    scanParameter.Cursor = cursor = scanResult.Cursor;
+                    if (!scanResult.Keys.IsNullOrEmpty())
+                    {
+                        deleteParameter.Keys = scanResult.Keys;
+                        deleteResult = Delete(deleteParameter);
+                    }
+                } while (cursor > 0);
+                return deleteResult ?? CacheResult.SuccessResponse<DeleteResult>();
+            }
+
             #endregion
 
             #region Get keys
@@ -1525,11 +1568,25 @@ namespace Sixnet.Cache
             /// <summary>
             /// Check whether key exist
             /// </summary>
-            /// <param name="existParameter">Exist parameter</param>
+            /// <param name="scanParameter">Exist parameter</param>
             /// <returns>Return cache result</returns>
-            public static ExistResult Exist(ExistParameter existParameter)
+            public static ExistResult Exist(ExistParameter scanParameter)
             {
-                return ExecuteCacheOperation(existParameter);
+                return ExecuteCacheOperation(scanParameter);
+            }
+
+            #endregion
+
+            #region Scan
+
+            /// <summary>
+            /// Scan key
+            /// </summary>
+            /// <param name="scanParameter">Scan parameter</param>
+            /// <returns>Return cache result</returns>
+            public static ScanResult Scan(ScanParameter scanParameter)
+            {
+                return ExecuteCacheOperation(scanParameter);
             }
 
             #endregion
@@ -1646,7 +1703,7 @@ namespace Sixnet.Cache
         /// <returns>Return cache provider</returns>
         internal static ISixnetCacheProvider GetCacheProvider(CacheServerType databaseType)
         {
-            var provider =  Options?.GetCacheProvider(databaseType);
+            var provider = Options?.GetCacheProvider(databaseType);
 
             SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"Not set provider for: {databaseType}");
 

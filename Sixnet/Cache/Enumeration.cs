@@ -168,7 +168,8 @@ namespace Sixnet.Cache
     {
         Include = 2,
         StartWith = 4,
-        EndWith = 8
+        EndWith = 8,
+        Custom = 16
     }
 
     /// <summary>
