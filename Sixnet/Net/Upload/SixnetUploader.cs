@@ -36,7 +36,7 @@ namespace Sixnet.Net.Upload
             SixnetDirectThrower.ThrowArgNullIf(files.IsNullOrEmpty(), nameof(files));
 
             var uploadObjectGroups = files.Select(c => c.ObjectName).Distinct().ToList();
-            var uploadResult = new UploadResult();
+            var uploadResult = UploadResult.SuccessResult();
             foreach (var uploadObjectName in uploadObjectGroups)
             {
                 var groupFiles = files.Where(c => c.ObjectName == uploadObjectName).ToList();

@@ -27,7 +27,7 @@ namespace Sixnet.Net.Upload
                 var uploadSetting = GetUploadSetting(uploadObjectName);
                 uploadTasks.Add(UploadAsync(groupFiles, uploadSetting, parameters));
             }
-            var uploadResult = new UploadResult();
+            var uploadResult = UploadResult.SuccessResult();
             uploadResult.Combine(await Task.WhenAll(uploadTasks).ConfigureAwait(false));
             return uploadResult;
         }
