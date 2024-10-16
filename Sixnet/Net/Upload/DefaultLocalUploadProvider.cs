@@ -203,7 +203,7 @@ namespace Sixnet.Net.Upload
             }
 
             // date folder
-            if (!uploadSetting.DateClassification)
+            if (uploadSetting.DateClassification)
             {
                 var dataFolder = DateTimeOffset.Now.ToString("yyyyMMdd");
                 relativePath = Path.Combine(relativePath, dataFolder);
