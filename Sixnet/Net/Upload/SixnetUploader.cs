@@ -1,7 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Threading.Tasks;
 using Sixnet.DependencyInjection;
 using Sixnet.Exceptions;
+using static System.Net.WebRequestMethods;
 
 namespace Sixnet.Net.Upload
 {
@@ -16,6 +21,7 @@ namespace Sixnet.Net.Upload
         /// Gets or sets the default content folder
         /// </summary>
         internal static string DefaultContentFolder { get; set; } = "wwwroot";
+        internal static string DefaultTempFolder { get; set; } = "sntemp";
         static readonly ISixnetUploadProvider _localUploadProvider = new DefaultLocalUploadProvider();
         static readonly ISixnetUploadProvider _remoteUploadProvider = new DefaultRemoteUploadProvider();
 
@@ -70,6 +76,25 @@ namespace Sixnet.Net.Upload
 
         #endregion
 
+        #region Move
+
+        /// <summary>
+        /// Move file
+        /// </summary>
+        /// <param name="parameter">Parameter</param>
+        /// <returns></returns>
+        public static List<string> Move(MoveUploadFileParameter parameter)
+        {
+            var uploadParameter = new UploadParameter()
+            {
+                Setting = GetUploadSetting(parameter?.ObjectName)
+            };
+            var provider = GetUploadProvider(uploadParameter);
+            return provider.Move(parameter);
+        }
+
+        #endregion
+
         #region Gets upload setting
 
         /// <summary>
@@ -77,7 +102,7 @@ namespace Sixnet.Net.Upload
         /// </summary>
         /// <param name="uploadObjectName">Upload object name</param>
         /// <returns>Return the upload setting</returns>
-        static UploadSetting GetUploadSetting(string uploadObjectName)
+        internal static UploadSetting GetUploadSetting(string uploadObjectName)
         {
             UploadSetting uploadSetting = null;
             var uploadOptions = SixnetContainer.GetOptions<UploadOptions>();
@@ -90,7 +115,7 @@ namespace Sixnet.Net.Upload
 
         #region Get upload provider
 
-        static ISixnetUploadProvider GetUploadProvider(UploadParameter parameter)
+        internal static ISixnetUploadProvider GetUploadProvider(UploadParameter parameter)
         {
             var uploadOptions = SixnetContainer.GetOptions<UploadOptions>();
             ISixnetUploadProvider provider = null;

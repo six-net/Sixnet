@@ -1,8 +1,10 @@
-﻿using Sixnet.Exceptions;
+﻿using Sixnet.DependencyInjection;
+using Sixnet.Exceptions;
 using Sixnet.Net.Http;
 using Sixnet.Serialization.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -23,6 +25,38 @@ namespace Sixnet.Net.Upload
             var remoteUploadInfos = GetRemoteUploadInfos(parameter);
             return SixnetHttp.UploadAsync(remoteUploadInfos.Item1, remoteUploadInfos.Item2, remoteUploadInfos.Item3);
         }
+
+        #region Move
+
+        /// <summary>
+        /// Move file
+        /// </summary>
+        /// <param name="parameter">Parameter</param>
+        /// <returns></returns>
+        public List<string> Move(MoveUploadFileParameter parameter)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(parameter == null, nameof(parameter));
+
+            var uploadSetting = SixnetUploader.GetUploadSetting(parameter.ObjectName);
+            var remoteUploadSetting = uploadSetting.GetRemoteSetting();
+            return SixnetHttp.PostJson<List<string>>(remoteUploadSetting.GetMoveFileUrl(), parameter);
+        }
+
+        /// <summary>
+        /// Move file
+        /// </summary>
+        /// <param name="parameter">Parameter</param>
+        /// <returns></returns>
+        public Task<List<string>> MoveAsync(MoveUploadFileParameter parameter)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(parameter == null, nameof(parameter));
+
+            var uploadSetting = SixnetUploader.GetUploadSetting(parameter.ObjectName);
+            var remoteUploadSetting = uploadSetting.GetRemoteSetting();
+            return SixnetHttp.PostJsonAsync<List<string>>(remoteUploadSetting.GetMoveFileUrl(), parameter);
+        }
+
+        #endregion
 
         (string, Dictionary<string, byte[]>, Dictionary<string, string>) GetRemoteUploadInfos(UploadParameter parameter)
         {

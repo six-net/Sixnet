@@ -21,6 +21,11 @@ namespace Sixnet.Net.Upload
         public string FileListPath { get; set; } = "filelist";
 
         /// <summary>
+        /// Gets or sets the move file path
+        /// </summary>
+        public string MoveFilePath { get; set; } = "move";
+
+        /// <summary>
         /// Gets or sets server url
         /// </summary>
         public string Host { get; set; }
@@ -49,6 +54,19 @@ namespace Sixnet.Net.Upload
                 return Host;
             }
             return string.Format("{0}/{1}", Host.Trim('/'), FileListPath);
+        }
+
+        /// <summary>
+        /// Gets file move url
+        /// </summary>
+        /// <returns>Return file list url</returns>
+        public string GetMoveFileUrl()
+        {
+            if (string.IsNullOrWhiteSpace(MoveFilePath))
+            {
+                return Host;
+            }
+            return string.Format("{0}/{1}", Host.Trim('/'), MoveFilePath);
         }
     }
 }

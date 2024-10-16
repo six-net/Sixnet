@@ -55,5 +55,25 @@ namespace Sixnet.Net.Upload
         }
 
         #endregion
+
+        #region Move
+
+        /// <summary>
+        /// Move file
+        /// </summary>
+        /// <param name="parameter">Parameter</param>
+        /// <returns></returns>
+        public static Task<List<string>> MoveAsync(MoveUploadFileParameter parameter)
+        {
+            var uploadParameter = new UploadParameter()
+            {
+                Setting = GetUploadSetting(parameter?.ObjectName)
+            };
+            var provider = GetUploadProvider(uploadParameter);
+            return provider.MoveAsync(parameter);
+        }
+
+
+        #endregion
     }
 }

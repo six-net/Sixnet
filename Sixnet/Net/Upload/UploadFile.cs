@@ -29,11 +29,6 @@ namespace Sixnet.Net.Upload
         public string Suffix { get; set; }
 
         /// <summary>
-        /// Whether to rename the file
-        /// </summary>
-        public bool Rename { get; set; }
-
-        /// <summary>
         /// Gets or sets the file content
         /// </summary>
         public byte[] FileContent { get; set; }

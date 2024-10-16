@@ -15,6 +15,11 @@ namespace Sixnet.Net.Upload
         public UploadSetting Default { get; set; } = new();
 
         /// <summary>
+        /// Gets or sets the temp folder
+        /// </summary>
+        public string TempFolder { get; set; } = SixnetUploader.DefaultTempFolder;
+
+        /// <summary>
         /// Gets or sets the upload object settings
         /// Key: upload object name
         /// </summary>

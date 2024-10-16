@@ -28,19 +28,30 @@ namespace Sixnet.Net.Upload
         /// <summary>
         /// Gets or sets file save path
         /// </summary>
-        public string SavePath { get; set; }
+        public string SavePath { get; set; } = SixnetUploader.DefaultContentFolder;
 
         /// <summary>
-        /// Gets or sets whether save to content root folder
+        /// Gets or sets the target path
+        /// </summary>
+        public string TargetPath { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether classification file by date folder.
         /// default is true
         /// </summary>
-        public bool SaveToContentRoot { get; set; } = true;
+        public bool DateClassification { get; set; } = true;
 
         /// <summary>
-        /// Gets or sets upload content root folder path
-        /// default value is 'wwwroot'
+        /// Whether save to the temp folder first
+        /// Default is true
         /// </summary>
-        public string ContentRootPath { get; set; } = SixnetUploader.DefaultContentFolder;
+        public bool TempFirst { get; set; } = true;
+
+        /// <summary>
+        /// Gets or sets whether rename file
+        /// default is true
+        /// </summary>
+        public bool Rename { get; set; }
 
         /// <summary>
         /// Gets or sets remote configs
