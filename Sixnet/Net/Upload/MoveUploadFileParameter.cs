@@ -15,12 +15,6 @@ namespace Sixnet.Net.Upload
         public string ObjectName {  get; set; }
 
         /// <summary>
-        /// Ignore not temp first 
-        /// Default is true
-        /// </summary>
-        public bool IgnoreNotTempFirst { get; set; } = true;
-
-        /// <summary>
         /// Gets or sets the relative file paths
         /// </summary>
         public List<string> RelativeFilePaths {  get; set; }

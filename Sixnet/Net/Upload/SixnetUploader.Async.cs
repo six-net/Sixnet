@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Sixnet.Exceptions;
@@ -73,6 +74,17 @@ namespace Sixnet.Net.Upload
             return provider.MoveAsync(parameter);
         }
 
+        /// <summary>
+        /// Move file
+        /// </summary>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        public static Task<List<string>> MoveAsync(Action<MoveUploadFileParameter> configure)
+        {
+            var parameter = new MoveUploadFileParameter();
+            configure?.Invoke(parameter);
+            return MoveAsync(parameter);
+        }
 
         #endregion
     }

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Sixnet.App;
 using Sixnet.Cache;
 using Sixnet.Development.Data;
+using Sixnet.Development.Entity;
 using Sixnet.Development.Message;
 using Sixnet.Development.Work;
 using Sixnet.Exceptions;
@@ -133,6 +134,11 @@ namespace Sixnet.DependencyInjection
         /// Configure unitofwork
         /// </summary>
         public Action<UnitOfWorkOptions> ConfigureUnitOfWork { get; set; }
+
+        /// <summary>
+        /// Configure entity
+        /// </summary>
+        public Action<SixnetEntityOptions> ConfigureEntity { get; set; }
 
         /// <summary>
         /// Set options style

@@ -40,9 +40,14 @@ namespace Sixnet.Development.Entity
         public FieldBehavior Behavior { get; set; } = FieldBehavior.None;
 
         /// <summary>
-        /// Gets or sets the field format options
+        /// Gets or sets the upload object name
         /// </summary>
-        public FieldFormatSetting FormatOptions { get; set; }
+        public string UploadObjectName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the field format setting
+        /// </summary>
+        public FieldFormatSetting FormatSetting { get; set; }
 
         /// <summary>
         /// Gets or sets the database type

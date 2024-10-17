@@ -22,6 +22,7 @@ namespace Sixnet.Net.Upload
 
         /// <summary>
         /// Gets or sets whether to use remote upload
+        /// Default is false
         /// </summary>
         public bool Remote { get; set; }
 
@@ -49,9 +50,9 @@ namespace Sixnet.Net.Upload
 
         /// <summary>
         /// Gets or sets whether rename file
-        /// default is true
+        /// Default is true
         /// </summary>
-        public bool Rename { get; set; }
+        public bool Rename { get; set; } = true;
 
         /// <summary>
         /// Gets or sets remote configs

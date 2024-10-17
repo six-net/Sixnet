@@ -138,7 +138,8 @@ namespace Sixnet.Development.Entity
                     DbType = entityFieldAttribute?.DbType,
                     Length = entityFieldAttribute?.Length ?? 0,
                     Description = entityFieldAttribute?.Description ?? string.Empty,
-                    StartValue = entityFieldAttribute?.StartValue ?? 0
+                    StartValue = entityFieldAttribute?.StartValue ?? 0,
+                    UploadObjectName = entityFieldAttribute.UploadObjectName ?? string.Empty,
                 };
 
                 //value provider

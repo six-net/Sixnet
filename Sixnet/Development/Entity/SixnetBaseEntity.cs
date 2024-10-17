@@ -8,6 +8,8 @@ using Sixnet.Exceptions;
 using static Sixnet.Validation.SixnetValidationConstants;
 using Sixnet.Serialization.Binary;
 using System.Threading.Tasks;
+using Sixnet.Net.Upload;
+using Sixnet.DependencyInjection;
 
 namespace Sixnet.Development.Entity
 {
@@ -261,9 +263,13 @@ namespace Sixnet.Development.Entity
         /// </summary>
         /// <param name="newEntity">New entity</param>
         /// <returns></returns>
-        internal protected virtual Task OnUpdatingAsync()
+        internal protected virtual async Task OnUpdatingAsync()
         {
-            return Task.CompletedTask;
+            #region upload path
+
+            await HandleUploadPathAsync().ConfigureAwait(false);
+
+            #endregion
         }
 
         /// <summary>
@@ -374,35 +380,39 @@ namespace Sixnet.Development.Entity
         /// <returns></returns>
         internal protected virtual async Task OnAddingAsync()
         {
-            #region Generate id
+            var entityOptions = SixnetContainer.GetOptions<SixnetEntityOptions>();
 
-            var generatedIdFields = SixnetEntityManager.GetFields<T>(FieldRole.GeneratedId);
-            if (!generatedIdFields.IsNullOrEmpty())
+            #region Generate id
+            if (!entityOptions.NotAutoGenerageId)
             {
-                foreach (var field in generatedIdFields)
+                var generatedIdFields = SixnetEntityManager.GetFields<T>(FieldRole.GeneratedId);
+                if (!generatedIdFields.IsNullOrEmpty())
                 {
-                    var fieldValue = GetValue(field.PropertyName);
-                    if (fieldValue == null || fieldValue <= field.StartValue)
+                    foreach (var field in generatedIdFields)
                     {
-                        var typeCode = Type.GetTypeCode(field.DataType);
-                        switch (typeCode)
+                        var fieldValue = GetValue(field.PropertyName);
+                        if (fieldValue == null || fieldValue <= field.StartValue)
                         {
-                            case TypeCode.Int16:
-                            case TypeCode.UInt16:
-                            case TypeCode.Int32:
-                            case TypeCode.UInt32:
-                                SetValue(field.PropertyName, await ObjectIdHelper.GetIntIdAsync<T>(field.PropertyName).ConfigureAwait(false));
-                                break;
-                            case TypeCode.Int64:
-                            case TypeCode.UInt64:
-                            case TypeCode.Double:
-                            case TypeCode.Single:
-                            case TypeCode.Decimal:
-                                SetValue(field.PropertyName, await ObjectIdHelper.GetLongIdAsync<T>(field.PropertyName).ConfigureAwait(false));
-                                break;
-                            default:
-                                SixnetDirectThrower.ThrowIf<NotSupportedException>(true, typeCode.ToString());
-                                break;
+                            var typeCode = Type.GetTypeCode(field.DataType);
+                            switch (typeCode)
+                            {
+                                case TypeCode.Int16:
+                                case TypeCode.UInt16:
+                                case TypeCode.Int32:
+                                case TypeCode.UInt32:
+                                    SetValue(field.PropertyName, await ObjectIdHelper.GetIntIdAsync<T>(field.PropertyName).ConfigureAwait(false));
+                                    break;
+                                case TypeCode.Int64:
+                                case TypeCode.UInt64:
+                                case TypeCode.Double:
+                                case TypeCode.Single:
+                                case TypeCode.Decimal:
+                                    SetValue(field.PropertyName, await ObjectIdHelper.GetLongIdAsync<T>(field.PropertyName).ConfigureAwait(false));
+                                    break;
+                                default:
+                                    SixnetDirectThrower.ThrowIf<NotSupportedException>(true, typeCode.ToString());
+                                    break;
+                            }
                         }
                     }
                 }
@@ -418,6 +428,47 @@ namespace Sixnet.Development.Entity
             };
 
             #endregion
+
+            #region upload path
+
+            await HandleUploadPathAsync().ConfigureAwait(false);
+
+            #endregion
+        }
+
+        #endregion
+
+        #region Upload
+
+        /// <summary>
+        /// Handle upload path
+        /// </summary>
+        /// <returns></returns>
+        protected async Task HandleUploadPathAsync()
+        {
+            var entityOptions = SixnetContainer.GetOptions<SixnetEntityOptions>();
+            if (entityOptions.NotAutoMoveUploadFile)
+            {
+                return;
+            }
+            var uploadFields = SixnetEntityManager.GetFields<T>(FieldRole.UploadPath);
+            if (!uploadFields.IsNullOrEmpty())
+            {
+                foreach (var field in uploadFields)
+                {
+                    var fieldValue = GetValue(field.PropertyName);
+                    if (string.IsNullOrWhiteSpace(fieldValue) || field.AllowBehavior(FieldBehavior.NotMoveUploadPath))
+                    {
+                        continue;
+                    }
+                    var newValue = (await SixnetUploader.MoveAsync(parm =>
+                    {
+                        parm.ObjectName = field.UploadObjectName;
+                        parm.RelativeFilePaths = new List<string>() { fieldValue };
+                    }).ConfigureAwait(false)).FirstOrDefault();
+                    SetValue(field.PropertyName, newValue);
+                }
+            }
         }
 
         #endregion

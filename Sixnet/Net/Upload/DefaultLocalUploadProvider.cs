@@ -44,9 +44,7 @@ namespace Sixnet.Net.Upload
             SixnetDirectThrower.ThrowArgNullIf(parameter?.RelativeFilePaths.IsNullOrEmpty() ?? true, nameof(MoveUploadFileParameter.RelativeFilePaths));
             var uploadSetting = SixnetUploader.GetUploadSetting(parameter.ObjectName);
 
-            // not move
-            var notMove = parameter.IgnoreNotTempFirst && !uploadSetting.TempFirst;
-            if (!notMove)
+            if (uploadSetting.TempFirst)
             {
                 var uploadOptions = SixnetContainer.GetOptions<UploadOptions>();
                 var uploadSavePath = GetUploadSavePath(uploadOptions, uploadSetting);
@@ -66,7 +64,9 @@ namespace Sixnet.Net.Upload
                         continue;
                     }
                     File.Move(orginalFile, targetFile);
+                    targetFiles.Add(filePath);
                 }
+                return targetFiles;
             }
             return parameter.RelativeFilePaths.Select(c => c).ToList();
         }

@@ -6,6 +6,7 @@ using Sixnet.Cache;
 using Sixnet.Cache.Provider.Memory;
 using Sixnet.Development.Data;
 using Sixnet.Development.Data.Event;
+using Sixnet.Development.Entity;
 using Sixnet.Development.Message;
 using Sixnet.Development.Repository;
 using Sixnet.Development.Work;
@@ -437,6 +438,8 @@ namespace Sixnet.DependencyInjection
             services.ConfigureIfNotNull<UnitOfWorkOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.UnitOfWork)));
             // Logging
             services.ConfigureIfNotNull<SixnetLoggingOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Logging)));
+            // Entity
+            services.ConfigureIfNotNull<SixnetEntityOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Entity)));
 
             // Post config options
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureUpload);
@@ -459,6 +462,7 @@ namespace Sixnet.DependencyInjection
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureUnitOfWork);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureLoggingBuilder);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureLogging);
+            services.PostConfigureIfNotNull(sixnetOptions.ConfigureEntity);
         }
 
         #endregion

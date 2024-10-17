@@ -1,5 +1,6 @@
 ﻿using Sixnet.Cache;
 using Sixnet.Development.Data;
+using Sixnet.Development.Entity;
 using Sixnet.Development.Message;
 using Sixnet.Development.Work;
 using Sixnet.IO.FileAccess;
@@ -96,5 +97,10 @@ namespace Sixnet.DependencyInjection
         /// Gets or sets the logging options
         /// </summary>
         public SixnetLoggingOptions Logging { get; set; }
+
+        /// <summary>
+        /// Gets or sets the entity
+        /// </summary>
+        public SixnetEntityOptions Entity { get; set; }
     }
 }

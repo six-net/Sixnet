@@ -93,6 +93,18 @@ namespace Sixnet.Net.Upload
             return provider.Move(parameter);
         }
 
+        /// <summary>
+        /// Move file
+        /// </summary>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        public static List<string> Move(Action<MoveUploadFileParameter> configure)
+        {
+            var parameter = new MoveUploadFileParameter();
+            configure?.Invoke(parameter);
+            return Move(parameter);
+        }
+
         #endregion
 
         #region Gets upload setting

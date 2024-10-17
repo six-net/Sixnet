@@ -38,7 +38,8 @@ namespace Sixnet.Development.Entity
         UpdateUserName = 8192,
         UpdateUserDisplayName = 16384,
         SplitValue = 32768,
-        GeneratedId = 65536
+        GeneratedId = 65536,
+        UploadPath = 131072
     }
 
     /// <summary>
@@ -65,6 +66,7 @@ namespace Sixnet.Development.Entity
         NotQuery = 2,
         NotInsert = 4,
         NotUpdate = 8,
+        NotMoveUploadPath = 16
     }
 
     /// <summary>
