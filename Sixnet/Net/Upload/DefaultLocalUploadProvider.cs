@@ -1,6 +1,7 @@
 ﻿using Sixnet.Code;
 using Sixnet.DependencyInjection;
 using Sixnet.Exceptions;
+using Sixnet.IO;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -57,14 +58,15 @@ namespace Sixnet.Net.Upload
                     {
                         filePath = filePath.LSplit(uploadOptions.TempFolder)[^1];
                     }
-                    var orginalFile = Path.Combine(uploadSavePath, filePath);
-                    var targetFile = Path.Combine(targetPath, filePath);
-                    if (File.Exists(targetFile))
+                    filePath = filePath?.Trim('/', '\\');
+                    var orginalFile = SixnetPathHelper.Combine(uploadSavePath, filePath);
+                    var targetFile = SixnetPathHelper.Combine(targetPath, filePath);
+                    targetFiles.Add(filePath);
+                    if (File.Exists(targetFile) || !File.Exists(orginalFile))
                     {
                         continue;
                     }
                     File.Move(orginalFile, targetFile);
-                    targetFiles.Add(filePath);
                 }
                 return targetFiles;
             }
@@ -192,30 +194,30 @@ namespace Sixnet.Net.Upload
             if (uploadSetting.TempFirst && !string.IsNullOrWhiteSpace(uploadOptions.TempFolder))
             {
                 relativePath = uploadOptions.TempFolder;
-                savePath = Path.Combine(savePath, uploadOptions.TempFolder);
+                savePath = SixnetPathHelper.Combine(savePath, uploadOptions.TempFolder);
             }
 
             // customer folder
             if (!string.IsNullOrWhiteSpace(folder))
             {
-                relativePath = Path.Combine(relativePath, folder);
-                savePath = Path.Combine(savePath, folder);
+                relativePath = SixnetPathHelper.Combine(relativePath, folder);
+                savePath = SixnetPathHelper.Combine(savePath, folder);
             }
 
             // date folder
             if (uploadSetting.DateClassification)
             {
                 var dataFolder = DateTimeOffset.Now.ToString("yyyyMMdd");
-                relativePath = Path.Combine(relativePath, dataFolder);
-                savePath = Path.Combine(savePath, dataFolder);
+                relativePath = SixnetPathHelper.Combine(relativePath, dataFolder);
+                savePath = SixnetPathHelper.Combine(savePath, dataFolder);
             }
 
             // create random folder
             if (!uploadSetting.Rename)
             {
                 var randomFolder = GuidHelper.GetGuid().ToString().Replace("-", "");
-                relativePath = Path.Combine(relativePath, randomFolder);
-                savePath = Path.Combine(savePath, randomFolder);
+                relativePath = SixnetPathHelper.Combine(relativePath, randomFolder);
+                savePath = SixnetPathHelper.Combine(savePath, randomFolder);
             }
 
             // create folder
@@ -236,7 +238,9 @@ namespace Sixnet.Net.Upload
         {
             return Path.IsPathRooted(uploadSetting.SavePath)
                    ? uploadSetting.SavePath
-                   : Path.Combine(Directory.GetCurrentDirectory(), uploadSetting.SavePath);
+                   : string.IsNullOrWhiteSpace(uploadSetting.SavePath)
+                     ? Directory.GetCurrentDirectory()
+                     : SixnetPathHelper.Combine(Directory.GetCurrentDirectory(), uploadSetting.SavePath);
         }
 
         /// <summary>
@@ -252,7 +256,7 @@ namespace Sixnet.Net.Upload
             // temp folder
             if (uploadSetting.TempFirst && !string.IsNullOrWhiteSpace(uploadOptions.TempFolder))
             {
-                savePath = Path.Combine(savePath, uploadOptions.TempFolder);
+                savePath = SixnetPathHelper.Combine(savePath, uploadOptions.TempFolder);
             }
             return savePath;
         }
@@ -267,7 +271,9 @@ namespace Sixnet.Net.Upload
             var targetPath = uploadSetting.TargetPath;
             if (!Path.IsPathRooted(targetPath))
             {
-                targetPath = Path.Combine(GetRootPath(uploadSetting), targetPath);
+                targetPath = string.IsNullOrWhiteSpace(targetPath) 
+                            ? GetRootPath(uploadSetting)
+                            : SixnetPathHelper.Combine(GetRootPath(uploadSetting), targetPath);
             }
             return targetPath;
         }
