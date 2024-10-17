@@ -9,11 +9,11 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Not auto generate id
         /// </summary>
-        public bool NotAutoGenerageId { get; set; } = true;
+        public bool NotAutoGenerageId { get; set; }
 
         /// <summary>
         /// Not auto move upload file
         /// </summary>
-        public bool NotAutoMoveUploadFile {  get; set; } = true;
+        public bool NotAutoMoveUploadFile {  get; set; }
     }
 }
