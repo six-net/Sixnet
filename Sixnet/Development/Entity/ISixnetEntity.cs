@@ -83,10 +83,28 @@ namespace Sixnet.Development.Entity
         Task OnDataUpdatingAsync();
 
         /// <summary>
+        /// Update data
+        /// </summary>
+        void OnDataUpdating();
+
+        /// <summary>
         /// Add data
         /// </summary>
         /// <returns></returns>
         Task OnDataAddingAsync();
+
+        /// <summary>
+        /// Add data
+        /// </summary>
+        /// <returns></returns>
+        void OnDataAdding();
+
+        /// <summary>
+        /// Modify from new data
+        /// </summary>
+        /// <param name="newData">New data</param>
+        /// <param name="configure">Configure</param>
+        Task ModifyFromAsync(T newData, Action<ModifyEntityOptions> configure = null);
 
         /// <summary>
         /// Modify from new data
@@ -94,6 +112,13 @@ namespace Sixnet.Development.Entity
         /// <param name="newData">New data</param>
         /// <param name="configure">Configure</param>
         void ModifyFrom(T newData, Action<ModifyEntityOptions> configure = null);
+
+        /// <summary>
+        /// Get modification assignment
+        /// </summary>
+        /// <param name="newData">New data</param>
+        /// <param name="configure">Configure</param>
+        Task<FieldsAssignment> GetModificationAssignmentAsync(T newData, Action<ModifyEntityOptions> configure = null);
 
         /// <summary>
         /// Get modification assignment

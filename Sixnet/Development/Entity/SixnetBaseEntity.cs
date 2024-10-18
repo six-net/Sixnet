@@ -261,6 +261,14 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Update data
         /// </summary>
+        public void OnDataUpdating()
+        {
+            OnUpdating();
+        }
+
+        /// <summary>
+        /// Update data
+        /// </summary>
         /// <param name="newEntity">New entity</param>
         /// <returns></returns>
         internal protected virtual async Task OnUpdatingAsync()
@@ -273,6 +281,36 @@ namespace Sixnet.Development.Entity
         }
 
         /// <summary>
+        /// Update data
+        /// </summary>
+        internal protected virtual void OnUpdating()
+        {
+            #region upload path
+
+            HandleUploadPath();
+
+            #endregion
+        }
+
+        /// <summary>
+        /// Modify from new data
+        /// </summary>
+        /// <param name="newData">New data</param>
+        /// <param name="configure">Configure</param>
+        public virtual async Task ModifyFromAsync(T newData, Action<ModifyEntityOptions> configure = null)
+        {
+            if (newData != null && newData != this)
+            {
+                await newData.OnDataUpdatingAsync().ConfigureAwait(false);
+                var modificationValues = GetModificationValues(newData.GetAllValues(), configure, false, out _);
+                foreach (var valueItem in modificationValues)
+                {
+                    SetValue(valueItem.Key, valueItem.Value);
+                }
+            }
+        }
+
+        /// <summary>
         /// Modify from new data
         /// </summary>
         /// <param name="newData">New data</param>
@@ -281,6 +319,7 @@ namespace Sixnet.Development.Entity
         {
             if (newData != null && newData != this)
             {
+                newData.OnDataUpdating();
                 var modificationValues = GetModificationValues(newData.GetAllValues(), configure, false, out _);
                 foreach (var valueItem in modificationValues)
                 {
@@ -294,8 +333,30 @@ namespace Sixnet.Development.Entity
         /// </summary>
         /// <param name="newData">New data</param>
         /// <param name="configure">Configure</param>
+        public virtual async Task<FieldsAssignment> GetModificationAssignmentAsync(T newData, Action<ModifyEntityOptions> configure = null)
+        {
+            if (newData != null)
+            {
+                await newData.OnDataUpdatingAsync().ConfigureAwait(false);
+            }
+            var fieldsAssignment = FieldsAssignment.Create();
+            var modificationValues = GetModificationValues(newData?.GetAllValues(), configure, newData == this, out var oldValues);
+            foreach (var valueItem in modificationValues)
+            {
+                fieldsAssignment.SetNewValue(valueItem.Key, valueItem.Value);
+            }
+            fieldsAssignment.OldValues = oldValues;
+            return fieldsAssignment;
+        }
+
+        /// <summary>
+        /// Get modification assignment
+        /// </summary>
+        /// <param name="newData">New data</param>
+        /// <param name="configure">Configure</param>
         public virtual FieldsAssignment GetModificationAssignment(T newData, Action<ModifyEntityOptions> configure = null)
         {
+            newData?.OnDataUpdating();
             var fieldsAssignment = FieldsAssignment.Create();
             var modificationValues = GetModificationValues(newData?.GetAllValues(), configure, newData == this, out var oldValues);
             foreach (var valueItem in modificationValues)
@@ -378,6 +439,15 @@ namespace Sixnet.Development.Entity
         /// Add data
         /// </summary>
         /// <returns></returns>
+        public void OnDataAdding()
+        {
+            OnAdding();
+        }
+
+        /// <summary>
+        /// Add data
+        /// </summary>
+        /// <returns></returns>
         internal protected virtual async Task OnAddingAsync()
         {
             var entityOptions = SixnetContainer.GetOptions<SixnetEntityOptions>();
@@ -436,6 +506,69 @@ namespace Sixnet.Development.Entity
             #endregion
         }
 
+        /// <summary>
+        /// Add data
+        /// </summary>
+        /// <returns></returns>
+        internal protected virtual void OnAdding()
+        {
+            var entityOptions = SixnetContainer.GetOptions<SixnetEntityOptions>();
+
+            #region Generate id
+
+            if (!entityOptions.NotAutoGenerageId)
+            {
+                var generatedIdFields = SixnetEntityManager.GetFields<T>(FieldRole.GeneratedId);
+                if (!generatedIdFields.IsNullOrEmpty())
+                {
+                    foreach (var field in generatedIdFields)
+                    {
+                        var fieldValue = GetValue(field.PropertyName);
+                        if (fieldValue == null || fieldValue <= field.StartValue)
+                        {
+                            var typeCode = Type.GetTypeCode(field.DataType);
+                            switch (typeCode)
+                            {
+                                case TypeCode.Int16:
+                                case TypeCode.UInt16:
+                                case TypeCode.Int32:
+                                case TypeCode.UInt32:
+                                    SetValue(field.PropertyName, ObjectIdHelper.GetIntId<T>(field.PropertyName));
+                                    break;
+                                case TypeCode.Int64:
+                                case TypeCode.UInt64:
+                                case TypeCode.Double:
+                                case TypeCode.Single:
+                                case TypeCode.Decimal:
+                                    SetValue(field.PropertyName, ObjectIdHelper.GetIntId<T>(field.PropertyName));
+                                    break;
+                                default:
+                                    SixnetDirectThrower.ThrowIf<NotSupportedException>(true, typeCode.ToString());
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            #endregion
+
+            #region primary key
+
+            if (IdentityValueIsNull())
+            {
+                InitIdentityValue();
+            };
+
+            #endregion
+
+            #region upload path
+
+            HandleUploadPath();
+
+            #endregion
+        }
+
         #endregion
 
         #region Upload
@@ -465,7 +598,38 @@ namespace Sixnet.Development.Entity
                     {
                         parm.ObjectName = field.UploadObjectName;
                         parm.RelativeFilePaths = new List<string>() { fieldValue };
-                    }).ConfigureAwait(false)).FirstOrDefault();
+                    }).ConfigureAwait(false))?.FirstOrDefault();
+                    SetValue(field.PropertyName, newValue);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handle upload path
+        /// </summary>
+        /// <returns></returns>
+        protected void HandleUploadPath()
+        {
+            var entityOptions = SixnetContainer.GetOptions<SixnetEntityOptions>();
+            if (entityOptions.NotAutoMoveUploadFile)
+            {
+                return;
+            }
+            var uploadFields = SixnetEntityManager.GetFields<T>(FieldRole.UploadPath);
+            if (!uploadFields.IsNullOrEmpty())
+            {
+                foreach (var field in uploadFields)
+                {
+                    var fieldValue = GetValue(field.PropertyName);
+                    if (string.IsNullOrWhiteSpace(fieldValue) || field.AllowBehavior(FieldBehavior.NotMoveUploadPath))
+                    {
+                        continue;
+                    }
+                    var newValue = SixnetUploader.Move(parm =>
+                    {
+                        parm.ObjectName = field.UploadObjectName;
+                        parm.RelativeFilePaths = new List<string>() { fieldValue };
+                    })?.FirstOrDefault();
                     SetValue(field.PropertyName, newValue);
                 }
             }

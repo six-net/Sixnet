@@ -792,7 +792,7 @@ namespace Sixnet.Development.Data.Client
             {
                 if (data != null)
                 {
-                    data.OnDataAddingAsync().Wait();
+                    data.OnDataAdding();
 
                     SixnetException.ThrowIf(!data.AllowToSave(), $"{typeof(T).Name}: {data.GetIdentityValue()} cann't to be add");
 
@@ -830,7 +830,7 @@ namespace Sixnet.Development.Data.Client
                 if (newData != null)
                 {
                     var entityIdentity = newData.GetIdentityValue();
-                    newData.OnDataUpdatingAsync().Wait();
+                    newData.OnDataUpdating();
 
                     SixnetException.ThrowIf(!newData.AllowToSave(), $"{typeof(T).Name}: {entityIdentity} cann't to be update");
 
