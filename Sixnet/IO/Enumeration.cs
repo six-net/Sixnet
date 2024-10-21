@@ -1,12 +1,12 @@
 ﻿using System;
 
-namespace Sixnet.Net.Upload
+namespace Sixnet.IO
 {
     /// <summary>
-    /// Defines the target to upload to
+    /// Defines the location to upload to
     /// </summary>
     [Serializable]
-    public enum UploadTarget
+    public enum UploadLocation
     {
         /// <summary>
         /// Upload file to local

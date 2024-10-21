@@ -1,12 +1,12 @@
 ﻿using System;
 
-namespace Sixnet.Net.Upload
+namespace Sixnet.IO
 {
     /// <summary>
-    /// Remote upload options
+    /// Remote remote upload setting
     /// </summary>
     [Serializable]
-    public class RemoteUploadSetting
+    public class SixnetRemoteUploadSetting
     {
         /// <summary>
         /// Gets or sets the relative path for file upload
@@ -21,9 +21,9 @@ namespace Sixnet.Net.Upload
         public string FileListPath { get; set; } = "filelist";
 
         /// <summary>
-        /// Gets or sets the move file path
+        /// Gets or sets the store file path
         /// </summary>
-        public string MoveFilePath { get; set; } = "move";
+        public string StoreFilePath { get; set; } = "store";
 
         /// <summary>
         /// Gets or sets server url
@@ -57,16 +57,16 @@ namespace Sixnet.Net.Upload
         }
 
         /// <summary>
-        /// Gets file move url
+        /// Gets file store url
         /// </summary>
-        /// <returns>Return file list url</returns>
-        public string GetMoveFileUrl()
+        /// <returns></returns>
+        public string GetStoreFileUrl()
         {
-            if (string.IsNullOrWhiteSpace(MoveFilePath))
+            if (string.IsNullOrWhiteSpace(StoreFilePath))
             {
                 return Host;
             }
-            return string.Format("{0}/{1}", Host.Trim('/'), MoveFilePath);
+            return string.Format("{0}/{1}", Host.Trim('/'), StoreFilePath);
         }
     }
 }

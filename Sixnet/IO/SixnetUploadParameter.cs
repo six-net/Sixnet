@@ -2,22 +2,22 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Sixnet.Net.Upload
+namespace Sixnet.IO
 {
     /// <summary>
     /// Upload parameter
     /// </summary>
-    public class UploadParameter
+    public class SixnetUploadParameter
     {
         /// <summary>
         /// Files
         /// </summary>
-        public List<UploadFile> Files { get; set; }
+        public List<SixnetUploadFile> Files { get; set; }
 
         /// <summary>
-        /// Upload setting
+        /// Sixnet file setting
         /// </summary>
-        public UploadSetting Setting { get; set; }
+        public SixnetFileSetting Setting { get; set; }
 
         /// <summary>
         /// Upload properties

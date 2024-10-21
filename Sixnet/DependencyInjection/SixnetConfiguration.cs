@@ -3,17 +3,15 @@ using Sixnet.Development.Data;
 using Sixnet.Development.Entity;
 using Sixnet.Development.Message;
 using Sixnet.Development.Work;
-using Sixnet.IO.FileAccess;
+using Sixnet.IO;
 using Sixnet.Logging;
 using Sixnet.MQ;
 using Sixnet.Net.Email;
 using Sixnet.Net.Sms;
-using Sixnet.Net.Upload;
 using Sixnet.Security.Authentication;
 using Sixnet.Security.Authorization;
 using Sixnet.Security.Cryptography;
 using Sixnet.Serialization.Json;
-using Sixnet.Token.Jwt;
 using Sixnet.Validation;
 
 namespace Sixnet.DependencyInjection
@@ -24,14 +22,9 @@ namespace Sixnet.DependencyInjection
     internal class SixnetConfiguration
     {
         /// <summary>
-        /// Gets or sets upload options
-        /// </summary>
-        public UploadOptions Upload { get; set; }
-
-        /// <summary>
         /// Gets or sets file access options
         /// </summary>
-        public FileAccessOptions FileAccess { get; set; }
+        public SixnetFileOptions File { get; set; }
 
         /// <summary>
         /// Gets or sets rsa options

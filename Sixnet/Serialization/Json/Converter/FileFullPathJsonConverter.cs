@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Sixnet.IO.FileAccess;
+using Sixnet.IO;
 
 namespace Sixnet.Serialization.Json.Converter
 {
-    public sealed class FileFullPathJsonConverter : JsonConverter<string>
+    public class FileFullPathJsonConverter : JsonConverter<string>
     {
         readonly string fileObjectName;
 
@@ -21,7 +21,7 @@ namespace Sixnet.Serialization.Json.Converter
 
         public override void Write(Utf8JsonWriter writer, string value, JsonSerializerOptions options)
         {
-            writer.WriteStringValue(SixnetFileAccessor.GetFileFullPath(fileObjectName, value));
+            writer.WriteStringValue(SixnetFileManager.GetFileAccessPath(fileObjectName, value));
         }
 
         public static FileFullPathJsonConverter GetInstance(string fileObjectName)

@@ -1,0 +1,302 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Sixnet.Code;
+using Sixnet.DependencyInjection;
+using Sixnet.Exceptions;
+
+namespace Sixnet.IO
+{
+    internal class DefaultLocalUploadProvider : ISixnetUploadProvider
+    {
+        #region Upload
+
+        /// <summary>
+        /// Upload file
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <returns></returns>
+        public SixnetUploadResult Upload(SixnetUploadParameter parameter)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(parameter == null, nameof(parameter));
+            SixnetDirectThrower.ThrowArgErrorIf(parameter.Files.IsNullOrEmpty(), "Files is null or empty");
+            var fileOptions = SixnetContainer.GetOptions<SixnetFileOptions>();
+            return SixnetUploadResult.SuccessResult(parameter.Files.Select(f => SaveFile(f, fileOptions, parameter.Setting)));
+        }
+
+        /// <summary>
+        /// Upload file
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <returns></returns>
+        public async Task<SixnetUploadResult> UploadAsync(SixnetUploadParameter parameter)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(parameter == null, nameof(parameter));
+            SixnetDirectThrower.ThrowArgErrorIf(parameter.Files.IsNullOrEmpty(), "Files is null or empty");
+
+            var fileOptions = SixnetContainer.GetOptions<SixnetFileOptions>();
+            var uploadTasks = parameter.Files.Select(f => SaveFileAsync(f, fileOptions, parameter.Setting));
+            return SixnetUploadResult.SuccessResult(await Task.WhenAll(uploadTasks).ConfigureAwait(false));
+        }
+
+        #endregion
+
+        #region Store
+
+        /// <summary>
+        /// Store uploaded file
+        /// </summary>
+        /// <param name="parameter">Parameter</param>
+        /// <returns></returns>
+        public List<string> StoreUploadedFile(SixnetStoreUploadedFileParameter parameter)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(parameter?.RelativeFilePaths.IsNullOrEmpty() ?? true, nameof(SixnetStoreUploadedFileParameter.RelativeFilePaths));
+            var fileSetting = SixnetFileManager.GetFileSetting(parameter.ObjectName);
+
+            if (fileSetting.UploadToTempFirst)
+            {
+                var fileOptions = SixnetContainer.GetOptions<SixnetFileOptions>();
+                var uploadRootPath = GetUploadRootPath(fileOptions, fileSetting);
+                var storePath = GetStorePath(fileOptions,fileSetting);
+                var storedFiles = new List<string>();
+                foreach (var file in parameter.RelativeFilePaths)
+                {
+                    var filePath = file;
+                    if (!string.IsNullOrWhiteSpace(fileOptions.UploadTempFolder))
+                    {
+                        filePath = filePath.LSplit(fileOptions.UploadTempFolder)[^1];
+                    }
+                    filePath = filePath?.Trim('/', '\\');
+                    var orginalFile = SixnetFileManager.CombinePath(uploadRootPath, file);
+                    var targetFile = SixnetFileManager.CombinePath(storePath, filePath);
+                    storedFiles.Add(filePath);
+                    if (File.Exists(targetFile) || !File.Exists(orginalFile))
+                    {
+                        continue;
+                    }
+                    var targetDir = Path.GetDirectoryName(targetFile);
+                    if (!Directory.Exists(targetDir))
+                    {
+                        Directory.CreateDirectory(targetDir);
+                    }
+                    File.Move(orginalFile, targetFile);
+                }
+                return storedFiles;
+            }
+            return parameter.RelativeFilePaths.Select(c => c).ToList();
+        }
+
+        /// <summary>
+        /// Store uploaded file
+        /// </summary>
+        /// <param name="parameter">Parameter</param>
+        /// <returns></returns>
+        public Task<List<string>> StoreUploadedFileAsync(SixnetStoreUploadedFileParameter parameter)
+        {
+            return Task.FromResult(StoreUploadedFile(parameter));
+        }
+
+        #endregion
+
+        #region Save file
+
+        /// <summary>
+        /// Save file
+        /// </summary>
+        /// <param name="file">File</param>
+        /// <param name="fileSetting">File setting</param>
+        /// <returns>upload file result</returns>
+        SixnetUploadFileResult SaveFile(SixnetUploadFile file, SixnetFileOptions fileOptions, SixnetFileSetting fileSetting)
+        {
+            var fileResult = HandleFile(file, fileOptions, fileSetting);
+            File.WriteAllBytes(fileResult.FullPath, file.FileContent);
+            return fileResult;
+        }
+
+        /// <summary>
+        /// Save file
+        /// </summary>
+        /// <param name="file">File</param>
+        /// <param name="fileSetting">File setting</param>
+        /// <returns>upload file result</returns>
+        async Task<SixnetUploadFileResult> SaveFileAsync(SixnetUploadFile file, SixnetFileOptions uploadOptions, SixnetFileSetting fileSetting)
+        {
+            var fileResult = HandleFile(file, uploadOptions, fileSetting);
+            await File.WriteAllBytesAsync(fileResult.FullPath, file.FileContent).ConfigureAwait(false);
+            return fileResult;
+        }
+
+        #endregion
+
+        #region Handle file
+
+        /// <summary>
+        /// Handle file
+        /// </summary>
+        /// <param name="file">File</param>
+        /// <param name="fileSetting">File setting</param>
+        /// <returns></returns>
+        SixnetUploadFileResult HandleFile(SixnetUploadFile file, SixnetFileOptions fileOptions, SixnetFileSetting fileSetting)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(fileSetting == null, nameof(fileSetting));
+            SixnetDirectThrower.ThrowArgNullIf(file == null, nameof(file));
+
+            #region save path
+
+            (string relativePath, string savePath) = GetUploadPath(file.ObjectName, fileOptions, fileSetting, string.Empty);
+
+            #endregion
+
+            #region file suffix
+
+            string suffix = Path.GetExtension(file.FileName).Trim('.');
+            if (!string.IsNullOrWhiteSpace(file.Suffix))
+            {
+                suffix = file.Suffix.Trim('.');
+            }
+
+            #endregion
+
+            #region file name
+
+            string fileName = Path.GetFileNameWithoutExtension(file.FileName);
+            if (fileSetting.Rename)
+            {
+                fileName = Guid.NewGuid().ToInt64().ToString();
+            }
+            fileName = string.Format("{0}.{1}", fileName, suffix);
+
+            #endregion
+
+            #region save file
+
+            var fileFullPath = Path.Combine(savePath, fileName);
+            relativePath = Path.Combine(relativePath, fileName);
+
+            #endregion
+
+            return new SixnetUploadFileResult()
+            {
+                FileName = fileName,
+                FullPath = fileFullPath,
+                Suffix = Path.GetExtension(fileName).Trim('.'),
+                RelativePath = relativePath,
+                UploadDate = DateTimeOffset.Now,
+                OriginalFileName = file.FileName,
+                Location = UploadLocation.Local
+            };
+        }
+
+        /// <summary>
+        /// Get upload root path
+        /// </summary>
+        /// <param name="fileOptions"></param>
+        /// <param name="fileSetting"></param>
+        /// <returns></returns>
+        string GetUploadRootPath(SixnetFileOptions fileOptions, SixnetFileSetting fileSetting)
+        {
+            var rootPath = fileSetting.UploadPath;
+            if (Path.IsPathRooted(rootPath))
+            {
+                return rootPath;
+            }
+            rootPath = fileOptions.UploadRootFolder;
+            if (Path.IsPathRooted(rootPath))
+            {
+                return rootPath;
+            }
+            return SixnetFileManager.CombinePath(Directory.GetCurrentDirectory(), rootPath);
+        }
+
+        /// <summary>
+        /// Get save path
+        /// Item1: relative path
+        /// Item2: save path
+        /// </summary>
+        /// <param name="fileSetting"></param>
+        /// <returns></returns>
+        (string, string) GetUploadPath(string fileObjectName, SixnetFileOptions fileOptions, SixnetFileSetting fileSetting, string folder)
+        {
+            // relative path
+            var relativePath = string.Empty;
+
+            // root path
+            var savePath = GetUploadRootPath(fileOptions, fileSetting);
+
+            // temp folder
+            if (fileSetting.UploadToTempFirst && !string.IsNullOrWhiteSpace(fileOptions.UploadTempFolder))
+            {
+                relativePath = fileOptions.UploadTempFolder;
+                savePath = SixnetFileManager.CombinePath(savePath, fileOptions.UploadTempFolder);
+            }
+
+            // setting path
+            var uploadSettingPath = fileSetting.UploadPath;
+            if (string.IsNullOrWhiteSpace(uploadSettingPath)
+                && !fileSetting.DisableDefaultFolderGroup
+                && !string.IsNullOrWhiteSpace(fileObjectName))
+            {
+                var fileObjectNames = fileObjectName.LSplit(".");
+                var fileObjectPath = SixnetFileManager.CombinePath(fileObjectNames);
+                savePath = SixnetFileManager.CombinePath(savePath, fileObjectPath);
+                relativePath = SixnetFileManager.CombinePath(relativePath, fileObjectPath);
+            }
+            else if (!Path.IsPathRooted(uploadSettingPath))
+            {
+                savePath = SixnetFileManager.CombinePath(savePath, uploadSettingPath);
+                relativePath = SixnetFileManager.CombinePath(relativePath, uploadSettingPath);
+            }
+
+            // customer folder
+            if (!string.IsNullOrWhiteSpace(folder))
+            {
+                relativePath = SixnetFileManager.CombinePath(relativePath, folder);
+                savePath = SixnetFileManager.CombinePath(savePath, folder);
+            }
+
+            // date folder
+            if (fileSetting.UseDateGroupFolder)
+            {
+                var dataFolder = DateTimeOffset.Now.ToString("yyyyMMdd");
+                relativePath = SixnetFileManager.CombinePath(relativePath, dataFolder);
+                savePath = SixnetFileManager.CombinePath(savePath, dataFolder);
+            }
+
+            // create random folder
+            if (!fileSetting.Rename)
+            {
+                var randomFolder = GuidHelper.GetGuid().ToString().Replace("-", "");
+                relativePath = SixnetFileManager.CombinePath(relativePath, randomFolder);
+                savePath = SixnetFileManager.CombinePath(savePath, randomFolder);
+            }
+
+            // create folder
+            if (!Directory.Exists(savePath))
+            {
+                Directory.CreateDirectory(savePath);
+            }
+
+            return (relativePath, savePath);
+        }
+
+        /// <summary>
+        /// Get the store path
+        /// </summary>
+        /// <param name="fileSetting"></param>
+        /// <returns></returns>
+        string GetStorePath(SixnetFileOptions fileOptions, SixnetFileSetting fileSetting)
+        {
+            var storePath = fileSetting.StorePath;
+            if (!Path.IsPathRooted(storePath))
+            {
+                var uploadRootPath = GetUploadRootPath(fileOptions, fileSetting);
+                return SixnetFileManager.CombinePath(uploadRootPath, storePath);
+            }
+            return storePath;
+        }
+
+        #endregion
+    }
+}

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Sixnet.Exceptions;
 using Sixnet.Net.Http;
 
-namespace Sixnet.Net.Upload
+namespace Sixnet.IO
 {
     /// <summary>
     /// Upload provider
@@ -17,27 +17,27 @@ namespace Sixnet.Net.Upload
         /// </summary>
         /// <param name="parameter">Parameter</param>
         /// <returns></returns>
-        UploadResult Upload(UploadParameter parameter);
+        SixnetUploadResult Upload(SixnetUploadParameter parameter);
 
         /// <summary>
         /// Upload file
         /// </summary>
         /// <param name="parameter">Parameter</param>
         /// <returns></returns>
-        Task<UploadResult> UploadAsync(UploadParameter parameter);
+        Task<SixnetUploadResult> UploadAsync(SixnetUploadParameter parameter);
 
         /// <summary>
-        /// Move file
+        /// Store uploaded file
         /// </summary>
         /// <param name="parameter">Parameter</param>
         /// <returns></returns>
-        List<string> Move(MoveUploadFileParameter parameter);
+        List<string> StoreUploadedFile(SixnetStoreUploadedFileParameter parameter);
 
         /// <summary>
-        /// Move file
+        /// Store uploaded file
         /// </summary>
         /// <param name="parameter">Parameter</param>
         /// <returns></returns>
-        Task<List<string>> MoveAsync(MoveUploadFileParameter parameter);
+        Task<List<string>> StoreUploadedFileAsync(SixnetStoreUploadedFileParameter parameter);
     }
 }

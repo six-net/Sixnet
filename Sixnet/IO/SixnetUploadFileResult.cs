@@ -1,13 +1,15 @@
 ﻿using System;
 
-namespace Sixnet.Net.Upload
+namespace Sixnet.IO
 {
     /// <summary>
     /// Upload file result
     /// </summary>
     [Serializable]
-    public class UploadFileResult
+    public class SixnetUploadFileResult
     {
+        #region Fields
+
         /// <summary>
         /// relative path
         /// </summary>
@@ -17,6 +19,8 @@ namespace Sixnet.Net.Upload
         /// full path
         /// </summary>
         string fullPath = string.Empty;
+
+        #endregion
 
         #region Properties
 
@@ -73,7 +77,7 @@ namespace Sixnet.Net.Upload
         /// <summary>
         /// Gets or sets the upload location
         /// </summary>
-        public UploadTarget Target { get; set; }
+        public UploadLocation Location { get; set; }
 
         #endregion
     }

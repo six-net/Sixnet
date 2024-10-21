@@ -2,21 +2,21 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Sixnet.Net.Upload
+namespace Sixnet.IO
 {
     /// <summary>
-    /// Move upload file parameter
+    /// Store uploaded file parameter
     /// </summary>
-    public class MoveUploadFileParameter
+    public class SixnetStoreUploadedFileParameter
     {
         /// <summary>
         /// Gets or sets the object
         /// </summary>
-        public string ObjectName {  get; set; }
+        public string ObjectName { get; set; }
 
         /// <summary>
         /// Gets or sets the relative file paths
         /// </summary>
-        public List<string> RelativeFilePaths {  get; set; }
+        public List<string> RelativeFilePaths { get; set; }
     }
 }

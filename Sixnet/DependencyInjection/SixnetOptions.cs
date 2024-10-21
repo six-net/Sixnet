@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Sixnet.App;
 using Sixnet.Cache;
@@ -7,21 +9,17 @@ using Sixnet.Development.Entity;
 using Sixnet.Development.Message;
 using Sixnet.Development.Work;
 using Sixnet.Exceptions;
-using Sixnet.IO.FileAccess;
+using Sixnet.IO;
 using Sixnet.Localization;
 using Sixnet.Logging;
 using Sixnet.MQ;
 using Sixnet.Net.Email;
 using Sixnet.Net.Sms;
-using Sixnet.Net.Upload;
 using Sixnet.Security.Authentication;
 using Sixnet.Security.Authorization;
 using Sixnet.Security.Cryptography;
 using Sixnet.Serialization.Json;
-using Sixnet.Token.Jwt;
 using Sixnet.Validation;
-using System;
-using System.Collections.Generic;
 
 namespace Sixnet.DependencyInjection
 {
@@ -81,14 +79,9 @@ namespace Sixnet.DependencyInjection
         public Action<ILoggingBuilder> ConfigureLoggingBuilder { get; set; }
 
         /// <summary>
-        /// Configure upload
+        /// Configure file
         /// </summary>
-        public Action<UploadOptions> ConfigureUpload { get; set; }
-
-        /// <summary>
-        /// Configure file access
-        /// </summary>
-        public Action<FileAccessOptions> ConfigureFileAccess { get; set; }
+        public Action<SixnetFileOptions> ConfigureFile { get; set; }
 
         /// <summary>
         /// Configure rsa

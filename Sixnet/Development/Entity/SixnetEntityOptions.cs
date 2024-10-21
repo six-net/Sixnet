@@ -12,8 +12,8 @@ namespace Sixnet.Development.Entity
         public bool NotAutoGenerageId { get; set; }
 
         /// <summary>
-        /// Not auto move upload file
+        /// Not auto move uploaded file
         /// </summary>
-        public bool NotAutoMoveUploadFile {  get; set; }
+        public bool NotAutoStoreUploadedFile {  get; set; }
     }
 }

@@ -82,9 +82,9 @@ namespace Sixnet.Development.Data.Field
         public FieldBehavior Behavior { get; set; } = FieldBehavior.None;
 
         /// <summary>
-        /// Gets or sets the upload object name
+        /// Gets or sets the file object name
         /// </summary>
-        public string UploadObjectName { get; set; }
+        public string FileObjectName { get; set; }
 
         /// <summary>
         /// Gets or sets the database type

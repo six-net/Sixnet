@@ -127,6 +127,12 @@ namespace Sixnet.Development.Entity
                 {
                     memberType = fieldInfo.FieldType;
                 }
+                // file object name
+                var fileObjectName = entityFieldAttribute?.FileObjectName;
+                if (string.IsNullOrWhiteSpace(fileObjectName))
+                {
+                    fileObjectName = $"{entityType.Name}.{propertyName}".ToLower();
+                }
                 var propertyField = new DataField()
                 {
                     FieldName = fieldName,
@@ -139,7 +145,7 @@ namespace Sixnet.Development.Entity
                     Length = entityFieldAttribute?.Length ?? 0,
                     Description = entityFieldAttribute?.Description ?? string.Empty,
                     StartValue = entityFieldAttribute?.StartValue ?? 0,
-                    UploadObjectName = entityFieldAttribute.UploadObjectName ?? string.Empty,
+                    FileObjectName = entityFieldAttribute.FileObjectName ?? string.Empty,
                 };
 
                 //value provider

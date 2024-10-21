@@ -7,7 +7,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using Sixnet.DependencyInjection;
-using Sixnet.Net.Upload;
+using Sixnet.IO;
 using Sixnet.Serialization.Json;
 
 namespace Sixnet.Net.Http
@@ -807,14 +807,14 @@ namespace Sixnet.Net.Http
         /// <param name="headers">Headers</param>
         /// <param name="token">Token</param>
         /// <returns>Return upload result</returns>
-        public static UploadResult Upload(string httpClientConfigName, string url, IDictionary<string, byte[]> files, IDictionary<string, string> parameters = null, IDictionary<string, string> headers = null, string token = "")
+        public static SixnetUploadResult Upload(string httpClientConfigName, string url, IDictionary<string, byte[]> files, IDictionary<string, string> parameters = null, IDictionary<string, string> headers = null, string token = "")
         {
             var response = Post(httpClientConfigName, url, parameters, headers, token, files);
             string valueAsString = ReadResponseString(response);
-            var result = SixnetJsonSerializer.Deserialize<UploadResult>(valueAsString);
+            var result = SixnetJsonSerializer.Deserialize<SixnetUploadResult>(valueAsString);
             result?.Files?.ForEach(file =>
             {
-                file.Target = UploadTarget.Remote;
+                file.Location = UploadLocation.Remote;
             });
             return result;
         }
@@ -828,7 +828,7 @@ namespace Sixnet.Net.Http
         /// <param name="headers">Headers</param>
         /// <param name="token">Token</param>
         /// <returns>Return upload result</returns>
-        public static UploadResult Upload(string url, IDictionary<string, byte[]> files, IDictionary<string, string> parameters = null, IDictionary<string, string> headers = null, string token = "")
+        public static SixnetUploadResult Upload(string url, IDictionary<string, byte[]> files, IDictionary<string, string> parameters = null, IDictionary<string, string> headers = null, string token = "")
         {
             return Upload(string.Empty, url, files, parameters, headers, token);
         }
@@ -843,11 +843,11 @@ namespace Sixnet.Net.Http
         /// <param name="headers">Headers</param>
         /// <param name="token">Token</param>
         /// <returns>Return upload result</returns>
-        public static UploadResult Upload(string httpClientConfigName, string url, byte[] file, object parameters, IDictionary<string, string> headers = null, string token = "")
+        public static SixnetUploadResult Upload(string httpClientConfigName, string url, byte[] file, object parameters, IDictionary<string, string> headers = null, string token = "")
         {
             if (file == null || file.Length <= 0)
             {
-                return UploadResult.FailResult("No file is specified for upload");
+                return SixnetUploadResult.FailResult("No file is specified for upload");
             }
             Dictionary<string, string> parameterDict = null;
             if (parameters != null)
@@ -866,7 +866,7 @@ namespace Sixnet.Net.Http
         /// <param name="headers">Headers</param>
         /// <param name="token">Token</param>
         /// <returns>Return upload result</returns>
-        public static UploadResult Upload(string url, byte[] file, object parameters, IDictionary<string, string> headers = null, string token = "")
+        public static SixnetUploadResult Upload(string url, byte[] file, object parameters, IDictionary<string, string> headers = null, string token = "")
         {
             return Upload(string.Empty, url, file, parameters, headers, token);
         }

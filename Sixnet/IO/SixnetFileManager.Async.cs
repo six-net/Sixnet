@@ -4,9 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Sixnet.Exceptions;
 
-namespace Sixnet.Net.Upload
+namespace Sixnet.IO
 {
-    public static partial class SixnetUploader
+    public static partial class SixnetFileManager
     {
         #region Upload
 
@@ -16,19 +16,19 @@ namespace Sixnet.Net.Upload
         /// <param name="files">Files</param>
         /// <param name="parameters">Parameters</param>
         /// <returns>Return the upload result</returns>
-        public static async Task<UploadResult> UploadAsync(IEnumerable<UploadFile> files, Dictionary<string, string> parameters = null)
+        public static async Task<SixnetUploadResult> UploadAsync(IEnumerable<SixnetUploadFile> files, Dictionary<string, string> parameters = null)
         {
             SixnetDirectThrower.ThrowArgNullIf(files.IsNullOrEmpty(), nameof(files));
 
             var uploadObjectGroups = files.Select(c => c.ObjectName).Distinct().ToList();
-            var uploadTasks = new List<Task<UploadResult>>(uploadObjectGroups.Count);
+            var uploadTasks = new List<Task<SixnetUploadResult>>(uploadObjectGroups.Count);
             foreach (var uploadObjectName in uploadObjectGroups)
             {
                 var groupFiles = files.Where(c => c.ObjectName == uploadObjectName).ToList();
-                var uploadSetting = GetUploadSetting(uploadObjectName);
-                uploadTasks.Add(UploadAsync(groupFiles, uploadSetting, parameters));
+                var fileSetting = GetFileSetting(uploadObjectName);
+                uploadTasks.Add(UploadAsync(groupFiles, fileSetting, parameters));
             }
-            var uploadResult = UploadResult.SuccessResult();
+            var uploadResult = SixnetUploadResult.SuccessResult();
             uploadResult.Combine(await Task.WhenAll(uploadTasks).ConfigureAwait(false));
             return uploadResult;
         }
@@ -37,53 +37,49 @@ namespace Sixnet.Net.Upload
         /// Upload
         /// </summary>
         /// <param name="files">Files</param>
-        /// <param name="uploadSetting">Upload setting</param>
+        /// <param name="fileSetting">Upload setting</param>
         /// <param name="parameters">Parameters</param>
         /// <returns>Return the upload result</returns>
-        public static Task<UploadResult> UploadAsync(IEnumerable<UploadFile> files, UploadSetting uploadSetting, Dictionary<string, string> parameters = null)
+        public static Task<SixnetUploadResult> UploadAsync(IEnumerable<SixnetUploadFile> files, SixnetFileSetting fileSetting, Dictionary<string, string> parameters = null)
         {
             SixnetDirectThrower.ThrowArgErrorIf(files.IsNullOrEmpty(), nameof(files));
-            SixnetDirectThrower.ThrowArgNullIf(uploadSetting == null, nameof(uploadSetting));
+            SixnetDirectThrower.ThrowArgNullIf(fileSetting == null, nameof(fileSetting));
 
-            var uploadParameter = new UploadParameter()
+            var uploadParameter = new SixnetUploadParameter()
             {
                 Files = files?.ToList(),
                 Properties = parameters,
-                Setting = uploadSetting
+                Setting = fileSetting
             };
             var provider = GetUploadProvider(uploadParameter);
             return provider.UploadAsync(uploadParameter);
         }
 
-        #endregion
-
-        #region Move
-
         /// <summary>
-        /// Move file
+        /// Store upload file
         /// </summary>
         /// <param name="parameter">Parameter</param>
         /// <returns></returns>
-        public static Task<List<string>> MoveAsync(MoveUploadFileParameter parameter)
+        public static Task<List<string>> StoreUploadedFileAsync(SixnetStoreUploadedFileParameter parameter)
         {
-            var uploadParameter = new UploadParameter()
+            var uploadParameter = new SixnetUploadParameter()
             {
-                Setting = GetUploadSetting(parameter?.ObjectName)
+                Setting = GetFileSetting(parameter?.ObjectName)
             };
             var provider = GetUploadProvider(uploadParameter);
-            return provider.MoveAsync(parameter);
+            return provider.StoreUploadedFileAsync(parameter);
         }
 
         /// <summary>
-        /// Move file
+        /// Store upload file
         /// </summary>
         /// <param name="configure"></param>
         /// <returns></returns>
-        public static Task<List<string>> MoveAsync(Action<MoveUploadFileParameter> configure)
+        public static Task<List<string>> StoreUploadedFileAsync(Action<SixnetStoreUploadedFileParameter> configure)
         {
-            var parameter = new MoveUploadFileParameter();
+            var parameter = new SixnetStoreUploadedFileParameter();
             configure?.Invoke(parameter);
-            return MoveAsync(parameter);
+            return StoreUploadedFileAsync(parameter);
         }
 
         #endregion

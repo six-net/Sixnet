@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Net.Http.Headers;
 using System.Net.Http;
 using System.Text;
-using Sixnet.Net.Upload;
 using System.Threading.Tasks;
 using System.Threading;
 using System.IO;
 using System.Linq;
 using Sixnet.Serialization.Json;
+using Sixnet.IO;
 
 namespace Sixnet.Net.Http
 {
@@ -754,14 +754,14 @@ namespace Sixnet.Net.Http
         /// <param name="headers">Headers</param>
         /// <param name="token">Token</param>
         /// <returns>Return upload result</returns>
-        public static async Task<UploadResult> UploadAsync(string httpClientConfigName, string url, IDictionary<string, byte[]> files, IDictionary<string, string> parameters = null, IDictionary<string, string> headers = null, string token = "")
+        public static async Task<SixnetUploadResult> UploadAsync(string httpClientConfigName, string url, IDictionary<string, byte[]> files, IDictionary<string, string> parameters = null, IDictionary<string, string> headers = null, string token = "")
         {
             var response = await PostAsync(httpClientConfigName, url, parameters, headers, token, files).ConfigureAwait(false);
             string valueAsString = await ReadResponseStringAsync(response).ConfigureAwait(false);
-            var result = SixnetJsonSerializer.Deserialize<UploadResult>(valueAsString);
+            var result = SixnetJsonSerializer.Deserialize<SixnetUploadResult>(valueAsString);
             result?.Files?.ForEach(file =>
             {
-                file.Target = UploadTarget.Remote;
+                file.Location = UploadLocation.Remote;
             });
             return result;
         }
@@ -775,7 +775,7 @@ namespace Sixnet.Net.Http
         /// <param name="headers">Headers</param>
         /// <param name="token">Token</param>
         /// <returns>Return upload result</returns>
-        public static async Task<UploadResult> UploadAsync(string url, IDictionary<string, byte[]> files, IDictionary<string, string> parameters = null, IDictionary<string, string> headers = null, string token = "")
+        public static async Task<SixnetUploadResult> UploadAsync(string url, IDictionary<string, byte[]> files, IDictionary<string, string> parameters = null, IDictionary<string, string> headers = null, string token = "")
         {
             return await UploadAsync(string.Empty, url, files, parameters, headers, token).ConfigureAwait(false);
         }
@@ -790,11 +790,11 @@ namespace Sixnet.Net.Http
         /// <param name="headers">Headers</param>
         /// <param name="token">Token</param>
         /// <returns>Return upload result</returns>
-        public static async Task<UploadResult> UploadAsync(string httpClientConfigName, string url, byte[] file, object parameters, IDictionary<string, string> headers = null, string token = "")
+        public static async Task<SixnetUploadResult> UploadAsync(string httpClientConfigName, string url, byte[] file, object parameters, IDictionary<string, string> headers = null, string token = "")
         {
             if (file == null || file.Length <= 0)
             {
-                return UploadResult.FailResult("No file is specified for upload");
+                return SixnetUploadResult.FailResult("No file is specified for upload");
             }
             Dictionary<string, string> parameterDict = null;
             if (parameters != null)
@@ -813,7 +813,7 @@ namespace Sixnet.Net.Http
         /// <param name="headers">Headers</param>
         /// <param name="token">Token</param>
         /// <returns>Return upload result</returns>
-        public static async Task<UploadResult> UploadAsync(string url, byte[] file, object parameters, IDictionary<string, string> headers = null, string token = "")
+        public static async Task<SixnetUploadResult> UploadAsync(string url, byte[] file, object parameters, IDictionary<string, string> headers = null, string token = "")
         {
             return await UploadAsync(string.Empty, url, file, parameters, headers, token).ConfigureAwait(false);
         }

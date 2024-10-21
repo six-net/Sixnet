@@ -1,12 +1,12 @@
 ﻿using System;
 
-namespace Sixnet.Net.Upload
+namespace Sixnet.IO
 {
     /// <summary>
-    /// Upload file info
+    /// Sixnet upload file
     /// </summary>
     [Serializable]
-    public class UploadFile
+    public class SixnetUploadFile
     {
         /// <summary>
         /// Gets or sets the file object name
@@ -17,11 +17,6 @@ namespace Sixnet.Net.Upload
         /// Gets or sets file name
         /// </summary>
         public string FileName { get; set; }
-
-        /// <summary>
-        /// Gets or sets save folder
-        /// </summary>
-        public string Folder { get; set; }
 
         /// <summary>
         /// Gets or sets file suffix

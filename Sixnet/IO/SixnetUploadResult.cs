@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Sixnet.Net.Upload
+namespace Sixnet.IO
 {
     /// <summary>
-    /// Upload result
+    /// Sixnet upload result
     /// </summary>
     [Serializable]
-    public class UploadResult
+    public class SixnetUploadResult
     {
         #region Properties
 
@@ -30,7 +30,7 @@ namespace Sixnet.Net.Upload
         /// <summary>
         /// Gets or sets file results
         /// </summary>
-        public List<UploadFileResult> Files { get; set; }
+        public List<SixnetUploadFileResult> Files { get; set; }
 
         #endregion
 
@@ -41,7 +41,7 @@ namespace Sixnet.Net.Upload
         /// </summary>
         /// <param name="results">Other upload results</param>
         /// <returns></returns>
-        public UploadResult Combine(params UploadResult[] results)
+        public SixnetUploadResult Combine(params SixnetUploadResult[] results)
         {
             if (results == null || results.Length <= 0)
             {
@@ -57,7 +57,7 @@ namespace Sixnet.Net.Upload
                 }
                 if (result.Files != null)
                 {
-                    Files = Files ?? new List<UploadFileResult>();
+                    Files = Files ?? new List<SixnetUploadFileResult>();
                     Files.AddRange(result.Files);
                 }
             }
@@ -69,9 +69,9 @@ namespace Sixnet.Net.Upload
         /// </summary>
         /// <param name="message">Message</param>
         /// <returns>upload result</returns>
-        public static UploadResult FailResult(string message = "")
+        public static SixnetUploadResult FailResult(string message = "")
         {
-            return new UploadResult()
+            return new SixnetUploadResult()
             {
                 Success = false,
                 Message = message
@@ -82,9 +82,9 @@ namespace Sixnet.Net.Upload
         /// Gets a success result
         /// </summary>
         /// <returns></returns>
-        public static UploadResult SuccessResult(IEnumerable<UploadFileResult> files = null)
+        public static SixnetUploadResult SuccessResult(IEnumerable<SixnetUploadFileResult> files = null)
         {
-            return new UploadResult()
+            return new SixnetUploadResult()
             {
                 Success = true,
                 Files = files?.ToList()

@@ -1,4 +1,8 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Sixnet.App;
@@ -11,23 +15,17 @@ using Sixnet.Development.Message;
 using Sixnet.Development.Repository;
 using Sixnet.Development.Work;
 using Sixnet.Exceptions;
-using Sixnet.IO.FileAccess;
+using Sixnet.IO;
 using Sixnet.Logging;
 using Sixnet.Mapper;
 using Sixnet.MQ;
 using Sixnet.Net.Email;
 using Sixnet.Net.Sms;
-using Sixnet.Net.Upload;
 using Sixnet.Security.Authentication;
 using Sixnet.Security.Authorization;
 using Sixnet.Security.Cryptography;
 using Sixnet.Serialization.Json;
-using Sixnet.Token.Jwt;
 using Sixnet.Validation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime;
 
 namespace Sixnet.DependencyInjection
 {
@@ -408,10 +406,8 @@ namespace Sixnet.DependencyInjection
         /// <param name="sixnetOptions"></param>
         static void ConfigureProjectDefaultOptions(IServiceCollection services, SixnetOptions sixnetOptions)
         {
-            // Upload
-            services.ConfigureIfNotNull<UploadOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Upload)));
-            // File access
-            services.ConfigureIfNotNull<FileAccessOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.FileAccess)));
+            // File
+            services.ConfigureIfNotNull<SixnetFileOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.File)));
             // Rsa key
             services.ConfigureIfNotNull<RSAOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Rsa)));
             // Database
@@ -442,8 +438,7 @@ namespace Sixnet.DependencyInjection
             services.ConfigureIfNotNull<SixnetEntityOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Entity)));
 
             // Post config options
-            services.PostConfigureIfNotNull(sixnetOptions.ConfigureUpload);
-            services.PostConfigureIfNotNull(sixnetOptions.ConfigureFileAccess);
+            services.PostConfigureIfNotNull(sixnetOptions.ConfigureFile);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureRSA);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureEmail);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureSms);

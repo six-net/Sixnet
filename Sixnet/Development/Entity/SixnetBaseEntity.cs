@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Sixnet.Code;
-using Sixnet.Validation;
+using Sixnet.DependencyInjection;
 using Sixnet.Development.Data.Field;
 using Sixnet.Exceptions;
-using static Sixnet.Validation.SixnetValidationConstants;
+using Sixnet.IO;
 using Sixnet.Serialization.Binary;
-using System.Threading.Tasks;
-using Sixnet.Net.Upload;
-using Sixnet.DependencyInjection;
+using static Sixnet.Validation.SixnetValidationConstants;
 
 namespace Sixnet.Development.Entity
 {
@@ -580,7 +579,7 @@ namespace Sixnet.Development.Entity
         protected async Task HandleUploadPathAsync()
         {
             var entityOptions = SixnetContainer.GetOptions<SixnetEntityOptions>();
-            if (entityOptions.NotAutoMoveUploadFile)
+            if (entityOptions.NotAutoStoreUploadedFile)
             {
                 return;
             }
@@ -594,9 +593,9 @@ namespace Sixnet.Development.Entity
                     {
                         continue;
                     }
-                    var newValue = (await SixnetUploader.MoveAsync(parm =>
+                    var newValue = (await SixnetFileManager.StoreUploadedFileAsync(parm =>
                     {
-                        parm.ObjectName = field.UploadObjectName;
+                        parm.ObjectName = field.FileObjectName;
                         parm.RelativeFilePaths = new List<string>() { fieldValue };
                     }).ConfigureAwait(false))?.FirstOrDefault();
                     SetValue(field.PropertyName, newValue);
@@ -611,7 +610,7 @@ namespace Sixnet.Development.Entity
         protected void HandleUploadPath()
         {
             var entityOptions = SixnetContainer.GetOptions<SixnetEntityOptions>();
-            if (entityOptions.NotAutoMoveUploadFile)
+            if (entityOptions.NotAutoStoreUploadedFile)
             {
                 return;
             }
@@ -625,9 +624,9 @@ namespace Sixnet.Development.Entity
                     {
                         continue;
                     }
-                    var newValue = SixnetUploader.Move(parm =>
+                    var newValue = SixnetFileManager.StoreUploadedFile(parm =>
                     {
-                        parm.ObjectName = field.UploadObjectName;
+                        parm.ObjectName = field.FileObjectName;
                         parm.RelativeFilePaths = new List<string>() { fieldValue };
                     })?.FirstOrDefault();
                     SetValue(field.PropertyName, newValue);

@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Sixnet.Cache;
 using Sixnet.Cache.Keys.Parameters;
 using Sixnet.Cache.Set.Parameters;
-using System.Linq;
-using System.Threading.Tasks;
-using Sixnet.Cache.Keys;
 using Sixnet.DependencyInjection;
-using Sixnet.Cache.Keys.Results;
 
 namespace Sixnet.Security.Permission
 {

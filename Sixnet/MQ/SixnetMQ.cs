@@ -254,7 +254,7 @@ namespace Sixnet.MQ
                 };
             }
             var endpoint = GetMessageQueueOptions()?.GetEndpoint(message);
-            if(endpoint == null && message?.Group == QueueMessageGroupNames.DomainMessage)
+            if (endpoint == null && message?.Group == QueueMessageGroupNames.DomainMessage)
             {
                 return new MessageQueueEndpoint()
                 {
