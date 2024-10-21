@@ -595,7 +595,7 @@ namespace Sixnet.Development.Entity
                     }
                     var newValue = (await SixnetFileManager.StoreUploadedFileAsync(parm =>
                     {
-                        parm.ObjectName = field.FileObjectName;
+                        parm.FileObjectName = field.FileObjectName;
                         parm.RelativeFilePaths = new List<string>() { fieldValue };
                     }).ConfigureAwait(false))?.FirstOrDefault();
                     SetValue(field.PropertyName, newValue);
@@ -626,7 +626,7 @@ namespace Sixnet.Development.Entity
                     }
                     var newValue = SixnetFileManager.StoreUploadedFile(parm =>
                     {
-                        parm.ObjectName = field.FileObjectName;
+                        parm.FileObjectName = field.FileObjectName;
                         parm.RelativeFilePaths = new List<string>() { fieldValue };
                     })?.FirstOrDefault();
                     SetValue(field.PropertyName, newValue);

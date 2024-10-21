@@ -53,25 +53,20 @@ namespace Sixnet.IO
         public List<string> StoreUploadedFile(SixnetStoreUploadedFileParameter parameter)
         {
             SixnetDirectThrower.ThrowArgNullIf(parameter?.RelativeFilePaths.IsNullOrEmpty() ?? true, nameof(SixnetStoreUploadedFileParameter.RelativeFilePaths));
-            var fileSetting = SixnetFileManager.GetFileSetting(parameter.ObjectName);
+            var fileSetting = SixnetFileManager.GetFileSetting(parameter.FileObjectName);
 
             if (fileSetting.UploadToTempFirst)
             {
                 var fileOptions = SixnetContainer.GetOptions<SixnetFileOptions>();
                 var uploadRootPath = GetUploadRootPath(fileOptions, fileSetting);
-                var storePath = GetStorePath(fileOptions,fileSetting);
+                (var storeRelativePath, var storePath) = GetStorePath(parameter.FileObjectName, fileOptions, fileSetting);
                 var storedFiles = new List<string>();
                 foreach (var file in parameter.RelativeFilePaths)
                 {
-                    var filePath = file;
-                    if (!string.IsNullOrWhiteSpace(fileOptions.UploadTempFolder))
-                    {
-                        filePath = filePath.LSplit(fileOptions.UploadTempFolder)[^1];
-                    }
-                    filePath = filePath?.Trim('/', '\\');
+                    var fileName = Path.GetFileName(file);
                     var orginalFile = SixnetFileManager.CombinePath(uploadRootPath, file);
-                    var targetFile = SixnetFileManager.CombinePath(storePath, filePath);
-                    storedFiles.Add(filePath);
+                    var targetFile = SixnetFileManager.CombinePath(storePath, fileName);
+                    storedFiles.Add(SixnetFileManager.CombinePath(storeRelativePath, fileName));
                     if (File.Exists(targetFile) || !File.Exists(orginalFile))
                     {
                         continue;
@@ -145,7 +140,7 @@ namespace Sixnet.IO
 
             #region save path
 
-            (string relativePath, string savePath) = GetUploadPath(file.ObjectName, fileOptions, fileSetting, string.Empty);
+            (string relativePath, string savePath) = GetUploadPath(file.ObjectName, fileOptions, fileSetting);
 
             #endregion
 
@@ -217,7 +212,7 @@ namespace Sixnet.IO
         /// </summary>
         /// <param name="fileSetting"></param>
         /// <returns></returns>
-        (string, string) GetUploadPath(string fileObjectName, SixnetFileOptions fileOptions, SixnetFileSetting fileSetting, string folder)
+        (string, string) GetUploadPath(string fileObjectName, SixnetFileOptions fileOptions, SixnetFileSetting fileSetting)
         {
             // relative path
             var relativePath = string.Empty;
@@ -232,44 +227,12 @@ namespace Sixnet.IO
                 savePath = SixnetFileManager.CombinePath(savePath, fileOptions.UploadTempFolder);
             }
 
-            // setting path
-            var uploadSettingPath = fileSetting.UploadPath;
-            if (string.IsNullOrWhiteSpace(uploadSettingPath)
-                && !fileSetting.DisableDefaultFolderGroup
-                && !string.IsNullOrWhiteSpace(fileObjectName))
+            // fileObjectPath
+            var fileObjectPath = GetFileObjectSavePath(fileObjectName, fileOptions, fileSetting);
+            if (!string.IsNullOrWhiteSpace(fileObjectPath))
             {
-                var fileObjectNames = fileObjectName.LSplit(".");
-                var fileObjectPath = SixnetFileManager.CombinePath(fileObjectNames);
-                savePath = SixnetFileManager.CombinePath(savePath, fileObjectPath);
                 relativePath = SixnetFileManager.CombinePath(relativePath, fileObjectPath);
-            }
-            else if (!Path.IsPathRooted(uploadSettingPath))
-            {
-                savePath = SixnetFileManager.CombinePath(savePath, uploadSettingPath);
-                relativePath = SixnetFileManager.CombinePath(relativePath, uploadSettingPath);
-            }
-
-            // customer folder
-            if (!string.IsNullOrWhiteSpace(folder))
-            {
-                relativePath = SixnetFileManager.CombinePath(relativePath, folder);
-                savePath = SixnetFileManager.CombinePath(savePath, folder);
-            }
-
-            // date folder
-            if (fileSetting.UseDateGroupFolder)
-            {
-                var dataFolder = DateTimeOffset.Now.ToString("yyyyMMdd");
-                relativePath = SixnetFileManager.CombinePath(relativePath, dataFolder);
-                savePath = SixnetFileManager.CombinePath(savePath, dataFolder);
-            }
-
-            // create random folder
-            if (!fileSetting.Rename)
-            {
-                var randomFolder = GuidHelper.GetGuid().ToString().Replace("-", "");
-                relativePath = SixnetFileManager.CombinePath(relativePath, randomFolder);
-                savePath = SixnetFileManager.CombinePath(savePath, randomFolder);
+                savePath = SixnetFileManager.CombinePath(savePath, fileObjectPath);
             }
 
             // create folder
@@ -286,15 +249,67 @@ namespace Sixnet.IO
         /// </summary>
         /// <param name="fileSetting"></param>
         /// <returns></returns>
-        string GetStorePath(SixnetFileOptions fileOptions, SixnetFileSetting fileSetting)
+        (string, string) GetStorePath(string fileObjectName, SixnetFileOptions fileOptions, SixnetFileSetting fileSetting)
         {
             var storePath = fileSetting.StorePath;
+            var storeRelativePath = string.Empty;
             if (!Path.IsPathRooted(storePath))
             {
+                storeRelativePath = storePath;
                 var uploadRootPath = GetUploadRootPath(fileOptions, fileSetting);
-                return SixnetFileManager.CombinePath(uploadRootPath, storePath);
+                storePath = SixnetFileManager.CombinePath(uploadRootPath, storePath);
             }
-            return storePath;
+
+            // file object path
+            var fileObjectPath = GetFileObjectSavePath(fileObjectName, fileOptions, fileSetting);
+            if (!string.IsNullOrWhiteSpace(fileObjectPath))
+            {
+                storeRelativePath = SixnetFileManager.CombinePath(storeRelativePath, fileObjectPath);
+                storePath = SixnetFileManager.CombinePath(storePath, fileObjectPath);
+            }
+
+            return (storeRelativePath, storePath);
+        }
+
+        /// <summary>
+        /// Get file object save path
+        /// </summary>
+        /// <param name="fileObjectName"></param>
+        /// <param name="fileOptions"></param>
+        /// <param name="fileSetting"></param>
+        /// <returns></returns>
+        string GetFileObjectSavePath(string fileObjectName, SixnetFileOptions fileOptions, SixnetFileSetting fileSetting)
+        {
+            var fileObjectPath = string.Empty;
+
+            // setting path
+            var uploadSettingPath = fileSetting.UploadPath;
+            if (string.IsNullOrWhiteSpace(uploadSettingPath)
+                && !fileSetting.DisableDefaultFolderGroup
+                && !string.IsNullOrWhiteSpace(fileObjectName))
+            {
+                var fileObjectNames = fileObjectName.LSplit(".");
+                fileObjectPath = SixnetFileManager.CombinePath(fileObjectNames);
+            }
+            else if (!Path.IsPathRooted(uploadSettingPath))
+            {
+                fileObjectPath = SixnetFileManager.CombinePath(fileObjectPath, uploadSettingPath);
+            }
+
+            // date folder
+            if (fileSetting.UseDateGroupFolder)
+            {
+                var dataFolder = DateTimeOffset.Now.ToString("yyyyMMdd");
+                fileObjectPath = SixnetFileManager.CombinePath(fileObjectPath, dataFolder);
+            }
+
+            // create random folder
+            if (!fileSetting.Rename)
+            {
+                var randomFolder = GuidHelper.GetGuid().ToString().Replace("-", "");
+                fileObjectPath = SixnetFileManager.CombinePath(fileObjectPath, randomFolder);
+            }
+            return fileObjectPath;
         }
 
         #endregion

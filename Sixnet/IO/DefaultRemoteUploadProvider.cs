@@ -40,7 +40,7 @@ namespace Sixnet.IO
         {
             SixnetDirectThrower.ThrowArgNullIf(parameter == null, nameof(parameter));
 
-            var uploadSetting = SixnetFileManager.GetFileSetting(parameter.ObjectName);
+            var uploadSetting = SixnetFileManager.GetFileSetting(parameter.FileObjectName);
             var remoteUploadSetting = uploadSetting.GetRemoteUploadSetting();
             return SixnetHttp.PostJson<List<string>>(remoteUploadSetting.GetStoreFileUrl(), parameter);
         }
@@ -54,7 +54,7 @@ namespace Sixnet.IO
         {
             SixnetDirectThrower.ThrowArgNullIf(parameter == null, nameof(parameter));
 
-            var uploadSetting = SixnetFileManager.GetFileSetting(parameter.ObjectName);
+            var uploadSetting = SixnetFileManager.GetFileSetting(parameter.FileObjectName);
             var remoteUploadSetting = uploadSetting.GetRemoteUploadSetting();
             return SixnetHttp.PostJsonAsync<List<string>>(remoteUploadSetting.GetStoreFileUrl(), parameter);
         }

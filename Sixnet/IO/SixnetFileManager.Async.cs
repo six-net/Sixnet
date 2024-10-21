@@ -64,7 +64,7 @@ namespace Sixnet.IO
         {
             var uploadParameter = new SixnetUploadParameter()
             {
-                Setting = GetFileSetting(parameter?.ObjectName)
+                Setting = GetFileSetting(parameter?.FileObjectName)
             };
             var provider = GetUploadProvider(uploadParameter);
             return provider.StoreUploadedFileAsync(parameter);

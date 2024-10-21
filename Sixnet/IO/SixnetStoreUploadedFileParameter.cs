@@ -10,9 +10,9 @@ namespace Sixnet.IO
     public class SixnetStoreUploadedFileParameter
     {
         /// <summary>
-        /// Gets or sets the object
+        /// Gets or sets the file object name
         /// </summary>
-        public string ObjectName { get; set; }
+        public string FileObjectName { get; set; }
 
         /// <summary>
         /// Gets or sets the relative file paths
