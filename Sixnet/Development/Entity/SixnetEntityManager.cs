@@ -145,7 +145,7 @@ namespace Sixnet.Development.Entity
                     Length = entityFieldAttribute?.Length ?? 0,
                     Description = entityFieldAttribute?.Description ?? string.Empty,
                     StartValue = entityFieldAttribute?.StartValue ?? 0,
-                    FileObjectName = entityFieldAttribute.FileObjectName ?? string.Empty,
+                    FileObjectName = fileObjectName,
                 };
 
                 //value provider
