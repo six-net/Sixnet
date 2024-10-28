@@ -7,7 +7,7 @@ namespace Sixnet.Development.Message
     /// <summary>
     /// Message options
     /// </summary>
-    public class MessageOptions
+    public class SixnetMessageOptions
     {
         #region Fields
 

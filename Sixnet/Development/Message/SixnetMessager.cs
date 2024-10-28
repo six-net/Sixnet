@@ -21,7 +21,7 @@ namespace Sixnet.Development.Message
         #region Fields
 
         static readonly AsyncLocal<MessageBox> _messageBox = new();
-        static readonly MessageOptions _defaultOptions = new();
+        static readonly SixnetMessageOptions _defaultOptions = new();
         static readonly DefaultMessageProvider _defaultMessageProvider = new();
 
         #endregion
@@ -279,9 +279,9 @@ namespace Sixnet.Development.Message
         /// Get message options
         /// </summary>
         /// <returns></returns>
-        public static MessageOptions GetMessageOptions()
+        public static SixnetMessageOptions GetMessageOptions()
         {
-            return SixnetContainer.GetOptions<MessageOptions>() ?? _defaultOptions;
+            return SixnetContainer.GetOptions<SixnetMessageOptions>() ?? _defaultOptions;
         }
 
         /// <summary>

@@ -11,7 +11,7 @@ namespace Sixnet.Development.Work
     /// <summary>
     /// Unit of work options
     /// </summary>
-    public class UnitOfWorkOptions
+    public class SixnetUnitOfWorkOptions
     {
         /// <summary>
         /// Gets or sets the retry times

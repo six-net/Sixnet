@@ -825,9 +825,9 @@ namespace Sixnet.Development.Data
         /// Get data options
         /// </summary>
         /// <returns></returns>
-        public static DataOptions GetDataOptions()
+        public static SixnetDataOptions GetDataOptions()
         {
-            return SixnetContainer.GetOptions<DataOptions>();
+            return SixnetContainer.GetOptions<SixnetDataOptions>();
         }
 
         #endregion

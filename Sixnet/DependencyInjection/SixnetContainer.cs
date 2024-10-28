@@ -41,11 +41,6 @@ namespace Sixnet.DependencyInjection
         /// </summary>
         static IServiceCollection _serviceCollection = null;
 
-        /// <summary>
-        /// Sixnet options
-        /// </summary>
-        internal static SixnetOptions Options = new();
-
         #endregion
 
         #region Properties
@@ -67,49 +62,23 @@ namespace Sixnet.DependencyInjection
         #region Configure
 
         /// <summary>
-        /// Configure sixnet
-        /// </summary>
-        /// <param name="configure">Configure</param>
-        public static IServiceCollection Configure(Action<SixnetOptions> configure = null)
-        {
-            configure?.Invoke(Options);
-            return ConfigureCore();
-        }
-
-        /// <summary>
-        /// Configure sixnet
-        /// </summary>
-        /// <param name="options">Sixnet options</param>
-        /// <returns></returns>
-        public static IServiceCollection Configure(SixnetOptions options)
-        {
-            // Set options
-            if (options != null)
-            {
-                Options = options;
-            }
-            return ConfigureCore();
-        }
-
-        /// <summary>
-        /// Configure core
+        /// Configure container
         /// </summary>
         /// <returns></returns>
-        static IServiceCollection ConfigureCore()
+        internal static IServiceCollection Configure(SixnetOptions options)
         {
             // Configure application
-            SixnetApplication.Configure(Options.ConfigureApp);
-            var appOptions = SixnetApplication.Options;
+            SixnetApplication.Configure(options.ConfigureApp);
 
             // Init services
-            _serviceCollection = Options.Services ?? new ServiceCollection();
+            _serviceCollection = options.Services ?? new ServiceCollection();
 
             // Build service provider
             BuildServiceProvider(true);
 
             // Register default project service
-            ConfigureProjectDefaultOptions(_serviceCollection, Options);
-            AddProjectDefaultService(_serviceCollection, Options);
+            ConfigureProjectDefaultOptions(_serviceCollection, options);
+            AddProjectDefaultService(_serviceCollection, options);
 
             // Build service provider
             BuildServiceProvider(true);
@@ -121,7 +90,7 @@ namespace Sixnet.DependencyInjection
             BuildServiceProvider(true);
 
             // Configure service
-            Options.ConfigureService?.Invoke(_serviceCollection);
+            options.ConfigureService?.Invoke(_serviceCollection);
 
             // Container
             var container = SixnetApplication.Options.DIContainer ?? new DefaultServiceProviderContainer();
@@ -365,18 +334,18 @@ namespace Sixnet.DependencyInjection
         /// <param name="name">Options name</param>
         /// <param name="style">Options style</param>
         /// <returns></returns>
-        public static TOptions GetOptions<TOptions>(string name, OptionsStyle? style = null) where TOptions : class
+        public static TOptions GetOptions<TOptions>(string name, SixnetOptionsStyle? style = null) where TOptions : class
         {
-            var optionsStyle = style ?? Options.GetOptionsStyle(typeof(TOptions));
+            var optionsStyle = style ?? Sixneter.Options.GetOptionsStyle(typeof(TOptions));
 
             TOptions currentOptions;
             switch (optionsStyle)
             {
-                case OptionsStyle.Snapshot:
+                case SixnetOptionsStyle.Snapshot:
                     var optionsSnapshot = GetService<IOptionsSnapshot<TOptions>>();
                     currentOptions = string.IsNullOrWhiteSpace(name) ? optionsSnapshot?.Value : optionsSnapshot?.Get(name);
                     break;
-                case OptionsStyle.Monitor:
+                case SixnetOptionsStyle.Monitor:
                     var optionsModitor = GetService<IOptionsMonitor<TOptions>>();
                     currentOptions = string.IsNullOrWhiteSpace(name) ? optionsModitor?.CurrentValue : optionsModitor?.Get(name);
                     break;
@@ -394,7 +363,7 @@ namespace Sixnet.DependencyInjection
         /// <typeparam name="TOptions"></typeparam>
         /// <param name="style">Options style</param>
         /// <returns></returns>
-        public static TOptions GetOptions<TOptions>(OptionsStyle? style = null) where TOptions : class
+        public static TOptions GetOptions<TOptions>(SixnetOptionsStyle? style = null) where TOptions : class
         {
             return GetOptions<TOptions>(string.Empty, style);
         }
@@ -409,19 +378,19 @@ namespace Sixnet.DependencyInjection
             // File
             services.ConfigureIfNotNull<SixnetFileOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.File)));
             // Rsa key
-            services.ConfigureIfNotNull<RSAOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Rsa)));
+            services.ConfigureIfNotNull<SixnetRsaOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Rsa)));
             // Database
-            services.ConfigureIfNotNull<DataOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Data)));
+            services.ConfigureIfNotNull<SixnetDataOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Data)));
             // Cache
-            services.ConfigureIfNotNull<CacheOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Cache)));
+            services.ConfigureIfNotNull<SixnetCacheOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Cache)));
             // Email
-            services.ConfigureIfNotNull<EmailOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Email)));
+            services.ConfigureIfNotNull<SixnetEmailOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Email)));
             // Sms
-            services.ConfigureIfNotNull<SmsOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Sms)));
+            services.ConfigureIfNotNull<SixnetSmsOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Sms)));
             // Message
-            services.ConfigureIfNotNull<MessageOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Message)));
+            services.ConfigureIfNotNull<SixnetMessageOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Message)));
             // Message queue
-            services.ConfigureIfNotNull<MessageQueueOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.MessageQueue)));
+            services.ConfigureIfNotNull<SixnetMessageQueueOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.MessageQueue)));
             // Json serialization
             services.ConfigureIfNotNull<SixnetJsonSerializationOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Json)));
             // Validation
@@ -431,7 +400,7 @@ namespace Sixnet.DependencyInjection
             // Authentication
             services.ConfigureIfNotNull<SixnetAuthenticationOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Authentication)));
             // UnitOfWork
-            services.ConfigureIfNotNull<UnitOfWorkOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.UnitOfWork)));
+            services.ConfigureIfNotNull<SixnetUnitOfWorkOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.UnitOfWork)));
             // Logging
             services.ConfigureIfNotNull<SixnetLoggingOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Logging)));
             // Entity
@@ -447,7 +416,7 @@ namespace Sixnet.DependencyInjection
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureMessageQueue);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureJson);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureValidation);
-            services.PostConfigureIfNotNull<CacheOptions>((options) =>
+            services.PostConfigureIfNotNull<SixnetCacheOptions>((options) =>
             {
                 options.AddCacheProvider(CacheServerType.InMemory, new MemoryProvider());
                 sixnetOptions.ConfigureCache?.Invoke(options);

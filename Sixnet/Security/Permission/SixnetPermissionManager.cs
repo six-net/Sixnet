@@ -324,7 +324,7 @@ namespace Sixnet.Security.Permission
         /// <param name="permissionObjectType">Permission object type</param>
         public static void ClearObjectPermission(string appTag, PermissionObjectType permissionObjectType)
         {
-            var cacheOptions = SixnetContainer.GetOptions<CacheOptions>();
+            var cacheOptions = SixnetContainer.GetOptions<SixnetCacheOptions>();
             var keyPattern = GetObjectPermissionKey(appTag, permissionObjectType, "*");
             if (cacheOptions.LowercaseKey)
             {
@@ -344,7 +344,7 @@ namespace Sixnet.Security.Permission
         /// <param name="permissionObjectType">Permission object type</param>
         public static Task ClearObjectPermissionAsync(string appTag, PermissionObjectType permissionObjectType)
         {
-            var cacheOptions = SixnetContainer.GetOptions<CacheOptions>();
+            var cacheOptions = SixnetContainer.GetOptions<SixnetCacheOptions>();
             var keyPattern = GetObjectPermissionKey(appTag, permissionObjectType, "*");
             if (cacheOptions.LowercaseKey)
             {

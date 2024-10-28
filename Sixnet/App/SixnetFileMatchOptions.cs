@@ -5,9 +5,9 @@ using System.IO;
 namespace Sixnet.App
 {
     /// <summary>
-    /// Application file match options
+    /// Sixnet application file match options
     /// </summary>
-    public class FileMatchOptions
+    public class SixnetFileMatchOptions
     {
         /// <summary>
         /// Gets or sets the file match pattern

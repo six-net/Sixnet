@@ -4,9 +4,9 @@ using System.Collections.Generic;
 namespace Sixnet.Net.Sms
 {
     /// <summary>
-    /// Sms options
+    /// Sixnet sms options
     /// </summary>
-    public class SmsOptions
+    public class SixnetSmsOptions
     {
         /// <summary>
         /// Whether use the same account.

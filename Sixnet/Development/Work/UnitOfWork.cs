@@ -318,7 +318,7 @@ namespace Sixnet.Development.Work
 
         #region Execute
 
-        static RetryPipeline GetRetryPipeline(ISixnetWork work, UnitOfWorkOptions options, UnitOfWorkSetting setting)
+        static RetryPipeline GetRetryPipeline(ISixnetWork work, SixnetUnitOfWorkOptions options, UnitOfWorkSetting setting)
         {
             var retryTimes = 0;
             if (!options.NotRetry && !setting.NotRetry)
@@ -342,7 +342,7 @@ namespace Sixnet.Development.Work
             };
         }
 
-        static RetryPipeline<T> GetRetryPipeline<T>(ISixnetWork work, UnitOfWorkOptions options, UnitOfWorkSetting setting)
+        static RetryPipeline<T> GetRetryPipeline<T>(ISixnetWork work, SixnetUnitOfWorkOptions options, UnitOfWorkSetting setting)
         {
             var retryTimes = 0;
             if (!options.NotRetry && !setting.NotRetry)
@@ -415,7 +415,7 @@ namespace Sixnet.Development.Work
 
         static void ExecuteCore(ISixnetWork work, Action<UnitOfWorkExecutionContext> action, UnitOfWorkSetting setting)
         {
-            var workOptions = SixnetContainer.GetOptions<UnitOfWorkOptions>();
+            var workOptions = SixnetContainer.GetOptions<SixnetUnitOfWorkOptions>();
             var retryPipeline = GetRetryPipeline(work, workOptions, setting);
             retryPipeline.Action = () =>
             {
@@ -482,7 +482,7 @@ namespace Sixnet.Development.Work
 
         static async Task ExecuteCoreAsync(ISixnetWork work, Func<UnitOfWorkExecutionContext, Task> func, UnitOfWorkSetting setting)
         {
-            var workOptions = SixnetContainer.GetOptions<UnitOfWorkOptions>();
+            var workOptions = SixnetContainer.GetOptions<SixnetUnitOfWorkOptions>();
             var retryPipeline = GetRetryPipeline(work, workOptions, setting);
             retryPipeline.ActionAsync = async () =>
             {
@@ -552,7 +552,7 @@ namespace Sixnet.Development.Work
 
         static T ExecuteCore<T>(ISixnetWork work, Func<UnitOfWorkExecutionContext, T> func, UnitOfWorkSetting setting)
         {
-            var workOptions = SixnetContainer.GetOptions<UnitOfWorkOptions>();
+            var workOptions = SixnetContainer.GetOptions<SixnetUnitOfWorkOptions>();
             var retryPipeline = GetRetryPipeline<T>(work, workOptions, setting);
             retryPipeline.Func = () =>
             {
@@ -624,7 +624,7 @@ namespace Sixnet.Development.Work
 
         static async Task<T> ExecuteCoreAsync<T>(ISixnetWork work, Func<UnitOfWorkExecutionContext, Task<T>> func, UnitOfWorkSetting setting)
         {
-            var workOptions = SixnetContainer.GetOptions<UnitOfWorkOptions>();
+            var workOptions = SixnetContainer.GetOptions<SixnetUnitOfWorkOptions>();
             var retryPipeline = GetRetryPipeline<T>(work, workOptions, setting);
             retryPipeline.FuncAsync = async () =>
             {

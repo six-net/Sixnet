@@ -37,7 +37,7 @@ namespace Sixnet.Cache
         /// <summary>
         /// Default options
         /// </summary>
-        static readonly CacheOptions _defaultOptions = new();
+        static readonly SixnetCacheOptions _defaultOptions = new();
 
         #endregion
 
@@ -56,7 +56,7 @@ namespace Sixnet.Cache
         /// <summary>
         /// Get cache options
         /// </summary>
-        public static CacheOptions Options => GetCacheOptions();
+        public static SixnetCacheOptions Options => GetCacheOptions();
 
         #endregion
 
@@ -1730,7 +1730,7 @@ namespace Sixnet.Cache
         /// <returns></returns>
         internal static CacheServer GetDefaultInMemoryServer()
         {
-            return CacheOptions.DefaultInMemoryServer;
+            return SixnetCacheOptions.DefaultInMemoryServer;
         }
 
         #endregion
@@ -1801,9 +1801,9 @@ namespace Sixnet.Cache
         /// Get cache options
         /// </summary>
         /// <returns></returns>
-        static CacheOptions GetCacheOptions()
+        static SixnetCacheOptions GetCacheOptions()
         {
-            var options = SixnetContainer.GetOptions<CacheOptions>();
+            var options = SixnetContainer.GetOptions<SixnetCacheOptions>();
             return options ?? _defaultOptions;
         }
 

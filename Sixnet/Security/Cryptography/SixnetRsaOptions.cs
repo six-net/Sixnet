@@ -3,7 +3,7 @@
     /// <summary>
     /// RSA options
     /// </summary>
-    public class RSAOptions
+    public class SixnetRsaOptions
     {
         /// <summary>
         /// Public key

@@ -1,6 +1,6 @@
 ﻿using System;
 using Microsoft.Extensions.Configuration;
-using Sixnet.App;
+using Sixnet;
 using Sixnet.DependencyInjection;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -9,11 +9,12 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddSixnet(this IServiceCollection services, Action<SixnetOptions> configure = null)
         {
-            return SixnetContainer.Configure((SixnetOptions options) =>
+            Sixneter.Init((SixnetOptions options) =>
             {
                 options.Services = services;
                 configure?.Invoke(options);
             });
+            return services;
         }
 
         public static IServiceCollection ConfigureIfNotNull<TOptions>(this IServiceCollection services, IConfiguration configuration) where TOptions : class

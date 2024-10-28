@@ -10,7 +10,7 @@ namespace Sixnet.DependencyInjection
     public class SixnetServiceProviderFactory : IServiceProviderFactory<ISixnetContainer>
     {
         readonly Action<SixnetOptions> _configure = null;
-        readonly SixnetOptions _options = SixnetContainer.Options;
+        readonly SixnetOptions _options = Sixneter.Options;
 
         public SixnetServiceProviderFactory(Action<SixnetOptions> configure = null)
         {
@@ -32,7 +32,7 @@ namespace Sixnet.DependencyInjection
                 _options.Services = services;
                 _configure?.Invoke(_options);
             }
-            SixnetContainer.Configure(_options);
+            Sixneter.Init(_options);
             return SixnetContainer.Container;
         }
 

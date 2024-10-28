@@ -9,7 +9,7 @@ namespace Sixnet.MQ
     /// <summary>
     /// Message queue options
     /// </summary>
-    public class MessageQueueOptions
+    public class SixnetMessageQueueOptions
     {
         #region Fields
 

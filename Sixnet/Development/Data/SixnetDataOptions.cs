@@ -18,9 +18,9 @@ using System.Linq.Expressions;
 namespace Sixnet.Development.Data
 {
     /// <summary>
-    /// Database options
+    /// Sixnet database options
     /// </summary>
-    public class DataOptions
+    public class SixnetDataOptions
     {
         #region Fields
 
@@ -111,7 +111,7 @@ namespace Sixnet.Development.Data
 
         #region Constructor
 
-        public DataOptions()
+        public SixnetDataOptions()
         {
             AddDefaultParameterHandler();
             SubscribeDefaultCommandStartingEvent();

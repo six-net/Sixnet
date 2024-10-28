@@ -47,7 +47,7 @@ namespace Sixnet.App
         /// <summary>
         /// Default application options
         /// </summary>
-        internal static ApplicationOptions Options = new();
+        internal static SixnetApplicationOptions Options = new();
 
         #endregion
 
@@ -76,7 +76,7 @@ namespace Sixnet.App
         /// Configure application
         /// </summary>
         /// <param name="configure">Configure application</param>
-        internal static void Configure(Action<ApplicationOptions> configure = null)
+        internal static void Configure(Action<SixnetApplicationOptions> configure = null)
         {
             configure?.Invoke(Options);
         }
@@ -181,7 +181,7 @@ namespace Sixnet.App
         /// <param name="originalFiles">Original files</param>
         /// <param name="options">Application options</param>
         /// <returns></returns>
-        internal static IEnumerable<FileInfo> FilterFiles(IEnumerable<FileInfo> originalFiles, ApplicationOptions options = null)
+        internal static IEnumerable<FileInfo> FilterFiles(IEnumerable<FileInfo> originalFiles, SixnetApplicationOptions options = null)
         {
             if (originalFiles.IsNullOrEmpty())
             {

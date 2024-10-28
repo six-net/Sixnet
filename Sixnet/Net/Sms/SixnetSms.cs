@@ -24,7 +24,7 @@ namespace Sixnet.Net.Sms
         /// <summary>
         /// Sms options
         /// </summary>
-        readonly static SmsOptions _defaultSmsOptions = new();
+        readonly static SixnetSmsOptions _defaultSmsOptions = new();
 
         #endregion
 
@@ -389,7 +389,7 @@ namespace Sixnet.Net.Sms
         /// </summary>
         /// <param name="smsParameter">Sms parameter</param>
         /// <returns></returns>
-        static SmsAccount GetSmsAccount(SmsOptions smsOptions, SmsParameter smsParameter)
+        static SmsAccount GetSmsAccount(SixnetSmsOptions smsOptions, SmsParameter smsParameter)
         {
             SixnetDirectThrower.ThrowArgNullIf(smsParameter == null, nameof(smsParameter));
 
@@ -404,9 +404,9 @@ namespace Sixnet.Net.Sms
         /// Get sms options
         /// </summary>
         /// <returns></returns>
-        static SmsOptions GetSmsOptions()
+        static SixnetSmsOptions GetSmsOptions()
         {
-            return SixnetContainer.GetOptions<SmsOptions>() ?? _defaultSmsOptions;
+            return SixnetContainer.GetOptions<SixnetSmsOptions>() ?? _defaultSmsOptions;
         }
 
         #endregion

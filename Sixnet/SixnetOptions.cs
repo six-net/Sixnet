@@ -21,7 +21,7 @@ using Sixnet.Security.Cryptography;
 using Sixnet.Serialization.Json;
 using Sixnet.Validation;
 
-namespace Sixnet.DependencyInjection
+namespace Sixnet
 {
     /// <summary>
     /// Sixnet options
@@ -31,7 +31,12 @@ namespace Sixnet.DependencyInjection
         /// <summary>
         /// Options styyles
         /// </summary>
-        readonly Dictionary<Guid, OptionsStyle> _optionsStyles = new();
+        readonly Dictionary<Guid, SixnetOptionsStyle> _optionsStyles = new();
+
+        /// <summary>
+        /// Gets or sets the args
+        /// </summary>
+        public string[] Args {  get; set; }
 
         /// <summary>
         /// Services
@@ -41,27 +46,27 @@ namespace Sixnet.DependencyInjection
         /// <summary>
         /// Configure app
         /// </summary>
-        public Action<ApplicationOptions> ConfigureApp { get; set; }
+        public Action<SixnetApplicationOptions> ConfigureApp { get; set; }
 
         /// <summary>
         /// Configure data
         /// </summary>
-        public Action<DataOptions> ConfigureData { get; set; }
+        public Action<SixnetDataOptions> ConfigureData { get; set; }
 
         /// <summary>
         /// Configure email
         /// </summary>
-        public Action<EmailOptions> ConfigureEmail { get; set; }
+        public Action<SixnetEmailOptions> ConfigureEmail { get; set; }
 
         /// <summary>
         /// Configure sms
         /// </summary>
-        public Action<SmsOptions> ConfigureSms { get; set; }
+        public Action<SixnetSmsOptions> ConfigureSms { get; set; }
 
         /// <summary>
         /// Configure messag
         /// </summary>
-        public Action<MessageOptions> ConfigureMessage { get; set; }
+        public Action<SixnetMessageOptions> ConfigureMessage { get; set; }
 
         /// <summary>
         /// Configure service
@@ -86,12 +91,12 @@ namespace Sixnet.DependencyInjection
         /// <summary>
         /// Configure rsa
         /// </summary>
-        public Action<RSAOptions> ConfigureRSA { get; set; }
+        public Action<SixnetRsaOptions> ConfigureRSA { get; set; }
 
         /// <summary>
         /// Configure cache
         /// </summary>
-        public Action<CacheOptions> ConfigureCache { get; set; }
+        public Action<SixnetCacheOptions> ConfigureCache { get; set; }
 
         /// <summary>
         /// Configure localization
@@ -106,7 +111,7 @@ namespace Sixnet.DependencyInjection
         /// <summary>
         /// Configure message queue
         /// </summary>
-        public Action<MessageQueueOptions> ConfigureMessageQueue { get; set; }
+        public Action<SixnetMessageQueueOptions> ConfigureMessageQueue { get; set; }
 
         /// <summary>
         /// Configure validation
@@ -126,7 +131,7 @@ namespace Sixnet.DependencyInjection
         /// <summary>
         /// Configure unitofwork
         /// </summary>
-        public Action<UnitOfWorkOptions> ConfigureUnitOfWork { get; set; }
+        public Action<SixnetUnitOfWorkOptions> ConfigureUnitOfWork { get; set; }
 
         /// <summary>
         /// Configure entity
@@ -138,7 +143,7 @@ namespace Sixnet.DependencyInjection
         /// </summary>
         /// <typeparam name="TOptions"></typeparam>
         /// <param name="style"></param>
-        public void SetOptionsStyle<TOptions>(OptionsStyle style)
+        public void SetOptionsStyle<TOptions>(SixnetOptionsStyle style)
         {
             SetOptionsStyle(typeof(TOptions), style);
         }
@@ -148,7 +153,7 @@ namespace Sixnet.DependencyInjection
         /// </summary>
         /// <param name="optionsType"></param>
         /// <param name="style"></param>
-        public void SetOptionsStyle(Type optionsType, OptionsStyle style)
+        public void SetOptionsStyle(Type optionsType, SixnetOptionsStyle style)
         {
             if (optionsType != null)
             {
@@ -161,7 +166,7 @@ namespace Sixnet.DependencyInjection
         /// </summary>
         /// <param name="optionsType"></param>
         /// <returns></returns>
-        internal OptionsStyle GetOptionsStyle(Type optionsType)
+        internal SixnetOptionsStyle GetOptionsStyle(Type optionsType)
         {
             SixnetDirectThrower.ThrowArgNullIf(optionsType == null, nameof(optionsType));
             var typeGuid = optionsType.GUID;
@@ -169,7 +174,17 @@ namespace Sixnet.DependencyInjection
             {
                 return _optionsStyles[typeGuid];
             }
-            return OptionsStyle.Constant;
+            return SixnetOptionsStyle.Constant;
         }
+    }
+
+    /// <summary>
+    /// Sixnet options style
+    /// </summary>
+    public enum SixnetOptionsStyle
+    {
+        Constant = 1,
+        Snapshot = 2,
+        Monitor = 3
     }
 }

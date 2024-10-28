@@ -26,7 +26,7 @@ namespace Sixnet.Net.Email
         /// <summary>
         /// Default email options
         /// </summary>
-        readonly static EmailOptions _defaultEmailOptions = new();
+        readonly static SixnetEmailOptions _defaultEmailOptions = new();
 
         #endregion
 
@@ -267,7 +267,7 @@ namespace Sixnet.Net.Email
         /// <param name="emailOptions">Email options</param>
         /// <param name="email">Email info</param>
         /// <returns></returns>
-        static EmailAccount GetEmailAccount(EmailOptions emailOptions, EmailInfo email)
+        static EmailAccount GetEmailAccount(SixnetEmailOptions emailOptions, EmailInfo email)
         {
             SixnetDirectThrower.ThrowArgNullIf(email == null, nameof(email));
 
@@ -282,9 +282,9 @@ namespace Sixnet.Net.Email
         /// Get email options
         /// </summary>
         /// <returns></returns>
-        static EmailOptions GetEmailOptions()
+        static SixnetEmailOptions GetEmailOptions()
         {
-            return SixnetContainer.GetOptions<EmailOptions>() ?? _defaultEmailOptions;
+            return SixnetContainer.GetOptions<SixnetEmailOptions>() ?? _defaultEmailOptions;
         }
 
         /// <summary>

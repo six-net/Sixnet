@@ -16,9 +16,9 @@ namespace Sixnet.Development.Data
         public Dictionary<Type, EntitySetting> Entities { get; set; }
 
         /// <summary>
-        /// Gets or sets the batch execution options
+        /// Gets or sets the batch setting
         /// </summary>
-        public DatabaseBatchSetting BatchOptions { get; set; }
+        public DatabaseBatchSetting BatchSetting { get; set; }
 
         /// <summary>
         /// Gets or sets the data isolation level

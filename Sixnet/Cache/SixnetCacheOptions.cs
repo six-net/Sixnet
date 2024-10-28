@@ -8,7 +8,7 @@ namespace Sixnet.Cache
     /// <summary>
     /// Cache options
     /// </summary>
-    public class CacheOptions
+    public class SixnetCacheOptions
     {
         #region Fields
 

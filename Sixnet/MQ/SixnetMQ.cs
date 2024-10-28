@@ -19,7 +19,7 @@ namespace Sixnet.MQ
         #region Fields
 
         static readonly InternalMessageQueueProvider _internalProvider = new();
-        static readonly MessageQueueOptions _defaultMessageQueueOptions = new();
+        static readonly SixnetMessageQueueOptions _defaultMessageQueueOptions = new();
         static readonly MessageQueueServer _defaultInProcessServer = new() { Type = MessageQueueType.Internal };
 
         #endregion
@@ -276,9 +276,9 @@ namespace Sixnet.MQ
         /// Get message queue options
         /// </summary>
         /// <returns></returns>
-        internal static MessageQueueOptions GetMessageQueueOptions()
+        internal static SixnetMessageQueueOptions GetMessageQueueOptions()
         {
-            return SixnetContainer.GetOptions<MessageQueueOptions>() ?? _defaultMessageQueueOptions;
+            return SixnetContainer.GetOptions<SixnetMessageQueueOptions>() ?? _defaultMessageQueueOptions;
         }
 
         #endregion

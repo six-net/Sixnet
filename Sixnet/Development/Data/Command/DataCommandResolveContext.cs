@@ -49,7 +49,7 @@ namespace Sixnet.Development.Data.Command
 
         const string DefaultParameterName = "Param";
 
-        public DataOptions DataOptions { get;  private set; }
+        public SixnetDataOptions DataOptions { get;  private set; }
 
         #endregion
 

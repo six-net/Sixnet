@@ -5,9 +5,9 @@ using Sixnet.Mapper;
 namespace Sixnet.App
 {
     /// <summary>
-    /// Application options
+    /// Sixnet application options
     /// </summary>
-    public class ApplicationOptions
+    public class SixnetApplicationOptions
     {
         /// <summary>
         /// Gets or sets object mapper builder
@@ -22,7 +22,7 @@ namespace Sixnet.App
         /// <summary>
         /// Gets or sets the file match options
         /// </summary>
-        public FileMatchOptions FileMatchOptions { get; private set; } = new();
+        public SixnetFileMatchOptions FileMatchOptions { get; private set; } = new();
 
         /// <summary>
         /// Gets the current application info

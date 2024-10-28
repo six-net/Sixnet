@@ -29,37 +29,37 @@ namespace Sixnet.DependencyInjection
         /// <summary>
         /// Gets or sets rsa options
         /// </summary>
-        public RSAOptions Rsa { get; set; }
+        public SixnetRsaOptions Rsa { get; set; }
 
         /// <summary>
         /// Gets or sets data options
         /// </summary>
-        public DataOptions Data { get; set; }
+        public SixnetDataOptions Data { get; set; }
 
         /// <summary>
         /// Gets or sets cache options
         /// </summary>
-        public CacheOptions Cache { get; set; }
+        public SixnetCacheOptions Cache { get; set; }
 
         /// <summary>
         /// Gets or sets the email options
         /// </summary>
-        public EmailOptions Email { get; set; }
+        public SixnetEmailOptions Email { get; set; }
 
         /// <summary>
         /// Gets or sets the sms options
         /// </summary>
-        public SmsOptions Sms { get; set; }
+        public SixnetSmsOptions Sms { get; set; }
 
         /// <summary>
         /// Gets or sets the message options
         /// </summary>
-        public MessageOptions Message { get; set; }
+        public SixnetMessageOptions Message { get; set; }
 
         /// <summary>
         /// Gets or sets the message queue options
         /// </summary>
-        public MessageQueueOptions MessageQueue { get; set; }
+        public SixnetMessageQueueOptions MessageQueue { get; set; }
 
         /// <summary>
         /// Gets or sets the json options
@@ -84,7 +84,7 @@ namespace Sixnet.DependencyInjection
         /// <summary>
         /// Gets or sets the unitofwork options
         /// </summary>
-        public UnitOfWorkOptions UnitOfWork { get; set; }
+        public SixnetUnitOfWorkOptions UnitOfWork { get; set; }
 
         /// <summary>
         /// Gets or sets the logging options

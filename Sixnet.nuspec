@@ -19,6 +19,7 @@
 		<dependency id="Microsoft.CSharp" version="4.7.0" />
 		<dependency id="Microsoft.Extensions.Configuration.Json" version="6.0.0" />
 		<dependency id="Microsoft.Extensions.DependencyInjection" version="6.0.0" />
+		<dependency id="Microsoft.Extensions.Hosting" Version="6.0.0" />
 		<dependency id="Microsoft.Extensions.Http" version="6.0.0" />
 		<dependency id="Microsoft.Extensions.Localization" version="6.0.0" />
 		<dependency id="Microsoft.Extensions.Logging" version="6.0.0" />

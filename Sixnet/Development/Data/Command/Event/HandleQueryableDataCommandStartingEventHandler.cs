@@ -82,7 +82,7 @@ namespace Sixnet.Development.Data.Command.Event
         /// </summary>
         /// <param name="context">Context</param>
         /// <returns></returns>
-        static ISixnetQueryable FilterData(DataOptions dataOptions, QueryableFilterContext context)
+        static ISixnetQueryable FilterData(SixnetDataOptions dataOptions, QueryableFilterContext context)
         {
             SixnetDirectThrower.ThrowArgNullIf(context?.OriginalQueryable is null, nameof(QueryableFilterContext.OriginalQueryable));
             var originalQueryable = context.OriginalQueryable;
@@ -269,7 +269,7 @@ namespace Sixnet.Development.Data.Command.Event
         /// </summary>
         /// <param name="context">Filter context</param>
         /// <returns></returns>
-        internal static ISixnetCondition GetDataFilter(DataOptions options, QueryableFilterContext context)
+        internal static ISixnetCondition GetDataFilter(SixnetDataOptions options, QueryableFilterContext context)
         {
             SixnetDirectThrower.ThrowArgNullIf(context == null, nameof(context));
 

@@ -5,9 +5,9 @@ using System.Text;
 namespace Sixnet.Net.Email
 {
     /// <summary>
-    /// Email options
+    /// Sixnet email options
     /// </summary>
-    public class EmailOptions
+    public class SixnetEmailOptions
     {
         /// <summary>
         /// Whether use same account
