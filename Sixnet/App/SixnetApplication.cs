@@ -150,26 +150,25 @@ namespace Sixnet.App
         /// <returns></returns>
         internal static IEnumerable<Type> GetAllConventionTypes()
         {
-            var files = GetMatchedFiles();
-            if (files.IsNullOrEmpty())
-            {
-                return Array.Empty<Type>();
-            }
             var entryAssembly = Assembly.GetEntryAssembly();
             IEnumerable<Type> allTypes = entryAssembly.GetTypes();
-            foreach (var file in files)
+            var files = GetMatchedFiles();
+            if (!files.IsNullOrEmpty())
             {
-                try
+                foreach (var file in files)
                 {
-                    var fileAssembly = Assembly.LoadFrom(file.FullName);
-                    if (fileAssembly != null && fileAssembly.FullName != entryAssembly.FullName)
+                    try
                     {
-                        allTypes = allTypes.Union(fileAssembly.GetTypes());
+                        var fileAssembly = Assembly.LoadFrom(file.FullName);
+                        if (fileAssembly != null && fileAssembly.FullName != entryAssembly.FullName)
+                        {
+                            allTypes = allTypes.Union(fileAssembly.GetTypes());
+                        }
                     }
-                }
-                catch (Exception ex)
-                {
-                    SixnetLogger.LogError(typeof(SixnetApplication).FullName, SixnetLogEvents.Application.LoadAssemblyFailure, ex, ex.Message);
+                    catch (Exception ex)
+                    {
+                        SixnetLogger.LogError(typeof(SixnetApplication).FullName, SixnetLogEvents.Application.LoadAssemblyFailure, ex, ex.Message);
+                    }
                 }
             }
             return allTypes;
