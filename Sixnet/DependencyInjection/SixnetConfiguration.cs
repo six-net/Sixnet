@@ -3,6 +3,7 @@ using Sixnet.Development.Data;
 using Sixnet.Development.Entity;
 using Sixnet.Development.Message;
 using Sixnet.Development.Work;
+using Sixnet.Extensions;
 using Sixnet.IO;
 using Sixnet.Logging;
 using Sixnet.MQ;
@@ -92,8 +93,13 @@ namespace Sixnet.DependencyInjection
         public SixnetLoggingOptions Logging { get; set; }
 
         /// <summary>
-        /// Gets or sets the entity
+        /// Gets or sets the entity options
         /// </summary>
         public SixnetEntityOptions Entity { get; set; }
+
+        /// <summary>
+        /// Gets or sets the enum options
+        /// </summary>
+        public SixnetEnumOptions Enum { get; set; }
     }
 }

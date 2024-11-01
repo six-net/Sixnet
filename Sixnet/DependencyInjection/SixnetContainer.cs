@@ -15,6 +15,7 @@ using Sixnet.Development.Message;
 using Sixnet.Development.Repository;
 using Sixnet.Development.Work;
 using Sixnet.Exceptions;
+using Sixnet.Extensions;
 using Sixnet.IO;
 using Sixnet.Logging;
 using Sixnet.Mapper;
@@ -405,6 +406,8 @@ namespace Sixnet.DependencyInjection
             services.ConfigureIfNotNull<SixnetLoggingOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Logging)));
             // Entity
             services.ConfigureIfNotNull<SixnetEntityOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Entity)));
+            // Enum
+            services.ConfigureIfNotNull<SixnetEnumOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Enum)));
 
             // Post config options
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureFile);
@@ -427,6 +430,7 @@ namespace Sixnet.DependencyInjection
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureLoggingBuilder);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureLogging);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureEntity);
+            services.PostConfigureIfNotNull(sixnetOptions.ConfigureEnum);
         }
 
         #endregion

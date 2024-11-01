@@ -5,7 +5,9 @@ using System.Data;
 using System.Linq;
 using AutoMapper;
 using Sixnet.Code;
+using Sixnet.DependencyInjection;
 using Sixnet.Exceptions;
+using Sixnet.Extensions;
 
 namespace System
 {
@@ -66,28 +68,28 @@ namespace System
         /// Generate dictionary by enum
         /// </summary>
         /// <param name="enumType">Enum type</param>
-        /// <param name="startWithEnumName">Whether start with enum name</param>
-        /// <param name="displayFriendly">Display friendly</param>
+        /// <param name="options">Options</param>
         /// <returns>Return the dictionary value</returns>
-        public static Dictionary<int, string> GetEnumValueAndNames(this Type enumType, bool startWithEnumName = false, bool displayFriendly = true)
+        public static Dictionary<int, string> GetEnumValueAndNames(this Type enumType, SixnetEnumOptions options)
         {
             if (enumType == null)
             {
                 return new Dictionary<int, string>(0);
             }
-
-            string formatedKey = $"{enumType.GUID}_{startWithEnumName}_{displayFriendly}";
+            options ??= SixnetContainer.GetOptions<SixnetEnumOptions>();
+            var formatedKey = $"{enumType.GUID}_{options.GetOptionsIdentityKey()}";
             if (CacheEnumValueAndNames.TryGetValue(formatedKey, out var valueAndNames))
             {
                 return valueAndNames ?? new Dictionary<int, string>(0);
             }
             var values = Enum.GetValues(enumType);
-            Dictionary<int, string> enumValues = new Dictionary<int, string>();
+            var enumValues = new Dictionary<int, string>();
             var displayAttrType = typeof(DisplayAttribute);
             foreach (int val in values)
             {
                 var enumName = Enum.GetName(enumType, val);
-                if (displayFriendly)
+                // display
+                if (!options.NotOutputDisplayName)
                 {
                     var enumField = enumType.GetField(enumName);
 
@@ -97,7 +99,19 @@ namespace System
                         enumName = string.IsNullOrWhiteSpace(displayName) ? enumName : displayName;
                     }
                 }
-                enumValues.Add(val, startWithEnumName ? $"{enumType.Name}{enumName}" : enumName);
+                // type name
+                enumName = options.NotStartByTypeName ? enumName : $"{enumType.Name}{enumName}";
+                // separate
+                if (!options.NotSeparateName)
+                {
+                    enumName = enumName.ToSeparatorCase(options.NameSeparateChar, options.UppercaseName);
+                }
+                // upper case
+                else if (!options.UppercaseName)
+                {
+                    enumName = enumName.ToLower();
+                }
+                enumValues.Add(val, enumName);
             }
             CacheEnumValueAndNames[formatedKey] = enumValues;
             return enumValues;

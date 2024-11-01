@@ -9,6 +9,7 @@ using Sixnet.Development.Entity;
 using Sixnet.Development.Message;
 using Sixnet.Development.Work;
 using Sixnet.Exceptions;
+using Sixnet.Extensions;
 using Sixnet.IO;
 using Sixnet.Localization;
 using Sixnet.Logging;
@@ -137,6 +138,11 @@ namespace Sixnet
         /// Configure entity
         /// </summary>
         public Action<SixnetEntityOptions> ConfigureEntity { get; set; }
+
+        /// <summary>
+        /// Configure enum
+        /// </summary>
+        public Action<SixnetEnumOptions> ConfigureEnum { get; set; }
 
         /// <summary>
         /// Set options style

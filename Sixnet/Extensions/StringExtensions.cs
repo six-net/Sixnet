@@ -384,6 +384,10 @@ namespace System
             {
                 return value;
             }
+            if(string.IsNullOrWhiteSpace(separator))
+            {
+                separator = "_";
+            }
             return SeparatorCaseNameCore(separator, !uppercase, value.AsSpan());
         }
 
