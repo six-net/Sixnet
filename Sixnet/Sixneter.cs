@@ -4,9 +4,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Sixnet.DependencyInjection;
+using Sixnet.Logging;
 
 namespace Sixnet
 {
+    /// <summary>
+    /// Sixnet manager
+    /// </summary>
     public static class Sixneter
     {
         #region Fields
@@ -48,8 +52,10 @@ namespace Sixnet
         /// </summary>
         static void InitCore()
         {
-            if(Options.Services == null)
+            if (Options.Services == null)
             {
+                SixnetLogger.LogDebug($"Init sixnet through new self host");
+
                 Host.CreateDefaultBuilder(Options.Args)
                     .UseServiceProviderFactory(new SixnetServiceProviderFactory())
                     .Build();
@@ -58,7 +64,7 @@ namespace Sixnet
             {
                 _ = SixnetContainer.Configure(Options);
             }
-        } 
+        }
 
         #endregion
     }
