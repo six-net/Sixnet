@@ -107,6 +107,12 @@ namespace Sixnet.Development.Data
         /// </summary>
         public bool AutoCreateSplitTable { get; set; } = true;
 
+        /// <summary>
+        /// Whether insert increment field.
+        /// Default is false
+        /// </summary>
+        public bool InsertIncrementField {  get; set; }
+
         #endregion
 
         #region Constructor

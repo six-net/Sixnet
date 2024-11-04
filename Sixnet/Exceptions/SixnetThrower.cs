@@ -164,7 +164,7 @@ namespace Sixnet.Exceptions
         {
             if (predicate && string.IsNullOrWhiteSpace(message))
             {
-                message = SixnetLocalizer.GetString(SixnetResourceKeys.UpdateDataFailed, SixnetLocalizer.GetString(typeof(T).Name));
+                message = SixnetLocalizer.GetString(SixnetResourceKeys.update_data_failed, SixnetLocalizer.GetString(typeof(T).Name));
             }
             ThrowAppExceptionIf(predicate, message);
         }
@@ -183,7 +183,7 @@ namespace Sixnet.Exceptions
         {
             if (predicate && string.IsNullOrWhiteSpace(message))
             {
-                message = SixnetLocalizer.GetString(SixnetResourceKeys.UnspecifiedData, SixnetLocalizer.GetString(typeof(T).Name));
+                message = SixnetLocalizer.GetString(SixnetResourceKeys.unspecified_data, SixnetLocalizer.GetString(typeof(T).Name));
             }
             ThrowAppExceptionIf(predicate, message);
         }
@@ -202,7 +202,7 @@ namespace Sixnet.Exceptions
         {
             if (predicate && string.IsNullOrWhiteSpace(message))
             {
-                message = SixnetLocalizer.GetString(SixnetResourceKeys.DeleteDataFailed, SixnetLocalizer.GetString(typeof(T).Name));
+                message = SixnetLocalizer.GetString(SixnetResourceKeys.delete_data_failed, SixnetLocalizer.GetString(typeof(T).Name));
             }
             ThrowAppExceptionIf(predicate, message);
         }
