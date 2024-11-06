@@ -105,7 +105,7 @@ namespace Sixnet.Development.Data.Command
         /// <summary>
         /// Gets or sets the options
         /// </summary>
-        public DataOperationOptions Options { get; set; }
+        public SixnetDataOperationOptions Options { get; set; }
 
         /// <summary>
         /// Starting event handlers

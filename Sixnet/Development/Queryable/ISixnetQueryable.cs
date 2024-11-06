@@ -937,7 +937,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="fieldsAssignment">Fields assignment</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        int Update(FieldsAssignment fieldsAssignment, Action<DataOperationOptions> configure = null);
+        int Update(FieldsAssignment fieldsAssignment, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -948,7 +948,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        int Delete(Action<DataOperationOptions> configure = null);
+        int Delete(Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -960,7 +960,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Data</returns>
-        T First<T>(Action<DataOperationOptions> configure = null);
+        T First<T>(Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -971,7 +971,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="configure">Confirure options </param>
         /// <returns>Data list</returns>
-        List<T> ToList<T>(Action<DataOperationOptions> configure = null);
+        List<T> ToList<T>(Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data list
@@ -982,7 +982,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        List<TReturn> ToList<TFirst, TSecond, TReturn>(Func<TFirst, TSecond, TReturn> dataMappingFunc, Action<DataOperationOptions> configure = null);
+        List<TReturn> ToList<TFirst, TSecond, TReturn>(Func<TFirst, TSecond, TReturn> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data list
@@ -994,7 +994,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        List<TReturn> ToList<TFirst, TSecond, TThird, TReturn>(Func<TFirst, TSecond, TThird, TReturn> dataMappingFunc, Action<DataOperationOptions> configure = null);
+        List<TReturn> ToList<TFirst, TSecond, TThird, TReturn>(Func<TFirst, TSecond, TThird, TReturn> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data list
@@ -1007,7 +1007,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        List<TReturn> ToList<TFirst, TSecond, TThird, TFourth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TReturn> dataMappingFunc, Action<DataOperationOptions> configure = null);
+        List<TReturn> ToList<TFirst, TSecond, TThird, TFourth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TReturn> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data list
@@ -1021,7 +1021,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        List<TReturn> ToList<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> dataMappingFunc, Action<DataOperationOptions> configure = null);
+        List<TReturn> ToList<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data list
@@ -1036,7 +1036,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        List<TReturn> ToList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> dataMappingFunc, Action<DataOperationOptions> configure = null);
+        List<TReturn> ToList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data list
@@ -1052,7 +1052,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        List<TReturn> ToList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> dataMappingFunc, Action<DataOperationOptions> configure = null);
+        List<TReturn> ToList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -1064,7 +1064,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="pagingFilter">Paging filter</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Paging data</returns>
-        PagingInfo<T> ToPaging<T>(PagingFilter pagingFilter, Action<DataOperationOptions> configure = null);
+        PagingInfo<T> ToPaging<T>(PagingFilter pagingFilter, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get paging
@@ -1073,7 +1073,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="pageSize">Page size</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Paging data</returns>
-        PagingInfo<T> ToPaging<T>(int page, int pageSize, Action<DataOperationOptions> configure = null);
+        PagingInfo<T> ToPaging<T>(int page, int pageSize, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -1084,7 +1084,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="configure">Confirure options </param>
         /// <returns>Whether has data</returns>
-        bool Any(Action<DataOperationOptions> configure = null);
+        bool Any(Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -1095,7 +1095,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="configure">Confirure options </param>
         /// <returns>Data num</returns>
-        int Count(Action<DataOperationOptions> configure = null);
+        int Count(Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -1107,7 +1107,7 @@ namespace Sixnet.Development.Queryable
         /// <typeparam name="TValue">Value type</typeparam>
         /// <param name="configure">Confirure options </param>
         /// <returns>Max value</returns>
-        TValue Max<TValue>(Action<DataOperationOptions> configure = null);
+        TValue Max<TValue>(Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -1119,7 +1119,7 @@ namespace Sixnet.Development.Queryable
         /// <typeparam name="TValue">Value type</typeparam>
         /// <param name="configure">Confirure options </param>
         /// <returns>Min value</returns>
-        TValue Min<TValue>(Action<DataOperationOptions> configure = null);
+        TValue Min<TValue>(Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -1131,7 +1131,7 @@ namespace Sixnet.Development.Queryable
         /// <typeparam name="TValue">Value type</typeparam>
         /// <param name="configure">Confirure options </param>
         /// <returns>Sum value</returns>
-        TValue Sum<TValue>(Action<DataOperationOptions> configure = null);
+        TValue Sum<TValue>(Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -1143,7 +1143,7 @@ namespace Sixnet.Development.Queryable
         /// <typeparam name="TValue">Value type</typeparam>
         /// <param name="configure">Confirure options </param>
         /// <returns>Average value</returns>
-        TValue Avg<TValue>(Action<DataOperationOptions> configure = null);
+        TValue Avg<TValue>(Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -1155,7 +1155,7 @@ namespace Sixnet.Development.Queryable
         /// <typeparam name="TValue">Value type</typeparam>
         /// <param name="configure">Confirure options </param>
         /// <returns>Value</returns>
-        TValue Scalar<TValue>(Action<DataOperationOptions> configure = null);
+        TValue Scalar<TValue>(Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -1199,7 +1199,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Data</returns>
-        TModel First(Action<DataOperationOptions> configure = null);
+        TModel First(Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -1210,7 +1210,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="configure">Confirure options </param>
         /// <returns>Data list</returns>
-        List<TModel> ToList(Action<DataOperationOptions> configure = null);
+        List<TModel> ToList(Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -1222,7 +1222,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="pagingFilter">Paging filter</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Paging data</returns>
-        PagingInfo<TModel> ToPaging(PagingFilter pagingFilter, Action<DataOperationOptions> configure = null);
+        PagingInfo<TModel> ToPaging(PagingFilter pagingFilter, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get paging
@@ -1231,7 +1231,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="pageSize">Page size</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Paging data</returns>
-        PagingInfo<TModel> ToPaging(int page, int pageSize, Action<DataOperationOptions> configure = null);
+        PagingInfo<TModel> ToPaging(int page, int pageSize, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion 
 
@@ -1243,7 +1243,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="fieldsAssignmentExpression">Fields assignment expression</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        int Update(Expression<Func<TModel, bool>> fieldsAssignmentExpression, Action<DataOperationOptions> configure = null);
+        int Update(Expression<Func<TModel, bool>> fieldsAssignmentExpression, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -1256,7 +1256,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="field">Field </param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Max value</returns>
-        TValue Max<TValue>(Expression<Func<TModel, TValue>> field, Action<DataOperationOptions> configure = null);
+        TValue Max<TValue>(Expression<Func<TModel, TValue>> field, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -1269,7 +1269,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="field">Field </param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Min value</returns>
-        TValue Min<TValue>(Expression<Func<TModel, TValue>> field, Action<DataOperationOptions> configure = null);
+        TValue Min<TValue>(Expression<Func<TModel, TValue>> field, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -1282,7 +1282,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="field">Field </param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Sum value</returns>
-        TValue Sum<TValue>(Expression<Func<TModel, TValue>> field, Action<DataOperationOptions> configure = null);
+        TValue Sum<TValue>(Expression<Func<TModel, TValue>> field, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -1295,7 +1295,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="field">Field </param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Average value</returns>
-        TValue Avg<TValue>(Expression<Func<TModel, TValue>> field, Action<DataOperationOptions> configure = null);
+        TValue Avg<TValue>(Expression<Func<TModel, TValue>> field, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -2750,7 +2750,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        List<TReturn> ToList<TReturn>(Func<TFirst, TSecond, TReturn> dataMappingFunc, Action<DataOperationOptions> configure = null);
+        List<TReturn> ToList<TReturn>(Func<TFirst, TSecond, TReturn> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -3582,7 +3582,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        List<TReturn> ToList<TReturn>(Func<TFirst, TSecond, TThird, TReturn> dataMappingFunc, Action<DataOperationOptions> configure = null);
+        List<TReturn> ToList<TReturn>(Func<TFirst, TSecond, TThird, TReturn> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -4491,7 +4491,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        List<TReturn> ToList<TReturn>(Func<TFirst, TSecond, TThird, TFourth, TReturn> dataMappingFunc, Action<DataOperationOptions> configure = null);
+        List<TReturn> ToList<TReturn>(Func<TFirst, TSecond, TThird, TFourth, TReturn> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -5473,7 +5473,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        List<TReturn> ToList<TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> dataMappingFunc, Action<DataOperationOptions> configure = null);
+        List<TReturn> ToList<TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -6528,7 +6528,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        List<TReturn> ToList<TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> dataMappingFunc, Action<DataOperationOptions> configure = null);
+        List<TReturn> ToList<TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -7440,7 +7440,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        List<TReturn> ToList<TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> dataMappingFunc, Action<DataOperationOptions> configure = null);
+        List<TReturn> ToList<TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 

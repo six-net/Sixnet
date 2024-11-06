@@ -41,7 +41,7 @@ namespace Sixnet.Development.Repository
         /// <param name="datas">Datas</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        protected override int AddData(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null)
+        protected override int AddData(IEnumerable<TModel> datas, Action<SixnetDataOperationOptions> configure = null)
         {
             return dataAccess.Insert(datas, configure);
         }
@@ -53,7 +53,7 @@ namespace Sixnet.Development.Repository
         /// <param name="datas">Datas</param>
         /// <param name="configure">Confirure options</param>
         /// <returns>Identities</returns>
-        protected override List<TIdentity> AddDataReturnIdentities<TIdentity>(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null)
+        protected override List<TIdentity> AddDataReturnIdentities<TIdentity>(IEnumerable<TModel> datas, Action<SixnetDataOperationOptions> configure = null)
         {
             return dataAccess.InsertReturnIdentities<TIdentity>(datas, configure);
         }
@@ -64,7 +64,7 @@ namespace Sixnet.Development.Repository
         /// <param name="newDatas">New datas</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        protected override int UpdateData(IEnumerable<TModel> newDatas, Action<DataOperationOptions> configure = null)
+        protected override int UpdateData(IEnumerable<TModel> newDatas, Action<SixnetDataOperationOptions> configure = null)
         {
             return dataAccess.Update(newDatas, configure);
         }
@@ -76,7 +76,7 @@ namespace Sixnet.Development.Repository
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        protected override int UpdateFields(FieldsAssignment fieldsAssignment, ISixnetQueryable queryable, Action<DataOperationOptions> configure = null)
+        protected override int UpdateFields(FieldsAssignment fieldsAssignment, ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
         {
             return dataAccess.Update(fieldsAssignment, queryable, configure);
         }
@@ -87,7 +87,7 @@ namespace Sixnet.Development.Repository
         /// <param name="datas">Datas</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        protected override int DeleteData(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null)
+        protected override int DeleteData(IEnumerable<TModel> datas, Action<SixnetDataOperationOptions> configure = null)
         {
             if (datas.IsNullOrEmpty())
             {
@@ -102,7 +102,7 @@ namespace Sixnet.Development.Repository
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        protected override int DeleteData(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null)
+        protected override int DeleteData(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
         {
             return dataAccess.Delete(queryable, configure);
         }
@@ -113,7 +113,7 @@ namespace Sixnet.Development.Repository
         /// <param name="queryable"></param>
         /// <param name="configure"></param>
         /// <returns></returns>
-        protected override TModel GetFirstData(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null)
+        protected override TModel GetFirstData(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
         {
             return dataAccess.QueryFirst(queryable, configure);
         }
@@ -124,7 +124,7 @@ namespace Sixnet.Development.Repository
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Data list</returns>
-        protected override List<TModel> GetDataList(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null)
+        protected override List<TModel> GetDataList(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
         {
             return (dataAccess.Query(queryable, configure)) ?? new List<TModel>(0);
         }
@@ -138,7 +138,7 @@ namespace Sixnet.Development.Repository
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        protected override List<TModel> GetDataList<TFirst, TSecond>(ISixnetQueryable queryable, Func<TFirst, TSecond, TModel> dataMappingFunc, Action<DataOperationOptions> configure = null)
+        protected override List<TModel> GetDataList<TFirst, TSecond>(ISixnetQueryable queryable, Func<TFirst, TSecond, TModel> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null)
         {
             return (dataAccess.QueryMapping(queryable, dataMappingFunc, configure)) ?? new List<TModel>(0);
         }
@@ -153,7 +153,7 @@ namespace Sixnet.Development.Repository
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        protected override List<TModel> GetDataList<TFirst, TSecond, TThird>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TModel> dataMappingFunc, Action<DataOperationOptions> configure = null)
+        protected override List<TModel> GetDataList<TFirst, TSecond, TThird>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TModel> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null)
         {
             return (dataAccess.QueryMapping(queryable, dataMappingFunc, configure)) ?? new List<TModel>(0);
         }
@@ -169,7 +169,7 @@ namespace Sixnet.Development.Repository
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        protected override List<TModel> GetDataList<TFirst, TSecond, TThird, TFourth>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TModel> dataMappingFunc, Action<DataOperationOptions> configure = null)
+        protected override List<TModel> GetDataList<TFirst, TSecond, TThird, TFourth>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TModel> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null)
         {
             return (dataAccess.QueryMapping(queryable, dataMappingFunc, configure)) ?? new List<TModel>(0);
         }
@@ -186,7 +186,7 @@ namespace Sixnet.Development.Repository
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        protected override List<TModel> GetDataList<TFirst, TSecond, TThird, TFourth, TFifth>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TModel> dataMappingFunc, Action<DataOperationOptions> configure = null)
+        protected override List<TModel> GetDataList<TFirst, TSecond, TThird, TFourth, TFifth>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TModel> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null)
         {
             return (dataAccess.QueryMapping(queryable, dataMappingFunc, configure)) ?? new List<TModel>(0);
         }
@@ -204,7 +204,7 @@ namespace Sixnet.Development.Repository
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        protected override List<TModel> GetDataList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TModel> dataMappingFunc, Action<DataOperationOptions> configure = null)
+        protected override List<TModel> GetDataList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TModel> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null)
         {
             return (dataAccess.QueryMapping(queryable, dataMappingFunc, configure)) ?? new List<TModel>(0);
         }
@@ -223,7 +223,7 @@ namespace Sixnet.Development.Repository
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        protected override List<TModel> GetDataList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TModel> dataMappingFunc, Action<DataOperationOptions> configure = null)
+        protected override List<TModel> GetDataList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TModel> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null)
         {
             return (dataAccess.QueryMapping(queryable, dataMappingFunc, configure)) ?? new List<TModel>(0);
         }
@@ -235,7 +235,7 @@ namespace Sixnet.Development.Repository
         /// <param name="pagingFilter">Paging filter</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Data paging</returns>
-        protected override PagingInfo<TModel> GetDataPaging(ISixnetQueryable queryable, PagingFilter pagingFilter, Action<DataOperationOptions> configure = null)
+        protected override PagingInfo<TModel> GetDataPaging(ISixnetQueryable queryable, PagingFilter pagingFilter, Action<SixnetDataOperationOptions> configure = null)
         {
             var entityPaging = dataAccess.QueryPaging(queryable, pagingFilter, configure);
             return entityPaging.ConvertTo<TModel>();
@@ -247,7 +247,7 @@ namespace Sixnet.Development.Repository
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Whether has data</returns>
-        protected override bool ExistsData(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null)
+        protected override bool ExistsData(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
         {
             return dataAccess.Exists(queryable, configure);
         }
@@ -258,7 +258,7 @@ namespace Sixnet.Development.Repository
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Count value</returns>
-        protected override int CountValue(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null)
+        protected override int CountValue(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
         {
             return dataAccess.Count(queryable, configure);
         }
@@ -270,7 +270,7 @@ namespace Sixnet.Development.Repository
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Max value</returns>
-        protected override TValue MaxValue<TValue>(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null)
+        protected override TValue MaxValue<TValue>(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
         {
             return dataAccess.Max<TValue>(queryable, configure);
         }
@@ -282,7 +282,7 @@ namespace Sixnet.Development.Repository
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Min value</returns>
-        protected override TValue MinValue<TValue>(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null)
+        protected override TValue MinValue<TValue>(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
         {
             return dataAccess.Min<TValue>(queryable, configure);
         }
@@ -294,7 +294,7 @@ namespace Sixnet.Development.Repository
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Sum value</returns>
-        protected override TValue SumValue<TValue>(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null)
+        protected override TValue SumValue<TValue>(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
         {
             return dataAccess.Sum<TValue>(queryable, configure);
         }
@@ -306,7 +306,7 @@ namespace Sixnet.Development.Repository
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Average value</returns>
-        protected override TValue AvgValue<TValue>(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null)
+        protected override TValue AvgValue<TValue>(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
         {
             return dataAccess.Scalar<TValue>(queryable, configure);
         }
@@ -318,7 +318,7 @@ namespace Sixnet.Development.Repository
         /// <param name="queryable"></param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Value</returns>
-        protected override TValue ScalarValue<TValue>(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null)
+        protected override TValue ScalarValue<TValue>(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
         {
             return dataAccess.Scalar<TValue>(queryable, configure);
         }

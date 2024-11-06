@@ -108,7 +108,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="conditionExpression">Condition expression</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public List<T> Query<T>(Expression<Func<T, bool>> conditionExpression, DataOperationOptions options = null)
+        public List<T> Query<T>(Expression<Func<T, bool>> conditionExpression, SixnetDataOperationOptions options = null)
         {
             return Query<T>(conditionExpression.GetQueryable<T>(), options);
         }
@@ -119,7 +119,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="queryable">Queryable</param>
         /// <param name="options">Options</param>
         /// <returns>Data list</returns>
-        public List<T> Query<T>(ISixnetQueryable queryable, DataOperationOptions options = null)
+        public List<T> Query<T>(ISixnetQueryable queryable, SixnetDataOperationOptions options = null)
         {
             var command = SixnetDataCommand.CreateQueryCommand<T>(queryable);
             var connections = GetConnections(GetDataCommandDatabaseServers(command, true));
@@ -137,7 +137,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="conditionExpression">Condition expression</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public T QueryFirst<T>(Expression<Func<T, bool>> conditionExpression, DataOperationOptions options = null)
+        public T QueryFirst<T>(Expression<Func<T, bool>> conditionExpression, SixnetDataOperationOptions options = null)
         {
             return QueryFirst<T>(conditionExpression.GetQueryable<T>(), options);
         }
@@ -148,7 +148,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="queryable">Queryable</param>
         /// <param name="options">Options</param>
         /// <returns>Data list</returns>
-        public T QueryFirst<T>(ISixnetQueryable queryable, DataOperationOptions options = null)
+        public T QueryFirst<T>(ISixnetQueryable queryable, SixnetDataOperationOptions options = null)
         {
             var command = SixnetDataCommand.CreateQueryCommand<T>(queryable);
             var connections = GetConnections(GetDataCommandDatabaseServers(command, true));
@@ -167,7 +167,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="pagingFilter">Paging filter</param>
         /// <param name="options">Options</param>
         /// <returns>Paging data</returns>
-        public PagingInfo<T> QueryPaging<T>(Expression<Func<T, bool>> conditionExpression, PagingFilter pagingFilter, DataOperationOptions options = null)
+        public PagingInfo<T> QueryPaging<T>(Expression<Func<T, bool>> conditionExpression, PagingFilter pagingFilter, SixnetDataOperationOptions options = null)
         {
             return QueryPaging<T>(conditionExpression.GetQueryable<T>(), pagingFilter, options);
         }
@@ -180,7 +180,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="pageSize">Page size</param>
         /// <param name="options">Options</param>
         /// <returns>Paging data</returns>
-        public PagingInfo<T> QueryPaging<T>(Expression<Func<T, bool>> conditionExpression, int page, int pageSize, DataOperationOptions options = null)
+        public PagingInfo<T> QueryPaging<T>(Expression<Func<T, bool>> conditionExpression, int page, int pageSize, SixnetDataOperationOptions options = null)
         {
             return QueryPaging<T>(conditionExpression.GetQueryable<T>(), page, pageSize, options);
         }
@@ -192,7 +192,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="pagingFilter">Paging filter</param>
         /// <param name="options">Options</param>
         /// <returns>Paging data</returns>
-        public PagingInfo<T> QueryPaging<T>(ISixnetQueryable queryable, PagingFilter pagingFilter, DataOperationOptions options = null)
+        public PagingInfo<T> QueryPaging<T>(ISixnetQueryable queryable, PagingFilter pagingFilter, SixnetDataOperationOptions options = null)
         {
             var command = SixnetDataCommand.CreateQueryCommand<T>(queryable);
             command.PagingFilter = pagingFilter;
@@ -213,7 +213,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="pageSize">Page size</param>
         /// <param name="options">Options</param>
         /// <returns>Paging data</returns>
-        public PagingInfo<T> QueryPaging<T>(ISixnetQueryable queryable, int page, int pageSize, DataOperationOptions options = null)
+        public PagingInfo<T> QueryPaging<T>(ISixnetQueryable queryable, int page, int pageSize, SixnetDataOperationOptions options = null)
         {
             return QueryPaging<T>(queryable, PagingFilter.Create(page, pageSize), options);
         }
@@ -228,7 +228,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="options">Options</param>
         /// <returns>Return the datas</returns>
-        public List<TReturn> QueryMapping<TFirst, TSecond, TReturn>(ISixnetQueryable queryable, Func<TFirst, TSecond, TReturn> dataMappingFunc, DataOperationOptions options = null)
+        public List<TReturn> QueryMapping<TFirst, TSecond, TReturn>(ISixnetQueryable queryable, Func<TFirst, TSecond, TReturn> dataMappingFunc, SixnetDataOperationOptions options = null)
         {
             var command = SixnetDataCommand.CreateQueryCommand<TReturn>(queryable);
             var connections = GetConnections(GetDataCommandDatabaseServers(command, true));
@@ -251,7 +251,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="options">Options</param>
         /// <returns>Return the datas</returns>
-        public List<TReturn> QueryMapping<TFirst, TSecond, TThird, TReturn>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TReturn> dataMappingFunc, DataOperationOptions options = null)
+        public List<TReturn> QueryMapping<TFirst, TSecond, TThird, TReturn>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TReturn> dataMappingFunc, SixnetDataOperationOptions options = null)
         {
             var command = SixnetDataCommand.CreateQueryCommand<TReturn>(queryable);
             var connections = GetConnections(GetDataCommandDatabaseServers(command, true));
@@ -275,7 +275,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="options">Options</param>
         /// <returns>Return the datas</returns>
-        public List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TReturn>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TReturn> dataMappingFunc, DataOperationOptions options = null)
+        public List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TReturn>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TReturn> dataMappingFunc, SixnetDataOperationOptions options = null)
         {
             var command = SixnetDataCommand.CreateQueryCommand<TReturn>(queryable);
             var connections = GetConnections(GetDataCommandDatabaseServers(command, true));
@@ -300,7 +300,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="options">Options</param>
         /// <returns>Return the datas</returns>
-        public List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> dataMappingFunc, DataOperationOptions options = null)
+        public List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> dataMappingFunc, SixnetDataOperationOptions options = null)
         {
             var command = SixnetDataCommand.CreateQueryCommand<TReturn>(queryable);
             var connections = GetConnections(GetDataCommandDatabaseServers(command, true));
@@ -326,7 +326,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="options">Options</param>
         /// <returns>Return the datas</returns>
-        public List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> dataMappingFunc, DataOperationOptions options = null)
+        public List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> dataMappingFunc, SixnetDataOperationOptions options = null)
         {
             var command = SixnetDataCommand.CreateQueryCommand<TReturn>(queryable);
             var connections = GetConnections(GetDataCommandDatabaseServers(command, true));
@@ -353,7 +353,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="options">Options</param>
         /// <returns>Return the datas</returns>
-        public List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> dataMappingFunc, DataOperationOptions options = null)
+        public List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> dataMappingFunc, SixnetDataOperationOptions options = null)
         {
             var command = SixnetDataCommand.CreateQueryCommand<TReturn>(queryable);
             var connections = GetConnections(GetDataCommandDatabaseServers(command, true));
@@ -371,7 +371,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="conditionExpression">Condition expression</param>
         /// <param name="options">Options</param>
         /// <returns>Paging data</returns>
-        public bool Exists<T>(Expression<Func<T, bool>> conditionExpression, DataOperationOptions options = null)
+        public bool Exists<T>(Expression<Func<T, bool>> conditionExpression, SixnetDataOperationOptions options = null)
         {
             return Exists(conditionExpression.GetQueryable<T>(), options);
         }
@@ -382,7 +382,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="queryable">Queryable</param>
         /// <param name="options">Options</param>
         /// <returns>Return whether the data exists or not</returns>
-        public bool Exists(ISixnetQueryable queryable, DataOperationOptions options = null)
+        public bool Exists(ISixnetQueryable queryable, SixnetDataOperationOptions options = null)
         {
             var command = SixnetDataCommand.CreateQueryCommand(queryable);
             var connections = GetConnections(GetDataCommandDatabaseServers(command, true));
@@ -400,7 +400,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="conditionExpression">Condition expression</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public int Count<T>(Expression<Func<T, bool>> conditionExpression, DataOperationOptions options = null)
+        public int Count<T>(Expression<Func<T, bool>> conditionExpression, SixnetDataOperationOptions options = null)
         {
             return Count(conditionExpression.GetQueryable<T>(), options);
         }
@@ -411,7 +411,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="queryable">Queryable</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public int Count(ISixnetQueryable queryable, DataOperationOptions options = null)
+        public int Count(ISixnetQueryable queryable, SixnetDataOperationOptions options = null)
         {
             SixnetDirectThrower.ThrowArgNullIf(queryable == null, nameof(queryable));
 
@@ -427,7 +427,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="conditionExpression">Condition expression</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public TValue Max<T, TValue>(Expression<Func<T, TValue>> field, Expression<Func<T, bool>> conditionExpression, DataOperationOptions options = null)
+        public TValue Max<T, TValue>(Expression<Func<T, TValue>> field, Expression<Func<T, bool>> conditionExpression, SixnetDataOperationOptions options = null)
         {
             var maxQueryable = conditionExpression.GetQueryable<T>();
             maxQueryable.Select(field.GetDataField(FieldFormatterNames.MAX));
@@ -440,7 +440,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="queryable">Queryable</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public TValue Max<TValue>(ISixnetQueryable queryable, DataOperationOptions options = null)
+        public TValue Max<TValue>(ISixnetQueryable queryable, SixnetDataOperationOptions options = null)
         {
             //var firstField = queryable.SelectedFields?.FirstOrDefault();
             //SixnetException.ThrowIf(!FieldFormatterNames.MAX.Equals(firstField?.FormatSetting?.Name), "The field for which the maximum value is to be calculated is not specified");
@@ -455,7 +455,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="conditionExpression">Condition expression</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public TValue Min<T, TValue>(Expression<Func<T, TValue>> field, Expression<Func<T, bool>> conditionExpression, DataOperationOptions options = null)
+        public TValue Min<T, TValue>(Expression<Func<T, TValue>> field, Expression<Func<T, bool>> conditionExpression, SixnetDataOperationOptions options = null)
         {
             var minQueryable = SixnetExpressionHelper.GetQueryable<T>(conditionExpression);
             minQueryable.Select(field.GetDataField(FieldFormatterNames.MIN));
@@ -468,7 +468,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="queryable">Queryable</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public TValue Min<TValue>(ISixnetQueryable queryable, DataOperationOptions options = null)
+        public TValue Min<TValue>(ISixnetQueryable queryable, SixnetDataOperationOptions options = null)
         {
             //var firstField = queryable.SelectedFields?.FirstOrDefault();
             //SixnetException.ThrowIf(!FieldFormatterNames.MIN.Equals(firstField?.FormatSetting?.Name), "The field for which the minimum value is to be calculated is not specified");
@@ -483,7 +483,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="conditionExpression">Condition expression</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public TValue Sum<T, TValue>(Expression<Func<T, TValue>> field, Expression<Func<T, bool>> conditionExpression, DataOperationOptions options = null)
+        public TValue Sum<T, TValue>(Expression<Func<T, TValue>> field, Expression<Func<T, bool>> conditionExpression, SixnetDataOperationOptions options = null)
         {
             var sumQueryable = SixnetExpressionHelper.GetQueryable<T>(conditionExpression);
             sumQueryable.Select(field.GetDataField(FieldFormatterNames.SUM));
@@ -496,7 +496,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="queryable">Queryable</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public TValue Sum<TValue>(ISixnetQueryable queryable, DataOperationOptions options = null)
+        public TValue Sum<TValue>(ISixnetQueryable queryable, SixnetDataOperationOptions options = null)
         {
             //var firstField = queryable.SelectedFields?.FirstOrDefault();
             //SixnetException.ThrowIf(!FieldFormatterNames.SUM.Equals(firstField?.FormatSetting?.Name), "The field for which the sum value is to be calculated is not specified");
@@ -511,7 +511,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="conditionExpression">Condition expression</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public TValue Avg<T, TValue>(Expression<Func<T, TValue>> field, Expression<Func<T, bool>> conditionExpression, DataOperationOptions options = null)
+        public TValue Avg<T, TValue>(Expression<Func<T, TValue>> field, Expression<Func<T, bool>> conditionExpression, SixnetDataOperationOptions options = null)
         {
             var avgQueryable = SixnetExpressionHelper.GetQueryable<T>(conditionExpression);
             avgQueryable.Select(field.GetDataField(FieldFormatterNames.AVG));
@@ -524,7 +524,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="queryable">Queryable</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public TValue Avg<TValue>(ISixnetQueryable queryable, DataOperationOptions options = null)
+        public TValue Avg<TValue>(ISixnetQueryable queryable, SixnetDataOperationOptions options = null)
         {
             //var firstField = queryable.SelectedFields?.FirstOrDefault();
             //SixnetException.ThrowIf(!FieldFormatterNames.AVG.Equals(firstField?.FormatSetting?.Name), "The field for which the avg value is to be calculated is not specified");
@@ -539,7 +539,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="queryable">Queryable</param>
         /// <param name="options">Options</param>
         /// <returns>Return the data</returns>
-        public TValue Scalar<TValue>(ISixnetQueryable queryable, DataOperationOptions options = null)
+        public TValue Scalar<TValue>(ISixnetQueryable queryable, SixnetDataOperationOptions options = null)
         {
             var command = SixnetDataCommand.CreateQueryCommand(queryable);
             var connections = GetConnections(GetDataCommandDatabaseServers(command, true));
@@ -557,7 +557,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="queries">queries</param>
         /// <param name="options">Options</param>
         /// <returns>Return the dataset</returns>
-        public DataSet QueryMultiple(IEnumerable<ISixnetQueryable> queries, DataOperationOptions options = null)
+        public DataSet QueryMultiple(IEnumerable<ISixnetQueryable> queries, SixnetDataOperationOptions options = null)
         {
             var commands = queries?.Select(c => SixnetDataCommand.CreateQueryCommand(c));
             var serverGroups = GroupDataCommandsDatabaseServer(commands, true);
@@ -578,7 +578,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="queries">Queries</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public Tuple<List<TFirst>, List<TSecond>> QueryMultiple<TFirst, TSecond>(IEnumerable<ISixnetQueryable> queries, DataOperationOptions options = null)
+        public Tuple<List<TFirst>, List<TSecond>> QueryMultiple<TFirst, TSecond>(IEnumerable<ISixnetQueryable> queries, SixnetDataOperationOptions options = null)
         {
             var commands = queries?.Select(c => SixnetDataCommand.CreateQueryCommand(c));
             var serverGroups = GroupDataCommandsDatabaseServer(commands, true);
@@ -600,7 +600,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="queries">Queries</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public Tuple<List<TFirst>, List<TSecond>, List<TThird>> QueryMultiple<TFirst, TSecond, TThird>(IEnumerable<ISixnetQueryable> queries, DataOperationOptions options = null)
+        public Tuple<List<TFirst>, List<TSecond>, List<TThird>> QueryMultiple<TFirst, TSecond, TThird>(IEnumerable<ISixnetQueryable> queries, SixnetDataOperationOptions options = null)
         {
             var commands = queries?.Select(c => SixnetDataCommand.CreateQueryCommand(c));
             var serverGroups = GroupDataCommandsDatabaseServer(commands, true);
@@ -623,7 +623,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="queries">Queries</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>> QueryMultiple<TFirst, TSecond, TThird, TFourth>(IEnumerable<ISixnetQueryable> queries, DataOperationOptions options = null)
+        public Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>> QueryMultiple<TFirst, TSecond, TThird, TFourth>(IEnumerable<ISixnetQueryable> queries, SixnetDataOperationOptions options = null)
         {
             var commands = queries?.Select(c => SixnetDataCommand.CreateQueryCommand(c));
             var serverGroups = GroupDataCommandsDatabaseServer(commands, true);
@@ -647,7 +647,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="queries">Queries</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>> QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth>(IEnumerable<ISixnetQueryable> queries, DataOperationOptions options = null)
+        public Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>> QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth>(IEnumerable<ISixnetQueryable> queries, SixnetDataOperationOptions options = null)
         {
             var commands = queries?.Select(c => SixnetDataCommand.CreateQueryCommand(c));
             var serverGroups = GroupDataCommandsDatabaseServer(commands, true);
@@ -672,7 +672,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="queries">Queries</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>> QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(IEnumerable<ISixnetQueryable> queries, DataOperationOptions options = null)
+        public Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>> QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(IEnumerable<ISixnetQueryable> queries, SixnetDataOperationOptions options = null)
         {
             var commands = queries?.Select(c => SixnetDataCommand.CreateQueryCommand(c));
             var serverGroups = GroupDataCommandsDatabaseServer(commands, true);
@@ -698,7 +698,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="queries">Queries</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>, List<TSeventh>> QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(IEnumerable<ISixnetQueryable> queries, DataOperationOptions options = null)
+        public Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>, List<TSeventh>> QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(IEnumerable<ISixnetQueryable> queries, SixnetDataOperationOptions options = null)
         {
             var commands = queries?.Select(c => SixnetDataCommand.CreateQueryCommand(c));
             var serverGroups = GroupDataCommandsDatabaseServer(commands, true);
@@ -722,7 +722,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="datas">Datas</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public int Insert<T>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class, ISixnetEntity<T>
+        public int Insert<T>(IEnumerable<T> datas, SixnetDataOperationOptions options = null) where T : class, ISixnetEntity<T>
         {
             var insertResult = InsertCore(datas, options);
             return insertResult?.Item1 ?? 0;
@@ -735,7 +735,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="data">Data</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public int Insert<T>(T data, DataOperationOptions options = null) where T : class, ISixnetEntity<T>
+        public int Insert<T>(T data, SixnetDataOperationOptions options = null) where T : class, ISixnetEntity<T>
         {
             return Insert<T>(new T[1] { data }, options);
         }
@@ -748,7 +748,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="datas">Datas</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public List<TIdentity> InsertReturnIdentities<T, TIdentity>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class, ISixnetEntity<T>
+        public List<TIdentity> InsertReturnIdentities<T, TIdentity>(IEnumerable<T> datas, SixnetDataOperationOptions options = null) where T : class, ISixnetEntity<T>
         {
             var insertResult = InsertCore(datas, options);
             return insertResult?.Item2?.Values.Cast<TIdentity>().ToList() ?? new List<TIdentity>(0);
@@ -762,7 +762,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="data">Data</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public TIdentity InsertReturnIdentity<T, TIdentity>(T data, DataOperationOptions options = null) where T : class, ISixnetEntity<T>
+        public TIdentity InsertReturnIdentity<T, TIdentity>(T data, SixnetDataOperationOptions options = null) where T : class, ISixnetEntity<T>
         {
             var identities = InsertReturnIdentities<T, TIdentity>(new List<T>(1) { data }, options);
             if (!identities.IsNullOrEmpty())
@@ -778,7 +778,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="datas">Datas</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        Tuple<int, Dictionary<string, dynamic>> InsertCore<T>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class, ISixnetEntity<T>
+        Tuple<int, Dictionary<string, dynamic>> InsertCore<T>(IEnumerable<T> datas, SixnetDataOperationOptions options = null) where T : class, ISixnetEntity<T>
         {
             if (datas.IsNullOrEmpty())
             {
@@ -818,7 +818,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="datas">Datas</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public int Update<T>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class, ISixnetEntity<T>
+        public int Update<T>(IEnumerable<T> datas, SixnetDataOperationOptions options = null) where T : class, ISixnetEntity<T>
         {
             if (datas.IsNullOrEmpty())
             {
@@ -855,7 +855,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="data">Data</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public int Update<T>(T data, DataOperationOptions options = null) where T : class, ISixnetEntity<T>
+        public int Update<T>(T data, SixnetDataOperationOptions options = null) where T : class, ISixnetEntity<T>
         {
             return Update(new T[1] { data }, options);
         }
@@ -867,7 +867,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="conditionExpression">Condition expression</param>
         /// <param name="options">Options</param>
         /// <returns>Affected data number</returns>
-        public int Update<T>(Expression<Func<T, bool>> fieldsAssignmentExpression, Expression<Func<T, bool>> conditionExpression, DataOperationOptions options = null)
+        public int Update<T>(Expression<Func<T, bool>> fieldsAssignmentExpression, Expression<Func<T, bool>> conditionExpression, SixnetDataOperationOptions options = null)
         {
             return Update(fieldsAssignmentExpression.GetFieldsAssignment(), conditionExpression, options);
         }
@@ -879,7 +879,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="conditionExpression">Condition expression</param>
         /// <param name="options">Options</param>
         /// <returns>Affected data number</returns>
-        public int Update<T>(FieldsAssignment fieldsAssignment, Expression<Func<T, bool>> conditionExpression, DataOperationOptions options = null)
+        public int Update<T>(FieldsAssignment fieldsAssignment, Expression<Func<T, bool>> conditionExpression, SixnetDataOperationOptions options = null)
         {
             return Update(fieldsAssignment, conditionExpression.GetQueryable<T>(), options);
         }
@@ -891,7 +891,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="queryable">Queryable</param>
         /// <param name="options">Options</param>
         /// <returns>Affected data number</returns>
-        public int Update(FieldsAssignment fieldsAssignment, ISixnetQueryable queryable, DataOperationOptions options = null)
+        public int Update(FieldsAssignment fieldsAssignment, ISixnetQueryable queryable, SixnetDataOperationOptions options = null)
         {
             if (fieldsAssignment == null)
             {
@@ -909,7 +909,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="updateCommands">Update commands</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        int Update(List<SixnetDataCommand> updateCommands, DataOperationOptions options = null)
+        int Update(List<SixnetDataCommand> updateCommands, SixnetDataOperationOptions options = null)
         {
             return Execute(updateCommands, options);
         }
@@ -920,7 +920,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="fieldsAssignment">Fields assignment</param>
         /// <param name="queryable">Queryable</param>
         /// <returns>Return modification command</returns>
-        SixnetDataCommand GetUpdateCommand(FieldsAssignment fieldsAssignment, ISixnetQueryable queryable, DataOperationOptions options)
+        SixnetDataCommand GetUpdateCommand(FieldsAssignment fieldsAssignment, ISixnetQueryable queryable, SixnetDataOperationOptions options)
         {
             var cmd = SixnetDataCommand.CreateQueryCommand(queryable);
             cmd.OperationType = DataOperationType.Update;
@@ -939,7 +939,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="datas">Datas</param>
         /// <param name="options">Options</param>
         /// <returns>Affected data number</returns>
-        public int Delete<T>(IEnumerable<T> datas, DataOperationOptions options = null) where T : class, ISixnetEntity<T>
+        public int Delete<T>(IEnumerable<T> datas, SixnetDataOperationOptions options = null) where T : class, ISixnetEntity<T>
         {
             if (datas.IsNullOrEmpty())
             {
@@ -955,7 +955,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="data">Data</param>
         /// <param name="options">Options</param>
         /// <returns>Affected data number</returns>
-        public int Delete<T>(T data, DataOperationOptions options = null) where T : class, ISixnetEntity<T>
+        public int Delete<T>(T data, SixnetDataOperationOptions options = null) where T : class, ISixnetEntity<T>
         {
             return Delete(new T[1] { data }, options);
         }
@@ -966,7 +966,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="conditionExpression">Condition expression</param>
         /// <param name="options">Options</param>
         /// <returns>Affected data number</returns>
-        public int Delete<T>(Expression<Func<T, bool>> conditionExpression, DataOperationOptions options = null)
+        public int Delete<T>(Expression<Func<T, bool>> conditionExpression, SixnetDataOperationOptions options = null)
         {
             return Delete(conditionExpression.GetQueryable<T>(), options);
         }
@@ -977,7 +977,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="queryable">Queryable</param>
         /// <param name="options">Options</param>
         /// <returns>Affected data number</returns>
-        public int Delete(ISixnetQueryable queryable, DataOperationOptions options = null)
+        public int Delete(ISixnetQueryable queryable, SixnetDataOperationOptions options = null)
         {
             SixnetDirectThrower.ThrowArgNullIf(queryable == null, nameof(queryable));
 
@@ -996,7 +996,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="identityInsert"></param>
         /// <param name="options"></param>
         /// <returns></returns>
-        Tuple<int, Dictionary<string, dynamic>> ExecuteCore(IEnumerable<SixnetDataCommand> commands, bool identityInsert, DataOperationOptions options = null)
+        Tuple<int, Dictionary<string, dynamic>> ExecuteCore(IEnumerable<SixnetDataCommand> commands, bool identityInsert, SixnetDataOperationOptions options = null)
         {
             var affectedRows = 0;
             var serverGroups = GroupDataCommandsDatabaseServer(commands, false);
@@ -1038,7 +1038,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="commands">Data commands</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public int Execute(IEnumerable<SixnetDataCommand> commands, DataOperationOptions options = null)
+        public int Execute(IEnumerable<SixnetDataCommand> commands, SixnetDataOperationOptions options = null)
         {
             return ExecuteCore(commands, false, options).Item1;
         }
@@ -1049,7 +1049,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="command">Data command</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public int Execute(SixnetDataCommand command, DataOperationOptions options = null)
+        public int Execute(SixnetDataCommand command, SixnetDataOperationOptions options = null)
         {
             return Execute(new SixnetDataCommand[1] { command }, options);
         }
@@ -1062,7 +1062,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="scriptType">Script type</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public int Execute(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, DataOperationOptions options = null)
+        public int Execute(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null)
         {
             var cmd = SixnetDataCommand.CreateScriptCommand(script, parameters, scriptType);
             return Execute(new List<SixnetDataCommand>(1) { cmd }, options);
@@ -1090,7 +1090,7 @@ namespace Sixnet.Development.Data.Client
         /// </summary>
         /// <param name="migrationInfo">Migration info</param>
         /// <param name="options">Data operation options</param>
-        public void Migrate(MigrationInfo migrationInfo, DataOperationOptions options = null)
+        public void Migrate(MigrationInfo migrationInfo, SixnetDataOperationOptions options = null)
         {
             SixnetDirectThrower.ThrowArgNullIf(internalDatabaseServers.IsNullOrEmpty(), "Database servers");
             var connections = GetConnections(internalDatabaseServers);
@@ -1106,7 +1106,7 @@ namespace Sixnet.Development.Data.Client
         /// </summary>
         /// <param name="options">Data operation options</param>
         /// <returns></returns>
-        public List<SixnetDataTable> GetTables(DataOperationOptions options = null)
+        public List<SixnetDataTable> GetTables(SixnetDataOperationOptions options = null)
         {
             SixnetDirectThrower.ThrowArgNullIf(internalDatabaseServers.IsNullOrEmpty(), "Database servers");
             var connections = GetConnections(internalDatabaseServers);
@@ -1742,7 +1742,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="queryable">Queryable</param>
         /// <param name="fieldFormatterName">Field formatter name</param>
         /// <param name="options">Options</param>
-        void ValidateCalculateField(ISixnetQueryable queryable, string fieldFormatterName, DataOperationOptions options)
+        void ValidateCalculateField(ISixnetQueryable queryable, string fieldFormatterName, SixnetDataOperationOptions options)
         {
             var firstField = queryable.SelectedFields?.FirstOrDefault();
             SixnetException.ThrowIf(!string.Equals(fieldFormatterName, firstField?.FormatSetting?.Name), $"The field for which the {fieldFormatterName} value is to be calculated is not specified");

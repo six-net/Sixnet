@@ -28,7 +28,7 @@ namespace Sixnet.Development.Repository
         /// <param name="data">Data</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        public sealed override async Task<int> AddAsync(TModel data, Action<DataOperationOptions> configure = null)
+        public sealed override async Task<int> AddAsync(TModel data, Action<SixnetDataOperationOptions> configure = null)
         {
             return await AddAsync(new List<TModel>(1) { data }, configure).ConfigureAwait(false);
         }
@@ -39,7 +39,7 @@ namespace Sixnet.Development.Repository
         /// <param name="datas">Datas</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        public sealed override Task<int> AddAsync(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null)
+        public sealed override Task<int> AddAsync(IEnumerable<TModel> datas, Action<SixnetDataOperationOptions> configure = null)
         {
             SixnetException.ThrowIf(datas.IsNullOrEmpty(), $"{nameof(datas)} is null or empty");
             return AddDataAsync(datas, configure);
@@ -52,7 +52,7 @@ namespace Sixnet.Development.Repository
         /// <param name="data">Data</param>
         /// <param name="configure">Confirure options</param>
         /// <returns>Identity</returns>
-        public sealed override async Task<TIdentity> AddReturnIdentityAsync<TIdentity>(TModel data, Action<DataOperationOptions> configure = null)
+        public sealed override async Task<TIdentity> AddReturnIdentityAsync<TIdentity>(TModel data, Action<SixnetDataOperationOptions> configure = null)
         {
             var identities = await AddReturnIdentitiesAsync<TIdentity>(new List<TModel>(1) { data }, configure).ConfigureAwait(false);
             if (!identities.IsNullOrEmpty())
@@ -69,7 +69,7 @@ namespace Sixnet.Development.Repository
         /// <param name="datas">Datas</param>
         /// <param name="configure">Confirure options</param>
         /// <returns>Identities</returns>
-        public sealed override Task<List<TIdentity>> AddReturnIdentitiesAsync<TIdentity>(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null)
+        public sealed override Task<List<TIdentity>> AddReturnIdentitiesAsync<TIdentity>(IEnumerable<TModel> datas, Action<SixnetDataOperationOptions> configure = null)
         {
             return AddDataReturnIdentitiesAsync<TIdentity>(datas, configure);
         }
@@ -84,7 +84,7 @@ namespace Sixnet.Development.Repository
         /// <param name="data">Data</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        public sealed override async Task<int> UpdateAsync(TModel data, Action<DataOperationOptions> configure = null)
+        public sealed override async Task<int> UpdateAsync(TModel data, Action<SixnetDataOperationOptions> configure = null)
         {
             return await UpdateAsync(new List<TModel>(1) { data }, configure).ConfigureAwait(false);
         }
@@ -95,7 +95,7 @@ namespace Sixnet.Development.Repository
         /// <param name="datas">Datas</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        public sealed override async Task<int> UpdateAsync(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null)
+        public sealed override async Task<int> UpdateAsync(IEnumerable<TModel> datas, Action<SixnetDataOperationOptions> configure = null)
         {
             SixnetException.ThrowIf(datas.IsNullOrEmpty(), $"{nameof(datas)} is null or empty");
             return await UpdateDataAsync(datas, configure).ConfigureAwait(false);
@@ -108,7 +108,7 @@ namespace Sixnet.Development.Repository
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        public sealed override Task<int> UpdateAsync(FieldsAssignment fieldsAssignment, ISixnetQueryable queryable, Action<DataOperationOptions> configure = null)
+        public sealed override Task<int> UpdateAsync(FieldsAssignment fieldsAssignment, ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
         {
             return UpdateFieldsAsync(fieldsAssignment, queryable, configure);
         }
@@ -120,7 +120,7 @@ namespace Sixnet.Development.Repository
         /// <param name="conditionExpression">Condition expression</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        public sealed override Task<int> UpdateAsync(FieldsAssignment fieldsAssignment, Expression<Func<TModel, bool>> conditionExpression, Action<DataOperationOptions> configure = null)
+        public sealed override Task<int> UpdateAsync(FieldsAssignment fieldsAssignment, Expression<Func<TModel, bool>> conditionExpression, Action<SixnetDataOperationOptions> configure = null)
         {
             return UpdateAsync(fieldsAssignment, conditionExpression.GetQueryable<TModel>(), configure);
         }
@@ -131,7 +131,7 @@ namespace Sixnet.Development.Repository
         /// <param name="fieldsAssignment">Fields assignment</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        public sealed override Task<int> UpdateAsync(FieldsAssignment fieldsAssignment, Action<DataOperationOptions> configure = null)
+        public sealed override Task<int> UpdateAsync(FieldsAssignment fieldsAssignment, Action<SixnetDataOperationOptions> configure = null)
         {
             return UpdateAsync(fieldsAssignment, SixnetQuerier.Create<TModel>(), configure);
         }
@@ -143,7 +143,7 @@ namespace Sixnet.Development.Repository
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        public sealed override Task<int> UpdateAsync(Expression<Func<TModel, bool>> fieldsAssignmentExpression, ISixnetQueryable queryable, Action<DataOperationOptions> configure = null)
+        public sealed override Task<int> UpdateAsync(Expression<Func<TModel, bool>> fieldsAssignmentExpression, ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
         {
             return UpdateAsync(fieldsAssignmentExpression.GetFieldsAssignment(), queryable, configure);
         }
@@ -155,7 +155,7 @@ namespace Sixnet.Development.Repository
         /// <param name="conditionExpression">Condition expression</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        public sealed override Task<int> UpdateAsync(Expression<Func<TModel, bool>> fieldsAssignmentExpression, Expression<Func<TModel, bool>> conditionExpression, Action<DataOperationOptions> configure = null)
+        public sealed override Task<int> UpdateAsync(Expression<Func<TModel, bool>> fieldsAssignmentExpression, Expression<Func<TModel, bool>> conditionExpression, Action<SixnetDataOperationOptions> configure = null)
         {
             return UpdateAsync(fieldsAssignmentExpression.GetFieldsAssignment(), conditionExpression.GetQueryable<TModel>(), configure);
         }
@@ -166,7 +166,7 @@ namespace Sixnet.Development.Repository
         /// <param name="fieldsAssignmentExpression">Fields assignment expression</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        public sealed override Task<int> UpdateAsync(Expression<Func<TModel, bool>> fieldsAssignmentExpression, Action<DataOperationOptions> configure = null)
+        public sealed override Task<int> UpdateAsync(Expression<Func<TModel, bool>> fieldsAssignmentExpression, Action<SixnetDataOperationOptions> configure = null)
         {
             return UpdateAsync(fieldsAssignmentExpression, SixnetQuerier.Create<TModel>(), configure);
         }
@@ -181,7 +181,7 @@ namespace Sixnet.Development.Repository
         /// <param name="data">Data</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        public sealed override Task<int> DeleteAsync(TModel data, Action<DataOperationOptions> configure = null)
+        public sealed override Task<int> DeleteAsync(TModel data, Action<SixnetDataOperationOptions> configure = null)
         {
             return DeleteAsync(new TModel[1] { data }, configure);
         }
@@ -192,7 +192,7 @@ namespace Sixnet.Development.Repository
         /// <param name="datas">Entity datas</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        public sealed override Task<int> DeleteAsync(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null)
+        public sealed override Task<int> DeleteAsync(IEnumerable<TModel> datas, Action<SixnetDataOperationOptions> configure = null)
         {
             SixnetException.ThrowIf(datas.IsNullOrEmpty(), $"{nameof(datas)} is null or empty");
 
@@ -209,7 +209,7 @@ namespace Sixnet.Development.Repository
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        public sealed override Task<int> DeleteAsync(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null)
+        public sealed override Task<int> DeleteAsync(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
         {
             return DeleteDataAsync(queryable, configure);
         }
@@ -220,7 +220,7 @@ namespace Sixnet.Development.Repository
         /// <param name="conditionExpression">Condition expression</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        public sealed override Task<int> DeleteAsync(Expression<Func<TModel, bool>> conditionExpression, Action<DataOperationOptions> configure = null)
+        public sealed override Task<int> DeleteAsync(Expression<Func<TModel, bool>> conditionExpression, Action<SixnetDataOperationOptions> configure = null)
         {
             return DeleteAsync(SixnetQuerier.Create(conditionExpression), configure);
         }
@@ -230,7 +230,7 @@ namespace Sixnet.Development.Repository
         /// </summary>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        public sealed override Task<int> DeleteAsync(Action<DataOperationOptions> configure = null)
+        public sealed override Task<int> DeleteAsync(Action<SixnetDataOperationOptions> configure = null)
         {
             return DeleteAsync(SixnetQuerier.Create<TModel>(), configure);
         }
@@ -245,7 +245,7 @@ namespace Sixnet.Development.Repository
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Data</returns>
-        public sealed override Task<TModel> GetAsync(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null)
+        public sealed override Task<TModel> GetAsync(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
         {
             return GetFirstDataAsync(queryable, configure);
         }
@@ -256,7 +256,7 @@ namespace Sixnet.Development.Repository
         /// <param name="conditionExpression">Condition expression</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Data</returns>
-        public sealed override Task<TModel> GetAsync(Expression<Func<TModel, bool>> conditionExpression, Action<DataOperationOptions> configure = null)
+        public sealed override Task<TModel> GetAsync(Expression<Func<TModel, bool>> conditionExpression, Action<SixnetDataOperationOptions> configure = null)
         {
             return GetAsync(conditionExpression.GetQueryable<TModel>(), configure);
         }
@@ -266,7 +266,7 @@ namespace Sixnet.Development.Repository
         /// </summary>
         /// <param name="configure">Confirure options </param>
         /// <returns>Data</returns>
-        public sealed override Task<TModel> GetAsync(Action<DataOperationOptions> configure = null)
+        public sealed override Task<TModel> GetAsync(Action<SixnetDataOperationOptions> configure = null)
         {
             return GetAsync(SixnetQuerier.Create<TModel>(), configure);
         }
@@ -281,7 +281,7 @@ namespace Sixnet.Development.Repository
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Data list</returns>
-        public sealed override Task<List<TModel>> GetListAsync(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null)
+        public sealed override Task<List<TModel>> GetListAsync(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
         {
             return GetDataListAsync(queryable, configure);
         }
@@ -292,7 +292,7 @@ namespace Sixnet.Development.Repository
         /// <param name="conditionExpression">Condition expression</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Data list</returns>
-        public sealed override Task<List<TModel>> GetListAsync(Expression<Func<TModel, bool>> conditionExpression, Action<DataOperationOptions> configure = null)
+        public sealed override Task<List<TModel>> GetListAsync(Expression<Func<TModel, bool>> conditionExpression, Action<SixnetDataOperationOptions> configure = null)
         {
             return GetListAsync(conditionExpression.GetQueryable<TModel>(), configure);
         }
@@ -302,7 +302,7 @@ namespace Sixnet.Development.Repository
         /// </summary>
         /// <param name="configure">Confirure options </param>
         /// <returns>Data list</returns>
-        public sealed override Task<List<TModel>> GetListAsync(Action<DataOperationOptions> configure = null)
+        public sealed override Task<List<TModel>> GetListAsync(Action<SixnetDataOperationOptions> configure = null)
         {
             return GetListAsync(SixnetQuerier.Create<TModel>(), configure);
         }
@@ -316,7 +316,7 @@ namespace Sixnet.Development.Repository
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        public sealed override Task<List<TModel>> GetListAsync<TFirst, TSecond>(ISixnetQueryable queryable, Func<TFirst, TSecond, TModel> dataMappingFunc, Action<DataOperationOptions> configure = null)
+        public sealed override Task<List<TModel>> GetListAsync<TFirst, TSecond>(ISixnetQueryable queryable, Func<TFirst, TSecond, TModel> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null)
         {
             return GetDataListAsync(queryable, dataMappingFunc, configure);
         }
@@ -331,7 +331,7 @@ namespace Sixnet.Development.Repository
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        public sealed override Task<List<TModel>> GetListAsync<TFirst, TSecond, TThird>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TModel> dataMappingFunc, Action<DataOperationOptions> configure = null)
+        public sealed override Task<List<TModel>> GetListAsync<TFirst, TSecond, TThird>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TModel> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null)
         {
             return GetDataListAsync(queryable, dataMappingFunc, configure);
         }
@@ -347,7 +347,7 @@ namespace Sixnet.Development.Repository
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        public sealed override Task<List<TModel>> GetListAsync<TFirst, TSecond, TThird, TFourth>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TModel> dataMappingFunc, Action<DataOperationOptions> configure = null)
+        public sealed override Task<List<TModel>> GetListAsync<TFirst, TSecond, TThird, TFourth>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TModel> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null)
         {
             return GetDataListAsync(queryable, dataMappingFunc, configure);
         }
@@ -364,7 +364,7 @@ namespace Sixnet.Development.Repository
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        public sealed override Task<List<TModel>> GetListAsync<TFirst, TSecond, TThird, TFourth, TFifth>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TModel> dataMappingFunc, Action<DataOperationOptions> configure = null)
+        public sealed override Task<List<TModel>> GetListAsync<TFirst, TSecond, TThird, TFourth, TFifth>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TModel> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null)
         {
             return GetDataListAsync(queryable, dataMappingFunc, configure);
         }
@@ -382,7 +382,7 @@ namespace Sixnet.Development.Repository
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        public sealed override Task<List<TModel>> GetListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TModel> dataMappingFunc, Action<DataOperationOptions> configure = null)
+        public sealed override Task<List<TModel>> GetListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TModel> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null)
         {
             return GetDataListAsync(queryable, dataMappingFunc, configure);
         }
@@ -401,7 +401,7 @@ namespace Sixnet.Development.Repository
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        public sealed override Task<List<TModel>> GetListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TModel> dataMappingFunc, Action<DataOperationOptions> configure = null)
+        public sealed override Task<List<TModel>> GetListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TModel> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null)
         {
             return GetDataListAsync(queryable, dataMappingFunc, configure);
         }
@@ -417,7 +417,7 @@ namespace Sixnet.Development.Repository
         /// <param name="pagingFilter">Paging filter</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Paging data</returns>
-        public sealed override Task<PagingInfo<TModel>> GetPagingAsync(ISixnetQueryable queryable, PagingFilter pagingFilter, Action<DataOperationOptions> configure = null)
+        public sealed override Task<PagingInfo<TModel>> GetPagingAsync(ISixnetQueryable queryable, PagingFilter pagingFilter, Action<SixnetDataOperationOptions> configure = null)
         {
             return GetDataPagingAsync(queryable, pagingFilter, configure);
         }
@@ -430,7 +430,7 @@ namespace Sixnet.Development.Repository
         /// <param name="pageSize">Page size</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Paging data</returns>
-        public sealed override Task<PagingInfo<TModel>> GetPagingAsync(ISixnetQueryable queryable, int page, int pageSize, Action<DataOperationOptions> configure = null)
+        public sealed override Task<PagingInfo<TModel>> GetPagingAsync(ISixnetQueryable queryable, int page, int pageSize, Action<SixnetDataOperationOptions> configure = null)
         {
             return GetPagingAsync(queryable, PagingFilter.Create(page, pageSize), configure);
         }
@@ -442,7 +442,7 @@ namespace Sixnet.Development.Repository
         /// <param name="pagingFilter">Paging filter</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Paging data</returns>
-        public sealed override Task<PagingInfo<TModel>> GetPagingAsync(Expression<Func<TModel, bool>> conditionExpression, PagingFilter pagingFilter, Action<DataOperationOptions> configure = null)
+        public sealed override Task<PagingInfo<TModel>> GetPagingAsync(Expression<Func<TModel, bool>> conditionExpression, PagingFilter pagingFilter, Action<SixnetDataOperationOptions> configure = null)
         {
             return GetPagingAsync(SixnetQuerier.Create(conditionExpression), pagingFilter, configure);
         }
@@ -455,7 +455,7 @@ namespace Sixnet.Development.Repository
         /// <param name="pageSize">Page size</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Paging data</returns>
-        public sealed override Task<PagingInfo<TModel>> GetPagingAsync(Expression<Func<TModel, bool>> conditionExpression, int page, int pageSize, Action<DataOperationOptions> configure = null)
+        public sealed override Task<PagingInfo<TModel>> GetPagingAsync(Expression<Func<TModel, bool>> conditionExpression, int page, int pageSize, Action<SixnetDataOperationOptions> configure = null)
         {
             return GetPagingAsync(SixnetQuerier.Create(conditionExpression), page, pageSize, configure);
         }
@@ -466,7 +466,7 @@ namespace Sixnet.Development.Repository
         /// <param name="pagingFilter">Paging filter</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Paging data</returns>
-        public sealed override Task<PagingInfo<TModel>> GetPagingAsync(PagingFilter pagingFilter, Action<DataOperationOptions> configure = null)
+        public sealed override Task<PagingInfo<TModel>> GetPagingAsync(PagingFilter pagingFilter, Action<SixnetDataOperationOptions> configure = null)
         {
             return GetPagingAsync(SixnetQuerier.Create<TModel>(), pagingFilter, configure);
         }
@@ -478,7 +478,7 @@ namespace Sixnet.Development.Repository
         /// <param name="pageSize">Page size</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Paging data</returns>
-        public sealed override Task<PagingInfo<TModel>> GetPagingAsync(int page, int pageSize, Action<DataOperationOptions> configure = null)
+        public sealed override Task<PagingInfo<TModel>> GetPagingAsync(int page, int pageSize, Action<SixnetDataOperationOptions> configure = null)
         {
             return GetPagingAsync(SixnetQuerier.Create<TModel>(), page, pageSize, configure);
         }
@@ -493,7 +493,7 @@ namespace Sixnet.Development.Repository
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Whether has data</returns>
-        public sealed override Task<bool> ExistsAsync(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null)
+        public sealed override Task<bool> ExistsAsync(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
         {
             return ExistsDataAsync(queryable, configure);
         }
@@ -504,7 +504,7 @@ namespace Sixnet.Development.Repository
         /// <param name="conditionExpression">Condition expression</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Whether has data</returns>
-        public sealed override Task<bool> ExistsAsync(Expression<Func<TModel, bool>> conditionExpression, Action<DataOperationOptions> configure = null)
+        public sealed override Task<bool> ExistsAsync(Expression<Func<TModel, bool>> conditionExpression, Action<SixnetDataOperationOptions> configure = null)
         {
             return ExistsAsync(SixnetQuerier.Create(conditionExpression), configure);
         }
@@ -514,7 +514,7 @@ namespace Sixnet.Development.Repository
         /// </summary>
         /// <param name="configure">Confirure options </param>
         /// <returns>Whether has data</returns>
-        public sealed override Task<bool> ExistsAsync(Action<DataOperationOptions> configure = null)
+        public sealed override Task<bool> ExistsAsync(Action<SixnetDataOperationOptions> configure = null)
         {
             return ExistsAsync(SixnetQuerier.Create<TModel>(), configure);
         }
@@ -529,7 +529,7 @@ namespace Sixnet.Development.Repository
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Data num</returns>
-        public sealed override Task<int> CountAsync(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null)
+        public sealed override Task<int> CountAsync(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
         {
             return CountValueAsync(queryable, configure);
         }
@@ -540,7 +540,7 @@ namespace Sixnet.Development.Repository
         /// <param name="conditionExpression">Condition expression</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Data num</returns>
-        public sealed override Task<int> CountAsync(Expression<Func<TModel, bool>> conditionExpression, Action<DataOperationOptions> configure = null)
+        public sealed override Task<int> CountAsync(Expression<Func<TModel, bool>> conditionExpression, Action<SixnetDataOperationOptions> configure = null)
         {
             return CountAsync(SixnetQuerier.Create(conditionExpression), configure);
         }
@@ -550,7 +550,7 @@ namespace Sixnet.Development.Repository
         /// </summary>
         /// <param name="configure">Confirure options </param>
         /// <returns>Data num</returns>
-        public sealed override Task<int> CountAsync(Action<DataOperationOptions> configure = null)
+        public sealed override Task<int> CountAsync(Action<SixnetDataOperationOptions> configure = null)
         {
             return CountAsync(SixnetQuerier.Create<TModel>(), configure);
         }
@@ -566,7 +566,7 @@ namespace Sixnet.Development.Repository
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Max value</returns>
-        public sealed override Task<TValue> MaxAsync<TValue>(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null)
+        public sealed override Task<TValue> MaxAsync<TValue>(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
         {
             return MaxValueAsync<TValue>(queryable, configure);
         }
@@ -578,7 +578,7 @@ namespace Sixnet.Development.Repository
         /// <param name="field">Field</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Max value</returns>
-        public sealed override Task<TValue> MaxAsync<TValue>(Expression<Func<TModel, TValue>> field, Action<DataOperationOptions> configure = null)
+        public sealed override Task<TValue> MaxAsync<TValue>(Expression<Func<TModel, TValue>> field, Action<SixnetDataOperationOptions> configure = null)
         {
             return MaxAsync(field, null, configure);
         }
@@ -591,7 +591,7 @@ namespace Sixnet.Development.Repository
         /// <param name="conditionExpression">Condition expression</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Max value</returns>
-        public sealed override Task<TValue> MaxAsync<TValue>(Expression<Func<TModel, TValue>> field, Expression<Func<TModel, bool>> conditionExpression, Action<DataOperationOptions> configure = null)
+        public sealed override Task<TValue> MaxAsync<TValue>(Expression<Func<TModel, TValue>> field, Expression<Func<TModel, bool>> conditionExpression, Action<SixnetDataOperationOptions> configure = null)
         {
             var maxQueryable = conditionExpression.GetQueryable<TModel>()
                 .Select(field.GetDataField(FieldFormatterNames.MAX));
@@ -609,7 +609,7 @@ namespace Sixnet.Development.Repository
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Min value</returns>
-        public sealed override Task<TValue> MinAsync<TValue>(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null)
+        public sealed override Task<TValue> MinAsync<TValue>(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
         {
             return MinValueAsync<TValue>(queryable, configure);
         }
@@ -621,7 +621,7 @@ namespace Sixnet.Development.Repository
         /// <param name="field">Field</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Min value</returns>
-        public sealed override Task<TValue> MinAsync<TValue>(Expression<Func<TModel, TValue>> field, Action<DataOperationOptions> configure = null)
+        public sealed override Task<TValue> MinAsync<TValue>(Expression<Func<TModel, TValue>> field, Action<SixnetDataOperationOptions> configure = null)
         {
             return MinAsync(field, null, configure);
         }
@@ -634,7 +634,7 @@ namespace Sixnet.Development.Repository
         /// <param name="conditionExpression">Condition expression</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Min value</returns>
-        public sealed override Task<TValue> MinAsync<TValue>(Expression<Func<TModel, TValue>> field, Expression<Func<TModel, bool>> conditionExpression, Action<DataOperationOptions> configure = null)
+        public sealed override Task<TValue> MinAsync<TValue>(Expression<Func<TModel, TValue>> field, Expression<Func<TModel, bool>> conditionExpression, Action<SixnetDataOperationOptions> configure = null)
         {
             var minQueryable = conditionExpression.GetQueryable<TModel>()
                 .Select(field.GetDataField(FieldFormatterNames.MIN));
@@ -652,7 +652,7 @@ namespace Sixnet.Development.Repository
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Sum value</returns>
-        public sealed override Task<TValue> SumAsync<TValue>(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null)
+        public sealed override Task<TValue> SumAsync<TValue>(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
         {
             return SumValueAsync<TValue>(queryable, configure);
         }
@@ -664,7 +664,7 @@ namespace Sixnet.Development.Repository
         /// <param name="field">Field</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Sum value</returns>
-        public sealed override Task<TValue> SumAsync<TValue>(Expression<Func<TModel, TValue>> field, Action<DataOperationOptions> configure = null)
+        public sealed override Task<TValue> SumAsync<TValue>(Expression<Func<TModel, TValue>> field, Action<SixnetDataOperationOptions> configure = null)
         {
             return SumAsync(field, null, configure);
         }
@@ -677,7 +677,7 @@ namespace Sixnet.Development.Repository
         /// <param name="conditionExpression">Condition expression</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Sum value</returns>
-        public sealed override Task<TValue> SumAsync<TValue>(Expression<Func<TModel, TValue>> field, Expression<Func<TModel, bool>> conditionExpression = null, Action<DataOperationOptions> configure = null)
+        public sealed override Task<TValue> SumAsync<TValue>(Expression<Func<TModel, TValue>> field, Expression<Func<TModel, bool>> conditionExpression = null, Action<SixnetDataOperationOptions> configure = null)
         {
             var sumQueryable = conditionExpression.GetQueryable<TModel>()
                 .Select(field.GetDataField(FieldFormatterNames.SUM));
@@ -695,7 +695,7 @@ namespace Sixnet.Development.Repository
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Average value</returns>
-        public sealed override Task<TValue> AvgAsync<TValue>(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null)
+        public sealed override Task<TValue> AvgAsync<TValue>(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
         {
             return AvgValueAsync<TValue>(queryable, configure);
         }
@@ -707,7 +707,7 @@ namespace Sixnet.Development.Repository
         /// <param name="field">Field</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Average value</returns>
-        public sealed override Task<TValue> AvgAsync<TValue>(Expression<Func<TModel, TValue>> field, Action<DataOperationOptions> configure = null)
+        public sealed override Task<TValue> AvgAsync<TValue>(Expression<Func<TModel, TValue>> field, Action<SixnetDataOperationOptions> configure = null)
         {
             return AvgAsync(field, null, configure);
         }
@@ -720,7 +720,7 @@ namespace Sixnet.Development.Repository
         /// <param name="conditionExpression">Condition expression</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Average value</returns>
-        public sealed override Task<TValue> AvgAsync<TValue>(Expression<Func<TModel, TValue>> field, Expression<Func<TModel, bool>> conditionExpression, Action<DataOperationOptions> configure = null)
+        public sealed override Task<TValue> AvgAsync<TValue>(Expression<Func<TModel, TValue>> field, Expression<Func<TModel, bool>> conditionExpression, Action<SixnetDataOperationOptions> configure = null)
         {
             var avgQueryable = conditionExpression.GetQueryable<TModel>()
                 .Select(field.GetDataField(FieldFormatterNames.AVG));
@@ -738,7 +738,7 @@ namespace Sixnet.Development.Repository
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Value</returns>
-        public sealed override Task<TValue> ScalarAsync<TValue>(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null)
+        public sealed override Task<TValue> ScalarAsync<TValue>(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
         {
             return ScalarValueAsync<TValue>(queryable, configure);
         }
@@ -750,7 +750,7 @@ namespace Sixnet.Development.Repository
         /// <param name="field">Field</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Value</returns>
-        public sealed override Task<TValue> ScalarAsync<TValue>(Expression<Func<TModel, TValue>> field, Action<DataOperationOptions> configure = null)
+        public sealed override Task<TValue> ScalarAsync<TValue>(Expression<Func<TModel, TValue>> field, Action<SixnetDataOperationOptions> configure = null)
         {
             return ScalarAsync(field, null, configure);
         }
@@ -763,7 +763,7 @@ namespace Sixnet.Development.Repository
         /// <param name="conditionExpression">Condition</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Value</returns>
-        public sealed override Task<TValue> ScalarAsync<TValue>(Expression<Func<TModel, TValue>> field, Expression<Func<TModel, bool>> conditionExpression, Action<DataOperationOptions> configure = null)
+        public sealed override Task<TValue> ScalarAsync<TValue>(Expression<Func<TModel, TValue>> field, Expression<Func<TModel, bool>> conditionExpression, Action<SixnetDataOperationOptions> configure = null)
         {
             var query = conditionExpression.GetQueryable<TModel>()
                         .Select(field.GetDataField());
@@ -777,7 +777,7 @@ namespace Sixnet.Development.Repository
         /// <param name="field">Field</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Value</returns>
-        public sealed override Task<TValue> ScalarAsync<TValue>(DataField field, Action<DataOperationOptions> configure = null)
+        public sealed override Task<TValue> ScalarAsync<TValue>(DataField field, Action<SixnetDataOperationOptions> configure = null)
         {
             return ScalarAsync<TValue>(field, null, configure);
         }
@@ -790,7 +790,7 @@ namespace Sixnet.Development.Repository
         /// <param name="conditionExpression">Condition</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Value</returns>
-        public sealed override Task<TValue> ScalarAsync<TValue>(DataField field, Expression<Func<TModel, bool>> conditionExpression, Action<DataOperationOptions> configure = null)
+        public sealed override Task<TValue> ScalarAsync<TValue>(DataField field, Expression<Func<TModel, bool>> conditionExpression, Action<SixnetDataOperationOptions> configure = null)
         {
             var query = conditionExpression.GetQueryable<TModel>()
                         .Select(field);
@@ -809,7 +809,7 @@ namespace Sixnet.Development.Repository
         /// <param name="datas">Datas</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        protected abstract Task<int> AddDataAsync(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null);
+        protected abstract Task<int> AddDataAsync(IEnumerable<TModel> datas, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Add datas and return identiies
@@ -818,7 +818,7 @@ namespace Sixnet.Development.Repository
         /// <param name="datas">Datas</param>
         /// <param name="configure">Confirure options</param>
         /// <returns>Identities</returns>
-        protected abstract Task<List<TIdentity>> AddDataReturnIdentitiesAsync<TIdentity>(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null);
+        protected abstract Task<List<TIdentity>> AddDataReturnIdentitiesAsync<TIdentity>(IEnumerable<TModel> datas, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Update data
@@ -826,7 +826,7 @@ namespace Sixnet.Development.Repository
         /// <param name="newDatas">New datas</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        protected abstract Task<int> UpdateDataAsync(IEnumerable<TModel> newDatas, Action<DataOperationOptions> configure = null);
+        protected abstract Task<int> UpdateDataAsync(IEnumerable<TModel> newDatas, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Update columns
@@ -835,7 +835,7 @@ namespace Sixnet.Development.Repository
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        protected abstract Task<int> UpdateFieldsAsync(FieldsAssignment fieldsAssignment, ISixnetQueryable queryable, Action<DataOperationOptions> configure = null);
+        protected abstract Task<int> UpdateFieldsAsync(FieldsAssignment fieldsAssignment, ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Delete data
@@ -843,7 +843,7 @@ namespace Sixnet.Development.Repository
         /// <param name="datas">Datas</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        protected abstract Task<int> DeleteDataAsync(IEnumerable<TModel> datas, Action<DataOperationOptions> configure = null);
+        protected abstract Task<int> DeleteDataAsync(IEnumerable<TModel> datas, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Delete data
@@ -851,7 +851,7 @@ namespace Sixnet.Development.Repository
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        protected abstract Task<int> DeleteDataAsync(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null);
+        protected abstract Task<int> DeleteDataAsync(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get first data
@@ -859,7 +859,7 @@ namespace Sixnet.Development.Repository
         /// <param name="queryable"></param>
         /// <param name="configure"></param>
         /// <returns></returns>
-        protected abstract Task<TModel> GetFirstDataAsync(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null);
+        protected abstract Task<TModel> GetFirstDataAsync(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data list
@@ -867,7 +867,7 @@ namespace Sixnet.Development.Repository
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Data list</returns>
-        protected abstract Task<List<TModel>> GetDataListAsync(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null);
+        protected abstract Task<List<TModel>> GetDataListAsync(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data list
@@ -878,7 +878,7 @@ namespace Sixnet.Development.Repository
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        protected abstract Task<List<TModel>> GetDataListAsync<TFirst, TSecond>(ISixnetQueryable queryable, Func<TFirst, TSecond, TModel> dataMappingFunc, Action<DataOperationOptions> configure = null);
+        protected abstract Task<List<TModel>> GetDataListAsync<TFirst, TSecond>(ISixnetQueryable queryable, Func<TFirst, TSecond, TModel> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data list
@@ -890,7 +890,7 @@ namespace Sixnet.Development.Repository
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        protected abstract Task<List<TModel>> GetDataListAsync<TFirst, TSecond, TThird>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TModel> dataMappingFunc, Action<DataOperationOptions> configure = null);
+        protected abstract Task<List<TModel>> GetDataListAsync<TFirst, TSecond, TThird>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TModel> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data list
@@ -903,7 +903,7 @@ namespace Sixnet.Development.Repository
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        protected abstract Task<List<TModel>> GetDataListAsync<TFirst, TSecond, TThird, TFourth>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TModel> dataMappingFunc, Action<DataOperationOptions> configure = null);
+        protected abstract Task<List<TModel>> GetDataListAsync<TFirst, TSecond, TThird, TFourth>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TModel> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data list
@@ -917,7 +917,7 @@ namespace Sixnet.Development.Repository
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        protected abstract Task<List<TModel>> GetDataListAsync<TFirst, TSecond, TThird, TFourth, TFifth>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TModel> dataMappingFunc, Action<DataOperationOptions> configure = null);
+        protected abstract Task<List<TModel>> GetDataListAsync<TFirst, TSecond, TThird, TFourth, TFifth>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TModel> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data list
@@ -932,7 +932,7 @@ namespace Sixnet.Development.Repository
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        protected abstract Task<List<TModel>> GetDataListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TModel> dataMappingFunc, Action<DataOperationOptions> configure = null);
+        protected abstract Task<List<TModel>> GetDataListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TModel> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data list
@@ -948,7 +948,7 @@ namespace Sixnet.Development.Repository
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        protected abstract Task<List<TModel>> GetDataListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TModel> dataMappingFunc, Action<DataOperationOptions> configure = null);
+        protected abstract Task<List<TModel>> GetDataListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TModel> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data paging
@@ -957,21 +957,21 @@ namespace Sixnet.Development.Repository
         /// <param name="pagingFilter">Paging filter</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Data paging</returns>
-        protected abstract Task<PagingInfo<TModel>> GetDataPagingAsync(ISixnetQueryable queryable, PagingFilter pagingFilter, Action<DataOperationOptions> configure = null);
+        protected abstract Task<PagingInfo<TModel>> GetDataPagingAsync(ISixnetQueryable queryable, PagingFilter pagingFilter, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Whether has data
         /// </summary>
         /// <param name="queryable">Queryable</param>
         /// <returns>Whether has data</returns>
-        protected abstract Task<bool> ExistsDataAsync(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null);
+        protected abstract Task<bool> ExistsDataAsync(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get count value
         /// </summary>
         /// <param name="queryable">Queryable</param>
         /// <returns>Count value</returns>
-        protected abstract Task<int> CountValueAsync(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null);
+        protected abstract Task<int> CountValueAsync(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get max value
@@ -979,7 +979,7 @@ namespace Sixnet.Development.Repository
         /// <typeparam name="TValue">Value type</typeparam>
         /// <param name="queryable">Queryable</param>
         /// <returns>Max value</returns>
-        protected abstract Task<TValue> MaxValueAsync<TValue>(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null);
+        protected abstract Task<TValue> MaxValueAsync<TValue>(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get min value
@@ -987,7 +987,7 @@ namespace Sixnet.Development.Repository
         /// <typeparam name="TValue">Value type</typeparam>
         /// <param name="queryable">Queryable</param>
         /// <returns>Min value</returns>
-        protected abstract Task<TValue> MinValueAsync<TValue>(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null);
+        protected abstract Task<TValue> MinValueAsync<TValue>(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get sum value
@@ -995,7 +995,7 @@ namespace Sixnet.Development.Repository
         /// <typeparam name="TValue">Value type</typeparam>
         /// <param name="queryable">Queryable</param>
         /// <returns>Sum value</returns>
-        protected abstract Task<TValue> SumValueAsync<TValue>(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null);
+        protected abstract Task<TValue> SumValueAsync<TValue>(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get average value
@@ -1003,7 +1003,7 @@ namespace Sixnet.Development.Repository
         /// <typeparam name="TValue">Value type</typeparam>
         /// <param name="queryable">Queryable</param>
         /// <returns>Average value</returns>
-        protected abstract Task<TValue> AvgValueAsync<TValue>(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null);
+        protected abstract Task<TValue> AvgValueAsync<TValue>(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get scalar value
@@ -1011,7 +1011,7 @@ namespace Sixnet.Development.Repository
         /// <typeparam name="TValue">Value type</typeparam>
         /// <param name="queryable">Queryable</param>
         /// <returns>Value</returns>
-        protected abstract Task<TValue> ScalarValueAsync<TValue>(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null);
+        protected abstract Task<TValue> ScalarValueAsync<TValue>(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
     }

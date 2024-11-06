@@ -31,7 +31,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="configure">Confirure options </param>
         /// <returns>Data</returns>
-        public TModel First(Action<DataOperationOptions> configure = null)
+        public TModel First(Action<SixnetDataOperationOptions> configure = null)
         {
             if (queryableContext.Repository is ISixnetRepository<TModel> firstRepository)
             {
@@ -49,7 +49,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="configure">Confirure options </param>
         /// <returns>Data list</returns>
-        public List<TModel> ToList(Action<DataOperationOptions> configure = null)
+        public List<TModel> ToList(Action<SixnetDataOperationOptions> configure = null)
         {
             if (queryableContext.Repository is ISixnetRepository<TModel> firstRepository)
             {
@@ -68,7 +68,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="pagingFilter">Paging filter</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Paging data</returns>
-        public PagingInfo<TModel> ToPaging(PagingFilter pagingFilter, Action<DataOperationOptions> configure = null)
+        public PagingInfo<TModel> ToPaging(PagingFilter pagingFilter, Action<SixnetDataOperationOptions> configure = null)
         {
             if (queryableContext.Repository is ISixnetRepository<TModel> firstRepository)
             {
@@ -84,7 +84,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="pageSize">Page size</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Paging data</returns>
-        public PagingInfo<TModel> ToPaging(int page, int pageSize, Action<DataOperationOptions> configure = null)
+        public PagingInfo<TModel> ToPaging(int page, int pageSize, Action<SixnetDataOperationOptions> configure = null)
         {
             return ToPaging(PagingFilter.Create(page, pageSize), configure);
         }
@@ -99,7 +99,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="fieldsAssignmentExpression">Fields assignment expression</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        public int Update(Expression<Func<TModel, bool>> fieldsAssignmentExpression, Action<DataOperationOptions> configure = null)
+        public int Update(Expression<Func<TModel, bool>> fieldsAssignmentExpression, Action<SixnetDataOperationOptions> configure = null)
         {
             return Update(fieldsAssignmentExpression.GetFieldsAssignment(), configure);
         }
@@ -115,7 +115,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="field">Field </param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Max value</returns>
-        public TValue Max<TValue>(Expression<Func<TModel, TValue>> field, Action<DataOperationOptions> configure = null)
+        public TValue Max<TValue>(Expression<Func<TModel, TValue>> field, Action<SixnetDataOperationOptions> configure = null)
         {
             Select(SixnetExpressionHelper.GetOutputDataField(this, field, FieldFormatSetting.Create(FieldFormatterNames.MAX)));
             return Max<TValue>(configure);
@@ -132,7 +132,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="field">Field </param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Min value</returns>
-        public TValue Min<TValue>(Expression<Func<TModel, TValue>> field, Action<DataOperationOptions> configure = null)
+        public TValue Min<TValue>(Expression<Func<TModel, TValue>> field, Action<SixnetDataOperationOptions> configure = null)
         {
             Select(SixnetExpressionHelper.GetOutputDataField(this, field, FieldFormatSetting.Create(FieldFormatterNames.MIN)));
             return Min<TValue>(configure);
@@ -149,7 +149,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="field">Field </param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Sum value</returns>
-        public TValue Sum<TValue>(Expression<Func<TModel, TValue>> field, Action<DataOperationOptions> configure = null)
+        public TValue Sum<TValue>(Expression<Func<TModel, TValue>> field, Action<SixnetDataOperationOptions> configure = null)
         {
             Select(SixnetExpressionHelper.GetOutputDataField(this, field, FieldFormatSetting.Create(FieldFormatterNames.SUM)));
             return Sum<TValue>(configure);
@@ -166,7 +166,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="field">Field </param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Average value</returns>
-        public TValue Avg<TValue>(Expression<Func<TModel, TValue>> field, Action<DataOperationOptions> configure = null)
+        public TValue Avg<TValue>(Expression<Func<TModel, TValue>> field, Action<SixnetDataOperationOptions> configure = null)
         {
             Select(SixnetExpressionHelper.GetOutputDataField(this, field, FieldFormatSetting.Create(FieldFormatterNames.AVG)));
             return Avg<TValue>(configure);

@@ -234,4 +234,27 @@ namespace Sixnet.Development.Data
     }
 
     #endregion
+
+    #region Data operation behavior
+
+    /// <summary>
+    /// Data operation behavior
+    /// </summary>
+    public enum DataOperationBehavior
+    {
+        /// <summary>
+        /// Default
+        /// </summary>
+        Default = 0,
+        /// <summary>
+        /// Enable
+        /// </summary>
+        Enable = 1,
+        /// <summary>
+        /// Disable
+        /// </summary>
+        Disable = 2,
+    }
+
+    #endregion
 }

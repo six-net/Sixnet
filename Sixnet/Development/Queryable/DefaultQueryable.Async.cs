@@ -25,7 +25,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="fieldsAssignment">Fields assignment</param>
         /// <param name="configure">Configure options</param>
         /// <returns>Affected rows</returns>
-        public async Task<int> UpdateAsync(FieldsAssignment fieldsAssignment, Action<DataOperationOptions> configure = null)
+        public async Task<int> UpdateAsync(FieldsAssignment fieldsAssignment, Action<SixnetDataOperationOptions> configure = null)
         {
             var repository = queryableContext.Repository;
             if (repository != null)
@@ -44,7 +44,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        public async Task<int> DeleteAsync(Action<DataOperationOptions> configure = null)
+        public async Task<int> DeleteAsync(Action<SixnetDataOperationOptions> configure = null)
         {
             var repository = queryableContext.Repository;
             if (repository != null)
@@ -64,7 +64,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Data</returns>
-        public async Task<T> FirstAsync<T>(Action<DataOperationOptions> configure = null)
+        public async Task<T> FirstAsync<T>(Action<SixnetDataOperationOptions> configure = null)
         {
             if (queryableContext.Repository is ISixnetRepository<T> repository)
             {
@@ -82,7 +82,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="configure">Confirure options </param>
         /// <returns>Data list</returns>
-        public async Task<List<T>> ToListAsync<T>(Action<DataOperationOptions> configure = null)
+        public async Task<List<T>> ToListAsync<T>(Action<SixnetDataOperationOptions> configure = null)
         {
             if (queryableContext.Repository is ISixnetRepository<T> repository)
             {
@@ -100,7 +100,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        public async Task<List<TReturn>> ToListAsync<TFirst, TSecond, TReturn>(Func<TFirst, TSecond, TReturn> dataMappingFunc, Action<DataOperationOptions> configure = null)
+        public async Task<List<TReturn>> ToListAsync<TFirst, TSecond, TReturn>(Func<TFirst, TSecond, TReturn> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null)
         {
             return await DataClientContext.QueryMappingAsync(this, dataMappingFunc, configure).ConfigureAwait(false);
         }
@@ -115,7 +115,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        public async Task<List<TReturn>> ToListAsync<TFirst, TSecond, TThird, TReturn>(Func<TFirst, TSecond, TThird, TReturn> dataMappingFunc, Action<DataOperationOptions> configure = null)
+        public async Task<List<TReturn>> ToListAsync<TFirst, TSecond, TThird, TReturn>(Func<TFirst, TSecond, TThird, TReturn> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null)
         {
             return await DataClientContext.QueryMappingAsync(this, dataMappingFunc, configure).ConfigureAwait(false);
         }
@@ -131,7 +131,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        public async Task<List<TReturn>> ToListAsync<TFirst, TSecond, TThird, TFourth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TReturn> dataMappingFunc, Action<DataOperationOptions> configure = null)
+        public async Task<List<TReturn>> ToListAsync<TFirst, TSecond, TThird, TFourth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TReturn> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null)
         {
             return await DataClientContext.QueryMappingAsync(this, dataMappingFunc, configure).ConfigureAwait(false);
         }
@@ -148,7 +148,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        public async Task<List<TReturn>> ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> dataMappingFunc, Action<DataOperationOptions> configure = null)
+        public async Task<List<TReturn>> ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null)
         {
             return await DataClientContext.QueryMappingAsync(this, dataMappingFunc, configure).ConfigureAwait(false);
         }
@@ -166,7 +166,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        public async Task<List<TReturn>> ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> dataMappingFunc, Action<DataOperationOptions> configure = null)
+        public async Task<List<TReturn>> ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null)
         {
             return await DataClientContext.QueryMappingAsync(this, dataMappingFunc, configure).ConfigureAwait(false);
         }
@@ -185,7 +185,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        public async Task<List<TReturn>> ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> dataMappingFunc, Action<DataOperationOptions> configure = null)
+        public async Task<List<TReturn>> ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null)
         {
             return await DataClientContext.QueryMappingAsync(this, dataMappingFunc, configure).ConfigureAwait(false);
         }
@@ -200,7 +200,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="pagingFilter">Paging filter</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Paging data</returns>
-        public async Task<PagingInfo<T>> ToPagingAsync<T>(PagingFilter pagingFilter, Action<DataOperationOptions> configure = null)
+        public async Task<PagingInfo<T>> ToPagingAsync<T>(PagingFilter pagingFilter, Action<SixnetDataOperationOptions> configure = null)
         {
             if (queryableContext.Repository is ISixnetRepository<T> repository)
             {
@@ -216,7 +216,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="pageSize">Page size</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Paging data</returns>
-        public async Task<PagingInfo<T>> ToPagingAsync<T>(int page, int pageSize, Action<DataOperationOptions> configure = null)
+        public async Task<PagingInfo<T>> ToPagingAsync<T>(int page, int pageSize, Action<SixnetDataOperationOptions> configure = null)
         {
             return await ToPagingAsync<T>(PagingFilter.Create(page, pageSize), configure).ConfigureAwait(false);
         }
@@ -230,7 +230,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="configure">Confirure options </param>
         /// <returns>Whether has data</returns>
-        public async Task<bool> AnyAsync(Action<DataOperationOptions> configure = null)
+        public async Task<bool> AnyAsync(Action<SixnetDataOperationOptions> configure = null)
         {
             var repository = queryableContext.Repository;
             if (repository != null)
@@ -249,7 +249,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="configure">Confirure options </param>
         /// <returns>Data num</returns>
-        public async Task<int> CountAsync(Action<DataOperationOptions> configure = null)
+        public async Task<int> CountAsync(Action<SixnetDataOperationOptions> configure = null)
         {
             var repository = queryableContext.Repository;
             if (repository != null)
@@ -269,7 +269,7 @@ namespace Sixnet.Development.Queryable
         /// <typeparam name="TValue">Value type</typeparam>
         /// <param name="configure">Confirure options </param>
         /// <returns>Max value</returns>
-        public async Task<TValue> MaxAsync<TValue>(Action<DataOperationOptions> configure = null)
+        public async Task<TValue> MaxAsync<TValue>(Action<SixnetDataOperationOptions> configure = null)
         {
             var repository = queryableContext.Repository;
             if (repository != null)
@@ -289,7 +289,7 @@ namespace Sixnet.Development.Queryable
         /// <typeparam name="TValue">Value type</typeparam>
         /// <param name="configure">Confirure options </param>
         /// <returns>Min value</returns>
-        public async Task<TValue> MinAsync<TValue>(Action<DataOperationOptions> configure = null)
+        public async Task<TValue> MinAsync<TValue>(Action<SixnetDataOperationOptions> configure = null)
         {
             var repository = queryableContext.Repository;
             if (repository != null)
@@ -309,7 +309,7 @@ namespace Sixnet.Development.Queryable
         /// <typeparam name="TValue">Value type</typeparam>
         /// <param name="configure">Confirure options </param>
         /// <returns>Sum value</returns>
-        public async Task<TValue> SumAsync<TValue>(Action<DataOperationOptions> configure = null)
+        public async Task<TValue> SumAsync<TValue>(Action<SixnetDataOperationOptions> configure = null)
         {
             var repository = queryableContext.Repository;
             if (repository != null)
@@ -329,7 +329,7 @@ namespace Sixnet.Development.Queryable
         /// <typeparam name="TValue">Value type</typeparam>
         /// <param name="configure">Confirure options </param>
         /// <returns>Average value</returns>
-        public async Task<TValue> AvgAsync<TValue>(Action<DataOperationOptions> configure = null)
+        public async Task<TValue> AvgAsync<TValue>(Action<SixnetDataOperationOptions> configure = null)
         {
             var repository = queryableContext.Repository;
             if (repository != null)
@@ -349,7 +349,7 @@ namespace Sixnet.Development.Queryable
         /// <typeparam name="TValue">Value type</typeparam>
         /// <param name="configure">Confirure options </param>
         /// <returns>Value</returns>
-        public async Task<TValue> ScalarAsync<TValue>(Action<DataOperationOptions> configure = null)
+        public async Task<TValue> ScalarAsync<TValue>(Action<SixnetDataOperationOptions> configure = null)
         {
             var repository = queryableContext.Repository;
             if (repository != null)

@@ -21,7 +21,7 @@ namespace Sixnet.Development.Data
         /// <param name="entities">Entities</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        public int Insert(IEnumerable<TEntity> entities, Action<DataOperationOptions> configure = null)
+        public int Insert(IEnumerable<TEntity> entities, Action<SixnetDataOperationOptions> configure = null)
         {
             return DataClientContext.Insert(entities, configure);
         }
@@ -33,7 +33,7 @@ namespace Sixnet.Development.Data
         /// <param name="entities">Entities</param>
         /// <param name="configure">Confirure options</param>
         /// <returns>Identities</returns>
-        public List<TIdentity> InsertReturnIdentities<TIdentity>(IEnumerable<TEntity> entities, Action<DataOperationOptions> configure = null)
+        public List<TIdentity> InsertReturnIdentities<TIdentity>(IEnumerable<TEntity> entities, Action<SixnetDataOperationOptions> configure = null)
         {
             return DataClientContext.InsertReturnIdentities<TEntity, TIdentity>(entities, configure);
         }
@@ -48,7 +48,7 @@ namespace Sixnet.Development.Data
         /// <param name="entities">Entities</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        public int Update(IEnumerable<TEntity> entities, Action<DataOperationOptions> configure = null)
+        public int Update(IEnumerable<TEntity> entities, Action<SixnetDataOperationOptions> configure = null)
         {
             return DataClientContext.Update(entities, configure);
         }
@@ -60,7 +60,7 @@ namespace Sixnet.Development.Data
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        public int Update(FieldsAssignment fieldsAssignment, ISixnetQueryable queryable, Action<DataOperationOptions> configure = null)
+        public int Update(FieldsAssignment fieldsAssignment, ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
         {
             return DataClientContext.Update(fieldsAssignment, queryable, configure);
         }
@@ -75,7 +75,7 @@ namespace Sixnet.Development.Data
         /// <param name="entities">Entities</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        public int Delete(IEnumerable<TEntity> entities, Action<DataOperationOptions> configure = null)
+        public int Delete(IEnumerable<TEntity> entities, Action<SixnetDataOperationOptions> configure = null)
         {
             return DataClientContext.Delete(entities, configure);
         }
@@ -86,7 +86,7 @@ namespace Sixnet.Development.Data
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        public int Delete(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null)
+        public int Delete(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
         {
             return DataClientContext.Delete(queryable, configure);
         }
@@ -101,7 +101,7 @@ namespace Sixnet.Development.Data
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return an entity</returns>
-        public TEntity QueryFirst(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null)
+        public TEntity QueryFirst(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
         {
             return DataClientContext.QueryFirst<TEntity>(queryable, configure);
         }
@@ -112,7 +112,7 @@ namespace Sixnet.Development.Data
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return entity list</returns>
-        public List<TEntity> Query(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null)
+        public List<TEntity> Query(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
         {
             return DataClientContext.Query<TEntity>(queryable, configure);
         }
@@ -127,7 +127,7 @@ namespace Sixnet.Development.Data
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        public List<TReturn> QueryMapping<TFirst, TSecond, TReturn>(ISixnetQueryable queryable, Func<TFirst, TSecond, TReturn> dataMappingFunc, Action<DataOperationOptions> configure = null)
+        public List<TReturn> QueryMapping<TFirst, TSecond, TReturn>(ISixnetQueryable queryable, Func<TFirst, TSecond, TReturn> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null)
         {
             return DataClientContext.QueryMapping(queryable, dataMappingFunc, configure);
         }
@@ -143,7 +143,7 @@ namespace Sixnet.Development.Data
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        public List<TReturn> QueryMapping<TFirst, TSecond, TThird, TReturn>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TReturn> dataMappingFunc, Action<DataOperationOptions> configure = null)
+        public List<TReturn> QueryMapping<TFirst, TSecond, TThird, TReturn>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TReturn> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null)
         {
             return DataClientContext.QueryMapping(queryable, dataMappingFunc, configure);
         }
@@ -160,7 +160,7 @@ namespace Sixnet.Development.Data
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        public List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TReturn>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TReturn> dataMappingFunc, Action<DataOperationOptions> configure = null)
+        public List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TReturn>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TReturn> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null)
         {
             return DataClientContext.QueryMapping(queryable, dataMappingFunc, configure);
         }
@@ -178,7 +178,7 @@ namespace Sixnet.Development.Data
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        public List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> dataMappingFunc, Action<DataOperationOptions> configure = null)
+        public List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null)
         {
             return DataClientContext.QueryMapping(queryable, dataMappingFunc, configure);
         }
@@ -197,7 +197,7 @@ namespace Sixnet.Development.Data
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        public List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> dataMappingFunc, Action<DataOperationOptions> configure = null)
+        public List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null)
         {
             return DataClientContext.QueryMapping(queryable, dataMappingFunc, configure);
         }
@@ -217,7 +217,7 @@ namespace Sixnet.Development.Data
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        public List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> dataMappingFunc, Action<DataOperationOptions> configure = null)
+        public List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null)
         {
             return DataClientContext.QueryMapping(queryable, dataMappingFunc, configure);
         }
@@ -229,7 +229,7 @@ namespace Sixnet.Development.Data
         /// <param name="pagingFilter">Paging filter</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return entity paging</returns>
-        public PagingInfo<TEntity> QueryPaging(ISixnetQueryable queryable, PagingFilter pagingFilter, Action<DataOperationOptions> configure = null)
+        public PagingInfo<TEntity> QueryPaging(ISixnetQueryable queryable, PagingFilter pagingFilter, Action<SixnetDataOperationOptions> configure = null)
         {
             return DataClientContext.QueryPaging<TEntity>(queryable, pagingFilter, configure);
         }
@@ -239,7 +239,7 @@ namespace Sixnet.Development.Data
         /// </summary>
         /// <param name="queryable">Queryable</param>
         /// <returns>Whether has data</returns>
-        public bool Exists(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null)
+        public bool Exists(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
         {
             return DataClientContext.Exists(queryable, configure);
         }
@@ -250,7 +250,7 @@ namespace Sixnet.Development.Data
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns></returns>
-        public int Count(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null)
+        public int Count(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
         {
             return DataClientContext.Count(queryable, configure);
         }
@@ -261,7 +261,7 @@ namespace Sixnet.Development.Data
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns></returns>
-        public TValue Max<TValue>(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null)
+        public TValue Max<TValue>(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
         {
             return DataClientContext.Max<TValue>(queryable, configure);
         }
@@ -272,7 +272,7 @@ namespace Sixnet.Development.Data
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns></returns>
-        public TValue Min<TValue>(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null)
+        public TValue Min<TValue>(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
         {
             return DataClientContext.Min<TValue>(queryable, configure);
         }
@@ -283,7 +283,7 @@ namespace Sixnet.Development.Data
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns></returns>
-        public TValue Sum<TValue>(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null)
+        public TValue Sum<TValue>(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
         {
             return DataClientContext.Sum<TValue>(queryable, configure);
         }
@@ -294,7 +294,7 @@ namespace Sixnet.Development.Data
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns></returns>
-        public TValue Avg<TValue>(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null)
+        public TValue Avg<TValue>(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
         {
             return DataClientContext.Avg<TValue>(queryable, configure);
         }
@@ -305,7 +305,7 @@ namespace Sixnet.Development.Data
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Value</returns>
-        public TValue Scalar<TValue>(ISixnetQueryable queryable, Action<DataOperationOptions> configure = null)
+        public TValue Scalar<TValue>(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
         {
             return DataClientContext.Scalar<TValue>(queryable, configure);
         }

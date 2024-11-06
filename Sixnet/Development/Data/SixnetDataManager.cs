@@ -811,10 +811,27 @@ namespace Sixnet.Development.Data
         /// </summary>
         /// <param name="dataOperationOptions">Data operation options</param>
         /// <returns></returns>
-        internal static bool AllowLogicalDelete(DataOperationOptions dataOperationOptions)
+        internal static bool AllowLogicalDelete(SixnetDataOperationOptions dataOperationOptions)
         {
-            var dataOptijons = GetDataOptions();
-            return !dataOptijons.DisableLogicalDelete && !(dataOperationOptions?.DisableLogicalDelete ?? false);
+            var dataOptions = GetDataOptions();
+            return dataOperationOptions?.AllowLogicalDelete(!(dataOptions?.DisableLogicalDelete ?? false))
+                   ?? !(dataOptions?.DisableLogicalDelete ?? false);
+        }
+
+        #endregion
+
+        #region Insert increment field
+
+        /// <summary>
+        /// Whether allow insert increment field
+        /// </summary>
+        /// <param name="dataOperationOptions"></param>
+        /// <returns></returns>
+        public static bool AllowInsertIncrementField(SixnetDataOperationOptions dataOperationOptions)
+        {
+            var dataOptions = GetDataOptions();
+            return dataOperationOptions?.AllowInsertIncrementField(dataOptions?.InsertIncrementField ?? false)
+                   ?? dataOptions?.InsertIncrementField ?? false;
         }
 
         #endregion

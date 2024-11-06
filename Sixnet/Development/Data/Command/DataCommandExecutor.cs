@@ -26,7 +26,7 @@ namespace Sixnet.Development.Command
         /// <param name="queryCommand">Query data command</param>
         /// <param name="options">Data operation options</param>
         /// <returns>Data list</returns>
-        public static List<T> Query<T>(IEnumerable<DatabaseConnection> connections, SixnetDataCommand queryCommand, DataOperationOptions options = null)
+        public static List<T> Query<T>(IEnumerable<DatabaseConnection> connections, SixnetDataCommand queryCommand, SixnetDataOperationOptions options = null)
         {
             ValidateConnections(connections);
             var datas = new List<T>();
@@ -48,7 +48,7 @@ namespace Sixnet.Development.Command
         /// <param name="queryCommand">Query data command</param>
         /// <param name="options">Data operation options</param>
         /// <returns>Data list</returns>
-        public static T QueryFirst<T>(IEnumerable<DatabaseConnection> connections, SixnetDataCommand queryCommand, DataOperationOptions options = null)
+        public static T QueryFirst<T>(IEnumerable<DatabaseConnection> connections, SixnetDataCommand queryCommand, SixnetDataOperationOptions options = null)
         {
             ValidateConnections(connections);
             queryCommand?.Queryable?.Take(1, queryCommand?.Queryable?.SkipCount ?? 0);
@@ -71,7 +71,7 @@ namespace Sixnet.Development.Command
         /// <param name="queryCommand">Query data command</param>
         /// <param name="options">Data operation options</param>
         /// <returns>Dynamic object paging</returns>
-        public static PagingInfo<T> QueryPaging<T>(IEnumerable<DatabaseConnection> connections, SixnetDataCommand queryCommand, DataOperationOptions options = null)
+        public static PagingInfo<T> QueryPaging<T>(IEnumerable<DatabaseConnection> connections, SixnetDataCommand queryCommand, SixnetDataOperationOptions options = null)
         {
             ValidateConnections(connections);
             var pagingFilter = queryCommand?.PagingFilter ?? new PagingFilter();
@@ -121,7 +121,7 @@ namespace Sixnet.Development.Command
         /// <param name="queryCommand">Query data command</param>
         /// <param name="options">Data operation options</param>
         /// <returns>Return data paging</returns>
-        static PagingInfo<T> SingleServerPaging<T>(DatabaseConnection connection, SixnetDataCommand queryCommand, DataOperationOptions options = null)
+        static PagingInfo<T> SingleServerPaging<T>(DatabaseConnection connection, SixnetDataCommand queryCommand, SixnetDataOperationOptions options = null)
         {
             var provider = connection.DatabaseProvider;
             return provider.QueryPaging<T>(GetDatabaseSingleCommand<SingleDatabaseCommand>(connection, queryCommand, options));
@@ -138,7 +138,7 @@ namespace Sixnet.Development.Command
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="options">Options</param>
         /// <returns>Return the datas</returns>
-        public static List<TReturn> QueryMapping<TFirst, TSecond, TReturn>(IEnumerable<DatabaseConnection> connections, SixnetDataCommand queryCommand, Func<TFirst, TSecond, TReturn> dataMappingFunc, DataOperationOptions options = null)
+        public static List<TReturn> QueryMapping<TFirst, TSecond, TReturn>(IEnumerable<DatabaseConnection> connections, SixnetDataCommand queryCommand, Func<TFirst, TSecond, TReturn> dataMappingFunc, SixnetDataOperationOptions options = null)
         {
             ValidateConnections(connections);
             var datas = new List<TReturn>();
@@ -167,7 +167,7 @@ namespace Sixnet.Development.Command
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="options">Options</param>
         /// <returns>Return the datas</returns>
-        public static List<TReturn> QueryMapping<TFirst, TSecond, TThird, TReturn>(IEnumerable<DatabaseConnection> connections, SixnetDataCommand queryCommand, Func<TFirst, TSecond, TThird, TReturn> dataMappingFunc, DataOperationOptions options = null)
+        public static List<TReturn> QueryMapping<TFirst, TSecond, TThird, TReturn>(IEnumerable<DatabaseConnection> connections, SixnetDataCommand queryCommand, Func<TFirst, TSecond, TThird, TReturn> dataMappingFunc, SixnetDataOperationOptions options = null)
         {
             ValidateConnections(connections);
             var datas = new List<TReturn>();
@@ -197,7 +197,7 @@ namespace Sixnet.Development.Command
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="options">Options</param>
         /// <returns>Return the datas</returns>
-        public static List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TReturn>(IEnumerable<DatabaseConnection> connections, SixnetDataCommand queryCommand, Func<TFirst, TSecond, TThird, TFourth, TReturn> dataMappingFunc, DataOperationOptions options = null)
+        public static List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TReturn>(IEnumerable<DatabaseConnection> connections, SixnetDataCommand queryCommand, Func<TFirst, TSecond, TThird, TFourth, TReturn> dataMappingFunc, SixnetDataOperationOptions options = null)
         {
             ValidateConnections(connections);
             var datas = new List<TReturn>();
@@ -228,7 +228,7 @@ namespace Sixnet.Development.Command
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="options">Options</param>
         /// <returns>Return the datas</returns>
-        public static List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(IEnumerable<DatabaseConnection> connections, SixnetDataCommand queryCommand, Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> dataMappingFunc, DataOperationOptions options = null)
+        public static List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(IEnumerable<DatabaseConnection> connections, SixnetDataCommand queryCommand, Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> dataMappingFunc, SixnetDataOperationOptions options = null)
         {
             ValidateConnections(connections);
             var datas = new List<TReturn>();
@@ -260,7 +260,7 @@ namespace Sixnet.Development.Command
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="options">Options</param>
         /// <returns>Return the datas</returns>
-        public static List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(IEnumerable<DatabaseConnection> connections, SixnetDataCommand queryCommand, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> dataMappingFunc, DataOperationOptions options = null)
+        public static List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(IEnumerable<DatabaseConnection> connections, SixnetDataCommand queryCommand, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> dataMappingFunc, SixnetDataOperationOptions options = null)
         {
             ValidateConnections(connections);
             var datas = new List<TReturn>();
@@ -293,7 +293,7 @@ namespace Sixnet.Development.Command
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="options">Options</param>
         /// <returns>Return the datas</returns>
-        public static List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(IEnumerable<DatabaseConnection> connections, SixnetDataCommand queryCommand, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> dataMappingFunc, DataOperationOptions options = null)
+        public static List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(IEnumerable<DatabaseConnection> connections, SixnetDataCommand queryCommand, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> dataMappingFunc, SixnetDataOperationOptions options = null)
         {
             ValidateConnections(connections);
             var datas = new List<TReturn>();
@@ -317,7 +317,7 @@ namespace Sixnet.Development.Command
         /// <param name="queryCommand">Query data command</param>
         /// <param name="options">Options</param>
         /// <returns>Return whether the data exists or not</returns>
-        public static bool Exists(IEnumerable<DatabaseConnection> connections, SixnetDataCommand queryCommand, DataOperationOptions options = null)
+        public static bool Exists(IEnumerable<DatabaseConnection> connections, SixnetDataCommand queryCommand, SixnetDataOperationOptions options = null)
         {
             ValidateConnections(connections);
             foreach (var conn in connections)
@@ -337,7 +337,7 @@ namespace Sixnet.Development.Command
         /// <param name="queryCommand">Query data command</param>
         /// <param name="options">Options</param>
         /// <returns>Data count</returns>
-        public static int Count(IEnumerable<DatabaseConnection> connections, SixnetDataCommand queryCommand, DataOperationOptions options = null)
+        public static int Count(IEnumerable<DatabaseConnection> connections, SixnetDataCommand queryCommand, SixnetDataOperationOptions options = null)
         {
             ValidateConnections(connections);
             var count = 0;
@@ -356,7 +356,7 @@ namespace Sixnet.Development.Command
         /// <param name="queryCommand">Query data command</param>
         /// <param name="options">Options</param>
         /// <returns>Return the data</returns>
-        public static TValue Scalar<TValue>(IEnumerable<DatabaseConnection> connections, SixnetDataCommand queryCommand, DataOperationOptions options = null)
+        public static TValue Scalar<TValue>(IEnumerable<DatabaseConnection> connections, SixnetDataCommand queryCommand, SixnetDataOperationOptions options = null)
         {
             ValidateConnections(connections);
             var values = new List<TValue>();
@@ -383,7 +383,7 @@ namespace Sixnet.Development.Command
         /// <param name="queryCommands">Queries</param>
         /// <param name="options">Options</param>
         /// <returns>Return the dataset</returns>
-        public static DataSet QueryMultiple(IEnumerable<DatabaseConnection> connections, IEnumerable<SixnetDataCommand> queryCommands, DataOperationOptions options = null)
+        public static DataSet QueryMultiple(IEnumerable<DatabaseConnection> connections, IEnumerable<SixnetDataCommand> queryCommands, SixnetDataOperationOptions options = null)
         {
             ValidateConnections(connections);
             var dataSets = new List<DataSet>();
@@ -416,7 +416,7 @@ namespace Sixnet.Development.Command
         /// <param name="queryCommands">Queries</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public static Tuple<List<TFirst>, List<TSecond>> QueryMultiple<TFirst, TSecond>(IEnumerable<DatabaseConnection> connections, IEnumerable<SixnetDataCommand> queryCommands, DataOperationOptions options = null)
+        public static Tuple<List<TFirst>, List<TSecond>> QueryMultiple<TFirst, TSecond>(IEnumerable<DatabaseConnection> connections, IEnumerable<SixnetDataCommand> queryCommands, SixnetDataOperationOptions options = null)
         {
             ValidateConnections(connections);
             var dataCollection = new List<Tuple<List<TFirst>, List<TSecond>>>();
@@ -451,7 +451,7 @@ namespace Sixnet.Development.Command
         /// <param name="queryCommands">Queries</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public static Tuple<List<TFirst>, List<TSecond>, List<TThird>> QueryMultiple<TFirst, TSecond, TThird>(IEnumerable<DatabaseConnection> connections, IEnumerable<SixnetDataCommand> queryCommands, DataOperationOptions options = null)
+        public static Tuple<List<TFirst>, List<TSecond>, List<TThird>> QueryMultiple<TFirst, TSecond, TThird>(IEnumerable<DatabaseConnection> connections, IEnumerable<SixnetDataCommand> queryCommands, SixnetDataOperationOptions options = null)
         {
             ValidateConnections(connections);
             var dataCollection = new List<Tuple<List<TFirst>, List<TSecond>, List<TThird>>>();
@@ -492,7 +492,7 @@ namespace Sixnet.Development.Command
         /// <param name="queryCommands">Queries</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public static Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>> QueryMultiple<TFirst, TSecond, TThird, TFourth>(IEnumerable<DatabaseConnection> connections, IEnumerable<SixnetDataCommand> queryCommands, DataOperationOptions options = null)
+        public static Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>> QueryMultiple<TFirst, TSecond, TThird, TFourth>(IEnumerable<DatabaseConnection> connections, IEnumerable<SixnetDataCommand> queryCommands, SixnetDataOperationOptions options = null)
         {
             ValidateConnections(connections);
             var dataCollection = new List<Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>>>();
@@ -539,7 +539,7 @@ namespace Sixnet.Development.Command
         /// <param name="queryCommands">Queries</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public static Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>> QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth>(IEnumerable<DatabaseConnection> connections, IEnumerable<SixnetDataCommand> queryCommands, DataOperationOptions options = null)
+        public static Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>> QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth>(IEnumerable<DatabaseConnection> connections, IEnumerable<SixnetDataCommand> queryCommands, SixnetDataOperationOptions options = null)
         {
             ValidateConnections(connections);
             var dataCollection = new List<Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>>>();
@@ -592,7 +592,7 @@ namespace Sixnet.Development.Command
         /// <param name="queryCommands">Queries</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public static Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>> QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(IEnumerable<DatabaseConnection> connections, IEnumerable<SixnetDataCommand> queryCommands, DataOperationOptions options = null)
+        public static Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>> QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(IEnumerable<DatabaseConnection> connections, IEnumerable<SixnetDataCommand> queryCommands, SixnetDataOperationOptions options = null)
         {
             ValidateConnections(connections);
             var dataCollection = new List<Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>>>();
@@ -652,7 +652,7 @@ namespace Sixnet.Development.Command
         /// <param name="options">Options</param>
         /// <returns></returns>
         public static Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>, List<TSeventh>> QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(
-            IEnumerable<DatabaseConnection> connections, IEnumerable<SixnetDataCommand> queryCommands, DataOperationOptions options = null)
+            IEnumerable<DatabaseConnection> connections, IEnumerable<SixnetDataCommand> queryCommands, SixnetDataOperationOptions options = null)
         {
             ValidateConnections(connections);
             var dataCollection = new List<Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>, List<TSeventh>>>();
@@ -708,7 +708,7 @@ namespace Sixnet.Development.Command
         /// <param name="connection">Connection</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public static List<SixnetDataTable> GetTables(DatabaseConnection connection, DataOperationOptions options = null)
+        public static List<SixnetDataTable> GetTables(DatabaseConnection connection, SixnetDataOperationOptions options = null)
         {
             return connection.DatabaseProvider.GetTables(new DatabaseCommand()
             {
@@ -728,7 +728,7 @@ namespace Sixnet.Development.Command
         /// <param name="commands">Data commands</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public static int Execute(IEnumerable<DatabaseConnection> connections, IEnumerable<SixnetDataCommand> commands, DataOperationOptions options = null)
+        public static int Execute(IEnumerable<DatabaseConnection> connections, IEnumerable<SixnetDataCommand> commands, SixnetDataOperationOptions options = null)
         {
             ValidateConnections(connections);
             var value = 0;
@@ -747,7 +747,7 @@ namespace Sixnet.Development.Command
         /// <param name="commands">Data commands</param>
         /// <param name="options">Options</param>
         /// <returns>Inserted data identities,Key: command id, Value: identity value</returns>
-        public static Dictionary<string, TIdentity> InsertAndReturnAutoIdentity<TIdentity>(IEnumerable<DatabaseConnection> connections, IEnumerable<SixnetDataCommand> commands, DataOperationOptions options = null)
+        public static Dictionary<string, TIdentity> InsertAndReturnAutoIdentity<TIdentity>(IEnumerable<DatabaseConnection> connections, IEnumerable<SixnetDataCommand> commands, SixnetDataOperationOptions options = null)
         {
             ValidateConnections(connections);
             var identityCollection = new List<Dictionary<string, TIdentity>>();
@@ -791,7 +791,7 @@ namespace Sixnet.Development.Command
         /// <param name="connections">Connections</param>
         /// <param name="migrationInfo">Migration info</param>
         /// <param name="options">Data operation options</param>
-        public static void Migrate(IEnumerable<DatabaseConnection> connections, MigrationInfo migrationInfo, DataOperationOptions options = null)
+        public static void Migrate(IEnumerable<DatabaseConnection> connections, MigrationInfo migrationInfo, SixnetDataOperationOptions options = null)
         {
             ValidateConnections(connections);
             foreach (var connection in connections)
@@ -816,7 +816,7 @@ namespace Sixnet.Development.Command
         /// <param name="queryable">Queryable</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        static TDatabaseCommand GetDatabaseSingleCommand<TDatabaseCommand>(DatabaseConnection connection, SixnetDataCommand dataCommand, DataOperationOptions options) where TDatabaseCommand : SingleDatabaseCommand, new()
+        static TDatabaseCommand GetDatabaseSingleCommand<TDatabaseCommand>(DatabaseConnection connection, SixnetDataCommand dataCommand, SixnetDataOperationOptions options) where TDatabaseCommand : SingleDatabaseCommand, new()
         {
             return new TDatabaseCommand()
             {
@@ -833,7 +833,7 @@ namespace Sixnet.Development.Command
         /// <param name="commands">Commands</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        static MultipleDatabaseCommand GetDatabaseMultipleCommand(DatabaseConnection connection, IEnumerable<SixnetDataCommand> commands, DataOperationOptions options)
+        static MultipleDatabaseCommand GetDatabaseMultipleCommand(DatabaseConnection connection, IEnumerable<SixnetDataCommand> commands, SixnetDataOperationOptions options)
         {
             SixnetDirectThrower.ThrowArgNullIf(commands.IsNullOrEmpty(), $"{nameof(commands)} is null or empty");
 

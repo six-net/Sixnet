@@ -24,7 +24,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="fieldsAssignment">Fields assignment</param>
         /// <param name="configure">Configure options</param>
         /// <returns>Affected rows</returns>
-        Task<int> UpdateAsync(FieldsAssignment fieldsAssignment, Action<DataOperationOptions> configure = null);
+        Task<int> UpdateAsync(FieldsAssignment fieldsAssignment, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -35,7 +35,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        Task<int> DeleteAsync(Action<DataOperationOptions> configure = null);
+        Task<int> DeleteAsync(Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -47,7 +47,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Data</returns>
-        Task<T> FirstAsync<T>(Action<DataOperationOptions> configure = null);
+        Task<T> FirstAsync<T>(Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -58,7 +58,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="configure">Confirure options </param>
         /// <returns>Data list</returns>
-        Task<List<T>> ToListAsync<T>(Action<DataOperationOptions> configure = null);
+        Task<List<T>> ToListAsync<T>(Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data list
@@ -69,7 +69,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        Task<List<TReturn>> ToListAsync<TFirst, TSecond, TReturn>(Func<TFirst, TSecond, TReturn> dataMappingFunc, Action<DataOperationOptions> configure = null);
+        Task<List<TReturn>> ToListAsync<TFirst, TSecond, TReturn>(Func<TFirst, TSecond, TReturn> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data list
@@ -81,7 +81,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        Task<List<TReturn>> ToListAsync<TFirst, TSecond, TThird, TReturn>(Func<TFirst, TSecond, TThird, TReturn> dataMappingFunc, Action<DataOperationOptions> configure = null);
+        Task<List<TReturn>> ToListAsync<TFirst, TSecond, TThird, TReturn>(Func<TFirst, TSecond, TThird, TReturn> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data list
@@ -94,7 +94,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        Task<List<TReturn>> ToListAsync<TFirst, TSecond, TThird, TFourth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TReturn> dataMappingFunc, Action<DataOperationOptions> configure = null);
+        Task<List<TReturn>> ToListAsync<TFirst, TSecond, TThird, TFourth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TReturn> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data list
@@ -108,7 +108,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        Task<List<TReturn>> ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> dataMappingFunc, Action<DataOperationOptions> configure = null);
+        Task<List<TReturn>> ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data list
@@ -123,7 +123,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        Task<List<TReturn>> ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> dataMappingFunc, Action<DataOperationOptions> configure = null);
+        Task<List<TReturn>> ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data list
@@ -139,7 +139,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        Task<List<TReturn>> ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> dataMappingFunc, Action<DataOperationOptions> configure = null);
+        Task<List<TReturn>> ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -151,7 +151,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="pagingFilter">Paging filter</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Paging data</returns>
-        Task<PagingInfo<T>> ToPagingAsync<T>(PagingFilter pagingFilter, Action<DataOperationOptions> configure = null);
+        Task<PagingInfo<T>> ToPagingAsync<T>(PagingFilter pagingFilter, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get paging
@@ -160,7 +160,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="pageSize">Page size</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Paging data</returns>
-        Task<PagingInfo<T>> ToPagingAsync<T>(int page, int pageSize, Action<DataOperationOptions> configure = null);
+        Task<PagingInfo<T>> ToPagingAsync<T>(int page, int pageSize, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -171,7 +171,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="configure">Confirure options </param>
         /// <returns>Whether has data</returns>
-        Task<bool> AnyAsync(Action<DataOperationOptions> configure = null);
+        Task<bool> AnyAsync(Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -182,7 +182,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="configure">Confirure options </param>
         /// <returns>Data num</returns>
-        Task<int> CountAsync(Action<DataOperationOptions> configure = null);
+        Task<int> CountAsync(Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -194,7 +194,7 @@ namespace Sixnet.Development.Queryable
         /// <typeparam name="TValue">Value type</typeparam>
         /// <param name="configure">Confirure options </param>
         /// <returns>Max value</returns>
-        Task<TValue> MaxAsync<TValue>(Action<DataOperationOptions> configure = null);
+        Task<TValue> MaxAsync<TValue>(Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -206,7 +206,7 @@ namespace Sixnet.Development.Queryable
         /// <typeparam name="TValue">Value type</typeparam>
         /// <param name="configure">Confirure options </param>
         /// <returns>Min value</returns>
-        Task<TValue> MinAsync<TValue>(Action<DataOperationOptions> configure = null);
+        Task<TValue> MinAsync<TValue>(Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -218,7 +218,7 @@ namespace Sixnet.Development.Queryable
         /// <typeparam name="TValue">Value type</typeparam>
         /// <param name="configure">Confirure options </param>
         /// <returns>Sum value</returns>
-        Task<TValue> SumAsync<TValue>(Action<DataOperationOptions> configure = null);
+        Task<TValue> SumAsync<TValue>(Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -230,7 +230,7 @@ namespace Sixnet.Development.Queryable
         /// <typeparam name="TValue">Value type</typeparam>
         /// <param name="configure">Confirure options </param>
         /// <returns>Average value</returns>
-        Task<TValue> AvgAsync<TValue>(Action<DataOperationOptions> configure = null);
+        Task<TValue> AvgAsync<TValue>(Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -242,7 +242,7 @@ namespace Sixnet.Development.Queryable
         /// <typeparam name="TValue">Value type</typeparam>
         /// <param name="configure">Confirure options </param>
         /// <returns>Value</returns>
-        Task<TValue> ScalarAsync<TValue>(Action<DataOperationOptions> configure = null);
+        Task<TValue> ScalarAsync<TValue>(Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -264,7 +264,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Data</returns>
-        Task<TModel> FirstAsync(Action<DataOperationOptions> configure = null);
+        Task<TModel> FirstAsync(Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -275,7 +275,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="configure">Confirure options </param>
         /// <returns>Data list</returns>
-        Task<List<TModel>> ToListAsync(Action<DataOperationOptions> configure = null);
+        Task<List<TModel>> ToListAsync(Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -287,7 +287,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="pagingFilter">Paging filter</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Paging data</returns>
-        Task<PagingInfo<TModel>> ToPagingAsync(PagingFilter pagingFilter, Action<DataOperationOptions> configure = null);
+        Task<PagingInfo<TModel>> ToPagingAsync(PagingFilter pagingFilter, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get paging
@@ -296,7 +296,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="pageSize">Page size</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Paging data</returns>
-        Task<PagingInfo<TModel>> ToPagingAsync(int page, int pageSize, Action<DataOperationOptions> configure = null);
+        Task<PagingInfo<TModel>> ToPagingAsync(int page, int pageSize, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion 
 
@@ -308,7 +308,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="fieldsAssignmentExpression">Fields assignment expression</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        Task<int> UpdateAsync(Expression<Func<TModel, bool>> fieldsAssignmentExpression, Action<DataOperationOptions> configure = null);
+        Task<int> UpdateAsync(Expression<Func<TModel, bool>> fieldsAssignmentExpression, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -321,7 +321,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="field">Field </param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Max value</returns>
-        Task<TValue> MaxAsync<TValue>(Expression<Func<TModel, TValue>> field, Action<DataOperationOptions> configure = null);
+        Task<TValue> MaxAsync<TValue>(Expression<Func<TModel, TValue>> field, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -334,7 +334,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="field">Field </param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Min value</returns>
-        Task<TValue> MinAsync<TValue>(Expression<Func<TModel, TValue>> field, Action<DataOperationOptions> configure = null);
+        Task<TValue> MinAsync<TValue>(Expression<Func<TModel, TValue>> field, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -347,7 +347,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="field">Field </param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Sum value</returns>
-        Task<TValue> SumAsync<TValue>(Expression<Func<TModel, TValue>> field, Action<DataOperationOptions> configure = null);
+        Task<TValue> SumAsync<TValue>(Expression<Func<TModel, TValue>> field, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -360,7 +360,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="field">Field </param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Average value</returns>
-        Task<TValue> AvgAsync<TValue>(Expression<Func<TModel, TValue>> field, Action<DataOperationOptions> configure = null);
+        Task<TValue> AvgAsync<TValue>(Expression<Func<TModel, TValue>> field, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -385,7 +385,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        Task<List<TReturn>> ToListAsync<TReturn>(Func<TFirst, TSecond, TReturn> dataMappingFunc, Action<DataOperationOptions> configure = null);
+        Task<List<TReturn>> ToListAsync<TReturn>(Func<TFirst, TSecond, TReturn> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -411,7 +411,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        Task<List<TReturn>> ToListAsync<TReturn>(Func<TFirst, TSecond, TThird, TReturn> dataMappingFunc, Action<DataOperationOptions> configure = null);
+        Task<List<TReturn>> ToListAsync<TReturn>(Func<TFirst, TSecond, TThird, TReturn> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -438,7 +438,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        Task<List<TReturn>> ToListAsync<TReturn>(Func<TFirst, TSecond, TThird, TFourth, TReturn> dataMappingFunc, Action<DataOperationOptions> configure = null);
+        Task<List<TReturn>> ToListAsync<TReturn>(Func<TFirst, TSecond, TThird, TFourth, TReturn> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -466,7 +466,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        Task<List<TReturn>> ToListAsync<TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> dataMappingFunc, Action<DataOperationOptions> configure = null);
+        Task<List<TReturn>> ToListAsync<TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -495,7 +495,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        Task<List<TReturn>> ToListAsync<TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> dataMappingFunc, Action<DataOperationOptions> configure = null);
+        Task<List<TReturn>> ToListAsync<TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -525,7 +525,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return the datas</returns>
-        Task<List<TReturn>> ToListAsync<TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> dataMappingFunc, Action<DataOperationOptions> configure = null);
+        Task<List<TReturn>> ToListAsync<TReturn>(Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 

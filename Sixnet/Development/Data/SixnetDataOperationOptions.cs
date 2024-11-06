@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
-using Sixnet.Localization;
 
 namespace Sixnet.Development.Data
 {
     /// <summary>
-    /// Data operation options
+    /// Sixnet Data operation options
     /// </summary>
     [Serializable]
-    public class DataOperationOptions
+    public class SixnetDataOperationOptions
     {
         /// <summary>
         /// Gets or sets the cancellation token
@@ -22,9 +21,10 @@ namespace Sixnet.Development.Data
         public bool MustAffectData { get; set; }
 
         /// <summary>
-        /// Whether disable logical delete
+        /// Gets or sets the data operation behavior.
+        /// Default is 'default'
         /// </summary>
-        public bool DisableLogicalDelete { get; set; }
+        public DataOperationBehavior LogicalDeleteBehavior { get; set; } = DataOperationBehavior.Default;
 
         /// <summary>
         /// Not overwrite fields
@@ -33,22 +33,28 @@ namespace Sixnet.Development.Data
 
         /// <summary>
         /// Whether not overwrite all field
-        /// Priority greater  than NotOverwriteFieldNames
+        /// Priority greater than NotOverwriteFieldNames
         /// </summary>
         public bool NotOverwrite { get; set; }
+
+        /// <summary>
+        /// Gets or sets the increment field behavior.
+        /// Default is 'default'
+        /// </summary>
+        public DataOperationBehavior InsertIncrementFieldBehavior { get; set; } = DataOperationBehavior.Default;
 
         /// <summary>
         /// Create data operation options
         /// </summary>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns></returns>
-        internal static DataOperationOptions Create(CancellationToken? cancellationToken = null, bool mustAffectData = false)
+        internal static SixnetDataOperationOptions Create(CancellationToken? cancellationToken = null, bool mustAffectData = false)
         {
             if (!cancellationToken.HasValue && !mustAffectData)
             {
                 return null;
             }
-            return new DataOperationOptions()
+            return new SixnetDataOperationOptions()
             {
                 CancellationToken = cancellationToken,
                 MustAffectData = mustAffectData
@@ -71,9 +77,36 @@ namespace Sixnet.Development.Data
             }
         }
 
+        /// <summary>
+        /// Is not overwrite field
+        /// </summary>
+        /// <param name="fieldName"></param>
+        /// <returns></returns>
         internal bool IsNotOverwriteField(string fieldName)
         {
             return !string.IsNullOrWhiteSpace(fieldName) && (_notOverwriteFieldNames?.Contains(fieldName) ?? false);
+        }
+
+        /// <summary>
+        /// Allow logical delete
+        /// </summary>
+        /// <param name="globalAllowLogicalDelete"></param>
+        /// <returns></returns>
+        public bool AllowLogicalDelete(bool globalAllowLogicalDelete)
+        {
+            return LogicalDeleteBehavior != DataOperationBehavior.Disable
+               && (globalAllowLogicalDelete || LogicalDeleteBehavior == DataOperationBehavior.Enable);
+        }
+
+        /// <summary>
+        /// Allow insert increment field
+        /// </summary>
+        /// <param name="globalAllowInsertIncrementField"></param>
+        /// <returns></returns>
+        public bool AllowInsertIncrementField(bool globalAllowInsertIncrementField)
+        {
+            return InsertIncrementFieldBehavior != DataOperationBehavior.Disable
+                && (globalAllowInsertIncrementField || InsertIncrementFieldBehavior == DataOperationBehavior.Enable);
         }
     }
 }
