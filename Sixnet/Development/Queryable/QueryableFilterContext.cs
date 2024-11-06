@@ -32,5 +32,10 @@ namespace Sixnet.Development.Queryable
         /// Gets or sets the operation type
         /// </summary>
         public DataOperationType OperationType { get; internal set; }
+
+        /// <summary>
+        /// Gets or sets the operation options
+        /// </summary>
+        public SixnetDataOperationOptions OperationOptions { get; internal set; }
     }
 }

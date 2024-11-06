@@ -502,9 +502,16 @@ namespace Sixnet.Development.Data.Client
         /// Execution
         /// </summary>
         /// <param name="commands">Data commands</param>
+        /// <returns></returns>
+        Task<int> ExecuteAsync(IEnumerable<SixnetDataCommand> commands);
+
+        /// <summary>
+        /// Execution
+        /// </summary>
+        /// <param name="command">Data command</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        Task<int> ExecuteAsync(IEnumerable<SixnetDataCommand> commands, SixnetDataOperationOptions options = null);
+        Task<int> ExecuteAsync(SixnetDataCommand command);
 
         /// <summary>
         /// Bulk insert

@@ -45,7 +45,7 @@ namespace Sixnet.Development.Data.Command.Event
             }
 
             // Filter data
-            newQueryable = FilterData(entityType, newQueryable, dataCommand.OperationType);
+            newQueryable = FilterData(entityType, dataCommand.Options, newQueryable, dataCommand.OperationType);
             dataCommand.Queryable = newQueryable;
         }
 
@@ -55,10 +55,11 @@ namespace Sixnet.Development.Data.Command.Event
         /// Filter data
         /// </summary>
         /// <param name="entityType">Entity type</param>
+        /// <param name="dataOperationOptions">Data operation options</param>
         /// <param name="originalQueryable">Origin queryable</param>
         /// <param name="operationType">Operation type</param>
         /// <returns></returns>
-        internal static ISixnetQueryable FilterData(Type entityType, ISixnetQueryable originalQueryable, DataOperationType operationType)
+        internal static ISixnetQueryable FilterData(Type entityType, SixnetDataOperationOptions dataOperationOptions, ISixnetQueryable originalQueryable, DataOperationType operationType)
         {
             originalQueryable ??= SixnetQuerier.Create();
             originalQueryable.SetModelType(entityType);
@@ -70,7 +71,8 @@ namespace Sixnet.Development.Data.Command.Event
                 OperationType = operationType,
                 Location = QueryableLocation.Top,
                 ModelType = entityType,
-                OriginalQueryable = originalQueryable
+                OriginalQueryable = originalQueryable,
+                OperationOptions = dataOperationOptions
             };
 
             var dataOptions = SixnetDataManager.GetDataOptions();
@@ -288,7 +290,9 @@ namespace Sixnet.Development.Data.Command.Event
             var dataFilter = options?.GetCustomDataFilter?.Invoke(context);
 
             // Archived
-            var ignoreArchived = originalQueryable.HasIgnoredFilter(FieldRole.Archive) || options.HasIgnoredRoleFilter(FieldRole.Archive);
+            var ignoreArchived = originalQueryable.HasIgnoredFilter(FieldRole.Archive)
+                                 || options.HasIgnoredRoleFilter(FieldRole.Archive)
+                                 || (context.OperationType == DataOperationType.Delete && !SixnetDataManager.AllowLogicalDelete(context.OperationOptions));
             if (!ignoreArchived)
             {
                 var inactiveFieldName = SixnetEntityManager.GetFieldName(context.ModelType, FieldRole.Archive);

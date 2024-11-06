@@ -502,9 +502,8 @@ namespace Sixnet.Development.Data.Client
         /// Execution
         /// </summary>
         /// <param name="commands">Data commands</param>
-        /// <param name="options">Options</param>
         /// <returns></returns>
-        int Execute(IEnumerable<SixnetDataCommand> commands, SixnetDataOperationOptions options = null);
+        int Execute(IEnumerable<SixnetDataCommand> commands);
 
         /// <summary>
         /// Execution
@@ -512,7 +511,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="command">Data command</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        int Execute(SixnetDataCommand command, SixnetDataOperationOptions options = null);
+        int Execute(SixnetDataCommand command);
 
         /// <summary>
         /// Execution

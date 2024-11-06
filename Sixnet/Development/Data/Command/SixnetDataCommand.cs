@@ -43,11 +43,6 @@ namespace Sixnet.Development.Data.Command
         public DataScriptType ScriptType { get; set; } = DataScriptType.Text;
 
         /// <summary>
-        /// Gets or sets the result type
-        /// </summary>
-        public CommandResultType CommandResultType { get; set; } = CommandResultType.AffectedRows;
-
-        /// <summary>
         /// Gets or sets the table name
         /// </summary>
         public string TableName { get; set; } = string.Empty;
@@ -306,37 +301,37 @@ namespace Sixnet.Development.Data.Command
 
         #endregion
 
-        #region Clone
+        //#region Clone
 
-        /// <summary>
-        /// Clone a ICommand object
-        /// </summary>
-        /// <returns></returns>
-        public SixnetDataCommand Clone()
-        {
-            var newCommand = new SixnetDataCommand()
-            {
-                Id = Id,
-                Script = Script,
-                ScriptType = ScriptType,
-                CommandResultType = CommandResultType,
-                TableName = TableName,
-                EntityIdentityValues = EntityIdentityValues?.ToDictionary(c => c.Key, c => c.Value),
-                Properties = Properties?.ToDictionary(c => c.Key, c => c.Value),
-                ExecutionMode = ExecutionMode,
-                Queryable = Queryable?.Clone(),
-                OperationType = OperationType,
-                FieldsAssignment = FieldsAssignment?.Clone(),
-                EntityType = EntityType,
-                ScriptParameters = ScriptParameters?.Clone(),
-                DataTable = DataTable
-            };
-            newCommand.StartingEventHandlers.AddRange(StartingEventHandlers);
-            newCommand.CallbackEventHandlers.AddRange(CallbackEventHandlers);
-            return newCommand;
-        }
+        ///// <summary>
+        ///// Clone a ICommand object
+        ///// </summary>
+        ///// <returns></returns>
+        //public SixnetDataCommand Clone()
+        //{
+        //    var newCommand = new SixnetDataCommand()
+        //    {
+        //        Id = Id,
+        //        Script = Script,
+        //        ScriptType = ScriptType,
+        //        CommandResultType = CommandResultType,
+        //        TableName = TableName,
+        //        EntityIdentityValues = EntityIdentityValues?.ToDictionary(c => c.Key, c => c.Value),
+        //        Properties = Properties?.ToDictionary(c => c.Key, c => c.Value),
+        //        ExecutionMode = ExecutionMode,
+        //        Queryable = Queryable?.Clone(),
+        //        OperationType = OperationType,
+        //        FieldsAssignment = FieldsAssignment?.Clone(),
+        //        EntityType = EntityType,
+        //        ScriptParameters = ScriptParameters?.Clone(),
+        //        DataTable = DataTable
+        //    };
+        //    newCommand.StartingEventHandlers.AddRange(StartingEventHandlers);
+        //    newCommand.CallbackEventHandlers.AddRange(CallbackEventHandlers);
+        //    return newCommand;
+        //}
 
-        #endregion
+        //#endregion
 
         #region Create command id
 

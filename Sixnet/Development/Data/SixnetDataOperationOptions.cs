@@ -50,10 +50,6 @@ namespace Sixnet.Development.Data
         /// <returns></returns>
         internal static SixnetDataOperationOptions Create(CancellationToken? cancellationToken = null, bool mustAffectData = false)
         {
-            if (!cancellationToken.HasValue && !mustAffectData)
-            {
-                return null;
-            }
             return new SixnetDataOperationOptions()
             {
                 CancellationToken = cancellationToken,

@@ -42,6 +42,6 @@ namespace Sixnet.Localization
         /// Update failed
         /// </summary>
         public const string update_failed = nameof(update_failed);
-
+        public static readonly string UpdateDataFailed;
     }
 }

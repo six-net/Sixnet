@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Sixnet.Development.Command;
@@ -122,7 +123,7 @@ namespace Sixnet.Development.Data.Client
         public List<T> Query<T>(ISixnetQueryable queryable, SixnetDataOperationOptions options = null)
         {
             var command = SixnetDataCommand.CreateQueryCommand<T>(queryable);
-            var connections = GetConnections(GetDataCommandDatabaseServers(command, true));
+            var connections = GetConnections(GetDataCommandDatabaseServers(command, true, options));
             var datas = DataCommandExecutor.Query<T>(connections, command, options);
 
             // query callback
@@ -151,7 +152,7 @@ namespace Sixnet.Development.Data.Client
         public T QueryFirst<T>(ISixnetQueryable queryable, SixnetDataOperationOptions options = null)
         {
             var command = SixnetDataCommand.CreateQueryCommand<T>(queryable);
-            var connections = GetConnections(GetDataCommandDatabaseServers(command, true));
+            var connections = GetConnections(GetDataCommandDatabaseServers(command, true, options));
             var data = DataCommandExecutor.QueryFirst<T>(connections, command, options);
 
             // query callback
@@ -196,7 +197,7 @@ namespace Sixnet.Development.Data.Client
         {
             var command = SixnetDataCommand.CreateQueryCommand<T>(queryable);
             command.PagingFilter = pagingFilter;
-            var connections = GetConnections(GetDataCommandDatabaseServers(command, true));
+            var connections = GetConnections(GetDataCommandDatabaseServers(command, true, options));
             var dataPaging = DataCommandExecutor.QueryPaging<T>(connections, command, options);
 
             // query callback
@@ -231,7 +232,7 @@ namespace Sixnet.Development.Data.Client
         public List<TReturn> QueryMapping<TFirst, TSecond, TReturn>(ISixnetQueryable queryable, Func<TFirst, TSecond, TReturn> dataMappingFunc, SixnetDataOperationOptions options = null)
         {
             var command = SixnetDataCommand.CreateQueryCommand<TReturn>(queryable);
-            var connections = GetConnections(GetDataCommandDatabaseServers(command, true));
+            var connections = GetConnections(GetDataCommandDatabaseServers(command, true, options));
             var datas = DataCommandExecutor.QueryMapping(connections, command, dataMappingFunc, options);
 
             // query callback
@@ -254,7 +255,7 @@ namespace Sixnet.Development.Data.Client
         public List<TReturn> QueryMapping<TFirst, TSecond, TThird, TReturn>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TReturn> dataMappingFunc, SixnetDataOperationOptions options = null)
         {
             var command = SixnetDataCommand.CreateQueryCommand<TReturn>(queryable);
-            var connections = GetConnections(GetDataCommandDatabaseServers(command, true));
+            var connections = GetConnections(GetDataCommandDatabaseServers(command, true, options));
             var datas = DataCommandExecutor.QueryMapping(connections, command, dataMappingFunc, options);
 
             // query callback
@@ -278,7 +279,7 @@ namespace Sixnet.Development.Data.Client
         public List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TReturn>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TReturn> dataMappingFunc, SixnetDataOperationOptions options = null)
         {
             var command = SixnetDataCommand.CreateQueryCommand<TReturn>(queryable);
-            var connections = GetConnections(GetDataCommandDatabaseServers(command, true));
+            var connections = GetConnections(GetDataCommandDatabaseServers(command, true, options));
             var datas = DataCommandExecutor.QueryMapping(connections, command, dataMappingFunc, options);
 
             // query callback
@@ -303,7 +304,7 @@ namespace Sixnet.Development.Data.Client
         public List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> dataMappingFunc, SixnetDataOperationOptions options = null)
         {
             var command = SixnetDataCommand.CreateQueryCommand<TReturn>(queryable);
-            var connections = GetConnections(GetDataCommandDatabaseServers(command, true));
+            var connections = GetConnections(GetDataCommandDatabaseServers(command, true, options));
             var datas = DataCommandExecutor.QueryMapping(connections, command, dataMappingFunc, options);
 
             // query callback
@@ -329,7 +330,7 @@ namespace Sixnet.Development.Data.Client
         public List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> dataMappingFunc, SixnetDataOperationOptions options = null)
         {
             var command = SixnetDataCommand.CreateQueryCommand<TReturn>(queryable);
-            var connections = GetConnections(GetDataCommandDatabaseServers(command, true));
+            var connections = GetConnections(GetDataCommandDatabaseServers(command, true, options));
             var datas = DataCommandExecutor.QueryMapping(connections, command, dataMappingFunc, options);
 
             // query callback
@@ -356,7 +357,7 @@ namespace Sixnet.Development.Data.Client
         public List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> dataMappingFunc, SixnetDataOperationOptions options = null)
         {
             var command = SixnetDataCommand.CreateQueryCommand<TReturn>(queryable);
-            var connections = GetConnections(GetDataCommandDatabaseServers(command, true));
+            var connections = GetConnections(GetDataCommandDatabaseServers(command, true, options));
             var datas = DataCommandExecutor.QueryMapping(connections, command, dataMappingFunc, options);
 
             // query callback
@@ -385,7 +386,7 @@ namespace Sixnet.Development.Data.Client
         public bool Exists(ISixnetQueryable queryable, SixnetDataOperationOptions options = null)
         {
             var command = SixnetDataCommand.CreateQueryCommand(queryable);
-            var connections = GetConnections(GetDataCommandDatabaseServers(command, true));
+            var connections = GetConnections(GetDataCommandDatabaseServers(command, true, options));
             var hasData = DataCommandExecutor.Exists(connections, command, options);
 
             // check callback
@@ -416,7 +417,7 @@ namespace Sixnet.Development.Data.Client
             SixnetDirectThrower.ThrowArgNullIf(queryable == null, nameof(queryable));
 
             var command = SixnetDataCommand.CreateQueryCommand(queryable);
-            var connections = GetConnections(GetDataCommandDatabaseServers(command, true));
+            var connections = GetConnections(GetDataCommandDatabaseServers(command, true, options));
             return DataCommandExecutor.Count(connections, command, options);
         }
 
@@ -542,7 +543,7 @@ namespace Sixnet.Development.Data.Client
         public TValue Scalar<TValue>(ISixnetQueryable queryable, SixnetDataOperationOptions options = null)
         {
             var command = SixnetDataCommand.CreateQueryCommand(queryable);
-            var connections = GetConnections(GetDataCommandDatabaseServers(command, true));
+            var connections = GetConnections(GetDataCommandDatabaseServers(command, true, options));
             var value = DataCommandExecutor.Scalar<TValue>(connections, command, options);
 
             // Got value callback
@@ -560,7 +561,7 @@ namespace Sixnet.Development.Data.Client
         public DataSet QueryMultiple(IEnumerable<ISixnetQueryable> queries, SixnetDataOperationOptions options = null)
         {
             var commands = queries?.Select(c => SixnetDataCommand.CreateQueryCommand(c));
-            var serverGroups = GroupDataCommandsDatabaseServer(commands, true);
+            var serverGroups = GroupDataCommandsDatabaseServer(commands, true, options);
             var dataSets = new List<DataSet>(serverGroups.Count);
             foreach (var serverItem in serverGroups)
             {
@@ -581,7 +582,7 @@ namespace Sixnet.Development.Data.Client
         public Tuple<List<TFirst>, List<TSecond>> QueryMultiple<TFirst, TSecond>(IEnumerable<ISixnetQueryable> queries, SixnetDataOperationOptions options = null)
         {
             var commands = queries?.Select(c => SixnetDataCommand.CreateQueryCommand(c));
-            var serverGroups = GroupDataCommandsDatabaseServer(commands, true);
+            var serverGroups = GroupDataCommandsDatabaseServer(commands, true, options);
             var groupDatas = new List<Tuple<List<TFirst>, List<TSecond>>>(serverGroups.Count);
             foreach (var serverItem in serverGroups)
             {
@@ -603,7 +604,7 @@ namespace Sixnet.Development.Data.Client
         public Tuple<List<TFirst>, List<TSecond>, List<TThird>> QueryMultiple<TFirst, TSecond, TThird>(IEnumerable<ISixnetQueryable> queries, SixnetDataOperationOptions options = null)
         {
             var commands = queries?.Select(c => SixnetDataCommand.CreateQueryCommand(c));
-            var serverGroups = GroupDataCommandsDatabaseServer(commands, true);
+            var serverGroups = GroupDataCommandsDatabaseServer(commands, true, options);
             var groupDatas = new List<Tuple<List<TFirst>, List<TSecond>, List<TThird>>>(serverGroups.Count);
             foreach (var serverItem in serverGroups)
             {
@@ -626,7 +627,7 @@ namespace Sixnet.Development.Data.Client
         public Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>> QueryMultiple<TFirst, TSecond, TThird, TFourth>(IEnumerable<ISixnetQueryable> queries, SixnetDataOperationOptions options = null)
         {
             var commands = queries?.Select(c => SixnetDataCommand.CreateQueryCommand(c));
-            var serverGroups = GroupDataCommandsDatabaseServer(commands, true);
+            var serverGroups = GroupDataCommandsDatabaseServer(commands, true, options);
             var groupDatas = new List<Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>>>(serverGroups.Count);
             foreach (var serverItem in serverGroups)
             {
@@ -650,7 +651,7 @@ namespace Sixnet.Development.Data.Client
         public Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>> QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth>(IEnumerable<ISixnetQueryable> queries, SixnetDataOperationOptions options = null)
         {
             var commands = queries?.Select(c => SixnetDataCommand.CreateQueryCommand(c));
-            var serverGroups = GroupDataCommandsDatabaseServer(commands, true);
+            var serverGroups = GroupDataCommandsDatabaseServer(commands, true, options);
             var groupDatas = new List<Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>>>(serverGroups.Count);
             foreach (var serverItem in serverGroups)
             {
@@ -675,7 +676,7 @@ namespace Sixnet.Development.Data.Client
         public Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>> QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(IEnumerable<ISixnetQueryable> queries, SixnetDataOperationOptions options = null)
         {
             var commands = queries?.Select(c => SixnetDataCommand.CreateQueryCommand(c));
-            var serverGroups = GroupDataCommandsDatabaseServer(commands, true);
+            var serverGroups = GroupDataCommandsDatabaseServer(commands, true, options);
             var groupDatas = new List<Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>>>(serverGroups.Count);
             foreach (var serverItem in serverGroups)
             {
@@ -701,7 +702,7 @@ namespace Sixnet.Development.Data.Client
         public Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>, List<TSeventh>> QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(IEnumerable<ISixnetQueryable> queries, SixnetDataOperationOptions options = null)
         {
             var commands = queries?.Select(c => SixnetDataCommand.CreateQueryCommand(c));
-            var serverGroups = GroupDataCommandsDatabaseServer(commands, true);
+            var serverGroups = GroupDataCommandsDatabaseServer(commands, true, options);
             var groupDatas = new List<Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>, List<TSeventh>>>(serverGroups.Count);
             foreach (var serverItem in serverGroups)
             {
@@ -845,7 +846,7 @@ namespace Sixnet.Development.Data.Client
             {
                 return 0;
             }
-            return Update(commands, options);
+            return Update(commands);
         }
 
         /// <summary>
@@ -900,7 +901,7 @@ namespace Sixnet.Development.Data.Client
             }
 
             var command = GetUpdateCommand(fieldsAssignment, queryable, options);
-            return Update(new List<SixnetDataCommand>(1) { command }, options);
+            return Update(new List<SixnetDataCommand>(1) { command });
         }
 
         /// <summary>
@@ -909,9 +910,9 @@ namespace Sixnet.Development.Data.Client
         /// <param name="updateCommands">Update commands</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        int Update(List<SixnetDataCommand> updateCommands, SixnetDataOperationOptions options = null)
+        int Update(List<SixnetDataCommand> updateCommands)
         {
-            return Execute(updateCommands, options);
+            return Execute(updateCommands);
         }
 
         /// <summary>
@@ -926,6 +927,7 @@ namespace Sixnet.Development.Data.Client
             cmd.OperationType = DataOperationType.Update;
             cmd.FieldsAssignment = fieldsAssignment;
             cmd.Queryable = queryable;
+            cmd.Options = options;
             return cmd;
         }
 
@@ -982,7 +984,8 @@ namespace Sixnet.Development.Data.Client
             SixnetDirectThrower.ThrowArgNullIf(queryable == null, nameof(queryable));
 
             var command = SixnetDataCommand.Create(DataOperationType.Delete, queryable);
-            return Execute(new List<SixnetDataCommand>(1) { command }, options);
+            command.Options = options;
+            return Execute(new List<SixnetDataCommand>(1) { command });
         }
 
         #endregion
@@ -999,7 +1002,7 @@ namespace Sixnet.Development.Data.Client
         Tuple<int, Dictionary<string, dynamic>> ExecuteCore(IEnumerable<SixnetDataCommand> commands, bool identityInsert, SixnetDataOperationOptions options = null)
         {
             var affectedRows = 0;
-            var serverGroups = GroupDataCommandsDatabaseServer(commands, false);
+            var serverGroups = GroupDataCommandsDatabaseServer(commands, false, options);
             var identities = new Dictionary<string, dynamic>();
             if (identityInsert)
             {
@@ -1036,11 +1039,10 @@ namespace Sixnet.Development.Data.Client
         /// Execution
         /// </summary>
         /// <param name="commands">Data commands</param>
-        /// <param name="options">Options</param>
         /// <returns></returns>
-        public int Execute(IEnumerable<SixnetDataCommand> commands, SixnetDataOperationOptions options = null)
+        public int Execute(IEnumerable<SixnetDataCommand> commands)
         {
-            return ExecuteCore(commands, false, options).Item1;
+            return ExecuteCore(commands, false).Item1;
         }
 
         /// <summary>
@@ -1049,9 +1051,9 @@ namespace Sixnet.Development.Data.Client
         /// <param name="command">Data command</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        public int Execute(SixnetDataCommand command, SixnetDataOperationOptions options = null)
+        public int Execute(SixnetDataCommand command)
         {
-            return Execute(new SixnetDataCommand[1] { command }, options);
+            return Execute(new SixnetDataCommand[1] { command });
         }
 
         /// <summary>
@@ -1065,7 +1067,8 @@ namespace Sixnet.Development.Data.Client
         public int Execute(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null)
         {
             var cmd = SixnetDataCommand.CreateScriptCommand(script, parameters, scriptType);
-            return Execute(new List<SixnetDataCommand>(1) { cmd }, options);
+            cmd.Options = options;
+            return Execute(new List<SixnetDataCommand>(1) { cmd });
         }
 
         /// <summary>
@@ -1077,7 +1080,7 @@ namespace Sixnet.Development.Data.Client
         public void BulkInsert(DataTable dataTable, ISixnetBulkInsertionOptions options = null)
         {
             var command = SixnetDataCommand.Create(dataTable);
-            var connections = GetConnections(GetDataCommandDatabaseServers(command, false));
+            var connections = GetConnections(GetDataCommandDatabaseServers(command, false, options?.DataOperationOptions));
             DataCommandExecutor.BulkInsert(connections, dataTable, options);
         }
 
@@ -1202,8 +1205,14 @@ namespace Sixnet.Development.Data.Client
         /// </summary>
         /// <param name="command">Command</param>
         /// <returns></returns>
-        List<DatabaseServer> GetDataCommandDatabaseServers(SixnetDataCommand command, bool useForQuery)
+        List<DatabaseServer> GetDataCommandDatabaseServers(SixnetDataCommand command, bool useForQuery, SixnetDataOperationOptions dataOperationOptions)
         {
+            // options
+            if (dataOperationOptions != null)
+            {
+                command.Options = dataOperationOptions;
+            }
+
             var servers = internalDatabaseServers.IsNullOrEmpty()
                 ? SixnetDataManager.GetCommandDatabaseServers(command)
                 : internalDatabaseServers;
@@ -1219,14 +1228,14 @@ namespace Sixnet.Development.Data.Client
         /// </summary>
         /// <param name="commands">Commands</param>
         /// <returns>Key: database server name,Value: commands</returns>
-        Dictionary<string, Tuple<DatabaseServer, List<SixnetDataCommand>>> GroupDataCommandsDatabaseServer(IEnumerable<SixnetDataCommand> commands, bool useForQuery)
+        Dictionary<string, Tuple<DatabaseServer, List<SixnetDataCommand>>> GroupDataCommandsDatabaseServer(IEnumerable<SixnetDataCommand> commands, bool useForQuery, SixnetDataOperationOptions dataOperationOptions)
         {
             SixnetDirectThrower.ThrowArgNullIf(commands.IsNullOrEmpty(), nameof(commands));
 
             var serverGroups = new Dictionary<string, Tuple<DatabaseServer, List<SixnetDataCommand>>>();
             foreach (var command in commands)
             {
-                var databaseServers = GetDataCommandDatabaseServers(command, useForQuery);
+                var databaseServers = GetDataCommandDatabaseServers(command, useForQuery, dataOperationOptions);
                 if (!databaseServers.IsNullOrEmpty())
                 {
                     foreach (var server in databaseServers)
@@ -1245,7 +1254,6 @@ namespace Sixnet.Development.Data.Client
         /// Handle data command before execution
         /// </summary>
         /// <param name="dataCommand">Data command</param>
-        /// <param name="useForQuery">Use for query</param>
         void HandleDataCommandBeforeExecution(SixnetDataCommand dataCommand)
         {
             if (dataCommand == null)

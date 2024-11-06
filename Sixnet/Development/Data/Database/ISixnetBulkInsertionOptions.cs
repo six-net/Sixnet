@@ -3,5 +3,11 @@
     /// <summary>
     /// Defines bulk insertion options
     /// </summary>
-    public interface ISixnetBulkInsertionOptions { }
+    public interface ISixnetBulkInsertionOptions 
+    {
+        /// <summary>
+        /// Gets or sets the data operation options
+        /// </summary>
+        SixnetDataOperationOptions DataOperationOptions { get; set; }
+    }
 }
