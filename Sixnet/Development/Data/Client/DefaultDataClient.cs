@@ -1204,6 +1204,8 @@ namespace Sixnet.Development.Data.Client
         /// Get database server
         /// </summary>
         /// <param name="command">Command</param>
+        /// <param name="useForQuery">User for query</param>
+        /// <param name="dataOperationOptions">Data operation options</param>
         /// <returns></returns>
         List<DatabaseServer> GetDataCommandDatabaseServers(SixnetDataCommand command, bool useForQuery, SixnetDataOperationOptions dataOperationOptions)
         {
