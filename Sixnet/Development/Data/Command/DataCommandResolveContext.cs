@@ -274,7 +274,7 @@ namespace Sixnet.Development.Data.Command
         {
             if (newParameters == null)
             {
-                parameters.Clear();
+                parameters?.Clear();
             }
             else
             {
