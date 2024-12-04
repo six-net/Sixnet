@@ -1146,23 +1146,15 @@ namespace Sixnet.Expressions.Linq
         {
             #region Type index
 
-            var typeIndexes = new Dictionary<string, int>();
-            var queryableType = queryable?.GetType();
-            if (queryableType != null && queryableType.IsGenericType)
+            Dictionary<string, int> parameterIndexes = null;
+            if (fieldExpression is LambdaExpression lambdaExp && lambdaExp.Parameters != null)
             {
-                var genericParameters = queryableType.GenericTypeArguments;
-                if (!genericParameters.IsNullOrEmpty())
-                {
-                    for (int i = 0; i < genericParameters.Length; i++)
-                    {
-                        typeIndexes[genericParameters[i].FullName] = i;
-                    }
-                }
+                parameterIndexes = GetLambdaParameterIndexes(lambdaExp);
             }
 
             #endregion
 
-            return GetDataField(fieldExpression, typeIndexes, outFormatSetting);
+            return GetDataField(fieldExpression, parameterIndexes, outFormatSetting);
         }
 
         /// <summary>

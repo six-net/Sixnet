@@ -1240,7 +1240,8 @@ namespace Sixnet.Development.Data.Database
                                               .FirstOrDefault();
             if (defaultSortField != null)
             {
-                originalQueryable.OrderBy(defaultSortField.PropertyName, true);
+                var orderField = DataField.Create(defaultSortField.PropertyName, originalQueryable.GetModelType());
+                originalQueryable.OrderBy(orderField);
                 AppendSort(context, originalQueryable, translationResult, true);
             }
             return translationResult.GetSort();

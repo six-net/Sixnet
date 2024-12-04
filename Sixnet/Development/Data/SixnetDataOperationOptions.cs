@@ -38,6 +38,11 @@ namespace Sixnet.Development.Data
         public bool NotOverwrite { get; set; }
 
         /// <summary>
+        /// Gets or sets the split on field name
+        /// </summary>
+        public string SpiltOnFieldName {  get; set; }
+
+        /// <summary>
         /// Gets or sets the increment field behavior.
         /// Default is 'default'
         /// </summary>
