@@ -1307,21 +1307,21 @@ namespace Sixnet.Development.Queryable
         new ISixnetQueryable<TFirst> OrderByIf(bool predicate, IEnumerable<ISixnetField> fields, bool desc = false);
 
         /// <summary>
-        /// Order by field
+        /// Order by fields
         /// </summary>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst> OrderBy(Expression<Func<TFirst, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst> OrderBy(Expression<Func<TFirst, object>> fields, bool desc = false);
 
         /// <summary>
         /// Order by fields
         /// </summary>
         /// <param name="predicate">Predicate</param>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst> OrderByIf(bool predicate, Expression<Func<TFirst, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst> OrderByIf(bool predicate, Expression<Func<TFirst, object>> fields, bool desc = false);
 
         #endregion
 
@@ -1578,14 +1578,14 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst> Select(params Expression<Func<TFirst, object>>[] fields);
+        ISixnetQueryable<TFirst> Select(Expression<Func<TFirst, object>> fields);
 
         /// <summary>
         /// Unselect fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst> Unselect(params Expression<Func<TFirst, object>>[] fields);
+        ISixnetQueryable<TFirst> Unselect(Expression<Func<TFirst, object>> fields);
 
         #endregion
 
@@ -1978,38 +1978,38 @@ namespace Sixnet.Development.Queryable
         new ISixnetQueryable<TFirst, TSecond> OrderByIf(bool predicate, IEnumerable<ISixnetField> fields, bool desc = false);
 
         /// <summary>
-        /// Order by field
+        /// Order by fields
         /// </summary>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond> OrderBy(Expression<Func<TFirst, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond> OrderBy(Expression<Func<TFirst, object>> fields, bool desc = false);
 
         /// <summary>
         /// Order by fields
         /// </summary>
         /// <param name="predicate">Predicate</param>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond> OrderByIf(bool predicate, Expression<Func<TFirst, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond> OrderByIf(bool predicate, Expression<Func<TFirst, object>> fields, bool desc = false);
 
         /// <summary>
-        /// Order by field
+        /// Order by fields
         /// </summary>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond> OrderBy(Expression<Func<TFirst, TSecond, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond> OrderBy(Expression<Func<TFirst, TSecond, object>> fields, bool desc = false);
 
         /// <summary>
         /// Order by fields
         /// </summary>
         /// <param name="predicate">Predicate</param>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, object>> fields, bool desc = false);
 
         #endregion
 
@@ -2266,28 +2266,28 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond> Select(params Expression<Func<TFirst, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond> Select(Expression<Func<TFirst, object>> fields);
 
         /// <summary>
         /// Unselect fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond> Unselect(params Expression<Func<TFirst, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond> Unselect(Expression<Func<TFirst, object>> fields);
 
         /// <summary>
         /// Select fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond> Select(params Expression<Func<TFirst, TSecond, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond> Select(Expression<Func<TFirst, TSecond, object>> fields);
 
         /// <summary>
         /// Unselect fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond> Unselect(params Expression<Func<TFirst, TSecond, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond> Unselect(Expression<Func<TFirst, TSecond, object>> fields);
 
         #endregion
 
@@ -2748,55 +2748,55 @@ namespace Sixnet.Development.Queryable
         new ISixnetQueryable<TFirst, TSecond, TThird> OrderByIf(bool predicate, IEnumerable<ISixnetField> fields, bool desc = false);
 
         /// <summary>
-        /// Order by field
+        /// Order by fields
         /// </summary>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird> OrderBy(Expression<Func<TFirst, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird> OrderBy(Expression<Func<TFirst, object>> fields, bool desc = false);
 
         /// <summary>
         /// Order by fields
         /// </summary>
         /// <param name="predicate">Predicate</param>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird> OrderByIf(bool predicate, Expression<Func<TFirst, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird> OrderByIf(bool predicate, Expression<Func<TFirst, object>> fields, bool desc = false);
 
         /// <summary>
         /// Order by field
         /// </summary>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird> OrderBy(Expression<Func<TFirst, TSecond, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird> OrderBy(Expression<Func<TFirst, TSecond, object>> fields, bool desc = false);
 
         /// <summary>
         /// Order by fields
         /// </summary>
         /// <param name="predicate">Predicate</param>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, object>> fields, bool desc = false);
 
         /// <summary>
-        /// Order by field
+        /// Order by fields
         /// </summary>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird> OrderBy(Expression<Func<TFirst, TSecond, TThird, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird> OrderBy(Expression<Func<TFirst, TSecond, TThird, object>> fields, bool desc = false);
 
         /// <summary>
         /// Order by fields
         /// </summary>
         /// <param name="predicate">Predicate</param>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, TThird, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, TThird, object>> fields, bool desc = false);
 
         #endregion
 
@@ -3049,42 +3049,42 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird> Select(params Expression<Func<TFirst, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird> Select(Expression<Func<TFirst, object>> fields);
 
         /// <summary>
         /// Unselect fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird> Unselect(params Expression<Func<TFirst, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird> Unselect(Expression<Func<TFirst, object>> fields);
 
         /// <summary>
         /// Select fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird> Select(params Expression<Func<TFirst, TSecond, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird> Select(Expression<Func<TFirst, TSecond, object>> fields);
 
         /// <summary>
         /// Unselect fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird> Unselect(params Expression<Func<TFirst, TSecond, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird> Unselect(Expression<Func<TFirst, TSecond, object>> fields);
 
         /// <summary>
         /// Select fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird> Select(params Expression<Func<TFirst, TSecond, TThird, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird> Select(Expression<Func<TFirst, TSecond, TThird, object>> fields);
 
         /// <summary>
         /// Unselect fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird> Unselect(params Expression<Func<TFirst, TSecond, TThird, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird> Unselect(Expression<Func<TFirst, TSecond, TThird, object>> fields);
 
         #endregion
 
@@ -3596,72 +3596,72 @@ namespace Sixnet.Development.Queryable
         new ISixnetQueryable<TFirst, TSecond, TThird, TFourth> OrderByIf(bool predicate, IEnumerable<ISixnetField> fields, bool desc = false);
 
         /// <summary>
-        /// Order by field
+        /// Order by fields
         /// </summary>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth> OrderBy(Expression<Func<TFirst, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth> OrderBy(Expression<Func<TFirst, object>> fields, bool desc = false);
 
         /// <summary>
         /// Order by fields
         /// </summary>
         /// <param name="predicate">Predicate</param>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth> OrderByIf(bool predicate, Expression<Func<TFirst, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth> OrderByIf(bool predicate, Expression<Func<TFirst, object>> fields, bool desc = false);
 
         /// <summary>
-        /// Order by field
+        /// Order by fields
         /// </summary>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth> OrderBy(Expression<Func<TFirst, TSecond, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth> OrderBy(Expression<Func<TFirst, TSecond, object>> fields, bool desc = false);
 
         /// <summary>
         /// Order by fields
         /// </summary>
         /// <param name="predicate">Predicate</param>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, object>> fields, bool desc = false);
 
         /// <summary>
-        /// Order by field
+        /// Order by fields
         /// </summary>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth> OrderBy(Expression<Func<TFirst, TSecond, TThird, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth> OrderBy(Expression<Func<TFirst, TSecond, TThird, object>> fields, bool desc = false);
 
         /// <summary>
         /// Order by fields
         /// </summary>
         /// <param name="predicate">Predicate</param>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, TThird, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, TThird, object>> fields, bool desc = false);
 
         /// <summary>
-        /// Order by field
+        /// Order by fields
         /// </summary>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth> OrderBy(Expression<Func<TFirst, TSecond, TThird, TFourth, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth> OrderBy(Expression<Func<TFirst, TSecond, TThird, TFourth, object>> fields, bool desc = false);
 
         /// <summary>
         /// Order by fields
         /// </summary>
         /// <param name="predicate">Predicate</param>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, TThird, TFourth, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, TThird, TFourth, object>> fields, bool desc = false);
 
         #endregion
 
@@ -3918,56 +3918,56 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth> Select(params Expression<Func<TFirst, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth> Select(Expression<Func<TFirst, object>> fields);
 
         /// <summary>
         /// Unselect fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth> Unselect(params Expression<Func<TFirst, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth> Unselect(Expression<Func<TFirst, object>> fields);
 
         /// <summary>
         /// Select fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth> Select(params Expression<Func<TFirst, TSecond, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth> Select(Expression<Func<TFirst, TSecond, object>> fields);
 
         /// <summary>
         /// Unselect fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth> Unselect(params Expression<Func<TFirst, TSecond, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth> Unselect(Expression<Func<TFirst, TSecond, object>> fields);
 
         /// <summary>
         /// Select fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth> Select(params Expression<Func<TFirst, TSecond, TThird, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth> Select(Expression<Func<TFirst, TSecond, TThird, object>> fields);
 
         /// <summary>
         /// Unselect fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth> Unselect(params Expression<Func<TFirst, TSecond, TThird, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth> Unselect(Expression<Func<TFirst, TSecond, TThird, object>> fields);
 
         /// <summary>
         /// Select fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth> Select(params Expression<Func<TFirst, TSecond, TThird, TFourth, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth> Select(Expression<Func<TFirst, TSecond, TThird, TFourth, object>> fields);
 
         /// <summary>
         /// Unselect fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth> Unselect(params Expression<Func<TFirst, TSecond, TThird, TFourth, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth> Unselect(Expression<Func<TFirst, TSecond, TThird, TFourth, object>> fields);
 
         #endregion
 
@@ -4530,89 +4530,89 @@ namespace Sixnet.Development.Queryable
         new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> OrderByIf(bool predicate, IEnumerable<ISixnetField> fields, bool desc = false);
 
         /// <summary>
-        /// Order by field
+        /// Order by fields
         /// </summary>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> OrderBy(Expression<Func<TFirst, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> OrderBy(Expression<Func<TFirst, object>> fields, bool desc = false);
 
         /// <summary>
         /// Order by fields
         /// </summary>
         /// <param name="predicate">Predicate</param>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> OrderByIf(bool predicate, Expression<Func<TFirst, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> OrderByIf(bool predicate, Expression<Func<TFirst, object>> fields, bool desc = false);
 
         /// <summary>
-        /// Order by field
+        /// Order by fields
         /// </summary>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> OrderBy(Expression<Func<TFirst, TSecond, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> OrderBy(Expression<Func<TFirst, TSecond, object>> fields, bool desc = false);
 
         /// <summary>
         /// Order by fields
         /// </summary>
         /// <param name="predicate">Predicate</param>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, object>> fields, bool desc = false);
 
         /// <summary>
-        /// Order by field
+        /// Order by fields
         /// </summary>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> OrderBy(Expression<Func<TFirst, TSecond, TThird, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> OrderBy(Expression<Func<TFirst, TSecond, TThird, object>> fields, bool desc = false);
 
         /// <summary>
         /// Order by fields
         /// </summary>
         /// <param name="predicate">Predicate</param>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, TThird, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, TThird, object>> fields, bool desc = false);
 
         /// <summary>
-        /// Order by field
+        /// Order by fields
         /// </summary>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> OrderBy(Expression<Func<TFirst, TSecond, TThird, TFourth, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> OrderBy(Expression<Func<TFirst, TSecond, TThird, TFourth, object>> fields, bool desc = false);
 
         /// <summary>
         /// Order by fields
         /// </summary>
         /// <param name="predicate">Predicate</param>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, TThird, TFourth, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, TThird, TFourth, object>> fields, bool desc = false);
 
         /// <summary>
-        /// Order by field
+        /// Order by fields
         /// </summary>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> OrderBy(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> OrderBy(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, object>> fields, bool desc = false);
 
         /// <summary>
         /// Order by fields
         /// </summary>
         /// <param name="predicate">Predicate</param>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, object>> fields, bool desc = false);
 
         #endregion
 
@@ -4869,70 +4869,70 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> Select(params Expression<Func<TFirst, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> Select(Expression<Func<TFirst, object>> fields);
 
         /// <summary>
         /// Unselect fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> Unselect(params Expression<Func<TFirst, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> Unselect(Expression<Func<TFirst, object>> fields);
 
         /// <summary>
         /// Select fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> Select(params Expression<Func<TFirst, TSecond, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> Select(Expression<Func<TFirst, TSecond, object>> fields);
 
         /// <summary>
         /// Unselect fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> Unselect(params Expression<Func<TFirst, TSecond, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> Unselect(Expression<Func<TFirst, TSecond, object>> fields);
 
         /// <summary>
         /// Select fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> Select(params Expression<Func<TFirst, TSecond, TThird, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> Select(Expression<Func<TFirst, TSecond, TThird, object>> fields);
 
         /// <summary>
         /// Unselect fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> Unselect(params Expression<Func<TFirst, TSecond, TThird, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> Unselect(Expression<Func<TFirst, TSecond, TThird, object>> fields);
 
         /// <summary>
         /// Select fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> Select(params Expression<Func<TFirst, TSecond, TThird, TFourth, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> Select(Expression<Func<TFirst, TSecond, TThird, TFourth, object>> fields);
 
         /// <summary>
         /// Unselect fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> Unselect(params Expression<Func<TFirst, TSecond, TThird, TFourth, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> Unselect(Expression<Func<TFirst, TSecond, TThird, TFourth, object>> fields);
 
         /// <summary>
         /// Select fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> Select(params Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> Select(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, object>> fields);
 
         /// <summary>
         /// Unselect fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> Unselect(params Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> Unselect(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, object>> fields);
 
         #endregion
 
@@ -5546,106 +5546,106 @@ namespace Sixnet.Development.Queryable
         new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderByIf(bool predicate, IEnumerable<ISixnetField> fields, bool desc = false);
 
         /// <summary>
-        /// Order by field
+        /// Order by fields
         /// </summary>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderBy(Expression<Func<TFirst, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderBy(Expression<Func<TFirst, object>> fields, bool desc = false);
 
         /// <summary>
         /// Order by fields
         /// </summary>
         /// <param name="predicate">Predicate</param>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderByIf(bool predicate, Expression<Func<TFirst, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderByIf(bool predicate, Expression<Func<TFirst, object>> fields, bool desc = false);
 
         /// <summary>
-        /// Order by field
+        /// Order by fields
         /// </summary>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderBy(Expression<Func<TFirst, TSecond, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderBy(Expression<Func<TFirst, TSecond, object>> fields, bool desc = false);
 
         /// <summary>
         /// Order by fields
         /// </summary>
         /// <param name="predicate">Predicate</param>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, object>> fields, bool desc = false);
 
         /// <summary>
-        /// Order by field
+        /// Order by fields
         /// </summary>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderBy(Expression<Func<TFirst, TSecond, TThird, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderBy(Expression<Func<TFirst, TSecond, TThird, object>> fields, bool desc = false);
 
         /// <summary>
         /// Order by fields
         /// </summary>
         /// <param name="predicate">Predicate</param>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, TThird, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, TThird, object>> fields, bool desc = false);
 
         /// <summary>
-        /// Order by field
+        /// Order by fields
         /// </summary>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderBy(Expression<Func<TFirst, TSecond, TThird, TFourth, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderBy(Expression<Func<TFirst, TSecond, TThird, TFourth, object>> fields, bool desc = false);
 
         /// <summary>
         /// Order by fields
         /// </summary>
         /// <param name="predicate">Predicate</param>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, TThird, TFourth, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, TThird, TFourth, object>> fields, bool desc = false);
 
         /// <summary>
-        /// Order by field
+        /// Order by fields
         /// </summary>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderBy(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderBy(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, object>> fields, bool desc = false);
 
         /// <summary>
         /// Order by fields
         /// </summary>
         /// <param name="predicate">Predicate</param>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, object>> fields, bool desc = false);
 
         /// <summary>
-        /// Order by field
+        /// Order by fields
         /// </summary>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderBy(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderBy(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, object>> fields, bool desc = false);
 
         /// <summary>
         /// Order by fields
         /// </summary>
         /// <param name="predicate">Predicate</param>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, object>> fields, bool desc = false);
 
         #endregion
 
@@ -5902,84 +5902,84 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Select(params Expression<Func<TFirst, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Select(Expression<Func<TFirst, object>> fields);
 
         /// <summary>
         /// Unselect fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Unselect(params Expression<Func<TFirst, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Unselect(Expression<Func<TFirst, object>> fields);
 
         /// <summary>
         /// Select fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Select(params Expression<Func<TFirst, TSecond, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Select(Expression<Func<TFirst, TSecond, object>> fields);
 
         /// <summary>
         /// Unselect fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Unselect(params Expression<Func<TFirst, TSecond, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Unselect(Expression<Func<TFirst, TSecond, object>> fields);
 
         /// <summary>
         /// Select fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Select(params Expression<Func<TFirst, TSecond, TThird, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Select(Expression<Func<TFirst, TSecond, TThird, object>> fields);
 
         /// <summary>
         /// Unselect fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Unselect(params Expression<Func<TFirst, TSecond, TThird, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Unselect(Expression<Func<TFirst, TSecond, TThird, object>> fields);
 
         /// <summary>
         /// Select fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Select(params Expression<Func<TFirst, TSecond, TThird, TFourth, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Select(Expression<Func<TFirst, TSecond, TThird, TFourth, object>> fields);
 
         /// <summary>
         /// Unselect fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Unselect(params Expression<Func<TFirst, TSecond, TThird, TFourth, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Unselect(Expression<Func<TFirst, TSecond, TThird, TFourth, object>> fields);
 
         /// <summary>
         /// Select fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Select(params Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Select(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, object>> fields);
 
         /// <summary>
         /// Unselect fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Unselect(params Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Unselect(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, object>> fields);
 
         /// <summary>
         /// Select fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Select(params Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Select(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, object>> fields);
 
         /// <summary>
         /// Unselect fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Unselect(params Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Unselect(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, object>> fields);
 
         #endregion
 
@@ -6644,123 +6644,123 @@ namespace Sixnet.Development.Queryable
         new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> OrderByIf(bool predicate, IEnumerable<ISixnetField> fields, bool desc = false);
 
         /// <summary>
-        /// Order by field
+        /// Order by fields
         /// </summary>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> OrderBy(Expression<Func<TFirst, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> OrderBy(Expression<Func<TFirst, object>> fields, bool desc = false);
 
         /// <summary>
         /// Order by fields
         /// </summary>
         /// <param name="predicate">Predicate</param>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> OrderByIf(bool predicate, Expression<Func<TFirst, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> OrderByIf(bool predicate, Expression<Func<TFirst, object>> fields, bool desc = false);
 
         /// <summary>
-        /// Order by field
+        /// Order by fields
         /// </summary>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> OrderBy(Expression<Func<TFirst, TSecond, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> OrderBy(Expression<Func<TFirst, TSecond, object>> fields, bool desc = false);
 
         /// <summary>
         /// Order by fields
         /// </summary>
         /// <param name="predicate">Predicate</param>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, object>> fields, bool desc = false);
 
         /// <summary>
-        /// Order by field
+        /// Order by fields
         /// </summary>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> OrderBy(Expression<Func<TFirst, TSecond, TThird, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> OrderBy(Expression<Func<TFirst, TSecond, TThird, object>> fields, bool desc = false);
 
         /// <summary>
         /// Order by fields
         /// </summary>
         /// <param name="predicate">Predicate</param>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, TThird, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, TThird, object>> fields, bool desc = false);
 
         /// <summary>
-        /// Order by field
+        /// Order by fields
         /// </summary>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> OrderBy(Expression<Func<TFirst, TSecond, TThird, TFourth, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> OrderBy(Expression<Func<TFirst, TSecond, TThird, TFourth, object>> fields, bool desc = false);
 
         /// <summary>
         /// Order by fields
         /// </summary>
         /// <param name="predicate">Predicate</param>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, TThird, TFourth, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, TThird, TFourth, object>> fields, bool desc = false);
 
         /// <summary>
-        /// Order by field
+        /// Order by fields
         /// </summary>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> OrderBy(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> OrderBy(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, object>> fields, bool desc = false);
 
         /// <summary>
         /// Order by fields
         /// </summary>
         /// <param name="predicate">Predicate</param>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, object>> fields, bool desc = false);
 
         /// <summary>
-        /// Order by field
+        /// Order by fields
         /// </summary>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> OrderBy(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> OrderBy(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, object>> fields, bool desc = false);
 
         /// <summary>
         /// Order by fields
         /// </summary>
         /// <param name="predicate">Predicate</param>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, object>> fields, bool desc = false);
 
         /// <summary>
-        /// Order by field
+        /// Order by fields
         /// </summary>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> OrderBy(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> OrderBy(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, object>> fields, bool desc = false);
 
         /// <summary>
         /// Order by fields
         /// </summary>
         /// <param name="predicate">Predicate</param>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, object>> field, bool desc = false);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, object>> fields, bool desc = false);
 
         #endregion
 
@@ -6801,98 +6801,98 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> Select(params Expression<Func<TFirst, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> Select(Expression<Func<TFirst, object>> fields);
 
         /// <summary>
         /// Unselect fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> Unselect(params Expression<Func<TFirst, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> Unselect(Expression<Func<TFirst, object>> fields);
 
         /// <summary>
         /// Select fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> Select(params Expression<Func<TFirst, TSecond, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> Select(Expression<Func<TFirst, TSecond, object>> fields);
 
         /// <summary>
         /// Unselect fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> Unselect(params Expression<Func<TFirst, TSecond, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> Unselect(Expression<Func<TFirst, TSecond, object>> fields);
 
         /// <summary>
         /// Select fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> Select(params Expression<Func<TFirst, TSecond, TThird, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> Select(Expression<Func<TFirst, TSecond, TThird, object>> fields);
 
         /// <summary>
         /// Unselect fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> Unselect(params Expression<Func<TFirst, TSecond, TThird, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> Unselect(Expression<Func<TFirst, TSecond, TThird, object>> fields);
 
         /// <summary>
         /// Select fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> Select(params Expression<Func<TFirst, TSecond, TThird, TFourth, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> Select(Expression<Func<TFirst, TSecond, TThird, TFourth, object>> fields);
 
         /// <summary>
         /// Unselect fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> Unselect(params Expression<Func<TFirst, TSecond, TThird, TFourth, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> Unselect(Expression<Func<TFirst, TSecond, TThird, TFourth, object>> fields);
 
         /// <summary>
         /// Select fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> Select(params Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> Select(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, object>> fields);
 
         /// <summary>
         /// Unselect fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> Unselect(params Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> Unselect(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, object>> fields);
 
         /// <summary>
         /// Select fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> Select(params Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> Select(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, object>> fields);
 
         /// <summary>
         /// Unselect fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> Unselect(params Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> Unselect(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, object>> fields);
 
         /// <summary>
         /// Select fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> Select(params Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> Select(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, object>> fields);
 
         /// <summary>
         /// Unselect fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> Unselect(params Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, object>>[] fields);
+        ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> Unselect(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, object>> fields);
 
         #endregion
 

@@ -433,7 +433,7 @@ namespace Sixnet.Development.Queryable
 
         #endregion
 
-        #region Query fields
+        #region Select
 
         /// <summary>
         /// Select fields
