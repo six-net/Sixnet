@@ -214,11 +214,11 @@ namespace System
         /// <returns></returns>
         internal static dynamic GetNowDateTime(this Type dataType)
         {
-            if (dataType == typeof(DateTimeOffset))
+            if (dataType == typeof(DateTimeOffset) || dataType == typeof(DateTimeOffset?))
             {
                 return DateTimeOffset.Now;
             }
-            if (dataType == typeof(DateTime))
+            if (dataType == typeof(DateTime) || dataType == typeof(DateTime?))
             {
                 return DateTime.Now;
             }
