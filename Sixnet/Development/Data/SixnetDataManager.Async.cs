@@ -72,6 +72,10 @@ namespace Sixnet.Development.Data
             // all table names
             var serverTableKey = GetDatabaseServerSplitTableCacheKey(entityConfig, context.Server);
             var allTableNames = await GetCachedTableNamesAsync(serverTableKey).ConfigureAwait(false);
+            if(allTableNames.IsNullOrEmpty())
+            {
+                allTableNames = await RefreshTablesAsync(context, rootTableName, serverTableKey, splitBehavior, provider).ConfigureAwait(false);
+            }
 
             // split table names
             if (context.Command?.OperationType == DataOperationType.Insert)

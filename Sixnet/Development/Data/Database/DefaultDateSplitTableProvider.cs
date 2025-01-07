@@ -48,10 +48,8 @@ namespace Sixnet.Development.Data.Database
         /// <returns></returns>
         public List<string> GetTableNames(GetSplitTableNameParameter parameter)
         {
-            if (parameter == null || parameter.AllTableNames.IsNullOrEmpty())
-            {
-                return new List<string>(0);
-            }
+            SixnetDirectThrower.ThrowArgNullIf(parameter == null, nameof(parameter));
+
             var splitBehavior = parameter.Behavior;
             var allTableNames = parameter.AllTableNames;
             var resolvedTableNames = parameter.ResolvedTableNames;
@@ -59,7 +57,7 @@ namespace Sixnet.Development.Data.Database
             {
                 resolvedTableNames = splitBehavior.SplitTableNameFilter(allTableNames, resolvedTableNames)?.ToList();
             }
-            else
+            else if (!allTableNames.IsNullOrEmpty() && !resolvedTableNames.IsNullOrEmpty())
             {
                 switch (splitBehavior.SelectionPattern)
                 {

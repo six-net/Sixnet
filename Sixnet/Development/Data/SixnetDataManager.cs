@@ -230,6 +230,10 @@ namespace Sixnet.Development.Data
             // all table names
             var serverTableKey = GetDatabaseServerSplitTableCacheKey(entityConfig, context.Server);
             var allTableNames = GetCachedTableNames(serverTableKey);
+            if (allTableNames.IsNullOrEmpty())
+            {
+                allTableNames = RefreshTables(context, rootTableName, serverTableKey, splitBehavior, provider);
+            }
 
             // split table names
             if (context.Command?.OperationType == DataOperationType.Insert)
