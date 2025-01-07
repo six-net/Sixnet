@@ -6,9 +6,9 @@ using Sixnet.Development.Entity;
 namespace Sixnet.Development.Data.Database
 {
     /// <summary>
-    /// Get split table name options
+    /// Get split table name parameter
     /// </summary>
-    public class GetSplitTableNameOptions
+    public class ResolveSplitTableNameParameter
     {
         /// <summary>
         /// Gets or sets the  entity configuration

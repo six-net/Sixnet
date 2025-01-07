@@ -177,26 +177,6 @@ namespace Sixnet.Development.Data
         #region Table name
 
         /// <summary>
-        /// Get default table name
-        /// </summary>
-        /// <param name="databaseType">Server type</param>
-        /// <param name="entityType">Entity type</param>
-        /// <returns></returns>
-        static string GetDefaultTableName(DatabaseType? databaseType, Type entityType)
-        {
-            SixnetDirectThrower.ThrowArgNullIf(entityType == null, nameof(entityType));
-
-            var tableName = databaseType.HasValue
-                ? GetEntitySetting(databaseType.Value, entityType)?.TableName
-                : string.Empty;
-            if (string.IsNullOrWhiteSpace(tableName))
-            {
-                tableName = SixnetEntityManager.GetTableName(entityType);
-            }
-            return tableName;
-        }
-
-        /// <summary>
         /// Gets data command table names
         /// </summary>
         /// <param name="context">Data command execution context</param>
@@ -234,16 +214,13 @@ namespace Sixnet.Development.Data
             SixnetDirectThrower.ThrowArgNullIf(entityConfig == null, nameof(entityConfig));
             SixnetDirectThrower.ThrowNotSupportIf(entityConfig.SplitTableType == SplitTableType.None, $"{entityConfig.EntityType.Name} not support split table.");
 
-            var splitProviderName = entityConfig.SplitTableProviderName ?? string.Empty;
             var dataOptions = GetDataOptions();
-            var provider = dataOptions.GetSplitTableProvider(splitProviderName);
-            provider ??= GetDefaultSplitTableProvider(entityConfig.SplitTableType);
-
+            var provider = GetSplitTableProvider(dataOptions, entityConfig);
             SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"Not set split table provider for {entityConfig.SplitTableProviderName}");
 
             var splitBehavior = context.GetSplitTableBehavior() ?? _defaultSplitTableBehavior;
             var rootTableName = GetDefaultTableName(context.Server.DatabaseType, entityConfig.EntityType);
-            var splitTableNames = provider.GetSplitTableNames(new GetSplitTableNameOptions()
+            var splitTableNames = provider.ResolveTableNames(new ResolveSplitTableNameParameter()
             {
                 EntityConfiguration = entityConfig,
                 RootTableName = rootTableName,
@@ -251,33 +228,17 @@ namespace Sixnet.Development.Data
             });
 
             // all table names
-            var databaseServer = context.Server;
-            var serverTableKey = $"{entityConfig.EntityType.Name}:{databaseServer.GetServerIdentityValue()}";
+            var serverTableKey = GetDatabaseServerSplitTableCacheKey(entityConfig, context.Server);
+            var allTableNames = GetCachedTableNames(serverTableKey);
 
-            var existParameter = new ExistParameter()
-            {
-                Keys = new List<CacheKey>() { serverTableKey }
-            };
-            HandleSplitTableCacheParameter(existParameter);
-            var hasGotTables = SixnetCacher.Keys.Exist(existParameter)?.KeyCount == 1;
-
-            List<string> allTableNames;
-            if (!hasGotTables)
-            {
-                allTableNames = RefreshTables(context, rootTableName, serverTableKey);
-            }
-            else
-            {
-                allTableNames = GetCachedTableNames(serverTableKey);
-            }
-
+            // split table names
             if (context.Command?.OperationType == DataOperationType.Insert)
             {
                 SixnetDirectThrower.ThrowInvalidOperationIf(splitTableNames.IsNullOrEmpty(), $"Not assign split table for {entityConfig.EntityType.Name}");
                 var diffTables = splitTableNames.Except(allTableNames, _defaultDataTableNameComparer);
-                if (!diffTables.IsNullOrEmpty() && !hasGotTables)
+                if (!diffTables.IsNullOrEmpty())
                 {
-                    allTableNames = RefreshTables(context, rootTableName, serverTableKey);
+                    allTableNames = RefreshTables(context, rootTableName, serverTableKey, splitBehavior, provider);
                     diffTables = splitTableNames.Except(allTableNames, _defaultDataTableNameComparer);
                 }
                 if (!diffTables.IsNullOrEmpty() && dataOptions.AutoCreateSplitTable)
@@ -291,10 +252,10 @@ namespace Sixnet.Development.Data
                             diffTables = splitTableNames.Except(allTableNames, _defaultDataTableNameComparer);
                             if (!diffTables.IsNullOrEmpty())
                             {
-                                AutoCreateTables(context, rootTableName, serverTableKey, entityConfig, diffTables);
+                                AutoCreateTables(context, rootTableName, serverTableKey, entityConfig, diffTables, splitBehavior, provider);
                             }
                         }
-                        catch (Exception ex)
+                        catch
                         {
                             throw;
                         }
@@ -309,36 +270,31 @@ namespace Sixnet.Development.Data
             {
                 if (splitBehavior.IsTakeAllSplitTables(splitTableNames))
                 {
+                    if (allTableNames.IsNullOrEmpty())
+                    {
+                        allTableNames = RefreshTables(context, rootTableName, serverTableKey, splitBehavior, provider);
+                    }
                     return allTableNames;
                 }
                 var diffTables = splitTableNames.Except(allTableNames, _defaultDataTableNameComparer);
-                if (!diffTables.IsNullOrEmpty() && hasGotTables)
+                if (!diffTables.IsNullOrEmpty())
                 {
-                    allTableNames = RefreshTables(context, rootTableName, serverTableKey);
+                    allTableNames = RefreshTables(context, rootTableName, serverTableKey, splitBehavior, provider);
                     diffTables = splitTableNames.Except(allTableNames, _defaultDataTableNameComparer);
                 }
                 if (!diffTables.IsNullOrEmpty())
                 {
                     splitTableNames = splitTableNames.Except(diffTables, _defaultDataTableNameComparer).ToList();
                 }
-                splitTableNames = provider.GetFinallySplitTableNames(splitBehavior, allTableNames, splitTableNames);
+                splitTableNames = provider.GetTableNames(new GetSplitTableNameParameter()
+                {
+                    ResolvedTableNames = splitTableNames,
+                    AllTableNames = allTableNames,
+                    RootTableName = rootTableName,
+                    Behavior = splitBehavior
+                });
             }
             return splitTableNames;
-        }
-
-        /// <summary>
-        /// Get cached table names
-        /// </summary>
-        /// <param name="serverTableKey">Server table key</param>
-        /// <returns></returns>
-        static List<string> GetCachedTableNames(string serverTableKey)
-        {
-            var setMembersParameter = new SetMembersParameter()
-            {
-                Key = serverTableKey
-            };
-            HandleSplitTableCacheParameter(setMembersParameter);
-            return SixnetCacher.Set.Members(setMembersParameter)?.Members ?? new List<string>(0);
         }
 
         /// <summary>
@@ -348,15 +304,20 @@ namespace Sixnet.Development.Data
         /// <param name="rootTableName"></param>
         /// <param name="serverTableKey"></param>
         /// <returns></returns>
-        static List<string> RefreshTables(DataCommandExecutionContext context, string rootTableName, string serverTableKey)
+        static List<string> RefreshTables(DataCommandExecutionContext context, string rootTableName, string serverTableKey
+            , SplitTableBehavior splitTableBehavior, ISixnetSplitTableProvider splitTableProvider)
         {
             List<string> allTableNames;
             using (var dataClient = GetClientForConnection(context.DatabaseConnection, true, true, false, context.DatabaseConnection.DataIsolationLevel))
             {
                 allTableNames = dataClient.GetTables()?.Select(c => c.TableName).ToList();
             }
-            allTableNames = allTableNames?.Where(t => t.ToLower().StartsWith(rootTableName.ToLower()))
-                .ToList() ?? new List<string>(0);
+            allTableNames = splitTableProvider.FilterAllTableNames(new FilterAllSplitTableNameParameter()
+            {
+                AllTableNames = allTableNames,
+                RootTableName = rootTableName,
+                Behavior = splitTableBehavior
+            }) ?? new List<string>(0);
             if (!allTableNames.IsNullOrEmpty())
             {
                 var setAddParameter = new SetAddParameter()
@@ -380,7 +341,8 @@ namespace Sixnet.Development.Data
         /// <param name="newTableNames">New table names</param>
         /// <returns></returns>
         static void AutoCreateTables(DataCommandExecutionContext context, string rootTableName, string serverTableKey
-            , EntityConfiguration entityConfig, IEnumerable<string> newTableNames)
+            , EntityConfiguration entityConfig, IEnumerable<string> newTableNames, SplitTableBehavior splitTableBehavior
+            , ISixnetSplitTableProvider splitTableProvider)
         {
             SixnetDirectThrower.ThrowArgNullIf(newTableNames.IsNullOrEmpty(), nameof(newTableNames));
 
@@ -399,7 +361,67 @@ namespace Sixnet.Development.Data
                 });
                 dataClient.Commit();
             }
-            RefreshTables(context, rootTableName, serverTableKey);
+            RefreshTables(context, rootTableName, serverTableKey, splitTableBehavior, splitTableProvider);
+        }
+
+        /// <summary>
+        /// Get default table name
+        /// </summary>
+        /// <param name="databaseType">Server type</param>
+        /// <param name="entityType">Entity type</param>
+        /// <returns></returns>
+        static string GetDefaultTableName(DatabaseType? databaseType, Type entityType)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(entityType == null, nameof(entityType));
+
+            var tableName = databaseType.HasValue
+                ? GetEntitySetting(databaseType.Value, entityType)?.TableName
+                : string.Empty;
+            if (string.IsNullOrWhiteSpace(tableName))
+            {
+                tableName = SixnetEntityManager.GetTableName(entityType);
+            }
+            return tableName;
+        }
+
+        /// <summary>
+        /// Get cached table names
+        /// </summary>
+        /// <param name="serverTableKey">Server table key</param>
+        /// <returns></returns>
+        static List<string> GetCachedTableNames(string serverTableKey)
+        {
+            var setMembersParameter = new SetMembersParameter()
+            {
+                Key = serverTableKey
+            };
+            HandleSplitTableCacheParameter(setMembersParameter);
+            return SixnetCacher.Set.Members(setMembersParameter)?.Members ?? new List<string>(0);
+        }
+
+        /// <summary>
+        /// Handle split table cache parameter
+        /// </summary>
+        /// <param name="parameter"></param>
+        static void HandleSplitTableCacheParameter(ISixnetCacheParameter parameter)
+        {
+            parameter.CacheObject = new CacheObject()
+            {
+                ObjectName = SixnetCacher.SplitTableCacheObjectName
+            };
+            parameter.UseInMemoryForDefault = true;
+        }
+
+        /// <summary>
+        /// Get split table provider
+        /// </summary>
+        /// <param name="dataOptions"></param>
+        /// <param name="entityConfiguration"></param>
+        /// <returns></returns>
+        static ISixnetSplitTableProvider GetSplitTableProvider(SixnetDataOptions dataOptions, EntityConfiguration entityConfiguration)
+        {
+            return dataOptions.GetSplitTableProvider(entityConfiguration.SplitTableProviderName)
+                   ?? GetDefaultSplitTableProvider(entityConfiguration.SplitTableType);
         }
 
         /// <summary>
@@ -426,16 +448,14 @@ namespace Sixnet.Development.Data
         }
 
         /// <summary>
-        /// Handle split table cache parameter
+        /// Get database server split table cache key
         /// </summary>
-        /// <param name="parameter"></param>
-        static void HandleSplitTableCacheParameter(ISixnetCacheParameter parameter)
+        /// <param name="entityConfiguration"></param>
+        /// <param name="databaseServer"></param>
+        /// <returns></returns>
+        static string GetDatabaseServerSplitTableCacheKey(EntityConfiguration entityConfiguration, DatabaseServer databaseServer)
         {
-            parameter.CacheObject = new CacheObject()
-            {
-                ObjectName = SixnetCacher.SplitTableCacheObjectName
-            };
-            parameter.UseInMemoryForDefault = true;
+            return $"{entityConfiguration.EntityType.Name}:{databaseServer.GetServerIdentityValue()}";
         }
 
         #endregion

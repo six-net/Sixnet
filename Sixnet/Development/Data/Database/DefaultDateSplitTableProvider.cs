@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using Sixnet.Development.Entity;
 using Sixnet.Exceptions;
 
@@ -14,18 +15,18 @@ namespace Sixnet.Development.Data.Database
     internal class DefaultDateSplitTableProvider : ISixnetSplitTableProvider
     {
         /// <summary>
-        /// Get split table names
+        /// Resolve split table names
         /// </summary>
-        /// <param name="options">Get split table name options</param>
+        /// <param name="parameter">Get split table name options</param>
         /// <returns></returns>
-        public List<string> GetSplitTableNames(GetSplitTableNameOptions options)
+        public List<string> ResolveTableNames(ResolveSplitTableNameParameter parameter)
         {
-            SixnetDirectThrower.ThrowArgNullIf(options == null, nameof(options));
-            SixnetDirectThrower.ThrowArgNullIf(options.EntityConfiguration == null, nameof(GetSplitTableNameOptions.EntityConfiguration));
-            SixnetDirectThrower.ThrowArgNullIf(options.SplitBehavior == null, nameof(GetSplitTableNameOptions.SplitBehavior));
-            SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(options.RootTableName), nameof(GetSplitTableNameOptions.RootTableName));
+            SixnetDirectThrower.ThrowArgNullIf(parameter == null, nameof(parameter));
+            SixnetDirectThrower.ThrowArgNullIf(parameter.EntityConfiguration == null, nameof(ResolveSplitTableNameParameter.EntityConfiguration));
+            SixnetDirectThrower.ThrowArgNullIf(parameter.SplitBehavior == null, nameof(ResolveSplitTableNameParameter.SplitBehavior));
+            SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(parameter.RootTableName), nameof(ResolveSplitTableNameParameter.RootTableName));
 
-            var splitBehavior = options.SplitBehavior;
+            var splitBehavior = parameter.SplitBehavior;
             if (splitBehavior.SplitValues.IsNullOrEmpty())
             {
                 return new List<string>(0);
@@ -34,38 +35,61 @@ namespace Sixnet.Development.Data.Database
             var tableNames = new List<string>();
             foreach (var splitValue in splitBehavior.SplitValues)
             {
-                var splitDate = GetSplitTableDate((splitValue is DateTimeOffset splitOffsetValue) ? splitOffsetValue.DateTime : splitValue, options.EntityConfiguration.SplitTableType);
-                tableNames.Add(GetSplitTable(options.EntityConfiguration, splitDate));
+                var splitDate = GetSplitTableDate((splitValue is DateTimeOffset splitOffsetValue) ? splitOffsetValue.DateTime : splitValue, parameter.EntityConfiguration.SplitTableType);
+                tableNames.Add(GetSplitTable(parameter.EntityConfiguration, splitDate));
             }
             return tableNames;
         }
 
         /// <summary>
-        /// Get finally split table names
+        /// Get table names
         /// </summary>
-        /// <param name="splitBehavior">Split table behavior</param>
-        /// <param name="allTableNames">All table names</param>
-        /// <param name="parsedTableNames">Parsed table names</param>
+        /// <param name="parameter">Parameter</param>
         /// <returns></returns>
-        public List<string> GetFinallySplitTableNames(SplitTableBehavior splitBehavior, List<string> allTableNames, List<string> parsedTableNames)
+        public List<string> GetTableNames(GetSplitTableNameParameter parameter)
         {
-            if (allTableNames.IsNullOrEmpty() || parsedTableNames.IsNullOrEmpty())
+            if (parameter == null || parameter.AllTableNames.IsNullOrEmpty())
             {
                 return new List<string>(0);
             }
-            switch (splitBehavior.SelectionPattern)
+            var splitBehavior = parameter.Behavior;
+            var allTableNames = parameter.AllTableNames;
+            var resolvedTableNames = parameter.ResolvedTableNames;
+            if (splitBehavior.SplitTableNameFilter != null)
             {
-                case SplitTableNameSelectionPattern.Range:
-                    var sortedAllTableNames = allTableNames.OrderBy(t => t).ToList();
-                    var sortedParsedTableNames = parsedTableNames.OrderBy(t => t);
-                    var minTableName = parsedTableNames.First();
-                    var maxTableName = parsedTableNames.Last();
-                    var minTableNameIndex = sortedAllTableNames.FindIndex(t => string.Equals(t, minTableName, StringComparison.OrdinalIgnoreCase));
-                    var maxTableNameIndex = sortedAllTableNames.FindIndex(t => string.Equals(t, maxTableName, StringComparison.OrdinalIgnoreCase));
-                    parsedTableNames = sortedAllTableNames.GetRange(minTableNameIndex, (maxTableNameIndex - minTableNameIndex) + 1);
-                    break;
+                resolvedTableNames = splitBehavior.SplitTableNameFilter(allTableNames, resolvedTableNames)?.ToList();
             }
-            return parsedTableNames;
+            else
+            {
+                switch (splitBehavior.SelectionPattern)
+                {
+                    case SplitTableNameSelectionPattern.Range:
+                        var sortedAllTableNames = allTableNames.OrderBy(t => t).ToList();
+                        var sortedResolvedTableNames = resolvedTableNames.OrderBy(t => t);
+                        var minTableName = sortedResolvedTableNames.First();
+                        var maxTableName = sortedResolvedTableNames.Last();
+                        var minTableNameIndex = sortedAllTableNames.FindIndex(t => string.Equals(t, minTableName, StringComparison.OrdinalIgnoreCase));
+                        var maxTableNameIndex = sortedAllTableNames.FindIndex(t => string.Equals(t, maxTableName, StringComparison.OrdinalIgnoreCase));
+                        resolvedTableNames = sortedAllTableNames.GetRange(minTableNameIndex, (maxTableNameIndex - minTableNameIndex) + 1);
+                        break;
+                }
+            }
+            return resolvedTableNames;
+        }
+
+        /// <summary>
+        /// Filter all table names
+        /// </summary>
+        /// <param name="parameter">Parameter</param>
+        /// <returns></returns>
+        public List<string> FilterAllTableNames(FilterAllSplitTableNameParameter parameter)
+        {
+            if (parameter?.AllTableNames.IsNullOrEmpty() ?? true)
+            {
+                return new List<string>(0);
+            }
+            var tableNameRegex = new Regex(@$"^{parameter.RootTableName}_\d+$");
+            return parameter.AllTableNames?.Where(tn => tableNameRegex.IsMatch(tn)).ToList();
         }
 
         /// <summary>

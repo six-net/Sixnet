@@ -3,86 +3,19 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Sixnet.Development.Data.Command;
 using Sixnet.Development.Data.Field;
 using Sixnet.Development.Data.Field.Formatting;
 using Sixnet.Development.Entity;
 using Sixnet.Development.Queryable;
 using Sixnet.Exceptions;
-using Sixnet.Logging;
 
 namespace Sixnet.Development.Data.Database
 {
-    /// <summary>
-    /// Base data command resolver
-    /// </summary>
-    public abstract partial class BaseDataCommandResolver : ISixnetDataCommandResolver
+    public abstract partial class BaseDataCommandResolver
     {
-        #region Properties
-
-        public string ConditionStartKeyword { get; set; } = " WHERE ";
-        public string AndConnector { get; set; } = "AND";
-        public string OrConnector { get; set; } = "OR";
-        public string EqualOperator { get; set; } = "=";
-        public string GreaterThanOperator { get; set; } = ">";
-        public string GreaterThanOrEqualOperator { get; set; } = ">=";
-        public string NotEqualOperator { get; set; } = "<>";
-        public string LessThanOperator { get; set; } = "<";
-        public string LessThanOrEqualOperator { get; set; } = "<=";
-        public string InOperator { get; set; } = " IN ";
-        public string NotInOperator { get; set; } = " NOT IN ";
-        public string LikeOperator { get; set; } = " LIKE ";
-        public string NotLikeOperator { get; set; } = " NOT LIKE ";
-        public string IsNullOperator { get; set; } = " IS NULL";
-        public string NotNullOperator { get; set; } = " IS NOT NULL";
-        public string TrueOperator { get; set; } = "1=1";
-        public string FalseOperator { get; set; } = "1<>1";
-        public string SortKeyword { get; set; } = " ORDER BY ";
-        public string DescKeyword { get; set; } = " DESC";
-        public string AscKeyword { get; set; } = " ASC";
-        public string GroupByKeyword { get; set; } = " GROUP BY ";
-        public string ParameterPrefix { get; set; } = "@";
-        public string PagingTableName { get; set; } = "SIXNET_TEMTABLE_PAGING";
-        public string PagingCountTableName { get; set; } = "SIXNET_TEMTABLE_PAGING_COUNT";
-        public string TablePetNameKeyword { get; set; } = " AS ";
-        public string ColumnPetNameKeyword { get; set; } = " AS ";
-        public string WithTableKeyword { get; set; } = " AS ";
-        public string NullKeyword { get; set; } = "NULL";
-        public string DistinctKeyword { get; set; } = " DISTINCT";
-        public string NegationKeyword { get; set; } = " NOT";
-        public bool ParameterizationJsonFormatter { get; set; } = true;
-        public Dictionary<string, bool> NotParameterizationFormatterNameDict { get; set; }
-        public DatabaseType DatabaseType { get; set; }
-        public Dictionary<JoinType, string> JoinOperatorDict { get; set; } = new Dictionary<JoinType, string>()
-        {
-            { JoinType.InnerJoin," INNER JOIN " },
-            { JoinType.CrossJoin," CROSS JOIN " },
-            { JoinType.LeftJoin," LEFT JOIN " },
-            { JoinType.RightJoin," RIGHT JOIN " },
-            { JoinType.FullJoin," FULL JOIN " }
-        };
-        public Dictionary<CalculationOperator, string> CalculationOperators = new Dictionary<CalculationOperator, string>(4)
-        {
-            [CalculationOperator.Add] = "+",
-            [CalculationOperator.Subtract] = "-",
-            [CalculationOperator.Multiply] = "*",
-            [CalculationOperator.Divide] = "/",
-        };
-        public ISixnetFieldFormatter DefaultFieldFormatter { get; set; }
-        public int DefaultCharLength { get; set; } = 50;
-        public int DefaultDecimalLength { get; set; } = 20;
-        public int DefaultDecimalPrecision { get; set; } = 4;
-        public Dictionary<DbType, string> DbTypeDefaultValues { get; set; }
-        public Func<string, string> WrapKeywordFunc { get; set; }
-        public string RecursiveKeyword { get; set; }
-        public bool UseFieldForRecursive { get; set; } = false;
-        public bool SplitWrapParameter { get; set; } = false;
-
-        #endregion
-
-        #region Methods
-
-        #region Statement
+        #region Statements
 
         #region Query
 
@@ -91,16 +24,16 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="command">Database single command</param>
         /// <returns></returns>
-        public virtual QueryDatabaseStatement GenerateDatabaseQueryStatement(SingleDatabaseCommand command)
+        public virtual async Task<QueryDatabaseStatement> GenerateDatabaseQueryStatementAsync(SingleDatabaseCommand command)
         {
             //create context
             var context = new DataCommandResolveContext(command.Connection, command.DataCommand);
 
             //translation query
-            var queryableTranResult = Translate(context);
+            var queryableTranResult = await TranslateAsync(context).ConfigureAwait(false);
 
             //generate statement
-            var statement = GenerateQueryStatementCore(context, queryableTranResult, QueryableLocation.Top);
+            var statement = await GenerateQueryStatementCoreAsync(context, queryableTranResult, QueryableLocation.Top).ConfigureAwait(false);
             var queryable = queryableTranResult.GetOriginalQueryable();
             statement.ScriptType = GetCommandType(queryable.ScriptType);
             return statement;
@@ -111,7 +44,7 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="command">Database multiple command</param>
         /// <returns></returns>
-        public virtual QueryDatabaseStatement GenerateDatabaseQueryStatement(MultipleDatabaseCommand command)
+        public virtual async Task<QueryDatabaseStatement> GenerateDatabaseQueryStatementAsync(MultipleDatabaseCommand command)
         {
             SixnetDirectThrower.ThrowArgNullIf(command?.DataCommands.IsNullOrEmpty() ?? true, "Not set any data command");
 
@@ -125,10 +58,10 @@ namespace Sixnet.Development.Data.Database
                 context.SetCommand(dataCommand);
 
                 //translation queryable
-                var queryableTranResult = Translate(context);
+                var queryableTranResult = await TranslateAsync(context).ConfigureAwait(false);
 
                 //generate statement
-                var cmdQueryableStatement = GenerateQueryStatementCore(context, queryableTranResult, QueryableLocation.Top);
+                var cmdQueryableStatement = await GenerateQueryStatementCoreAsync(context, queryableTranResult, QueryableLocation.Top).ConfigureAwait(false);
 
                 commandScriptBuilder.AppendLine(cmdQueryableStatement.Script + ";");
                 groupParameters = groupParameters == null
@@ -147,13 +80,13 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="command">Database single command</param>
         /// <returns></returns>
-        public virtual QueryDatabaseStatement GenerateDatabaseQueryPagingStatement(SingleDatabaseCommand command)
+        public virtual async Task<QueryDatabaseStatement> GenerateDatabaseQueryPagingStatementAsync(SingleDatabaseCommand command)
         {
             var queryable = command?.DataCommand?.Queryable;
             //create context
             var context = new DataCommandResolveContext(command.Connection, command.DataCommand);
             //translation query
-            var translationResult = Translate(context);
+            var translationResult = await TranslateAsync(context).ConfigureAwait(false);
             string sqlStatement;
             IEnumerable<ISixnetField> outputFields = null;
             IEnumerable<ISixnetField> originalOutputFields = null;
@@ -179,7 +112,7 @@ namespace Sixnet.Development.Data.Database
                     if (string.IsNullOrWhiteSpace(targetScript))
                     {
                         //target
-                        var targetStatement = GetFromTargetStatement(context, queryable, QueryableLocation.Top, tablePetName);
+                        var targetStatement = await GetFromTargetStatementAsync(context, queryable, QueryableLocation.Top, tablePetName).ConfigureAwait(false);
                         originalOutputFields = outputFields = targetStatement.OutputFields;
                         //condition
                         var condition = translationResult.GetCondition(ConditionStartKeyword);
@@ -203,13 +136,13 @@ namespace Sixnet.Development.Data.Database
                         var sortFields = queryable.Sorts.Select(se => se.Field);
                         outputFields = outputFields.Union(sortFields);
                     }
-                    var outputFieldString = FormatFieldsString(context, queryable, QueryableLocation.PreScript, FieldLocation.InnerOutput, outputFields);
+                    var outputFieldString = await FormatFieldsStringAsync(context, queryable, QueryableLocation.PreScript, FieldLocation.InnerOutput, outputFields).ConfigureAwait(false);
 
                     //sort
                     var sort = translationResult.GetSort();
                     if (string.IsNullOrWhiteSpace(sort))
                     {
-                        sort = GetDefaultSort(context, translationResult, queryable, outputFields, tablePetName);
+                        sort = await GetDefaultSortAsync(context, translationResult, queryable, outputFields, tablePetName).ConfigureAwait(false);
                     }
                     var hasSort = !string.IsNullOrWhiteSpace(sort);
 
@@ -235,7 +168,7 @@ namespace Sixnet.Development.Data.Database
                     //limit
                     var pagingFilter = command.DataCommand.PagingFilter;
                     var limit = GetLimitString((pagingFilter.Page - 1) * pagingFilter.PageSize, pagingFilter.PageSize, hasSort);
-                    outputFieldString = FormatFieldsString(context, queryable, QueryableLocation.Top, FieldLocation.Output, originalOutputFields);
+                    outputFieldString = await FormatFieldsStringAsync(context, queryable, QueryableLocation.Top, FieldLocation.Output, originalOutputFields).ConfigureAwait(false);
                     sqlStatement = $"{preScript}SELECT (SELECT {pagingTotalCountFieldName} FROM {PagingCountTableName}){ColumnPetNameKeyword}{pagingTotalCountFieldName},''{ColumnPetNameKeyword}{SixnetDataManager.GetPagingTotalSplitFieldName()},{outputFieldString} FROM {PagingTableName}{TablePetNameKeyword}{tablePetName}{sort}{limit}";
                     break;
             }
@@ -255,7 +188,7 @@ namespace Sixnet.Development.Data.Database
         /// <param name="translationResult">Queryable translation result</param>
         /// <param name="queryableLocation">Queryable location</param>
         /// <returns></returns>
-        protected abstract QueryDatabaseStatement GenerateQueryStatementCore(DataCommandResolveContext context, QueryableTranslationResult translationResult, QueryableLocation queryableLocation);
+        protected abstract Task<QueryDatabaseStatement> GenerateQueryStatementCoreAsync(DataCommandResolveContext context, QueryableTranslationResult translationResult, QueryableLocation queryableLocation);
 
         #endregion
 
@@ -266,10 +199,10 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="command">Database single command</param>
         /// <returns></returns>
-        public virtual List<ExecutionDatabaseStatement> GenerateDatabaseExecutionStatements(SingleDatabaseCommand command)
+        public virtual async Task<List<ExecutionDatabaseStatement>> GenerateDatabaseExecutionStatementsAsync(SingleDatabaseCommand command)
         {
             var commandResolveContext = new DataCommandResolveContext(command.Connection, command.DataCommand);
-            return GenerateDatabaseExecutionStatements(commandResolveContext);
+            return await GenerateDatabaseExecutionStatementsAsync(commandResolveContext).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -277,7 +210,7 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="command">Database execution command</param>
         /// <returns></returns>
-        public virtual List<ExecutionDatabaseStatement> GenerateDatabaseExecutionStatements(MultipleDatabaseCommand command)
+        public virtual async Task<List<ExecutionDatabaseStatement>> GenerateDatabaseExecutionStatementsAsync(MultipleDatabaseCommand command)
         {
             SixnetDirectThrower.ThrowArgNullIf(command?.DataCommands.IsNullOrEmpty() ?? true, "Data commands is null or empty");
 
@@ -344,7 +277,7 @@ namespace Sixnet.Development.Data.Database
             {
                 commandResolveContext.ClearParameters();
                 commandResolveContext.SetCommand(cmd);
-                var executionStatements = GenerateDatabaseExecutionStatements(commandResolveContext);
+                var executionStatements = await GenerateDatabaseExecutionStatementsAsync(commandResolveContext).ConfigureAwait(false);
                 if (!executionStatements.IsNullOrEmpty())
                 {
                     foreach (var statement in executionStatements)
@@ -382,7 +315,7 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="context">Command resolve context</param>
         /// <returns></returns>
-        protected virtual List<ExecutionDatabaseStatement> GenerateDatabaseExecutionStatements(DataCommandResolveContext context)
+        protected virtual async Task<List<ExecutionDatabaseStatement>> GenerateDatabaseExecutionStatementsAsync(DataCommandResolveContext context)
         {
             var command = context.DataCommandExecutionContext.Command;
             var statements = new List<ExecutionDatabaseStatement>();
@@ -411,17 +344,17 @@ namespace Sixnet.Development.Data.Database
                     case DataOperationType.Insert:
                         if (!(command?.FieldsAssignment?.NewValues?.IsNullOrEmpty() ?? true))
                         {
-                            statements.AddRange(GenerateInsertStatements(context));
+                            statements.AddRange(await GenerateInsertStatementsAsync(context).ConfigureAwait(false));
                         }
                         break;
                     case DataOperationType.Update:
                         if (!(command?.FieldsAssignment?.NewValues?.IsNullOrEmpty() ?? true))
                         {
-                            statements.AddRange(GenerateUpdateStatements(context));
+                            statements.AddRange(await GenerateUpdateStatementsAsync(context).ConfigureAwait(false));
                         }
                         break;
                     case DataOperationType.Delete:
-                        statements.AddRange(GenerateDeleteStatements(context));
+                        statements.AddRange(await GenerateDeleteStatementsAsync(context).ConfigureAwait(false));
                         break;
                     default:
                         statements.Add(GetScriptStatement());
@@ -436,21 +369,21 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="context">Command resolve context</param>
         /// <returns></returns>
-        protected abstract List<ExecutionDatabaseStatement> GenerateInsertStatements(DataCommandResolveContext context);
+        protected abstract Task<List<ExecutionDatabaseStatement>> GenerateInsertStatementsAsync(DataCommandResolveContext context);
 
         /// <summary>
         /// Get update statement
         /// </summary>
         /// <param name="context">Command resolve context</param>
         /// <returns></returns>
-        protected abstract List<ExecutionDatabaseStatement> GenerateUpdateStatements(DataCommandResolveContext context);
+        protected abstract Task<List<ExecutionDatabaseStatement>> GenerateUpdateStatementsAsync(DataCommandResolveContext context);
 
         /// <summary>
         /// Get delete statement
         /// </summary>
         /// <param name="context">Command resolve context</param>
         /// <returns></returns>
-        protected abstract List<ExecutionDatabaseStatement> GenerateDeleteStatements(DataCommandResolveContext context);
+        protected abstract Task<List<ExecutionDatabaseStatement>> GenerateDeleteStatementsAsync(DataCommandResolveContext context);
 
         #endregion
 
@@ -463,12 +396,12 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="command">Database migration command</param>
         /// <returns></returns>
-        public virtual List<ExecutionDatabaseStatement> GenerateDatabaseMigrationStatements(MigrationDatabaseCommand command)
+        public virtual async Task<List<ExecutionDatabaseStatement>> GenerateDatabaseMigrationStatementsAsync(MigrationDatabaseCommand command)
         {
             var statements = new List<ExecutionDatabaseStatement>();
 
             // Create table
-            var createTableStatements = GetCreateTableStatements(command);
+            var createTableStatements = await GetCreateTableStatementsAsync(command).ConfigureAwait(false);
             if (!createTableStatements.IsNullOrEmpty())
             {
                 statements.AddRange(createTableStatements);
@@ -486,63 +419,7 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="migrationCommand">Migration command</param>
         /// <returns></returns>
-        protected abstract List<ExecutionDatabaseStatement> GetCreateTableStatements(MigrationDatabaseCommand migrationCommand);
-
-        #endregion
-
-        #region Get field nullable
-
-        /// <summary>
-        /// Get field nullable
-        /// </summary>
-        /// <param name="field">Field</param>
-        /// <param name="options">Options</param>
-        /// <returns></returns>
-        protected virtual string GetFieldNullable(DataField field, MigrationInfo options)
-        {
-            SixnetDirectThrower.ThrowArgNullIf(field == null, nameof(field));
-            var dataType = field.DataType;
-            var required = field.HasDbFeature(FieldDbFeature.NotNull);
-            return required || !dataType.AllowNull() ? " NOT NULL" : " NULL";
-        }
-
-        #endregion
-
-        #region Get field sql data type
-
-        /// <summary>
-        /// Get sql data type
-        /// </summary>
-        /// <param name="field">Field</param>
-        /// <returns></returns>
-        protected abstract string GetSqlDataType(DataField field, MigrationInfo options);
-
-        #endregion
-
-        #region Get field default value
-
-        /// <summary>
-        /// Get sql default value
-        /// </summary>
-        /// <param name="field"></param>
-        /// <param name="options"></param>
-        /// <returns></returns>
-        protected virtual string GetSqlDefaultValue(DataField field, MigrationInfo options)
-        {
-            SixnetDirectThrower.ThrowArgNullIf(field == null, nameof(field));
-            var defaultValue = field.DefaultValue;
-            var useDefaultValue = field.HasDbFeature(FieldDbFeature.Default);
-            if (string.IsNullOrWhiteSpace(defaultValue) && useDefaultValue)
-            {
-                var dbType = field.DataType.GetDbType();
-                DbTypeDefaultValues.TryGetValue(dbType, out defaultValue);
-            }
-            if (!string.IsNullOrWhiteSpace(defaultValue))
-            {
-                defaultValue = $" DEFAULT ({defaultValue})";
-            }
-            return defaultValue;
-        }
+        protected abstract Task<List<ExecutionDatabaseStatement>> GetCreateTableStatementsAsync(MigrationDatabaseCommand migrationCommand);
 
         #endregion
 
@@ -558,19 +435,19 @@ namespace Sixnet.Development.Data.Database
         /// <param name="location">Query object location</param>
         /// <param name="applyTablePetName">Whether apply table pet name</param>
         /// <returns></returns>
-        protected virtual QueryDatabaseStatement GetFromTargetStatement(DataCommandResolveContext context, ISixnetQueryable originalQueryable
+        protected virtual async Task<QueryDatabaseStatement> GetFromTargetStatementAsync(DataCommandResolveContext context, ISixnetQueryable originalQueryable
             , QueryableLocation location, string tablePetName, bool applyTablePetName = true)
         {
             switch (originalQueryable.FromType)
             {
                 case QueryableFromType.Queryable:
-                    var targetTranslationResult = ExecuteTranslation(context, originalQueryable.TargetQueryable, QueryableLocation.From, true);
-                    var databaseStatement = GenerateQueryStatementCore(context, targetTranslationResult, QueryableLocation.From);
+                    var targetTranslationResult = await ExecuteTranslationAsync(context, originalQueryable.TargetQueryable, QueryableLocation.From, true).ConfigureAwait(false);
+                    var databaseStatement = await GenerateQueryStatementCoreAsync(context, targetTranslationResult, QueryableLocation.From).ConfigureAwait(false);
                     databaseStatement.Script = $"({databaseStatement.Script}){(applyTablePetName ? $"{TablePetNameKeyword}{tablePetName}" : "")}";
                     databaseStatement.ComplexTarget = true;
                     return databaseStatement;
                 default:
-                    var tableNames = context.GetTableNames(originalQueryable, location);
+                    var tableNames = await context.GetTableNamesAsync(originalQueryable, location).ConfigureAwait(false);
                     var targetScript = "";
                     var complexTarget = false;
                     if (tableNames.Count == 1)
@@ -602,11 +479,11 @@ namespace Sixnet.Development.Data.Database
         /// <param name="topQueryable">Top queryable</param>
         /// <param name="joinEntry">Join entry</param>
         /// <returns></returns>
-        protected virtual QueryDatabaseStatement GetJoinTargetStatement(DataCommandResolveContext context, ISixnetQueryable topQueryable, JoinEntry joinEntry)
+        protected virtual async Task<QueryDatabaseStatement> GetJoinTargetStatementAsync(DataCommandResolveContext context, ISixnetQueryable topQueryable, JoinEntry joinEntry)
         {
             var joinTargetQueryable = joinEntry.Target;
             var joinTablePetName = context.GetTablePetName(topQueryable, joinTargetQueryable.GetModelType(), joinEntry.Index);
-            return GetFromTargetStatement(context, joinTargetQueryable, QueryableLocation.JoinTarget, joinTablePetName);
+            return await GetFromTargetStatementAsync(context, joinTargetQueryable, QueryableLocation.JoinTarget, joinTablePetName).ConfigureAwait(false);
         }
 
         #endregion
@@ -620,12 +497,12 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="context">Command resolve context</param>
         /// <returns>Return a translation result</returns>
-        protected virtual QueryableTranslationResult Translate(DataCommandResolveContext context)
+        protected virtual async Task<QueryableTranslationResult> TranslateAsync(DataCommandResolveContext context)
         {
             var queryable = context?.DataCommandExecutionContext?.Command?.Queryable;
             if (queryable != null)
             {
-                return ExecuteTranslation(context, queryable, QueryableLocation.Top);
+                return await ExecuteTranslationAsync(context, queryable, QueryableLocation.Top).ConfigureAwait(false);
             }
             return null;
         }
@@ -638,7 +515,7 @@ namespace Sixnet.Development.Data.Database
         /// <param name="location">Queryable location</param>
         /// <param name="useSort">Indicates whether use sort</param>
         /// <returns>Return a translation result</returns>
-        protected virtual QueryableTranslationResult ExecuteTranslation(DataCommandResolveContext context, ISixnetQueryable queryable, QueryableLocation location, bool useSort = true)
+        protected virtual async Task<QueryableTranslationResult> ExecuteTranslationAsync(DataCommandResolveContext context, ISixnetQueryable queryable, QueryableLocation location, bool useSort = true)
         {
             if (queryable == null)
             {
@@ -653,25 +530,25 @@ namespace Sixnet.Development.Data.Database
                     context.InitQueryableTablePetName(queryable);
 
                     // Condition
-                    translationResult = AppendCondition(context, translationResult, queryable);
+                    translationResult = await AppendConditionAsync(context, translationResult, queryable).ConfigureAwait(false);
 
                     // Sort
-                    translationResult = AppendSort(context, queryable, translationResult, useSort);
+                    translationResult = await AppendSortAsync(context, queryable, translationResult, useSort).ConfigureAwait(false);
 
                     // Combine
-                    translationResult = AppandCombine(context, queryable, translationResult);
+                    translationResult = await AppandCombineAsync(context, queryable, translationResult).ConfigureAwait(false);
 
                     // Join
-                    translationResult = AppendJoin(context, queryable, translationResult);
+                    translationResult = await AppendJoinAsync(context, queryable, translationResult).ConfigureAwait(false);
 
                     // Group
-                    translationResult = AppendGroup(context, queryable, translationResult, location);
+                    translationResult = await AppendGroupAsync(context, queryable, translationResult, location).ConfigureAwait(false);
 
                     // Having
-                    translationResult = AppendHaving(context, queryable, translationResult, location);
+                    translationResult = await AppendHavingAsync(context, queryable, translationResult, location).ConfigureAwait(false);
 
                     // Recurve
-                    translationResult = AppendTree(context, queryable, translationResult, location);
+                    translationResult = await AppendTreeAsync(context, queryable, translationResult, location).ConfigureAwait(false);
 
                     break;
                 default:
@@ -689,13 +566,13 @@ namespace Sixnet.Development.Data.Database
         /// <param name="parentTranslationResult">Parent translation result</param>
         /// <param name="queryable">Query object</param>
         /// <returns></returns>
-        protected virtual QueryableTranslationResult AppendCondition(DataCommandResolveContext context, QueryableTranslationResult parentTranslationResult, ISixnetQueryable queryable)
+        protected virtual async Task<QueryableTranslationResult> AppendConditionAsync(DataCommandResolveContext context, QueryableTranslationResult parentTranslationResult, ISixnetQueryable queryable)
         {
             if (!queryable.Conditions.IsNullOrEmpty())
             {
                 foreach (var condition in queryable.Conditions)
                 {
-                    var conditionResult = TranslateCondition(context, queryable, condition);
+                    var conditionResult = await TranslateConditionAsync(context, queryable, condition).ConfigureAwait(false);
                     if (conditionResult != null)
                     {
                         parentTranslationResult.AddCondition(conditionResult.GetCondition(), condition.Connector.ToString().ToUpper());
@@ -711,9 +588,8 @@ namespace Sixnet.Development.Data.Database
         /// <param name="context">Command resolve context</param>
         /// <param name="topQueryable">Source query</param>
         /// <param name="condition">Condition</param>
-        /// <param name="tablePetName">Table pet name</param>
         /// <returns></returns>
-        protected virtual QueryableTranslationResult TranslateCondition(DataCommandResolveContext context, ISixnetQueryable topQueryable, ISixnetCondition condition)
+        protected virtual async Task<QueryableTranslationResult> TranslateConditionAsync(DataCommandResolveContext context, ISixnetQueryable topQueryable, ISixnetCondition condition)
         {
             QueryableTranslationResult translationResult = null;
             if (condition == null)
@@ -722,7 +598,7 @@ namespace Sixnet.Development.Data.Database
             }
             if (condition is Criterion criterion)
             {
-                translationResult = TranslateCriterion(context, topQueryable, criterion);
+                translationResult = await TranslateCriterionAsync(context, topQueryable, criterion).ConfigureAwait(false);
             }
             if (condition is ISixnetQueryable groupQueryable && !groupQueryable.Conditions.IsNullOrEmpty())
             {
@@ -732,11 +608,11 @@ namespace Sixnet.Development.Data.Database
                     var firstCondition = groupQueryable.Conditions.First();
                     if (firstCondition is Criterion firstCriterion)
                     {
-                        translationResult = TranslateCriterion(context, topQueryable, firstCriterion);
+                        translationResult = await TranslateCriterionAsync(context, topQueryable, firstCriterion).ConfigureAwait(false);
                     }
                     else
                     {
-                        translationResult = TranslateCondition(context, topQueryable, firstCondition);
+                        translationResult = await TranslateConditionAsync(context, topQueryable, firstCondition).ConfigureAwait(false);
                     }
                 }
                 else
@@ -746,7 +622,7 @@ namespace Sixnet.Development.Data.Database
                     var index = 0;
                     foreach (var groupItem in groupQueryable.Conditions)
                     {
-                        var itemResult = TranslateCondition(context, topQueryable, groupItem);
+                        var itemResult = await TranslateConditionAsync(context, topQueryable, groupItem).ConfigureAwait(false);
                         var itemCondition = itemResult.GetCondition();
                         if (!string.IsNullOrWhiteSpace(itemCondition))
                         {
@@ -774,7 +650,7 @@ namespace Sixnet.Development.Data.Database
         /// <param name="topQueryable">Top queryable</param>
         /// <param name="criterion">Criterion</param>
         /// <returns></returns>
-        protected virtual QueryableTranslationResult TranslateCriterion(DataCommandResolveContext context, ISixnetQueryable topQueryable, Criterion criterion)
+        protected virtual async Task<QueryableTranslationResult> TranslateCriterionAsync(DataCommandResolveContext context, ISixnetQueryable topQueryable, Criterion criterion)
         {
             var criterionTranResult = QueryableTranslationResult.Create(topQueryable);
             if (criterion == null)
@@ -783,8 +659,8 @@ namespace Sixnet.Development.Data.Database
             }
 
             var sqlOperator = GetOperator(criterion.Operator);
-            var leftFieldString = FormatCriterionField(context, topQueryable, criterion.Left, criterion.Operator);
-            var rightFieldString = FormatCriterionField(context, topQueryable, criterion.Right, criterion.Operator);
+            var leftFieldString = await FormatCriterionFieldAsync(context, topQueryable, criterion.Left, criterion.Operator).ConfigureAwait(false);
+            var rightFieldString = await FormatCriterionFieldAsync(context, topQueryable, criterion.Right, criterion.Operator).ConfigureAwait(false);
             var needParameter = OperatorNeedParameter(criterion.Operator);
             var connector = criterion.Connector.ToString().ToUpper();
             if (!needParameter)
@@ -802,12 +678,12 @@ namespace Sixnet.Development.Data.Database
         /// <param name="subqueryable">Subqueryable</param>
         /// <returns></returns>
         /// <exception cref="SixnetException"></exception>
-        protected virtual string TranslateSubquery(DataCommandResolveContext context, ISixnetQueryable subqueryable)
+        protected virtual async Task<string> TranslateSubqueryAsync(DataCommandResolveContext context, ISixnetQueryable subqueryable)
         {
             SixnetException.ThrowIf(subqueryable.SelectedFields.IsNullOrEmpty(), "Subqueryable must set query fields");
 
-            var subqueryTranslationResult = ExecuteTranslation(context, subqueryable, QueryableLocation.Subquery, true);
-            var subqueryStatement = GenerateQueryStatementCore(context, subqueryTranslationResult, QueryableLocation.Subquery);
+            var subqueryTranslationResult = await ExecuteTranslationAsync(context, subqueryable, QueryableLocation.Subquery, true).ConfigureAwait(false);
+            var subqueryStatement = await GenerateQueryStatementCoreAsync(context, subqueryTranslationResult, QueryableLocation.Subquery).ConfigureAwait(false);
             return subqueryStatement.Script;
         }
 
@@ -822,7 +698,7 @@ namespace Sixnet.Development.Data.Database
         /// <param name="topQueryable">Top queryable</param>
         /// <param name="parentTranslationResult">Parent translation result</param>
         /// <returns></returns>
-        protected virtual QueryableTranslationResult AppandCombine(DataCommandResolveContext context, ISixnetQueryable topQueryable, QueryableTranslationResult parentTranslationResult)
+        protected virtual async Task<QueryableTranslationResult> AppandCombineAsync(DataCommandResolveContext context, ISixnetQueryable topQueryable, QueryableTranslationResult parentTranslationResult)
         {
             if (topQueryable?.Combines.IsNullOrEmpty() ?? true)
             {
@@ -835,8 +711,8 @@ namespace Sixnet.Development.Data.Database
                 {
                     continue;
                 }
-                var combineQueryResult = ExecuteTranslation(context, combineEntry.Target, QueryableLocation.Combine, true);
-                var combineStatement = GenerateQueryStatementCore(context, combineQueryResult, QueryableLocation.Combine);
+                var combineQueryResult = await ExecuteTranslationAsync(context, combineEntry.Target, QueryableLocation.Combine, true).ConfigureAwait(false);
+                var combineStatement = await GenerateQueryStatementCoreAsync(context, combineQueryResult, QueryableLocation.Combine).ConfigureAwait(false);
                 combineBuilder.Append($"{GetCombineOperator(combineEntry.Type)}{combineStatement.Script}");
             }
             parentTranslationResult.SetCombine(combineBuilder.ToString());
@@ -855,7 +731,7 @@ namespace Sixnet.Development.Data.Database
         /// <param name="parentTranslationResult">Parent translation result</param>
         /// <param name="useSort">Indecates whether use sort</param>
         /// <returns></returns>
-        protected virtual QueryableTranslationResult AppendSort(DataCommandResolveContext context, ISixnetQueryable originalQueryable, QueryableTranslationResult parentTranslationResult, bool useSort)
+        protected virtual async Task<QueryableTranslationResult> AppendSortAsync(DataCommandResolveContext context, ISixnetQueryable originalQueryable, QueryableTranslationResult parentTranslationResult, bool useSort)
         {
             if (!useSort || (originalQueryable?.Sorts.IsNullOrEmpty() ?? true))
             {
@@ -865,7 +741,7 @@ namespace Sixnet.Development.Data.Database
             var hasGroup = !originalQueryable.GroupFields.IsNullOrEmpty();
             foreach (var sortEntry in originalQueryable.Sorts)
             {
-                sortBuilder.Append($"{FormatSortField(context, originalQueryable, sortEntry)}{(sortEntry.Desc ? DescKeyword : AscKeyword)},");
+                sortBuilder.Append($"{await FormatSortFieldAsync(context, originalQueryable, sortEntry).ConfigureAwait(false)}{(sortEntry.Desc ? DescKeyword : AscKeyword)},");
             }
             parentTranslationResult.SetSort(sortBuilder.ToString().Trim(','), SortKeyword);
             return parentTranslationResult;
@@ -883,7 +759,7 @@ namespace Sixnet.Development.Data.Database
         /// <param name="parentTranslationResult">Parent translation result</param>
         /// <param name="tablePetName">Table pet name</param>
         /// <returns></returns>
-        protected virtual QueryableTranslationResult AppendJoin(DataCommandResolveContext context, ISixnetQueryable topQueryable, QueryableTranslationResult parentTranslationResult)
+        protected virtual async Task<QueryableTranslationResult> AppendJoinAsync(DataCommandResolveContext context, ISixnetQueryable topQueryable, QueryableTranslationResult parentTranslationResult)
         {
             if (topQueryable.Joins.IsNullOrEmpty())
             {
@@ -892,10 +768,10 @@ namespace Sixnet.Development.Data.Database
             var joinBuilder = new StringBuilder();
             foreach (var joinEntry in topQueryable.Joins)
             {
-                var joinTargetSegment = GetJoinTargetStatement(context, topQueryable, joinEntry);
+                var joinTargetSegment = await GetJoinTargetStatementAsync(context, topQueryable, joinEntry).ConfigureAwait(false);
 
                 //join connection
-                var joinResult = GetJoinConnection(context, topQueryable, joinEntry);
+                var joinResult = await GetJoinConnectionAsync(context, topQueryable, joinEntry).ConfigureAwait(false);
 
                 var joinConnection = joinResult.GetJoinConnection();
                 joinBuilder.Append($"{GetJoinOperator(joinEntry.Type)}{joinTargetSegment.Script}{joinConnection}");
@@ -912,7 +788,7 @@ namespace Sixnet.Development.Data.Database
         /// <param name="topQueryable">Top queryable</param>
         /// <param name="joinEntry">Join entry</param>
         /// <returns>Return join condition</returns>
-        protected virtual QueryableTranslationResult GetJoinConnection(DataCommandResolveContext context, ISixnetQueryable topQueryable, JoinEntry joinEntry)
+        protected virtual async Task<QueryableTranslationResult> GetJoinConnectionAsync(DataCommandResolveContext context, ISixnetQueryable topQueryable, JoinEntry joinEntry)
         {
             if (joinEntry.Type == JoinType.CrossJoin)
             {
@@ -928,7 +804,7 @@ namespace Sixnet.Development.Data.Database
             var joinConnectionResult = QueryableTranslationResult.Create(topQueryable);
             foreach (var condition in joinConnection.Conditions)
             {
-                var conditionResult = TranslateCondition(context, topQueryable, condition);
+                var conditionResult = await TranslateConditionAsync(context, topQueryable, condition).ConfigureAwait(false);
                 joinConnectionResult.AddCondition(conditionResult.GetCondition(), condition.Connector.ToString().ToUpper());
             }
 
@@ -943,6 +819,65 @@ namespace Sixnet.Development.Data.Database
 
         #endregion
 
+        #region Group
+
+        /// <summary>
+        /// Append group
+        /// </summary>
+        /// <param name="context">Command resolve context</param>
+        /// <param name="originalQueryable">Original queryable</param>
+        /// <param name="translationResult">Translation result</param>
+        /// <param name="location">Query object location</param>
+        /// <returns></returns>
+        protected virtual async Task<QueryableTranslationResult> AppendGroupAsync(DataCommandResolveContext context, ISixnetQueryable originalQueryable
+            , QueryableTranslationResult translationResult, QueryableLocation location)
+        {
+            if (!originalQueryable.GroupFields.IsNullOrEmpty())
+            {
+                var groupFormatedFields = new List<string>();
+                foreach (var groupField in originalQueryable.GroupFields)
+                {
+                    groupFormatedFields.Add(await FormatFieldAsync(context, originalQueryable, SixnetDataManager.GetField(DatabaseType, originalQueryable?.GetModelType(), groupField), location, FieldLocation.Criterion).ConfigureAwait(false));
+                }
+                translationResult.SetGroup($"{GroupByKeyword}{string.Join(",", groupFormatedFields)}");
+            }
+            return translationResult;
+        }
+
+        #endregion
+
+        #region Having
+
+        /// <summary>
+        /// Append Having
+        /// </summary>
+        /// <param name="context">Command resolve context</param>
+        /// <param name="originalQuery">Original query</param>
+        /// <param name="translationResult">Translation result</param>
+        /// <param name="location">Query object location</param>
+        /// <returns></returns>
+        protected virtual async Task<QueryableTranslationResult> AppendHavingAsync(DataCommandResolveContext context, ISixnetQueryable originalQuery, QueryableTranslationResult translationResult, QueryableLocation location)
+        {
+            if (originalQuery.HavingQueryable != null)
+            {
+                var havingResult = QueryableTranslationResult.Create(originalQuery);
+                foreach (var condition in originalQuery.HavingQueryable.Conditions)
+                {
+                    var conditionResult = await TranslateConditionAsync(context, originalQuery, condition).ConfigureAwait(false);
+                    havingResult.AddCondition(conditionResult.GetCondition(), condition.Connector.ToString().ToUpper());
+                }
+
+                var havingCondition = havingResult?.GetCondition();
+                if (!string.IsNullOrWhiteSpace(havingCondition))
+                {
+                    translationResult.SetHavingCondition($" HAVING {havingCondition}");
+                }
+            }
+            return translationResult;
+        }
+
+        #endregion
+
         #region Tree
 
         /// <summary>
@@ -953,7 +888,7 @@ namespace Sixnet.Development.Data.Database
         /// <param name="translationResult">Translation result</param>
         /// <param name="location">Query object location</param>
         /// <returns></returns>
-        protected virtual QueryableTranslationResult AppendTree(DataCommandResolveContext context, ISixnetQueryable originalQueryable, QueryableTranslationResult translationResult, QueryableLocation location)
+        protected virtual async Task<QueryableTranslationResult> AppendTreeAsync(DataCommandResolveContext context, ISixnetQueryable originalQueryable, QueryableTranslationResult translationResult, QueryableLocation location)
         {
             var treeInfo = originalQueryable.TreeInfo;
             if (treeInfo == null)
@@ -966,10 +901,12 @@ namespace Sixnet.Development.Data.Database
             //field
             var dataField = SixnetDataManager.GetField(DatabaseType, originalQueryable?.GetModelType(), treeInfo.DataField);
             var parentField = SixnetDataManager.GetField(DatabaseType, originalQueryable?.GetModelType(), treeInfo.ParentField);
-            var treeDataFieldString = FormatField(context, originalQueryable, dataField, QueryableLocation.PreScript
-                , FieldLocation.Join, tablePetName: treeInfo.Direction == TreeMatchingDirection.Down ? preScriptTablePetName : "");
-            var treeParentFieldString = FormatField(context, originalQueryable, parentField, QueryableLocation.PreScript
-                , FieldLocation.Join, tablePetName: treeInfo.Direction == TreeMatchingDirection.Up ? preScriptTablePetName : "");
+            var treeDataFieldString = await FormatFieldAsync(context, originalQueryable, dataField, QueryableLocation.PreScript
+                , FieldLocation.Join, tablePetName: treeInfo.Direction == TreeMatchingDirection.Down ? preScriptTablePetName : "")
+                .ConfigureAwait(false);
+            var treeParentFieldString = await FormatFieldAsync(context, originalQueryable, parentField, QueryableLocation.PreScript
+                , FieldLocation.Join, tablePetName: treeInfo.Direction == TreeMatchingDirection.Up ? preScriptTablePetName : "")
+                .ConfigureAwait(false);
 
             // entity table name
             context.SetActivityQueryable(originalQueryable, location);
@@ -980,7 +917,7 @@ namespace Sixnet.Development.Data.Database
             IEnumerable<ISixnetField> outputFields;
             var join = translationResult.GetJoin();
             var condition = translationResult.GetCondition(ConditionStartKeyword);
-            var targetStatement = GetFromTargetStatement(context, originalQueryable, location, tablePetName, false);
+            var targetStatement = await GetFromTargetStatementAsync(context, originalQueryable, location, tablePetName, false).ConfigureAwait(false);
             if (targetStatement.ComplexTarget)
             {
                 //output fields
@@ -989,7 +926,7 @@ namespace Sixnet.Development.Data.Database
                 {
                     outputFields = SixnetDataManager.GetAllQueryableFields(DatabaseType, originalQueryable.GetModelType());
                 }
-                var outputFieldString = FormatFieldsString(context, originalQueryable, QueryableLocation.PreScript, FieldLocation.InnerOutput, outputFields);
+                var outputFieldString = await FormatFieldsStringAsync(context, originalQueryable, QueryableLocation.PreScript, FieldLocation.InnerOutput, outputFields).ConfigureAwait(false);
                 var withFields = UseFieldForRecursive ? $"({FormatColumnFieldsString(context, originalQueryable, outputFields)})" : "";
 
                 //target statement
@@ -1005,7 +942,7 @@ namespace Sixnet.Development.Data.Database
             {
                 var fromScript = $"{targetStatement.Script}{TablePetNameKeyword}{tablePetName}";
                 outputFields = SixnetDataManager.GetAllQueryableFields(DatabaseType, originalQueryable.GetModelType());
-                var outputFieldString = FormatFieldsString(context, originalQueryable, QueryableLocation.PreScript, FieldLocation.InnerOutput, outputFields);
+                var outputFieldString = await FormatFieldsStringAsync(context, originalQueryable, QueryableLocation.PreScript, FieldLocation.InnerOutput, outputFields).ConfigureAwait(false);
                 var withFields = UseFieldForRecursive ? $"({FormatColumnFieldsString(context, originalQueryable, outputFields)})" : "";
 
                 preScript =
@@ -1023,216 +960,11 @@ namespace Sixnet.Development.Data.Database
 
         #endregion
 
-        #region Group
-
-        /// <summary>
-        /// Append group
-        /// </summary>
-        /// <param name="context">Command resolve context</param>
-        /// <param name="originalQueryable">Original queryable</param>
-        /// <param name="translationResult">Translation result</param>
-        /// <param name="location">Query object location</param>
-        /// <returns></returns>
-        protected virtual QueryableTranslationResult AppendGroup(DataCommandResolveContext context, ISixnetQueryable originalQueryable
-            , QueryableTranslationResult translationResult, QueryableLocation location)
-        {
-            if (!originalQueryable.GroupFields.IsNullOrEmpty())
-            {
-                translationResult.SetGroup($"{GroupByKeyword}{string.Join(",", originalQueryable.GroupFields.Select(gf => FormatField(context, originalQueryable, SixnetDataManager.GetField(DatabaseType, originalQueryable?.GetModelType(), gf), location, FieldLocation.Criterion)))}");
-            }
-            return translationResult;
-        }
-
-        #endregion
-
-        #region Having
-
-        /// <summary>
-        /// Append Having
-        /// </summary>
-        /// <param name="context">Command resolve context</param>
-        /// <param name="originalQuery">Original query</param>
-        /// <param name="translationResult">Translation result</param>
-        /// <param name="location">Query object location</param>
-        /// <returns></returns>
-        protected virtual QueryableTranslationResult AppendHaving(DataCommandResolveContext context, ISixnetQueryable originalQuery, QueryableTranslationResult translationResult, QueryableLocation location)
-        {
-            if (originalQuery.HavingQueryable != null)
-            {
-                var havingResult = QueryableTranslationResult.Create(originalQuery);
-                foreach (var condition in originalQuery.HavingQueryable.Conditions)
-                {
-                    var conditionResult = TranslateCondition(context, originalQuery, condition);
-                    havingResult.AddCondition(conditionResult.GetCondition(), condition.Connector.ToString().ToUpper());
-                }
-
-                var havingCondition = havingResult?.GetCondition();
-                if (!string.IsNullOrWhiteSpace(havingCondition))
-                {
-                    translationResult.SetHavingCondition($" HAVING {havingCondition}");
-                }
-            }
-            return translationResult;
-        }
-
-        #endregion
-
         #region Util
-
-        #region Operator
-
-        /// <summary>
-        /// Get sql operator by criterion operator
-        /// </summary>
-        /// <param name="criterionOperator">Criterion operator</param>
-        /// <returns></returns>
-        protected virtual string GetOperator(CriterionOperator criterionOperator)
-        {
-            var sqlOperator = string.Empty;
-            switch (criterionOperator)
-            {
-                case CriterionOperator.Equal:
-                    sqlOperator = EqualOperator;
-                    break;
-                case CriterionOperator.GreaterThan:
-                    sqlOperator = GreaterThanOperator;
-                    break;
-                case CriterionOperator.GreaterThanOrEqual:
-                    sqlOperator = GreaterThanOrEqualOperator;
-                    break;
-                case CriterionOperator.NotEqual:
-                    sqlOperator = NotEqualOperator;
-                    break;
-                case CriterionOperator.LessThan:
-                    sqlOperator = LessThanOperator;
-                    break;
-                case CriterionOperator.LessThanOrEqual:
-                    sqlOperator = LessThanOrEqualOperator;
-                    break;
-                case CriterionOperator.In:
-                    sqlOperator = InOperator;
-                    break;
-                case CriterionOperator.NotIn:
-                    sqlOperator = NotInOperator;
-                    break;
-                case CriterionOperator.Like:
-                case CriterionOperator.BeginLike:
-                case CriterionOperator.EndLike:
-                    sqlOperator = LikeOperator;
-                    break;
-                case CriterionOperator.NotLike:
-                case CriterionOperator.NotBeginLike:
-                case CriterionOperator.NotEndLike:
-                    sqlOperator = NotLikeOperator;
-                    break;
-                case CriterionOperator.IsNull:
-                    sqlOperator = IsNullOperator;
-                    break;
-                case CriterionOperator.NotNull:
-                    sqlOperator = NotNullOperator;
-                    break;
-                case CriterionOperator.True:
-                    sqlOperator = TrueOperator;
-                    break;
-                case CriterionOperator.False:
-                    sqlOperator = FalseOperator;
-                    break;
-            }
-            return sqlOperator;
-        }
-
-        /// <summary>
-        /// Get join operator
-        /// </summary>
-        /// <param name="joinType">Join type</param>
-        /// <returns></returns>
-        protected virtual string GetJoinOperator(JoinType joinType)
-        {
-            return JoinOperatorDict[joinType];
-        }
-
-        /// <summary>
-        /// Get combine operator
-        /// </summary>
-        /// <param name="combineType">Combine type</param>
-        /// <returns>Return combine operator</returns>
-        protected virtual string GetCombineOperator(CombineType combineType)
-        {
-            return combineType switch
-            {
-                CombineType.UnionAll => " UNION ALL ",
-                CombineType.Union => " UNION ",
-                CombineType.Except => " EXCEPT ",
-                CombineType.Intersect => " INTERSECT ",
-                _ => throw new InvalidOperationException($"{DatabaseType} not support {combineType}"),
-            };
-        }
-
-        /// <summary>
-        /// Indicates operator whether need parameter
-        /// </summary>
-        /// <param name="criterionOperator">Criterion operator</param>
-        /// <returns></returns>
-        protected virtual bool OperatorNeedParameter(CriterionOperator criterionOperator)
-        {
-            var needParameter = true;
-            switch (criterionOperator)
-            {
-                case CriterionOperator.NotNull:
-                case CriterionOperator.IsNull:
-                    needParameter = false;
-                    break;
-            }
-            return needParameter;
-        }
-
-        /// <summary>
-        /// Get system calculation operator
-        /// </summary>
-        /// <param name="calculationOperator">Calculation operator</param>
-        /// <returns>Return system calculation operator</returns>
-        protected virtual string GetSystemCalculationOperator(CalculationOperator calculationOperator)
-        {
-            CalculationOperators.TryGetValue(calculationOperator, out var systemCalculationOperator);
-            return systemCalculationOperator;
-        }
-
-        #endregion
-
-        #region Get limit string
-
-        /// <summary>
-        /// Get limit string
-        /// </summary>
-        /// <param name="offsetNum">Offset num</param>
-        /// <param name="takeNum">Take num</param>
-        /// <param name="hasSort">Has sort</param>
-        /// <returns></returns>
-        protected abstract string GetLimitString(int offsetNum, int takeNum, bool hasSort);
-
-        #endregion
-
-        #region Get distinct string
-
-        /// <summary>
-        /// Get distinct string
-        /// </summary>
-        /// <param name="queryable"></param>
-        /// <returns></returns>
-        protected virtual string GetDistinctString(ISixnetQueryable queryable)
-        {
-            if (queryable?.IsDistincted ?? false)
-            {
-                return DistinctKeyword;
-            }
-            return string.Empty;
-        }
-
-        #endregion
 
         #region Get default sort
 
-        protected virtual string GetDefaultSort(DataCommandResolveContext context, QueryableTranslationResult translationResult, ISixnetQueryable originalQueryable, IEnumerable<ISixnetField> dataFields, string tablePetName)
+        protected virtual async Task<string> GetDefaultSortAsync(DataCommandResolveContext context, QueryableTranslationResult translationResult, ISixnetQueryable originalQueryable, IEnumerable<ISixnetField> dataFields, string tablePetName)
         {
             var defaultSortField = dataFields?.Where(f => f is DataField)
                                               .OrderByDescending(f => f.InRole(FieldRole.Sequence))
@@ -1242,7 +974,7 @@ namespace Sixnet.Development.Data.Database
             {
                 var orderField = DataField.Create(defaultSortField.PropertyName, originalQueryable.GetModelType());
                 originalQueryable.OrderBy(orderField);
-                AppendSort(context, originalQueryable, translationResult, true);
+                await AppendSortAsync(context, originalQueryable, translationResult, true).ConfigureAwait(false);
             }
             return translationResult.GetSort();
         }
@@ -1255,27 +987,44 @@ namespace Sixnet.Development.Data.Database
         /// Format fields output string
         /// </summary>
         /// <param name="context">Context</param>
-        /// <param name="tablePetName">Table pet name</param>
         /// <param name="queryable">Query</param>
         /// <param name="fields">Fields</param>
-        /// <param name="ignoreFormatter">Whether ignore formatter</param>
         /// <returns></returns>
-        protected virtual string FormatFieldsString(DataCommandResolveContext context, ISixnetQueryable queryable, QueryableLocation queryLocation, FieldLocation fieldLocation, IEnumerable<ISixnetField> fields)
+        protected virtual async Task<string> FormatFieldsStringAsync(DataCommandResolveContext context, ISixnetQueryable queryable, QueryableLocation queryLocation, FieldLocation fieldLocation, IEnumerable<ISixnetField> fields)
         {
-            return string.Join(",", FormatFields(context, queryable, queryLocation, fieldLocation, fields));
+            return string.Join(",", await FormatFieldsAsync(context, queryable, queryLocation, fieldLocation, fields));
         }
 
         /// <summary>
         /// Format fields
         /// </summary>
         /// <param name="context">Command resolve context</param>
-        /// <param name="tablePetName">Table pet name</param>
         /// <param name="queryable">Query object</param>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        protected virtual IEnumerable<string> FormatFields(DataCommandResolveContext context, ISixnetQueryable queryable, QueryableLocation queryLocation, FieldLocation fieldLocation, IEnumerable<ISixnetField> fields)
+        protected virtual async Task<IEnumerable<string>> FormatFieldsAsync(DataCommandResolveContext context, ISixnetQueryable queryable, QueryableLocation queryLocation, FieldLocation fieldLocation, IEnumerable<ISixnetField> fields)
         {
-            return fields?.Select(field => FormatField(context, queryable, field, queryLocation, fieldLocation, null)) ?? Array.Empty<string>();
+            var formatedFields = new List<string>();
+            if (!fields.IsNullOrEmpty())
+            {
+                foreach (var field in fields)
+                {
+                    formatedFields.Add(await FormatFieldAsync(context, queryable, field, queryLocation, fieldLocation, null).ConfigureAwait(false));
+                }
+            }
+            return formatedFields;
+        }
+
+        /// <summary>
+        /// Format sort field name
+        /// </summary>
+        /// <param name="queryable">Query object</param>
+        /// <param name="sortEntry">Sort entry</param>
+        /// <returns></returns>
+        protected virtual async Task<string> FormatSortFieldAsync(DataCommandResolveContext context, ISixnetQueryable queryable, SortEntry sortEntry)
+        {
+            var field = SixnetDataManager.GetField(context.DataCommandExecutionContext.Server.DatabaseType, queryable?.GetModelType(), sortEntry.Field);
+            return await FormatFieldAsync(context, queryable, field, QueryableLocation.Top, FieldLocation.Sort).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -1286,23 +1035,10 @@ namespace Sixnet.Development.Data.Database
         /// <param name="queryable">Query object</param>
         /// <param name="field">Field</param>
         /// <returns></returns>
-        protected virtual string FormatCriterionField(DataCommandResolveContext context, ISixnetQueryable queryable, ISixnetField field, CriterionOperator criterionOperator)
+        protected virtual async Task<string> FormatCriterionFieldAsync(DataCommandResolveContext context, ISixnetQueryable queryable, ISixnetField field, CriterionOperator criterionOperator)
         {
             field = SixnetDataManager.GetField(context.DataCommandExecutionContext.Server.DatabaseType, queryable?.GetModelType(), field);
-            return FormatField(context, queryable, field, QueryableLocation.Top, FieldLocation.Criterion, criterionOperator);
-        }
-
-        /// <summary>
-        /// Format sort field name
-        /// </summary>
-        /// <param name="queryable">Query object</param>
-        /// <param name="tablePetName">Table pet name</param>
-        /// <param name="sortEntry">Sort entry</param>
-        /// <returns></returns>
-        protected virtual string FormatSortField(DataCommandResolveContext context, ISixnetQueryable queryable, SortEntry sortEntry)
-        {
-            var field = SixnetDataManager.GetField(context.DataCommandExecutionContext.Server.DatabaseType, queryable?.GetModelType(), sortEntry.Field);
-            return FormatField(context, queryable, field, QueryableLocation.Top, FieldLocation.Sort);
+            return await FormatFieldAsync(context, queryable, field, QueryableLocation.Top, FieldLocation.Criterion, criterionOperator).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -1312,7 +1048,7 @@ namespace Sixnet.Development.Data.Database
         /// <param name="command">Data command</param>
         /// <param name="value">Value</param>
         /// <returns></returns>
-        protected virtual string FormatUpdateValueField(DataCommandResolveContext context, SixnetDataCommand command, dynamic value)
+        protected virtual async Task<string> FormatUpdateValueFieldAsync(DataCommandResolveContext context, SixnetDataCommand command, dynamic value)
         {
             if (value == null)
             {
@@ -1321,7 +1057,7 @@ namespace Sixnet.Development.Data.Database
             var valueField = value as ISixnetField;
             valueField ??= ConstantField.Create(value);
             valueField = SixnetDataManager.GetField(context.DataCommandExecutionContext.Server.DatabaseType, command.GetEntityType(), valueField);
-            return FormatField(context, command.Queryable, valueField, QueryableLocation.Top, FieldLocation.UpdateValue);
+            return await FormatFieldAsync(context, command.Queryable, valueField, QueryableLocation.Top, FieldLocation.UpdateValue).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -1331,7 +1067,7 @@ namespace Sixnet.Development.Data.Database
         /// <param name="queryable">Queryable</param>
         /// <param name="valueField">Value field</param>
         /// <returns></returns>
-        protected virtual string FormatInsertValueField(DataCommandResolveContext context, ISixnetQueryable queryable, dynamic value)
+        protected virtual async Task<string> FormatInsertValueFieldAsync(DataCommandResolveContext context, ISixnetQueryable queryable, dynamic value)
         {
             if (value == null)
             {
@@ -1339,7 +1075,7 @@ namespace Sixnet.Development.Data.Database
             }
             var valueField = value as ISixnetField;
             valueField ??= ConstantField.Create(value);
-            return FormatField(context, queryable, valueField, QueryableLocation.Top, FieldLocation.InsertValue);
+            return await FormatFieldAsync(context, queryable, valueField, QueryableLocation.Top, FieldLocation.InsertValue).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -1352,7 +1088,7 @@ namespace Sixnet.Development.Data.Database
         /// <param name="formatOptions">Field format options</param>
         /// <param name="ignoreFormatter">Whether ignore formatter</param>
         /// <returns>Return field conversion result</returns>
-        protected virtual string FormatField(DataCommandResolveContext context, ISixnetQueryable queryable, ISixnetField field
+        protected virtual async Task<string> FormatFieldAsync(DataCommandResolveContext context, ISixnetQueryable queryable, ISixnetField field
             , QueryableLocation queryableLocation, FieldLocation fieldLocation, CriterionOperator? criterionOperator = null
             , string tablePetName = "", string formatterName = "")
         {
@@ -1389,7 +1125,7 @@ namespace Sixnet.Development.Data.Database
             // queryable field
             else if (field is QueryableField queryableField)
             {
-                formatedFieldName = $"({TranslateSubquery(context, queryableField.Queryable)})";
+                formatedFieldName = $"({await TranslateSubqueryAsync(context, queryableField.Queryable).ConfigureAwait(false)})";
             }
             // constant field
             else if (field is ConstantField constantField)
@@ -1435,7 +1171,7 @@ namespace Sixnet.Development.Data.Database
                 {
                     if (formatSetting.Parameter is ISixnetField parameterField)
                     {
-                        formatSetting.Parameter = FormatField(context, queryable, parameterField, queryableLocation, FieldLocation.FormatParameter, criterionOperator, tablePetName, formatSetting.Name);
+                        formatSetting.Parameter = await FormatFieldAsync(context, queryable, parameterField, queryableLocation, FieldLocation.FormatParameter, criterionOperator, tablePetName, formatSetting.Name).ConfigureAwait(false);
                     }
                     formatContext.FieldName = formatedFieldName;
                     formatContext.FormatSetting = formatSetting;
@@ -1459,259 +1195,6 @@ namespace Sixnet.Development.Data.Database
 
             return formatedFieldName;
         }
-
-        protected virtual bool ParameterizationField(FieldLocation fieldLocation, string formatterName = "")
-        {
-            return fieldLocation == FieldLocation.Criterion
-                || fieldLocation == FieldLocation.UpdateValue
-                || fieldLocation == FieldLocation.InsertValue
-                || (fieldLocation == FieldLocation.FormatParameter && !string.IsNullOrWhiteSpace(formatterName))
-                 && (NotParameterizationFormatterNameDict.IsNullOrEmpty() || !NotParameterizationFormatterNameDict.TryGetValue(formatterName, out var notParam) || !notParam);
-        }
-
-        protected virtual bool NeedWrapParameter(CriterionOperator criterionOperator)
-        {
-            switch (criterionOperator)
-            {
-                case CriterionOperator.In:
-                case CriterionOperator.NotIn:
-                    return true;
-                default:
-                    return false;
-            }
-        }
-
-        /// <summary>
-        /// Format column fields string
-        /// </summary>
-        /// <param name="context"></param>
-        /// <param name="queryable"></param>
-        /// <param name="fields"></param>
-        /// <returns></returns>
-        protected virtual string FormatColumnFieldsString(DataCommandResolveContext context, ISixnetQueryable queryable, IEnumerable<ISixnetField> fields)
-        {
-            return fields.IsNullOrEmpty()
-                ? string.Empty
-                : string.Join(",", fields.Select(f => WrapKeywordFunc(f.GetFieldName(context.DataCommandExecutionContext.Server.DatabaseType))));
-        }
-
-        #endregion
-
-        #region Criterion value
-
-        /// <summary>
-        /// Format criterion value
-        /// </summary>
-        /// <param name="criterionOperator">Criterion operator</param>
-        /// <param name="value">Value</param>
-        /// <returns>Return formated criterion value</returns>
-        protected virtual dynamic FormatCriterionValue(CriterionOperator? criterionOperator, dynamic value)
-        {
-            dynamic realValue = value;
-            if (criterionOperator.HasValue)
-            {
-                switch (criterionOperator)
-                {
-                    case CriterionOperator.Like:
-                    case CriterionOperator.NotLike:
-                        realValue = $"%{value}%";
-                        break;
-                    case CriterionOperator.BeginLike:
-                    case CriterionOperator.NotBeginLike:
-                        realValue = $"{value}%";
-                        break;
-                    case CriterionOperator.EndLike:
-                    case CriterionOperator.NotEndLike:
-                        realValue = $"%{value}";
-                        break;
-                }
-            }
-            return realValue;
-        }
-
-        #endregion
-
-        #region Pre script
-
-        /// <summary>
-        /// Get pre script
-        /// </summary>
-        /// <param name="context"></param>
-        /// <param name="location"></param>
-        /// <returns></returns>
-        protected virtual string GetPreScript(DataCommandResolveContext context, QueryableLocation location)
-        {
-            if (location == QueryableLocation.Top || location == QueryableLocation.UsingSource)
-            {
-                return FormatPreScript(context);
-            }
-            return string.Empty;
-        }
-
-        /// <summary>
-        /// Get pre script
-        /// </summary>
-        /// <returns>Return pre script</returns>
-        protected virtual string FormatPreScript(DataCommandResolveContext context)
-        {
-            var preScripts = context.GetPreScripts();
-            if (preScripts.IsNullOrEmpty())
-            {
-                return string.Empty;
-            }
-            return $"{RecursiveKeyword} {string.Join(",", preScripts)}";
-        }
-
-        #endregion
-
-        #region Parameter
-
-        /// <summary>
-        /// Format parameter name
-        /// </summary>
-        /// <param name="parameterName">Parameter name</param>
-        /// <returns></returns>
-        public virtual string FormatParameterName(string parameterName)
-        {
-            return $"{ParameterPrefix}{parameterName}";
-        }
-
-        #endregion
-
-        #region Data source
-
-        ///// <summary>
-        ///// Check whether is independent data source
-        ///// </summary>
-        ///// <param name="targetQueryable">target queryable</param>
-        ///// <returns></returns>
-        //protected virtual bool IsIndependentDataSource(ISixnetQueryable targetQueryable)
-        //{
-        //    var isIndependentSource = targetQueryable.FromType != QueryableFromType.Table || IgnoreJoinConditionInRoot(targetQueryable);
-        //    if (!isIndependentSource)
-        //    {
-        //        var entityConfig = EntityManager.GetEntityConfiguration(targetQueryable?.GetModelType());
-        //        isIndependentSource = entityConfig?.IsSplitTable ?? false;
-        //    }
-        //    return isIndependentSource;
-        //}
-
-        ///// <summary>
-        ///// Check whether Ignore join condition in root condition string
-        ///// </summary>
-        ///// <param name="joinTargetQueryable">Join target queryable</param>
-        ///// <returns></returns>
-        //protected virtual bool IgnoreJoinConditionInRoot(ISixnetQueryable joinTargetQueryable)
-        //{
-        //    return joinTargetQueryable.TreeInfo != null || !joinTargetQueryable.GroupFields.IsNullOrEmpty() || joinTargetQueryable.TakeCount > 0 || !joinTargetQueryable.Combines.IsNullOrEmpty();
-        //}
-
-        #endregion
-
-        #region Framework log
-
-        /// <summary>
-        /// Log execution command
-        /// </summary>
-        /// <param name="statement">Exection command</param>
-        protected virtual void LogExecutionStatement(ExecutionDatabaseStatement statement)
-        {
-            FrameworkLogManager.LogDatabaseExecutionStatement(GetType(), DatabaseType, statement);
-        }
-
-        /// <summary>
-        /// Log script
-        /// </summary>
-        /// <param name="script">Script</param>
-        /// <param name="parameter">Parameter</param>
-        protected virtual void LogScript(string script, object parameter)
-        {
-            FrameworkLogManager.LogDatabaseScript(GetType(), DatabaseType, script, parameter);
-        }
-
-        #endregion
-
-        #region Get command type
-
-        /// <summary>
-        /// Get command type
-        /// </summary>
-        /// <param name="command">Command</param>
-        /// <returns>Return command type</returns>
-        protected virtual CommandType GetCommandType(SixnetDataCommand command)
-        {
-            return GetCommandType(command.ScriptType);
-        }
-
-        /// <summary>
-        /// Get command type
-        /// </summary>
-        /// <param name="scriptType">Script type</param>
-        /// <returns></returns>
-        public virtual CommandType GetCommandType(DataScriptType scriptType)
-        {
-            return scriptType switch
-            {
-                DataScriptType.Text => CommandType.Text,
-                DataScriptType.StoredProcedure => CommandType.StoredProcedure,
-                DataScriptType.TableDirect => CommandType.TableDirect,
-                _ => throw new NotSupportedException(scriptType.ToString()),
-            };
-        }
-
-        #endregion
-
-        #region Convert parameter
-
-        /// <summary>
-        /// Convert parameter
-        /// </summary>
-        /// <param name="originalParameter">Original parameter</param>
-        /// <returns>Return command parameters</returns>
-        protected virtual DataCommandParameters ConvertParameter(object originalParameter)
-        {
-            return DataCommandParameters.Parse(originalParameter);
-        }
-
-        #endregion
-
-        #region Format wrap join fields
-
-        protected virtual IEnumerable<string> FormatWrapJoinPrimaryKeys(DataCommandResolveContext context, ISixnetQueryable queryable, Type entityType, string topTablePetName, string sourceTablePetName, string targetTablePetName)
-        {
-            var primaryKeyFields = SixnetDataManager.GetFields(DatabaseType, entityType, SixnetEntityManager.GetPrimaryKeyFields(entityType));
-            SixnetException.ThrowIf(primaryKeyFields.IsNullOrEmpty(), $"{entityType?.FullName} not set primary key");
-            return FormatWrapJoinFields(context, queryable, primaryKeyFields, topTablePetName, sourceTablePetName, targetTablePetName);
-        }
-
-        protected virtual IEnumerable<string> FormatWrapJoinFields(DataCommandResolveContext context, ISixnetQueryable queryable, IEnumerable<ISixnetField> fields, string topTablePetName, string sourceTablePetName, string targetTablePetName)
-        {
-            var joinItems = fields.Select(field =>
-            {
-                return $"{FormatField(context, queryable, field, QueryableLocation.Top, FieldLocation.Join, tablePetName: sourceTablePetName)} = {FormatField(context, queryable, field, QueryableLocation.Top, FieldLocation.Join, tablePetName: targetTablePetName)}";
-            });
-            return joinItems;
-        }
-
-        #endregion
-
-        #region Negate condition
-
-        /// <summary>
-        /// Negate condition
-        /// </summary>
-        /// <param name="conditionString">Condition string</param>
-        /// <returns></returns>
-        protected string NegateCondition(string conditionString)
-        {
-            if (string.IsNullOrWhiteSpace(conditionString))
-            {
-                return string.Empty;
-            }
-            return $"{NegationKeyword} {conditionString}";
-        }
-
-        #endregion
 
         #endregion
 

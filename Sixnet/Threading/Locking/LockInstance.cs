@@ -29,5 +29,14 @@ namespace Sixnet.Threading.Locking
         {
             return SixnetLocker.ReleaseLock(lockObject, lockName, lockValue);
         }
+
+        /// <summary>
+        /// Release lock
+        /// </summary>
+        /// <returns></returns>
+        public readonly Task<bool> ReleaseAsync()
+        {
+            return SixnetLocker.ReleaseLockAsync(lockObject, lockName, lockValue);
+        }
     }
 }

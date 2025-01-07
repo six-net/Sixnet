@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using Sixnet.Development.Data.Database;
 
 namespace Sixnet.Development.Data
 {
@@ -109,5 +110,10 @@ namespace Sixnet.Development.Data
             return InsertIncrementFieldBehavior != DataOperationBehavior.Disable
                 && (globalAllowInsertIncrementField || InsertIncrementFieldBehavior == DataOperationBehavior.Enable);
         }
+
+        /// <summary>
+        /// Gets or sets the split table behavior
+        /// </summary>
+        public SplitTableBehavior SplitTableBehavior {  get; set; }
     }
 }

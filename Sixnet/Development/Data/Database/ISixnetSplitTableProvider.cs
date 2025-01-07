@@ -15,17 +15,22 @@ namespace Sixnet.Development.Data.Database
         /// <summary>
         /// Get split table names
         /// </summary>
-        /// <param name="options">Get split table name options</param>
+        /// <param name="parameter">Parameter</param>
         /// <returns></returns>
-        List<string> GetSplitTableNames(GetSplitTableNameOptions options);
+        List<string> ResolveTableNames(ResolveSplitTableNameParameter parameter);
 
         /// <summary>
-        /// Get finally split table names
+        /// Get split table names
         /// </summary>
-        /// <param name="splitBehavior">Split table behavior</param>
-        /// <param name="allTableNames">All table names</param>
-        /// <param name="parsedTableNames">Parsed table names</param>
+        /// <param name="parameter">Parameter</param>
         /// <returns></returns>
-        List<string> GetFinallySplitTableNames(SplitTableBehavior splitBehavior, List<string> allTableNames, List<string> parsedTableNames);
+        List<string> GetTableNames(GetSplitTableNameParameter parameter);
+
+        /// <summary>
+        /// Filter all table names
+        /// </summary>
+        /// <param name="parameter">Parameter</param>
+        /// <returns></returns>
+        List<string> FilterAllTableNames(FilterAllSplitTableNameParameter parameter);
     }
 }
