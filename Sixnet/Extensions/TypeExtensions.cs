@@ -247,5 +247,48 @@ namespace System
         }
 
         #endregion
+
+        #region Get type identity key
+
+        /// <summary>
+        /// Get type identity key
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static string GetTypeIdentityKey(this Type type)
+        {
+            if (type == null)
+            {
+                return string.Empty;
+            }
+            if (type.IsGenericType)
+            {
+                return string.Join("-", ResolveGenericTypeKeys(type));
+            }
+            else
+            {
+                return type.GUID.ToString();
+            }
+        }
+
+        static List<string> ResolveGenericTypeKeys(Type type)
+        {
+            var keys = new List<string>() { type.GUID.ToString() };
+            foreach (var argType in type.GenericTypeArguments)
+            {
+                if (argType.IsGenericType)
+                {
+                    var argTypeKeys = ResolveGenericTypeKeys(argType);
+                    keys.AddRange(argTypeKeys);
+                }
+                else
+                {
+                    keys.Add(argType.GUID.ToString());
+                }
+            }
+            return keys;
+        }
+
+        #endregion
     }
 }
