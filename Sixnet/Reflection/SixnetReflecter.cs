@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -30,12 +31,12 @@ namespace Sixnet.Reflection
             /// <summary>
             /// Common collection type to list methods
             /// </summary>
-            static readonly Dictionary<Guid, MethodInfo> CacheCommonCollectionTypeToListMethods = new();
+            static readonly ConcurrentDictionary<string, MethodInfo> CacheCommonCollectionTypeToListMethods = new();
 
             /// <summary>
             /// Common collection type contains methods
             /// </summary>
-            static readonly Dictionary<Guid, MethodInfo> CacheCommonCollectionTypeContainsMethods = new();
+            static readonly ConcurrentDictionary<string, MethodInfo> CacheCommonCollectionTypeContainsMethods = new();
 
             static Collections()
             {
@@ -60,11 +61,27 @@ namespace Sixnet.Reflection
                     ,typeof(string)
                     ,typeof(Guid)
                     ,typeof(object)
+                    ,typeof(TimeSpan)
+                    ,typeof(byte?)
+                    ,typeof(decimal?)
+                    ,typeof(double?)
+                    ,typeof(float?)
+                    ,typeof(int?)
+                    ,typeof(long?)
+                    ,typeof(sbyte?)
+                    ,typeof(short?)
+                    ,typeof(uint?)
+                    ,typeof(ulong?)
+                    ,typeof(ushort?)
+                    ,typeof(DateTime?)
+                    ,typeof(DateTimeOffset?)
+                    ,typeof(Guid?)
+                    ,typeof(TimeSpan?)
                 };
                 commonTypes.ForEach(type =>
                 {
-                    CacheCommonCollectionTypeToListMethods[type.GUID] = CollectionToListMethod.MakeGenericMethod(type);
-                    CacheCommonCollectionTypeContainsMethods[type.GUID] = CollectionContainsMethod.MakeGenericMethod(type);
+                    CacheCommonCollectionTypeToListMethods[type.GetTypeIdentityKey()] = CollectionToListMethod.MakeGenericMethod(type);
+                    CacheCommonCollectionTypeContainsMethods[type.GetTypeIdentityKey()] = CollectionContainsMethod.MakeGenericMethod(type);
                 });
             }
 
@@ -83,15 +100,13 @@ namespace Sixnet.Reflection
                 if (!collectionType.IsSerializable && collectionType.IsGenericType)
                 {
                     var valueType = collectionType.GenericTypeArguments[0];
-                    if (CacheCommonCollectionTypeToListMethods.TryGetValue(valueType.GUID, out var method))
+                    var valueTypeIdentity = valueType.GetTypeIdentityKey();
+                    if (!CacheCommonCollectionTypeToListMethods.TryGetValue(valueTypeIdentity, out var method))
                     {
-                        return method.Invoke(null, new object[1] { originalCollection }) as IEnumerable;
+                        method = CollectionToListMethod.MakeGenericMethod(valueType);
+                        CacheCommonCollectionTypeToListMethods.TryAdd(valueTypeIdentity, method);
                     }
-                    else
-                    {
-                        var toListMethod = CollectionToListMethod.MakeGenericMethod(valueType);
-                        return toListMethod.Invoke(null, new object[1] { originalCollection }) as IEnumerable;
-                    }
+                    return method.Invoke(null, new object[1] { originalCollection }) as IEnumerable;
                 }
                 return originalCollection;
             }
@@ -107,11 +122,13 @@ namespace Sixnet.Reflection
                 {
                     throw new SixnetException("Value type can't be null");
                 }
-                if (CacheCommonCollectionTypeContainsMethods.TryGetValue(valueType.GUID, out var method))
+                var typeIdentityKey = valueType.GetTypeIdentityKey();
+                if (!CacheCommonCollectionTypeContainsMethods.TryGetValue(typeIdentityKey, out var methodInfo))
                 {
-                    return method;
+                    methodInfo = CollectionContainsMethod.MakeGenericMethod(valueType);
+                    CacheCommonCollectionTypeContainsMethods.TryAdd(typeIdentityKey, methodInfo);
                 }
-                return CollectionContainsMethod.MakeGenericMethod(valueType);
+                return methodInfo;
             }
 
             /// <summary>
