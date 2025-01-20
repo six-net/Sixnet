@@ -99,7 +99,7 @@ namespace Sixnet.Reflection
                 var collectionType = originalCollection.GetType();
                 if (!collectionType.IsSerializable && collectionType.IsGenericType)
                 {
-                    var valueType = collectionType.GenericTypeArguments[0];
+                    var valueType = collectionType.GenericTypeArguments.Last();
                     var valueTypeIdentity = valueType.GetTypeIdentityKey();
                     if (!CacheCommonCollectionTypeToListMethods.TryGetValue(valueTypeIdentity, out var method))
                     {
