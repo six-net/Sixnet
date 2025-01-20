@@ -82,12 +82,7 @@ namespace Sixnet.Reflection
                 var collectionType = originalCollection.GetType();
                 if (!collectionType.IsSerializable && collectionType.IsGenericType)
                 {
-                    Type valueType = null;
-                    foreach (var val in originalCollection)
-                    {
-                        valueType = val.GetType();
-                        break;
-                    }
+                    var valueType = collectionType.GenericTypeArguments[0];
                     if (CacheCommonCollectionTypeToListMethods.TryGetValue(valueType.GUID, out var method))
                     {
                         return method.Invoke(null, new object[1] { originalCollection }) as IEnumerable;
@@ -126,7 +121,7 @@ namespace Sixnet.Reflection
             /// <returns></returns>
             public static bool IsCollectionType(Type valueType)
             {
-                return valueType !=null && (valueType.IsArray || typeof(IEnumerable).IsAssignableFrom(valueType));
+                return valueType != null && (valueType.IsArray || typeof(IEnumerable).IsAssignableFrom(valueType));
             }
         }
 
