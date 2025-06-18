@@ -197,16 +197,19 @@ namespace Sixnet.Development.Data.Database
         {
             var dataCommandResolver = GetDataCommandResolver();
             var queryStatement = await dataCommandResolver.GenerateDatabaseQueryPagingStatementAsync(command).ConfigureAwait(false);
-            var pagingDatas = (await command.Connection.DbConnection.QueryAsync<PagingTotalCountModel, T, PagingTotalCountMappingModel<T>>(GetCommandDefinition(command, queryStatement)
-                               , PagingTotalCountMappingModel<T>.PagingTotalCountMappingFunc, SixnetDataManager.GetPagingTotalSplitFieldName()).ConfigureAwait(false)
-                               )?.ToList() ?? new List<PagingTotalCountMappingModel<T>>(0);
-            if (pagingDatas.IsNullOrEmpty())
+            List<T> datas = null;
+            var totalCount = 0;
+            using (var gridReader = await command.Connection.DbConnection.QueryMultipleAsync(GetCommandDefinition(command, queryStatement)).ConfigureAwait(false))
+            {
+                datas = (await gridReader.ReadAsync<T>().ConfigureAwait(false))?.ToList();
+                totalCount = (await gridReader.ReadFirstOrDefaultAsync<PagingTotalCountModel>().ConfigureAwait(false))?.SixnetPagingTotalDataCount ?? 0;
+            }
+            if (datas.IsNullOrEmpty())
             {
                 return SixnetPager.Empty<T>();
             }
-            var firstData = pagingDatas.First();
             var pagingFilter = command.DataCommand.PagingFilter;
-            return SixnetPager.Create(pagingFilter.Page, pagingFilter.PageSize, firstData.PagingTotalDataCount, pagingDatas.Select(c => c.RealReturnData));
+            return SixnetPager.Create(pagingFilter.Page, pagingFilter.PageSize, totalCount, datas);
         }
 
         /// <summary>

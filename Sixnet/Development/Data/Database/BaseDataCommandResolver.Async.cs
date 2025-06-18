@@ -89,7 +89,6 @@ namespace Sixnet.Development.Data.Database
             var translationResult = await TranslateAsync(context).ConfigureAwait(false);
             string sqlStatement;
             IEnumerable<ISixnetField> outputFields = null;
-            IEnumerable<ISixnetField> originalOutputFields = null;
             switch (queryable.ExecutionMode)
             {
                 case QueryableExecutionMode.Script:
@@ -113,7 +112,7 @@ namespace Sixnet.Development.Data.Database
                     {
                         //target
                         var targetStatement = await GetFromTargetStatementAsync(context, queryable, QueryableLocation.Top, tablePetName).ConfigureAwait(false);
-                        originalOutputFields = outputFields = targetStatement.OutputFields;
+                        outputFields = targetStatement.OutputFields;
                         //condition
                         var condition = translationResult.GetCondition(ConditionStartKeyword);
                         //join
@@ -129,12 +128,7 @@ namespace Sixnet.Development.Data.Database
                     // output fields
                     if (outputFields.IsNullOrEmpty() || !queryable.SelectedFields.IsNullOrEmpty())
                     {
-                        originalOutputFields = outputFields = SixnetDataManager.GetQueryableFields(DatabaseType, queryable.GetModelType(), queryable, context.IsRootQueryable(queryable));
-                    }
-                    if (!queryable.Sorts.IsNullOrEmpty())
-                    {
-                        var sortFields = queryable.Sorts.Select(se => se.Field);
-                        outputFields = outputFields.Union(sortFields);
+                        outputFields = SixnetDataManager.GetQueryableFields(DatabaseType, queryable.GetModelType(), queryable, context.IsRootQueryable(queryable));
                     }
                     var outputFieldString = await FormatFieldsStringAsync(context, queryable, QueryableLocation.PreScript, FieldLocation.InnerOutput, outputFields).ConfigureAwait(false);
 
@@ -154,22 +148,18 @@ namespace Sixnet.Development.Data.Database
                             throw new NotSupportedException("Not supported this output type for paging");
                         default:
                             sqlStatement = $"SELECT{GetDistinctString(queryable)} {outputFieldString} FROM {targetScript}";
-                            if (hasCombine)
-                            {
-                                sqlStatement = $"({sqlStatement}){combine}";
-                            }
                             break;
                     }
-                    var pagingTotalCountFieldName = SixnetDataManager.GetPagingTotalFieldName();
-                    context.AddPreScript($"{PagingTableName}{WithTableKeyword}({sqlStatement})", PagingTableName, tablePetName);
-                    context.AddPreScript($"{PagingCountTableName}{WithTableKeyword}(SELECT COUNT(1){ColumnPetNameKeyword}{pagingTotalCountFieldName} FROM {PagingTableName})", PagingCountTableName, tablePetName);
                     var preScript = FormatPreScript(context);
 
                     //limit
                     var pagingFilter = command.DataCommand.PagingFilter;
                     var limit = GetLimitString((pagingFilter.Page - 1) * pagingFilter.PageSize, pagingFilter.PageSize, hasSort);
-                    outputFieldString = await FormatFieldsStringAsync(context, queryable, QueryableLocation.Top, FieldLocation.Output, originalOutputFields).ConfigureAwait(false);
-                    sqlStatement = $"{preScript}SELECT (SELECT {pagingTotalCountFieldName} FROM {PagingCountTableName}){ColumnPetNameKeyword}{pagingTotalCountFieldName},''{ColumnPetNameKeyword}{SixnetDataManager.GetPagingTotalSplitFieldName()},{outputFieldString} FROM {PagingTableName}{TablePetNameKeyword}{tablePetName}{sort}{limit}";
+                    var dataSqlStatement = hasCombine
+                        ? $"{preScript}(SELECT {tablePetName}.* FROM ({sqlStatement}{sort}{limit}){TablePetNameKeyword}{tablePetName}){combine}"
+                        : $"{preScript}{sqlStatement}{sort}{limit};";
+                    var totalSqlStatement = $"{preScript}SELECT COUNT(1){ColumnPetNameKeyword}SixnetPagingTotalDataCount FROM ({sqlStatement}){TablePetNameKeyword}{tablePetName};";
+                    sqlStatement = $"{dataSqlStatement}{Environment.NewLine}{totalSqlStatement}";
                     break;
             }
 
