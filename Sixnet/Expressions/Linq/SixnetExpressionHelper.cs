@@ -1028,6 +1028,17 @@ namespace Sixnet.Expressions.Linq
         /// <returns></returns>
         public static ISixnetField GetDataField(Expression fieldExpression, FieldFormatSetting formatSetting = null)
         {
+            return GetDataFields(fieldExpression, formatSetting).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Get data fields
+        /// </summary>
+        /// <param name="fieldExpression"></param>
+        /// <param name="formatSetting"></param>
+        /// <returns></returns>
+        public static List<ISixnetField> GetDataFields(Expression fieldExpression, FieldFormatSetting formatSetting = null)
+        {
             SixnetDirectThrower.ThrowArgNullIf(fieldExpression == null, $"{nameof(fieldExpression)} is null");
             Dictionary<string, int> parameterIndexes = null;
             if (fieldExpression is LambdaExpression lambdaExp)
@@ -1035,19 +1046,95 @@ namespace Sixnet.Expressions.Linq
                 parameterIndexes = GetLambdaParameterIndexes(lambdaExp);
                 fieldExpression = lambdaExp.Body;
             }
-            return GetDataField(fieldExpression, parameterIndexes, formatSetting);
+            return GetExpressionDataFields(fieldExpression, parameterIndexes, formatSetting);
         }
 
         /// <summary>
-        /// Get criterion field
+        /// Get data field
         /// </summary>
         /// <param name="fieldExpression">Field expression</param>
         /// <returns></returns>
-        public static ISixnetField GetDataField(Expression fieldExpression, Dictionary<string, int> parameterIndexes, FieldFormatSetting outFormatSetting = null)
+        static ISixnetField GetDataField(Expression fieldExpression, Dictionary<string, int> parameterIndexes, FieldFormatSetting outFormatSetting = null)
+        {
+            return GetExpressionDataFields(fieldExpression, parameterIndexes, outFormatSetting).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Get expression data fields
+        /// </summary>
+        /// <param name="fieldExpression">Field expression</param>
+        /// <returns></returns>
+        static List<ISixnetField> GetExpressionDataFields(Expression fieldExpression, Dictionary<string, int> parameterIndexes, FieldFormatSetting outFormatSetting = null)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(fieldExpression == null, nameof(fieldExpression));
+            var dataExpression = fieldExpression;
+            var fields = new List<ISixnetField>();
+
+            if (fieldExpression is LambdaExpression lambdaExp)
+            {
+                dataExpression = lambdaExp.Body;
+            }
+            switch (dataExpression.NodeType)
+            {
+                case ExpressionType.New:
+                    var newExpression = dataExpression as NewExpression;
+                    if (!(newExpression?.Arguments?.IsNullOrEmpty() ?? true))
+                    {
+                        foreach (var argExp in newExpression.Arguments)
+                        {
+                            var argField = GetSingleExpressionDataField(argExp, parameterIndexes, outFormatSetting);
+                            if (argField != null)
+                            {
+                                fields.Add(argField);
+                            }
+                        }
+                    }
+                    break;
+                case ExpressionType.NewArrayInit:
+                    var newArrayInitExpression = dataExpression as NewArrayExpression;
+                    if (!(newArrayInitExpression?.Expressions?.IsNullOrEmpty() ?? true))
+                    {
+                        foreach (var eleExp in newArrayInitExpression.Expressions)
+                        {
+                            var argField = GetSingleExpressionDataField(eleExp, parameterIndexes, outFormatSetting);
+                            if (argField != null)
+                            {
+                                fields.Add(argField);
+                            }
+                        }
+                    }
+                    break;
+                default:
+                    fields.Add(GetSingleExpressionDataField(dataExpression, parameterIndexes, outFormatSetting));
+                    break;
+                case ExpressionType.ListInit:
+                    var listInitExpression = dataExpression as ListInitExpression;
+                    if (!(listInitExpression?.Initializers.IsNullOrEmpty() ?? true))
+                    {
+                        foreach (var ele in listInitExpression.Initializers)
+                        {
+                            var argField = GetSingleExpressionDataField(ele.Arguments[0], parameterIndexes, outFormatSetting);
+                            if (argField != null)
+                            {
+                                fields.Add(argField);
+                            }
+                        }
+                    }
+                    break;
+            }
+            return fields;
+        }
+
+        /// <summary>
+        /// Get single data field
+        /// </summary>
+        /// <param name="fieldExpression">Field expression</param>
+        /// <returns></returns>
+        static ISixnetField GetSingleExpressionDataField(Expression fieldExpression, Dictionary<string, int> parameterIndexes, FieldFormatSetting outFormatSetting = null)
         {
             var childExpression = fieldExpression;
             SixnetDirectThrower.ThrowArgNullIf(childExpression == null, $"Not support expression:{fieldExpression?.GetType()}");
-            ISixnetField criterionField = null;
+            ISixnetField dataField = null;
             FieldFormatSetting fieldFormatSetting = null;
             FieldFormatSetting innermostFieldFormatSetting = null;
             var isEnd = false;
@@ -1075,7 +1162,7 @@ namespace Sixnet.Expressions.Linq
                             }
                             var propertyField = DataField.Create(propertyName, modelType, modelTypeIndex, null, entityField?.FieldName);
                             propertyField.DataType = memberExpression.Type;
-                            criterionField = propertyField;
+                            dataField = propertyField;
                             isEnd = true;
                         }
                         break;
@@ -1103,14 +1190,14 @@ namespace Sixnet.Expressions.Linq
                 }
             } while (childExpression != null);
 
-            if (criterionField == null)
+            if (dataField == null)
             {
                 try
                 {
                     var value = Expression.Lambda(fieldExpression).Compile().DynamicInvoke();
                     if (value != null)
                     {
-                        criterionField = ConstantField.Create(value);
+                        dataField = ConstantField.Create(value);
                     }
                 }
                 catch (Exception ex)
@@ -1131,38 +1218,9 @@ namespace Sixnet.Expressions.Linq
                         fieldFormatSetting = outFormatSetting;
                     }
                 }
-                criterionField.FormatSetting = fieldFormatSetting;
+                dataField.FormatSetting = fieldFormatSetting;
             }
-            return criterionField;
-        }
-
-        /// <summary>
-        /// Get output data field
-        /// </summary>
-        /// <param name="queryable">Queryable</param>
-        /// <param name="fieldExpression">Field expression</param>
-        /// <returns></returns>
-        public static ISixnetField GetOutputDataField(ISixnetQueryable queryable, Expression fieldExpression, FieldFormatSetting outFormatSetting = null)
-        {
-            #region Type index
-
-            var typeIndexes = new Dictionary<string, int>();
-            var queryableType = queryable?.GetType();
-            if (queryableType != null && queryableType.IsGenericType)
-            {
-                var genericParameters = queryableType.GenericTypeArguments;
-                if (!genericParameters.IsNullOrEmpty())
-                {
-                    for (int i = 0; i < genericParameters.Length; i++)
-                    {
-                        typeIndexes[genericParameters[i].FullName] = i;
-                    }
-                }
-            }
-
-            #endregion
-
-            return GetDataField(fieldExpression, typeIndexes, outFormatSetting);
+            return dataField;
         }
 
         /// <summary>
@@ -1249,7 +1307,7 @@ namespace Sixnet.Expressions.Linq
                     case ExpressionType.Add:
                         var addExpression = formatExpression as BinaryExpression;
                         var parameterField = GetDataField(addExpression.Right);
-                        var fieldDataType = parameterField.GetDataType();
+                        var fieldDataType = parameterField?.GetDataType();
                         fieldFormatSetting = FieldFormatSetting.Create((fieldDataType == _stringType || fieldDataType == _charType) ? FieldFormatterNames.STRING_CONCAT : FieldFormatterNames.ADD, parameterField);
                         break;
                     case ExpressionType.Subtract:

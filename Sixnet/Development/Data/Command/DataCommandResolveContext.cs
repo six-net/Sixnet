@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 using Sixnet.DependencyInjection;
 using Sixnet.Development.Data.Database;
 using Sixnet.Development.Queryable;
@@ -49,7 +50,7 @@ namespace Sixnet.Development.Data.Command
 
         const string DefaultParameterName = "Param";
 
-        public SixnetDataOptions DataOptions { get;  private set; }
+        public SixnetDataOptions DataOptions { get; private set; }
 
         #endregion
 
@@ -330,16 +331,6 @@ namespace Sixnet.Development.Data.Command
         #region Table name
 
         /// <summary>
-        /// Get join table name
-        /// </summary>
-        /// <param name="joinQueryable">Join queryable</param>
-        /// <returns>Return table name</returns>
-        public string GetJoinTableName(ISixnetQueryable joinQueryable)
-        {
-            return GetTableNames(joinQueryable, QueryableLocation.JoinTarget)?.FirstOrDefault();
-        }
-
-        /// <summary>
         /// Get table name
         /// </summary>
         /// <param name="activityQueryable">Activity queryable</param>
@@ -348,6 +339,17 @@ namespace Sixnet.Development.Data.Command
         public List<string> GetTableNames(ISixnetQueryable activityQueryable, QueryableLocation queryableLocation)
         {
             return DataCommandExecutionContext.GetTableNames(activityQueryable, queryableLocation);
+        }
+
+        /// <summary>
+        /// Get table name
+        /// </summary>
+        /// <param name="activityQueryable">Activity queryable</param>
+        /// <param name="queryableLocation">Activity queryable location</param>
+        /// <returns>Return table name</returns>
+        public async Task<List<string>> GetTableNamesAsync(ISixnetQueryable activityQueryable, QueryableLocation queryableLocation)
+        {
+            return await DataCommandExecutionContext.GetTableNamesAsync(activityQueryable, queryableLocation).ConfigureAwait(false);
         }
 
         #endregion

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using Sixnet.Development.Data;
 using Sixnet.Development.Data.Field;
@@ -218,32 +219,6 @@ namespace Sixnet.Development.Queryable
         #region Sort
 
         /// <summary>
-        /// Order by fields
-        /// </summary>
-        /// <param name="fieldNames">Field names</param>
-        /// <param name="desc">Whether order by desc</param>
-        /// <param name="targetType">Target type</param>
-        /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderBy(IEnumerable<string> fieldNames, bool desc = false, Type targetType = null)
-        {
-            base.OrderBy(fieldNames, desc, targetType);
-            return this;
-        }
-
-        /// <summary>
-        /// Order by field
-        /// </summary>
-        /// <param name="fieldName">Field name</param>
-        /// <param name="desc">Whether order by desc</param>
-        /// <param name="targetType">Target type</param>
-        /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderBy(string fieldName, bool desc = false, Type targetType = null)
-        {
-            base.OrderBy(fieldName, desc, targetType);
-            return this;
-        }
-
-        /// <summary>
         /// Order by field
         /// </summary>
         /// <param name="field">Field</param>
@@ -264,34 +239,6 @@ namespace Sixnet.Development.Queryable
         public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderBy(IEnumerable<ISixnetField> fields, bool desc = false)
         {
             base.OrderBy(fields, desc);
-            return this;
-        }
-
-        /// <summary>
-        /// Order by fields
-        /// </summary>
-        /// <param name="predicate">Predicate</param>
-        /// <param name="fieldNames">Field names</param>
-        /// <param name="desc">Whether order by desc</param>
-        /// <param name="targetType">Target type</param>
-        /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderByIf(bool predicate, IEnumerable<string> fieldNames, bool desc = false, Type targetType = null)
-        {
-            base.OrderByIf(predicate, fieldNames, desc, targetType);
-            return this;
-        }
-
-        /// <summary>
-        /// Order by field
-        /// </summary>
-        /// <param name="predicate">Predicate</param>
-        /// <param name="fieldName">Field name</param>
-        /// <param name="desc">Whether order by desc</param>
-        /// <param name="targetType">Target type</param>
-        /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderByIf(bool predicate, string fieldName, bool desc = false, Type targetType = null)
-        {
-            base.OrderByIf(predicate, fieldName, desc, targetType);
             return this;
         }
 
@@ -322,14 +269,14 @@ namespace Sixnet.Development.Queryable
         }
 
         /// <summary>
-        /// Order by field
+        /// Order by fields
         /// </summary>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderBy(Expression<Func<TFirst, object>> field, bool desc = false)
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderBy(Expression<Func<TFirst, object>> fields, bool desc = false)
         {
-            OrderByExpressionField<TFirst>(field, desc);
+            OrderByExpressionField(fields, desc);
             return this;
         }
 
@@ -337,25 +284,25 @@ namespace Sixnet.Development.Queryable
         /// Order by fields
         /// </summary>
         /// <param name="predicate">Predicate</param>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderByIf(bool predicate, Expression<Func<TFirst, object>> field, bool desc = false)
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderByIf(bool predicate, Expression<Func<TFirst, object>> fields, bool desc = false)
         {
             return predicate
-                ? OrderBy(field, desc)
+                ? OrderBy(fields, desc)
                 : this;
         }
 
         /// <summary>
-        /// Order by field
+        /// Order by fields
         /// </summary>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderBy(Expression<Func<TSecond, object>> field, bool desc = false)
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderBy(Expression<Func<TFirst, TSecond, object>> fields, bool desc = false)
         {
-            OrderByExpressionField(field, desc);
+            OrderByExpressionField(fields, desc);
             return this;
         }
 
@@ -363,25 +310,25 @@ namespace Sixnet.Development.Queryable
         /// Order by fields
         /// </summary>
         /// <param name="predicate">Predicate</param>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderByIf(bool predicate, Expression<Func<TSecond, object>> field, bool desc = false)
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, object>> fields, bool desc = false)
         {
             return predicate
-                    ? OrderBy(field, desc)
+                    ? OrderBy(fields, desc)
                     : this;
         }
 
         /// <summary>
-        /// Order by field
+        /// Order by fields
         /// </summary>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderBy(Expression<Func<TThird, object>> field, bool desc = false)
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderBy(Expression<Func<TFirst, TSecond, TThird, object>> fields, bool desc = false)
         {
-            OrderByExpressionField(field, desc);
+            OrderByExpressionField(fields, desc);
             return this;
         }
 
@@ -389,25 +336,25 @@ namespace Sixnet.Development.Queryable
         /// Order by fields
         /// </summary>
         /// <param name="predicate">Predicate</param>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderByIf(bool predicate, Expression<Func<TThird, object>> field, bool desc = false)
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, TThird, object>> fields, bool desc = false)
         {
             return predicate
-                    ? OrderBy(field, desc)
+                    ? OrderBy(fields, desc)
                     : this;
         }
 
         /// <summary>
-        /// Order by field
+        /// Order by fields
         /// </summary>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderBy(Expression<Func<TFourth, object>> field, bool desc = false)
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderBy(Expression<Func<TFirst, TSecond, TThird, TFourth, object>> fields, bool desc = false)
         {
-            OrderByExpressionField(field, desc);
+            OrderByExpressionField(fields, desc);
             return this;
         }
 
@@ -415,25 +362,25 @@ namespace Sixnet.Development.Queryable
         /// Order by fields
         /// </summary>
         /// <param name="predicate">Predicate</param>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Field</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderByIf(bool predicate, Expression<Func<TFourth, object>> field, bool desc = false)
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, TThird, TFourth, object>> fields, bool desc = false)
         {
             return predicate
-                    ? OrderBy(field, desc)
+                    ? OrderBy(fields, desc)
                     : this;
         }
 
         /// <summary>
-        /// Order by field
+        /// Order by fields
         /// </summary>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderBy(Expression<Func<TFifth, object>> field, bool desc = false)
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderBy(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, object>> fields, bool desc = false)
         {
-            OrderByExpressionField(field, desc);
+            OrderByExpressionField(fields, desc);
             return this;
         }
 
@@ -441,25 +388,25 @@ namespace Sixnet.Development.Queryable
         /// Order by fields
         /// </summary>
         /// <param name="predicate">Predicate</param>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderByIf(bool predicate, Expression<Func<TFifth, object>> field, bool desc = false)
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, object>> fields, bool desc = false)
         {
             return predicate
-                    ? OrderBy(field, desc)
+                    ? OrderBy(fields, desc)
                     : this;
         }
 
         /// <summary>
-        /// Order by field
+        /// Order by fields
         /// </summary>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderBy(Expression<Func<TSixth, object>> field, bool desc = false)
+        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderBy(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, object>> fields, bool desc = false)
         {
-            OrderByExpressionField(field, desc);
+            OrderByExpressionField(fields, desc);
             return this;
         }
 
@@ -467,13 +414,13 @@ namespace Sixnet.Development.Queryable
         /// Order by fields
         /// </summary>
         /// <param name="predicate">Predicate</param>
-        /// <param name="field">Field</param>
+        /// <param name="fields">Fields</param>
         /// <param name="desc">Whether order by desc</param>
         /// <returns></returns>
-        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderByIf(bool predicate, Expression<Func<TSixth, object>> field, bool desc = false)
+        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> OrderByIf(bool predicate, Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, object>> fields, bool desc = false)
         {
             return predicate
-                    ? OrderBy(field, desc)
+                    ? OrderBy(fields, desc)
                     : this;
         }
 
@@ -818,17 +765,6 @@ namespace Sixnet.Development.Queryable
         }
 
         /// <summary>
-        /// Select fields
-        /// </summary>
-        /// <param name="fieldNames">Field names</param>
-        /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Select(params string[] fieldNames)
-        {
-            base.Select(fieldNames);
-            return this;
-        }
-
-        /// <summary>
         /// Unselect fields
         /// </summary>
         /// <param name="fields">Fields</param>
@@ -840,22 +776,11 @@ namespace Sixnet.Development.Queryable
         }
 
         /// <summary>
-        /// Unselect fields
-        /// </summary>
-        /// <param name="fieldNames">Field names</param>
-        /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Unselect(params string[] fieldNames)
-        {
-            base.Unselect(fieldNames);
-            return this;
-        }
-
-        /// <summary>
         /// Select fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Select(params Expression<Func<TFirst, object>>[] fields)
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Select(Expression<Func<TFirst, object>> fields)
         {
             IncludeExpressionFieldsCore(fields);
             return this;
@@ -866,7 +791,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Unselect(params Expression<Func<TFirst, object>>[] fields)
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Unselect(Expression<Func<TFirst, object>> fields)
         {
             ExcludeExpressionFieldsCore(fields);
             return this;
@@ -877,7 +802,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Select(params Expression<Func<TSecond, object>>[] fields)
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Select(Expression<Func<TFirst, TSecond, object>> fields)
         {
             IncludeExpressionFieldsCore(fields);
             return this;
@@ -888,7 +813,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Unselect(params Expression<Func<TSecond, object>>[] fields)
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Unselect(Expression<Func<TFirst, TSecond, object>> fields)
         {
             ExcludeExpressionFieldsCore(fields);
             return this;
@@ -899,7 +824,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Select(params Expression<Func<TThird, object>>[] fields)
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Select(Expression<Func<TFirst, TSecond, TThird, object>> fields)
         {
             IncludeExpressionFieldsCore(fields);
             return this;
@@ -910,7 +835,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Unselect(params Expression<Func<TThird, object>>[] fields)
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Unselect(Expression<Func<TFirst, TSecond, TThird, object>> fields)
         {
             ExcludeExpressionFieldsCore(fields);
             return this;
@@ -921,7 +846,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Select(params Expression<Func<TFourth, object>>[] fields)
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Select(Expression<Func<TFirst, TSecond, TThird, TFourth, object>> fields)
         {
             IncludeExpressionFieldsCore(fields);
             return this;
@@ -932,7 +857,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Unselect(params Expression<Func<TFourth, object>>[] fields)
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Unselect(Expression<Func<TFirst, TSecond, TThird, TFourth, object>> fields)
         {
             ExcludeExpressionFieldsCore(fields);
             return this;
@@ -943,7 +868,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Select(params Expression<Func<TFifth, object>>[] fields)
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Select(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, object>> fields)
         {
             IncludeExpressionFieldsCore(fields);
             return this;
@@ -954,7 +879,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Unselect(params Expression<Func<TFifth, object>>[] fields)
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Unselect(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, object>> fields)
         {
             ExcludeExpressionFieldsCore(fields);
             return this;
@@ -965,7 +890,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Select(params Expression<Func<TSixth, object>>[] fields)
+        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Select(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, object>> fields)
         {
             IncludeExpressionFieldsCore(fields);
             return this;
@@ -976,7 +901,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Unselect(params Expression<Func<TSixth, object>>[] fields)
+        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Unselect(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, object>> fields)
         {
             ExcludeExpressionFieldsCore(fields);
             return this;
@@ -985,19 +910,6 @@ namespace Sixnet.Development.Queryable
         #endregion
 
         #region Tree
-
-        /// <summary>
-        /// Tree matching
-        /// </summary>
-        /// <param name="dataFieldName">Data field name</param>
-        /// <param name="parentFieldName">Parent field name</param>
-        /// <param name="direction">Matching direction</param>
-        /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Tree(string dataFieldName, string parentFieldName, TreeMatchingDirection direction = TreeMatchingDirection.Down)
-        {
-            base.Tree(dataFieldName, parentFieldName, direction);
-            return this;
-        }
 
         /// <summary>
         /// Tree matching
@@ -1020,6 +932,71 @@ namespace Sixnet.Development.Queryable
         /// <param name="direction">Matching direction</param>
         /// <returns></returns>
         public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Tree(Expression<Func<TFirst, object>> dataField, Expression<Func<TFirst, object>> parentField, TreeMatchingDirection direction = TreeMatchingDirection.Down)
+        {
+            Tree(SixnetExpressionHelper.GetDataField(dataField), SixnetExpressionHelper.GetDataField(parentField), direction);
+            return this;
+        }
+
+        /// <summary>
+        /// Tree match
+        /// </summary>
+        /// <param name="dataField">Data field</param>
+        /// <param name="parentField">Parent field</param>
+        /// <param name="direction">Matching direction</param>
+        /// <returns></returns>
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Tree(Expression<Func<TFirst, TSecond, object>> dataField, Expression<Func<TFirst, TSecond, object>> parentField, TreeMatchingDirection direction = TreeMatchingDirection.Down)
+        {
+            Tree(SixnetExpressionHelper.GetDataField(dataField), SixnetExpressionHelper.GetDataField(parentField), direction);
+            return this;
+        }
+
+        /// <summary>
+        /// Tree match
+        /// </summary>
+        /// <param name="dataField">Data field</param>
+        /// <param name="parentField">Parent field</param>
+        /// <param name="direction">Matching direction</param>
+        /// <returns></returns>
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Tree(Expression<Func<TFirst, TSecond, TThird, object>> dataField, Expression<Func<TFirst, TSecond, TThird, object>> parentField, TreeMatchingDirection direction = TreeMatchingDirection.Down)
+        {
+            Tree(SixnetExpressionHelper.GetDataField(dataField), SixnetExpressionHelper.GetDataField(parentField), direction);
+            return this;
+        }
+
+        /// <summary>
+        /// Tree match
+        /// </summary>
+        /// <param name="dataField">Data field</param>
+        /// <param name="parentField">Parent field</param>
+        /// <param name="direction">Matching direction</param>
+        /// <returns></returns>
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Tree(Expression<Func<TFirst, TSecond, TThird, TFourth, object>> dataField, Expression<Func<TFirst, TSecond, TThird, TFourth, object>> parentField, TreeMatchingDirection direction = TreeMatchingDirection.Down)
+        {
+            Tree(SixnetExpressionHelper.GetDataField(dataField), SixnetExpressionHelper.GetDataField(parentField), direction);
+            return this;
+        }
+
+        /// <summary>
+        /// Tree match
+        /// </summary>
+        /// <param name="dataField">Data field</param>
+        /// <param name="parentField">Parent field</param>
+        /// <param name="direction">Matching direction</param>
+        /// <returns></returns>
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Tree(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, object>> dataField, Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, object>> parentField, TreeMatchingDirection direction = TreeMatchingDirection.Down)
+        {
+            Tree(SixnetExpressionHelper.GetDataField(dataField), SixnetExpressionHelper.GetDataField(parentField), direction);
+            return this;
+        }
+
+        /// <summary>
+        /// Tree match
+        /// </summary>
+        /// <param name="dataField">Data field</param>
+        /// <param name="parentField">Parent field</param>
+        /// <param name="direction">Matching direction</param>
+        /// <returns></returns>
+        public ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Tree(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, object>> dataField, Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, object>> parentField, TreeMatchingDirection direction = TreeMatchingDirection.Down)
         {
             Tree(SixnetExpressionHelper.GetDataField(dataField), SixnetExpressionHelper.GetDataField(parentField), direction);
             return this;
@@ -1513,7 +1490,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="splitTableNameFilter">Split table name filter</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> SplitTable(Func<IEnumerable<string>, IEnumerable<string>> splitTableNameFilter)
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> SplitTable(Func<IEnumerable<string>, IEnumerable<string>, IEnumerable<string>> splitTableNameFilter)
         {
             base.SplitTable(splitTableNameFilter);
             return this;

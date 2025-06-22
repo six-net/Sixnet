@@ -56,6 +56,8 @@ namespace Sixnet.Development.Data
         Oracle = 130,
         SQLite = 150,
         PostgreSQL = 160,
+        DaMeng = 170,
+        Kingbase = 180
     }
 
     /// <summary>

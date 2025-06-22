@@ -194,13 +194,13 @@ namespace Sixnet.Threading.Locking
             var currentLockValue = SixnetCacher.String.Get(getLockParameter)?.Values?.FirstOrDefault()?.Value?.ToString();
             if (currentLockValue == lockValue)
             {
-                var delLockOptions = new DeleteParameter()
+                var delLockParameter = new DeleteParameter()
                 {
                     Keys = new List<CacheKey>() { lockName },
                     CacheObject = cacheObject
                 };
-                HandleLockParameter(delLockOptions);
-                return SixnetCacher.Keys.Delete(delLockOptions)?.Success ?? false;
+                HandleLockParameter(delLockParameter);
+                return SixnetCacher.Keys.Delete(delLockParameter)?.Success ?? false;
             }
             return false;
         }
@@ -266,7 +266,6 @@ namespace Sixnet.Threading.Locking
         /// Get create database connection lock
         /// </summary>
         /// <param name="server">Database server</param>
-        /// <param name="lockValue">Lock value</param>
         /// <param name="expirationSeconds">Expiration seconds</param>
         /// <returns></returns>
         public static LockInstance? GetCreateDatabaseConnectionLock(DatabaseServer server, int? expirationSeconds = null)
@@ -293,7 +292,7 @@ namespace Sixnet.Threading.Locking
         /// <param name="culture">Culture</param>
         /// <param name="expirationSeconds">Expiration seconds</param>
         /// <returns></returns>
-        public static LockInstance? GetLoadLocalizationStringLock(CultureInfo culture, int? expirationSeconds = null)
+        internal static LockInstance? GetLoadLocalizationStringLock(CultureInfo culture, int? expirationSeconds = null)
         {
             var lockName = GetLoadLocalizationStringLockName(culture);
             return GetLock(LoadLocalizationStringLockName, lockName, GetLockValue(), expirationSeconds);
@@ -306,7 +305,7 @@ namespace Sixnet.Threading.Locking
         /// <param name="culture">Culture</param>
         /// <param name="expirationSeconds">Expiration seconds</param>
         /// <returns></returns>
-        public static LockInstance? GetLoadLocalizationStringLock(string resourceBaseName, CultureInfo culture, int? expirationSeconds = null)
+        internal static LockInstance? GetLoadLocalizationStringLock(string resourceBaseName, CultureInfo culture, int? expirationSeconds = null)
         {
             var lockName = GetLoadLocalizationStringLockName(culture, resourceBaseName);
             return GetLock(LoadLocalizationStringLockName, lockName, GetLockValue(), expirationSeconds);
@@ -331,7 +330,7 @@ namespace Sixnet.Threading.Locking
         /// </summary>
         /// <param name="queueName"></param>
         /// <returns></returns>
-        public static LockInstance? GetCreateInternalQueueLock(string queueName, int? expirationSeconds = null)
+        internal static LockInstance? GetCreateInternalQueueLock(string queueName, int? expirationSeconds = null)
         {
             var lockName = GetCreateInternalQueueLockName(queueName);
             return GetLock(CreateInProcessQueueLockName, lockName, GetLockValue(), expirationSeconds);

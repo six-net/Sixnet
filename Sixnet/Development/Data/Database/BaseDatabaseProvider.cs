@@ -281,19 +281,19 @@ namespace Sixnet.Development.Data.Database
         {
             var dataCommandResolver = GetDataCommandResolver();
             var queryStatement = dataCommandResolver.GenerateDatabaseQueryPagingStatement(command);
-            var pagingDatas = command.Connection.DbConnection.Query<PagingTotalCountModel, T, PagingTotalCountMappingModel<T>>(queryStatement.Script, PagingTotalCountMappingModel<T>.PagingTotalCountMappingFunc
-                , param: ConvertDataCommandParameters(queryStatement.Parameters)
-                , transaction: command.Connection?.Transaction?.DbTransaction
-                , splitOn: SixnetDataManager.GetPagingTotalSplitFieldName()
-                , commandType: queryStatement.ScriptType)
-                ?.ToList() ?? new List<PagingTotalCountMappingModel<T>>(0);
-            if (pagingDatas.IsNullOrEmpty())
+            List<T> datas = null;
+            var totalCount = 0;
+            using (var gridReader = command.Connection.DbConnection.QueryMultiple(GetCommandDefinition(command, queryStatement)))
+            {
+                datas = gridReader.Read<T>()?.ToList();
+                totalCount = gridReader.ReadFirstOrDefault<PagingTotalCountModel>()?.SixnetPagingTotalDataCount ?? 0;
+            }
+            if (datas.IsNullOrEmpty())
             {
                 return SixnetPager.Empty<T>();
             }
-            var firstData = pagingDatas.First();
             var pagingFilter = command.DataCommand.PagingFilter;
-            return SixnetPager.Create(pagingFilter.Page, pagingFilter.PageSize, firstData.PagingTotalDataCount, pagingDatas.Select(c => c.RealReturnData));
+            return SixnetPager.Create(pagingFilter.Page, pagingFilter.PageSize, totalCount, datas);
         }
 
         /// <summary>
