@@ -146,7 +146,6 @@ namespace Sixnet.Development.Entity
                     Description = entityFieldAttribute?.Description ?? string.Empty,
                     StartValue = entityFieldAttribute?.StartValue ?? 0,
                     FileObjectName = fileObjectName,
-                    ModelType = entityType
                 };
 
                 //value provider

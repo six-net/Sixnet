@@ -22,10 +22,8 @@ namespace Sixnet.Development.Data.Database
 
         /// <summary>
         /// Gets or sets the split table name filter
-        /// Arg1: All table names,
-        /// Arg2: Resolved table names
         /// </summary>
-        public Func<IEnumerable<string>, IEnumerable<string>, IEnumerable<string>> SplitTableNameFilter { get; set; }
+        public Func<IEnumerable<string>, IEnumerable<string>> SplitTableNameFilter { get; set; }
 
         public SplitTableBehavior Clone()
         {

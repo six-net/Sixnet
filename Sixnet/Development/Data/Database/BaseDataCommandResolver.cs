@@ -16,7 +16,7 @@ namespace Sixnet.Development.Data.Database
     /// <summary>
     /// Base data command resolver
     /// </summary>
-    public abstract partial class BaseDataCommandResolver : ISixnetDataCommandResolver
+    public abstract class BaseDataCommandResolver : ISixnetDataCommandResolver
     {
         #region Properties
 
@@ -156,6 +156,7 @@ namespace Sixnet.Development.Data.Database
             var translationResult = Translate(context);
             string sqlStatement;
             IEnumerable<ISixnetField> outputFields = null;
+            IEnumerable<ISixnetField> originalOutputFields = null;
             switch (queryable.ExecutionMode)
             {
                 case QueryableExecutionMode.Script:
@@ -179,7 +180,7 @@ namespace Sixnet.Development.Data.Database
                     {
                         //target
                         var targetStatement = GetFromTargetStatement(context, queryable, QueryableLocation.Top, tablePetName);
-                        outputFields = targetStatement.OutputFields;
+                        originalOutputFields = outputFields = targetStatement.OutputFields;
                         //condition
                         var condition = translationResult.GetCondition(ConditionStartKeyword);
                         //join
@@ -195,7 +196,12 @@ namespace Sixnet.Development.Data.Database
                     // output fields
                     if (outputFields.IsNullOrEmpty() || !queryable.SelectedFields.IsNullOrEmpty())
                     {
-                        outputFields = SixnetDataManager.GetQueryableFields(DatabaseType, queryable.GetModelType(), queryable, context.IsRootQueryable(queryable));
+                        originalOutputFields = outputFields = SixnetDataManager.GetQueryableFields(DatabaseType, queryable.GetModelType(), queryable, context.IsRootQueryable(queryable));
+                    }
+                    if (!queryable.Sorts.IsNullOrEmpty())
+                    {
+                        var sortFields = queryable.Sorts.Select(se => se.Field);
+                        outputFields = outputFields.Union(sortFields);
                     }
                     var outputFieldString = FormatFieldsString(context, queryable, QueryableLocation.PreScript, FieldLocation.InnerOutput, outputFields);
 
@@ -215,18 +221,22 @@ namespace Sixnet.Development.Data.Database
                             throw new NotSupportedException("Not supported this output type for paging");
                         default:
                             sqlStatement = $"SELECT{GetDistinctString(queryable)} {outputFieldString} FROM {targetScript}";
+                            if (hasCombine)
+                            {
+                                sqlStatement = $"({sqlStatement}){combine}";
+                            }
                             break;
                     }
+                    var pagingTotalCountFieldName = SixnetDataManager.GetPagingTotalFieldName();
+                    context.AddPreScript($"{PagingTableName}{WithTableKeyword}({sqlStatement})", PagingTableName, tablePetName);
+                    context.AddPreScript($"{PagingCountTableName}{WithTableKeyword}(SELECT COUNT(1){ColumnPetNameKeyword}{pagingTotalCountFieldName} FROM {PagingTableName})", PagingCountTableName, tablePetName);
                     var preScript = FormatPreScript(context);
 
                     //limit
                     var pagingFilter = command.DataCommand.PagingFilter;
                     var limit = GetLimitString((pagingFilter.Page - 1) * pagingFilter.PageSize, pagingFilter.PageSize, hasSort);
-                    var dataSqlStatement = hasCombine
-                        ? $"{preScript}(SELECT {tablePetName}.* FROM ({sqlStatement}{sort}{limit}){TablePetNameKeyword}{tablePetName}){combine}"
-                        : $"{preScript}{sqlStatement}{sort}{limit};";
-                    var totalSqlStatement = $"{preScript}SELECT COUNT(1){ColumnPetNameKeyword}SixnetPagingTotalDataCount FROM ({sqlStatement}){TablePetNameKeyword}{tablePetName};";
-                    sqlStatement = $"{dataSqlStatement}{Environment.NewLine}{totalSqlStatement}";
+                    outputFieldString = FormatFieldsString(context, queryable, QueryableLocation.Top, FieldLocation.Output, originalOutputFields);
+                    sqlStatement = $"{preScript}SELECT (SELECT {pagingTotalCountFieldName} FROM {PagingCountTableName}){ColumnPetNameKeyword}{pagingTotalCountFieldName},''{ColumnPetNameKeyword}{SixnetDataManager.GetPagingTotalSplitFieldName()},{outputFieldString} FROM {PagingTableName}{TablePetNameKeyword}{tablePetName}{sort}{limit}";
                     break;
             }
 
@@ -1230,8 +1240,7 @@ namespace Sixnet.Development.Data.Database
                                               .FirstOrDefault();
             if (defaultSortField != null)
             {
-                var orderField = DataField.Create(defaultSortField.PropertyName, originalQueryable.GetModelType());
-                originalQueryable.OrderBy(orderField);
+                originalQueryable.OrderBy(defaultSortField.PropertyName, true);
                 AppendSort(context, originalQueryable, translationResult, true);
             }
             return translationResult.GetSort();

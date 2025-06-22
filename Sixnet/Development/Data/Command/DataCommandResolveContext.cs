@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Threading.Tasks;
 using Sixnet.DependencyInjection;
 using Sixnet.Development.Data.Database;
 using Sixnet.Development.Queryable;
@@ -50,7 +49,7 @@ namespace Sixnet.Development.Data.Command
 
         const string DefaultParameterName = "Param";
 
-        public SixnetDataOptions DataOptions { get; private set; }
+        public SixnetDataOptions DataOptions { get;  private set; }
 
         #endregion
 
@@ -331,14 +330,13 @@ namespace Sixnet.Development.Data.Command
         #region Table name
 
         /// <summary>
-        /// Get table name
+        /// Get join table name
         /// </summary>
-        /// <param name="activityQueryable">Activity queryable</param>
-        /// <param name="queryableLocation">Activity queryable location</param>
+        /// <param name="joinQueryable">Join queryable</param>
         /// <returns>Return table name</returns>
-        public List<string> GetTableNames(ISixnetQueryable activityQueryable, QueryableLocation queryableLocation)
+        public string GetJoinTableName(ISixnetQueryable joinQueryable)
         {
-            return DataCommandExecutionContext.GetTableNames(activityQueryable, queryableLocation);
+            return GetTableNames(joinQueryable, QueryableLocation.JoinTarget)?.FirstOrDefault();
         }
 
         /// <summary>
@@ -347,9 +345,9 @@ namespace Sixnet.Development.Data.Command
         /// <param name="activityQueryable">Activity queryable</param>
         /// <param name="queryableLocation">Activity queryable location</param>
         /// <returns>Return table name</returns>
-        public async Task<List<string>> GetTableNamesAsync(ISixnetQueryable activityQueryable, QueryableLocation queryableLocation)
+        public List<string> GetTableNames(ISixnetQueryable activityQueryable, QueryableLocation queryableLocation)
         {
-            return await DataCommandExecutionContext.GetTableNamesAsync(activityQueryable, queryableLocation).ConfigureAwait(false);
+            return DataCommandExecutionContext.GetTableNames(activityQueryable, queryableLocation);
         }
 
         #endregion

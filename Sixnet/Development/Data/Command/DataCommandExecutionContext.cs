@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Sixnet.Development.Data;
 using Sixnet.Development.Data.Database;
 using Sixnet.Development.Queryable;
@@ -147,7 +146,7 @@ namespace Sixnet.Development.Data.Command
                 case DataOperationType.BulkInsert:
                     throw new NotSupportedException($"Not support get split values for {DataOperationType.BulkInsert}");
                 default:
-                    return Command.Options?.SplitTableBehavior ?? ActivityQueryable?.SplitTableBehavior;
+                    return ActivityQueryable?.SplitTableBehavior;
             }
         }
 

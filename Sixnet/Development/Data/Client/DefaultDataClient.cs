@@ -133,20 +133,6 @@ namespace Sixnet.Development.Data.Client
         }
 
         /// <summary>
-        /// Query data list
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="script">Script</param>
-        /// <param name="parameters">Parameters</param>
-        /// <param name="scriptType">Script type</param>
-        /// <param name="options">Options</param>
-        /// <returns></returns>
-        public List<T> Query<T>(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null)
-        {
-            return Query<T>(GetScriptQuery(script, parameters, scriptType), options);
-        }
-
-        /// <summary>
         /// Query the first data
         /// </summary>
         /// <param name="conditionExpression">Condition expression</param>
@@ -173,20 +159,6 @@ namespace Sixnet.Development.Data.Client
             HandleQueryCallback(command, new T[1] { data });
 
             return data;
-        }
-
-        /// <summary>
-        /// Query the first data
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="script">Script</param>
-        /// <param name="parameters">Parameters</param>
-        /// <param name="scriptType">Script type</param>
-        /// <param name="options">Options</param>
-        /// <returns></returns>
-        public T QueryFirst<T>(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null)
-        {
-            return QueryFirst<T>(GetScriptQuery(script, parameters, scriptType), options);
         }
 
         /// <summary>
@@ -274,23 +246,6 @@ namespace Sixnet.Development.Data.Client
         /// </summary>
         /// <typeparam name="TFirst">First data type</typeparam>
         /// <typeparam name="TSecond">Second data type</typeparam>
-        /// <typeparam name="TReturn">Return data type</typeparam>
-        /// <param name="script">Script</param>
-        /// <param name="parameters">Parameters</param>
-        /// <param name="dataMappingFunc">Data mapping function</param>
-        /// <param name="scriptType">Script type</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return the datas</returns>
-        public List<TReturn> QueryMapping<TFirst, TSecond, TReturn>(string script, object parameters, Func<TFirst, TSecond, TReturn> dataMappingFunc, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null)
-        {
-            return QueryMapping(GetScriptQuery(script, parameters, scriptType), dataMappingFunc, options);
-        }
-
-        /// <summary>
-        /// Query datas
-        /// </summary>
-        /// <typeparam name="TFirst">First data type</typeparam>
-        /// <typeparam name="TSecond">Second data type</typeparam>
         /// <typeparam name="TThird">Third data type</typeparam>
         /// <typeparam name="TReturn">Return data type</typeparam>
         /// <param name="queryable">Queryable</param>
@@ -307,24 +262,6 @@ namespace Sixnet.Development.Data.Client
             HandleQueryCallback(command, datas);
 
             return datas;
-        }
-
-        /// <summary>
-        /// Query datas
-        /// </summary>
-        /// <typeparam name="TFirst">First data type</typeparam>
-        /// <typeparam name="TSecond">Second data type</typeparam>
-        /// <typeparam name="TThird">Third data type</typeparam>
-        /// <typeparam name="TReturn">Return data type</typeparam>
-        /// <param name="script">Script</param>
-        /// <param name="parameters">Parameters</param>
-        /// <param name="dataMappingFunc">Data mapping function</param>
-        /// <param name="scriptType">Script type</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return the datas</returns>
-        public List<TReturn> QueryMapping<TFirst, TSecond, TThird, TReturn>(string script, object parameters, Func<TFirst, TSecond, TThird, TReturn> dataMappingFunc, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null)
-        {
-            return QueryMapping(GetScriptQuery(script, parameters, scriptType), dataMappingFunc, options);
         }
 
         /// <summary>
@@ -358,25 +295,6 @@ namespace Sixnet.Development.Data.Client
         /// <typeparam name="TSecond">Second data type</typeparam>
         /// <typeparam name="TThird">Third data type</typeparam>
         /// <typeparam name="TFourth">Fourth data type</typeparam>
-        /// <typeparam name="TReturn">Return data type</typeparam>
-        /// <param name="script">Script</param>
-        /// <param name="parameters">Parameters</param>
-        /// <param name="dataMappingFunc">Data mapping function</param>
-        /// <param name="scriptType">Script type</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return the datas</returns>
-        public List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TReturn>(string script, object parameters, Func<TFirst, TSecond, TThird, TFourth, TReturn> dataMappingFunc, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null)
-        {
-            return QueryMapping(GetScriptQuery(script, parameters, scriptType), dataMappingFunc, options);
-        }
-
-        /// <summary>
-        /// Query datas
-        /// </summary>
-        /// <typeparam name="TFirst">First data type</typeparam>
-        /// <typeparam name="TSecond">Second data type</typeparam>
-        /// <typeparam name="TThird">Third data type</typeparam>
-        /// <typeparam name="TFourth">Fourth data type</typeparam>
         /// <typeparam name="TFifth">Fifth data type</typeparam>
         /// <typeparam name="TReturn">Return data type</typeparam>
         /// <param name="queryable">Queryable</param>
@@ -393,26 +311,6 @@ namespace Sixnet.Development.Data.Client
             HandleQueryCallback(command, datas);
 
             return datas;
-        }
-
-        /// <summary>
-        /// Query datas
-        /// </summary>
-        /// <typeparam name="TFirst">First data type</typeparam>
-        /// <typeparam name="TSecond">Second data type</typeparam>
-        /// <typeparam name="TThird">Third data type</typeparam>
-        /// <typeparam name="TFourth">Fourth data type</typeparam>
-        /// <typeparam name="TFifth">Fifth data type</typeparam>
-        /// <typeparam name="TReturn">Return data type</typeparam>
-        /// <param name="script">Script</param>
-        /// <param name="parameters">Parameters</param>
-        /// <param name="dataMappingFunc">Data mapping function</param>
-        /// <param name="scriptType">Script type</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return the datas</returns>
-        public List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(string script, object parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> dataMappingFunc, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null)
-        {
-            return QueryMapping(GetScriptQuery(script, parameters, scriptType), dataMappingFunc, options);
         }
 
         /// <summary>
@@ -450,27 +348,6 @@ namespace Sixnet.Development.Data.Client
         /// <typeparam name="TFourth">Fourth data type</typeparam>
         /// <typeparam name="TFifth">Fifth data type</typeparam>
         /// <typeparam name="TSixth">Sixth data type</typeparam>
-        /// <typeparam name="TReturn">Return data type</typeparam>
-        /// <param name="script">Script</param>
-        /// <param name="parameters">Parameters</param>
-        /// <param name="dataMappingFunc">Data mapping function</param>
-        /// <param name="scriptType">Script type</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return the datas</returns>
-        public List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(string script, object parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> dataMappingFunc, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null)
-        {
-            return QueryMapping(GetScriptQuery(script, parameters, scriptType), dataMappingFunc, options);
-        }
-
-        /// <summary>
-        /// Query datas
-        /// </summary>
-        /// <typeparam name="TFirst">First data type</typeparam>
-        /// <typeparam name="TSecond">Second data type</typeparam>
-        /// <typeparam name="TThird">Third data type</typeparam>
-        /// <typeparam name="TFourth">Fourth data type</typeparam>
-        /// <typeparam name="TFifth">Fifth data type</typeparam>
-        /// <typeparam name="TSixth">Sixth data type</typeparam>
         /// <typeparam name="TSeventh">Seventh data type</typeparam>
         /// <typeparam name="TReturn">Return data type</typeparam>
         /// <param name="queryable">Queryable</param>
@@ -487,28 +364,6 @@ namespace Sixnet.Development.Data.Client
             HandleQueryCallback(command, datas);
 
             return datas;
-        }
-
-        /// <summary>
-        /// Query datas
-        /// </summary>
-        /// <typeparam name="TFirst">First data type</typeparam>
-        /// <typeparam name="TSecond">Second data type</typeparam>
-        /// <typeparam name="TThird">Third data type</typeparam>
-        /// <typeparam name="TFourth">Fourth data type</typeparam>
-        /// <typeparam name="TFifth">Fifth data type</typeparam>
-        /// <typeparam name="TSixth">Sixth data type</typeparam>
-        /// <typeparam name="TSeventh">Seventh data type</typeparam>
-        /// <typeparam name="TReturn">Return data type</typeparam>
-        /// <param name="script">Script</param>
-        /// <param name="parameters">Parameters</param>
-        /// <param name="dataMappingFunc">Data mapping function</param>
-        /// <param name="scriptType">Script type</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return the datas</returns>
-        public List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(string script, object parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> dataMappingFunc, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null)
-        {
-            return QueryMapping(GetScriptQuery(script, parameters, scriptType), dataMappingFunc, options);
         }
 
         /// <summary>
@@ -679,7 +534,7 @@ namespace Sixnet.Development.Data.Client
         }
 
         /// <summary>
-        /// Scalar value
+        /// Aggregate value
         /// </summary>
         /// <typeparam name="TValue">Data type</typeparam>
         /// <param name="queryable">Queryable</param>
@@ -695,20 +550,6 @@ namespace Sixnet.Development.Data.Client
             HandleGotValueCallback(command, value);
 
             return value;
-        }
-
-        /// <summary>
-        /// Scalar value
-        /// </summary>
-        /// <typeparam name="TValue">Data type</typeparam>
-        /// <param name="script">Script</param>
-        /// <param name="parameters">Parameters</param>
-        /// <param name="scriptType">Script type</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return the data</returns>
-        public TValue Scalar<TValue>(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null)
-        {
-            return Scalar<TValue>(GetScriptQuery(script, parameters, scriptType), options);
         }
 
         /// <summary>
@@ -728,19 +569,6 @@ namespace Sixnet.Development.Data.Client
                 dataSets.Add(DataCommandExecutor.QueryMultiple(new List<DatabaseConnection>(1) { serverConnection }, serverItem.Value.Item2, options));
             }
             return UnionDataSet(dataSets);
-        }
-
-        /// <summary>
-        /// Query multiple data
-        /// </summary>
-        /// <param name="script">Script</param>
-        /// <param name="parameters">Parameters</param>
-        /// <param name="scriptType">Script type</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return the dataset</returns>
-        public DataSet QueryMultiple(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null)
-        {
-            return QueryMultiple(new List<ISixnetQueryable>() { GetScriptQuery(script, parameters, scriptType) }, options);
         }
 
         /// <summary>
@@ -769,21 +597,6 @@ namespace Sixnet.Development.Data.Client
         /// </summary>
         /// <typeparam name="TFirst">First data type</typeparam>
         /// <typeparam name="TSecond">Second data type</typeparam>
-        /// <param name="script">Script</param>
-        /// <param name="parameters">Parameters</param>
-        /// <param name="scriptType">Script type</param>
-        /// <param name="options">Options</param>
-        /// <returns></returns>
-        public Tuple<List<TFirst>, List<TSecond>> QueryMultiple<TFirst, TSecond>(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null)
-        {
-            return QueryMultiple<TFirst, TSecond>(new List<ISixnetQueryable>(1) { GetScriptQuery(script, parameters, scriptType) }, options);
-        }
-
-        /// <summary>
-        /// Query multiple data
-        /// </summary>
-        /// <typeparam name="TFirst">First data type</typeparam>
-        /// <typeparam name="TSecond">Second data type</typeparam>
         /// <typeparam name="TThird">Third data type</typeparam>
         /// <param name="queries">Queries</param>
         /// <param name="options">Options</param>
@@ -799,22 +612,6 @@ namespace Sixnet.Development.Data.Client
                 groupDatas.Add(DataCommandExecutor.QueryMultiple<TFirst, TSecond, TThird>(new List<DatabaseConnection>(1) { serverConnection }, serverItem.Value.Item2, options));
             }
             return UnionMultipleDatas(groupDatas, groupDatas?.Count ?? 0);
-        }
-
-        /// <summary>
-        /// Query multiple data
-        /// </summary>
-        /// <typeparam name="TFirst">First data type</typeparam>
-        /// <typeparam name="TSecond">Second data type</typeparam>
-        /// <typeparam name="TThird">Third data type</typeparam>
-        /// <param name="script">Script</param>
-        /// <param name="parameters">Parameters</param>
-        /// <param name="scriptType">Script type</param>
-        /// <param name="options">Options</param>
-        /// <returns></returns>
-        public Tuple<List<TFirst>, List<TSecond>, List<TThird>> QueryMultiple<TFirst, TSecond, TThird>(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null)
-        {
-            return QueryMultiple<TFirst, TSecond, TThird>(new List<ISixnetQueryable>(1) { GetScriptQuery(script, parameters, scriptType) }, options);
         }
 
         /// <summary>
@@ -847,23 +644,6 @@ namespace Sixnet.Development.Data.Client
         /// <typeparam name="TSecond">Second data type</typeparam>
         /// <typeparam name="TThird">Third data type</typeparam>
         /// <typeparam name="TFourth">Fourth data type</typeparam>
-        /// <param name="script">Script</param>
-        /// <param name="parameters">Parameters</param>
-        /// <param name="scriptType">Script type</param>
-        /// <param name="options">Options</param>
-        /// <returns></returns>
-        public Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>> QueryMultiple<TFirst, TSecond, TThird, TFourth>(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null)
-        {
-            return QueryMultiple<TFirst, TSecond, TThird, TFourth>(new List<ISixnetQueryable>(1) { GetScriptQuery(script, parameters, scriptType) }, options);
-        }
-
-        /// <summary>
-        /// Query multiple data
-        /// </summary>
-        /// <typeparam name="TFirst">First data type</typeparam>
-        /// <typeparam name="TSecond">Second data type</typeparam>
-        /// <typeparam name="TThird">Third data type</typeparam>
-        /// <typeparam name="TFourth">Fourth data type</typeparam>
         /// <typeparam name="TFifth">Fifth data type</typeparam>
         /// <param name="queries">Queries</param>
         /// <param name="options">Options</param>
@@ -879,24 +659,6 @@ namespace Sixnet.Development.Data.Client
                 groupDatas.Add(DataCommandExecutor.QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth>(new List<DatabaseConnection>(1) { serverConnection }, serverItem.Value.Item2, options));
             }
             return UnionMultipleDatas(groupDatas, groupDatas?.Count ?? 0);
-        }
-
-        /// <summary>
-        /// Query multiple data
-        /// </summary>
-        /// <typeparam name="TFirst">First data type</typeparam>
-        /// <typeparam name="TSecond">Second data type</typeparam>
-        /// <typeparam name="TThird">Third data type</typeparam>
-        /// <typeparam name="TFourth">Fourth data type</typeparam>
-        /// <typeparam name="TFifth">Fifth data type</typeparam>
-        /// <param name="script">Script</param>
-        /// <param name="parameters">Parameters</param>
-        /// <param name="scriptType">Script type</param>
-        /// <param name="options">Options</param>
-        /// <returns></returns>
-        public Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>> QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth>(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null)
-        {
-            return QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth>(new List<ISixnetQueryable>(1) { GetScriptQuery(script, parameters, scriptType) }, options);
         }
 
         /// <summary>
@@ -933,25 +695,6 @@ namespace Sixnet.Development.Data.Client
         /// <typeparam name="TFourth">Fourth data type</typeparam>
         /// <typeparam name="TFifth">Fifth data type</typeparam>
         /// <typeparam name="TSixth">Sixth data type</typeparam>
-        /// <param name="script">Script</param>
-        /// <param name="parameters">Parameters</param>
-        /// <param name="scriptType">Script type</param>
-        /// <param name="options">Options</param>
-        /// <returns></returns>
-        public Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>> QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null)
-        {
-            return QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(new List<ISixnetQueryable>(1) { GetScriptQuery(script, parameters, scriptType) }, options);
-        }
-
-        /// <summary>
-        /// Query multiple data
-        /// </summary>
-        /// <typeparam name="TFirst">First data type</typeparam>
-        /// <typeparam name="TSecond">Second data type</typeparam>
-        /// <typeparam name="TThird">Third data type</typeparam>
-        /// <typeparam name="TFourth">Fourth data type</typeparam>
-        /// <typeparam name="TFifth">Fifth data type</typeparam>
-        /// <typeparam name="TSixth">Sixth data type</typeparam>
         /// <typeparam name="TSeventh">Seventh data type</typeparam>
         /// <param name="queries">Queries</param>
         /// <param name="options">Options</param>
@@ -967,26 +710,6 @@ namespace Sixnet.Development.Data.Client
                 groupDatas.Add(DataCommandExecutor.QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(new List<DatabaseConnection>(1) { serverConnection }, serverItem.Value.Item2, options));
             }
             return UnionMultipleDatas(groupDatas, groupDatas?.Count ?? 0);
-        }
-
-        /// <summary>
-        /// Query multiple data
-        /// </summary>
-        /// <typeparam name="TFirst">First data type</typeparam>
-        /// <typeparam name="TSecond">Second data type</typeparam>
-        /// <typeparam name="TThird">Third data type</typeparam>
-        /// <typeparam name="TFourth">Fourth data type</typeparam>
-        /// <typeparam name="TFifth">Fifth data type</typeparam>
-        /// <typeparam name="TSixth">Sixth data type</typeparam>
-        /// <typeparam name="TSeventh">Seventh data type</typeparam>
-        /// <param name="script">Script</param>
-        /// <param name="parameters">Parameters</param>
-        /// <param name="scriptType">Script type</param>
-        /// <param name="options">Options</param>
-        /// <returns></returns>
-        public Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>, List<TSeventh>> QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null)
-        {
-            return QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(new List<ISixnetQueryable>(1) { GetScriptQuery(script, parameters, scriptType) }, options);
         }
 
         #endregion
@@ -1784,11 +1507,12 @@ namespace Sixnet.Development.Data.Client
             {
                 foreach (var ds in dataSets)
                 {
-                    while (ds.Tables != null && ds.Tables.Count > 0)
+                    if (ds.Tables != null && ds.Tables.Count > 0)
                     {
-                        var firstTable = ds.Tables[0];
-                        ds.Tables.Remove(firstTable);
-                        unionDataSet.Tables.Add(firstTable);
+                        foreach (DataTable dt in ds.Tables)
+                        {
+                            unionDataSet.Tables.Add(dt);
+                        }
                     }
                 }
             }
@@ -2032,13 +1756,6 @@ namespace Sixnet.Development.Data.Client
         {
             var firstField = queryable.SelectedFields?.FirstOrDefault();
             SixnetException.ThrowIf(!string.Equals(fieldFormatterName, firstField?.FormatSetting?.Name), $"The field for which the {fieldFormatterName} value is to be calculated is not specified");
-        }
-
-        ISixnetQueryable GetScriptQuery(string script, object parameters, DataScriptType scriptType = DataScriptType.Text)
-        {
-            var query = SixnetQuerier.Create();
-            query.SetScript(script, scriptType, parameters);
-            return query;
         }
 
         #endregion

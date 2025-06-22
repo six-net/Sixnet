@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
-using Sixnet.Development.Data.Database;
 
 namespace Sixnet.Development.Data
 {
@@ -37,11 +36,6 @@ namespace Sixnet.Development.Data
         /// Priority greater than NotOverwriteFieldNames
         /// </summary>
         public bool NotOverwrite { get; set; }
-
-        /// <summary>
-        /// Gets or sets the split on field name
-        /// </summary>
-        public string SpiltOnFieldName {  get; set; }
 
         /// <summary>
         /// Gets or sets the increment field behavior.
@@ -110,10 +104,5 @@ namespace Sixnet.Development.Data
             return InsertIncrementFieldBehavior != DataOperationBehavior.Disable
                 && (globalAllowInsertIncrementField || InsertIncrementFieldBehavior == DataOperationBehavior.Enable);
         }
-
-        /// <summary>
-        /// Gets or sets the split table behavior
-        /// </summary>
-        public SplitTableBehavior SplitTableBehavior {  get; set; }
     }
 }

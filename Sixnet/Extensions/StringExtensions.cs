@@ -332,19 +332,9 @@ namespace System
             {
                 return value;
             }
-
-#if NETCOREAPP
-            return string.Create(name.Length, name, (chars, name) =>
-            {
-                name.CopyTo(chars);
-                FixCasing(chars);
-            });
-#else
-            char[] chars = value.ToCharArray();
+            var chars = value.ToCharArray();
             FixCasing(chars);
             return new string(chars);
-#endif
-
         }
 
         private static void FixCasing(Span<char> chars)
@@ -384,7 +374,7 @@ namespace System
             {
                 return value;
             }
-            if(string.IsNullOrWhiteSpace(separator))
+            if (string.IsNullOrWhiteSpace(separator))
             {
                 separator = "_";
             }

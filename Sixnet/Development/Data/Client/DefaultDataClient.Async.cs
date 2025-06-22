@@ -55,18 +55,6 @@ namespace Sixnet.Development.Data.Client
         }
 
         /// <summary>
-        /// Query data list
-        /// </summary>
-        /// <param name="script">Script</param>
-        /// <param name="parameters">Parameters</param>
-        /// <param name="options">Options</param>
-        /// <returns>Data list</returns>
-        public Task<List<T>> QueryAsync<T>(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null)
-        {
-            return QueryAsync<T>(GetScriptQuery(script, parameters, scriptType), options);
-        }
-
-        /// <summary>
         /// Query the first data
         /// </summary>
         /// <param name="conditionExpression">Condition expression</param>
@@ -93,18 +81,6 @@ namespace Sixnet.Development.Data.Client
             await HandleQueryCallbackAsync(command, new List<T>(1) { data }, command.Options?.CancellationToken ?? default).ConfigureAwait(false);
 
             return data;
-        }
-
-        /// <summary>
-        /// Query the first data
-        /// </summary>
-        /// <param name="script">Script</param>
-        /// <param name="parameters">Parameters</param>
-        /// <param name="options">Options</param>
-        /// <returns>Data list</returns>
-        public Task<T> QueryFirstAsync<T>(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null)
-        {
-            return QueryFirstAsync<T>(GetScriptQuery(script, parameters, scriptType), options);
         }
 
         /// <summary>
@@ -192,22 +168,6 @@ namespace Sixnet.Development.Data.Client
         /// </summary>
         /// <typeparam name="TFirst">First data type</typeparam>
         /// <typeparam name="TSecond">Second data type</typeparam>
-        /// <typeparam name="TReturn">Return data type</typeparam>
-        /// <param name="script">Script</param>
-        /// <param name="parameters">Parameters</param>
-        /// <param name="dataMappingFunc">Data mapping function</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return the datas</returns>
-        public Task<List<TReturn>> QueryMappingAsync<TFirst, TSecond, TReturn>(string script, object parameters, Func<TFirst, TSecond, TReturn> dataMappingFunc, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null)
-        {
-            return QueryMappingAsync(GetScriptQuery(script, parameters, scriptType), dataMappingFunc, options);
-        }
-
-        /// <summary>
-        /// Query datas
-        /// </summary>
-        /// <typeparam name="TFirst">First data type</typeparam>
-        /// <typeparam name="TSecond">Second data type</typeparam>
         /// <typeparam name="TThird">Third data type</typeparam>
         /// <typeparam name="TReturn">Return data type</typeparam>
         /// <param name="queryable">Queryable</param>
@@ -224,23 +184,6 @@ namespace Sixnet.Development.Data.Client
             await HandleQueryCallbackAsync(command, datas, command.Options?.CancellationToken ?? default).ConfigureAwait(false);
 
             return datas;
-        }
-
-        /// <summary>
-        /// Query datas
-        /// </summary>
-        /// <typeparam name="TFirst">First data type</typeparam>
-        /// <typeparam name="TSecond">Second data type</typeparam>
-        /// <typeparam name="TThird">Third data type</typeparam>
-        /// <typeparam name="TReturn">Return data type</typeparam>
-        /// <param name="script">Script</param>
-        /// <param name="parameters">Parameters</param>
-        /// <param name="dataMappingFunc">Data mapping function</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return the datas</returns>
-        public Task<List<TReturn>> QueryMappingAsync<TFirst, TSecond, TThird, TReturn>(string script, object parameters, Func<TFirst, TSecond, TThird, TReturn> dataMappingFunc, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null)
-        {
-            return QueryMappingAsync(GetScriptQuery(script, parameters, scriptType), dataMappingFunc, options);
         }
 
         /// <summary>
@@ -274,24 +217,6 @@ namespace Sixnet.Development.Data.Client
         /// <typeparam name="TSecond">Second data type</typeparam>
         /// <typeparam name="TThird">Third data type</typeparam>
         /// <typeparam name="TFourth">Fourth data type</typeparam>
-        /// <typeparam name="TReturn">Return data type</typeparam>
-        /// <param name="script">Script</param>
-        /// <param name="parameters">Parameters</param>
-        /// <param name="dataMappingFunc">Data mapping function</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return the datas</returns>
-        public Task<List<TReturn>> QueryMappingAsync<TFirst, TSecond, TThird, TFourth, TReturn>(string script, object parameters, Func<TFirst, TSecond, TThird, TFourth, TReturn> dataMappingFunc, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null)
-        {
-            return QueryMappingAsync(GetScriptQuery(script, parameters, scriptType), dataMappingFunc, options);
-        }
-
-        /// <summary>
-        /// Query datas
-        /// </summary>
-        /// <typeparam name="TFirst">First data type</typeparam>
-        /// <typeparam name="TSecond">Second data type</typeparam>
-        /// <typeparam name="TThird">Third data type</typeparam>
-        /// <typeparam name="TFourth">Fourth data type</typeparam>
         /// <typeparam name="TFifth">Fifth data type</typeparam>
         /// <typeparam name="TReturn">Return data type</typeparam>
         /// <param name="queryable">Queryable</param>
@@ -308,25 +233,6 @@ namespace Sixnet.Development.Data.Client
             await HandleQueryCallbackAsync(command, datas, command.Options?.CancellationToken ?? default).ConfigureAwait(false);
 
             return datas;
-        }
-
-        /// <summary>
-        /// Query datas
-        /// </summary>
-        /// <typeparam name="TFirst">First data type</typeparam>
-        /// <typeparam name="TSecond">Second data type</typeparam>
-        /// <typeparam name="TThird">Third data type</typeparam>
-        /// <typeparam name="TFourth">Fourth data type</typeparam>
-        /// <typeparam name="TFifth">Fifth data type</typeparam>
-        /// <typeparam name="TReturn">Return data type</typeparam>
-        /// <param name="script">Script</param>
-        /// <param name="parameters">Parameters</param>
-        /// <param name="dataMappingFunc">Data mapping function</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return the datas</returns>
-        public Task<List<TReturn>> QueryMappingAsync<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(string script, object parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> dataMappingFunc, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null)
-        {
-            return QueryMappingAsync(GetScriptQuery(script, parameters, scriptType), dataMappingFunc, options);
         }
 
         /// <summary>
@@ -364,26 +270,6 @@ namespace Sixnet.Development.Data.Client
         /// <typeparam name="TFourth">Fourth data type</typeparam>
         /// <typeparam name="TFifth">Fifth data type</typeparam>
         /// <typeparam name="TSixth">Sixth data type</typeparam>
-        /// <typeparam name="TReturn">Return data type</typeparam>
-        /// <param name="script">Script</param>
-        /// <param name="parameters">Parameters</param>
-        /// <param name="dataMappingFunc">Data mapping function</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return the datas</returns>
-        public Task<List<TReturn>> QueryMappingAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(string script, object parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> dataMappingFunc, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null)
-        {
-            return QueryMappingAsync(GetScriptQuery(script, parameters, scriptType), dataMappingFunc, options);
-        }
-
-        /// <summary>
-        /// Query datas
-        /// </summary>
-        /// <typeparam name="TFirst">First data type</typeparam>
-        /// <typeparam name="TSecond">Second data type</typeparam>
-        /// <typeparam name="TThird">Third data type</typeparam>
-        /// <typeparam name="TFourth">Fourth data type</typeparam>
-        /// <typeparam name="TFifth">Fifth data type</typeparam>
-        /// <typeparam name="TSixth">Sixth data type</typeparam>
         /// <typeparam name="TSeventh">Seventh data type</typeparam>
         /// <typeparam name="TReturn">Return data type</typeparam>
         /// <param name="queryable">Queryable</param>
@@ -400,27 +286,6 @@ namespace Sixnet.Development.Data.Client
             await HandleQueryCallbackAsync(command, datas, command.Options?.CancellationToken ?? default).ConfigureAwait(false);
 
             return datas;
-        }
-
-        /// <summary>
-        /// Query datas
-        /// </summary>
-        /// <typeparam name="TFirst">First data type</typeparam>
-        /// <typeparam name="TSecond">Second data type</typeparam>
-        /// <typeparam name="TThird">Third data type</typeparam>
-        /// <typeparam name="TFourth">Fourth data type</typeparam>
-        /// <typeparam name="TFifth">Fifth data type</typeparam>
-        /// <typeparam name="TSixth">Sixth data type</typeparam>
-        /// <typeparam name="TSeventh">Seventh data type</typeparam>
-        /// <typeparam name="TReturn">Return data type</typeparam>
-        /// <param name="script">Script</param>
-        /// <param name="parameters">Parameters</param>
-        /// <param name="dataMappingFunc">Data mapping function</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return the datas</returns>
-        public Task<List<TReturn>> QueryMappingAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(string script, object parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> dataMappingFunc, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null)
-        {
-            return QueryMappingAsync(GetScriptQuery(script, parameters, scriptType), dataMappingFunc, options);
         }
 
         /// <summary>
@@ -583,7 +448,7 @@ namespace Sixnet.Development.Data.Client
         }
 
         /// <summary>
-        /// Scalar value
+        /// Aggregate value
         /// </summary>
         /// <typeparam name="TValue">Data type</typeparam>
         /// <param name="queryable">Queryable</param>
@@ -599,19 +464,6 @@ namespace Sixnet.Development.Data.Client
             await HandleGotValueCallbackAsync(command, value, command.Options?.CancellationToken ?? default).ConfigureAwait(false);
 
             return value;
-        }
-
-        /// <summary>
-        /// Scalar value
-        /// </summary>
-        /// <typeparam name="TValue">Data type</typeparam>
-        /// <param name="script">Script</param>
-        /// <param name="parameters">Parameters</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return the data</returns>
-        public Task<TValue> ScalarAsync<TValue>(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null)
-        {
-            return ScalarAsync<TValue>(GetScriptQuery(script, parameters, scriptType), options);
         }
 
         /// <summary>
@@ -637,18 +489,6 @@ namespace Sixnet.Development.Data.Client
         /// <summary>
         /// Query multiple data
         /// </summary>
-        /// <param name="script">Script</param>
-        /// <param name="parameters">Parameters</param>
-        /// <param name="options">Options</param>
-        /// <returns>Return the dataset</returns>
-        public Task<DataSet> QueryMultipleAsync(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null)
-        {
-            return QueryMultipleAsync(new List<ISixnetQueryable>(1) { GetScriptQuery(script, parameters, scriptType) }, options);
-        }
-
-        /// <summary>
-        /// Query multiple data
-        /// </summary>
         /// <typeparam name="TFirst">First data type</typeparam>
         /// <typeparam name="TSecond">Second data type</typeparam>
         /// <param name="queries">Queries</param>
@@ -666,21 +506,6 @@ namespace Sixnet.Development.Data.Client
             }
             var taskDatas = await Task.WhenAll(queryTasks).ConfigureAwait(false);
             return UnionMultipleDatas(taskDatas, taskDatas?.Length ?? 0);
-        }
-
-
-        /// <summary>
-        /// Query multiple data
-        /// </summary>
-        /// <typeparam name="TFirst">First data type</typeparam>
-        /// <typeparam name="TSecond">Second data type</typeparam>
-        /// <param name="script">Script</param>
-        /// <param name="parameters">Parameters</param>
-        /// <param name="options">Options</param>
-        /// <returns></returns>
-        public Task<Tuple<List<TFirst>, List<TSecond>>> QueryMultipleAsync<TFirst, TSecond>(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null)
-        {
-            return QueryMultipleAsync<TFirst, TSecond>(new List<ISixnetQueryable>(1) { GetScriptQuery(script, parameters, scriptType) }, options);
         }
 
         /// <summary>
@@ -704,21 +529,6 @@ namespace Sixnet.Development.Data.Client
             }
             var taskDatas = await Task.WhenAll(queryTasks).ConfigureAwait(false);
             return UnionMultipleDatas(taskDatas, taskDatas?.Length ?? 0);
-        }
-
-        /// <summary>
-        /// Query multiple data
-        /// </summary>
-        /// <typeparam name="TFirst">First data type</typeparam>
-        /// <typeparam name="TSecond">Second data type</typeparam>
-        /// <typeparam name="TThird">Third data type</typeparam>
-        /// <param name="script">Script</param>
-        /// <param name="parameters">Parameters</param>
-        /// <param name="options">Options</param>
-        /// <returns></returns>
-        public Task<Tuple<List<TFirst>, List<TSecond>, List<TThird>>> QueryMultipleAsync<TFirst, TSecond, TThird>(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null)
-        {
-            return QueryMultipleAsync<TFirst, TSecond, TThird>(new List<ISixnetQueryable>(1) { GetScriptQuery(script, parameters, scriptType) }, options);
         }
 
         /// <summary>
@@ -752,22 +562,6 @@ namespace Sixnet.Development.Data.Client
         /// <typeparam name="TSecond">Second data type</typeparam>
         /// <typeparam name="TThird">Third data type</typeparam>
         /// <typeparam name="TFourth">Fourth data type</typeparam>
-        /// <param name="script">Script</param>
-        /// <param name="parameters">Parameters</param>
-        /// <param name="options">Options</param>
-        /// <returns></returns>
-        public Task<Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>>> QueryMultipleAsync<TFirst, TSecond, TThird, TFourth>(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null)
-        {
-            return QueryMultipleAsync<TFirst, TSecond, TThird, TFourth>(new List<ISixnetQueryable>(1) { GetScriptQuery(script, parameters, scriptType) }, options);
-        }
-
-        /// <summary>
-        /// Query multiple data
-        /// </summary>
-        /// <typeparam name="TFirst">First data type</typeparam>
-        /// <typeparam name="TSecond">Second data type</typeparam>
-        /// <typeparam name="TThird">Third data type</typeparam>
-        /// <typeparam name="TFourth">Fourth data type</typeparam>
         /// <typeparam name="TFifth">Fifth data type</typeparam>
         /// <param name="queries">Queries</param>
         /// <param name="options">Options</param>
@@ -784,23 +578,6 @@ namespace Sixnet.Development.Data.Client
             }
             var taskDatas = await Task.WhenAll(queryTasks).ConfigureAwait(false);
             return UnionMultipleDatas(taskDatas, taskDatas?.Length ?? 0);
-        }
-
-        /// <summary>
-        /// Query multiple data
-        /// </summary>
-        /// <typeparam name="TFirst">First data type</typeparam>
-        /// <typeparam name="TSecond">Second data type</typeparam>
-        /// <typeparam name="TThird">Third data type</typeparam>
-        /// <typeparam name="TFourth">Fourth data type</typeparam>
-        /// <typeparam name="TFifth">Fifth data type</typeparam>
-        /// <param name="script">Script</param>
-        /// <param name="parameters">Parameters</param>
-        /// <param name="options">Options</param>
-        /// <returns></returns>
-        public Task<Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>>> QueryMultipleAsync<TFirst, TSecond, TThird, TFourth, TFifth>(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null)
-        {
-            return QueryMultipleAsync<TFirst, TSecond, TThird, TFourth, TFifth>(new List<ISixnetQueryable>(1) { GetScriptQuery(script, parameters, scriptType) }, options);
         }
 
         /// <summary>
@@ -838,24 +615,6 @@ namespace Sixnet.Development.Data.Client
         /// <typeparam name="TFourth">Fourth data type</typeparam>
         /// <typeparam name="TFifth">Fifth data type</typeparam>
         /// <typeparam name="TSixth">Sixth data type</typeparam>
-        /// <param name="script">Script</param>
-        /// <param name="parameters">Parameters</param>
-        /// <param name="options">Options</param>
-        /// <returns></returns>
-        public Task<Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>>> QueryMultipleAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null)
-        {
-            return QueryMultipleAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(new List<ISixnetQueryable>(1) { GetScriptQuery(script, parameters, scriptType) }, options);
-        }
-
-        /// <summary>
-        /// Query multiple data
-        /// </summary>
-        /// <typeparam name="TFirst">First data type</typeparam>
-        /// <typeparam name="TSecond">Second data type</typeparam>
-        /// <typeparam name="TThird">Third data type</typeparam>
-        /// <typeparam name="TFourth">Fourth data type</typeparam>
-        /// <typeparam name="TFifth">Fifth data type</typeparam>
-        /// <typeparam name="TSixth">Sixth data type</typeparam>
         /// <typeparam name="TSeventh">Seventh data type</typeparam>
         /// <param name="queries">Queries</param>
         /// <param name="options">Options</param>
@@ -872,25 +631,6 @@ namespace Sixnet.Development.Data.Client
             }
             var taskDatas = await Task.WhenAll(queryTasks).ConfigureAwait(false);
             return UnionMultipleDatas(taskDatas, taskDatas?.Length ?? 0);
-        }
-
-        /// <summary>
-        /// Query multiple data
-        /// </summary>
-        /// <typeparam name="TFirst">First data type</typeparam>
-        /// <typeparam name="TSecond">Second data type</typeparam>
-        /// <typeparam name="TThird">Third data type</typeparam>
-        /// <typeparam name="TFourth">Fourth data type</typeparam>
-        /// <typeparam name="TFifth">Fifth data type</typeparam>
-        /// <typeparam name="TSixth">Sixth data type</typeparam>
-        /// <typeparam name="TSeventh">Seventh data type</typeparam>
-        /// <param name="script">Script</param>
-        /// <param name="parameters">Parameters</param>
-        /// <param name="options">Options</param>
-        /// <returns></returns>
-        public Task<Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>, List<TSeventh>>> QueryMultipleAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null)
-        {
-            return QueryMultipleAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(new List<ISixnetQueryable>(1) { GetScriptQuery(script, parameters, scriptType) }, options);
         }
 
         #endregion

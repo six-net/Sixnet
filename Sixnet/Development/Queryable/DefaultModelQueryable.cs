@@ -117,7 +117,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Max value</returns>
         public TValue Max<TValue>(Expression<Func<TModel, TValue>> field, Action<SixnetDataOperationOptions> configure = null)
         {
-            Select(SixnetExpressionHelper.GetDataField(field, FieldFormatSetting.Create(FieldFormatterNames.MAX)));
+            Select(SixnetExpressionHelper.GetOutputDataField(this, field, FieldFormatSetting.Create(FieldFormatterNames.MAX)));
             return Max<TValue>(configure);
         }
 
@@ -134,7 +134,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Min value</returns>
         public TValue Min<TValue>(Expression<Func<TModel, TValue>> field, Action<SixnetDataOperationOptions> configure = null)
         {
-            Select(SixnetExpressionHelper.GetDataField(field, FieldFormatSetting.Create(FieldFormatterNames.MIN)));
+            Select(SixnetExpressionHelper.GetOutputDataField(this, field, FieldFormatSetting.Create(FieldFormatterNames.MIN)));
             return Min<TValue>(configure);
         }
 
@@ -151,7 +151,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Sum value</returns>
         public TValue Sum<TValue>(Expression<Func<TModel, TValue>> field, Action<SixnetDataOperationOptions> configure = null)
         {
-            Select(SixnetExpressionHelper.GetDataField(field, FieldFormatSetting.Create(FieldFormatterNames.SUM)));
+            Select(SixnetExpressionHelper.GetOutputDataField(this, field, FieldFormatSetting.Create(FieldFormatterNames.SUM)));
             return Sum<TValue>(configure);
         }
 
@@ -168,7 +168,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Average value</returns>
         public TValue Avg<TValue>(Expression<Func<TModel, TValue>> field, Action<SixnetDataOperationOptions> configure = null)
         {
-            Select(SixnetExpressionHelper.GetDataField(field, FieldFormatSetting.Create(FieldFormatterNames.AVG)));
+            Select(SixnetExpressionHelper.GetOutputDataField(this, field, FieldFormatSetting.Create(FieldFormatterNames.AVG)));
             return Avg<TValue>(configure);
         }
 

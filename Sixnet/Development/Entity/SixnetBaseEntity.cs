@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Sixnet.Code;
+﻿using Sixnet.Code;
 using Sixnet.DependencyInjection;
 using Sixnet.Development.Data.Field;
 using Sixnet.Exceptions;
 using Sixnet.IO;
-using Sixnet.Serialization.Binary;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using static Sixnet.Validation.SixnetValidationConstants;
 
 namespace Sixnet.Development.Entity
@@ -404,13 +403,7 @@ namespace Sixnet.Development.Entity
                         {
                             var oldValue = oldValues[valueItem.Key];
                             var newValue = valueItem.Value;
-                            bool isValueType = field.DataType.IsValueType || typeof(string).IsAssignableFrom(field.DataType);
-                            bool isUpdated = isValueType
-                                ? oldValue != newValue
-                                : field.DataType.IsSerializable
-                                                ? SixnetBinarySerializer.SerializeObjectToString(oldValue) != SixnetBinarySerializer.SerializeObjectToString(newValue)
-                                                : oldValue != newValue;
-                            if (isUpdated)
+                            if (oldValue != newValue)
                             {
                                 modificationValues[valueItem.Key] = valueItem.Value;
                             }

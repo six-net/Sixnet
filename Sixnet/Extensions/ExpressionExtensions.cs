@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Sixnet.Development.Data.Field;
+﻿using Sixnet.Development.Data.Field;
 using Sixnet.Development.Data.Field.Formatting;
 using Sixnet.Development.Queryable;
 using Sixnet.Expressions.Linq;
