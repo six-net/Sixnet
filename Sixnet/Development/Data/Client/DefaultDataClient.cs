@@ -1784,12 +1784,11 @@ namespace Sixnet.Development.Data.Client
             {
                 foreach (var ds in dataSets)
                 {
-                    if (ds.Tables != null && ds.Tables.Count > 0)
+                    while (ds.Tables != null && ds.Tables.Count > 0)
                     {
-                        foreach (DataTable dt in ds.Tables)
-                        {
-                            unionDataSet.Tables.Add(dt);
-                        }
+                        var firstTable = ds.Tables[0];
+                        ds.Tables.Remove(firstTable);
+                        unionDataSet.Tables.Add(firstTable);
                     }
                 }
             }

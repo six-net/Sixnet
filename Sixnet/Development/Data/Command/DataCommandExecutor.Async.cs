@@ -395,15 +395,27 @@ namespace Sixnet.Development.Command
             }
             var finallyDataSet = new DataSet();
             var dataSets = await Task.WhenAll(queryTasks).ConfigureAwait(false);
+
+            if (dataSets.IsNullOrEmpty())
+            {
+                return null;
+            }
+            if (dataSets.Length == 1)
+            {
+                return dataSets[0];
+            }
+
             foreach (var valueDataSet in dataSets)
             {
                 if ((valueDataSet?.Tables?.Count ?? 0) < 1)
                 {
                     continue;
                 }
-                foreach (DataTable table in valueDataSet.Tables)
+                while (valueDataSet.Tables.Count > 0)
                 {
-                    finallyDataSet.Tables.Add(table);
+                    var firstTable = valueDataSet.Tables[0];
+                    valueDataSet.Tables.Remove(firstTable);
+                    finallyDataSet.Tables.Add(firstTable);
                 }
             }
             return finallyDataSet;

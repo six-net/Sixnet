@@ -392,6 +392,14 @@ namespace Sixnet.Development.Command
                 var databaseCommand = GetDatabaseMultipleCommand(conn, queryCommands, options);
                 dataSets.Add(conn.DatabaseProvider.QueryMultiple(databaseCommand));
             }
+            if (dataSets.IsNullOrEmpty())
+            {
+                return null;
+            }
+            if (dataSets.Count == 1)
+            {
+                return dataSets.FirstOrDefault();
+            }
             var finallyDataSet = new DataSet();
             foreach (var valueDataSet in dataSets)
             {
@@ -399,9 +407,11 @@ namespace Sixnet.Development.Command
                 {
                     continue;
                 }
-                foreach (DataTable table in valueDataSet.Tables)
+                while (valueDataSet.Tables.Count > 0)
                 {
-                    finallyDataSet.Tables.Add(table);
+                    var firstTable = valueDataSet.Tables[0];
+                    valueDataSet.Tables.Remove(firstTable);
+                    finallyDataSet.Tables.Add(firstTable);
                 }
             }
             return finallyDataSet;
