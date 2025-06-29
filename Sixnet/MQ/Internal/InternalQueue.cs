@@ -8,7 +8,7 @@ using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 
-namespace Sixnet.MQ.InProcess
+namespace Sixnet.MQ.Internal
 {
     /// <summary>
     /// Internal queue

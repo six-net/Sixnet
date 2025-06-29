@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sixnet.MQ.InProcess
+namespace Sixnet.MQ.Internal
 {
     /// <summary>
     /// Internal queue message

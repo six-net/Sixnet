@@ -7,7 +7,7 @@ using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Sixnet.DependencyInjection;
 using Sixnet.Exceptions;
-using Sixnet.MQ.InProcess;
+using Sixnet.MQ.Internal;
 
 namespace Sixnet.MQ
 {
@@ -20,7 +20,7 @@ namespace Sixnet.MQ
 
         static readonly InternalMessageQueueProvider _internalProvider = new();
         static readonly SixnetMessageQueueOptions _defaultMessageQueueOptions = new();
-        static readonly MessageQueueServer _defaultInProcessServer = new() { Type = MessageQueueType.Internal };
+        static readonly MessageQueueServer _defaultInternalServer = new() { Type = MessageQueueType.Internal };
 
         #endregion
 
@@ -249,7 +249,7 @@ namespace Sixnet.MQ
             {
                 return new MessageQueueEndpoint()
                 {
-                    Server = _defaultInProcessServer,
+                    Server = _defaultInternalServer,
                     QueueNames = new List<string>() { inProcessMessage.QueueName }
                 };
             }
@@ -258,7 +258,7 @@ namespace Sixnet.MQ
             {
                 return new MessageQueueEndpoint()
                 {
-                    Server = _defaultInProcessServer,
+                    Server = _defaultInternalServer,
                     QueueNames = new List<string>() { InternalQueueNames.DomainMessage }
                 };
             }

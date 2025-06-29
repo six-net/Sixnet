@@ -4,7 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-namespace Sixnet.MQ.InProcess
+namespace Sixnet.MQ.Internal
 {
     /// <summary>
     /// Internal queue manager
@@ -32,7 +32,7 @@ namespace Sixnet.MQ.InProcess
                     {
                         var newQueue = InternalQueue.Create(name);
                         var mqOptions = SixnetMQ.GetMessageQueueOptions();
-                        if(mqOptions.AutoConsumeInternalQueue)
+                        if (mqOptions.AutoConsumeInternalQueue)
                         {
                             newQueue.Consume();
                         }
