@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Sixnet.DependencyInjection;
 using Sixnet.MQ;
-using Sixnet.MQ.InProcess;
+using Sixnet.MQ.Internal;
 
 namespace Sixnet.Logging
 {
