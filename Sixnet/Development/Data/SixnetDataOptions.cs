@@ -111,7 +111,17 @@ namespace Sixnet.Development.Data
         /// Whether insert increment field.
         /// Default is false
         /// </summary>
-        public bool InsertIncrementField {  get; set; }
+        public bool InsertIncrementField { get; set; }
+
+        /// <summary>
+        /// Gets or sets the default database word and name pattern
+        /// </summary>
+        public DatabaseWordAndNamePattern DatabaseWordAndNamePattern { get; set; } = DatabaseWordAndNamePattern.Original;
+
+        /// <summary>
+        /// Gets or sets the default database word and name separator
+        /// </summary>
+        public string DatabaseWordAndNameSeparator { get; set; } = "_";
 
         #endregion
 

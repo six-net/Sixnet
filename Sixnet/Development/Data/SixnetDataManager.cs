@@ -1,5 +1,9 @@
-﻿using Sixnet.Cache;
-using Sixnet.Cache.Keys.Parameters;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using Sixnet.Cache;
 using Sixnet.Cache.Set.Parameters;
 using Sixnet.DependencyInjection;
 using Sixnet.Development.Data.Client;
@@ -15,11 +19,6 @@ using Sixnet.Development.Entity;
 using Sixnet.Development.Queryable;
 using Sixnet.Exceptions;
 using Sixnet.Threading.Locking;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
 
 namespace Sixnet.Development.Data
 {
@@ -927,6 +926,42 @@ namespace Sixnet.Development.Data
         public static DatabaseBatchSetting GetBatchSetting(DatabaseType databaseType)
         {
             return GetDataOptions().GetBatchSetting(databaseType);
+        }
+
+        #endregion
+
+        #region Handle database word and name
+
+        /// <summary>
+        /// Handle database word and name
+        /// </summary>
+        /// <param name="databaseType">Databae type</param>
+        /// <param name="orginalValue">Orginal value</param>
+        /// <returns></returns>
+        public static string HandleDatabaseWordAndName(DatabaseType databaseType, string orginalValue)
+        {
+            if (string.IsNullOrWhiteSpace(orginalValue))
+            {
+                return string.Empty;
+            }
+            var dataOptions = GetDataOptions();
+            var formattedValue = orginalValue;
+            switch (dataOptions.DatabaseWordAndNamePattern)
+            {
+                case DatabaseWordAndNamePattern.Uppercase:
+                    formattedValue = orginalValue.ToUpper();
+                    break;
+                case DatabaseWordAndNamePattern.Lowercase:
+                    formattedValue = orginalValue.ToLower();
+                    break;
+                case DatabaseWordAndNamePattern.UppercaseWithSeparator:
+                    formattedValue = orginalValue.ToSeparatorCase(dataOptions.DatabaseWordAndNameSeparator, true);
+                    break;
+                case DatabaseWordAndNamePattern.LowercaseWithSeparator:
+                    formattedValue = orginalValue.ToSeparatorCase(dataOptions.DatabaseWordAndNameSeparator, false);
+                    break;
+            }
+            return formattedValue;
         }
 
         #endregion

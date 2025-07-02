@@ -24,5 +24,15 @@ namespace Sixnet.Development.Data
         /// Gets or sets the data isolation level
         /// </summary>
         public DataIsolationLevel? IsolationLevel { get; set; }
+
+        /// <summary>
+        /// Gets or sets the default database word and name pattern
+        /// </summary>
+        public DatabaseWordAndNamePattern DatabaseWordAndNamePattern { get; set; } = DatabaseWordAndNamePattern.Original;
+
+        /// <summary>
+        /// Gets or sets the default database word and name separator
+        /// </summary>
+        public string DatabaseWordAndNameSeparator { get; set; } = "_";
     }
 }

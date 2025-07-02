@@ -259,4 +259,20 @@ namespace Sixnet.Development.Data
     }
 
     #endregion
+
+    #region Database word and name pattern
+
+    /// <summary>
+    /// Database word and name pattern
+    /// </summary>
+    public enum DatabaseWordAndNamePattern
+    {
+        Original = 1,
+        Uppercase = 2,
+        Lowercase = 3,
+        UppercaseWithSeparator = 4,
+        LowercaseWithSeparator = 5
+    }
+
+    #endregion
 }
