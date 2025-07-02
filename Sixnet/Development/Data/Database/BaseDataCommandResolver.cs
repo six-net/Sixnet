@@ -1369,8 +1369,8 @@ namespace Sixnet.Development.Data.Database
                 {
                     tablePetName = context.GetTablePetName(queryable, fieldModelType, regularField.ModelTypeIndex);
                 }
-                fieldName = regularField.FieldName;
-                formatedFieldName = $"{WrapKeywordFunc(regularField.FieldName)}";
+                fieldName = $"{WrapKeywordFunc(regularField.FieldName)}";
+                formatedFieldName = fieldName;
                 if (!string.IsNullOrWhiteSpace(tablePetName) && fieldLocation != FieldLocation.InsertValue)
                 {
                     formatedFieldName = $"{tablePetName}.{formatedFieldName}";
