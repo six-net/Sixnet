@@ -130,7 +130,7 @@ namespace Sixnet.Development.Data.Database
                     {
                         outputFields = SixnetDataManager.GetQueryableFields(DatabaseType, queryable.GetModelType(), queryable, context.IsRootQueryable(queryable));
                     }
-                    var outputFieldString = await FormatFieldsStringAsync(context, queryable, QueryableLocation.PreScript, FieldLocation.InnerOutput, outputFields).ConfigureAwait(false);
+                    var outputFieldString = await FormatFieldsStringAsync(context, queryable, QueryableLocation.Top, FieldLocation.Output, outputFields).ConfigureAwait(false);
 
                     //sort
                     var sort = translationResult.GetSort();
@@ -442,14 +442,14 @@ namespace Sixnet.Development.Data.Database
                     var complexTarget = false;
                     if (tableNames.Count == 1)
                     {
-                        targetScript = $"{WrapKeywordFunc(tableNames.FirstOrDefault())}{(applyTablePetName ? $"{TablePetNameKeyword}{tablePetName}" : "")}";
+                        targetScript = $"{FormatAndWrapKeywordFunc(tableNames.FirstOrDefault())}{(applyTablePetName ? $"{TablePetNameKeyword}{tablePetName}" : "")}";
                     }
                     else
                     {
                         var targetScripts = new List<string>(tableNames.Count);
                         foreach (var tableName in tableNames)
                         {
-                            targetScripts.Add($"SELECT * FROM {WrapKeywordFunc(tableName)}");
+                            targetScripts.Add($"SELECT * FROM {FormatAndWrapKeywordFunc(tableName)}");
                         }
                         targetScript = $"({string.Join(" UNION ", targetScripts)}){(applyTablePetName ? $"{TablePetNameKeyword}{tablePetName}" : "")}";
                         complexTarget = true;
@@ -1105,8 +1105,8 @@ namespace Sixnet.Development.Data.Database
                 {
                     tablePetName = context.GetTablePetName(queryable, fieldModelType, regularField.ModelTypeIndex);
                 }
-                fieldName = $"{WrapKeywordFunc(regularField.FieldName)}";
-                formatedFieldName = fieldName;
+                fieldName = FormatKeywordFunc(regularField.FieldName);
+                formatedFieldName = WrapKeywordFunc(fieldName);
                 if (!string.IsNullOrWhiteSpace(tablePetName) && fieldLocation != FieldLocation.InsertValue)
                 {
                     formatedFieldName = $"{tablePetName}.{formatedFieldName}";

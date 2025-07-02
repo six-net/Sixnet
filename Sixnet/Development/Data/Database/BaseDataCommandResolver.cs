@@ -73,6 +73,8 @@ namespace Sixnet.Development.Data.Database
         public int DefaultDecimalLength { get; set; } = 20;
         public int DefaultDecimalPrecision { get; set; } = 4;
         public Dictionary<DbType, string> DbTypeDefaultValues { get; set; }
+        //public Func<string, string> FormatAndWrapKeywordFunc { get; set; }
+        public Func<string, string> FormatKeywordFunc { get; set; }
         public Func<string, string> WrapKeywordFunc { get; set; }
         public string RecursiveKeyword { get; set; }
         public bool UseFieldForRecursive { get; set; } = false;
@@ -197,7 +199,7 @@ namespace Sixnet.Development.Data.Database
                     {
                         outputFields = SixnetDataManager.GetQueryableFields(DatabaseType, queryable.GetModelType(), queryable, context.IsRootQueryable(queryable));
                     }
-                    var outputFieldString = FormatFieldsString(context, queryable, QueryableLocation.PreScript, FieldLocation.InnerOutput, outputFields);
+                    var outputFieldString = FormatFieldsString(context, queryable, QueryableLocation.Top, FieldLocation.Output, outputFields);
 
                     //sort
                     var sort = translationResult.GetSort();
@@ -565,14 +567,14 @@ namespace Sixnet.Development.Data.Database
                     var complexTarget = false;
                     if (tableNames.Count == 1)
                     {
-                        targetScript = $"{WrapKeywordFunc(tableNames.FirstOrDefault())}{(applyTablePetName ? $"{TablePetNameKeyword}{tablePetName}" : "")}";
+                        targetScript = $"{FormatAndWrapKeywordFunc(tableNames.FirstOrDefault())}{(applyTablePetName ? $"{TablePetNameKeyword}{tablePetName}" : "")}";
                     }
                     else
                     {
                         var targetScripts = new List<string>(tableNames.Count);
                         foreach (var tableName in tableNames)
                         {
-                            targetScripts.Add($"SELECT * FROM {WrapKeywordFunc(tableName)}");
+                            targetScripts.Add($"SELECT * FROM {FormatAndWrapKeywordFunc(tableName)}");
                         }
                         targetScript = $"({string.Join(" UNION ", targetScripts)}){(applyTablePetName ? $"{TablePetNameKeyword}{tablePetName}" : "")}";
                         complexTarget = true;
@@ -1369,8 +1371,8 @@ namespace Sixnet.Development.Data.Database
                 {
                     tablePetName = context.GetTablePetName(queryable, fieldModelType, regularField.ModelTypeIndex);
                 }
-                fieldName = $"{WrapKeywordFunc(regularField.FieldName)}";
-                formatedFieldName = fieldName;
+                fieldName = FormatKeywordFunc(regularField.FieldName);
+                formatedFieldName = WrapKeywordFunc(fieldName);
                 if (!string.IsNullOrWhiteSpace(tablePetName) && fieldLocation != FieldLocation.InsertValue)
                 {
                     formatedFieldName = $"{tablePetName}.{formatedFieldName}";
@@ -1482,7 +1484,17 @@ namespace Sixnet.Development.Data.Database
         {
             return fields.IsNullOrEmpty()
                 ? string.Empty
-                : string.Join(",", fields.Select(f => WrapKeywordFunc(f.GetFieldName(context.DataCommandExecutionContext.Server.DatabaseType))));
+                : string.Join(",", fields.Select(f => FormatAndWrapKeywordFunc(f.GetFieldName(context.DataCommandExecutionContext.Server.DatabaseType))));
+        }
+
+        /// <summary>
+        /// Format and wrap keyword func
+        /// </summary>
+        /// <param name="originalValue"></param>
+        /// <returns></returns>
+        protected string FormatAndWrapKeywordFunc(string originalValue)
+        {
+            return WrapKeywordFunc(FormatKeywordFunc(originalValue));
         }
 
         #endregion
