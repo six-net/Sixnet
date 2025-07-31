@@ -62,25 +62,7 @@ namespace Sixnet.Development.Data
         /// <returns></returns>
         internal static List<DatabaseServer> GetCommandDatabaseServers(SixnetDataCommand command)
         {
-            List<DatabaseServer> servers = null;
-            var dataOptions = GetDataOptions();
-            if (dataOptions.GetDataCommandDatabaseServers == null)
-            {
-                switch (dataOptions.DatabaseServerMatchPattern)
-                {
-                    case DatabaseServerMatchPattern.Default:
-                        servers = GetDefaultDatabaseServers();
-                        break;
-                    case DatabaseServerMatchPattern.All:
-                        servers = GetAllDatabaseServers();
-                        break;
-                }
-            }
-            else
-            {
-                servers = dataOptions.GetDataCommandDatabaseServers.Invoke(command);
-            }
-            return servers ?? new List<DatabaseServer>(0);
+            return GetDataOptions().GetDataCommandDatabaseServers(command);
         }
 
         /// <summary>
@@ -148,8 +130,7 @@ namespace Sixnet.Development.Data
         /// <returns></returns>
         public static IDbConnection GetDatabaseConnection(DatabaseServer server)
         {
-            var options = GetDataOptions();
-            return options.GetDatabaseConnection?.Invoke(server);
+            return GetDataOptions().GetConnection(server);
         }
 
         #endregion
@@ -848,13 +829,11 @@ namespace Sixnet.Development.Data
         /// <summary>
         /// Whether allow insert increment field
         /// </summary>
-        /// <param name="dataOperationOptions"></param>
+        /// <param name="commandExecutionContext">Command execution context</param>
         /// <returns></returns>
-        public static bool AllowInsertIncrementField(SixnetDataOperationOptions dataOperationOptions)
+        public static bool AllowInsertIncrementField(DataCommandExecutionContext commandExecutionContext)
         {
-            var dataOptions = GetDataOptions();
-            return dataOperationOptions?.AllowInsertIncrementField(dataOptions?.InsertIncrementField ?? false)
-                   ?? dataOptions?.InsertIncrementField ?? false;
+            return GetDataOptions().AllowInsertIncrementField(commandExecutionContext);
         }
 
         #endregion
@@ -930,38 +909,17 @@ namespace Sixnet.Development.Data
 
         #endregion
 
-        #region Handle database word and name
+        #region Format database word and name
 
         /// <summary>
-        /// Handle database word and name
+        /// Format database word and name
         /// </summary>
         /// <param name="databaseType">Databae type</param>
         /// <param name="orginalValue">Orginal value</param>
         /// <returns></returns>
-        public static string HandleDatabaseWordAndName(DatabaseType databaseType, string orginalValue)
+        public static string FormatDatabaseWordAndName(DatabaseType databaseType, string orginalValue)
         {
-            if (string.IsNullOrWhiteSpace(orginalValue))
-            {
-                return string.Empty;
-            }
-            var dataOptions = GetDataOptions();
-            var formattedValue = orginalValue;
-            switch (dataOptions.DatabaseWordAndNamePattern)
-            {
-                case DatabaseWordAndNamePattern.Uppercase:
-                    formattedValue = orginalValue.ToUpper();
-                    break;
-                case DatabaseWordAndNamePattern.Lowercase:
-                    formattedValue = orginalValue.ToLower();
-                    break;
-                case DatabaseWordAndNamePattern.UppercaseWithSeparator:
-                    formattedValue = orginalValue.ToSeparatorCase(dataOptions.DatabaseWordAndNameSeparator, true);
-                    break;
-                case DatabaseWordAndNamePattern.LowercaseWithSeparator:
-                    formattedValue = orginalValue.ToSeparatorCase(dataOptions.DatabaseWordAndNameSeparator, false);
-                    break;
-            }
-            return formattedValue;
+            return GetDataOptions().FormatDatabaseWordAndName(databaseType, orginalValue);
         }
 
         #endregion

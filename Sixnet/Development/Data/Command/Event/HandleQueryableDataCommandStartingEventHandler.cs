@@ -287,7 +287,7 @@ namespace Sixnet.Development.Data.Command.Event
             }
 
             // Custom  filter
-            var dataFilter = options?.GetCustomDataFilter?.Invoke(context);
+            var dataFilter = options?.GetCustomFilter()?.Invoke(context);
 
             // Archived
             var ignoreArchived = originalQueryable.HasIgnoredFilter(FieldRole.Archive)

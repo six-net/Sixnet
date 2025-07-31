@@ -1,4 +1,5 @@
 ﻿using Sixnet.Development.Data.Database;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -42,6 +43,22 @@ namespace Sixnet.Development.Data.Client
         /// Rollback transaction
         /// </summary>
         void Rollback();
+
+        #endregion
+
+        #region Database
+
+        /// <summary>
+        /// Get connections
+        /// </summary>
+        /// <returns></returns>
+        Dictionary<string, DatabaseConnection> GetConnections();
+
+        /// <summary>
+        /// Get database servers
+        /// </summary>
+        /// <returns></returns>
+        List<DatabaseServer> GetDatabaseServers();
 
         #endregion
     }

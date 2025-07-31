@@ -1,29 +1,33 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
 	<PropertyGroup>
 		<TargetFrameworks>netstandard2.1;net6.0;net8.0</TargetFrameworks>
+		<NoWarn>CS3002,CS3001,CS3003</NoWarn>
 		<LangVersion>9.0</LangVersion>
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>sixnet.snk</AssemblyOriginatorKeyFile>
-		<Copyright>Copyright © DingBin.Li</Copyright>
-		<PackageProjectUrl>https://github.com/six-net</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/six-net</RepositoryUrl>
-		<Authors>DingBin.Li</Authors>
-		<PackageTags>.NET,Sixnet</PackageTags>
-		<NoWarn>CS3027;CS3003;CS3002;CS3001</NoWarn>
-		<GenerateSourceRevisionId>false</GenerateSourceRevisionId>
+		<AssemblyVersion>2.0.0.0</AssemblyVersion>
+		<FileVersion>2.0.0.0</FileVersion>
+		<Version>2.0.0</Version>
 	</PropertyGroup>
+
+	<ItemGroup>
+		<None Remove="Extensions\jh5dcsi2.ylf~" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
 		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Localization" Version="6.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Localization" Version="6.0.14" />
 		<PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="6.0.0" />
+		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="7.3.0" />
 		<PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
+		<PackageReference Include="System.DirectoryServices.Protocols" Version="6.0.1" />
 		<PackageReference Include="System.Drawing.Common" Version="6.0.0" />
 		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.3.0" />
 		<PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
@@ -32,6 +36,11 @@
 		<PackageReference Include="System.Threading.Channels" Version="6.0.0" />
 		<PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
 	</ItemGroup>
+
+	<ItemGroup>
+		<Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+	</ItemGroup>
+
 	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
 		<PackageReference Include="AutoMapper">
 			<Version>14.0.0</Version>
@@ -47,4 +56,5 @@
 			<Version>12.0.1</Version>
 		</PackageReference>
 	</ItemGroup>
+
 </Project>

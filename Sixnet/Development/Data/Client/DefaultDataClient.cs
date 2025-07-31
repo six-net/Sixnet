@@ -1475,6 +1475,28 @@ namespace Sixnet.Development.Data.Client
 
         #endregion
 
+        #region Database
+
+        /// <summary>
+        /// Get connections
+        /// </summary>
+        /// <returns></returns>
+        public Dictionary<string, DatabaseConnection> GetConnections()
+        {
+            return databaseConnections?.ToDictionary(c => c.Key, c => c.Value) ?? new Dictionary<string, DatabaseConnection>(0);
+        }
+
+        /// <summary>
+        /// Get database servers
+        /// </summary>
+        /// <returns></returns>
+        public List<DatabaseServer> GetDatabaseServers()
+        {
+            return internalDatabaseServers?.Select(c => c).ToList() ?? new List<DatabaseServer>(0);
+        }
+
+        #endregion
+
         #region Util
 
         /// <summary>
