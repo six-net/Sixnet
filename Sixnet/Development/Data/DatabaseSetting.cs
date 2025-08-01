@@ -125,7 +125,7 @@ namespace Sixnet.Development.Data
                 return null;
             }
             EntitySetting entitySetting = null;
-            _entities.TryGetValue(entityType, out entitySetting);
+            _entities?.TryGetValue(entityType, out entitySetting);
             return entitySetting;
         }
 
