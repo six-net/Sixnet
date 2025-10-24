@@ -35,9 +35,9 @@ namespace Sixnet.App
         };
 
         /// <summary>
-        /// modules
+        /// Initializable models
         /// </summary>
-        static List<ISixnetModule> _modules = null;
+        static List<ISixnetInitializable> _initializableModels = null;
 
         /// <summary>
         /// Config models
@@ -207,51 +207,37 @@ namespace Sixnet.App
         }
 
         /// <summary>
-        /// Add module
+        /// Add initializable modele
         /// </summary>
-        /// <param name="module"></param>
-        internal static void AddModule(ISixnetModule module)
+        /// <param name="model"></param>
+        internal static void AddInitializable(ISixnetInitializable model)
         {
-            if (module != null)
+            if (model != null)
             {
-                _modules ??= new List<ISixnetModule>();
-                _modules.Add(module);
+                _initializableModels ??= new List<ISixnetInitializable>();
+                _initializableModels.Add(model);
             }
         }
 
         /// <summary>
-        /// Configure modules
+        /// Execute initializable
         /// </summary>
-        internal static void ConfigureModules()
+        internal static void ExecuteInitializable()
         {
-            if (!_modules.IsNullOrEmpty())
+            if (!_initializableModels.IsNullOrEmpty())
             {
-                foreach (var configration in _modules)
+                foreach (var initializable in _initializableModels)
                 {
-                    configration?.Configure();
+                    initializable?.Init();
                 }
-            }
-        }
-
-        /// <summary>
-        /// Init modules
-        /// </summary>
-        internal static void InitModules()
-        {
-            if (!_modules.IsNullOrEmpty())
-            {
-                foreach (var configration in _modules)
-                {
-                    configration?.Init();
-                }
-                _modules?.Clear();
-                _modules = null;
+                _initializableModels?.Clear();
+                _initializableModels = null;
             }
         }
 
         /// <summary>
         /// Add Configurable model
-        /// <param name="module"></param>
+        /// <param name="configurable"></param>
         internal static void AddConfigurable(ISixnetConfigurable configurable)
         {
             if (configurable != null)

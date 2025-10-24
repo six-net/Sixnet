@@ -51,6 +51,11 @@ namespace Sixnet
         public IServiceCollection Services { get; set; }
 
         /// <summary>
+        /// Configure host builder
+        /// </summary>
+        public Action<IHostBuilder> ConfigureHostBuilder { get; set; }
+
+        /// <summary>
         /// Configure app
         /// </summary>
         public Action<SixnetApplicationOptions> ConfigureApp { get; set; }
@@ -84,11 +89,6 @@ namespace Sixnet
         /// Configure logging
         /// </summary>
         public Action<SixnetLoggingOptions> ConfigureLogging { get; set; }
-
-        /// <summary>
-        /// Configure logging builder
-        /// </summary>
-        public Action<ILoggingBuilder> ConfigureLoggingBuilder { get; set; }
 
         /// <summary>
         /// Configure file

@@ -32,9 +32,9 @@ namespace Sixnet.App
         static readonly Type _entityContractType = typeof(ISixnetEntity);
 
         /// <summary>
-        /// Module contract
+        /// Initializable contract
         /// </summary>
-        static readonly Type _moduleContractType = typeof(ISixnetModule);
+        static readonly Type _initializableContractType = typeof(ISixnetInitializable);
 
         /// <summary>
         /// Configurable contract 
@@ -113,10 +113,10 @@ namespace Sixnet.App
                     }
                     else if (!type.IsAbstract)
                     {
-                        if (IsDirectFromInterface(_moduleContractType, type)) // init module
+                        if (IsDirectFromInterface(_initializableContractType, type)) // init model
                         {
-                            var moduleConfiguration = Activator.CreateInstance(type) as ISixnetModule;
-                            SixnetApplication.AddModule(moduleConfiguration);
+                            var initializableModel = Activator.CreateInstance(type) as ISixnetInitializable;
+                            SixnetApplication.AddInitializable(initializableModel);
                         }
                         if (IsDirectFromInterface(_configurableContractType, type))
                         {

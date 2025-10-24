@@ -43,6 +43,11 @@ namespace Sixnet.DependencyInjection
         /// </summary>
         static IServiceCollection _serviceCollection = null;
 
+        /// <summary>
+        /// Sixnet options
+        /// </summary>
+        static SixnetOptions _options = null;
+
         #endregion
 
         #region Properties
@@ -105,9 +110,6 @@ namespace Sixnet.DependencyInjection
             // Build service provider
             BuildServiceProvider(true);
 
-            //Configure module
-            SixnetApplication.ConfigureModules();
-
             // Configurable
             SixnetApplication.ExecuteConfigurable();
 
@@ -122,6 +124,8 @@ namespace Sixnet.DependencyInjection
 
             GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
             GC.Collect();
+
+            _options = options;
 
             return _serviceCollection;
         }
@@ -341,7 +345,7 @@ namespace Sixnet.DependencyInjection
         /// <returns></returns>
         public static TOptions GetOptions<TOptions>(string name, SixnetOptionsStyle? style = null) where TOptions : class
         {
-            var optionsStyle = style ?? Sixneter.Options.GetOptionsStyle(typeof(TOptions));
+            var optionsStyle = style ?? _options?.GetOptionsStyle(typeof(TOptions));
 
             TOptions currentOptions;
             switch (optionsStyle)
@@ -431,7 +435,6 @@ namespace Sixnet.DependencyInjection
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureAuthorization);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureAuthentication);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureUnitOfWork);
-            services.PostConfigureIfNotNull(sixnetOptions.ConfigureLoggingBuilder);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureLogging);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureEntity);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureEnum);
@@ -470,7 +473,7 @@ namespace Sixnet.DependencyInjection
 
         #endregion
 
-        #region Application
+        #region Application lifetime
 
         /// <summary>
         /// Register application life time
@@ -485,7 +488,7 @@ namespace Sixnet.DependencyInjection
                 {
                     SixnetLogger.LogDebug($"Application:{SixnetApplication.Current?.Title} is started");
 
-                    SixnetApplication.InitModules();
+                    SixnetApplication.ExecuteInitializable();
 
                     options.ApplicationStarted?.Invoke(options);
                 });

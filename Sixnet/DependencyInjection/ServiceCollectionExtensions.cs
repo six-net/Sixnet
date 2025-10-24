@@ -9,11 +9,12 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddSixnet(this IServiceCollection services, Action<SixnetOptions> configure = null)
         {
-            Sixneter.Init((SixnetOptions options) =>
+            var options = new SixnetOptions
             {
-                options.Services = services;
-                configure?.Invoke(options);
-            });
+                Services = services
+            };
+            configure?.Invoke(options);
+            Sixneter.Init(options);
             return services;
         }
 
