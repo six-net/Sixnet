@@ -7,6 +7,7 @@ using System.Linq.Expressions;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 using Sixnet.Development.Command;
 using Sixnet.Development.Data.Command;
 using Sixnet.Development.Data.Database;
@@ -1375,6 +1376,27 @@ namespace Sixnet.Development.Data.Client
             SixnetDirectThrower.ThrowArgNullIf(internalDatabaseServers.IsNullOrEmpty(), "Database servers");
             var connections = GetConnections(internalDatabaseServers);
             DataCommandExecutor.Migrate(connections, migrationInfo, options);
+        }
+
+        /// <summary>
+        /// Create table
+        /// </summary>
+        /// <typeparam name="TEntity">Entity type</typeparam>
+        public void CreateTable<TEntity>(Action<SixnetCreateTableOptions> configure = null) where TEntity : ISixnetEntity
+        {
+            CreateTable(typeof(TEntity), configure);
+        }
+
+        /// <summary>
+        /// Create table
+        /// </summary>
+        /// <param name="entityType">Entity type</param>
+        /// <param name="configure">Configure options</param>
+        public void CreateTable(Type entityType, Action<SixnetCreateTableOptions> configure = null)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(internalDatabaseServers.IsNullOrEmpty(), "Database servers");
+            var connections = GetConnections(internalDatabaseServers);
+            DataCommandExecutor.CreateTable(connections, entityType, configure);
         }
 
         #endregion

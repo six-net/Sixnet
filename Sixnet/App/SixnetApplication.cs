@@ -220,6 +220,20 @@ namespace Sixnet.App
         }
 
         /// <summary>
+        /// Configure modules
+        /// </summary>
+        internal static void ConfigureModules()
+        {
+            if (!_modules.IsNullOrEmpty())
+            {
+                foreach (var configration in _modules)
+                {
+                    configration?.Configure();
+                }
+            }
+        }
+
+        /// <summary>
         /// Init modules
         /// </summary>
         internal static void InitModules()

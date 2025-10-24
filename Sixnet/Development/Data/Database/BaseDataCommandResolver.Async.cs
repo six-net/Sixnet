@@ -1120,7 +1120,7 @@ namespace Sixnet.Development.Data.Database
             // constant field
             else if (field is ConstantField constantField)
             {
-                if (ParameterizationField(fieldLocation))
+                if (ParameterizationField(fieldLocation, formatterName))
                 {
                     var constantValue = constantField.Value;
                     if (criterionOperator.HasValue && NeedWrapParameter(criterionOperator.Value) && SplitWrapParameter)
@@ -1141,7 +1141,7 @@ namespace Sixnet.Development.Data.Database
                 }
                 else
                 {
-                    formatedFieldName = constantField.Value == null ? "''" : $"'{constantField.Value.ToString()}'";
+                    formatedFieldName = constantField.Value == null ? $"{NullKeyword}" : $"{constantField.Value}";
                 }
             }
             SixnetDirectThrower.ThrowInvalidOperationIf(string.IsNullOrWhiteSpace(formatedFieldName), $"Invalid for {field.GetType()}");
@@ -1155,7 +1155,8 @@ namespace Sixnet.Development.Data.Database
                     TablePetName = tablePetName,
                     Server = context.DataCommandExecutionContext.Server,
                     FieldLocation = fieldLocation,
-                    QueryLocation = queryableLocation
+                    QueryLocation = queryableLocation,
+                    ResolveContext = context
                 };
                 do
                 {

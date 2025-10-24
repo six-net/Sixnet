@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Sixnet.App;
 using Sixnet.Cache;
@@ -104,8 +105,8 @@ namespace Sixnet.DependencyInjection
             // Build service provider
             BuildServiceProvider(true);
 
-            //Init module
-            SixnetApplication.InitModules();
+            //Configure module
+            SixnetApplication.ConfigureModules();
 
             // Configurable
             SixnetApplication.ExecuteConfigurable();
@@ -115,6 +116,9 @@ namespace Sixnet.DependencyInjection
 
             // Event
             SixnetDataEventBus.SubscribeDefaultDataEvent();
+
+            // Application life time
+            RegisterApplicationLifetime(options);
 
             GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
             GC.Collect();
@@ -462,6 +466,44 @@ namespace Sixnet.DependencyInjection
             services.AddSingleton(typeof(ISixnetDataAccess<>), typeof(DefaultDataAccess<>));
             services.AddSingleton(typeof(ISixnetRepository<>), typeof(DefaultRepository<>));
             services.AddSixnetLocalization(sixnetOptions?.ConfigureLocalization);
+        }
+
+        #endregion
+
+        #region Application
+
+        /// <summary>
+        /// Register application life time
+        /// </summary>
+        /// <param name="options"></param>
+        internal static void RegisterApplicationLifetime(SixnetOptions options)
+        {
+            var lifeTime = GetService<IHostApplicationLifetime>();
+            if (lifeTime != null)
+            {
+                lifeTime.ApplicationStarted.Register(() =>
+                {
+                    SixnetLogger.LogDebug($"Application:{SixnetApplication.Current?.Title} is started");
+
+                    SixnetApplication.InitModules();
+
+                    options.ApplicationStarted?.Invoke(options);
+                });
+
+                lifeTime.ApplicationStopping.Register(() =>
+                {
+                    SixnetLogger.LogDebug($"Application:{SixnetApplication.Current?.Title} is stopping");
+
+                    options.ApplicationStopping?.Invoke(options);
+                });
+
+                lifeTime.ApplicationStopped.Register(() =>
+                {
+                    SixnetLogger.LogDebug($"Application:{SixnetApplication.Current?.Title} is stopped");
+
+                    options.ApplicationStopped?.Invoke(options);
+                });
+            }
         }
 
         #endregion

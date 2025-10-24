@@ -4,7 +4,6 @@ using System.Linq;
 using Sixnet.App;
 using Sixnet.Development.Entity;
 using Sixnet.Mapper;
-using Sixnet.Development.Domain;
 using Sixnet.Model;
 
 namespace AutoMapper

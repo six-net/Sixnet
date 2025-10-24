@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using Microsoft.Extensions.Options;
 using Sixnet.Development.Data;
 using Sixnet.Development.Data.Command;
 using Sixnet.Development.Data.Database;
@@ -811,6 +812,55 @@ namespace Sixnet.Development.Command
                     CancellationToken = options?.CancellationToken,
                     Connection = connection,
                     MigrationInfo = migrationInfo
+                });
+            }
+        }
+
+        #endregion
+
+        #region Create table
+
+        /// <summary>
+        /// Create table
+        /// </summary>
+        /// <param name="connections"></param>
+        /// <param name="configure"></param>
+        public static void CreateTable(IEnumerable<DatabaseConnection> connections, Type entityType, Action<SixnetCreateTableOptions> configure = null)
+        {
+            var createTableOptions = new SixnetCreateTableOptions();
+            configure?.Invoke(createTableOptions);
+            ValidateConnections(connections);
+
+            foreach (var connection in connections)
+            {
+                var dataCommand = SixnetDataCommand.Create(null);
+                dataCommand.OperationType = DataOperationType.None;
+                dataCommand.SetEntityType(entityType);
+                dataCommand.Options = new SixnetDataOperationOptions()
+                {
+                    SplitTableBehavior = new SplitTableBehavior()
+                    {
+                        SelectionPattern = SplitTableNameSelectionPattern.Range,
+                        SplitValues = createTableOptions.SplitValues
+                    }
+                };
+                var executionContext = DataCommandExecutionContext.Create(connection, dataCommand);
+                var tableNames = SixnetDataManager.GetTableNames(executionContext);
+
+                connection.DatabaseProvider.Migrate(new MigrationDatabaseCommand()
+                {
+                    Connection = connection,
+                    MigrationInfo = new MigrationInfo()
+                    {
+                        NewTables = new List<NewTableInfo>()
+                        {
+                            new NewTableInfo()
+                            {
+                                EntityType = entityType,
+                                TableNames = tableNames
+                            }
+                        }
+                    }
                 });
             }
         }

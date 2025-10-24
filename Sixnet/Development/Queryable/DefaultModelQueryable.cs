@@ -175,5 +175,18 @@ namespace Sixnet.Development.Queryable
         #endregion
 
         #endregion
+
+        #region From
+
+        /// <summary>
+        /// As a source to other Queryable
+        /// </summary>
+        /// <returns>A new Queryable</returns>
+        public ISixnetQueryable<TSource> AsSource<TSource>()
+        {
+            return SixnetQuerier.Create<TSource>().From(this);
+        }
+
+        #endregion
     }
 }

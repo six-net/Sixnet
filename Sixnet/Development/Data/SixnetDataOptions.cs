@@ -744,6 +744,21 @@ namespace Sixnet.Development.Data
                 case DatabaseWordAndNamePattern.LowercaseWithSeparator:
                     formattedValue = orginalValue.ToSeparatorCase(nameSeparator, false);
                     break;
+                case DatabaseWordAndNamePattern.Reverse:
+                    formattedValue = new string(orginalValue.Reverse().ToArray());
+                    break;
+                case DatabaseWordAndNamePattern.UppercaseReverse:
+                    formattedValue = new string(orginalValue.Reverse().ToArray()).ToUpper();
+                    break;
+                case DatabaseWordAndNamePattern.LowercaseReverse:
+                    formattedValue = new string(orginalValue.Reverse().ToArray()).ToLower();
+                    break;
+                case DatabaseWordAndNamePattern.UppercaseReverseWithSeparator:
+                    formattedValue = new string(orginalValue.ToSeparatorCase(nameSeparator, true).Reverse().ToArray());
+                    break;
+                case DatabaseWordAndNamePattern.LowercaseReverseWithSeparator:
+                    formattedValue = new string(orginalValue.ToSeparatorCase(nameSeparator, false).Reverse().ToArray());
+                    break;
             }
             return formattedValue;
         }

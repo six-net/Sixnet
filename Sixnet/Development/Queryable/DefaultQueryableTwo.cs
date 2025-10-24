@@ -547,6 +547,59 @@ namespace Sixnet.Development.Queryable
         }
 
         /// <summary>
+        /// Select fields
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        /// <returns></returns>
+        public new ISixnetQueryable<TFirst, TSecond> Select<TResult>(Expression<Func<TFirst, TResult>> fields)
+        {
+            IncludeExpressionFieldsCore(fields);
+            return this;
+        }
+
+        /// <summary>
+        /// Select fields
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        /// <returns></returns>
+        public ISixnetQueryable<TFirst, TSecond> Select<TResult>(Expression<Func<TFirst, TSecond, TResult>> fields)
+        {
+            IncludeExpressionFieldsCore(fields);
+            return this;
+        }
+
+        /// <summary>
+        /// Select fields
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        /// <returns></returns>
+        public new ISixnetQueryable<TResult> SelectAsSource<TResult>(Expression<Func<TFirst, TResult>> fields)
+        {
+            return IncludeExpressionFieldsAsSourceCore<TResult>(fields);
+        }
+
+        /// <summary>
+        /// Select fields
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        /// <returns></returns>
+        public ISixnetQueryable<TResult> SelectAsSource<TResult>(Expression<Func<TFirst, TSecond, TResult>> fields)
+        {
+            return IncludeExpressionFieldsAsSourceCore<TResult>(fields);
+        }
+
+        /// <summary>
+        /// Exclude fields
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        /// <returns></returns>
+        public ISixnetQueryable<TFirst, TSecond> Unselect(Expression<Func<TFirst, TSecond, object>> fields)
+        {
+            ExcludeExpressionFieldsCore(fields);
+            return this;
+        }
+
+        /// <summary>
         /// Exclude fields
         /// </summary>
         /// <param name="fields">Fields</param>
@@ -558,44 +611,11 @@ namespace Sixnet.Development.Queryable
         }
 
         /// <summary>
-        /// Select fields
-        /// </summary>
-        /// <param name="fields">Fields</param>
-        /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond> Select(Expression<Func<TFirst, object>> fields)
-        {
-            IncludeExpressionFieldsCore(fields);
-            return this;
-        }
-
-        /// <summary>
         /// Exclude fields
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
         public new ISixnetQueryable<TFirst, TSecond> Unselect(Expression<Func<TFirst, object>> fields)
-        {
-            ExcludeExpressionFieldsCore(fields);
-            return this;
-        }
-
-        /// <summary>
-        /// Select fields
-        /// </summary>
-        /// <param name="fields">Fields</param>
-        /// <returns></returns>
-        public ISixnetQueryable<TFirst, TSecond> Select(Expression<Func<TFirst, TSecond, object>> fields)
-        {
-            IncludeExpressionFieldsCore(fields);
-            return this;
-        }
-
-        /// <summary>
-        /// Exclude fields
-        /// </summary>
-        /// <param name="fields">Fields</param>
-        /// <returns></returns>
-        public ISixnetQueryable<TFirst, TSecond> Unselect(Expression<Func<TFirst, TSecond, object>> fields)
         {
             ExcludeExpressionFieldsCore(fields);
             return this;
@@ -864,7 +884,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond> GroupBy(params Expression<Func<TFirst, object>>[] fields)
+        public new ISixnetQueryable<TFirst, TSecond> GroupBy(Expression<Func<TFirst, object>> fields)
         {
             GroupByExpression(fields);
             return this;
@@ -875,7 +895,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        public ISixnetQueryable<TFirst, TSecond> GroupBy(params Expression<Func<TSecond, object>>[] fields)
+        public ISixnetQueryable<TFirst, TSecond> GroupBy(Expression<Func<TFirst, TSecond, object>> fields)
         {
             GroupByExpression(fields);
             return this;

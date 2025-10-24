@@ -771,6 +771,18 @@ namespace Sixnet.Development.Data.Client
         /// <param name="options">Data operation options</param>
         void Migrate(MigrationInfo migrationInfo, SixnetDataOperationOptions options = null);
 
+        /// <summary>
+        /// Create table
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        void CreateTable<TEntity>(Action<SixnetCreateTableOptions> configure = null) where TEntity : ISixnetEntity;
+
+        ///// <summary>
+        ///// Delete table
+        ///// </summary>
+        ///// <typeparam name="TEntity"></typeparam>
+        //void DeleteTable<TEntity>() where TEntity : ISixnetEntity;
+
         #endregion
 
         #region Get tables

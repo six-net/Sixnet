@@ -20,7 +20,12 @@ namespace Sixnet.Development.Data.Field.Formatting
         /// <summary>
         /// Gets or sets the child format options
         /// </summary>
-        public FieldFormatSetting Child { get; set; }
+        public FieldFormatSetting Child { get; private set; }
+
+        /// <summary>
+        /// Gets or sets weather has data field
+        /// </summary>
+        public bool HasDataField { get; set; }
 
         /// <summary>
         /// Create a field format options
@@ -33,8 +38,22 @@ namespace Sixnet.Development.Data.Field.Formatting
             return new FieldFormatSetting()
             {
                 Name = formatterName,
-                Parameter = parameter
+                Parameter = parameter,
+                HasDataField = parameter is DataField
             };
+        }
+
+        /// <summary>
+        /// Set child field format setting
+        /// </summary>
+        /// <param name="child"></param>
+        public void SetChild(FieldFormatSetting child)
+        {
+            if (child != null)
+            {
+                Child = child;
+                HasDataField |= child.HasDataField;
+            }
         }
 
         /// <summary>

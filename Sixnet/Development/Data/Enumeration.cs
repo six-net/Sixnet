@@ -10,6 +10,7 @@ namespace Sixnet.Development.Data
     [Serializable]
     public enum DataOperationType
     {
+        None = 0,
         /// <summary>
         /// Insert
         /// </summary>
@@ -175,7 +176,8 @@ namespace Sixnet.Development.Data
         Join = 340,
         UpdateValue = 350,
         InsertValue = 360,
-        FormatParameter = 370
+        FormatParameter = 370,
+        Conditional = 380
     }
 
     #endregion
@@ -271,7 +273,13 @@ namespace Sixnet.Development.Data
         Uppercase = 2,
         Lowercase = 3,
         UppercaseWithSeparator = 4,
-        LowercaseWithSeparator = 5
+        LowercaseWithSeparator = 5,
+        Reverse = 6,
+        UppercaseReverse = 7,
+        LowercaseReverse = 8,
+        UppercaseReverseWithSeparator = 9,
+        LowercaseReverseWithSeparator = 10,
+        
     }
 
     #endregion

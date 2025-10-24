@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Sixnet.App;
 using Sixnet.Cache;
@@ -30,6 +31,11 @@ namespace Sixnet
     public class SixnetOptions
     {
         /// <summary>
+        /// Host builder
+        /// </summary>
+        internal protected IHostBuilder HostBuilder { get; set; }
+
+        /// <summary>
         /// Options styyles
         /// </summary>
         readonly Dictionary<Guid, SixnetOptionsStyle> _optionsStyles = new();
@@ -37,7 +43,7 @@ namespace Sixnet
         /// <summary>
         /// Gets or sets the args
         /// </summary>
-        public string[] Args {  get; set; }
+        public string[] Args { get; set; }
 
         /// <summary>
         /// Services
@@ -166,6 +172,21 @@ namespace Sixnet
                 _optionsStyles[optionsType.GUID] = style;
             }
         }
+
+        /// <summary>
+        /// Application started
+        /// </summary>
+        public Action<SixnetOptions> ApplicationStarted { get; set; }
+
+        /// <summary>
+        /// Application stopping
+        /// </summary>
+        public Action<SixnetOptions> ApplicationStopping { get; set; }
+
+        /// <summary>
+        /// Application stopped
+        /// </summary>
+        public Action<SixnetOptions> ApplicationStopped { get; set; }
 
         /// <summary>
         /// Get options style

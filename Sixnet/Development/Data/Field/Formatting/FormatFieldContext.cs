@@ -1,4 +1,5 @@
-﻿using Sixnet.Development.Data.Database;
+﻿using Sixnet.Development.Data.Command;
+using Sixnet.Development.Data.Database;
 using Sixnet.Development.Queryable;
 
 namespace Sixnet.Development.Data.Field.Formatting
@@ -42,5 +43,10 @@ namespace Sixnet.Development.Data.Field.Formatting
         /// Gets or sets the query location
         /// </summary>
         public QueryableLocation QueryLocation { get; set; } = QueryableLocation.Top;
+
+        /// <summary>
+        /// Resolve context
+        /// </summary>
+        public DataCommandResolveContext ResolveContext { get; set; }
     }
 }

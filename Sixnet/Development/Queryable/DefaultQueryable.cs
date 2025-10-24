@@ -1175,6 +1175,15 @@ namespace Sixnet.Development.Queryable
             return this;
         }
 
+        /// <summary>
+        /// As a source to other Queryable
+        /// </summary>
+        /// <returns>A new Queryable</returns>
+        public ISixnetQueryable AsSource()
+        {
+            return SixnetQuerier.Create().From(this);
+        }
+
         #endregion
 
         #region Split table

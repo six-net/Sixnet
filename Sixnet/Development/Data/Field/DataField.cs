@@ -17,6 +17,8 @@ namespace Sixnet.Development.Data.Field
 
         protected string identityValue = string.Empty;
 
+        bool fixedFieldName = false;
+
         #endregion
 
         #region Properties
@@ -219,7 +221,8 @@ namespace Sixnet.Development.Data.Field
                 DataType = DataType,
                 FieldName = FieldName,
                 PropertyName = PropertyName,
-                ModelTypeIndex = ModelTypeIndex
+                ModelTypeIndex = ModelTypeIndex,
+                fixedFieldName = fixedFieldName
             };
         }
 
@@ -379,7 +382,7 @@ namespace Sixnet.Development.Data.Field
         {
             var fieldName = FieldName;
             var entityType = GetModelType();
-            if (entityType != null)
+            if (entityType != null && !fixedFieldName)
             {
                 var entitySetting = SixnetDataManager.GetEntitySetting(databaseType, entityType);
                 if ((entitySetting?.Fields?.TryGetValue(PropertyName, out var fieldSetting) ?? false)

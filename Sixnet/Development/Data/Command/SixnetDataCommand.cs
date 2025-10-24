@@ -301,38 +301,6 @@ namespace Sixnet.Development.Data.Command
 
         #endregion
 
-        //#region Clone
-
-        ///// <summary>
-        ///// Clone a ICommand object
-        ///// </summary>
-        ///// <returns></returns>
-        //public SixnetDataCommand Clone()
-        //{
-        //    var newCommand = new SixnetDataCommand()
-        //    {
-        //        Id = Id,
-        //        Script = Script,
-        //        ScriptType = ScriptType,
-        //        CommandResultType = CommandResultType,
-        //        TableName = TableName,
-        //        EntityIdentityValues = EntityIdentityValues?.ToDictionary(c => c.Key, c => c.Value),
-        //        Properties = Properties?.ToDictionary(c => c.Key, c => c.Value),
-        //        ExecutionMode = ExecutionMode,
-        //        Queryable = Queryable?.Clone(),
-        //        OperationType = OperationType,
-        //        FieldsAssignment = FieldsAssignment?.Clone(),
-        //        EntityType = EntityType,
-        //        ScriptParameters = ScriptParameters?.Clone(),
-        //        DataTable = DataTable
-        //    };
-        //    newCommand.StartingEventHandlers.AddRange(StartingEventHandlers);
-        //    newCommand.CallbackEventHandlers.AddRange(CallbackEventHandlers);
-        //    return newCommand;
-        //}
-
-        //#endregion
-
         #region Create command id
 
         /// <summary>

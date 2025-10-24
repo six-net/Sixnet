@@ -14,66 +14,26 @@
     <copyright>Copyright © DingBin.Li</copyright>
     <tags>.NET,Sixnet,DDD</tags>
     <dependencies>
-      <group targetFramework=".NETStandard2.1">
-		<dependency id="Microsoft.Bcl.HashCode" version="1.1.1" />
-		<dependency id="Microsoft.CSharp" version="4.7.0" />
-		<dependency id="Microsoft.Extensions.Configuration.Json" version="6.0.0" />
-		<dependency id="Microsoft.Extensions.DependencyInjection" version="6.0.0" />
-		<dependency id="Microsoft.Extensions.Hosting" version="6.0.0" />
-		<dependency id="Microsoft.Extensions.Http" version="6.0.0" />
-		<dependency id="Microsoft.Extensions.Localization" version="6.0.0" />
-		<dependency id="Microsoft.Extensions.Logging" version="6.0.0" />
-		<dependency id="Microsoft.Extensions.Options.ConfigurationExtensions" version="6.0.0" />
-		<dependency id="System.ComponentModel.Annotations" version="5.0.0" />
-		<dependency id="System.Drawing.Common" version="6.0.0" />
-		<dependency id="System.IdentityModel.Tokens.Jwt" version="7.3.0" />
-		<dependency id="System.Reflection.Emit" version="4.7.0" />
-		<dependency id="System.Reflection.Emit.Lightweight" version="4.7.0" />
-		<dependency id="System.Text.Json" version="9.0.6" />
-		<dependency id="System.Threading.Channels" version="6.0.0" />
-		<dependency id="System.Threading.Tasks.Extensions" version="4.5.4" />
-		<dependency id="AutoMapper" version="12.0.1" />
-      </group>
-	  <group targetFramework="net6.0">
-		<dependency id="Microsoft.Bcl.HashCode" version="1.1.1" />
-		<dependency id="Microsoft.CSharp" version="4.7.0" />
-		<dependency id="Microsoft.Extensions.Configuration.Json" version="6.0.0" />
-		<dependency id="Microsoft.Extensions.DependencyInjection" version="6.0.0" />
-		<dependency id="Microsoft.Extensions.Hosting" version="6.0.0" />
-		<dependency id="Microsoft.Extensions.Http" version="6.0.0" />
-		<dependency id="Microsoft.Extensions.Localization" version="6.0.0" />
-		<dependency id="Microsoft.Extensions.Logging" version="6.0.0" />
-		<dependency id="Microsoft.Extensions.Options.ConfigurationExtensions" version="6.0.0" />
-		<dependency id="System.ComponentModel.Annotations" version="5.0.0" />
-		<dependency id="System.Drawing.Common" version="6.0.0" />
-		<dependency id="System.IdentityModel.Tokens.Jwt" version="7.3.0" />
-		<dependency id="System.Reflection.Emit" version="4.7.0" />
-		<dependency id="System.Reflection.Emit.Lightweight" version="4.7.0" />
-		<dependency id="System.Text.Json" version="9.0.6" />
-		<dependency id="System.Threading.Channels" version="6.0.0" />
-		<dependency id="System.Threading.Tasks.Extensions" version="4.5.4" />
-		<dependency id="AutoMapper" version="13.0.1" />
-      </group>
-	  <group targetFramework="net8.0">
-		<dependency id="Microsoft.Bcl.HashCode" version="1.1.1" />
-		<dependency id="Microsoft.CSharp" version="4.7.0" />
-		<dependency id="Microsoft.Extensions.Configuration.Json" version="6.0.0" />
-		<dependency id="Microsoft.Extensions.DependencyInjection" version="6.0.0" />
-		<dependency id="Microsoft.Extensions.Hosting" version="6.0.0" />
-		<dependency id="Microsoft.Extensions.Http" version="6.0.0" />
-		<dependency id="Microsoft.Extensions.Localization" version="6.0.0" />
-		<dependency id="Microsoft.Extensions.Logging" version="6.0.0" />
-		<dependency id="Microsoft.Extensions.Options.ConfigurationExtensions" version="6.0.0" />
-		<dependency id="System.ComponentModel.Annotations" version="5.0.0" />
-		<dependency id="System.Drawing.Common" version="6.0.0" />
-		<dependency id="System.IdentityModel.Tokens.Jwt" version="7.3.0" />
-		<dependency id="System.Reflection.Emit" version="4.7.0" />
-		<dependency id="System.Reflection.Emit.Lightweight" version="4.7.0" />
-		<dependency id="System.Text.Json" version="9.0.6" />
-		<dependency id="System.Threading.Channels" version="6.0.0" />
-		<dependency id="System.Threading.Tasks.Extensions" version="4.5.4" />
-		<dependency id="AutoMapper" version="14.0.0" />
-      </group>
+		<PackageReference Include="Microsoft.Bcl.HashCode" Version="6.0.0" />
+		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.10" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.10" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.10" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="9.0.10" />
+		<PackageReference Include="Microsoft.Extensions.Localization" Version="9.0.10" />
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.10" />
+		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.10" />
+		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.14.0" />
+		<PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
+		<PackageReference Include="System.DirectoryServices.Protocols" Version="9.0.10" />
+		<PackageReference Include="System.Drawing.Common" Version="9.0.10" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
+		<PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
+		<PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0" />
+		<PackageReference Include="System.Text.Json" Version="9.0.10" />
+		<PackageReference Include="System.Threading.Channels" Version="9.0.10" />
+		<PackageReference Include="System.Threading.Tasks.Extensions" Version="4.6.3" />
+		<PackageReference Include="AutoMapper" Version="15.0.1" />
     </dependencies>
   </metadata>
   <files>
