@@ -1,4 +1,5 @@
-﻿using Sixnet.Exceptions;
+﻿using System;
+using Sixnet.Exceptions;
 
 namespace Sixnet.Development.Data.Database
 {
@@ -12,7 +13,7 @@ namespace Sixnet.Development.Data.Database
         /// <summary>
         /// Gets or sets the database server name
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; set; } = Guid.NewGuid().ToString();
 
         /// <summary>
         /// Gets or sets the database server role
@@ -28,6 +29,21 @@ namespace Sixnet.Development.Data.Database
         /// Gets or sets database type
         /// </summary>
         public DatabaseType DatabaseType { get; set; }
+
+        /// <summary>
+        /// Connection string secret key
+        /// </summary>
+        public string SecretKey { get; set; } = "";
+
+        /// <summary>
+        /// Connection string secret IV
+        /// </summary>
+        public string SecretIV { get; set; }
+
+        /// <summary>
+        /// Encrypt connection string
+        /// </summary>
+        public bool Encrypt { get; set; }
 
         #endregion
 

@@ -13,22 +13,22 @@ namespace Sixnet.Security.Authentication
         /// <summary>
         /// Expire seconds
         /// </summary>
-        public int ExpireSeconds { get; set; }
+        public int ExpireSeconds { get; set; } = 7200;
 
         /// <summary>
         /// Jwt token issuer
         /// </summary>
-        public string JwtValidIssuer { get; set; }
+        public string JwtValidIssuer { get; set; } = "http://localhost:5000";
 
         /// <summary>
         /// Jwt token audience
         /// </summary>
-        public string JwtValidAudience { get; set; }
+        public string JwtValidAudience { get; set; } = "api";
 
         /// <summary>
         /// Jwt token issuer signing key
         /// </summary>
-        public string JwtIssuerSigningKey { get; set; }
+        public string JwtIssuerSigningKey { get; set; } = "token.sixnet.net_token.sixnet.net";
 
         /// <summary>
         /// Jwt clock skew seconds

@@ -135,6 +135,20 @@ namespace Sixnet.Development.Data
 
         #endregion
 
+        #region Resolve connection string
+
+        /// <summary>
+        /// Resolve connection string
+        /// </summary>
+        /// <param name="server"></param>
+        /// <returns></returns>
+        public static string ResolveConnectionString(DatabaseServer server)
+        {
+            return server.ConnectionString;
+        }
+
+        #endregion
+
         #region Database provider
 
         /// <summary>

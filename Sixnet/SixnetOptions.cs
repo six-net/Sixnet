@@ -46,6 +46,16 @@ namespace Sixnet
         public string[] Args { get; set; }
 
         /// <summary>
+        /// Whether not auto init entity id
+        /// </summary>
+        public bool NotAutoInitEntityId {  get; set; }
+
+        /// <summary>
+        /// Whether not auto execute initializable
+        /// </summary>
+        public bool NotAutoExecuteInitializable {  get; set; }
+
+        /// <summary>
         /// Services
         /// </summary>
         public IServiceCollection Services { get; set; }

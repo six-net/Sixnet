@@ -31,7 +31,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             if (configure != null)
             {
-                services.PostConfigure<TOptions>(configure);
+                services.PostConfigure(configure);
             }
             return services;
         }

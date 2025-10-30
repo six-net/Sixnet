@@ -15,7 +15,7 @@ namespace Sixnet.Localization
         /// <summary>
         /// Json resource path
         /// </summary>
-        public string JsonResourcePath { get; set; }
+        public string JsonResourcePath { get; set; } = "Resources";
 
         /// <summary>
         /// Whether Auto localize throwed message

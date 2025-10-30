@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 using Sixnet.App;
 using Sixnet.Cache;
 using Sixnet.Cache.Provider.Memory;
+using Sixnet.Code;
 using Sixnet.Development.Data;
 using Sixnet.Development.Data.Event;
 using Sixnet.Development.Entity;
@@ -423,7 +424,20 @@ namespace Sixnet.DependencyInjection
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureEmail);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureSms);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureMessage);
-            services.PostConfigureIfNotNull(sixnetOptions.ConfigureData);
+            services.PostConfigureIfNotNull<SixnetDataOptions>((options) =>
+            {
+                sixnetOptions.ConfigureData?.Invoke(options);
+                if (!options.Servers.IsNullOrEmpty())
+                {
+                    foreach (var server in options.Servers)
+                    {
+                        if (server.Encrypt)
+                        {
+                            server.ConnectionString = AesHelper.Decrypt(server.ConnectionString, server.SecretKey, server.SecretIV);
+                        }
+                    }
+                }
+            });
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureMessageQueue);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureJson);
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureValidation);
@@ -488,7 +502,14 @@ namespace Sixnet.DependencyInjection
                 {
                     SixnetLogger.LogDebug($"Application:{SixnetApplication.Current?.Title} is started");
 
-                    SixnetApplication.ExecuteInitializable();
+                    if (!options.NotAutoExecuteInitializable)
+                    {
+                        SixnetApplication.ExecuteInitializable();
+                    }
+                    if (!options.NotAutoInitEntityId)
+                    {
+                        ObjectIdHelper.InitAppObjectIds();
+                    }
 
                     options.ApplicationStarted?.Invoke(options);
                 });
