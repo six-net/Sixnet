@@ -69,6 +69,11 @@ namespace Sixnet.Cache
         /// </summary>
         public bool LowercaseKey { get; set; } = true;
 
+        /// <summary>
+        /// Whether use in memory for default
+        /// </summary>
+        public bool UseInMemoryForDefault { get; set; } = true;
+
         #endregion
 
         #region Methods

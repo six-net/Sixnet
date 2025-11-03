@@ -115,6 +115,7 @@ namespace Sixnet.Cache
         /// <returns>Return cache server</returns>
         protected virtual CacheServer GetCacheServer()
         {
+            UseInMemoryForDefault |= SixnetCacher.Options.UseInMemoryForDefault;
             var server = SixnetCacher.GetCacheServer(this);
             if (server == null && UseInMemoryForDefault)
             {
