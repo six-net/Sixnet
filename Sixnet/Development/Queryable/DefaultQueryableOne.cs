@@ -1,10 +1,8 @@
-﻿using Sixnet.Development.Data;
+﻿// "Company © 2025. All rights reserved."
+
+using Sixnet.Development.Data;
 using Sixnet.Development.Data.Field;
 using Sixnet.Expressions.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
 
 namespace Sixnet.Development.Queryable
 {

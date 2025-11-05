@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Text;
+
 using Sixnet.Development.Data.Field;
 
 namespace Sixnet.Development.Queryable
@@ -141,7 +141,7 @@ namespace Sixnet.Development.Queryable
             {
                 return string.Empty;
             }
-            if(negationFunc!=null)
+            if (negationFunc != null)
             {
                 conditionString = negationFunc(conditionString);
             }
@@ -157,7 +157,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="negationFunc">Negation func</param>
         /// <returns></returns>
-        public QueryableTranslationResult Negate(Func<string,string> negationFunc)
+        public QueryableTranslationResult Negate(Func<string, string> negationFunc)
         {
             this.negationFunc = negationFunc;
             return this;

@@ -1,13 +1,9 @@
-﻿using System;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Collections;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Globalization;
-using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
-using System.Runtime.CompilerServices;
+
 using Sixnet.Development.Data.Field;
 using Sixnet.Development.Data.Field.Formatting;
 using Sixnet.Development.Entity;
@@ -160,7 +156,7 @@ namespace Sixnet.Expressions.Linq
                 throw new InvalidOperationException(ex.Message);
             }
 
-            return "[" + Convert.ToString(func(null), CultureInfo.InvariantCulture) + "]";
+            return "[" + System.Convert.ToString(func(null), CultureInfo.InvariantCulture) + "]";
         }
 
         #endregion

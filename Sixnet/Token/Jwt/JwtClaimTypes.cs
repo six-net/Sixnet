@@ -1,4 +1,6 @@
-﻿namespace Sixnet.Token.Jwt
+﻿// "Company © 2025. All rights reserved."
+
+namespace Sixnet.Token.Jwt
 {
     /// <summary>
     /// Commonly used claim types

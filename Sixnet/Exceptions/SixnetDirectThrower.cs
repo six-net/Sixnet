@@ -1,11 +1,8 @@
-﻿using System;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
-using Sixnet.App;
-using Sixnet.DependencyInjection;
+
 using Sixnet.Localization;
 
 namespace Sixnet.Exceptions

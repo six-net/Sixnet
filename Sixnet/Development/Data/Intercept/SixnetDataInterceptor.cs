@@ -1,11 +1,11 @@
-﻿using Sixnet.Development.Data.Command;
+﻿// "Company © 2025. All rights reserved."
+
+using Sixnet.Development.Data.Command;
 using Sixnet.Development.Data.Field;
 using Sixnet.Development.Data.Field.Formatting;
 using Sixnet.Development.Entity;
 using Sixnet.Exceptions;
 using Sixnet.Session;
-using System;
-using System.Collections.Generic;
 
 namespace Sixnet.Development.Data.Intercept
 {

@@ -1,7 +1,7 @@
-﻿using System;
-using System.Data;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Collections;
-using System.Collections.Generic;
+using System.Data;
 using System.Text;
 
 namespace Sixnet.Development.Data.Dapper

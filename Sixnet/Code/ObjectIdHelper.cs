@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Threading.Tasks;
+
 using Sixnet.Cache;
 using Sixnet.Cache.String.Parameters;
 using Sixnet.Development.Data.Field;
@@ -225,7 +222,7 @@ namespace Sixnet.Code
             for (var i = beginId + 1; i <= newValue; i++)
             {
                 SixnetThrower.ThrowIf<ArgumentOutOfRangeException>(i > int.MaxValue);
-                newIds.Add(Convert.ToInt32(i));
+                newIds.Add(System.Convert.ToInt32(i));
             }
             return newIds;
         }
@@ -292,7 +289,7 @@ namespace Sixnet.Code
             for (var i = beginId + 1; i <= newValue; i++)
             {
                 SixnetThrower.ThrowIf<ArgumentOutOfRangeException>(i > int.MaxValue);
-                newIds.Add(Convert.ToInt32(i));
+                newIds.Add(System.Convert.ToInt32(i));
             }
             return newIds;
         }

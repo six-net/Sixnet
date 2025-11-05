@@ -1,10 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// "Company © 2025. All rights reserved."
+
+using Microsoft.Extensions.Logging;
+
 using Sixnet.Development.Data;
 using Sixnet.Development.Data.Database;
 using Sixnet.Development.Work;
 using Sixnet.Diagnostics;
-using Microsoft.Extensions.Logging;
 using Sixnet.Serialization.Json;
 
 namespace Sixnet.Logging
@@ -73,7 +74,7 @@ namespace Sixnet.Logging
                 return string.Empty;
             }
             return string.Join(NewLine, messages);
-        } 
+        }
 
         #endregion
 

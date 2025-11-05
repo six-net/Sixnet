@@ -1,7 +1,8 @@
-﻿using System;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Collections;
-using System.Collections.Generic;
 using System.Data;
+
 using Sixnet.Development.Data.Parameter.Handler;
 
 namespace Sixnet.Development.Data.ParameterHandler.Handler
@@ -32,7 +33,7 @@ namespace Sixnet.Development.Data.ParameterHandler.Handler
                 else if (originalParameter.Value is sbyte || originalParameter.DbType == DbType.SByte)
                 {
                     originalParameter.DbType = DbType.Int16;
-                    originalParameter.Value = Convert.ToInt16(originalParameter.Value);
+                    originalParameter.Value = System.Convert.ToInt16(originalParameter.Value);
                 }
             }
             return originalParameter;

@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Globalization;
 using System.IO;
 using System.Text;
+
 using Sixnet.App;
 using Sixnet.Code;
 

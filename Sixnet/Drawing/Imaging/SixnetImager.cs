@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Linq;
+
 using Sixnet.Code;
 using Sixnet.DependencyInjection;
 

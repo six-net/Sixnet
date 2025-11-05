@@ -1,10 +1,8 @@
-﻿using System;
-using static Sixnet.Development.Data.Dapper.SqlMapper;
-using System.Collections.Generic;
+﻿// "Company © 2025. All rights reserved."
+
 using Sixnet.Development.Data.Field;
 using Sixnet.Development.Entity;
 using Sixnet.Exceptions;
-using System.Linq;
 
 namespace Sixnet.Development.Queryable
 {

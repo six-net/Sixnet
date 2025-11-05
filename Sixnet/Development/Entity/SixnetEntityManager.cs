@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Linq.Expressions;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Reflection;
-using Sixnet.Development.Data;
+
 using Sixnet.Development.Data.Field;
 using Sixnet.Expressions.Linq;
 using Sixnet.Reflection;

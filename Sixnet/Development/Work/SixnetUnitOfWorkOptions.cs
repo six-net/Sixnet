@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.SqlTypes;
-using System.Linq;
-using System.Text;
+﻿// "Company © 2025. All rights reserved."
+
 using Sixnet.Component.Retry;
 using Sixnet.Exceptions;
 
@@ -32,7 +29,7 @@ namespace Sixnet.Development.Work
         /// <summary>
         /// Whether not retry
         /// </summary>
-        public bool NotRetry {  get; set; }
+        public bool NotRetry { get; set; }
 
         bool DefaultSqlToRetry(RetryContext context)
         {

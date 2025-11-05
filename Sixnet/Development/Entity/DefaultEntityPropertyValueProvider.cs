@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq.Expressions;
+﻿// "Company © 2025. All rights reserved."
 
 namespace Sixnet.Development.Entity
 {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Data;
 using System.Runtime.CompilerServices;
 
@@ -12,11 +13,9 @@ namespace Sixnet.Development.Data.Dapper
             private static readonly int s_typeCount = CountNonTrivial(out s_typeHash);
 
             internal Identity(string sql, CommandType? commandType, string connectionString, Type type, Type parametersType, int gridIndex = 0)
-                : base(sql, commandType, connectionString, type, parametersType, s_typeHash, gridIndex)
-            {}
+                : base(sql, commandType, connectionString, type, parametersType, s_typeHash, gridIndex) { }
             internal Identity(string sql, CommandType? commandType, IDbConnection connection, Type type, Type parametersType, int gridIndex = 0)
-                : base(sql, commandType, connection.ConnectionString, type, parametersType, s_typeHash, gridIndex)
-            { }
+                : base(sql, commandType, connection.ConnectionString, type, parametersType, s_typeHash, gridIndex) { }
 
             static int CountNonTrivial(out int hashCode)
             {
@@ -24,7 +23,7 @@ namespace Sixnet.Development.Data.Dapper
                 int count = 0;
                 bool Map<T>()
                 {
-                    if(typeof(T) != typeof(DontMap))
+                    if (typeof(T) != typeof(DontMap))
                     {
                         count++;
                         hashCodeLocal = (hashCodeLocal * 23) + (typeof(T).GetHashCode());
@@ -39,7 +38,8 @@ namespace Sixnet.Development.Data.Dapper
                 return count;
             }
             internal override int TypeCount => s_typeCount;
-            internal override Type GetType(int index) => index switch {
+            internal override Type GetType(int index) => index switch
+            {
                 0 => typeof(TFirst),
                 1 => typeof(TSecond),
                 2 => typeof(TThird),
@@ -212,7 +212,7 @@ namespace Sixnet.Development.Data.Dapper
             private static bool TypesEqual(Identity x, Identity y, int count)
             {
                 if (y.TypeCount != count) return false;
-                for(int i = 0; i < count; i++)
+                for (int i = 0; i < count; i++)
                 {
                     if (x.GetType(i) != y.GetType(i))
                         return false;

@@ -1,7 +1,4 @@
-﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
-
-using System.Collections.Generic;
-using System.Linq.Expressions;
+﻿// "Company © 2025. All rights reserved."
 
 namespace Sixnet.Expressions.Linq
 {

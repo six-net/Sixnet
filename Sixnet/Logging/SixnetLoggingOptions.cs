@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Text;
+
 using Microsoft.Extensions.Logging;
 
 namespace Sixnet.Logging

@@ -1,6 +1,8 @@
-﻿using Sixnet.Exceptions;
-using System;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Threading.Tasks;
+
+using Sixnet.Exceptions;
 
 namespace Sixnet.Cache
 {

@@ -1,6 +1,8 @@
-﻿using System;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Threading;
 using System.Threading.Tasks;
+
 using Sixnet.Development.Event;
 
 namespace Sixnet.Development.Domain.Event
@@ -12,7 +14,7 @@ namespace Sixnet.Development.Domain.Event
     public class DefaultDomainEventHandler<TEvent> : DefaultEventHandler<TEvent>, ISixnetDomainEventHandler where TEvent : ISixnetDomainEvent
     {
 
-        public DefaultDomainEventHandler(Func<TEvent, CancellationToken, Task> handlerExecutor, DomainEventHandlerOptions options = null) 
+        public DefaultDomainEventHandler(Func<TEvent, CancellationToken, Task> handlerExecutor, DomainEventHandlerOptions options = null)
             : base(handlerExecutor, options?.GetSixnetEventHandlerOptions())
         {
         }

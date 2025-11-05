@@ -1,5 +1,8 @@
-﻿using Microsoft.Extensions.Localization;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Globalization;
+
+using Microsoft.Extensions.Localization;
 
 namespace Sixnet.Localization
 {

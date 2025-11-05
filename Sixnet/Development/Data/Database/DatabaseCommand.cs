@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Threading;
-using System.Windows.Input;
 
 namespace Sixnet.Development.Data.Database
 {

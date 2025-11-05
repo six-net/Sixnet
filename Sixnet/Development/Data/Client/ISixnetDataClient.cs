@@ -1,7 +1,9 @@
-﻿using Sixnet.Development.Data.Database;
-using System.Collections.Generic;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Threading;
 using System.Threading.Tasks;
+
+using Sixnet.Development.Data.Database;
 
 namespace Sixnet.Development.Data.Client
 {

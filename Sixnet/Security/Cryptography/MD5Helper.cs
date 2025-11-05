@@ -1,5 +1,5 @@
-﻿using System;
-using System.Runtime.CompilerServices;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Security.Cryptography;
 using System.Text;
 

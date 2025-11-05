@@ -1,6 +1,8 @@
-﻿using System;
-using Sixnet.DependencyInjection;
+﻿// "Company © 2025. All rights reserved."
+
 using Microsoft.Extensions.Logging;
+
+using Sixnet.DependencyInjection;
 
 namespace Sixnet.Logging
 {
@@ -24,8 +26,8 @@ namespace Sixnet.Logging
             {
                 return null;
             }
-            loggerCategoryName = string.IsNullOrWhiteSpace(loggerCategoryName) 
-                ? SixnetLogger.DefaultLoggerCategoryName 
+            loggerCategoryName = string.IsNullOrWhiteSpace(loggerCategoryName)
+                ? SixnetLogger.DefaultLoggerCategoryName
                 : loggerCategoryName;
             return loggerFactory.CreateLogger(loggerCategoryName);
         }

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿// "Company © 2025. All rights reserved."
 
 namespace Sixnet.Net.Sms
 {

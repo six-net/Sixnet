@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Data;
 
 namespace Sixnet.Development.Data.Dapper
@@ -27,7 +27,7 @@ namespace Sixnet.Development.Data.Dapper
                     }
                     else
                     {
-                        yield return (T)Convert.ChangeType(val, convertToType, System.Globalization.CultureInfo.InvariantCulture);
+                        yield return (T)System.Convert.ChangeType(val, convertToType, System.Globalization.CultureInfo.InvariantCulture);
                     }
                 } while (reader.Read());
             }

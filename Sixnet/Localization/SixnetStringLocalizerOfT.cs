@@ -1,8 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Globalization;
-using System.Text;
+
 using Microsoft.Extensions.Localization;
+
 using Sixnet.Exceptions;
 
 namespace Sixnet.Localization

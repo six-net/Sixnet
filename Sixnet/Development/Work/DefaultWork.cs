@@ -1,14 +1,14 @@
-﻿using System;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+
 using Sixnet.Development.Data;
 using Sixnet.Development.Data.Client;
 using Sixnet.Development.Data.Database;
 using Sixnet.Development.Data.Event;
 using Sixnet.Development.Domain.Event;
-using Sixnet.Development.Event;
 using Sixnet.Logging;
 
 namespace Sixnet.Development.Work

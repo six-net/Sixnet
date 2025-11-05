@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Sixnet.Development.Data;
-using Sixnet.Development.Repository;
-using Sixnet.Model.Paging;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Threading.Tasks;
-using System.Linq.Expressions;
+
+using Sixnet.Development.Data;
 using Sixnet.Development.Data.Field.Formatting;
+using Sixnet.Development.Repository;
 using Sixnet.Expressions.Linq;
+using Sixnet.Model.Paging;
 
 namespace Sixnet.Development.Queryable
 {

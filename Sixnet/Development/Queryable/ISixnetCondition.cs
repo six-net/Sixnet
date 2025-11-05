@@ -1,4 +1,6 @@
-﻿namespace Sixnet.Development.Queryable
+﻿// "Company © 2025. All rights reserved."
+
+namespace Sixnet.Development.Queryable
 {
     /// <summary>
     /// Defines condition contract

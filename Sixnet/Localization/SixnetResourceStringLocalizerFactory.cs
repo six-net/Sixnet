@@ -1,11 +1,13 @@
-using System;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Collections.Concurrent;
 using System.IO;
 using System.Reflection;
-using System.Resources;
+
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+
 using Sixnet.Exceptions;
 
 namespace Sixnet.Localization

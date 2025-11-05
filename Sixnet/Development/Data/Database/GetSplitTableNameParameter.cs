@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Sixnet.Cache.String.Parameters;
+﻿// "Company © 2025. All rights reserved."
 
 namespace Sixnet.Development.Data.Database
 {

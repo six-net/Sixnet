@@ -1,4 +1,4 @@
-﻿using System;
+﻿// "Company © 2025. All rights reserved."
 
 namespace Sixnet.Code
 {
@@ -12,7 +12,7 @@ namespace Sixnet.Code
         /// <summary>
         /// Random object
         /// </summary>
-        private static readonly Random random; 
+        private static readonly Random random;
 
         #endregion
 

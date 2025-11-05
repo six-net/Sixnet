@@ -1,7 +1,8 @@
-﻿using Sixnet.Exceptions;
-using System;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Collections.Concurrent;
-using System.Collections.Generic;
+
+using Sixnet.Exceptions;
 
 namespace Sixnet.Token
 {

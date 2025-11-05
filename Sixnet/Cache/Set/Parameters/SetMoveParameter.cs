@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Threading.Tasks;
+
 using Sixnet.Cache.Set.Results;
 
 namespace Sixnet.Cache.Set.Parameters

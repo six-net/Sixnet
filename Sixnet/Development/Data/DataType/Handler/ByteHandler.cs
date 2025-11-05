@@ -1,5 +1,7 @@
-﻿using System;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Data;
+
 using Sixnet.Development.Data.Dapper;
 
 namespace Sixnet.Development.Data.DataType.Handler
@@ -8,7 +10,7 @@ namespace Sixnet.Development.Data.DataType.Handler
     {
         public override byte Parse(object value)
         {
-            return Convert.ToByte(value);
+            return System.Convert.ToByte(value);
         }
 
         public override void SetValue(IDbDataParameter parameter, byte value)

@@ -1,4 +1,6 @@
-﻿using Sixnet.Development.Data.Client;
+﻿// "Company © 2025. All rights reserved."
+
+using Sixnet.Development.Data.Client;
 using Sixnet.Development.Data.Command;
 using Sixnet.Development.Queryable;
 using Sixnet.Exceptions;
@@ -26,7 +28,7 @@ namespace Sixnet.Development.Data.Event
         /// </summary>
         public dynamic Value { get; set; }
 
-        public static GotValueEvent Create(ISixnetDataClient dataClient, SixnetDataCommand command,  dynamic value)
+        public static GotValueEvent Create(ISixnetDataClient dataClient, SixnetDataCommand command, dynamic value)
         {
             SixnetDirectThrower.ThrowArgNullIf(command == null, nameof(command));
 

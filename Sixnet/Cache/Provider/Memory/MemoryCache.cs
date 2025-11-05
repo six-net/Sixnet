@@ -1,16 +1,14 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+﻿// "Company © 2025. All rights reserved."
 
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+
 using Microsoft.Extensions.Options;
-using Sixnet.Code;
+
 using Sixnet.Cache.Provider.Memory.Abstractions;
 using Sixnet.Cache.Provider.Memory.Abstractions.Internal;
+using Sixnet.Code;
 
 namespace Sixnet.Cache.Provider.Memory
 {

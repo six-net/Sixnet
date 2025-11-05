@@ -1,6 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using Sixnet.Development.Event;
+﻿// "Company © 2025. All rights reserved."
+
 using Sixnet.Development.Work;
 
 namespace Sixnet.Development.Message

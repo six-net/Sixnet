@@ -1,10 +1,10 @@
-using System;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Reflection;
 using System.Resources;
+
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 

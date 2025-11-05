@@ -1,4 +1,6 @@
-﻿using Sixnet.Model;
+﻿// "Company © 2025. All rights reserved."
+
+using Sixnet.Model;
 
 namespace Sixnet.Development.Data.Field.Formatting
 {

@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Threading;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Threading.Tasks;
 
 namespace Sixnet.Net.Email

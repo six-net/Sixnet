@@ -1,7 +1,4 @@
-﻿using Sixnet.DependencyInjection;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
+﻿// "Company © 2025. All rights reserved."
 
 namespace Sixnet.Development.Message
 {

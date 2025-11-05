@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// "Company © 2025. All rights reserved."
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+
 using Sixnet.App;
 using Sixnet.Cache;
 using Sixnet.Development.Data;
@@ -48,12 +48,12 @@ namespace Sixnet
         /// <summary>
         /// Whether not auto init entity id
         /// </summary>
-        public bool NotAutoInitEntityId {  get; set; }
+        public bool NotAutoInitEntityId { get; set; }
 
         /// <summary>
         /// Whether not auto execute initializable
         /// </summary>
-        public bool NotAutoExecuteInitializable {  get; set; }
+        public bool NotAutoExecuteInitializable { get; set; }
 
         /// <summary>
         /// Services

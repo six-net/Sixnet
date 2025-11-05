@@ -1,4 +1,6 @@
-﻿namespace Sixnet.Development.Data
+﻿// "Company © 2025. All rights reserved."
+
+namespace Sixnet.Development.Data
 {
     /// <summary>
     /// Database batch setting

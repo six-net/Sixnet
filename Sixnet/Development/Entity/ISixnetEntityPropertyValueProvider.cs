@@ -1,4 +1,6 @@
-﻿namespace Sixnet.Development.Entity
+﻿// "Company © 2025. All rights reserved."
+
+namespace Sixnet.Development.Entity
 {
     internal interface ISixnetEntityPropertyValueProvider
     {

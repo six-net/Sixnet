@@ -1,5 +1,6 @@
-﻿using Sixnet.Environments;
-using System;
+﻿// "Company © 2025. All rights reserved."
+
+using Sixnet.Environments;
 
 namespace Sixnet.App
 {

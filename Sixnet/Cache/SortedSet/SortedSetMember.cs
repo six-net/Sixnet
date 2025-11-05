@@ -1,4 +1,6 @@
-﻿namespace Sixnet.Cache.SortedSet
+﻿// "Company © 2025. All rights reserved."
+
+namespace Sixnet.Cache.SortedSet
 {
     /// <summary>
     /// Sorted set value

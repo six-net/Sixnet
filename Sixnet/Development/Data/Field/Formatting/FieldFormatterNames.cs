@@ -1,4 +1,6 @@
-﻿namespace Sixnet.Development.Data.Field.Formatting
+﻿// "Company © 2025. All rights reserved."
+
+namespace Sixnet.Development.Data.Field.Formatting
 {
     /// <summary>
     /// Default field formatter names

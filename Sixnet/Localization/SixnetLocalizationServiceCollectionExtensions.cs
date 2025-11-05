@@ -1,8 +1,10 @@
-﻿using Microsoft.Extensions.DependencyInjection.Extensions;
+﻿// "Company © 2025. All rights reserved."
+
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Localization;
+
 using Sixnet.Exceptions;
 using Sixnet.Localization;
-using System;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

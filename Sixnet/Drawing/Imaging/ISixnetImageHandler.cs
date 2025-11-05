@@ -1,4 +1,6 @@
-﻿using System.Drawing;
+﻿// "Company © 2025. All rights reserved."
+
+using System.Drawing;
 
 namespace Sixnet.Drawing.Imaging
 {

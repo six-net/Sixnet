@@ -1,12 +1,12 @@
-﻿using Sixnet.DependencyInjection;
+﻿// "Company © 2025. All rights reserved."
+
+using System.Runtime;
+using System.Text.RegularExpressions;
+
+using Sixnet.DependencyInjection;
 using Sixnet.Development.Entity;
 using Sixnet.Logging;
 using Sixnet.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime;
-using System.Text.RegularExpressions;
 
 namespace Sixnet.App
 {

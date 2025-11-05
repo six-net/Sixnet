@@ -1,4 +1,6 @@
-﻿namespace Sixnet.Cache.Set.Results
+﻿// "Company © 2025. All rights reserved."
+
+namespace Sixnet.Cache.Set.Results
 {
     /// <summary>
     /// Set random member result

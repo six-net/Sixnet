@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// "Company © 2025. All rights reserved."
+
 using System.ComponentModel;
 
 namespace Sixnet.Development.Data.Dapper
@@ -60,7 +60,7 @@ namespace Sixnet.Development.Data.Dapper
                 EventDescriptorCollection ICustomTypeDescriptor.GetEvents(Attribute[] attributes) => EventDescriptorCollection.Empty;
 
                 internal static PropertyDescriptorCollection GetProperties(DapperRow row) => GetProperties(row?.table, row);
-                internal static PropertyDescriptorCollection GetProperties(DapperTable table, IDictionary<string,object> row = null)
+                internal static PropertyDescriptorCollection GetProperties(DapperTable table, IDictionary<string, object> row = null)
                 {
                     string[] names = table?.FieldNames;
                     if (names == null || names.Length == 0) return PropertyDescriptorCollection.Empty;
@@ -96,7 +96,7 @@ namespace Sixnet.Development.Data.Dapper
                 public override Type ComponentType => typeof(DapperRow);
                 public override Type PropertyType => _type;
                 public override object GetValue(object component)
-                    => ((DapperRow)component).TryGetValue(_index, out var val) ? (val ?? DBNull.Value): DBNull.Value;
+                    => ((DapperRow)component).TryGetValue(_index, out var val) ? (val ?? DBNull.Value) : DBNull.Value;
                 public override void SetValue(object component, object value)
                     => ((DapperRow)component).SetValue(_index, value is DBNull ? null : value);
             }

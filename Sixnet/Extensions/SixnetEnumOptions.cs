@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿// "Company © 2025. All rights reserved."
 
 namespace Sixnet.Extensions
 {
@@ -13,19 +11,19 @@ namespace Sixnet.Extensions
         /// Not start by enum type name when output enum item name.
         /// Default is false.
         /// </summary>
-        public bool NotStartByTypeName {  get; set; }
+        public bool NotStartByTypeName { get; set; }
 
         /// <summary>
         /// Whether not output enum item display name.
         /// Default is false.
         /// </summary>
-        public bool NotOutputDisplayName {  get; set; }
+        public bool NotOutputDisplayName { get; set; }
 
         /// <summary>
         /// Whether not upper item name
         /// Default is false
         /// </summary>
-        public bool UppercaseName {  get; set; }
+        public bool UppercaseName { get; set; }
 
         /// <summary>
         /// Whether not separate name.
@@ -36,7 +34,7 @@ namespace Sixnet.Extensions
         /// <summary>
         /// Gets or sets the name separate char
         /// </summary>
-        public string NameSeparateChar {  get; set; }
+        public string NameSeparateChar { get; set; }
 
         internal string GetOptionsIdentityKey()
         {

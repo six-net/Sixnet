@@ -1,7 +1,7 @@
-﻿using Sixnet.Constants;
+﻿// "Company © 2025. All rights reserved."
+
+using Sixnet.Constants;
 using Sixnet.Development.Work;
-using Sixnet.Exceptions;
-using System.Collections.Generic;
 
 namespace Sixnet.Model
 {

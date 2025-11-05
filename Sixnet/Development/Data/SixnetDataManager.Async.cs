@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Threading.Tasks;
+
 using Sixnet.Cache;
-using Sixnet.Cache.Keys.Parameters;
 using Sixnet.Cache.Set.Parameters;
 using Sixnet.Development.Data.Command;
 using Sixnet.Development.Data.Database;
@@ -72,7 +71,7 @@ namespace Sixnet.Development.Data
             // all table names
             var serverTableKey = GetDatabaseServerSplitTableCacheKey(entityConfig, context.Server);
             var allTableNames = await GetCachedTableNamesAsync(serverTableKey).ConfigureAwait(false);
-            if(allTableNames.IsNullOrEmpty())
+            if (allTableNames.IsNullOrEmpty())
             {
                 allTableNames = await RefreshTablesAsync(context, rootTableName, serverTableKey, splitBehavior, provider).ConfigureAwait(false);
             }

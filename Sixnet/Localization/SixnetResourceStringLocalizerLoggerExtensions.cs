@@ -1,5 +1,7 @@
-﻿using System;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Globalization;
+
 using Microsoft.Extensions.Logging;
 
 namespace Sixnet.Localization

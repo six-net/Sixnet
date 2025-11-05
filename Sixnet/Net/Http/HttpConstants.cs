@@ -1,4 +1,6 @@
-﻿namespace Sixnet.Net.Http
+﻿// "Company © 2025. All rights reserved."
+
+namespace Sixnet.Net.Http
 {
     /// <summary>
     /// Http constants

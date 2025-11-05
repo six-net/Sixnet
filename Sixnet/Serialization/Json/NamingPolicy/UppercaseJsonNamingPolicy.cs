@@ -1,4 +1,6 @@
-﻿using System.Text.Json;
+﻿// "Company © 2025. All rights reserved."
+
+using System.Text.Json;
 
 namespace Sixnet.Serialization.Json.NamingPolicy
 {

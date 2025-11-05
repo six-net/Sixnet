@@ -1,11 +1,9 @@
-﻿using Sixnet.Development.Message;
-using Sixnet.Development.Repository;
-using Sixnet.Exceptions;
-using Sixnet.MQ;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Threading.Tasks;
+
+using Sixnet.Development.Message;
+using Sixnet.Exceptions;
 
 namespace Sixnet.Net.Email
 {

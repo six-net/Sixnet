@@ -1,6 +1,8 @@
-﻿using System;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Collections.Concurrent;
 using System.Text.Json.Serialization;
+
 using Sixnet.Serialization.Json.Converter;
 
 namespace Sixnet.Serialization.Json

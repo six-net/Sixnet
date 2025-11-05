@@ -1,4 +1,6 @@
-﻿using Sixnet.Development.Data.Command;
+﻿// "Company © 2025. All rights reserved."
+
+using Sixnet.Development.Data.Command;
 using Sixnet.Development.Data.Database;
 using Sixnet.Development.Queryable;
 

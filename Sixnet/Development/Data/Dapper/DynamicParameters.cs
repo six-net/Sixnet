@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Data;
-using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
-using Sixnet.Development.Data.Dapper;
 
 namespace Sixnet.Development.Data.Dapper
 {

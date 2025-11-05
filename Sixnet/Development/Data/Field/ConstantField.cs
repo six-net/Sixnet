@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Runtime.CompilerServices;
-using System.Text;
+﻿// "Company © 2025. All rights reserved."
+
 using Sixnet.Development.Data.Field.Formatting;
 using Sixnet.Development.Entity;
 
@@ -153,8 +149,8 @@ namespace Sixnet.Development.Data.Field
         {
             if (!base.Equals(obj))
             {
-                return obj is ConstantField constantField 
-                    && constantField.PropertyName == PropertyName 
+                return obj is ConstantField constantField
+                    && constantField.PropertyName == PropertyName
                     && constantField.Value == Value;
             }
             return true;

@@ -1,8 +1,6 @@
-﻿using Microsoft.Extensions.FileSystemGlobbing.Internal;
-using Sixnet.Expressions.Regular;
-using System;
+﻿// "Company © 2025. All rights reserved."
+
 using System.ComponentModel.DataAnnotations;
-using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace Sixnet.Validation.Validators

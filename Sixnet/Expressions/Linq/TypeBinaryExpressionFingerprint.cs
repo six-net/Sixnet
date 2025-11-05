@@ -1,8 +1,6 @@
-﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// "Company © 2025. All rights reserved."
 
-using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq.Expressions;
 
 #pragma warning disable 659 // overrides AddToHashCodeCombiner instead
 

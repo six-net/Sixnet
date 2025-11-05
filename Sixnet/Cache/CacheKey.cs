@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿// "Company © 2025. All rights reserved."
 
 namespace Sixnet.Cache
 {

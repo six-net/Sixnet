@@ -1,7 +1,9 @@
-﻿using System;
-using Sixnet.Exceptions;
+﻿// "Company © 2025. All rights reserved."
+
 using AutoMapper;
+
 using Sixnet.App;
+using Sixnet.Exceptions;
 
 namespace Sixnet.Mapper
 {

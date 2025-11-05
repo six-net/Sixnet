@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Reflection;
+
 using Sixnet.Reflection;
 
 namespace Sixnet.Validation
@@ -125,10 +124,10 @@ namespace Sixnet.Validation
                                 BuildEnumValidation(modelType, enumType, valueFieldArray);
                                 break;
                             case ValidatorType.MaxLength:
-                                BuidMaxLengthValidation(modelType, Convert.ToInt32(rule.MaxValue), valueFieldArray);
+                                BuidMaxLengthValidation(modelType, System.Convert.ToInt32(rule.MaxValue), valueFieldArray);
                                 break;
                             case ValidatorType.MinLength:
-                                BuildMinLengthValidation(modelType, Convert.ToInt32(rule.MinValue), valueFieldArray);
+                                BuildMinLengthValidation(modelType, System.Convert.ToInt32(rule.MinValue), valueFieldArray);
                                 break;
                             case ValidatorType.Range:
                                 BuildRangeValidation(modelType, rule.MinValue, rule.MaxValue, rule.LowerBoundary, rule.UpperBoundary, valueFieldArray);
@@ -137,7 +136,7 @@ namespace Sixnet.Validation
                                 BuildRegularExpressionValidation(modelType, rule.Value, valueFieldArray);
                                 break;
                             case ValidatorType.StringLength:
-                                BuildStringLengthValidation(modelType, Convert.ToInt32(rule.MinValue), Convert.ToInt32(rule.MaxValue), valueFieldArray);
+                                BuildStringLengthValidation(modelType, System.Convert.ToInt32(rule.MinValue), System.Convert.ToInt32(rule.MaxValue), valueFieldArray);
                                 break;
                             case ValidatorType.Compare:
                                 BuildCompareValidation(modelType, rule.Value, rule.CompareType, parameterExpression, funcType, parameterArray, rule.Operator, fieldInstance);

@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Runtime.InteropServices;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Threading;
 using System.Threading.Tasks;
+
 using Sixnet.Development.Data.Client;
 using Sixnet.Development.Data.Command;
 using Sixnet.Development.Entity;

@@ -1,6 +1,8 @@
-﻿using System.Data.SqlTypes;
+﻿// "Company © 2025. All rights reserved."
+
+using System.Data.SqlTypes;
 using System.Globalization;
-using System.Linq;
+
 using Sixnet.Constants;
 using Sixnet.Model;
 

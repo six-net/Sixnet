@@ -1,6 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿// "Company © 2025. All rights reserved."
+
 using Sixnet.Token.Jwt;
 
 namespace Sixnet.Security.Authentication
@@ -47,7 +46,7 @@ namespace Sixnet.Security.Authentication
 
         internal JwtSetting GetJwtSetting()
         {
-            return new JwtSetting() 
+            return new JwtSetting()
             {
                 TokenExpirationSeconds = ExpireSeconds,
                 ClockSkewSeconds = JwtClockSkewSeconds,

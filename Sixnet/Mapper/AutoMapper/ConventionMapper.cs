@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.Extensions.Logging;
-using Sixnet.DependencyInjection;
+﻿// "Company © 2025. All rights reserved."
 
 namespace AutoMapper
 {
@@ -34,7 +30,7 @@ namespace AutoMapper
 
         public ConventionMapper(Action<IMapperConfigurationExpression> configuration)
         {
-            var mapperConfiguration = new MapperConfiguration(configuration, SixnetContainer.GetService<ILoggerFactory>());
+            var mapperConfiguration = new MapperConfiguration(configuration);
             Mapper = mapperConfiguration.CreateMapper();
         }
     }

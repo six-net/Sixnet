@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Data;
-using System.Text;
+﻿// "Company © 2025. All rights reserved."
 
 namespace Sixnet.Development.Data.Parameter.Handler
 {

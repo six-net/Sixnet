@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿// "Company © 2025. All rights reserved."
+
 using Sixnet.Development.Data.Field;
 using Sixnet.Development.Data.Field.Formatting;
 using Sixnet.Development.Queryable;

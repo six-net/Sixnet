@@ -1,4 +1,6 @@
-﻿namespace Sixnet.Development.Data.Parameter.Handler
+﻿// "Company © 2025. All rights reserved."
+
+namespace Sixnet.Development.Data.Parameter.Handler
 {
     /// <summary>
     /// Defines parameter handler

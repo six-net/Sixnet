@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Text;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Threading.Tasks;
 
 namespace Sixnet.MQ
@@ -142,7 +140,7 @@ namespace Sixnet.MQ
         /// <returns></returns>
         public Func<SixnetQueueMessage, Task<bool>> GetHandler(string topic)
         {
-            if(string.IsNullOrWhiteSpace(topic))
+            if (string.IsNullOrWhiteSpace(topic))
             {
                 return null;
             }

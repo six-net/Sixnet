@@ -1,4 +1,5 @@
-﻿using System;
+﻿// "Company © 2025. All rights reserved."
+
 using Sixnet.Development.Data;
 using Sixnet.Development.Queryable;
 
@@ -34,7 +35,7 @@ namespace Sixnet.Model.Paging
         public override ISixnetQueryable CreateQueryable(bool useForPaging = false)
         {
             return null;
-        } 
+        }
 
         #endregion
 

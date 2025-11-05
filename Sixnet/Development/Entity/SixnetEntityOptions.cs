@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿// "Company © 2025. All rights reserved."
 
 namespace Sixnet.Development.Entity
 {
@@ -14,6 +12,6 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Not auto move uploaded file
         /// </summary>
-        public bool NotAutoStoreUploadedFile {  get; set; }
+        public bool NotAutoStoreUploadedFile { get; set; }
     }
 }

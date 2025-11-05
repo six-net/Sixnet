@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Sixnet.Cache.Keys.Parameters;
-using Sixnet.Cache.String.Parameters;
-using Sixnet.Cache;
-using Sixnet.Exceptions;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Threading;
 using System.Threading.Tasks;
-using System.Linq;
+
+using Sixnet.Cache;
+using Sixnet.Cache.Keys.Parameters;
+using Sixnet.Cache.String.Parameters;
 using Sixnet.Development.Data.Database;
+using Sixnet.Exceptions;
 
 namespace Sixnet.Threading.Locking
 {

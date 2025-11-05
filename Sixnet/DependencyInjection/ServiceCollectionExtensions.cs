@@ -1,11 +1,12 @@
-﻿using System;
+﻿// "Company © 2025. All rights reserved."
+
 using Microsoft.Extensions.Configuration;
+
 using Sixnet;
-using Sixnet.DependencyInjection;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
-    public static class ServiceCollectionExtensions
+    public static partial class ServiceCollectionExtensions
     {
         public static IServiceCollection AddSixnet(this IServiceCollection services, Action<SixnetOptions> configure = null)
         {

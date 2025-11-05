@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Threading.Tasks;
-using Sixnet.Cache.Keys.Results;
 
 namespace Sixnet.Cache.Keys.Parameters
 {
@@ -14,7 +12,7 @@ namespace Sixnet.Cache.Keys.Parameters
         /// <summary>
         /// Gets the pattern
         /// </summary>
-        public string Pattern {  get; set; }
+        public string Pattern { get; set; }
 
         protected override CacheResult ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, CacheServer server)
         {

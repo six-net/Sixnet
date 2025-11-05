@@ -1,4 +1,6 @@
-﻿namespace Sixnet.Token
+﻿// "Company © 2025. All rights reserved."
+
+namespace Sixnet.Token
 {
     /// <summary>
     /// Token value

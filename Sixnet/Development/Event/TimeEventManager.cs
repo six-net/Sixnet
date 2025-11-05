@@ -1,6 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq.Expressions;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Threading;
 using System.Threading.Tasks;
 

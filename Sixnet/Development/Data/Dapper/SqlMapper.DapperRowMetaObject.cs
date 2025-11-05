@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Reflection;
 namespace Sixnet.Development.Data.Dapper
 {
@@ -91,7 +91,7 @@ namespace Sixnet.Development.Data.Dapper
 
             public override IEnumerable<string> GetDynamicMemberNames()
             {
-                if(HasValue && Value is IDictionary<string, object> lookup) return lookup.Keys;
+                if (HasValue && Value is IDictionary<string, object> lookup) return lookup.Keys;
                 return Array.Empty<string>();
             }
         }

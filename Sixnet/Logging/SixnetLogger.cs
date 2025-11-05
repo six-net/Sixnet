@@ -1,8 +1,9 @@
-﻿using System;
+﻿// "Company © 2025. All rights reserved."
+
 using Microsoft.Extensions.Logging;
+
 using Sixnet.DependencyInjection;
 using Sixnet.MQ;
-using Sixnet.MQ.Internal;
 
 namespace Sixnet.Logging
 {

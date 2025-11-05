@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Data;
-using System.Linq;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 
@@ -425,7 +424,7 @@ namespace Sixnet.Development.Data.Dapper
             {
                 T typed => typed,
                 null or DBNull => default,
-                _ => (T)Convert.ChangeType(value, Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T), CultureInfo.InvariantCulture),
+                _ => (T)System.Convert.ChangeType(value, Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T), CultureInfo.InvariantCulture),
             };
         }
     }

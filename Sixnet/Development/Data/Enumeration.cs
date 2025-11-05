@@ -1,4 +1,4 @@
-﻿using System;
+﻿// "Company © 2025. All rights reserved."
 
 namespace Sixnet.Development.Data
 {
@@ -279,7 +279,7 @@ namespace Sixnet.Development.Data
         LowercaseReverse = 8,
         UppercaseReverseWithSeparator = 9,
         LowercaseReverseWithSeparator = 10,
-        
+
     }
 
     #endregion

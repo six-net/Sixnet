@@ -1,4 +1,6 @@
-﻿using Sixnet.Cache;
+﻿// "Company © 2025. All rights reserved."
+
+using Sixnet.Cache;
 using Sixnet.Development.Data;
 using Sixnet.Development.Entity;
 using Sixnet.Development.Message;

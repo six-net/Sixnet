@@ -1,4 +1,6 @@
-﻿namespace System.Collections
+﻿// "Company © 2025. All rights reserved."
+
+namespace System.Collections
 {
     /// <summary>
     /// Bit array extensions
@@ -58,7 +60,7 @@
                 }
             }
             return true;
-        } 
+        }
 
         #endregion
     }

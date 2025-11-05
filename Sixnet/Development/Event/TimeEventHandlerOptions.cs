@@ -1,4 +1,6 @@
-﻿namespace Sixnet.Development.Event
+﻿// "Company © 2025. All rights reserved."
+
+namespace Sixnet.Development.Event
 {
     /// <summary>
     /// Sixnet time  event handler options

@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Text.Json;
-using Microsoft.Extensions.Options;
+
 using Sixnet.Exceptions;
 using Sixnet.Serialization.Json.Converter;
 using Sixnet.Serialization.Json.NamingPolicy;

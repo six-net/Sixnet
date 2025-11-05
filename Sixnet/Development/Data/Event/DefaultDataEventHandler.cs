@@ -1,8 +1,9 @@
-﻿using System;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Threading;
 using System.Threading.Tasks;
+
 using Sixnet.Development.Event;
-using Sixnet.Exceptions;
 
 namespace Sixnet.Development.Data.Event
 {

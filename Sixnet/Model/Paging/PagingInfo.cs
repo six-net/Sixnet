@@ -1,6 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿// "Company © 2025. All rights reserved."
+
 using Sixnet.Development.Data;
 
 namespace Sixnet.Model.Paging

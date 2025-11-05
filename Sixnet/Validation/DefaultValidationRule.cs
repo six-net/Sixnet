@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq.Expressions;
-using System.Text;
+﻿// "Company © 2025. All rights reserved."
 
 namespace Sixnet.Validation
 {

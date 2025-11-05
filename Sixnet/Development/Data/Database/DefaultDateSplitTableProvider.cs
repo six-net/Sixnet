@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Text.RegularExpressions;
+
 using Sixnet.Development.Entity;
 using Sixnet.Exceptions;
 
@@ -113,11 +111,11 @@ namespace Sixnet.Development.Data.Database
         {
             return splitTableType switch
             {
-                SplitTableType.Day => Convert.ToDateTime(splitDateTime.ToString("yyyy-MM-dd")),
+                SplitTableType.Day => System.Convert.ToDateTime(splitDateTime.ToString("yyyy-MM-dd")),
                 SplitTableType.Week => GetMondayDateTime(splitDateTime),
-                SplitTableType.Month => Convert.ToDateTime(splitDateTime.ToString("yyyy-MM-01")),
+                SplitTableType.Month => System.Convert.ToDateTime(splitDateTime.ToString("yyyy-MM-01")),
                 SplitTableType.Season => GetSeasonDateTime(splitDateTime),
-                SplitTableType.Year => Convert.ToDateTime(splitDateTime.ToString("yyyy-01-01")),
+                SplitTableType.Year => System.Convert.ToDateTime(splitDateTime.ToString("yyyy-01-01")),
                 _ => throw new Exception($"Not support {splitTableType}"),
             };
         }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿// "Company © 2025. All rights reserved."
+
 using Sixnet.Algorithm.Selection;
 
 namespace Sixnet.Code

@@ -1,5 +1,7 @@
-﻿using System;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Data;
+
 using Sixnet.Development.Data.Dapper;
 
 namespace Sixnet.Development.Data.DataType.Handler

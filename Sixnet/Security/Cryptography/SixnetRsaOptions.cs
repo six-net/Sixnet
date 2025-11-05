@@ -1,4 +1,6 @@
-﻿namespace Sixnet.Security.Cryptography
+﻿// "Company © 2025. All rights reserved."
+
+namespace Sixnet.Security.Cryptography
 {
     /// <summary>
     /// RSA options

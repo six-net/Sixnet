@@ -1,4 +1,7 @@
-﻿using System.Data;
+﻿// "Company © 2025. All rights reserved."
+
+using System.Data;
+
 using Sixnet.Development.Data.Command;
 
 namespace Sixnet.Development.Data.Database

@@ -1,10 +1,9 @@
-﻿using Sixnet.DependencyInjection;
+﻿// "Company © 2025. All rights reserved."
+
 using Sixnet.Development.Data.Field.Formatting;
 using Sixnet.Development.Entity;
 using Sixnet.Exceptions;
 using Sixnet.Expressions.Linq;
-using System;
-using System.Linq.Expressions;
 
 namespace Sixnet.Development.Data.Field
 {

@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq.Expressions;
-using System.Text;
-using Sixnet.Development.Command;
+﻿// "Company © 2025. All rights reserved."
+
 using Sixnet.Exceptions;
 using Sixnet.Expressions.Linq;
 using Sixnet.Model;
@@ -61,7 +58,7 @@ namespace Sixnet.Development.Data.Field
                 SixnetExpressionHelper.AppendToFieldsAssignment(this, updateExpression);
             }
         }
-        
+
         /// <summary>
         /// Whether has new value
         /// </summary>

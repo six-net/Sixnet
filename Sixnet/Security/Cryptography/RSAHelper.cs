@@ -1,9 +1,11 @@
-﻿using Sixnet.Exceptions;
-using System;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Collections.Concurrent;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+
+using Sixnet.Exceptions;
 
 namespace Sixnet.Security.Cryptography
 {
@@ -32,7 +34,7 @@ namespace Sixnet.Security.Cryptography
                 : CreateRSAProviderFromPrivateKey(key);
             encoding ??= Encoding.UTF8;
             encryptionPadding ??= RSAEncryptionPadding.Pkcs1;
-            return Convert.ToBase64String(rsa.Encrypt(encoding.GetBytes(value), encryptionPadding));
+            return System.Convert.ToBase64String(rsa.Encrypt(encoding.GetBytes(value), encryptionPadding));
         }
 
         #endregion
@@ -55,7 +57,7 @@ namespace Sixnet.Security.Cryptography
                 : CreateRSAProviderFromPrivateKey(key);
             encoding ??= Encoding.UTF8;
             encryptionPadding ??= RSAEncryptionPadding.Pkcs1;
-            return encoding.GetString(rsa.Decrypt(Convert.FromBase64String(value), encryptionPadding));
+            return encoding.GetString(rsa.Decrypt(System.Convert.FromBase64String(value), encryptionPadding));
         }
 
         #endregion
@@ -84,7 +86,7 @@ namespace Sixnet.Security.Cryptography
 
             var dataBytes = encoding.GetBytes(value);
             var signatureBytes = rsa.SignData(dataBytes, hashAlgorithmName.Value, signaturePadding);
-            return Convert.ToBase64String(signatureBytes);
+            return System.Convert.ToBase64String(signatureBytes);
         }
 
         #endregion
@@ -111,7 +113,7 @@ namespace Sixnet.Security.Cryptography
             signaturePadding ??= RSASignaturePadding.Pkcs1;
 
             var dataBytes = encoding.GetBytes(value);
-            var signBytes = Convert.FromBase64String(sign);
+            var signBytes = System.Convert.FromBase64String(sign);
             return rsa.VerifyData(dataBytes, signBytes, hashAlgorithmName.Value, signaturePadding);
         }
 
@@ -136,7 +138,7 @@ namespace Sixnet.Security.Cryptography
             // encoded OID sequence for  PKCS #1 rsaEncryption szOID_RSA_RSA = "1.2.840.113549.1.1.1"
             var seqOid = new byte[] { 0x30, 0x0D, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01, 0x01, 0x05, 0x00 };
             var seq = new byte[15];
-            var x509Key = Convert.FromBase64String(publicKey);
+            var x509Key = System.Convert.FromBase64String(publicKey);
 
             // ---------  Set up stream to read the asn.1 encoded SubjectPublicKeyInfo blob  ------
             using (MemoryStream mem = new MemoryStream(x509Key))
@@ -242,7 +244,7 @@ namespace Sixnet.Security.Cryptography
                 return rsa;
             }
 
-            var privateKeyBits = Convert.FromBase64String(privateKey);
+            var privateKeyBits = System.Convert.FromBase64String(privateKey);
 
             rsa = RSA.Create();
             var rsaParameters = new RSAParameters();

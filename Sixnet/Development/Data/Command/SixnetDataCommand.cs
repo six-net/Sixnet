@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Data;
-using System.Linq;
+
 using Sixnet.Development.Data.Command.Event;
 using Sixnet.Development.Data.Field;
 using Sixnet.Development.Entity;

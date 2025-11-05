@@ -1,7 +1,8 @@
-﻿using System;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Collections;
-using System.Collections.Generic;
 using System.Data;
+
 using Sixnet.Development.Data.Parameter.Handler;
 
 namespace Sixnet.Development.Data.ParameterHandler.Handler
@@ -25,7 +26,7 @@ namespace Sixnet.Development.Data.ParameterHandler.Handler
                 else if (originalParameter.Value is ushort || originalParameter.DbType == DbType.UInt16)
                 {
                     originalParameter.DbType = DbType.Int32;
-                    originalParameter.Value = Convert.ToInt32(originalParameter.Value);
+                    originalParameter.Value = System.Convert.ToInt32(originalParameter.Value);
                 }
             }
             return originalParameter;

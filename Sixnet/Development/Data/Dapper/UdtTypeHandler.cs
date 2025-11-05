@@ -1,6 +1,6 @@
-﻿using System;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Data;
-using Sixnet.Development.Data.Dapper;
 
 namespace Sixnet.Development.Data.Dapper
 {
@@ -33,7 +33,7 @@ namespace Sixnet.Development.Data.Dapper
 #pragma warning disable 0618
                 parameter.Value = SanitizeParameterValue(value);
 #pragma warning restore 0618
-                if(!(value is DBNull)) StructuredHelper.ConfigureUDT(parameter, udtTypeName);
+                if (!(value is DBNull)) StructuredHelper.ConfigureUDT(parameter, udtTypeName);
             }
         }
     }

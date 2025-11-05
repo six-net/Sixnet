@@ -1,5 +1,4 @@
-﻿using System;
-using Sixnet.Exceptions;
+﻿// "Company © 2025. All rights reserved."
 
 namespace Sixnet.Development.Data.Database
 {

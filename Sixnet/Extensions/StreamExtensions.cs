@@ -1,4 +1,6 @@
-﻿namespace System.IO
+﻿// "Company © 2025. All rights reserved."
+
+namespace System.IO
 {
     /// <summary>
     /// Stream extensions

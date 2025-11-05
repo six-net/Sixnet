@@ -1,4 +1,6 @@
-﻿using System.Text.RegularExpressions;
+﻿// "Company © 2025. All rights reserved."
+
+using System.Text.RegularExpressions;
 
 namespace Sixnet.Expressions.Regular
 {

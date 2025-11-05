@@ -1,12 +1,10 @@
-﻿using Sixnet.Exceptions;
-using Sixnet.Logging;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Net.Mail;
-using System.Threading;
 using System.Threading.Tasks;
+
+using Sixnet.Exceptions;
+using Sixnet.Logging;
 
 namespace Sixnet.Net.Email
 {

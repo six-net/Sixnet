@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// "Company © 2025. All rights reserved."
+
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Microsoft.Extensions.Options;
+
 using Microsoft.IdentityModel.Tokens;
-using Sixnet.App;
+
 using Sixnet.DependencyInjection;
 using Sixnet.Exceptions;
 using Sixnet.Security.Authentication;
@@ -103,7 +103,7 @@ namespace Sixnet.Token.Jwt
         {
             SixnetDirectThrower.ThrowArgNullIf(claims == null, nameof(claims));
 
-            var jwtSetting = SixnetContainer.GetOptions<SixnetAuthenticationOptions>()?.GetJwtSetting() ?? new JwtSetting(); 
+            var jwtSetting = SixnetContainer.GetOptions<SixnetAuthenticationOptions>()?.GetJwtSetting() ?? new JwtSetting();
             configure?.Invoke(jwtSetting);
             SixnetDirectThrower.ThrowArgNullIf(jwtSetting == null, nameof(jwtSetting));
 

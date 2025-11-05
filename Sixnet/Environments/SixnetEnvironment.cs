@@ -1,12 +1,10 @@
-﻿using Sixnet.DependencyInjection;
-using Sixnet.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Text;
+
+using Sixnet.Logging;
 
 namespace Sixnet.Environments
 {
@@ -97,9 +95,9 @@ namespace Sixnet.Environments
         /// <summary>
         /// Gets all ips
         /// </summary>
-        public static List<string> AllIps 
-        { 
-            get 
+        public static List<string> AllIps
+        {
+            get
             {
                 try
                 {
@@ -112,7 +110,7 @@ namespace Sixnet.Environments
                     SixnetLogger.LogError(ex, ex.Message);
                     return new List<string>(0);
                 }
-            } 
+            }
         }
 
         /// <summary>
@@ -126,7 +124,7 @@ namespace Sixnet.Environments
                 {
                     var hostName = Dns.GetHostName();
                     var allIps = Dns.GetHostAddresses(hostName);
-                    if(allIps.IsNullOrEmpty())
+                    if (allIps.IsNullOrEmpty())
                     {
                         return string.Empty;
                     }

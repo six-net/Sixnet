@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿// "Company © 2025. All rights reserved."
+
 using System.ComponentModel.DataAnnotations;
-using Sixnet.Validation;
+
 using Sixnet.Expressions.Regular;
 using Sixnet.Localization;
+using Sixnet.Validation;
 
 namespace System
 {

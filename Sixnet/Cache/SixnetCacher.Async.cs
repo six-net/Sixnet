@@ -1,4 +1,8 @@
-﻿using Sixnet.Cache.Hash.Parameters;
+﻿// "Company © 2025. All rights reserved."
+
+using System.Threading.Tasks;
+
+using Sixnet.Cache.Hash.Parameters;
 using Sixnet.Cache.Hash.Results;
 using Sixnet.Cache.Keys.Parameters;
 using Sixnet.Cache.Keys.Results;
@@ -13,10 +17,6 @@ using Sixnet.Cache.SortedSet.Results;
 using Sixnet.Cache.String.Parameters;
 using Sixnet.Cache.String.Results;
 using Sixnet.Serialization.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Sixnet.Cache
 {

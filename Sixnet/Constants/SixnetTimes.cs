@@ -1,6 +1,6 @@
-﻿using Sixnet.Model;
-using System;
-using System.Collections.Generic;
+﻿// "Company © 2025. All rights reserved."
+
+using Sixnet.Model;
 
 namespace Sixnet.Constants
 {

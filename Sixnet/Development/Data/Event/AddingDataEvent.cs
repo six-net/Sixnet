@@ -1,6 +1,7 @@
-﻿using Sixnet.Development.Data.Client;
+﻿// "Company © 2025. All rights reserved."
+
+using Sixnet.Development.Data.Client;
 using Sixnet.Development.Data.Command;
-using Sixnet.Exceptions;
 
 namespace Sixnet.Development.Data.Event
 {

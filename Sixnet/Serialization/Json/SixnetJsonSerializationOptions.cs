@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text.Encodings.Web;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace Sixnet.Serialization.Json
 {
@@ -45,6 +43,6 @@ namespace Sixnet.Serialization.Json
         /// <summary>
         /// Indicates whether disable localization converter
         /// </summary>
-        public bool DisableLocalConverter {  get; set; }
+        public bool DisableLocalConverter { get; set; }
     }
 }

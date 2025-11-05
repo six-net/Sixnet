@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿// "Company © 2025. All rights reserved."
+
+using System.Threading.Tasks;
 
 namespace Sixnet.Net.Sms
 {

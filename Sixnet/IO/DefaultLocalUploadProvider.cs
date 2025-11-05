@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// "Company © 2025. All rights reserved."
+
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
+
 using Sixnet.Code;
 using Sixnet.DependencyInjection;
 using Sixnet.Exceptions;

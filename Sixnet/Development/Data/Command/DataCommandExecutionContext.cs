@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Sixnet.Development.Data;
+﻿// "Company © 2025. All rights reserved."
+
 using Sixnet.Development.Data.Database;
 using Sixnet.Development.Queryable;
 using Sixnet.Exceptions;

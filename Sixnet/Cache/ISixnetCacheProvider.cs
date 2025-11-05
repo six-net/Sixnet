@@ -1,4 +1,6 @@
-﻿using Sixnet.Cache.Hash.Parameters;
+﻿// "Company © 2025. All rights reserved."
+
+using Sixnet.Cache.Hash.Parameters;
 using Sixnet.Cache.Hash.Results;
 using Sixnet.Cache.Keys.Parameters;
 using Sixnet.Cache.Keys.Results;
@@ -10,7 +12,6 @@ using Sixnet.Cache.Set.Parameters;
 using Sixnet.Cache.Set.Results;
 using Sixnet.Cache.SortedSet.Parameters;
 using Sixnet.Cache.SortedSet.Results;
-using Sixnet.Cache.String;
 using Sixnet.Cache.String.Parameters;
 using Sixnet.Cache.String.Results;
 

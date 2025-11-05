@@ -1,4 +1,6 @@
-﻿namespace Sixnet.Expressions.Regular
+﻿// "Company © 2025. All rights reserved."
+
+namespace Sixnet.Expressions.Regular
 {
     /// <summary>
     /// Regex patterns

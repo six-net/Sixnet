@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿// "Company © 2025. All rights reserved."
+
+using System.ComponentModel.DataAnnotations;
 
 namespace Sixnet.Validation
 {

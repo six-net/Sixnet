@@ -1,4 +1,6 @@
-﻿namespace Sixnet.Validation
+﻿// "Company © 2025. All rights reserved."
+
+namespace Sixnet.Validation
 {
     /// <summary>
     /// Defines validation rule contract

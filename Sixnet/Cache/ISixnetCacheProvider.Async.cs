@@ -1,24 +1,19 @@
-﻿using System.Collections.Generic;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Threading.Tasks;
-using Sixnet.Cache.Hash;
+
 using Sixnet.Cache.Hash.Parameters;
 using Sixnet.Cache.Hash.Results;
-using Sixnet.Cache.Keys;
 using Sixnet.Cache.Keys.Parameters;
 using Sixnet.Cache.Keys.Results;
-using Sixnet.Cache.List;
 using Sixnet.Cache.List.Parameters;
 using Sixnet.Cache.List.Results;
-using Sixnet.Cache.Server;
 using Sixnet.Cache.Server.Parameters;
 using Sixnet.Cache.Server.Response;
-using Sixnet.Cache.Set;
 using Sixnet.Cache.Set.Parameters;
 using Sixnet.Cache.Set.Results;
-using Sixnet.Cache.SortedSet;
 using Sixnet.Cache.SortedSet.Parameters;
 using Sixnet.Cache.SortedSet.Results;
-using Sixnet.Cache.String;
 using Sixnet.Cache.String.Parameters;
 using Sixnet.Cache.String.Results;
 

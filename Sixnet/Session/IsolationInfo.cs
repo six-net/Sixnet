@@ -1,4 +1,6 @@
-﻿namespace Sixnet.Session
+﻿// "Company © 2025. All rights reserved."
+
+namespace Sixnet.Session
 {
     /// <summary>
     /// Defines isolation info

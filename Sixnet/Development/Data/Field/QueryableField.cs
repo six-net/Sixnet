@@ -1,8 +1,8 @@
-﻿using Sixnet.Development.Data.Field.Formatting;
+﻿// "Company © 2025. All rights reserved."
+
+using Sixnet.Development.Data.Field.Formatting;
 using Sixnet.Development.Entity;
 using Sixnet.Development.Queryable;
-using System;
-using System.Linq;
 
 namespace Sixnet.Development.Data.Field
 {

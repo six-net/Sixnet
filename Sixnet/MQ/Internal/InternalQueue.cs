@@ -1,12 +1,13 @@
-﻿using Microsoft.Extensions.Logging;
-using Sixnet.Logging;
-using Sixnet.Serialization.Json;
-using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+
+using Microsoft.Extensions.Logging;
+
+using Sixnet.Logging;
+using Sixnet.Serialization.Json;
 
 namespace Sixnet.MQ.Internal
 {

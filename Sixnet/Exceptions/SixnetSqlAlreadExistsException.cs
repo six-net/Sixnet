@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Data.SqlTypes;
 using System.Runtime.Serialization;
-using System.Text;
 
 namespace Sixnet.Exceptions
 {

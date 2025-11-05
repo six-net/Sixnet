@@ -1,5 +1,7 @@
-﻿using System;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Data;
+
 using Sixnet.Development.Data.Dapper;
 
 namespace Sixnet.Development.Data.DataType.Handler
@@ -12,7 +14,7 @@ namespace Sixnet.Development.Data.DataType.Handler
         public override uint Parse(object value)
 #pragma warning restore CS3002
         {
-            return Convert.ToUInt32(value);
+            return System.Convert.ToUInt32(value);
         }
 
 #pragma warning disable CS3001

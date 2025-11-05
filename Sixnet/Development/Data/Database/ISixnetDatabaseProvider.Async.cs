@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Data;
-using System.Text;
-using Sixnet.Model.Paging;
 using System.Threading.Tasks;
+
+using Sixnet.Model.Paging;
 
 namespace Sixnet.Development.Data.Database
 {

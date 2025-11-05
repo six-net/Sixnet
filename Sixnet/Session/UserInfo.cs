@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Security.Claims;
 using System.Security.Principal;
+
 using Sixnet.App;
 using Sixnet.Token.Jwt;
 

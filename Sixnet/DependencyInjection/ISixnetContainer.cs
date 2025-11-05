@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// "Company © 2025. All rights reserved."
+
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Sixnet.DependencyInjection

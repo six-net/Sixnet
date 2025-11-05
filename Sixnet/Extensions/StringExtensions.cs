@@ -1,12 +1,12 @@
-﻿using System.Buffers;
+﻿// "Company © 2025. All rights reserved."
+
+using System.Buffers;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Xml.Linq;
+
 using Sixnet.App;
 using Sixnet.Localization;
 using Sixnet.Security.Cryptography;

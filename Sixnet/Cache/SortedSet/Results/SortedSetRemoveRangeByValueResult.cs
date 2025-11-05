@@ -1,4 +1,6 @@
-﻿namespace Sixnet.Cache.SortedSet.Results
+﻿// "Company © 2025. All rights reserved."
+
+namespace Sixnet.Cache.SortedSet.Results
 {
     /// <summary>
     /// Sorted set remove range by value result

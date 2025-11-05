@@ -1,10 +1,9 @@
-﻿using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿// "Company © 2025. All rights reserved."
+
+using System.Collections.Concurrent;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
-using System.Linq;
-using AutoMapper;
-using Sixnet.Code;
+
 using Sixnet.DependencyInjection;
 using Sixnet.Exceptions;
 using Sixnet.Extensions;

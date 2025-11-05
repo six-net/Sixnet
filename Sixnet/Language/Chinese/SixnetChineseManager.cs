@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿// "Company © 2025. All rights reserved."
+
 using Sixnet.DependencyInjection;
 using Sixnet.Exceptions;
 

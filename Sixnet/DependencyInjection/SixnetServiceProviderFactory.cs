@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Sixnet.App;
-using System;
+﻿// "Company © 2025. All rights reserved."
+
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Sixnet.DependencyInjection
 {

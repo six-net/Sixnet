@@ -1,4 +1,6 @@
-﻿namespace Sixnet.Cache.List.Results
+﻿// "Company © 2025. All rights reserved."
+
+namespace Sixnet.Cache.List.Results
 {
     /// <summary>
     /// List right pop result

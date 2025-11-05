@@ -1,4 +1,7 @@
-﻿using AutoMapper;
+﻿// "Company © 2025. All rights reserved."
+
+using AutoMapper;
+
 using Sixnet.DependencyInjection;
 using Sixnet.Mapper;
 

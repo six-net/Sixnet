@@ -1,7 +1,7 @@
-﻿using Sixnet.App;
+﻿// "Company © 2025. All rights reserved."
+
 using Sixnet.Localization;
 using Sixnet.Serialization.Json;
-using System;
 
 namespace Sixnet.Model
 {

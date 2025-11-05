@@ -1,6 +1,4 @@
-﻿using Sixnet.Exceptions;
-using System;
-using System.Collections.Generic;
+﻿// "Company © 2025. All rights reserved."
 
 namespace Sixnet.Cache
 {

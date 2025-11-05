@@ -1,8 +1,8 @@
-﻿using Sixnet.Threading.Locking;
-using System;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+
+using Sixnet.Threading.Locking;
 
 namespace Sixnet.MQ.Internal
 {

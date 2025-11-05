@@ -1,6 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿// "Company © 2025. All rights reserved."
+
 using Sixnet.Development.Data.Client;
 using Sixnet.Development.Data.Command;
 

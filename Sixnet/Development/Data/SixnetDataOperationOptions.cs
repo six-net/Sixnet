@@ -1,6 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Threading;
+
 using Sixnet.Development.Data.Database;
 
 namespace Sixnet.Development.Data
@@ -41,7 +42,7 @@ namespace Sixnet.Development.Data
         /// <summary>
         /// Gets or sets the split on field name
         /// </summary>
-        public string SpiltOnFieldName {  get; set; }
+        public string SpiltOnFieldName { get; set; }
 
         /// <summary>
         /// Gets or sets the increment field behavior.
@@ -114,6 +115,6 @@ namespace Sixnet.Development.Data
         /// <summary>
         /// Gets or sets the split table behavior
         /// </summary>
-        public SplitTableBehavior SplitTableBehavior {  get; set; }
+        public SplitTableBehavior SplitTableBehavior { get; set; }
     }
 }

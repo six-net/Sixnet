@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Text.Json;
 using System.Text.Json.Serialization;
+
 using Sixnet.DependencyInjection;
 using Sixnet.Localization;
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Data;
 using System.Reflection;
 using System.Reflection.Emit;

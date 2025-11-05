@@ -1,6 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using Sixnet.Development.Data;
+﻿// "Company © 2025. All rights reserved."
+
 using Sixnet.Development.Data.Field;
 
 namespace Sixnet.Development.Entity

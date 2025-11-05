@@ -1,7 +1,9 @@
-﻿using Sixnet.DependencyInjection;
-using Sixnet.Exceptions;
-using System;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Globalization;
+
+using Sixnet.DependencyInjection;
+using Sixnet.Exceptions;
 
 namespace Sixnet.Localization
 {

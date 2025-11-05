@@ -1,4 +1,5 @@
-﻿using System;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Collections.Concurrent;
 using System.Security.Cryptography;
 using System.Text;
@@ -30,7 +31,7 @@ namespace Sixnet.Security.Cryptography
             using (var encryptor = aes.CreateEncryptor())
             {
                 byte[] encryptArray = encoding.GetBytes(value);
-                return Convert.ToBase64String(encryptor.TransformFinalBlock(encryptArray, 0, encryptArray.Length));
+                return System.Convert.ToBase64String(encryptor.TransformFinalBlock(encryptArray, 0, encryptArray.Length));
             }
         }
 
@@ -52,7 +53,7 @@ namespace Sixnet.Security.Cryptography
             var aes = GetAes(key, iv, mode, paddingMode, encoding);
             using (var decryptor = aes.CreateDecryptor())
             {
-                byte[] decryptArray = Convert.FromBase64String(value);
+                byte[] decryptArray = System.Convert.FromBase64String(value);
                 return encoding.GetString(decryptor.TransformFinalBlock(decryptArray, 0, decryptArray.Length));
             }
         }

@@ -1,5 +1,6 @@
-﻿using Sixnet.DependencyInjection;
-using System;
+﻿// "Company © 2025. All rights reserved."
+
+using Sixnet.DependencyInjection;
 
 namespace Sixnet.Serialization.Json
 {

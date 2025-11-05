@@ -1,4 +1,6 @@
-﻿namespace Sixnet.Cache.Keys
+﻿// "Company © 2025. All rights reserved."
+
+namespace Sixnet.Cache.Keys
 {
     /// <summary>
     /// Cache key query

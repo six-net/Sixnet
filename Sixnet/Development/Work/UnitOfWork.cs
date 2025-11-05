@@ -1,16 +1,14 @@
-﻿using Sixnet.Component.Retry;
+﻿// "Company © 2025. All rights reserved."
+
+using System.Threading;
+using System.Threading.Tasks;
+
+using Sixnet.Component.Retry;
 using Sixnet.DependencyInjection;
 using Sixnet.Development.Data;
 using Sixnet.Development.Data.Database;
 using Sixnet.Development.Domain.Event;
 using Sixnet.Development.Message;
-using Sixnet.Development.Queryable;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using static System.Collections.Specialized.BitVector32;
 
 namespace Sixnet.Development.Work
 {

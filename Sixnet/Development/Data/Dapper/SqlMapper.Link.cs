@@ -1,4 +1,6 @@
-﻿using System.Threading;
+﻿// "Company © 2025. All rights reserved."
+
+using System.Threading;
 
 namespace Sixnet.Development.Data.Dapper
 {

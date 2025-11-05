@@ -1,6 +1,6 @@
-﻿using System;
+﻿// "Company © 2025. All rights reserved."
+
 using System.ComponentModel.DataAnnotations;
-using Sixnet.Expressions.Regular;
 
 namespace Sixnet.Validation.Validators
 {

@@ -1,5 +1,7 @@
-﻿using System;
+﻿// "Company © 2025. All rights reserved."
+
 using System.ComponentModel.DataAnnotations;
+
 using Sixnet.Expressions.Regular;
 
 namespace Sixnet.Validation.Validators
@@ -31,8 +33,8 @@ namespace Sixnet.Validation.Validators
         public override SixnetValidationResult Validate(dynamic value, string errorMessage)
         {
             var success = ValidationExtensions.IsCompressFileNullable(value?.ToString());
-            return success 
-                ? SixnetValidationResult.SuccessResult() 
+            return success
+                ? SixnetValidationResult.SuccessResult()
                 : SixnetValidationResult.ErrorResult(errorMessage);
         }
 

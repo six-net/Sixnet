@@ -1,6 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿// "Company © 2025. All rights reserved."
+
 using Sixnet.App;
 using Sixnet.Development.Entity;
 using Sixnet.Mapper;

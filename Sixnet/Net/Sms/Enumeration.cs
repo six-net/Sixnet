@@ -1,4 +1,6 @@
-﻿namespace Sixnet.Net.Sms
+﻿// "Company © 2025. All rights reserved."
+
+namespace Sixnet.Net.Sms
 {
     /// <summary>
     /// Defines the sms send status

@@ -1,4 +1,6 @@
-﻿namespace Sixnet.Validation.Validators
+﻿// "Company © 2025. All rights reserved."
+
+namespace Sixnet.Validation.Validators
 {
     /// <summary>
     /// Compare verification value

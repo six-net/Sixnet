@@ -1,6 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// "Company © 2025. All rights reserved."
+
 using System.IO;
+
 using Sixnet.Algorithm.Selection;
 
 namespace Sixnet.IO
@@ -70,7 +71,7 @@ namespace Sixnet.IO
         /// Whether disable default folder group
         /// Default is false
         /// </summary>
-        public bool DisableDefaultFolderGroup {  get; set; }
+        public bool DisableDefaultFolderGroup { get; set; }
 
         /// <summary>
         /// Gets or sets whether classification file by date folder.

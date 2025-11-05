@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.1;net6.0;net8.0</TargetFrameworks>
+		<TargetFrameworks>net6.0;net8.0</TargetFrameworks>
 		<NoWarn>CS3002,CS3001,CS3003</NoWarn>
-		<LangVersion>9.0</LangVersion>
+		<LangVersion>12.0</LangVersion>
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>sixnet.snk</AssemblyOriginatorKeyFile>
 		<AssemblyVersion>2.0.0.0</AssemblyVersion>
@@ -31,6 +31,13 @@
 		<PackageReference Include="System.Text.Json" Version="9.0.10" />
 		<PackageReference Include="System.Threading.Channels" Version="9.0.10" />
 		<PackageReference Include="System.Threading.Tasks.Extensions" Version="4.6.3" />
-		<PackageReference Include="AutoMapper" Version="15.0.1" />
+	</ItemGroup>
+	<ItemGroup>
+		<Using Include="System" />
+		<Using Include="System.Linq" />
+		<Using Include="System.Linq.Expressions" />
+		<Using Include="System.Collections.Generic" />
+		<Using Include="System.Linq.Expressions.Expression" Static="true" />
+		<Using Include="AutoMapper.Execution.ExpressionBuilder" Static="true" />
 	</ItemGroup>
 </Project>

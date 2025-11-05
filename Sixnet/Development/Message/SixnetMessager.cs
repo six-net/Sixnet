@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+
 using Sixnet.DependencyInjection;
-using Sixnet.Development.Work;
 using Sixnet.Exceptions;
-using Sixnet.Model;
-using Sixnet.Net.Email;
-using Sixnet.Net.Sms;
 
 namespace Sixnet.Development.Message
 {

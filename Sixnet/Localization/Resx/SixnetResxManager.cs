@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿// "Company © 2025. All rights reserved."
+
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Globalization;
 using System.Reflection;

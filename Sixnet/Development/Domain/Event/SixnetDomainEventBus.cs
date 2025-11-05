@@ -1,11 +1,11 @@
-﻿using Sixnet.Development.Data.Event;
-using Sixnet.Development.Event;
-using Sixnet.Development.Work;
-using System;
-using System.Collections.Generic;
-using System.Linq.Expressions;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Threading;
 using System.Threading.Tasks;
+
+using Sixnet.Development.Data.Event;
+using Sixnet.Development.Event;
+using Sixnet.Development.Work;
 
 namespace Sixnet.Development.Domain.Event
 {

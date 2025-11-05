@@ -1,4 +1,6 @@
-﻿namespace Sixnet.Cache.String.Results
+﻿// "Company © 2025. All rights reserved."
+
+namespace Sixnet.Cache.String.Results
 {
     /// <summary>
     /// String append result

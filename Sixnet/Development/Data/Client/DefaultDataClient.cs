@@ -1,13 +1,9 @@
-﻿using System;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Security.Cryptography;
 using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
+
 using Sixnet.Development.Command;
 using Sixnet.Development.Data.Command;
 using Sixnet.Development.Data.Database;

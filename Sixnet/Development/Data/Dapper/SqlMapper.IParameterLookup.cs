@@ -1,4 +1,6 @@
-﻿namespace Sixnet.Development.Data.Dapper
+﻿// "Company © 2025. All rights reserved."
+
+namespace Sixnet.Development.Data.Dapper
 {
     public static partial class SqlMapper
     {

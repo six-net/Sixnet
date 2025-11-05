@@ -1,4 +1,6 @@
-﻿namespace Sixnet.Serialization.Json
+﻿// "Company © 2025. All rights reserved."
+
+namespace Sixnet.Serialization.Json
 {
     /// <summary>
     /// Defines json serialization provider

@@ -1,11 +1,11 @@
-﻿using System.Data;
+﻿// "Company © 2025. All rights reserved."
+
+using System.Data;
 using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
-using System.Reflection.Emit;
 using System.Xml;
+
 using Sixnet.Development.Data.Field;
 using Sixnet.Exceptions;
 using Sixnet.Model;

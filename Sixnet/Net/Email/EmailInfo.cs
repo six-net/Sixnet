@@ -1,8 +1,8 @@
-﻿using Sixnet.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Text;
+
+using Sixnet.Model;
 
 namespace Sixnet.Net.Email
 {

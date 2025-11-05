@@ -1,4 +1,5 @@
-﻿using System;
+﻿// "Company © 2025. All rights reserved."
+
 using Sixnet.Exceptions;
 
 namespace Sixnet.Code
@@ -25,7 +26,7 @@ namespace Sixnet.Code
                 return 999999999;
             }
             var maxValue = Math.Pow(10, numberLength) - 1;
-            return Convert.ToInt32(maxValue);
+            return System.Convert.ToInt32(maxValue);
         }
 
         #endregion
@@ -46,7 +47,7 @@ namespace Sixnet.Code
             {
                 return 0;
             }
-            return Convert.ToInt32(Math.Pow(10, numberLength - 1));
+            return System.Convert.ToInt32(Math.Pow(10, numberLength - 1));
         }
 
         #endregion

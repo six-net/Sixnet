@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿// "Company © 2025. All rights reserved."
 
 namespace Sixnet.Development.Data.Command.Event
 {

@@ -1,7 +1,8 @@
-﻿using System;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Collections;
-using System.Collections.Generic;
 using System.Data;
+
 using Sixnet.Development.Data.Parameter.Handler;
 
 namespace Sixnet.Development.Data.ParameterHandler.Handler
@@ -25,7 +26,7 @@ namespace Sixnet.Development.Data.ParameterHandler.Handler
                 else if (originalParameter.Value is ulong || originalParameter.DbType == DbType.UInt64)
                 {
                     originalParameter.DbType = DbType.Decimal;
-                    originalParameter.Value = Convert.ToDecimal(originalParameter.Value);
+                    originalParameter.Value = System.Convert.ToDecimal(originalParameter.Value);
                 }
             }
             return originalParameter;

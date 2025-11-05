@@ -1,8 +1,8 @@
-﻿using Sixnet.Serialization.Json;
-using System;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Collections;
-using System.Collections.Generic;
-using System.Text;
+
+using Sixnet.Serialization.Json;
 
 namespace Sixnet.Validation
 {

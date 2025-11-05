@@ -1,25 +1,22 @@
-﻿/*
+﻿// "Company © 2025. All rights reserved."
+
+/*
  License: http://www.apache.org/licenses/LICENSE-2.0
  Home page: https://github.com/DapperLib/Dapper-dot-net
  */
 
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Globalization;
-using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml;
 using System.Xml.Linq;
-using Sixnet.Development.Data.Dapper;
 
 namespace Sixnet.Development.Data.Dapper
 {
@@ -1129,7 +1126,7 @@ namespace Sixnet.Development.Data.Dapper
                     reader.Dispose();
                 }
                 if (wasClosed) cnn.Close();
-                
+
                 cmd?.Parameters.Clear();
                 cmd?.Dispose();
             }
@@ -1261,7 +1258,7 @@ namespace Sixnet.Development.Data.Dapper
                 var elementType = typeof(T).GetElementType();
                 var result = Array.CreateInstance(elementType, array.Length);
                 for (int i = 0; i < array.Length; i++)
-                    result.SetValue(Convert.ChangeType(array.GetValue(i), elementType, CultureInfo.InvariantCulture), i);
+                    result.SetValue(System.Convert.ChangeType(array.GetValue(i), elementType, CultureInfo.InvariantCulture), i);
                 return (T)(object)result;
             }
             else
@@ -1269,7 +1266,7 @@ namespace Sixnet.Development.Data.Dapper
                 try
                 {
                     var convertToType = Nullable.GetUnderlyingType(effectiveType) ?? effectiveType;
-                    return (T)Convert.ChangeType(val, convertToType, CultureInfo.InvariantCulture);
+                    return (T)System.Convert.ChangeType(val, convertToType, CultureInfo.InvariantCulture);
                 }
                 catch (Exception ex)
                 {
@@ -1581,15 +1578,15 @@ namespace Sixnet.Development.Data.Dapper
 
         private static Func<IDataReader, TReturn> GenerateMapper<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(Func<IDataReader, object> deserializer, Func<IDataReader, object>[] otherDeserializers, object map)
             => otherDeserializers.Length switch
-        {
-            1 => r => ((Func<TFirst, TSecond, TReturn>)map)((TFirst)deserializer(r), (TSecond)otherDeserializers[0](r)),
-            2 => r => ((Func<TFirst, TSecond, TThird, TReturn>)map)((TFirst)deserializer(r), (TSecond)otherDeserializers[0](r), (TThird)otherDeserializers[1](r)),
-            3 => r => ((Func<TFirst, TSecond, TThird, TFourth, TReturn>)map)((TFirst)deserializer(r), (TSecond)otherDeserializers[0](r), (TThird)otherDeserializers[1](r), (TFourth)otherDeserializers[2](r)),
-            4 => r => ((Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>)map)((TFirst)deserializer(r), (TSecond)otherDeserializers[0](r), (TThird)otherDeserializers[1](r), (TFourth)otherDeserializers[2](r), (TFifth)otherDeserializers[3](r)),
-            5 => r => ((Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>)map)((TFirst)deserializer(r), (TSecond)otherDeserializers[0](r), (TThird)otherDeserializers[1](r), (TFourth)otherDeserializers[2](r), (TFifth)otherDeserializers[3](r), (TSixth)otherDeserializers[4](r)),
-            6 => r => ((Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>)map)((TFirst)deserializer(r), (TSecond)otherDeserializers[0](r), (TThird)otherDeserializers[1](r), (TFourth)otherDeserializers[2](r), (TFifth)otherDeserializers[3](r), (TSixth)otherDeserializers[4](r), (TSeventh)otherDeserializers[5](r)),
-            _ => throw new NotSupportedException(),
-        };
+            {
+                1 => r => ((Func<TFirst, TSecond, TReturn>)map)((TFirst)deserializer(r), (TSecond)otherDeserializers[0](r)),
+                2 => r => ((Func<TFirst, TSecond, TThird, TReturn>)map)((TFirst)deserializer(r), (TSecond)otherDeserializers[0](r), (TThird)otherDeserializers[1](r)),
+                3 => r => ((Func<TFirst, TSecond, TThird, TFourth, TReturn>)map)((TFirst)deserializer(r), (TSecond)otherDeserializers[0](r), (TThird)otherDeserializers[1](r), (TFourth)otherDeserializers[2](r)),
+                4 => r => ((Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>)map)((TFirst)deserializer(r), (TSecond)otherDeserializers[0](r), (TThird)otherDeserializers[1](r), (TFourth)otherDeserializers[2](r), (TFifth)otherDeserializers[3](r)),
+                5 => r => ((Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>)map)((TFirst)deserializer(r), (TSecond)otherDeserializers[0](r), (TThird)otherDeserializers[1](r), (TFourth)otherDeserializers[2](r), (TFifth)otherDeserializers[3](r), (TSixth)otherDeserializers[4](r)),
+                6 => r => ((Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>)map)((TFirst)deserializer(r), (TSecond)otherDeserializers[0](r), (TThird)otherDeserializers[1](r), (TFourth)otherDeserializers[2](r), (TFifth)otherDeserializers[3](r), (TSixth)otherDeserializers[4](r), (TSeventh)otherDeserializers[5](r)),
+                _ => throw new NotSupportedException(),
+            };
 
         private static Func<IDataReader, TReturn> GenerateMapper<TReturn>(int length, Func<IDataReader, object> deserializer, Func<IDataReader, object>[] otherDeserializers, Func<object[], TReturn> map)
         {
@@ -1848,7 +1845,7 @@ namespace Sixnet.Development.Data.Dapper
                 return new ArgumentException(
                     string.IsNullOrEmpty(splitOnColumnName)
                     ? "When using the multi-mapping APIs ensure you set the splitOn param if you have keys other than Id"
-                    : $"Multi-map error: splitOn column '{splitOnColumnName}' was not found - please ensure your splitOn parameter is set and in the correct order", 
+                    : $"Multi-map error: splitOn column '{splitOnColumnName}' was not found - please ensure your splitOn parameter is set and in the correct order",
                     "splitOn");
             }
             else
@@ -2950,7 +2947,7 @@ namespace Sixnet.Development.Data.Dapper
                     var val = r.GetValue(index);
                     if (val is float || val is double || val is decimal)
                     {
-                        val = Convert.ChangeType(val, Enum.GetUnderlyingType(effectiveType), CultureInfo.InvariantCulture);
+                        val = System.Convert.ChangeType(val, Enum.GetUnderlyingType(effectiveType), CultureInfo.InvariantCulture);
                     }
                     return val is DBNull ? null : Enum.ToObject(effectiveType, val);
                 };
@@ -2980,7 +2977,7 @@ namespace Sixnet.Development.Data.Dapper
             {
                 if (value is float || value is double || value is decimal)
                 {
-                    value = Convert.ChangeType(value, Enum.GetUnderlyingType(type), CultureInfo.InvariantCulture);
+                    value = System.Convert.ChangeType(value, Enum.GetUnderlyingType(type), CultureInfo.InvariantCulture);
                 }
                 return (T)Enum.ToObject(type, value);
             }
@@ -2988,7 +2985,7 @@ namespace Sixnet.Development.Data.Dapper
             {
                 return (T)handler.Parse(type, value);
             }
-            return (T)Convert.ChangeType(value, type, CultureInfo.InvariantCulture);
+            return (T)System.Convert.ChangeType(value, type, CultureInfo.InvariantCulture);
         }
 
         private static readonly MethodInfo
@@ -3624,7 +3621,7 @@ namespace Sixnet.Development.Data.Dapper
                     il.Emit(OpCodes.Ldtoken, via ?? to); // stack is now [target][target][value][member-type-token]
                     il.EmitCall(OpCodes.Call, typeof(Type).GetMethod(nameof(Type.GetTypeFromHandle)), null); // stack is now [target][target][value][member-type]
                     il.EmitCall(OpCodes.Call, InvariantCulture, null); // stack is now [target][target][value][member-type][culture]
-                    il.EmitCall(OpCodes.Call, typeof(Convert).GetMethod(nameof(Convert.ChangeType), new Type[] { typeof(object), typeof(Type), typeof(IFormatProvider) }), null); // stack is now [target][target][boxed-member-type-value]
+                    il.EmitCall(OpCodes.Call, typeof(Convert).GetMethod(nameof(System.Convert.ChangeType), new Type[] { typeof(object), typeof(Type), typeof(IFormatProvider) }), null); // stack is now [target][target][boxed-member-type-value]
                     il.Emit(OpCodes.Unbox_Any, to); // stack is now [target][target][typed-value]
                 }
             }
@@ -3682,7 +3679,7 @@ namespace Sixnet.Development.Data.Dapper
                         }
                         else
                         {
-                            formattedValue = Convert.ToString(value) + " - " + Type.GetTypeCode(value.GetType());
+                            formattedValue = System.Convert.ToString(value) + " - " + Type.GetTypeCode(value.GetType());
                         }
                     }
                     catch (Exception valEx)

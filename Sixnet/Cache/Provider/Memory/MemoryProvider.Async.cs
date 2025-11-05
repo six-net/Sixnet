@@ -1,4 +1,13 @@
-﻿using Microsoft.Extensions.Options;
+﻿// "Company © 2025. All rights reserved."
+
+using System.Collections;
+using System.Collections.Concurrent;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+
+using Microsoft.Extensions.Options;
+
 using Sixnet.Algorithm.Selection;
 using Sixnet.Cache.Hash.Parameters;
 using Sixnet.Cache.Hash.Results;
@@ -17,14 +26,6 @@ using Sixnet.Cache.SortedSet.Results;
 using Sixnet.Cache.String.Parameters;
 using Sixnet.Cache.String.Results;
 using Sixnet.Code;
-using System;
-using System.Collections;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Sixnet.Cache.Provider.Memory
 {

@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// "Company © 2025. All rights reserved."
+
 using Sixnet.Development.Data.Command;
 using Sixnet.Development.Data.Field;
-using Sixnet.Exceptions;
 
 namespace Sixnet.Development.Data.Intercept
 {

@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Localization;
+﻿// "Company © 2025. All rights reserved."
+
+using Microsoft.Extensions.Localization;
 
 namespace System.Reflection
 {
@@ -18,7 +20,7 @@ namespace System.Reflection
         {
             var rootNamespaceAttribute = assembly.GetCustomAttribute<RootNamespaceAttribute>();
             return rootNamespaceAttribute?.RootNamespace ?? assembly.GetName().Name;
-        } 
+        }
 
         #endregion
     }

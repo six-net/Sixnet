@@ -1,6 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Microsoft.Extensions.Options;
+﻿// "Company © 2025. All rights reserved."
+
 using Sixnet.Extensions;
 using Sixnet.Model;
 

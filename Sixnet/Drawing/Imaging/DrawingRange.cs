@@ -1,4 +1,6 @@
-﻿namespace Sixnet.Drawing.Imaging
+﻿// "Company © 2025. All rights reserved."
+
+namespace Sixnet.Drawing.Imaging
 {
     /// <summary>
     /// Defines a drawing range

@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net.Http.Headers;
+﻿// "Company © 2025. All rights reserved."
+
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
-using System.Threading.Tasks;
 using System.Threading;
-using System.IO;
-using System.Linq;
-using Sixnet.Serialization.Json;
+using System.Threading.Tasks;
+
 using Sixnet.IO;
+using Sixnet.Serialization.Json;
 
 namespace Sixnet.Net.Http
 {

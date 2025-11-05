@@ -1,4 +1,6 @@
-﻿using Sixnet.Development.Data.Intercept;
+﻿// "Company © 2025. All rights reserved."
+
+using Sixnet.Development.Data.Intercept;
 
 namespace Sixnet.Development.Data.Command.Event
 {

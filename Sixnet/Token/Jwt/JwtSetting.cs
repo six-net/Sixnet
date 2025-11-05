@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.IdentityModel.Tokens;
+﻿// "Company © 2025. All rights reserved."
+
 using Sixnet.Security.Authentication;
 
 namespace Sixnet.Token.Jwt
