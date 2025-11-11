@@ -33,6 +33,11 @@ namespace Sixnet.Model
         public object SourceData {  get; set; }
 
         /// <summary>
+        /// Wheter is leaf node
+        /// </summary>
+        public bool IsLeaf {  get; set; }
+
+        /// <summary>
         /// Gets or sets the children
         /// </summary>
         public List<SixnetCascadingValue<TValue>> Children { get; set; }

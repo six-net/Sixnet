@@ -326,7 +326,9 @@ namespace System.Collections.Generic
             , Func<TModel, string> labelSelector
             , Func<TModel, TValue> valueSelector
             , Func<TModel, TValue> parentValueSelector
-            , Func<TModel, double> sequenceSelector = null)
+            , Func<TModel, double> sequenceSelector = null
+            , Func<TModel, SixnetCascadingValue<TValue>, bool> itemFilter = null
+            , bool noneChildIsLeaf = true)
         {
             if (datas.IsNullOrEmpty())
             {
@@ -353,7 +355,14 @@ namespace System.Collections.Generic
                     Level = 1,
                     SourceData = data,
                 };
-                ResolveCascadingChildValues(2, newCascadingValue, datas, labelSelector, valueSelector, parentValueSelector, sequenceSelector);
+                ResolveCascadingChildValues(2, newCascadingValue, datas
+                    , labelSelector, valueSelector, parentValueSelector
+                    , sequenceSelector, itemFilter, noneChildIsLeaf);
+                newCascadingValue.IsLeaf = noneChildIsLeaf && newCascadingValue.Children.IsNullOrEmpty();
+                if (!(itemFilter?.Invoke(data, newCascadingValue) ?? true))
+                {
+                    continue;
+                }
                 values.Add(newCascadingValue);
             }
             return values;
@@ -363,7 +372,9 @@ namespace System.Collections.Generic
             , Func<TModel, string> labelSelector
             , Func<TModel, TValue> valueSelector
             , Func<TModel, TValue> parentValueSelector
-            , Func<TModel, double> sequenceSelector = null)
+            , Func<TModel, double> sequenceSelector = null
+            , Func<TModel, SixnetCascadingValue<TValue>, bool> itemFilter = null
+            , bool noneChildIsLeaf = true)
         {
             if (parentValue == null || datas.IsNullOrEmpty())
             {
@@ -385,7 +396,14 @@ namespace System.Collections.Generic
                     Level = level,
                     SourceData = data,
                 };
-                ResolveCascadingChildValues(level++, newCascadingValue, datas, labelSelector, valueSelector, parentValueSelector, sequenceSelector);
+                ResolveCascadingChildValues(level++, newCascadingValue, datas
+                    , labelSelector, valueSelector, parentValueSelector
+                    , sequenceSelector, itemFilter, noneChildIsLeaf);
+                newCascadingValue.IsLeaf = noneChildIsLeaf && newCascadingValue.Children.IsNullOrEmpty();
+                if (!(itemFilter?.Invoke(data, newCascadingValue) ?? true))
+                {
+                    continue;
+                }
                 childValues.Add(newCascadingValue);
             }
             parentValue.Children = childValues;
