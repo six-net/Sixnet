@@ -28,6 +28,11 @@ namespace Sixnet.Model
         public double Sequence { get; set; }
 
         /// <summary>
+        /// Gets or sets the source data
+        /// </summary>
+        public object SourceData {  get; set; }
+
+        /// <summary>
         /// Gets or sets the children
         /// </summary>
         public List<SixnetCascadingValue<TValue>> Children { get; set; }

@@ -350,7 +350,8 @@ namespace System.Collections.Generic
                     Label = labelSelector(data),
                     Value = valueSelector(data),
                     Sequence = sequenceSelector?.Invoke(data) ?? 0,
-                    Level = 1
+                    Level = 1,
+                    SourceData = data,
                 };
                 ResolveCascadingChildValues(2, newCascadingValue, datas, labelSelector, valueSelector, parentValueSelector, sequenceSelector);
                 values.Add(newCascadingValue);
@@ -381,7 +382,8 @@ namespace System.Collections.Generic
                     Label = labelSelector(data),
                     Value = valueSelector(data),
                     Sequence = sequenceSelector?.Invoke(data) ?? 0,
-                    Level = level
+                    Level = level,
+                    SourceData = data,
                 };
                 ResolveCascadingChildValues(level++, newCascadingValue, datas, labelSelector, valueSelector, parentValueSelector, sequenceSelector);
                 childValues.Add(newCascadingValue);
