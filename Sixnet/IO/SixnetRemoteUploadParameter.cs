@@ -9,14 +9,8 @@ namespace Sixnet.IO
     public class SixnetRemoteUploadParameter
     {
         /// <summary>
-        /// Gets or sets upload files
+        /// Gets or sets upload items
         /// </summary>
-        public List<SixnetUploadFile> Files { get; set; }
-
-        /// <summary>
-        /// Gets or sets upload file parameter name
-        /// Default value is 'sixnet_upload_file_options'
-        /// </summary>
-        public const string RequestParameterName = "sixnet_upload_file_parameters";
+        public List<SixnetUploadFile> Items { get; set; }
     }
 }

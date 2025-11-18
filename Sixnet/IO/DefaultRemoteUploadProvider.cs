@@ -73,13 +73,13 @@ namespace Sixnet.IO
 
             var remoteParameter = new SixnetRemoteUploadParameter()
             {
-                Files = parameter.Files
+                Items = parameter.Files
             };
             var remoteUploadSetting = parameter.Setting.GetRemoteUploadSetting();
             parameter.Properties ??= new Dictionary<string, string>();
-            parameter.Properties[SixnetRemoteUploadParameter.RequestParameterName] = SixnetJsonSerializer.Serialize(remoteParameter);
+            // parameter.Properties[SixnetRemoteUploadParameter.RequestParameterName] = SixnetJsonSerializer.Serialize(remoteParameter);
             var url = remoteUploadSetting.GetUploadUrl();
-            return (url, parameter.Files.ToDictionary(c => c.FileName, c => c.FileContent), parameter.Properties);
+            return (url, null, parameter.Properties); // ToDO
         }
     }
 }

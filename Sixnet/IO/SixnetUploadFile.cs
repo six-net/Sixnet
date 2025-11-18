@@ -1,6 +1,4 @@
-﻿// "Company © 2025. All rights reserved."
-
-namespace Sixnet.IO
+﻿namespace Sixnet.IO
 {
     /// <summary>
     /// Sixnet upload file
@@ -26,6 +24,6 @@ namespace Sixnet.IO
         /// <summary>
         /// Gets or sets the file content
         /// </summary>
-        public byte[] FileContent { get; set; }
+        public byte[] Content { get; set; }
     }
 }

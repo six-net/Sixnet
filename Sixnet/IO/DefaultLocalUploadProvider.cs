@@ -106,7 +106,7 @@ namespace Sixnet.IO
         SixnetUploadFileResult SaveFile(SixnetUploadFile file, SixnetFileOptions fileOptions, SixnetFileSetting fileSetting)
         {
             var fileResult = HandleFile(file, fileOptions, fileSetting);
-            File.WriteAllBytes(fileResult.FullPath, file.FileContent);
+            File.WriteAllBytes(fileResult.FullPath, file.Content);
             return fileResult;
         }
 
@@ -119,7 +119,7 @@ namespace Sixnet.IO
         async Task<SixnetUploadFileResult> SaveFileAsync(SixnetUploadFile file, SixnetFileOptions uploadOptions, SixnetFileSetting fileSetting)
         {
             var fileResult = HandleFile(file, uploadOptions, fileSetting);
-            await File.WriteAllBytesAsync(fileResult.FullPath, file.FileContent).ConfigureAwait(false);
+            await File.WriteAllBytesAsync(fileResult.FullPath, file.Content).ConfigureAwait(false);
             return fileResult;
         }
 
