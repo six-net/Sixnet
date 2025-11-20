@@ -435,11 +435,15 @@ namespace Sixnet.Development.Data.Database
                     var databaseStatement = await GenerateQueryStatementCoreAsync(context, targetTranslationResult, QueryableLocation.From).ConfigureAwait(false);
                     databaseStatement.Script = $"({databaseStatement.Script}){(applyTablePetName ? $"{TablePetNameKeyword}{tablePetName}" : "")}";
                     databaseStatement.ComplexTarget = true;
+                    if (!databaseStatement.OutputFields.IsNullOrEmpty())
+                    {
+                        databaseStatement.OutputFields = new List<ISixnetField>(1) { DataField.Create("*", originalQueryable.GetModelType(), 0, null, "*") };
+                    }
                     return databaseStatement;
                 default:
                     var tableNames = await context.GetTableNamesAsync(originalQueryable, location).ConfigureAwait(false);
-                    var targetScript = "";
                     var complexTarget = false;
+                    string targetScript;
                     if (tableNames.Count == 1)
                     {
                         targetScript = $"{FormatAndWrapKeywordFunc(tableNames.FirstOrDefault())}{(applyTablePetName ? $"{TablePetNameKeyword}{tablePetName}" : "")}";

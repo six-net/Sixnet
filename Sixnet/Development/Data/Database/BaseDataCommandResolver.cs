@@ -695,8 +695,8 @@ namespace Sixnet.Development.Data.Database
                     return databaseStatement;
                 default:
                     var tableNames = context.GetTableNames(originalQueryable, location);
-                    var targetScript = "";
                     var complexTarget = false;
+                    string targetScript;
                     if (tableNames.Count == 1)
                     {
                         targetScript = $"{FormatAndWrapKeywordFunc(tableNames.FirstOrDefault())}{(applyTablePetName ? $"{TablePetNameKeyword}{tablePetName}" : "")}";
