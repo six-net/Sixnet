@@ -1584,20 +1584,21 @@ namespace Sixnet.Development.Data.Database
                         realFormat = true;
                     }
                     formatSetting = formatSetting.Child;
-
                 } while (formatSetting != null);
 
                 hasFormat = realFormat;
             }
 
-            var fieldPetName = (queryableLocation == QueryableLocation.Top || queryableLocation == QueryableLocation.From) && fieldLocation == FieldLocation.Output && !string.IsNullOrWhiteSpace(propertyName)
+            var fieldPetName = (queryableLocation == QueryableLocation.Top || queryableLocation == QueryableLocation.From) 
+                && fieldLocation == FieldLocation.Output && !string.IsNullOrWhiteSpace(propertyName)
                     ? WrapKeywordFunc(propertyName)
                     : !string.IsNullOrWhiteSpace(fieldName)
                       ? WrapKeywordFunc(fieldName)
                       : string.Empty;
             formatedFieldName = !string.IsNullOrWhiteSpace(fieldPetName)
                 && (fieldLocation == FieldLocation.Output || fieldLocation == FieldLocation.InnerOutput)
-                && (hasFormat || ((queryableLocation == QueryableLocation.Top || queryableLocation == QueryableLocation.From) && fieldName != propertyName))
+                && (hasFormat || ((queryableLocation == QueryableLocation.Top || queryableLocation == QueryableLocation.From) 
+                && fieldName != propertyName))
                     ? $"{formatedFieldName}{ColumnPetNameKeyword}{fieldPetName}"
                     : formatedFieldName;
 

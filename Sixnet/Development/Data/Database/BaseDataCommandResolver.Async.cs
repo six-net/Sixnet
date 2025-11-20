@@ -1109,8 +1109,15 @@ namespace Sixnet.Development.Data.Database
                 {
                     tablePetName = context.GetTablePetName(queryable, fieldModelType, regularField.ModelTypeIndex);
                 }
-                fieldName = FormatKeywordFunc(regularField.FieldName);
-                formatedFieldName = WrapKeywordFunc(fieldName);
+                if (regularField.FieldName == "*")
+                {
+                    formatedFieldName = fieldName = regularField.FieldName;
+                }
+                else
+                {
+                    fieldName = FormatKeywordFunc(regularField.FieldName);
+                    formatedFieldName = WrapKeywordFunc(fieldName);
+                }
                 if (!string.IsNullOrWhiteSpace(tablePetName) && fieldLocation != FieldLocation.InsertValue)
                 {
                     formatedFieldName = $"{tablePetName}.{formatedFieldName}";
@@ -1148,11 +1155,16 @@ namespace Sixnet.Development.Data.Database
                     formatedFieldName = constantField.Value == null ? $"{NullKeyword}" : $"{constantField.Value}";
                 }
             }
+            else if (field is ConditionalDataField conditionalDataField)
+            {
+                formatedFieldName = FormatConditionalField(context, queryable, queryableLocation, conditionalDataField, criterionOperator, tablePetName, formatterName);
+            }
             SixnetDirectThrower.ThrowInvalidOperationIf(string.IsNullOrWhiteSpace(formatedFieldName), $"Invalid for {field.GetType()}");
 
             var hasFormat = formatSetting != null;
             if (hasFormat)
             {
+                var realFormat = false;
                 var formatContext = new FormatFieldContext()
                 {
                     PropertyName = propertyName,
@@ -1166,25 +1178,35 @@ namespace Sixnet.Development.Data.Database
                 {
                     if (formatSetting.Parameter is ISixnetField parameterField)
                     {
-                        formatSetting.Parameter = await FormatFieldAsync(context, queryable, parameterField, queryableLocation, FieldLocation.FormatParameter, criterionOperator, tablePetName, formatSetting.Name).ConfigureAwait(false);
+                        formatSetting.Parameter = await FormatFieldAsync(context, queryable, parameterField, queryableLocation
+                            , FieldLocation.FormatParameter, criterionOperator, tablePetName, formatSetting.Name)
+                            .ConfigureAwait(false);
                     }
                     formatContext.FieldName = formatedFieldName;
                     formatContext.FormatSetting = formatSetting;
                     var fieldFormatter = SixnetDataManager.GetFieldFormatter(formatSetting.Name) ?? DefaultFieldFormatter;
-                    formatedFieldName = fieldFormatter.Format(formatContext);
+                    var newFormatedFieldName = fieldFormatter.Format(formatContext);
+                    if (!string.IsNullOrWhiteSpace(newFormatedFieldName))
+                    {
+                        formatedFieldName = newFormatedFieldName;
+                        realFormat = true;
+                    }
                     formatSetting = formatSetting.Child;
-
                 } while (formatSetting != null);
+
+                hasFormat = realFormat;
             }
 
-            var fieldPetName = queryableLocation == QueryableLocation.Top && fieldLocation == FieldLocation.Output && !string.IsNullOrWhiteSpace(propertyName)
+            var fieldPetName = (queryableLocation == QueryableLocation.Top || queryableLocation == QueryableLocation.From) 
+                && fieldLocation == FieldLocation.Output && !string.IsNullOrWhiteSpace(propertyName)
                     ? WrapKeywordFunc(propertyName)
                     : !string.IsNullOrWhiteSpace(fieldName)
                       ? WrapKeywordFunc(fieldName)
                       : string.Empty;
             formatedFieldName = !string.IsNullOrWhiteSpace(fieldPetName)
                 && (fieldLocation == FieldLocation.Output || fieldLocation == FieldLocation.InnerOutput)
-                && (hasFormat || (queryableLocation == QueryableLocation.Top && fieldName != propertyName))
+                && (hasFormat || ((queryableLocation == QueryableLocation.Top || queryableLocation == QueryableLocation.From) 
+                && fieldName != propertyName))
                     ? $"{formatedFieldName}{ColumnPetNameKeyword}{fieldPetName}"
                     : formatedFieldName;
 
