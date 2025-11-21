@@ -73,6 +73,6 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Gets or sets the start value
         /// </summary>
-        public long StartValue { get; set; } = 0;
+        public long? StartValue { get; set; }
     }
 }

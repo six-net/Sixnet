@@ -45,6 +45,11 @@ namespace Sixnet.Development.Entity
         /// </summary>
         public EntityStyle Style { get; set; } = EntityStyle.Physical;
 
+        /// <summary>
+        /// Gets or sets the primary key start value
+        /// </summary>
+        public long PrimaryKeyStartValue { get; set; } = 0;
+
         #endregion
 
         static internal EntityAttribute Default = new();

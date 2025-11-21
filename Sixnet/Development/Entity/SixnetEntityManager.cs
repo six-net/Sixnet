@@ -141,10 +141,15 @@ namespace Sixnet.Development.Entity
                     DbType = entityFieldAttribute?.DbType,
                     Length = entityFieldAttribute?.Length ?? 0,
                     Description = entityFieldAttribute?.Description ?? string.Empty,
-                    StartValue = entityFieldAttribute?.StartValue ?? 0,
                     FileObjectName = fileObjectName,
                     ModelType = entityType
                 };
+                var fieldStartValue = entityFieldAttribute?.StartValue;
+                if (!fieldStartValue.HasValue && propertyField.InRole(FieldRole.PrimaryKey))
+                {
+                    fieldStartValue = entityAttribute.PrimaryKeyStartValue;
+                }
+                propertyField.StartValue = fieldStartValue ?? 0;
 
                 //value provider
                 var valueProvider = GetValueProvider(entityType, member);
