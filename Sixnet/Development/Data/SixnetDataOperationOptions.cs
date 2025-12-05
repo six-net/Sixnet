@@ -116,5 +116,10 @@ namespace Sixnet.Development.Data
         /// Gets or sets the split table behavior
         /// </summary>
         public SplitTableBehavior SplitTableBehavior { get; set; }
+
+        /// <summary>
+        /// timeout (in seconds)
+        /// </summary>
+        public int? Timeout { get; set; }
     }
 }

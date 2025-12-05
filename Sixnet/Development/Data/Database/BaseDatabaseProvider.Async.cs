@@ -473,7 +473,7 @@ namespace Sixnet.Development.Data.Database
             try
             {
                 var dataCommandResolver = GetDataCommandResolver();
-                var statements = await dataCommandResolver.GenerateDatabaseMigrationStatementsAsync(command).ConfigureAwait(false);
+                var statements = dataCommandResolver.GenerateDatabaseMigrationStatements(command);
                 foreach (var statement in statements)
                 {
                     await ExecuteDatabaseStatementAsync(command, statement).ConfigureAwait(false);
@@ -487,7 +487,21 @@ namespace Sixnet.Development.Data.Database
 
         #endregion
 
-        #region Get table
+        #region Get databases
+
+        /// <summary>
+        /// Get databases
+        /// </summary>
+        /// <param name="command">Command</param>
+        /// <returns></returns>
+        public virtual async Task<List<SixnetDatabase>> GetDatabasesAsync(DatabaseCommand command)
+        {
+            return (await command.Connection.DbConnection.QueryAsync<SixnetDatabase>(queryDatabasesScript, transaction: command.Connection?.Transaction?.DbTransaction).ConfigureAwait(false)).ToList();
+        }
+
+        #endregion
+
+        #region Get tables
 
         /// <summary>
         /// Get tables
@@ -496,7 +510,49 @@ namespace Sixnet.Development.Data.Database
         /// <returns></returns>
         public virtual async Task<List<SixnetDataTable>> GetTablesAsync(DatabaseCommand command)
         {
-            return (await command.Connection.DbConnection.QueryAsync<SixnetDataTable>(queryDatabaseTablesScript, transaction: command.Connection?.Transaction?.DbTransaction).ConfigureAwait(false)).ToList();
+            return (await command.Connection.DbConnection.QueryAsync<SixnetDataTable>(queryTablesScript, transaction: command.Connection?.Transaction?.DbTransaction).ConfigureAwait(false)).ToList();
+        }
+
+        #endregion
+
+        #region Get views
+
+        /// <summary>
+        /// Get views
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        public async Task<List<SixnetView>> GetViewsAsync(DatabaseCommand command)
+        {
+            return (await command.Connection.DbConnection.QueryAsync<SixnetView>(queryViewsScript, transaction: command.Connection?.Transaction?.DbTransaction).ConfigureAwait(false)).ToList();
+        }
+
+        #endregion
+
+        #region Get stored procedures
+
+        /// <summary>
+        /// Get stored procedures
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        public async Task<List<SixnetStoredProcedure>> GetStoredProceduresAsync(DatabaseCommand command)
+        {
+            return (await command.Connection.DbConnection.QueryAsync<SixnetStoredProcedure>(queryStoredProcedureScript, transaction: command.Connection?.Transaction?.DbTransaction).ConfigureAwait(false)).ToList();
+        }
+
+        #endregion
+
+        #region Get columns
+
+        /// <summary>
+        /// Get columns
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        public async Task<List<SixnetColumn>> GetColumnsAsync(DatabaseCommand command)
+        {
+            return (await command.Connection.DbConnection.QueryAsync<SixnetColumn>(queryColumnScript, transaction: command.Connection?.Transaction?.DbTransaction).ConfigureAwait(false)).ToList();
         }
 
         #endregion

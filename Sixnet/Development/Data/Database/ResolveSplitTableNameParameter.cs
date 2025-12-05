@@ -23,5 +23,10 @@ namespace Sixnet.Development.Data.Database
         /// Gets or sets the split behavior
         /// </summary>
         public SplitTableBehavior SplitBehavior { get; set; }
+
+        /// <summary>
+        /// Gets or sets the expansion num
+        /// </summary>
+        public int ExpansionNum {  get; set; }
     }
 }

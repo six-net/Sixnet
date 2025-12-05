@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Sixnet.Development.Data;
 using Sixnet.Development.Data.Command;
 using Sixnet.Development.Data.Database;
+using Sixnet.Development.Data.Field;
 using Sixnet.Development.Data.Field.Formatting;
 using Sixnet.Model.Paging;
 
@@ -742,11 +743,7 @@ namespace Sixnet.Development.Command
         /// <returns></returns>
         public static Task<List<SixnetDataTable>> GetTablesAsync(DatabaseConnection connection, SixnetDataOperationOptions options = null)
         {
-            return connection.DatabaseProvider.GetTablesAsync(new DatabaseCommand()
-            {
-                Connection = connection,
-                CancellationToken = options?.CancellationToken ?? default
-            });
+            return connection.DatabaseProvider.GetTablesAsync(DatabaseCommand.Create(connection, options));
         }
 
         #endregion
@@ -854,14 +851,115 @@ namespace Sixnet.Development.Command
             var migrationTasks = new List<Task>();
             foreach (var connection in connections)
             {
-                migrationTasks.Add(connection.DatabaseProvider.MigrateAsync(new MigrationDatabaseCommand()
+                var command = DatabaseCommand.Create<MigrationDatabaseCommand>(connection, options, cmd =>
                 {
-                    CancellationToken = options?.CancellationToken,
-                    Connection = connection,
-                    MigrationInfo = migrationInfo
-                }));
+                    cmd.MigrationInfo = migrationInfo;
+                });
+                migrationTasks.Add(connection.DatabaseProvider.MigrateAsync(command));
             }
             return Task.WhenAll(migrationTasks);
+        }
+
+        #endregion
+
+        #region Create table
+
+        /// <summary>
+        /// Create table
+        /// </summary>
+        /// <param name="connections"></param>
+        /// <param name="entityType"></param>
+        /// <param name="options"></param>
+        public static async Task CreateTableAsync(IEnumerable<DatabaseConnection> connections, Type entityType, SixnetDataOperationOptions options = null)
+        {
+            ValidateConnections(connections);
+            foreach (var connection in connections)
+            {
+                var command = GetCreateTableCommand(connection, entityType, options);
+                await connection.DatabaseProvider.MigrateAsync(command);
+            }
+        }
+
+        #endregion
+
+        #region Delete table
+
+        /// <summary>
+        /// Delete table
+        /// </summary>
+        /// <param name="connections"></param>
+        /// <param name="entityType"></param>
+        /// <param name="options"></param>
+        public static async Task DeleteTableAsync(IEnumerable<DatabaseConnection> connections, List<Type> entityTypes, SixnetDataOperationOptions options = null)
+        {
+            ValidateConnections(connections);
+            foreach (var connection in connections)
+            {
+                var allTablesNames = (await connection.DatabaseProvider.GetTablesAsync(DatabaseCommand.Create(connection, options)).ConfigureAwait(false))?.Select(c => c.Name).ToList();
+                foreach (var entityType in entityTypes)
+                {
+                    await connection.DatabaseProvider.MigrateAsync(GetDeleteTableCommand(connection, allTablesNames, entityType, options));
+                }
+            }
+        }
+
+        #endregion
+
+        #region Add field
+
+        /// <summary>
+        /// Add field
+        /// </summary>
+        /// <param name="connections"></param>
+        /// <param name="entityType"></param>
+        /// <param name="fields"></param>
+        /// <param name="options"></param>
+        public static async Task AddFieldAsync(IEnumerable<DatabaseConnection> connections, Type entityType, List<DataField> fields, SixnetDataOperationOptions options = null)
+        {
+            ValidateConnections(connections);
+            foreach (var connection in connections)
+            {
+                await connection.DatabaseProvider.MigrateAsync(GetAddFieldCommand(connection, (await connection.DatabaseProvider.GetTablesAsync(DatabaseCommand.Create(connection, options)).ConfigureAwait(false))?.Select(c => c.Name).ToList(), entityType, fields, options));
+            }
+        }
+
+        #endregion
+
+        #region Delete field
+
+        /// <summary>
+        /// Delete field
+        /// </summary>
+        /// <param name="connections"></param>
+        /// <param name="entityType"></param>
+        /// <param name="fields"></param>
+        /// <param name="options"></param>
+        public static async Task DeleteFieldAsync(IEnumerable<DatabaseConnection> connections, Type entityType, List<DataField> fields, SixnetDataOperationOptions options = null)
+        {
+            ValidateConnections(connections);
+            foreach (var connection in connections)
+            {
+                await connection.DatabaseProvider.MigrateAsync(GetDeleteFieldCommand(connection, (await connection.DatabaseProvider.GetTablesAsync(DatabaseCommand.Create(connection, options)).ConfigureAwait(false))?.Select(c => c.Name).ToList(), entityType, fields, options));
+            }
+        }
+
+        #endregion
+
+        #region Alter field
+
+        /// <summary>
+        /// Alter fields
+        /// </summary>
+        /// <param name="entityType"></param>
+        /// <param name="fields"></param>
+        /// <param name="options"></param>
+        public static async Task AlterFieldAsync(IEnumerable<DatabaseConnection> connections, Type entityType, Dictionary<string, DataField> fields, SixnetDataOperationOptions options)
+        {
+            ValidateConnections(connections);
+            foreach (var connection in connections)
+            {
+                await connection.DatabaseProvider.MigrateAsync(GetAlterFieldCommand(connection, (await connection.DatabaseProvider.GetTablesAsync(DatabaseCommand.Create(connection, options)).ConfigureAwait(false))?.Select(c => c.Name).ToList(), entityType, fields, options));
+            }
         }
 
         #endregion

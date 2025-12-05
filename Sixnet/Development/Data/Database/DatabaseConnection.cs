@@ -140,6 +140,7 @@ namespace Sixnet.Development.Data.Database
                     break;
                 case DatabaseConnectionOperationType.Rollback:
                     Transaction?.Rollback();
+                    Transaction = null;
                     newTransaction = OpenTransaction();
                     break;
             }
@@ -187,7 +188,7 @@ namespace Sixnet.Development.Data.Database
         /// <summary>
         /// Create a new database connection
         /// </summary>
-        /// <param name="databaseServer">Database server</param>
+        /// <param name="server">Database server</param>
         /// <param name="useTransaction">Whether use transaction</param>
         /// <param name="isolationLevel">Isolation level</param>
         /// <returns></returns>

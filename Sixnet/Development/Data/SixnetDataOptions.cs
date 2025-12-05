@@ -53,6 +53,11 @@ namespace Sixnet.Development.Data
         public List<DatabaseServer> Servers { get; set; }
 
         /// <summary>
+        /// Gets or sets the default schema
+        /// </summary>
+        public string DefaultSchema { get; set; }
+
+        /// <summary>
         /// Whether disable logical delete.
         /// Performing a physical delete when it is true
         /// </summary>
@@ -100,6 +105,11 @@ namespace Sixnet.Development.Data
         /// Gets or sets the default database word and name separator
         /// </summary>
         public string DatabaseWordAndNameSeparator { get; set; } = "_";
+
+        /// <summary>
+        /// Gets or sets the default default command timeout(in seconds)
+        /// </summary>
+        public int? DefaultCommandTimeout {  get; set; }
 
         #endregion
 

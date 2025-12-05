@@ -262,7 +262,18 @@ namespace Sixnet.Development.Data.Database
 
         #endregion
 
-        #region Get table
+        #region Get databases
+
+        /// <summary>
+        /// Get databases
+        /// </summary>
+        /// <param name="command">Command</param>
+        /// <returns></returns>
+        List<SixnetDatabase> GetDatabases(DatabaseCommand command);
+
+        #endregion
+
+        #region Get tables
 
         /// <summary>
         /// Get table
@@ -270,6 +281,39 @@ namespace Sixnet.Development.Data.Database
         /// <param name="command">Command</param>
         /// <returns></returns>
         List<SixnetDataTable> GetTables(DatabaseCommand command);
+
+        #endregion
+
+        #region Get views
+
+        /// <summary>
+        /// Get views
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        List<SixnetView> GetViews(DatabaseCommand command);
+
+        #endregion
+
+        #region Get stored procedures
+
+        /// <summary>
+        /// Get stored procedures
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        List<SixnetStoredProcedure> GetStoredProcedures(DatabaseCommand command);
+
+        #endregion
+
+        #region Get columns
+
+        /// <summary>
+        /// Get columns
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        List<SixnetColumn> GetColumns(DatabaseCommand command);
 
         #endregion
     }

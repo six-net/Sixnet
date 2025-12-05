@@ -2,6 +2,7 @@
 
 using System.Reflection;
 
+using Sixnet.Development.Data.Database;
 using Sixnet.Development.Data.Field;
 using Sixnet.Expressions.Linq;
 using Sixnet.Reflection;
@@ -46,6 +47,7 @@ namespace Sixnet.Development.Entity
                     _allFieldRoles.Add(roleVal);
                 }
             }
+            ConfigureEntity(typeof(SixnetAppUpdateRecordEntity));
         }
 
         #endregion
@@ -82,7 +84,8 @@ namespace Sixnet.Development.Entity
             {
                 entityConfig = new EntityConfiguration()
                 {
-                    Group = entityAttribute?.Module ?? string.Empty
+                    Group = entityAttribute?.Module ?? string.Empty,
+                    Schema = entityAttribute?.Schema ?? string.Empty,
                 };
             }
             //table name
@@ -142,14 +145,19 @@ namespace Sixnet.Development.Entity
                     Length = entityFieldAttribute?.Length ?? 0,
                     Description = entityFieldAttribute?.Description ?? string.Empty,
                     FileObjectName = fileObjectName,
-                    ModelType = entityType
+                    ModelType = entityType,
+                    DbFeature = entityFieldAttribute?.DbFeature ?? FieldDbFeature.None,
+                    FormatSetting = entityFieldAttribute?.FormatSetting,
+                    Precision = entityFieldAttribute?.Precision ?? 0,
+                    DefaultValue = entityFieldAttribute?.DefaultValue ?? string.Empty,
+                    IncrementValue = entityFieldAttribute?.IncrementValue ?? 0,
                 };
-                var fieldStartValue = entityFieldAttribute?.StartValue;
-                if (!fieldStartValue.HasValue && propertyField.InRole(FieldRole.PrimaryKey))
+                var fieldStartValue = entityFieldAttribute?.StartValue ?? 0;
+                if (propertyField.InRole(FieldRole.PrimaryKey) && fieldStartValue == 0)
                 {
                     fieldStartValue = entityAttribute.PrimaryKeyStartValue;
                 }
-                propertyField.StartValue = fieldStartValue ?? 0;
+                propertyField.StartValue = fieldStartValue;
 
                 //value provider
                 var valueProvider = GetValueProvider(entityType, member);
@@ -231,6 +239,7 @@ namespace Sixnet.Development.Entity
                     editableFields.Add(field);
                 }
             }
+            entityConfig.IsSystem = entityAttribute.IsSystem;
             entityConfig.Description = entityAttribute.Description ?? string.Empty;
             entityConfig.AllFields = allFieldDict;
             entityConfig.CacheFieldNames = cacheFieldNames;
@@ -246,6 +255,7 @@ namespace Sixnet.Development.Entity
             entityConfig.RoleFields = roleFields;
             entityConfig.SplitTableType = entityAttribute.SplitTableType;
             entityConfig.SplitTableProviderName = entityAttribute.SplitTableProviderName;
+            entityConfig.AutoExpansionSplitNum = entityAttribute.AutoExpansionSplitNum;
             _entityConfigurations[typeGuid] = entityConfig;
         }
 

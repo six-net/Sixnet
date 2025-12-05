@@ -4,6 +4,8 @@ using System.Runtime;
 using System.Text.RegularExpressions;
 
 using Sixnet.DependencyInjection;
+using Sixnet.Development.Data;
+using Sixnet.Development.Data.Database;
 using Sixnet.Development.Entity;
 using Sixnet.Logging;
 using Sixnet.Model;
@@ -40,6 +42,11 @@ namespace Sixnet.App
         /// Configurable contract 
         /// </summary>
         static readonly Type _configurableContractType = typeof(ISixnetConfigurable);
+
+        /// <summary>
+        /// Database update contract type
+        /// </summary>
+        static readonly Type _databaseUpdateRecordContractType = typeof(ISixnetDatabaseUpdateRecord);
 
         /// <summary>
         /// Convention service patterns
@@ -122,6 +129,11 @@ namespace Sixnet.App
                         {
                             var configModel = Activator.CreateInstance(type) as ISixnetConfigurable;
                             SixnetApplication.AddConfigurable(configModel);
+                        }
+                        if (_databaseUpdateRecordContractType.IsAssignableFrom(type))
+                        {
+                            var updateRecord = Activator.CreateInstance(type) as ISixnetDatabaseUpdateRecord;
+                            SixnetDataManager.AddDatabaseUpdateRecord(updateRecord);
                         }
                     }
                 }

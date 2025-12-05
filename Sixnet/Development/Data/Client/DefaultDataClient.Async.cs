@@ -13,6 +13,7 @@ using Sixnet.Development.Data.Field.Formatting;
 using Sixnet.Development.Entity;
 using Sixnet.Development.Queryable;
 using Sixnet.Exceptions;
+using Sixnet.Expressions.Linq;
 using Sixnet.Model.Paging;
 
 namespace Sixnet.Development.Data.Client
@@ -1252,7 +1253,7 @@ namespace Sixnet.Development.Data.Client
 
         #endregion
 
-        #region Migrate
+        #region Migration
 
         /// <summary>
         /// Migrate
@@ -1264,6 +1265,172 @@ namespace Sixnet.Development.Data.Client
             SixnetDirectThrower.ThrowArgNullIf(internalDatabaseServers.IsNullOrEmpty(), "Database servers");
             var connections = GetConnections(internalDatabaseServers);
             return DataCommandExecutor.MigrateAsync(connections, migrationInfo, options);
+        }
+
+        /// <summary>
+        /// Create all entity tables
+        /// </summary>
+        /// <param name="options"></param>
+        /// <returns></returns>
+        public async Task CreateAllEntityTablesAsync(SixnetDataOperationOptions options = null)
+        {
+            var entities = SixnetEntityManager.GetAllEntityConfigs();
+            foreach (var entity in entities)
+            {
+                if (!entity.IsSystem)
+                {
+                    await CreateTableAsync(entity.EntityType, options);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Delete all entity tables
+        /// </summary>
+        /// <param name="options"></param>
+        /// <returns></returns>
+        public async Task DeleteAllEntityTablesAsync(SixnetDataOperationOptions options = null)
+        {
+            var entities = SixnetEntityManager.GetAllEntityConfigs();
+            await DeleteTableAsync(entities.Where(c => !c.IsSystem).Select(c => c.EntityType).ToList(), options);
+        }
+
+        /// <summary>
+        /// Create entity table
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="options"></param>
+        public Task CreateTableAsync<TEntity>(SixnetDataOperationOptions options = null) where TEntity : ISixnetEntity
+        {
+            return CreateTableAsync(typeof(TEntity), options);
+        }
+
+        /// <summary>
+        /// Delete entity table
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="options"></param>
+        public Task DeleteTableAsync<TEntity>(SixnetDataOperationOptions options = null) where TEntity : ISixnetEntity
+        {
+            return DeleteTableAsync(new List<Type>(1) { typeof(TEntity) }, options);
+        }
+
+        /// <summary>
+        /// Add field
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="field"></param>
+        /// <param name="options"></param>
+        public Task AddFieldAsync<TEntity>(Expression<Func<TEntity, object>> field, SixnetDataOperationOptions options = null) where TEntity : ISixnetEntity
+        {
+            return AddFieldAsync(typeof(TEntity), new List<DataField>(1) { SixnetExpressionHelper.GetDataField(field) as DataField }, options);
+        }
+
+        /// <summary>
+        /// Delete field
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        public Task DeleteFieldAsync<TEntity>(Expression<Func<TEntity, object>> field, SixnetDataOperationOptions options = null) where TEntity : ISixnetEntity
+        {
+            return DeleteFieldAsync(typeof(TEntity), new List<DataField>(1) { SixnetExpressionHelper.GetDataField(field) as DataField }, options);
+        }
+
+        /// <summary>
+        /// Alter field
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="field"></param>
+        /// <param name="options"></param>
+        public Task AlterFieldAsync<TEntity>(Expression<Func<TEntity, object>> field, SixnetDataOperationOptions options = null)
+        {
+            var dataField = SixnetExpressionHelper.GetDataField(field) as DataField;
+            return AlterFieldAsync(typeof(TEntity), new Dictionary<string, DataField>(1) { { dataField.FieldName, dataField } }, options);
+        }
+
+        /// <summary>
+        /// Alter field
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="field"></param>
+        /// <param name="options"></param>
+        public Task AlterFieldAsync<TEntity>(Expression<Func<TEntity, object>> field, Action<DataField> configureField = null, SixnetDataOperationOptions options = null)
+        {
+            var dataField = SixnetExpressionHelper.GetDataField(field) as DataField;
+            configureField?.Invoke(dataField);
+            return AlterFieldAsync(typeof(TEntity), new Dictionary<string, DataField>(1) { { dataField.FieldName, dataField } }, options);
+        }
+
+        /// <summary>
+        /// Alter field
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="fieldName"></param>
+        /// <param name="field"></param>
+        /// <param name="options"></param>
+        public Task AlterFieldAsync<TEntity>(string fieldName, DataField field, SixnetDataOperationOptions options = null)
+        {
+            return AlterFieldAsync(typeof(TEntity), new Dictionary<string, DataField>(1) { { fieldName, field } }, options);
+        }
+
+        /// <summary>
+        /// Create table
+        /// </summary>
+        /// <param name="entityType">Entity type</param>
+        /// <param name="options">Options</param>
+        public Task CreateTableAsync(Type entityType, SixnetDataOperationOptions options = null)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(internalDatabaseServers.IsNullOrEmpty(), "Database servers");
+            var connections = GetConnections(internalDatabaseServers);
+            return DataCommandExecutor.CreateTableAsync(connections, entityType, options);
+        }
+
+        /// <summary>
+        /// Delete table
+        /// </summary>
+        /// <param name="entityTypes"></param>
+        /// <param name="options"></param>
+        public Task DeleteTableAsync(List<Type> entityTypes, SixnetDataOperationOptions options = null)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(internalDatabaseServers.IsNullOrEmpty(), "Database servers");
+            var connections = GetConnections(internalDatabaseServers);
+            return DataCommandExecutor.DeleteTableAsync(connections, entityTypes, options);
+        }
+
+        /// <summary>
+        /// Add field
+        /// </summary>
+        /// <param name="entityType"></param>
+        /// <param name="options"></param>
+        public Task AddFieldAsync(Type entityType, List<DataField> fields, SixnetDataOperationOptions options = null)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(internalDatabaseServers.IsNullOrEmpty(), "Database servers");
+            var connections = GetConnections(internalDatabaseServers);
+            return DataCommandExecutor.AddFieldAsync(connections, entityType, fields, options);
+        }
+
+        /// <summary>
+        /// Delete field
+        /// </summary>
+        /// <param name="entityType"></param>
+        /// <param name="options"></param>
+        public Task DeleteFieldAsync(Type entityType, List<DataField> fields, SixnetDataOperationOptions options = null)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(internalDatabaseServers.IsNullOrEmpty(), "Database servers");
+            var connections = GetConnections(internalDatabaseServers);
+            return DataCommandExecutor.DeleteFieldAsync(connections, entityType, fields, options);
+        }
+
+        /// <summary>
+        /// Alter fields
+        /// </summary>
+        /// <param name="entityType"></param>
+        /// <param name="fields"></param>
+        /// <param name="options"></param>
+        public Task AlterFieldAsync(Type entityType, Dictionary<string, DataField> fields, SixnetDataOperationOptions options)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(internalDatabaseServers.IsNullOrEmpty(), "Database servers");
+            var connections = GetConnections(internalDatabaseServers);
+            return DataCommandExecutor.AlterFieldAsync(connections, entityType, fields, options);
         }
 
         #endregion

@@ -87,12 +87,5 @@ namespace Sixnet.Development.Data.Command
         /// <param name="command">Database migration command</param>
         /// <returns></returns>
         List<ExecutionDatabaseStatement> GenerateDatabaseMigrationStatements(MigrationDatabaseCommand command);
-
-        /// <summary>
-        /// Generate database migration statement
-        /// </summary>
-        /// <param name="command">Database migration command</param>
-        /// <returns></returns>
-        Task<List<ExecutionDatabaseStatement>> GenerateDatabaseMigrationStatementsAsync(MigrationDatabaseCommand command);
     }
 }

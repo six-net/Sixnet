@@ -33,10 +33,20 @@ namespace Sixnet.Development.Data.Database
             var tableNames = new List<string>();
             foreach (var splitValue in splitBehavior.SplitValues)
             {
-                var splitDate = GetSplitTableDate((splitValue is DateTimeOffset splitOffsetValue) ? splitOffsetValue.DateTime : splitValue, parameter.EntityConfiguration.SplitTableType);
+                var splitDate = GetSplitTableDate((splitValue is DateTimeOffset splitOffsetValue)
+                    ? splitOffsetValue.DateTime
+                    : splitValue, parameter.EntityConfiguration.SplitTableType);
                 tableNames.Add(GetSplitTable(parameter.EntityConfiguration, splitDate));
+                if (parameter.ExpansionNum > 0)
+                {
+                    for (var i = 1; i <= parameter.ExpansionNum; i++)
+                    {
+                        var expansionSplitDate = GetExpansionSplitTableDate(splitDate, parameter.EntityConfiguration.SplitTableType, i);
+                        tableNames.Add(GetSplitTable(parameter.EntityConfiguration, expansionSplitDate));
+                    }
+                }
             }
-            return tableNames;
+            return tableNames.Distinct().ToList();
         }
 
         /// <summary>
@@ -116,6 +126,26 @@ namespace Sixnet.Development.Data.Database
                 SplitTableType.Month => System.Convert.ToDateTime(splitDateTime.ToString("yyyy-MM-01")),
                 SplitTableType.Season => GetSeasonDateTime(splitDateTime),
                 SplitTableType.Year => System.Convert.ToDateTime(splitDateTime.ToString("yyyy-01-01")),
+                _ => throw new Exception($"Not support {splitTableType}"),
+            };
+        }
+
+        /// <summary>
+        /// Get expansion split table date
+        /// </summary>
+        /// <param name="splitDateTime"></param>
+        /// <param name="splitTableType"></param>
+        /// <param name="expansionValue"></param>
+        /// <returns></returns>
+        DateTime GetExpansionSplitTableDate(DateTime splitDateTime, SplitTableType splitTableType, int expansionValue)
+        {
+            return splitTableType switch
+            {
+                SplitTableType.Day => splitDateTime.AddDays(expansionValue),
+                SplitTableType.Week => splitDateTime.AddDays(expansionValue * 7),
+                SplitTableType.Month => splitDateTime.AddMonths(expansionValue),
+                SplitTableType.Season => splitDateTime.AddMonths(expansionValue * 3),
+                SplitTableType.Year => splitDateTime.AddYears(expansionValue),
                 _ => throw new Exception($"Not support {splitTableType}"),
             };
         }

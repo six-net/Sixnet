@@ -130,8 +130,7 @@ namespace Sixnet.Development.Data.Command
             var command = new SixnetDataCommand()
             {
                 EntityType = entityType,
-                OperationType = operationType,
-                TableName = SixnetEntityManager.GetTableName(entityType)
+                OperationType = operationType
             };
             return command;
         }
@@ -149,8 +148,7 @@ namespace Sixnet.Development.Data.Command
             {
                 OperationType = operationType,
                 Queryable = queryable,
-                EntityType = entityType,
-                TableName = SixnetEntityManager.GetTableName(entityType)
+                EntityType = entityType
             };
         }
 
@@ -170,8 +168,7 @@ namespace Sixnet.Development.Data.Command
             {
                 OperationType = DataOperationType.Query,
                 Queryable = queryable,
-                EntityType = entityType,
-                TableName = SixnetEntityManager.GetTableName(entityType)
+                EntityType = entityType
             };
         }
 
@@ -187,8 +184,7 @@ namespace Sixnet.Development.Data.Command
             {
                 OperationType = DataOperationType.Query,
                 Queryable = queryable,
-                EntityType = entityType,
-                TableName = SixnetEntityManager.GetTableName(entityType)
+                EntityType = entityType
             };
         }
 
