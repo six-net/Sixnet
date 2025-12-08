@@ -16,7 +16,11 @@ namespace Sixnet.Development.Data.Database
     {
         #region Fields
 
-        protected string queryDatabaseTablesScript = "";
+        protected string queryTablesScript = "";
+        protected string queryDatabasesScript = "";
+        protected string queryViewsScript = "";
+        protected string queryStoredProcedureScript = "";
+        protected string queryColumnScript = "";
 
         #endregion
 
@@ -62,9 +66,12 @@ namespace Sixnet.Development.Data.Database
         /// <returns></returns>
         protected virtual CommandDefinition GetCommandDefinition(DatabaseCommand command, DatabaseStatement statement)
         {
-            return new CommandDefinition(statement.Script, ConvertDataCommandParameters(statement.Parameters)
-                                , transaction: command.Connection?.Transaction?.DbTransaction, commandType: statement.ScriptType
-                                , cancellationToken: command?.CancellationToken ?? default);
+            return new CommandDefinition(statement.Script
+                                , ConvertDataCommandParameters(statement.Parameters)
+                                , transaction: command.Connection?.Transaction?.DbTransaction
+                                , commandType: statement.ScriptType
+                                , cancellationToken: command?.CancellationToken ?? default
+                                , commandTimeout: command.CommandTimeout);
         }
 
         #endregion
@@ -572,7 +579,21 @@ namespace Sixnet.Development.Data.Database
 
         #endregion
 
-        #region Get table
+        #region Get databases
+
+        /// <summary>
+        /// Get databases
+        /// </summary>
+        /// <param name="command">Command</param>
+        /// <returns></returns>
+        public virtual List<SixnetDatabase> GetDatabases(DatabaseCommand command)
+        {
+            return command.Connection.DbConnection.Query<SixnetDatabase>(queryDatabasesScript, transaction: command.Connection?.Transaction?.DbTransaction).ToList();
+        }
+
+        #endregion
+
+        #region Get tables
 
         /// <summary>
         /// Get table
@@ -581,7 +602,49 @@ namespace Sixnet.Development.Data.Database
         /// <returns></returns>
         public virtual List<SixnetDataTable> GetTables(DatabaseCommand command)
         {
-            return command.Connection.DbConnection.Query<SixnetDataTable>(queryDatabaseTablesScript, transaction: command.Connection?.Transaction?.DbTransaction).ToList();
+            return command.Connection.DbConnection.Query<SixnetDataTable>(queryTablesScript, transaction: command.Connection?.Transaction?.DbTransaction).ToList();
+        }
+
+        #endregion
+
+        #region Get views
+
+        /// <summary>
+        /// Get views
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        public List<SixnetView> GetViews(DatabaseCommand command)
+        {
+            return command.Connection.DbConnection.Query<SixnetView>(queryViewsScript, transaction: command.Connection?.Transaction?.DbTransaction).ToList();
+        }
+
+        #endregion
+
+        #region Get stored procedures
+
+        /// <summary>
+        /// Get stored procedures
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        public List<SixnetStoredProcedure> GetStoredProcedures(DatabaseCommand command)
+        {
+            return command.Connection.DbConnection.Query<SixnetStoredProcedure>(queryStoredProcedureScript, transaction: command.Connection?.Transaction?.DbTransaction).ToList();
+        }
+
+        #endregion
+
+        #region Get columns
+
+        /// <summary>
+        /// Get columns
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        public List<SixnetColumn> GetColumns(DatabaseCommand command)
+        {
+            return command.Connection.DbConnection.Query<SixnetColumn>(queryColumnScript, transaction: command.Connection?.Transaction?.DbTransaction).ToList();
         }
 
         #endregion

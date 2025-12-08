@@ -127,6 +127,11 @@ namespace Sixnet.Development.Data.Field
         /// </summary>
         public long StartValue { get; set; }
 
+        /// <summary>
+        /// Gets or sets the increment value
+        /// </summary>
+        public int IncrementValue { get; set; }
+
         #endregion
 
         #region Methods
@@ -145,46 +150,21 @@ namespace Sixnet.Development.Data.Field
         public static DataField Create(string propertyName, Type modelType = null, int modelTypeIndex = 0, FieldFormatSetting fieldFormatSetting = null, string fieldName = "")
         {
             SixnetDirectThrower.ThrowArgErrorIf(string.IsNullOrWhiteSpace(propertyName), "Property name is null or empty");
-            var field = new DataField()
+            DataField field = null;
+            if (modelType != null)
+            {
+                field = SixnetEntityManager.GetField(modelType, propertyName)?.Clone() as DataField;
+            }
+            field ??= new DataField()
             {
                 PropertyName = propertyName,
-                FieldName = string.IsNullOrWhiteSpace(fieldName) ? propertyName : fieldName,
-                FormatSetting = fieldFormatSetting,
                 ModelType = modelType,
-                ModelTypeIndex = modelTypeIndex
             };
+            field.ModelTypeIndex = modelTypeIndex;
+            field.FormatSetting = fieldFormatSetting;
+            field.FieldName = string.IsNullOrWhiteSpace(fieldName) ? propertyName : fieldName;
             field.identityValue = field.GetIdentity();
             return field;
-        }
-
-        /// <summary>
-        /// Create a data field
-        /// </summary>
-        /// <typeparam name="TModel">Model type</typeparam>
-        /// <param name="field">Field</param>
-        /// <param name="modelTypeIndex">Model type index</param>
-        /// <param name="fieldFormatSetting">Field format setting</param>
-        /// <param name="fieldName">Field name</param>
-        /// <returns></returns>
-        public static DataField Create<TModel>(Expression<Func<TModel, dynamic>> field, int modelTypeIndex = 0, FieldFormatSetting fieldFormatSetting = null, string fieldName = "")
-        {
-            var propertyName = SixnetExpressionHelper.GetExpressionLastPropertyName(field);
-            return Create(propertyName, typeof(TModel), modelTypeIndex, fieldFormatSetting, fieldName);
-        }
-
-        /// <summary>
-        /// Create a data field
-        /// </summary>
-        /// <typeparam name="TModel">Model type</typeparam>
-        /// <param name="field">Field</param>
-        /// <param name="modelTypeIndex">Model type index</param>
-        /// <param name="formatterName">Field formatter name</param>
-        /// <param name="fieldName">Field name</param>
-        /// <returns></returns>
-        public static DataField Create<TModel>(Expression<Func<TModel, dynamic>> field, int modelTypeIndex = 0, string formatterName = "", string fieldName = "")
-        {
-            var propertyName = SixnetExpressionHelper.GetExpressionLastPropertyName(field);
-            return Create(propertyName, typeof(TModel), modelTypeIndex, FieldFormatSetting.Create(formatterName), fieldName);
         }
 
         string GetIdentity()
@@ -221,7 +201,10 @@ namespace Sixnet.Development.Data.Field
                 FieldName = FieldName,
                 PropertyName = PropertyName,
                 ModelTypeIndex = ModelTypeIndex,
-                fixedFieldName = fixedFieldName
+                fixedFieldName = fixedFieldName,
+                FileObjectName = FileObjectName,
+                IncrementValue = IncrementValue,
+                StartValue = StartValue,
             };
         }
 

@@ -740,8 +740,111 @@ namespace Sixnet.Development.Data.Client
         /// Migrate
         /// </summary>
         /// <param name="migrationInfo">Migration info</param>
-        /// <param name="options">Options</param>
+        /// <param name="options">Data operation options</param>
         Task MigrateAsync(MigrationInfo migrationInfo, SixnetDataOperationOptions options = null);
+
+        /// <summary>
+        /// Create all entity tables
+        /// </summary>
+        /// <param name="options"></param>
+        /// <returns></returns>
+        Task CreateAllEntityTablesAsync(SixnetDataOperationOptions options = null);
+
+        /// <summary>
+        /// Delete all entity tables
+        /// </summary>
+        /// <param name="options"></param>
+        /// <returns></returns>
+        Task DeleteAllEntityTablesAsync(SixnetDataOperationOptions options = null);
+
+        /// <summary>
+        /// Create entity table
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="options"></param>
+        Task CreateTableAsync<TEntity>(SixnetDataOperationOptions options = null) where TEntity : ISixnetEntity;
+
+        /// <summary>
+        /// Delete entity table
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="options"></param>
+        Task DeleteTableAsync<TEntity>(SixnetDataOperationOptions options = null) where TEntity : ISixnetEntity;
+
+        /// <summary>
+        /// Add field
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="field"></param>
+        /// <param name="options"></param>
+        Task AddFieldAsync<TEntity>(Expression<Func<TEntity, object>> field, SixnetDataOperationOptions options = null) where TEntity : ISixnetEntity;
+
+        /// <summary>
+        /// Delete field
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        Task DeleteFieldAsync<TEntity>(Expression<Func<TEntity, object>> field, SixnetDataOperationOptions options = null) where TEntity : ISixnetEntity;
+
+        /// <summary>
+        /// Alter field
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="field"></param>
+        /// <param name="options"></param>
+        Task AlterFieldAsync<TEntity>(Expression<Func<TEntity, object>> field, SixnetDataOperationOptions options = null);
+
+        /// <summary>
+        /// Alter field
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="field"></param>
+        /// <param name="options"></param>
+        Task AlterFieldAsync<TEntity>(Expression<Func<TEntity, object>> field, Action<DataField> configureField = null, SixnetDataOperationOptions options = null);
+
+        /// <summary>
+        /// Alter field
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="fieldName"></param>
+        /// <param name="field"></param>
+        /// <param name="options"></param>
+        Task AlterFieldAsync<TEntity>(string fieldName, DataField field, SixnetDataOperationOptions options = null);
+
+        /// <summary>
+        /// Create table
+        /// </summary>
+        /// <param name="entityType">Entity type</param>
+        /// <param name="options">Options</param>
+        Task CreateTableAsync(Type entityType, SixnetDataOperationOptions options = null);
+
+        /// <summary>
+        /// Delete table
+        /// </summary>
+        /// <param name="entityType"></param>
+        /// <param name="options"></param>
+        Task DeleteTableAsync(List<Type> entityTypes, SixnetDataOperationOptions options = null);
+
+        /// <summary>
+        /// Add field
+        /// </summary>
+        /// <param name="entityType"></param>
+        /// <param name="options"></param>
+        Task AddFieldAsync(Type entityType, List<DataField> fields, SixnetDataOperationOptions options = null);
+
+        /// <summary>
+        /// Delete field
+        /// </summary>
+        /// <param name="entityType"></param>
+        /// <param name="options"></param>
+        Task DeleteFieldAsync(Type entityType, List<DataField> fields, SixnetDataOperationOptions options = null);
+
+        /// <summary>
+        /// Alter fields
+        /// </summary>
+        /// <param name="entityType"></param>
+        /// <param name="fields"></param>
+        /// <param name="options"></param>
+        Task AlterFieldAsync(Type entityType, Dictionary<string, DataField> fields, SixnetDataOperationOptions options);
 
         #endregion
 

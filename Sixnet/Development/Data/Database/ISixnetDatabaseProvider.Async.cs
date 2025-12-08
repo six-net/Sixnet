@@ -252,7 +252,18 @@ namespace Sixnet.Development.Data.Database
 
         #endregion
 
-        #region Get table
+        #region Get databases
+
+        /// <summary>
+        /// Get databases
+        /// </summary>
+        /// <param name="command">Command</param>
+        /// <returns></returns>
+        Task<List<SixnetDatabase>> GetDatabasesAsync(DatabaseCommand command);
+
+        #endregion
+
+        #region Get tables
 
         /// <summary>
         /// Get table
@@ -260,6 +271,39 @@ namespace Sixnet.Development.Data.Database
         /// <param name="command">Command</param>
         /// <returns></returns>
         Task<List<SixnetDataTable>> GetTablesAsync(DatabaseCommand command);
+
+        #endregion
+
+        #region Get views
+
+        /// <summary>
+        /// Get views
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        Task<List<SixnetView>> GetViewsAsync(DatabaseCommand command);
+
+        #endregion
+
+        #region Get stored procedures
+
+        /// <summary>
+        /// Get stored procedures
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        Task<List<SixnetStoredProcedure>> GetStoredProceduresAsync(DatabaseCommand command);
+
+        #endregion
+
+        #region Get columns
+
+        /// <summary>
+        /// Get columns
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        Task<List<SixnetColumn>> GetColumnsAsync(DatabaseCommand command);
 
         #endregion
     }

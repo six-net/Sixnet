@@ -1,7 +1,9 @@
 ﻿// "Company © 2025. All rights reserved."
 
 using System.Data;
+using System.Threading.Tasks;
 
+using Sixnet.Development.Command;
 using Sixnet.Development.Data.Command;
 using Sixnet.Development.Data.Database;
 using Sixnet.Development.Data.Field;
@@ -762,7 +764,7 @@ namespace Sixnet.Development.Data.Client
 
         #endregion
 
-        #region Migrate
+        #region Migration
 
         /// <summary>
         /// Migrate
@@ -772,16 +774,107 @@ namespace Sixnet.Development.Data.Client
         void Migrate(MigrationInfo migrationInfo, SixnetDataOperationOptions options = null);
 
         /// <summary>
-        /// Create table
+        /// Create all entity tables
+        /// </summary>
+        /// <param name="options"></param>
+        /// <returns></returns>
+        void CreateAllEntityTables(SixnetDataOperationOptions options = null);
+
+        /// <summary>
+        /// Delete all entity tables
+        /// </summary>
+        /// <param name="options"></param>
+        /// <returns></returns>
+        void DeleteAllEntityTables(SixnetDataOperationOptions options = null);
+
+        /// <summary>
+        /// Create entity table
         /// </summary>
         /// <typeparam name="TEntity"></typeparam>
-        void CreateTable<TEntity>(Action<SixnetCreateTableOptions> configure = null) where TEntity : ISixnetEntity;
+        /// <param name="options"></param>
+        void CreateTable<TEntity>(SixnetDataOperationOptions options = null) where TEntity : ISixnetEntity;
 
-        ///// <summary>
-        ///// Delete table
-        ///// </summary>
-        ///// <typeparam name="TEntity"></typeparam>
-        //void DeleteTable<TEntity>() where TEntity : ISixnetEntity;
+        /// <summary>
+        /// Delete entity table
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="options"></param>
+        void DeleteTable<TEntity>(SixnetDataOperationOptions options = null) where TEntity : ISixnetEntity;
+
+        /// <summary>
+        /// Add field
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="field"></param>
+        /// <param name="options"></param>
+        void AddField<TEntity>(Expression<Func<TEntity, object>> field, SixnetDataOperationOptions options = null) where TEntity : ISixnetEntity;
+
+        /// <summary>
+        /// Delete field
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        void DeleteField<TEntity>(Expression<Func<TEntity, object>> field, SixnetDataOperationOptions options = null) where TEntity : ISixnetEntity;
+
+        /// <summary>
+        /// Alter field
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="field"></param>
+        /// <param name="options"></param>
+        void AlterField<TEntity>(Expression<Func<TEntity, object>> field, SixnetDataOperationOptions options = null);
+
+        /// <summary>
+        /// Alter field
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="field"></param>
+        /// <param name="options"></param>
+        void AlterField<TEntity>(Expression<Func<TEntity, object>> field, Action<DataField> configureField = null, SixnetDataOperationOptions options = null);
+
+        /// <summary>
+        /// Alter field
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="fieldName"></param>
+        /// <param name="field"></param>
+        /// <param name="options"></param>
+        void AlterField<TEntity>(string fieldName, DataField field, SixnetDataOperationOptions options = null);
+
+        /// <summary>
+        /// Create table
+        /// </summary>
+        /// <param name="entityType">Entity type</param>
+        /// <param name="options">Options</param>
+        void CreateTable(Type entityType, SixnetDataOperationOptions options = null);
+
+        /// <summary>
+        /// Delete table
+        /// </summary>
+        /// <param name="entityType"></param>
+        /// <param name="options"></param>
+        void DeleteTable(List<Type> entityTypes, SixnetDataOperationOptions options = null);
+
+        /// <summary>
+        /// Add field
+        /// </summary>
+        /// <param name="entityType"></param>
+        /// <param name="options"></param>
+        void AddField(Type entityType, List<DataField> fields, SixnetDataOperationOptions options = null);
+
+        /// <summary>
+        /// Delete field
+        /// </summary>
+        /// <param name="entityType"></param>
+        /// <param name="options"></param>
+        void DeleteField(Type entityType, List<DataField> fields, SixnetDataOperationOptions options = null);
+
+        /// <summary>
+        /// Alter fields
+        /// </summary>
+        /// <param name="entityType"></param>
+        /// <param name="fields"></param>
+        /// <param name="options"></param>
+        void AlterField(Type entityType, Dictionary<string, DataField> fields, SixnetDataOperationOptions options);
 
         #endregion
 

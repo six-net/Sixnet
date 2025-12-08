@@ -46,6 +46,6 @@ namespace Sixnet.Development.Data.Database
         /// Gets or sets the deletable fields
         /// Key: table name
         /// </summary>
-        public Dictionary<string, List<string>> DeletableFields { get; set; }
+        public Dictionary<string, List<DataField>> DeletableFields { get; set; }
     }
 }

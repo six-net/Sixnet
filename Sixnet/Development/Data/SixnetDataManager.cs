@@ -2,6 +2,7 @@
 
 using System.Collections;
 using System.Data;
+using System.Threading.Tasks;
 
 using Sixnet.Cache;
 using Sixnet.Cache.Set.Parameters;
@@ -48,6 +49,7 @@ namespace Sixnet.Development.Data
         static readonly DefaultDateSplitTableProvider _defaultDateSplitTableProvider = new();
         static readonly SplitTableBehavior _defaultSplitTableBehavior = new();
         static readonly SixnetDataTableNameComparer _defaultDataTableNameComparer = new();
+        static readonly SortedDictionary<Version, SortedSet<ISixnetDatabaseUpdateRecord>> _updateRecords = new();
 
         #endregion
 
@@ -187,10 +189,9 @@ namespace Sixnet.Development.Data
             {
                 return GetSplitTableNames(context, entityConfig);
             }
-            else // default table name
+            else
             {
-                var tableName = GetDefaultTableName(context.Server?.DatabaseType, entityType);
-                tableName = string.IsNullOrWhiteSpace(tableName) ? context.Command?.TableName : tableName;
+                var tableName = GetDefaultTableName(context.Server?.DatabaseType, entityConfig, context.Command?.TableName);
                 return new List<string>(1) { tableName };
             }
         }
@@ -213,7 +214,7 @@ namespace Sixnet.Development.Data
             SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"Not set split table provider for {entityConfig.SplitTableProviderName}");
 
             var splitBehavior = context.GetSplitTableBehavior() ?? _defaultSplitTableBehavior;
-            var rootTableName = GetDefaultTableName(context.Server.DatabaseType, entityConfig.EntityType);
+            var rootTableName = GetDefaultTableName(context.Server.DatabaseType, entityConfig, context.Command?.TableName);
             var splitTableNames = provider.ResolveTableNames(new ResolveSplitTableNameParameter()
             {
                 EntityConfiguration = entityConfig,
@@ -308,7 +309,7 @@ namespace Sixnet.Development.Data
             List<string> allTableNames;
             using (var dataClient = GetClientForConnection(context.DatabaseConnection, true, true, false, context.DatabaseConnection.DataIsolationLevel))
             {
-                allTableNames = dataClient.GetTables()?.Select(c => c.TableName).ToList();
+                allTableNames = dataClient.GetTables()?.Select(c => c.Name).ToList();
             }
             allTableNames = splitTableProvider.FilterAllTableNames(new FilterAllSplitTableNameParameter()
             {
@@ -368,16 +369,36 @@ namespace Sixnet.Development.Data
         /// <param name="databaseType">Server type</param>
         /// <param name="entityType">Entity type</param>
         /// <returns></returns>
-        static string GetDefaultTableName(DatabaseType? databaseType, Type entityType)
+        internal static string GetDefaultTableName(DatabaseType? databaseType
+            , EntityConfiguration entityConfig, string defaultTableName = "")
         {
-            SixnetDirectThrower.ThrowArgNullIf(entityType == null, nameof(entityType));
+            SixnetDirectThrower.ThrowArgNullIf(entityConfig == null, nameof(entityConfig));
 
+            var entityType = entityConfig.EntityType;
             var tableName = databaseType.HasValue
                 ? GetEntitySetting(databaseType.Value, entityType)?.TableName
                 : string.Empty;
             if (string.IsNullOrWhiteSpace(tableName))
             {
                 tableName = SixnetEntityManager.GetTableName(entityType);
+            }
+            if (string.IsNullOrWhiteSpace(tableName) && !string.IsNullOrWhiteSpace(defaultTableName))
+            {
+                tableName = defaultTableName;
+            }
+            if (string.IsNullOrWhiteSpace(tableName))
+            {
+                return tableName;
+            }
+            var dataOptions = GetDataOptions();
+            var schema = entityConfig.Schema;
+            if (string.IsNullOrWhiteSpace(schema))
+            {
+                schema = dataOptions.DefaultSchema;
+            }
+            if (!string.IsNullOrWhiteSpace(schema))
+            {
+                return $"{schema}.{tableName}";
             }
             return tableName;
         }
@@ -416,7 +437,7 @@ namespace Sixnet.Development.Data
         /// <param name="dataOptions"></param>
         /// <param name="entityConfiguration"></param>
         /// <returns></returns>
-        static ISixnetSplitTableProvider GetSplitTableProvider(SixnetDataOptions dataOptions, EntityConfiguration entityConfiguration)
+        internal static ISixnetSplitTableProvider GetSplitTableProvider(SixnetDataOptions dataOptions, EntityConfiguration entityConfiguration)
         {
             return dataOptions.GetSplitTableProvider(entityConfiguration.SplitTableProviderName)
                    ?? GetDefaultSplitTableProvider(entityConfiguration.SplitTableType);
@@ -934,6 +955,273 @@ namespace Sixnet.Development.Data
         public static string FormatDatabaseWordAndName(DatabaseType databaseType, string orginalValue)
         {
             return GetDataOptions().FormatDatabaseWordAndName(databaseType, orginalValue);
+        }
+
+        #endregion
+
+        #region Database update
+
+        /// <summary>
+        /// Add database update record
+        /// </summary>
+        /// <param name="record"></param>
+        public static void AddDatabaseUpdateRecord(ISixnetDatabaseUpdateRecord record)
+        {
+            if (record != null)
+            {
+                _updateRecords.TryGetValue(record.Version, out var records);
+                records ??= [];
+                records.Add(record);
+                _updateRecords[record.Version] = records;
+            }
+        }
+
+        /// <summary>
+        /// Get database update records
+        /// </summary>
+        /// <returns></returns>
+        public static SortedDictionary<Version, SortedSet<ISixnetDatabaseUpdateRecord>> GetDatabaseUpdateRecords()
+        {
+            return _updateRecords;
+        }
+
+        /// <summary>
+        /// Update database
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <returns></returns>
+        public static UpdateDatabaseResult UpdateDatabase(SixnetUpdateDatabaseParameter parameter)
+        {
+            var reportProcess = parameter.ReportProcess;
+            try
+            {
+                reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Begin, parameter));
+
+                reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.BeginGettingCurrentInfo, parameter));
+                var recordRes = GetDatabaseUpdateRecordsCore(parameter);
+                var context = recordRes.Item1;
+                reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.EndGettingCurrentInfo, parameter, null, context.CurrentVersion, context.CurrentRecordId));
+
+                if (recordRes.Item2.IsNullOrEmpty())
+                {
+                    reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.NoneRecords, parameter));
+                }
+                else
+                {
+                    foreach (var record in recordRes.Item2)
+                    {
+                        if (recordRes.Item3)
+                        {
+                            reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Update, parameter, record));
+                            record.UpdateAsync(context).Wait();
+                            reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.UpdateFinished, parameter, record));
+                        }
+                        else
+                        {
+                            reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Rollback, parameter, record));
+                            record.RollbackAsync(context).Wait();
+                            reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.RollbackFinished, parameter, record));
+                        }
+                    }
+                }
+                reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.End, parameter));
+            }
+            catch (Exception ex)
+            {
+                reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Error, parameter, ex: ex));
+                throw;
+            }
+
+            return UpdateDatabaseResult.SuccessResult("");
+        }
+
+        /// <summary>
+        /// Get database update records
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <returns></returns>
+        public static List<ISixnetDatabaseUpdateRecord> GetDatabaseUpdateRecords(SixnetUpdateDatabaseParameter parameter)
+        {
+            return GetDatabaseUpdateRecordsCore(parameter).Item2;
+        }
+
+        /// <summary>
+        /// Get database update records core
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <returns></returns>
+        static Tuple<SixnetUpdateDatabaseContext, List<ISixnetDatabaseUpdateRecord>, bool> GetDatabaseUpdateRecordsCore(SixnetUpdateDatabaseParameter parameter)
+        {
+            SixnetDirectThrower.ThrowArgErrorIf(parameter?.DatabaseServer == null, "Database server is null");
+            SixnetDirectThrower.ThrowArgErrorIf(parameter?.TargetVersion == null, "Target version is null");
+            var currentVersion = new Version(0, 0, 0);
+            var currentRecordId = 0L;
+            using (var client = GetClient(parameter.DatabaseServer, false, true))
+            {
+                // create table
+                client.CreateTable(typeof(SixnetAppUpdateRecordEntity));
+                client.Commit();
+                var lastRecordQueryable = SixnetQuerier.Create<SixnetAppUpdateRecordEntity>()
+                    .OrderBy(c => c.Id, true);
+                var lastRecord = client.QueryFirst<SixnetAppUpdateRecordEntity>(lastRecordQueryable);
+                if (lastRecord != null)
+                {
+                    currentVersion = Version.Parse(lastRecord.AppVersion);
+                    currentRecordId = lastRecord.Id;
+                }
+            }
+            var context = new SixnetUpdateDatabaseContext()
+            {
+                UpdateParameter = parameter,
+                CurrentVersion = currentVersion,
+                CurrentRecordId = currentRecordId
+            };
+            if (currentVersion <= parameter.TargetVersion)
+            {
+                return new Tuple<SixnetUpdateDatabaseContext, List<ISixnetDatabaseUpdateRecord>, bool>(context, GetForwardRecords(context), true);
+            }
+            else
+            {
+                return new Tuple<SixnetUpdateDatabaseContext, List<ISixnetDatabaseUpdateRecord>, bool>(context, GetRollbackRecords(context), false);
+            }
+        }
+
+        /// <summary>
+        /// Get forward records
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        static List<ISixnetDatabaseUpdateRecord> GetForwardRecords(SixnetUpdateDatabaseContext context)
+        {
+            if (_updateRecords.IsNullOrEmpty())
+            {
+                return new List<ISixnetDatabaseUpdateRecord>(0);
+            }
+            var targetVersion = context.UpdateParameter.TargetVersion;
+            var currentVersion = context.CurrentVersion;
+            var currentRecordId = context.CurrentRecordId;
+            var reportProcess = context.UpdateParameter?.ReportProcess;
+            var recordVersions = new SortedSet<Version>(_updateRecords.Keys);
+            var minVersion = recordVersions.Min;
+            var allRecords = new List<ISixnetDatabaseUpdateRecord>();
+
+            // lower version
+            if (currentVersion >= recordVersions.Min)
+            {
+                var nextRecord = SixnetEmptyDatabaseUpdateRecord.Create(currentRecordId + 1);
+                var lowerVersions = recordVersions.GetViewBetween(recordVersions.Min, currentVersion);
+                foreach (var lowerVersion in lowerVersions)
+                {
+                    _updateRecords.TryGetValue(lowerVersion, out var lowerVersionRecords);
+                    if (lowerVersionRecords == null || lowerVersionRecords.Count < 1)
+                    {
+                        continue;
+                    }
+                    var maxRecord = lowerVersionRecords.Max;
+                    if (maxRecord.Id < nextRecord.Id)
+                    {
+                        continue;
+                    }
+                    var updatableRecords = lowerVersionRecords.GetViewBetween(nextRecord, maxRecord);
+                    foreach (var record in updatableRecords)
+                    {
+                        if (record.Version != lowerVersion || currentVersion < record.Version || currentRecordId >= record.Id)
+                        {
+                            reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.ErrorRecord, context.UpdateParameter, record));
+                            continue;
+                        }
+                        allRecords.Add(record);
+                    }
+                }
+            }
+
+            // abover version
+            var nextVersion = new Version(currentVersion.Major, currentVersion.Minor, currentVersion.Build, currentVersion.Revision + 1);
+            if (nextVersion <= targetVersion)
+            {
+                var aboverVersions = recordVersions.GetViewBetween(nextVersion, targetVersion);
+                if (!aboverVersions.IsNullOrEmpty())
+                {
+                    foreach (var aboverVersion in aboverVersions)
+                    {
+                        _updateRecords.TryGetValue(aboverVersion, out var aboverVersionRecords);
+                        if (aboverVersionRecords == null || aboverVersionRecords.Count < 1)
+                        {
+                            continue;
+                        }
+                        foreach (var record in aboverVersionRecords)
+                        {
+                            if (record.Version != aboverVersion || record.Version > targetVersion || record.Version <= currentVersion)
+                            {
+                                reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.ErrorRecord, context.UpdateParameter, record));
+                                continue;
+                            }
+                            allRecords.Add(record);
+                        }
+                    }
+                }
+            }
+            return allRecords;
+        }
+
+        /// <summary>
+        /// Get rollback records
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        static List<ISixnetDatabaseUpdateRecord> GetRollbackRecords(SixnetUpdateDatabaseContext context)
+        {
+            if (_updateRecords.IsNullOrEmpty())
+            {
+                return new List<ISixnetDatabaseUpdateRecord>(0);
+            }
+            var targetVersion = context.UpdateParameter.TargetVersion;
+            var currentVersion = context.CurrentVersion;
+            var recordVersions = new SortedSet<Version>(_updateRecords.Keys);
+            if (targetVersion >= currentVersion)
+            {
+                return new List<ISixnetDatabaseUpdateRecord>(0);
+            }
+            var endVersion = new Version(targetVersion.Major, targetVersion.Minor, targetVersion.Build, targetVersion.Revision + 1);
+            if (endVersion > currentVersion)
+            {
+                return new List<ISixnetDatabaseUpdateRecord>(0);
+            }
+            var lowerVersions = recordVersions.GetViewBetween(endVersion, currentVersion).Reverse();
+            var allRecords = new List<ISixnetDatabaseUpdateRecord>();
+            foreach (var lowerVersion in lowerVersions)
+            {
+                _updateRecords.TryGetValue(lowerVersion, out var lowerVersionRecords);
+                if (lowerVersionRecords == null || lowerVersionRecords.Count < 1)
+                {
+                    continue;
+                }
+                var reverseRecords = lowerVersionRecords.Reverse();
+                foreach (var record in reverseRecords)
+                {
+                    allRecords.Add(record);
+                }
+            }
+            return allRecords;
+        }
+
+        #endregion
+
+        #region Timeout 
+
+        /// <summary>
+        /// Get command timeout
+        /// </summary>
+        /// <param name="options"></param>
+        /// <returns></returns>
+        internal static int? GetCommandTimeout(SixnetDataOperationOptions options)
+        {
+            var timeout = options?.Timeout;
+            if (!timeout.HasValue || timeout.Value < 1)
+            {
+                timeout = GetDataOptions()?.DefaultCommandTimeout;
+            }
+            return timeout;
         }
 
         #endregion

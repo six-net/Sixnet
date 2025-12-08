@@ -20,6 +20,11 @@ namespace Sixnet.Development.Entity
         public string Group { get; set; }
 
         /// <summary>
+        /// Gets or sets the schema name
+        /// </summary>
+        public string Schema { get; set; }
+
+        /// <summary>
         /// Gets or sets the table name
         /// </summary>
         public string TableName { get; set; }
@@ -107,5 +112,15 @@ namespace Sixnet.Development.Entity
         /// Whether is split table
         /// </summary>
         public bool IsSplitTable => SplitTableType != SplitTableType.None;
+
+        /// <summary>
+        /// Gets or sets the auto extend split num
+        /// </summary>
+        public int AutoExpansionSplitNum { get; set; }
+
+        /// <summary>
+        /// Whether is system entity
+        /// </summary>
+        public bool IsSystem { get; set; }
     }
 }

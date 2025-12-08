@@ -16,6 +16,11 @@ namespace Sixnet.Development.Entity
         public string Module { get; set; }
 
         /// <summary>
+        /// Gets or sets the schema name
+        /// </summary>
+        public string Schema {  get; set; }
+
+        /// <summary>
         /// Gets or sets the table name
         /// </summary>
         public string TableName { get; set; }
@@ -41,6 +46,11 @@ namespace Sixnet.Development.Entity
         public string SplitTableProviderName { get; set; }
 
         /// <summary>
+        /// Gets or sets the auto extend split num
+        /// </summary>
+        public int AutoExpansionSplitNum { get; set; } = 5;
+
+        /// <summary>
         /// Gets or sets the entity style
         /// </summary>
         public EntityStyle Style { get; set; } = EntityStyle.Physical;
@@ -49,6 +59,11 @@ namespace Sixnet.Development.Entity
         /// Gets or sets the primary key start value
         /// </summary>
         public long PrimaryKeyStartValue { get; set; } = 0;
+
+        /// <summary>
+        /// Whether is system entity
+        /// </summary>
+        public bool IsSystem {  get; set; }
 
         #endregion
 

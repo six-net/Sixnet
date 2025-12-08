@@ -377,44 +377,6 @@ namespace Sixnet.Development.Data.Database
 
         #endregion
 
-        #region Migration
-
-        #region Generate database migration statements
-
-        /// <summary>
-        /// Generate database migration statements
-        /// </summary>
-        /// <param name="command">Database migration command</param>
-        /// <returns></returns>
-        public virtual async Task<List<ExecutionDatabaseStatement>> GenerateDatabaseMigrationStatementsAsync(MigrationDatabaseCommand command)
-        {
-            var statements = new List<ExecutionDatabaseStatement>();
-
-            // Create table
-            var createTableStatements = await GetCreateTableStatementsAsync(command).ConfigureAwait(false);
-            if (!createTableStatements.IsNullOrEmpty())
-            {
-                statements.AddRange(createTableStatements);
-            }
-
-            return statements;
-        }
-
-        #endregion
-
-        #region Get create table statements
-
-        /// <summary>
-        /// Get create table statements
-        /// </summary>
-        /// <param name="migrationCommand">Migration command</param>
-        /// <returns></returns>
-        protected abstract Task<List<ExecutionDatabaseStatement>> GetCreateTableStatementsAsync(MigrationDatabaseCommand migrationCommand);
-
-        #endregion
-
-        #endregion
-
         #region From target
 
         /// <summary>
@@ -446,14 +408,14 @@ namespace Sixnet.Development.Data.Database
                     string targetScript;
                     if (tableNames.Count == 1)
                     {
-                        targetScript = $"{FormatAndWrapKeywordFunc(tableNames.FirstOrDefault())}{(applyTablePetName ? $"{TablePetNameKeyword}{tablePetName}" : "")}";
+                        targetScript = $"{FormatAndWrapKeywordFunc(tableNames.FirstOrDefault(), DatabaseObjectNameType.TableName)}{(applyTablePetName ? $"{TablePetNameKeyword}{tablePetName}" : "")}";
                     }
                     else
                     {
                         var targetScripts = new List<string>(tableNames.Count);
                         foreach (var tableName in tableNames)
                         {
-                            targetScripts.Add($"SELECT * FROM {FormatAndWrapKeywordFunc(tableName)}");
+                            targetScripts.Add($"SELECT * FROM {FormatAndWrapKeywordFunc(tableName, DatabaseObjectNameType.TableName)}");
                         }
                         targetScript = $"({string.Join(" UNION ", targetScripts)}){(applyTablePetName ? $"{TablePetNameKeyword}{tablePetName}" : "")}";
                         complexTarget = true;
@@ -1115,8 +1077,8 @@ namespace Sixnet.Development.Data.Database
                 }
                 else
                 {
-                    fieldName = FormatKeywordFunc(regularField.FieldName);
-                    formatedFieldName = WrapKeywordFunc(fieldName);
+                    fieldName = FormatKeywordFunc(regularField.FieldName, DatabaseObjectNameType.ColumnName);
+                    formatedFieldName = WrapKeywordFunc(fieldName, DatabaseObjectNameType.ColumnName);
                 }
                 if (!string.IsNullOrWhiteSpace(tablePetName) && fieldLocation != FieldLocation.InsertValue)
                 {
@@ -1197,15 +1159,15 @@ namespace Sixnet.Development.Data.Database
                 hasFormat = realFormat;
             }
 
-            var fieldPetName = (queryableLocation == QueryableLocation.Top || queryableLocation == QueryableLocation.From) 
+            var fieldPetName = (queryableLocation == QueryableLocation.Top || queryableLocation == QueryableLocation.From)
                 && fieldLocation == FieldLocation.Output && !string.IsNullOrWhiteSpace(propertyName)
-                    ? WrapKeywordFunc(propertyName)
+                    ? WrapKeywordFunc(propertyName, DatabaseObjectNameType.ColumnName)
                     : !string.IsNullOrWhiteSpace(fieldName)
-                      ? WrapKeywordFunc(fieldName)
+                      ? WrapKeywordFunc(fieldName, DatabaseObjectNameType.ColumnName)
                       : string.Empty;
             formatedFieldName = !string.IsNullOrWhiteSpace(fieldPetName)
                 && (fieldLocation == FieldLocation.Output || fieldLocation == FieldLocation.InnerOutput)
-                && (hasFormat || ((queryableLocation == QueryableLocation.Top || queryableLocation == QueryableLocation.From) 
+                && (hasFormat || ((queryableLocation == QueryableLocation.Top || queryableLocation == QueryableLocation.From)
                 && fieldName != propertyName))
                     ? $"{formatedFieldName}{ColumnPetNameKeyword}{fieldPetName}"
                     : formatedFieldName;

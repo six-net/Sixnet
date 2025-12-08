@@ -73,8 +73,8 @@ namespace Sixnet.Development.Data.Database
         public int DefaultDecimalLength { get; set; } = 20;
         public int DefaultDecimalPrecision { get; set; } = 4;
         public Dictionary<DbType, string> DbTypeDefaultValues { get; set; }
-        public Func<string, string> FormatKeywordFunc { get; set; }
-        public Func<string, string> WrapKeywordFunc { get; set; }
+        public Func<string, DatabaseObjectNameType, string> FormatKeywordFunc { get; set; }
+        public Func<string, DatabaseObjectNameType, string> WrapKeywordFunc { get; set; }
         public string RecursiveKeyword { get; set; }
         public bool UseFieldForRecursive { get; set; } = false;
         public bool SplitWrapParameter { get; set; } = false;
@@ -480,7 +480,7 @@ namespace Sixnet.Development.Data.Database
             }
 
             // New fields
-            var newFieldStatements = GetCreateFieldStatements(command);
+            var newFieldStatements = GetAddFieldStatements(command);
             if (!newFieldStatements.IsNullOrEmpty())
             {
                 statements.AddRange(newFieldStatements);
@@ -538,42 +538,23 @@ namespace Sixnet.Development.Data.Database
             var statements = new List<ExecutionDatabaseStatement>();
             foreach (var tableName in migrationCommand.MigrationInfo.DeletableTableNames)
             {
-                statements.Add(new ExecutionDatabaseStatement()
+                var deleteStatement = new ExecutionDatabaseStatement()
                 {
                     Script = $"DROP TABLE IF EXISTS {tableName};"
-                });
+                };
+                statements.Add(deleteStatement);
+
+                // Log script
+                LogExecutionStatement(deleteStatement);
             }
             return statements;
         }
 
         #endregion
 
-        #region Get new filed statements
+        #region Get add filed statements
 
-        protected virtual List<ExecutionDatabaseStatement> GetCreateFieldStatements(MigrationDatabaseCommand migrationCommand)
-        {
-            if (migrationCommand?.MigrationInfo?.NewFields.IsNullOrEmpty() ?? true)
-            {
-                return new List<ExecutionDatabaseStatement>(0);
-            }
-
-            var statements = new List<ExecutionDatabaseStatement>();
-            foreach (var tableItem in migrationCommand.MigrationInfo.NewFields)
-            {
-                if (!tableItem.Value.IsNullOrEmpty())
-                {
-                    foreach (var field in tableItem.Value)
-                    {
-                        var dataFieldName = WrapKeywordFunc(field.GetFieldName(DatabaseType));
-                        statements.Add(new ExecutionDatabaseStatement()
-                        {
-                            Script = $"ALTER TABLE {tableItem.Key} ADD COLUMN {dataFieldName}{GetSqlDataType(field, migrationCommand.MigrationInfo)}{GetFieldNullable(field, migrationCommand.MigrationInfo)}{GetSqlDefaultValue(field, migrationCommand.MigrationInfo)};"
-                        });
-                    }
-                }
-            }
-            return statements;
-        }
+        protected abstract List<ExecutionDatabaseStatement> GetAddFieldStatements(MigrationDatabaseCommand migrationCommand);
 
         #endregion
 
@@ -584,28 +565,21 @@ namespace Sixnet.Development.Data.Database
 
         #region Get delete filed statements
 
-        protected virtual List<ExecutionDatabaseStatement> GetDeleteFieldStatements(MigrationDatabaseCommand migrationCommand)
-        {
-            if (migrationCommand?.MigrationInfo?.DeletableFields.IsNullOrEmpty() ?? true)
-            {
-                return new List<ExecutionDatabaseStatement>(0);
-            }
+        protected abstract List<ExecutionDatabaseStatement> GetDeleteFieldStatements(MigrationDatabaseCommand migrationCommand);
 
-            var statements = new List<ExecutionDatabaseStatement>();
-            foreach (var tableItem in migrationCommand.MigrationInfo.DeletableFields)
-            {
-                if (!tableItem.Value.IsNullOrEmpty())
-                {
-                    foreach (var fieldName in tableItem.Value)
-                    {
-                        statements.Add(new ExecutionDatabaseStatement()
-                        {
-                            Script = $"ALTER TABLE {tableItem.Key} DROP COLUMN {fieldName};"
-                        });
-                    }
-                }
-            }
-            return statements;
+        #endregion
+
+        #region Get field definition
+
+        /// <summary>
+        /// Get field definition
+        /// </summary>
+        /// <param name="field"></param>
+        /// <param name="options"></param>
+        /// <returns></returns>
+        protected virtual string GetFieldDefinition(DataField field, MigrationInfo options)
+        {
+            return $"{GetSqlDataType(field, options)}{GetFieldIdentity(field, options)}{GetFieldNullable(field, options)}{GetSqlDefaultValue(field, options)}";
         }
 
         #endregion
@@ -664,6 +638,21 @@ namespace Sixnet.Development.Data.Database
             return defaultValue;
         }
 
+        #region Get field identity
+
+        /// <summary>
+        /// Get field identity
+        /// </summary>
+        /// <param name="field">Field</param>
+        /// <param name="options">Options</param>
+        /// <returns></returns>
+        protected virtual string GetFieldIdentity(DataField field, MigrationInfo options)
+        {
+            return string.Empty;
+        }
+
+        #endregion
+
         #endregion
 
         #endregion
@@ -699,14 +688,14 @@ namespace Sixnet.Development.Data.Database
                     string targetScript;
                     if (tableNames.Count == 1)
                     {
-                        targetScript = $"{FormatAndWrapKeywordFunc(tableNames.FirstOrDefault())}{(applyTablePetName ? $"{TablePetNameKeyword}{tablePetName}" : "")}";
+                        targetScript = $"{FormatAndWrapKeywordFunc(tableNames.FirstOrDefault(), DatabaseObjectNameType.TableName)}{(applyTablePetName ? $"{TablePetNameKeyword}{tablePetName}" : "")}";
                     }
                     else
                     {
                         var targetScripts = new List<string>(tableNames.Count);
                         foreach (var tableName in tableNames)
                         {
-                            targetScripts.Add($"SELECT * FROM {FormatAndWrapKeywordFunc(tableName)}");
+                            targetScripts.Add($"SELECT * FROM {FormatAndWrapKeywordFunc(tableName, DatabaseObjectNameType.TableName)}");
                         }
                         targetScript = $"({string.Join(" UNION ", targetScripts)}){(applyTablePetName ? $"{TablePetNameKeyword}{tablePetName}" : "")}";
                         complexTarget = true;
@@ -1509,8 +1498,8 @@ namespace Sixnet.Development.Data.Database
                 }
                 else
                 {
-                    fieldName = FormatKeywordFunc(regularField.FieldName);
-                    formatedFieldName = WrapKeywordFunc(fieldName);
+                    fieldName = FormatKeywordFunc(regularField.FieldName, DatabaseObjectNameType.ColumnName);
+                    formatedFieldName = WrapKeywordFunc(fieldName, DatabaseObjectNameType.ColumnName);
                 }
                 if (!string.IsNullOrWhiteSpace(tablePetName) && fieldLocation != FieldLocation.InsertValue)
                 {
@@ -1589,15 +1578,15 @@ namespace Sixnet.Development.Data.Database
                 hasFormat = realFormat;
             }
 
-            var fieldPetName = (queryableLocation == QueryableLocation.Top || queryableLocation == QueryableLocation.From) 
+            var fieldPetName = (queryableLocation == QueryableLocation.Top || queryableLocation == QueryableLocation.From)
                 && fieldLocation == FieldLocation.Output && !string.IsNullOrWhiteSpace(propertyName)
-                    ? WrapKeywordFunc(propertyName)
+                    ? WrapKeywordFunc(propertyName, DatabaseObjectNameType.ColumnName)
                     : !string.IsNullOrWhiteSpace(fieldName)
-                      ? WrapKeywordFunc(fieldName)
+                      ? WrapKeywordFunc(fieldName, DatabaseObjectNameType.ColumnName)
                       : string.Empty;
             formatedFieldName = !string.IsNullOrWhiteSpace(fieldPetName)
                 && (fieldLocation == FieldLocation.Output || fieldLocation == FieldLocation.InnerOutput)
-                && (hasFormat || ((queryableLocation == QueryableLocation.Top || queryableLocation == QueryableLocation.From) 
+                && (hasFormat || ((queryableLocation == QueryableLocation.Top || queryableLocation == QueryableLocation.From)
                 && fieldName != propertyName))
                     ? $"{formatedFieldName}{ColumnPetNameKeyword}{fieldPetName}"
                     : formatedFieldName;
@@ -1640,7 +1629,7 @@ namespace Sixnet.Development.Data.Database
         {
             return fields.IsNullOrEmpty()
                 ? string.Empty
-                : string.Join(",", fields.Select(f => FormatAndWrapKeywordFunc(f.GetFieldName(context.DataCommandExecutionContext.Server.DatabaseType))));
+                : string.Join(",", fields.Select(f => FormatAndWrapKeywordFunc(f.GetFieldName(context.DataCommandExecutionContext.Server.DatabaseType), DatabaseObjectNameType.ColumnName)));
         }
 
         /// <summary>
@@ -1648,9 +1637,9 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="originalValue"></param>
         /// <returns></returns>
-        protected string FormatAndWrapKeywordFunc(string originalValue)
+        protected string FormatAndWrapKeywordFunc(string originalValue, DatabaseObjectNameType nameType)
         {
-            return WrapKeywordFunc(FormatKeywordFunc(originalValue));
+            return WrapKeywordFunc(FormatKeywordFunc(originalValue, nameType), nameType);
         }
 
         /// <summary>
