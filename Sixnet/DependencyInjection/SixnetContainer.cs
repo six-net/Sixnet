@@ -269,6 +269,20 @@ namespace Sixnet.DependencyInjection
 
         #endregion
 
+        #region Repository
+
+        /// <summary>
+        /// Get repository
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static ISixnetRepository<T> GetRepository<T>()
+        {
+            return GetService<ISixnetRepository<T>>();
+        }
+
+        #endregion
+
         #region Service provider
 
         /// <summary>
