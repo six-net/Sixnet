@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Sixnet.DependencyInjection;
 using Sixnet.Development.Data.Client;
 using Sixnet.Development.Entity;
+using Sixnet.Development.Queryable;
 using Sixnet.Development.Repository;
 using Sixnet.Development.Work;
 using Sixnet.Model.Paging;
@@ -132,7 +133,7 @@ namespace Sixnet.Development.Data.Database
         /// <typeparam name="TEntity"></typeparam>
         /// <param name="configure"></param>
         /// <returns></returns>
-        protected virtual TEntity GetEntityInstance<TEntity>(Action<TEntity> configure = null) where TEntity : class, ISixnetEntity<TEntity>, new()
+        protected virtual TEntity GetEntityInstance<TEntity>(Action<TEntity> configure) where TEntity : class, ISixnetEntity<TEntity>, new()
         {
             var instance = new TEntity();
             if (instance is CreateDateEntity<TEntity> createDateEntity)
@@ -161,8 +162,32 @@ namespace Sixnet.Development.Data.Database
         /// <returns></returns>
         protected virtual async Task<TEntity> InsertAsync<TEntity>(Action<TEntity> configure = null) where TEntity : class, ISixnetEntity<TEntity>, new()
         {
-            var instance = GetEntityInstance<TEntity>();
+            var instance = GetEntityInstance(configure);
             var repository = SixnetContainer.GetRepository<TEntity>();
+            await repository.AddAsync(instance).ConfigureAwait(false);
+            return instance;
+        }
+
+        /// <summary>
+        /// Insert entity data when not exists
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        protected virtual async Task<TEntity> InsertWhenNotExistAsync<TEntity>(Expression<Func<TEntity, bool>> conditionExpression, bool isIncludeArchived = true, Action<TEntity> configure = null) where TEntity : class, ISixnetEntity<TEntity>, new()
+        {
+            var repository = SixnetContainer.GetRepository<TEntity>();
+            var queryable = repository.AsQueryable(conditionExpression);
+            if (isIncludeArchived)
+            {
+                queryable = queryable.IncludeArchived();
+            }
+            var currentData = await queryable.FirstAsync().ConfigureAwait(false);
+            if (currentData != null)
+            {
+                return currentData;
+            }
+            var instance = GetEntityInstance(configure);
             await repository.AddAsync(instance).ConfigureAwait(false);
             return instance;
         }
@@ -174,7 +199,7 @@ namespace Sixnet.Development.Data.Database
         /// <param name="conditionExpression"></param>
         /// <param name="isIncludeArchived"></param>
         /// <returns></returns>
-        protected virtual async Task DeleteAsync<TEntity>(Expression<Func<TEntity, bool>> conditionExpression, bool isIncludeArchived = true)
+        protected virtual async Task DeleteAsync<TEntity>(Expression<Func<TEntity, bool>> conditionExpression, bool isIncludeArchived = true, bool logicalDelete = false)
         {
             var repository = SixnetContainer.GetRepository<TEntity>();
             var deleteQueryable = repository.AsQueryable(conditionExpression);
@@ -182,7 +207,13 @@ namespace Sixnet.Development.Data.Database
             {
                 deleteQueryable = deleteQueryable.IncludeArchived();
             }
-            await deleteQueryable.DeleteAsync().ConfigureAwait(false);
+            await deleteQueryable.DeleteAsync(options =>
+            {
+                if (!logicalDelete)
+                {
+                    options.LogicalDeleteBehavior = DataOperationBehavior.Disable;
+                }
+            }).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -201,6 +232,24 @@ namespace Sixnet.Development.Data.Database
                 updateQueryable = updateQueryable.IncludeArchived();
             }
             await updateQueryable.UpdateAsync(fieldsAssignmentExpression).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Get data
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="conditionExpression"></param>
+        /// <param name="isIncludeArchived"></param>
+        /// <returns></returns>
+        protected virtual async Task<TEntity> GetAsync<TEntity>(Expression<Func<TEntity, bool>> conditionExpression, bool isIncludeArchived = true)
+        {
+            var repository = SixnetContainer.GetRepository<TEntity>();
+            var queryable = repository.AsQueryable(conditionExpression);
+            if (isIncludeArchived)
+            {
+                queryable = queryable.IncludeArchived();
+            }
+            return await queryable.FirstAsync().ConfigureAwait(false);
         }
 
         /// <summary>
@@ -239,6 +288,24 @@ namespace Sixnet.Development.Data.Database
                 queryable = queryable.IncludeArchived();
             }
             return await queryable.ToPagingAsync(page, pageSize).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Exists
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="conditionExpression"></param>
+        /// <param name="isIncludeArchived"></param>
+        /// <returns></returns>
+        protected virtual async Task<bool> ExistsAsync<TEntity>(Expression<Func<TEntity, bool>> conditionExpression, bool isIncludeArchived = true)
+        {
+            var repository = SixnetContainer.GetRepository<TEntity>();
+            var queryable = repository.AsQueryable(conditionExpression);
+            if (isIncludeArchived)
+            {
+                queryable = queryable.IncludeArchived();
+            }
+            return await queryable.AnyAsync().ConfigureAwait(false);
         }
 
         /// <summary>
