@@ -169,6 +169,22 @@ namespace Sixnet.Development.Data.Database
         }
 
         /// <summary>
+        /// Insert entity data
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        protected virtual async Task<TEntity> InsertAsync<TEntity>(TEntity data) where TEntity : class, ISixnetEntity<TEntity>, new()
+        {
+            if (data != null)
+            {
+                var repository = SixnetContainer.GetRepository<TEntity>();
+                await repository.AddAsync(data).ConfigureAwait(false);
+            }
+            return data;
+        }
+
+        /// <summary>
         /// Insert entity data when not exists
         /// </summary>
         /// <typeparam name="TEntity"></typeparam>
@@ -190,6 +206,32 @@ namespace Sixnet.Development.Data.Database
             var instance = GetEntityInstance(configure);
             await repository.AddAsync(instance).ConfigureAwait(false);
             return instance;
+        }
+
+        /// <summary>
+        /// Insert entity data when not exists
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        protected virtual async Task<TEntity> InsertWhenNotExistAsync<TEntity>(Expression<Func<TEntity, bool>> conditionExpression, TEntity data, bool isIncludeArchived = true) where TEntity : class, ISixnetEntity<TEntity>, new()
+        {
+            if (data != null)
+            {
+                var repository = SixnetContainer.GetRepository<TEntity>();
+                var queryable = repository.AsQueryable(conditionExpression);
+                if (isIncludeArchived)
+                {
+                    queryable = queryable.IncludeArchived();
+                }
+                var currentData = await queryable.FirstAsync().ConfigureAwait(false);
+                if (currentData != null)
+                {
+                    return currentData;
+                }
+                await repository.AddAsync(data).ConfigureAwait(false);
+            }
+            return data;
         }
 
         /// <summary>
