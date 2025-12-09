@@ -174,7 +174,7 @@ namespace Sixnet.Development.Data.Database
         /// <typeparam name="TEntity"></typeparam>
         /// <param name="configure"></param>
         /// <returns></returns>
-        protected virtual async Task<TEntity> InsertWhenNotExistAsync<TEntity>(Expression<Func<TEntity, bool>> conditionExpression, bool isIncludeArchived = true, Action<TEntity> configure = null) where TEntity : class, ISixnetEntity<TEntity>, new()
+        protected virtual async Task<TEntity> InsertWhenNotExistAsync<TEntity>(Expression<Func<TEntity, bool>> conditionExpression, Action<TEntity> configure = null, bool isIncludeArchived = true) where TEntity : class, ISixnetEntity<TEntity>, new()
         {
             var repository = SixnetContainer.GetRepository<TEntity>();
             var queryable = repository.AsQueryable(conditionExpression);
