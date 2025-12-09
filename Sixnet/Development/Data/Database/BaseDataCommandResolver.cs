@@ -597,7 +597,7 @@ namespace Sixnet.Development.Data.Database
             SixnetDirectThrower.ThrowArgNullIf(field == null, nameof(field));
             var dataType = field.DataType;
             var required = field.HasDbFeature(FieldDbFeature.NotNull);
-            return required || !dataType.AllowNull() ? " NOT NULL" : " NULL";
+            return required || !dataType.AllowNull() || field.InRole(FieldRole.PrimaryKey) ? " NOT NULL" : " NULL";
         }
 
         #endregion
