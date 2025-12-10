@@ -620,6 +620,22 @@ namespace Sixnet.Development.Data.Client
         /// <returns></returns>
         Task<TIdentity> InsertReturnIdentityAsync<T, TIdentity>(T data, SixnetDataOperationOptions options = null) where T : class, ISixnetEntity<T>;
 
+        /// <summary>
+        /// Bulk insert
+        /// </summary>
+        /// <param name="dataTable">Data table</param>
+        /// <param name="options">Options</param>
+        /// <returns></returns>
+        Task BulkInsertAsync(DataTable dataTable, ISixnetBulkInsertionOptions options = null);
+
+        /// <summary>
+        /// Bulk insert
+        /// </summary>
+        /// <param name="datas">Data table</param>
+        /// <param name="options">Options</param>
+        /// <returns></returns>
+        Task BulkInsertAsync<T>(IEnumerable<T> datas, ISixnetBulkInsertionOptions options = null);
+
         #endregion
 
         #region Update
@@ -723,14 +739,6 @@ namespace Sixnet.Development.Data.Client
         /// <param name="options">Options</param>
         /// <returns></returns>
         Task<int> ExecuteAsync(SixnetDataCommand command);
-
-        /// <summary>
-        /// Bulk insert
-        /// </summary>
-        /// <param name="dataTable">Data table</param>
-        /// <param name="options">Options</param>
-        /// <returns></returns>
-        Task BulkInsertAsync(DataTable dataTable, ISixnetBulkInsertionOptions options = null);
 
         #endregion
 

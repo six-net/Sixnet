@@ -1084,6 +1084,30 @@ namespace Sixnet.Development.Data.Client
             return ExecuteCore(commands, incrementField != null, options);
         }
 
+        /// <summary>
+        /// Bulk insert
+        /// </summary>
+        /// <param name="dataTable">Data table</param>
+        /// <param name="options">Options</param>
+        /// <returns></returns>
+        public void BulkInsert(DataTable dataTable, ISixnetBulkInsertionOptions options = null)
+        {
+            var command = SixnetDataCommand.Create(dataTable);
+            var connections = GetConnections(GetDataCommandDatabaseServers(command, false, options?.DataOperationOptions));
+            DataCommandExecutor.BulkInsert(connections, dataTable, options);
+        }
+
+        /// <summary>
+        /// Bulk insert
+        /// </summary>
+        /// <param name="datas">Datas</param>
+        /// <param name="options">Options</param>
+        /// <returns></returns>
+        public void BulkInsert<T>(IEnumerable<T> datas, ISixnetBulkInsertionOptions options = null)
+        {
+            BulkInsert(datas.ToDataTable(), options);
+        }
+
         #endregion
 
         #region Update
@@ -1345,19 +1369,6 @@ namespace Sixnet.Development.Data.Client
             var cmd = SixnetDataCommand.CreateScriptCommand(script, parameters, scriptType);
             cmd.Options = options;
             return Execute(new List<SixnetDataCommand>(1) { cmd });
-        }
-
-        /// <summary>
-        /// Bulk insert
-        /// </summary>
-        /// <param name="dataTable">Data table</param>
-        /// <param name="options">Options</param>
-        /// <returns></returns>
-        public void BulkInsert(DataTable dataTable, ISixnetBulkInsertionOptions options = null)
-        {
-            var command = SixnetDataCommand.Create(dataTable);
-            var connections = GetConnections(GetDataCommandDatabaseServers(command, false, options?.DataOperationOptions));
-            DataCommandExecutor.BulkInsert(connections, dataTable, options);
         }
 
         #endregion

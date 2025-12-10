@@ -989,6 +989,30 @@ namespace Sixnet.Development.Data.Client
             return await ExecuteCoreAsync(commands, incrementField != null, options).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Bulk insert
+        /// </summary>
+        /// <param name="dataTable">Data table</param>
+        /// <param name="options">Options</param>
+        /// <returns></returns>
+        public async Task BulkInsertAsync(DataTable dataTable, ISixnetBulkInsertionOptions options = null)
+        {
+            var command = SixnetDataCommand.Create(dataTable);
+            var connections = GetConnections(await GetDataCommandDatabaseServersAsync(command, false, options?.DataOperationOptions).ConfigureAwait(false));
+            await DataCommandExecutor.BulkInsertAsync(connections, dataTable, options).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Bulk insert
+        /// </summary>
+        /// <param name="datas">Data table</param>
+        /// <param name="options">Options</param>
+        /// <returns></returns>
+        public Task BulkInsertAsync<T>(IEnumerable<T> datas, ISixnetBulkInsertionOptions options = null)
+        {
+            return BulkInsertAsync(datas.ToDataTable(), options);
+        }
+
         #endregion
 
         #region Update
@@ -1236,19 +1260,6 @@ namespace Sixnet.Development.Data.Client
             var cmd = SixnetDataCommand.CreateScriptCommand(script, parameters, scriptType);
             cmd.Options = options;
             return await ExecuteAsync(new List<SixnetDataCommand>(1) { cmd }).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Bulk insert
-        /// </summary>
-        /// <param name="dataTable">Data table</param>
-        /// <param name="options">Options</param>
-        /// <returns></returns>
-        public async Task BulkInsertAsync(DataTable dataTable, ISixnetBulkInsertionOptions options = null)
-        {
-            var command = SixnetDataCommand.Create(dataTable);
-            var connections = GetConnections(await GetDataCommandDatabaseServersAsync(command, false, options?.DataOperationOptions).ConfigureAwait(false));
-            await DataCommandExecutor.BulkInsertAsync(connections, dataTable, options).ConfigureAwait(false);
         }
 
         #endregion

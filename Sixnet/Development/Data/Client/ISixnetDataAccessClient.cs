@@ -2,6 +2,7 @@
 
 using System.Data;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 using Sixnet.Development.Command;
 using Sixnet.Development.Data.Command;
@@ -640,6 +641,22 @@ namespace Sixnet.Development.Data.Client
         /// <returns></returns>
         TIdentity InsertReturnIdentity<T, TIdentity>(T data, SixnetDataOperationOptions options = null) where T : class, ISixnetEntity<T>;
 
+        /// <summary>
+        /// Bulk insert
+        /// </summary>
+        /// <param name="dataTable">Data table</param>
+        /// <param name="options">Options</param>
+        /// <returns></returns>
+        void BulkInsert(DataTable dataTable, ISixnetBulkInsertionOptions options = null);
+
+        /// <summary>
+        /// Bulk insert
+        /// </summary>
+        /// <param name="datas">Data table</param>
+        /// <param name="options">Options</param>
+        /// <returns></returns>
+        void BulkInsert<T>(IEnumerable<T> datas, ISixnetBulkInsertionOptions options = null);
+
         #endregion
 
         #region Update
@@ -753,14 +770,6 @@ namespace Sixnet.Development.Data.Client
         /// <param name="options">Options</param>
         /// <returns></returns>
         int Execute(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null);
-
-        /// <summary>
-        /// Bulk insert
-        /// </summary>
-        /// <param name="dataTable">Data table</param>
-        /// <param name="options">Options</param>
-        /// <returns></returns>
-        void BulkInsert(DataTable dataTable, ISixnetBulkInsertionOptions options = null);
 
         #endregion
 
