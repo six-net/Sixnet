@@ -6,7 +6,10 @@ using System.IO;
 using System.Reflection;
 using System.Xml;
 
+using Sixnet.Development.Data;
+using Sixnet.Development.Data.Database;
 using Sixnet.Development.Data.Field;
+using Sixnet.Development.Entity;
 using Sixnet.Exceptions;
 using Sixnet.Model;
 
@@ -252,36 +255,59 @@ namespace System.Collections.Generic
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="datas">Data set</param>
         /// <returns>Return datatable</returns>
-        public static DataTable ToDataTable<T>(this IEnumerable<T> datas)
+        public static DataTable ToDataTable<T>(this IEnumerable<T> datas, DatabaseType? databaseType = null)
         {
-            DataTable table = new DataTable();
+            var table = new DataTable();
             var dataType = typeof(T);
             var properties = dataType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
             var fields = dataType.GetFields(BindingFlags.Public | BindingFlags.Instance);
+            var entityConfig = SixnetEntityManager.GetEntityConfig(dataType);
+            table.TableName = entityConfig == null
+                ? dataType.Name
+                : SixnetDataManager.GetDefaultTableName(databaseType, entityConfig);
+            var columnNameDict = new Dictionary<string, string>();
             foreach (var property in properties)
             {
-                table.Columns.Add(property.Name, property.PropertyType.GetRealValueType());
+                var columnName = property.Name;
+                var entityField = SixnetEntityManager.GetField(dataType, columnName);
+                if (entityField != null)
+                {
+                    columnName = databaseType.HasValue
+                        ? entityField.GetFieldName(databaseType.Value)
+                        : entityField.FieldName;
+                }
+                columnNameDict[property.Name] = columnName;
+                table.Columns.Add(columnName, property.PropertyType.GetRealValueType());
             }
             foreach (var field in fields)
             {
-                table.Columns.Add(field.Name, field.FieldType.GetRealValueType());
+                var columnName = field.Name;
+                var entityField = SixnetEntityManager.GetField(dataType, columnName);
+                if (entityField != null)
+                {
+                    columnName = databaseType.HasValue
+                        ? entityField.GetFieldName(databaseType.Value)
+                        : entityField.FieldName;
+                }
+                columnNameDict[field.Name] = columnName;
+                table.Columns.Add(columnName, field.FieldType.GetRealValueType());
             }
             if (!datas.IsNullOrEmpty())
             {
                 foreach (var data in datas)
                 {
-                    DataRow row = table.NewRow();
+                    var row = table.NewRow();
                     foreach (var property in properties)
                     {
                         var propertyVal = property.GetValue(data);
                         propertyVal ??= DBNull.Value;
-                        row[property.Name] = propertyVal;
+                        row[columnNameDict[property.Name]] = propertyVal;
                     }
                     foreach (var field in fields)
                     {
                         var fieldVal = field.GetValue(data);
                         fieldVal ??= DBNull.Value;
-                        row[field.Name] = fieldVal;
+                        row[columnNameDict[field.Name]] = fieldVal;
                     }
                     table.Rows.Add(row);
                 }
