@@ -128,6 +128,34 @@ namespace Sixnet.Development.Data.Database
         }
 
         /// <summary>
+        /// Set basic info
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="instance"></param>
+        /// <returns></returns>
+        protected virtual TEntity SetBasicInfo<TEntity>(TEntity instance) where TEntity : class, ISixnetEntity<TEntity>
+        {
+            if (instance != null)
+            {
+                if (instance is CreateDateEntity<TEntity> createDateEntity)
+                {
+                    createDateEntity.CreateUserId = SystemUserId;
+                    createDateEntity.CreateUserName = SystemUserName;
+                    createDateEntity.CreateUserDisplayName = SystemUserDisplayName;
+                    createDateEntity.CreateDate = DateTimeOffset.Now;
+                }
+                if (instance is CreateUpdateDateEntity<TEntity> updateDateEntity)
+                {
+                    updateDateEntity.UpdateUserId = SystemUserId;
+                    updateDateEntity.UpdateUserName = SystemUserName;
+                    updateDateEntity.UpdateUserDisplayName = SystemUserDisplayName;
+                    updateDateEntity.UpdateDate = DateTimeOffset.Now;
+                }
+            }
+            return instance;
+        }
+
+        /// <summary>
         /// Get entity instance
         /// </summary>
         /// <typeparam name="TEntity"></typeparam>
@@ -136,20 +164,7 @@ namespace Sixnet.Development.Data.Database
         protected virtual TEntity GetEntityInstance<TEntity>(Action<TEntity> configure) where TEntity : class, ISixnetEntity<TEntity>, new()
         {
             var instance = new TEntity();
-            if (instance is CreateDateEntity<TEntity> createDateEntity)
-            {
-                createDateEntity.CreateUserId = SystemUserId;
-                createDateEntity.CreateUserName = SystemUserName;
-                createDateEntity.CreateUserDisplayName = SystemUserDisplayName;
-                createDateEntity.CreateDate = DateTimeOffset.Now;
-            }
-            if (instance is CreateUpdateDateEntity<TEntity> updateDateEntity)
-            {
-                updateDateEntity.UpdateUserId = SystemUserId;
-                updateDateEntity.UpdateUserName = SystemUserName;
-                updateDateEntity.UpdateUserDisplayName = SystemUserDisplayName;
-                updateDateEntity.UpdateDate = DateTimeOffset.Now;
-            }
+            SetBasicInfo(instance);
             configure?.Invoke(instance);
             return instance;
         }
