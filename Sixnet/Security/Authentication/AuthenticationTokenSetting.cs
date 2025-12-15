@@ -29,6 +29,11 @@ namespace Sixnet.Security.Authentication
         /// </summary>
         public AuthenticationScore Score { get; set; } = AuthenticationScore.Single;
 
+        /// <summary>
+        /// Ignore server validation
+        /// </summary>
+        public bool IgnoreServerValidation { get; set; }
+
         internal bool IsUnlimited => Score == AuthenticationScore.Unlimited;
     }
 }

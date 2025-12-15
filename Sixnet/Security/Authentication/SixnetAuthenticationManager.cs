@@ -2,9 +2,11 @@
 
 using System.Threading.Tasks;
 
+using Sixnet.App;
 using Sixnet.Cache;
 using Sixnet.Cache.Keys.Parameters;
 using Sixnet.Cache.String.Parameters;
+using Sixnet.DependencyInjection;
 using Sixnet.Security.Permission;
 
 namespace Sixnet.Security.Authentication
@@ -25,29 +27,18 @@ namespace Sixnet.Security.Authentication
 
             var token = string.IsNullOrWhiteSpace(setting.Token) ? Guid.NewGuid().ToString() : setting.Token;
             var userKey = GetUserKey(setting);
-            if (setting.IsUnlimited)
+            await SixnetCacher.String.SetAsync(new StringSetParameter()
             {
-                await SixnetCacher.Keys.DeleteAsync(new DeleteParameter()
-                {
-                    CacheObject = GetCacheObject(),
-                    Keys = new List<CacheKey> { userKey }
-                }).ConfigureAwait(false);
-            }
-            else
-            {
-                await SixnetCacher.String.SetAsync(new StringSetParameter()
-                {
-                    CacheObject = GetCacheObject(),
-                    Items = new List<CacheEntry>()
+                CacheObject = GetCacheObject(),
+                Items =
+                [
+                    new CacheEntry()
                     {
-                        new CacheEntry()
-                        {
-                            Key = userKey,
-                            Value = token
-                        }
+                        Key = userKey,
+                        Value = token
                     }
-                }).ConfigureAwait(false);
-            }
+                ]
+            }).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -61,33 +52,22 @@ namespace Sixnet.Security.Authentication
 
             var token = string.IsNullOrWhiteSpace(setting.Token) ? Guid.NewGuid().ToString() : setting.Token;
             var userKey = GetUserKey(setting);
-            if (setting.IsUnlimited)
+            SixnetCacher.String.Set(new StringSetParameter()
             {
-                SixnetCacher.Keys.Delete(new DeleteParameter()
-                {
-                    CacheObject = GetCacheObject(),
-                    Keys = new List<CacheKey> { userKey }
-                });
-            }
-            else
-            {
-                SixnetCacher.String.Set(new StringSetParameter()
-                {
-                    CacheObject = GetCacheObject(),
-                    Items = new List<CacheEntry>()
+                CacheObject = GetCacheObject(),
+                Items =
+                [
+                    new CacheEntry()
                     {
-                        new CacheEntry()
+                        Key = userKey,
+                        Value = token,
+                        Expiration = new CacheExpiration()
                         {
-                            Key = userKey,
-                            Value = token,
-                            Expiration = new CacheExpiration()
-                            {
-                                AbsoluteExpiration = DateTimeOffset.Now.AddSeconds(setting.ExpireSeconds)
-                            }
+                            AbsoluteExpiration = DateTimeOffset.Now.AddSeconds(setting.ExpireSeconds)
                         }
                     }
-                }); ;
-            }
+                ]
+            });
         }
 
         /// <summary>
@@ -104,7 +84,7 @@ namespace Sixnet.Security.Authentication
             await SixnetCacher.Keys.DeleteAsync(new DeleteParameter()
             {
                 CacheObject = GetCacheObject(),
-                Keys = new List<CacheKey> { userKey }
+                Keys = [userKey]
             }).ConfigureAwait(false);
         }
 
@@ -122,7 +102,7 @@ namespace Sixnet.Security.Authentication
             SixnetCacher.Keys.Delete(new DeleteParameter()
             {
                 CacheObject = GetCacheObject(),
-                Keys = new List<CacheKey> { userKey }
+                Keys = [userKey]
             });
         }
 
@@ -134,17 +114,28 @@ namespace Sixnet.Security.Authentication
         {
             var setting = new AuthenticationTokenSetting();
             configure?.Invoke(setting);
-
-            if (setting.IsUnlimited)
-            {
-                return true;
-            }
             var userKey = GetUserKey(setting);
             var token = (await SixnetCacher.String.GetAsync(new StringGetParameter()
             {
                 CacheObject = GetCacheObject(),
                 Keys = new List<CacheKey>() { userKey }
             }).ConfigureAwait(false)).Values?.FirstOrDefault()?.Value?.ToString();
+
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                if (setting.IgnoreServerValidation)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            if (setting.IsUnlimited)
+            {
+                return true;
+            }
             return token == setting.Token;
         }
 
@@ -156,18 +147,82 @@ namespace Sixnet.Security.Authentication
         {
             var setting = new AuthenticationTokenSetting();
             configure?.Invoke(setting);
-
-            if (setting.IsUnlimited)
-            {
-                return true;
-            }
             var userKey = GetUserKey(setting);
             var token = SixnetCacher.String.Get(new StringGetParameter()
             {
                 CacheObject = GetCacheObject(),
                 Keys = new List<CacheKey>() { userKey }
             }).Values?.FirstOrDefault()?.Value?.ToString();
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                if (setting.IgnoreServerValidation)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            if (setting.IsUnlimited)
+            {
+                return true;
+            }
             return token == setting.Token;
+        }
+
+        /// <summary>
+        /// Get authentication token
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public static string GetAuthenticationToken(string userId, Action<AuthenticationTokenSetting> configure = null)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return string.Empty;
+            }
+            var authOptions = SixnetContainer.GetOptions<SixnetAuthenticationOptions>() ?? new SixnetAuthenticationOptions();
+            var tokenSetting = new AuthenticationTokenSetting()
+            {
+                AppTag = SixnetApplication.Current.GetDefaultAppTag(),
+                Score = authOptions.Score,
+                UserId = userId,
+            };
+            configure?.Invoke(tokenSetting);
+            var userKey = GetUserKey(tokenSetting);
+            return SixnetCacher.String.Get(new StringGetParameter()
+            {
+                CacheObject = GetCacheObject(),
+                Keys = new List<CacheKey>() { userKey }
+            }).Values?.FirstOrDefault()?.Value?.ToString();
+        }
+
+        /// <summary>
+        /// Get authentication token
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public static async Task<string> GetAuthenticationTokenAsync(string userId, Action<AuthenticationTokenSetting> configure = null)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return string.Empty;
+            }
+            var authOptions = SixnetContainer.GetOptions<SixnetAuthenticationOptions>() ?? new SixnetAuthenticationOptions();
+            var tokenSetting = new AuthenticationTokenSetting()
+            {
+                AppTag = SixnetApplication.Current.GetDefaultAppTag(),
+                Score = authOptions.Score,
+                UserId = userId,
+            };
+            configure?.Invoke(tokenSetting);
+            var userKey = GetUserKey(tokenSetting);
+            return (await SixnetCacher.String.GetAsync(new StringGetParameter()
+            {
+                CacheObject = GetCacheObject(),
+                Keys = new List<CacheKey>() { userKey }
+            })).Values?.FirstOrDefault()?.Value?.ToString();
         }
 
         /// <summary>
@@ -181,9 +236,12 @@ namespace Sixnet.Security.Authentication
             var authorizationObject = PermissionObjectType.User;
             var appTag = setting.Score == AuthenticationScore.Application ? setting.AppTag : "";
             var userId = setting.UserId;
-            return string.IsNullOrWhiteSpace(appTag)
-                        ? $"{authorizationObject}{keyNameSplitChar}{userId}{keyNameSplitChar}Token"
-                        : $"{appTag}{keyNameSplitChar}{authorizationObject}{keyNameSplitChar}{userId}{keyNameSplitChar}Token";
+            var userKey = $"{authorizationObject}{keyNameSplitChar}{userId}{keyNameSplitChar}Token";
+            if (!string.IsNullOrWhiteSpace(appTag))
+            {
+                userKey = $"{appTag}{keyNameSplitChar}{userKey}";
+            }
+            return userKey;
         }
 
         /// <summary>
