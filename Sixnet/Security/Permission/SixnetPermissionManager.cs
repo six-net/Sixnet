@@ -530,19 +530,19 @@ namespace Sixnet.Security.Permission
         /// <param name="userId">User id</param>
         /// <param name="getUserPermissionsFunc">Get user permissions func</param>
         /// <param name="configure">Auth configure</param>
-        public static async Task RefreshAuthenticatedUserPermissionAsync(string appTag, string userId, Func<string, List<string>> getUserPermissionsFunc, Action<AuthenticationTokenSetting> configure = null)
+        public static async Task RefreshAuthenticatedUserPermissionAsync(string appTag, string userId, Func<string, Task<List<string>>> getUserPermissionsFuncAsync, Action<AuthenticationTokenSetting> configure = null)
         {
             if (string.IsNullOrWhiteSpace(userId))
             {
                 return;
             }
-            SixnetDirectThrower.ThrowArgErrorIf(getUserPermissionsFunc == null, nameof(getUserPermissionsFunc));
+            SixnetDirectThrower.ThrowArgErrorIf(getUserPermissionsFuncAsync == null, nameof(getUserPermissionsFuncAsync));
             var authToken = await SixnetAuthenticationManager.GetAuthenticationTokenAsync(userId, configure);
             if (string.IsNullOrWhiteSpace(authToken))
             {
                 return;
             }
-            var permissionIds = getUserPermissionsFunc?.Invoke(userId);
+            var permissionIds = await getUserPermissionsFuncAsync?.Invoke(userId);
             await SetObjectPermissionAsync(appTag, PermissionObjectType.User, userId, permissionIds);
         }
 
@@ -552,9 +552,9 @@ namespace Sixnet.Security.Permission
         /// <param name="userId">User id</param>
         /// <param name="getUserPermissionsFunc">Get user permissions func</param>
         /// <param name="configure">Auth configure</param>
-        public static Task RefreshAuthenticatedUserPermissionAsync(string userId, Func<string, List<string>> getUserPermissionsFunc, Action<AuthenticationTokenSetting> configure = null)
+        public static Task RefreshAuthenticatedUserPermissionAsync(string userId, Func<string, Task<List<string>>> getUserPermissionsFuncAsync, Action<AuthenticationTokenSetting> configure = null)
         {
-            return RefreshAuthenticatedUserPermissionAsync(SixnetApplication.Current.GetDefaultAppTag(), userId, getUserPermissionsFunc, configure);
+            return RefreshAuthenticatedUserPermissionAsync(SixnetApplication.Current.GetDefaultAppTag(), userId, getUserPermissionsFuncAsync, configure);
         }
 
         /// <summary>
