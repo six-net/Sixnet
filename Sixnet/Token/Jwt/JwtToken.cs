@@ -154,7 +154,7 @@ namespace Sixnet.Token.Jwt
         /// <param name="claims">Claims</param>
         /// <param name="configure">Configure jwt setting</param>
         /// <returns></returns>
-        public static JwtToken CreateToken(IEnumerable<Claim> claims, Action<JwtSetting> configure = null)
+        public static JwtToken Create(IEnumerable<Claim> claims, Action<JwtSetting> configure = null)
         {
             SixnetDirectThrower.ThrowArgNullIf(claims == null, nameof(claims));
 
@@ -171,7 +171,7 @@ namespace Sixnet.Token.Jwt
         /// <param name="claims">Claims</param>
         /// <param name="configure">Configure jwt setting</param>
         /// <returns></returns>
-        public static async Task<JwtToken> CreateTokenAsync(IEnumerable<Claim> claims, Action<JwtSetting> configure = null)
+        public static async Task<JwtToken> CreateAsync(IEnumerable<Claim> claims, Action<JwtSetting> configure = null)
         {
             SixnetDirectThrower.ThrowArgNullIf(claims == null, nameof(claims));
 
@@ -188,10 +188,10 @@ namespace Sixnet.Token.Jwt
         /// <param name="user">User info</param>
         /// <param name="configure">Configure jwt options</param>
         /// <returns></returns>
-        public static JwtToken CreateToken(UserInfo user, Action<JwtSetting> configure = null)
+        public static JwtToken Create(UserInfo user, Action<JwtSetting> configure = null)
         {
             SixnetDirectThrower.ThrowArgNullIf(user == null, nameof(user));
-            return CreateToken(user.GetClaims(), configure);
+            return Create(user.GetClaims(), configure);
         }
 
         /// <summary>
@@ -200,10 +200,10 @@ namespace Sixnet.Token.Jwt
         /// <param name="user">User info</param>
         /// <param name="configure">Configure jwt options</param>
         /// <returns></returns>
-        public static async Task<JwtToken> CreateTokenAsync(UserInfo user, Action<JwtSetting> configure = null)
+        public static async Task<JwtToken> CreateAsync(UserInfo user, Action<JwtSetting> configure = null)
         {
             SixnetDirectThrower.ThrowArgNullIf(user == null, nameof(user));
-            return await CreateTokenAsync(user.GetClaims(), configure);
+            return await CreateAsync(user.GetClaims(), configure);
         }
 
         /// <summary>
@@ -278,6 +278,78 @@ namespace Sixnet.Token.Jwt
             var jwtToken = validatedToken as JwtSecurityToken;
             var tokenUser = UserInfo.GetUserFromClaims(jwtToken.Claims);
             return await CreateTokenCoreAsync(tokenUser.GetClaims(), jwtSetting);
+        }
+
+        /// <summary>
+        /// Destory token
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="configure"></param>
+        public static void Destroy(UserInfo user, Action<JwtSetting> configure = null)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(user == null, nameof(user));
+
+            var jwtSetting = SixnetContainer.GetOptions<SixnetAuthenticationOptions>()?.GetJwtSetting() ?? new JwtSetting();
+            configure?.Invoke(jwtSetting);
+            SixnetDirectThrower.ThrowArgNullIf(jwtSetting == null, nameof(jwtSetting));
+
+            SixnetAuthenticationManager.RemoveAuthenticationToken(setting =>
+            {
+                setting.AppTag = user.AppTag;
+                setting.Token = user.Token;
+                setting.UserId = user.Id;
+                setting.Score = jwtSetting.Score;
+                setting.ExpireSeconds = jwtSetting.TokenExpirationSeconds;
+            });
+        }
+
+        /// <summary>
+        /// Destory token
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="configure"></param>
+        public static async Task DestroyAsync(UserInfo user, Action<JwtSetting> configure = null)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(user == null, nameof(user));
+
+            var jwtSetting = SixnetContainer.GetOptions<SixnetAuthenticationOptions>()?.GetJwtSetting() ?? new JwtSetting();
+            configure?.Invoke(jwtSetting);
+            SixnetDirectThrower.ThrowArgNullIf(jwtSetting == null, nameof(jwtSetting));
+
+            await SixnetAuthenticationManager.RemoveAuthenticationTokenAsync(setting =>
+            {
+                setting.AppTag = user.AppTag;
+                setting.Token = user.Token;
+                setting.UserId = user.Id;
+                setting.Score = jwtSetting.Score;
+                setting.ExpireSeconds = jwtSetting.TokenExpirationSeconds;
+            });
+        }
+
+        /// <summary>
+        /// Destory current user token
+        /// </summary>
+        /// <param name="configure"></param>
+        public static void DestroyCurrentUser(Action<JwtSetting> configure = null)
+        {
+            var currentUser = SessionContext.Current?.User;
+            if (currentUser != null)
+            {
+                Destroy(SessionContext.Current?.User, configure);
+            }
+        }
+
+        /// <summary>
+        /// Destory current user token
+        /// </summary>
+        /// <param name="configure"></param>
+        public static async Task DestroyCurrentUserAsync(Action<JwtSetting> configure = null)
+        {
+            var currentUser = SessionContext.Current?.User;
+            if (currentUser != null)
+            {
+                await DestroyAsync(SessionContext.Current?.User, configure);
+            }
         }
 
         #endregion
