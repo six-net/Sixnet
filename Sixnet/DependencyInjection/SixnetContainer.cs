@@ -57,12 +57,12 @@ namespace Sixnet.DependencyInjection
         /// <summary>
         /// Gets the current DI container
         /// </summary>
-        public static ISixnetContainer Container { get; private set; } = null;
+        public static ISixnetContainer Container { get; internal set; } = null;
 
         /// <summary>
         /// Gets the current service provider
         /// </summary>
-        public static IServiceProvider ServiceProvider { get; private set; } = null;
+        public static IServiceProvider ServiceProvider { get; internal set; } = null;
 
         #endregion
 
@@ -99,7 +99,7 @@ namespace Sixnet.DependencyInjection
             BuildServiceProvider(true);
 
             // Configure service
-            options.ConfigureService?.Invoke(_serviceCollection);
+            options.ConfigureService(_serviceCollection);
 
             // Container
             var container = SixnetApplication.Options.DIContainer ?? new DefaultServiceProviderContainer();
@@ -434,14 +434,14 @@ namespace Sixnet.DependencyInjection
             services.ConfigureIfNotNull<SixnetEnumOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Enum)));
 
             // Post config options
-            services.PostConfigureIfNotNull(sixnetOptions.ConfigureFile);
-            services.PostConfigureIfNotNull(sixnetOptions.ConfigureRSA);
-            services.PostConfigureIfNotNull(sixnetOptions.ConfigureEmail);
-            services.PostConfigureIfNotNull(sixnetOptions.ConfigureSms);
-            services.PostConfigureIfNotNull(sixnetOptions.ConfigureMessage);
+            services.PostConfigureIfNotNull(sixnetOptions.ConfigureFileAction);
+            services.PostConfigureIfNotNull(sixnetOptions.ConfigureRsaAction);
+            services.PostConfigureIfNotNull(sixnetOptions.ConfigureEmailAction);
+            services.PostConfigureIfNotNull(sixnetOptions.ConfigureSmsAction);
+            services.PostConfigureIfNotNull(sixnetOptions.ConfigureMessageAction);
             services.PostConfigureIfNotNull<SixnetDataOptions>((options) =>
             {
-                sixnetOptions.ConfigureData?.Invoke(options);
+                sixnetOptions.ConfigureData(options);
                 if (!options.Servers.IsNullOrEmpty())
                 {
                     foreach (var server in options.Servers)
@@ -453,20 +453,20 @@ namespace Sixnet.DependencyInjection
                     }
                 }
             });
-            services.PostConfigureIfNotNull(sixnetOptions.ConfigureMessageQueue);
-            services.PostConfigureIfNotNull(sixnetOptions.ConfigureJson);
-            services.PostConfigureIfNotNull(sixnetOptions.ConfigureValidation);
+            services.PostConfigureIfNotNull(sixnetOptions.ConfigureMessageQueueAction);
+            services.PostConfigureIfNotNull(sixnetOptions.ConfigureJsonAction);
+            services.PostConfigureIfNotNull(sixnetOptions.ConfigureValidationAction);
             services.PostConfigureIfNotNull<SixnetCacheOptions>((options) =>
             {
                 options.AddCacheProvider(CacheServerType.InMemory, new MemoryProvider());
-                sixnetOptions.ConfigureCache?.Invoke(options);
+                sixnetOptions.ConfigureCache(options);
             });
-            services.PostConfigureIfNotNull(sixnetOptions.ConfigureAuthorization);
-            services.PostConfigureIfNotNull(sixnetOptions.ConfigureAuthentication);
-            services.PostConfigureIfNotNull(sixnetOptions.ConfigureUnitOfWork);
-            services.PostConfigureIfNotNull(sixnetOptions.ConfigureLogging);
-            services.PostConfigureIfNotNull(sixnetOptions.ConfigureEntity);
-            services.PostConfigureIfNotNull(sixnetOptions.ConfigureEnum);
+            services.PostConfigureIfNotNull(sixnetOptions.ConfigureAuthorizationAction);
+            services.PostConfigureIfNotNull(sixnetOptions.ConfigureAuthenticationAction);
+            services.PostConfigureIfNotNull(sixnetOptions.ConfigureUnitOfWorkAction);
+            services.PostConfigureIfNotNull(sixnetOptions.ConfigureLoggingAction);
+            services.PostConfigureIfNotNull(sixnetOptions.ConfigureEntityAction);
+            services.PostConfigureIfNotNull(sixnetOptions.ConfigureEnumAction);
         }
 
         #endregion
@@ -497,7 +497,10 @@ namespace Sixnet.DependencyInjection
             services.AddSingleton<ISixnetMessageProvider, DefaultMessageProvider>();
             services.AddSingleton(typeof(ISixnetDataAccess<>), typeof(DefaultDataAccess<>));
             services.AddSingleton(typeof(ISixnetRepository<>), typeof(DefaultRepository<>));
-            services.AddSixnetLocalization(sixnetOptions?.ConfigureLocalization);
+            services.AddSixnetLocalization(options => 
+            {
+                sixnetOptions?.ConfigureLocalization(options);
+            });
         }
 
         #endregion
@@ -525,22 +528,29 @@ namespace Sixnet.DependencyInjection
                     {
                         ObjectIdHelper.InitAppObjectIds();
                     }
-
-                    options.ApplicationStarted?.Invoke(options);
+                    if (SixnetApplication.Options.EnableLicense)
+                    {
+                        var license = SixnetApplication.Options.GetLicenseFunc?.Invoke();
+                        SixnetDirectThrower.ThrowAppException(license == null, "Not set license");
+                        var validateResult = license.Validate();
+                        SixnetDirectThrower.ThrowAppException(!validateResult.IsAvailable, "License is not available");
+                        SixnetApplication.Current.License = license;
+                    }
+                    options.ApplicationStarted(options);
                 });
 
                 lifeTime.ApplicationStopping.Register(() =>
                 {
                     SixnetLogger.LogDebug($"Application:{SixnetApplication.Current?.Title} is stopping");
 
-                    options.ApplicationStopping?.Invoke(options);
+                    options.ApplicationStopping(options);
                 });
 
                 lifeTime.ApplicationStopped.Register(() =>
                 {
                     SixnetLogger.LogDebug($"Application:{SixnetApplication.Current?.Title} is stopped");
 
-                    options.ApplicationStopped?.Invoke(options);
+                    options.ApplicationStopped(options);
                 });
             }
         }

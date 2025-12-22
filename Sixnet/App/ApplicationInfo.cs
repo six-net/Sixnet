@@ -1,6 +1,7 @@
 ﻿// "Company © 2025. All rights reserved."
 
 using Sixnet.Environments;
+using Sixnet.Security.License;
 
 namespace Sixnet.App
 {
@@ -48,14 +49,7 @@ namespace Sixnet.App
         /// <summary>
         /// Gets or sets the machine name
         /// </summary>
-        public string MachineName { get; set; } = SixnetEnvironment.MachineName;
-
-        /// <summary>
-        /// Gets or sets the mac address 
-        /// </summary>
-        public string Mac { get; set; } = SixnetEnvironment.MainMac;
-
-        public string Ip { get; set; } = SixnetEnvironment.MainIp;
+        public string MachineName { get; set; }
 
         /// <summary>
         /// Gets or sets the env
@@ -70,5 +64,10 @@ namespace Sixnet.App
         {
             return $"{Name}{Env}";
         }
+
+        /// <summary>
+        /// Gets or sets the license
+        /// </summary>
+        public SixnetLicenseInfo License {  get; set; }
     }
 }

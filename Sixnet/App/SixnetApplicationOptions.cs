@@ -4,6 +4,7 @@ using AutoMapper;
 
 using Sixnet.DependencyInjection;
 using Sixnet.Mapper;
+using Sixnet.Security.License;
 
 namespace Sixnet.App
 {
@@ -25,7 +26,7 @@ namespace Sixnet.App
         /// <summary>
         /// Gets or sets the file match options
         /// </summary>
-        public SixnetFileMatchOptions FileMatchOptions { get; private set; } = new();
+        public SixnetFileMatchOptions FileMatchOptions { get; internal set; } = new();
 
         /// <summary>
         /// Gets the current application info
@@ -41,5 +42,15 @@ namespace Sixnet.App
         /// Gets or sets the virtual path
         /// </summary>
         public string VirtualPath { get; set; }
+
+        /// <summary>
+        /// Whether enable license
+        /// </summary>
+        public bool EnableLicense {  get; set; }
+
+        /// <summary>
+        /// Get license func
+        /// </summary>
+        public Func<SixnetLicenseInfo> GetLicenseFunc { get; set; }
     }
 }

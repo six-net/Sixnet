@@ -112,7 +112,7 @@ namespace Sixnet
                 SixnetLogger.LogDebug($"Init sixnet through new self host");
                 var hostBuilder = Host.CreateDefaultBuilder(options.Args)
                     .UseServiceProviderFactory(new SixnetServiceProviderFactory(options));
-                options.ConfigureHostBuilder?.Invoke(hostBuilder);
+                options.ConfigureHostBuilder(hostBuilder);
                 options.HostBuilder = hostBuilder;
                 return hostBuilder.Build();
             }

@@ -5,6 +5,7 @@ using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
+using Sixnet.Environments;
 using Sixnet.Logging;
 using Sixnet.Model;
 
@@ -57,7 +58,7 @@ namespace Sixnet.App
         /// <summary>
         /// Gets or sets the information about the currently running application
         /// </summary>
-        public static ApplicationInfo Current { get; private set; }
+        public static ApplicationInfo Current { get; internal set; }
 
         /// <summary>
         /// Gets the current application root path
@@ -117,14 +118,6 @@ namespace Sixnet.App
         {
             var entryAssembly = Assembly.GetEntryAssembly();
             var assemblyName = entryAssembly.GetName().Name;
-            var machineName = string.Empty;
-            try
-            {
-                machineName = Environment.MachineName;
-            }
-            catch (Exception)
-            {
-            }
             return new ApplicationInfo()
             {
                 Code = "",
@@ -132,7 +125,8 @@ namespace Sixnet.App
                 Title = assemblyName,
                 Type = SixnetApplicationType.Unknown,
                 Version = FileVersionInfo.GetVersionInfo(entryAssembly.Location).FileVersion,
-                MachineName = machineName
+                MachineName = SixnetEnvironment.GetMachineName(),
+
             };
         }
 

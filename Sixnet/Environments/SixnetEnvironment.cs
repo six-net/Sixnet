@@ -1,8 +1,14 @@
 ﻿// "Company © 2025. All rights reserved."
 
+using System.IO;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Text;
+
+using Microsoft.Win32;
 
 using Sixnet.Logging;
 
@@ -16,127 +22,165 @@ namespace Sixnet.Environments
         /// <summary>
         /// Gets the machine name
         /// </summary>
-        public static string MachineName
+        public static string GetMachineName()
         {
-            get
+            try
             {
-                try
-                {
-                    return Environment.MachineName;
-                }
-                catch (Exception ex)
-                {
-                    SixnetLogger.LogError(ex, ex.Message);
-                    return string.Empty;
-                }
+                return Environment.MachineName;
+            }
+            catch (Exception ex)
+            {
+                SixnetLogger.LogError(ex, ex.Message);
+                return string.Empty;
             }
         }
 
         /// <summary>
-        /// Gets all mac address
+        /// Get machine id
         /// </summary>
-        public static List<string> AllMacs
+        /// <returns></returns>
+        public static string GetMachineId()
         {
-            get
+            try
             {
-                try
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    var macs = new List<string>();
-                    var networkInterfaces = NetworkInterface.GetAllNetworkInterfaces();
-                    if (networkInterfaces.IsNullOrEmpty())
+                    static string readMachineGuidValue(RegistryView view)
                     {
-                        return new List<string>(0);
+                        using var baseKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, view);
+                        using var key = baseKey.OpenSubKey(@"SOFTWARE\Microsoft\Cryptography");
+                        return key?.GetValue("MachineGuid")?.ToString();
                     }
-                    foreach (var ni in networkInterfaces)
+                    var machineId = readMachineGuidValue(RegistryView.Registry64);
+                    if (!string.IsNullOrWhiteSpace(machineId))
                     {
-                        var macAddress = ni.GetPhysicalAddress()?.ToString();
-                        if (!string.IsNullOrWhiteSpace(macAddress))
+                        return machineId;
+                    }
+                    machineId = readMachineGuidValue(RegistryView.Registry32);
+                    return machineId ?? string.Empty;
+                }
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    string[] paths =
+                    {
+                        "/etc/machine-id",
+                        "/var/lib/dbus/machine-id"
+                    };
+
+                    foreach (var path in paths)
+                    {
+                        if (File.Exists(path))
                         {
-                            macs.Add(macAddress);
+                            return File.ReadAllText(path).Trim();
                         }
                     }
-                    return macs;
                 }
-                catch (Exception ex)
-                {
-                    SixnetLogger.LogError(ex, ex.Message);
-                    return new List<string>(0);
-                }
-            }
-        }
 
-        /// <summary>
-        /// Gets the main mac
-        /// </summary>
-        public static string MainMac
-        {
-            get
-            {
-                try
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
-                    var allMacs = NetworkInterface.GetAllNetworkInterfaces();
-                    if (allMacs.IsNullOrEmpty())
+                    var psi = new System.Diagnostics.ProcessStartInfo
                     {
-                        return string.Empty;
-                    }
-                    var mainMac = allMacs
-                            .FirstOrDefault(ni => ni.NetworkInterfaceType != NetworkInterfaceType.Loopback && ni.OperationalStatus == OperationalStatus.Up)
-                            ?? allMacs.FirstOrDefault();
-                    return mainMac?.GetPhysicalAddress()?.ToString() ?? string.Empty;
-                }
-                catch (Exception ex)
-                {
-                    SixnetLogger.LogError(ex, ex.Message);
-                    return string.Empty;
+                        FileName = "ioreg",
+                        Arguments = "-rd1 -c IOPlatformExpertDevice",
+                        RedirectStandardOutput = true
+                    };
+
+                    using var process = System.Diagnostics.Process.Start(psi);
+                    var output = process!.StandardOutput.ReadToEnd();
+
+                    var line = output.Split('\n')
+                        .FirstOrDefault(l => l.Contains("IOPlatformUUID"));
+
+                    return line?.Split('=').Last().Trim().Trim('"');
                 }
             }
+            catch (Exception ex)
+            {
+                SixnetLogger.LogError(ex, ex.Message);
+                throw;
+            }
+            return string.Empty;
         }
 
         /// <summary>
-        /// Gets all ips
+        /// Gets network adapters
         /// </summary>
-        public static List<string> AllIps
+        public static List<NetworkInterface> GetNetworkAdapters()
         {
-            get
-            {
-                try
-                {
-                    var hostName = Dns.GetHostName();
-                    var ipAddresses = Dns.GetHostAddresses(hostName);
-                    return ipAddresses?.Select(ip => ip.ToString()).ToList() ?? new List<string>(0);
-                }
-                catch (Exception ex)
-                {
-                    SixnetLogger.LogError(ex, ex.Message);
-                    return new List<string>(0);
-                }
-            }
+            return NetworkInterface.GetAllNetworkInterfaces()?.ToList() ?? new List<NetworkInterface>(0);
         }
 
         /// <summary>
-        /// Gets the main ip
+        /// Get mac addresses
         /// </summary>
-        public static string MainIp
+        /// <returns></returns>
+        public static List<string> GetMacAddresses()
         {
-            get
+            return NetworkInterface.GetAllNetworkInterfaces()?
+            .Select(ni => ni.GetPhysicalAddress()?.ToString())
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .ToList() ?? new List<string>(0);
+        }
+
+        /// <summary>
+        /// Get first primary mac address
+        /// </summary>
+        /// <returns></returns>
+        public static string GetFirstPrimaryMacAddress()
+        {
+            return GetNetworkAdapters()
+                   .Where(n =>
+                       n.OperationalStatus == OperationalStatus.Up &&
+                       n.NetworkInterfaceType != NetworkInterfaceType.Loopback &&
+                       n.NetworkInterfaceType != NetworkInterfaceType.Tunnel &&
+                       !n.Description.ToLower().Contains("virtual") &&
+                       !n.Description.ToLower().Contains("docker"))
+                   .Select(n => n.GetPhysicalAddress()?.ToString())
+                   .Where(c => !string.IsNullOrWhiteSpace(c))
+                   .OrderBy(c => c)
+                   .FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Get local IPv4 addresses
+        /// </summary>
+        /// <returns>Local IPv4 addresses</returns>
+        public static List<IPAddress> GetIPAddresses()
+        {
+            return GetNetworkAdapters()?
+                .Where(ni => ni.NetworkInterfaceType != NetworkInterfaceType.Loopback &&
+                             ni.NetworkInterfaceType != NetworkInterfaceType.Tunnel)
+                .SelectMany(ni => ni.GetIPProperties().UnicastAddresses)
+                .Select(ua => ua.Address)
+                .Where(ip => !IPAddress.IsLoopback(ip)).ToList()
+                ?? new List<IPAddress>(0);
+        }
+
+        /// <summary>
+        /// Get local IPv4 addresses
+        /// </summary>
+        /// <returns>Local IPv4 addresses</returns>
+        public static IEnumerable<IPAddress> GetIPv4Addresses()
+        {
+            return GetIPAddresses()?.Where(c => c.AddressFamily == AddressFamily.InterNetwork).ToList() ?? new List<IPAddress>(0);
+        }
+
+        /// <summary>
+        /// Get machine unique code
+        /// </summary>
+        /// <returns></returns>
+        public static string GetMachineUniqueCode()
+        {
+            var parts = new List<string>
             {
-                try
-                {
-                    var hostName = Dns.GetHostName();
-                    var allIps = Dns.GetHostAddresses(hostName);
-                    if (allIps.IsNullOrEmpty())
-                    {
-                        return string.Empty;
-                    }
-                    var ipAddress = allIps.FirstOrDefault(ip => ip.AddressFamily == AddressFamily.InterNetwork) ?? allIps.FirstOrDefault();
-                    return ipAddress?.ToString() ?? string.Empty;
-                }
-                catch (Exception ex)
-                {
-                    SixnetLogger.LogError(ex, ex.Message);
-                    return string.Empty;
-                }
-            }
+                GetMachineName(),
+                GetMachineId(),
+                GetFirstPrimaryMacAddress(),
+                Environment.ProcessorCount.ToString(),
+            };
+            string raw = string.Join("|", parts.Where(p => !string.IsNullOrWhiteSpace(p)));
+            byte[] hash = SHA256.HashData(Encoding.UTF8.GetBytes(raw));
+            return System.Convert.ToHexString(hash);
         }
     }
 }
