@@ -67,7 +67,7 @@ namespace Sixnet.Development.Data.Command
         /// </summary>
         /// <param name="command">Command</param>
         /// <returns>Return table name</returns>
-        public List<string> GetTableNames(SixnetDataCommand command = null)
+        public List<DatabaseObjectName> GetTableNames(SixnetDataCommand command = null)
         {
             if (command != null)
             {
@@ -82,7 +82,7 @@ namespace Sixnet.Development.Data.Command
         /// <param name="activityQueryable">Activity query</param>
         /// <param name="queryableLocation">Activity query location</param>
         /// <returns>Return table name</returns>
-        public List<string> GetTableNames(ISixnetQueryable activityQueryable, QueryableLocation queryableLocation)
+        public List<DatabaseObjectName> GetTableNames(ISixnetQueryable activityQueryable, QueryableLocation queryableLocation)
         {
             if (Command == null)
             {

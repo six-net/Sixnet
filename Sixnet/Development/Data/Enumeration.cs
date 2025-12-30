@@ -284,15 +284,15 @@ namespace Sixnet.Development.Data
 
     #endregion
 
-    #region Database object name type
+    #region Database object type
 
     /// <summary>
-    /// Database object name type
+    /// Database object type
     /// </summary>
-    public enum DatabaseObjectNameType
+    public enum DatabaseObjectType
     {
-        TableName = 1,
-        ColumnName = 2
+        Table = 1,
+        Column = 2
     }
 
     #endregion

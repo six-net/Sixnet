@@ -15,6 +15,6 @@ namespace Sixnet.Development.Data.Database
         /// <summary>
         /// Gets or sets the table names
         /// </summary>
-        public List<string> TableNames { get; set; }
+        public List<DatabaseObjectName> TableNames { get; set; }
     }
 }

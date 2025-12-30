@@ -33,6 +33,13 @@ namespace Sixnet.Development.Data.Database
         /// <returns>Database connection</returns>
         public abstract IDbConnection GetDbConnection(DatabaseServer server);
 
+        /// <summary>
+        /// Get database connection meta
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
+        public abstract DatabaseConnectionMeta GetDbConnectionMeta(IDbConnection connection);
+
         #endregion
 
         #region Command resolver

@@ -895,7 +895,7 @@ namespace Sixnet.Development.Command
             ValidateConnections(connections);
             foreach (var connection in connections)
             {
-                var allTablesNames = (await connection.DatabaseProvider.GetTablesAsync(DatabaseCommand.Create(connection, options)).ConfigureAwait(false))?.Select(c => c.Name).ToList();
+                var allTablesNames = (await connection.DatabaseProvider.GetTablesAsync(DatabaseCommand.Create(connection, options)).ConfigureAwait(false))?.Select(c => c.GetDatabaseObjectName()).ToList();
                 foreach (var entityType in entityTypes)
                 {
                     await connection.DatabaseProvider.MigrateAsync(GetDeleteTableCommand(connection, allTablesNames, entityType, options));
@@ -919,7 +919,7 @@ namespace Sixnet.Development.Command
             ValidateConnections(connections);
             foreach (var connection in connections)
             {
-                await connection.DatabaseProvider.MigrateAsync(GetAddFieldCommand(connection, (await connection.DatabaseProvider.GetTablesAsync(DatabaseCommand.Create(connection, options)).ConfigureAwait(false))?.Select(c => c.Name).ToList(), entityType, fields, options));
+                await connection.DatabaseProvider.MigrateAsync(GetAddFieldCommand(connection, (await connection.DatabaseProvider.GetTablesAsync(DatabaseCommand.Create(connection, options)).ConfigureAwait(false))?.Select(c => c.GetDatabaseObjectName()).ToList(), entityType, fields, options));
             }
         }
 
@@ -939,7 +939,7 @@ namespace Sixnet.Development.Command
             ValidateConnections(connections);
             foreach (var connection in connections)
             {
-                await connection.DatabaseProvider.MigrateAsync(GetDeleteFieldCommand(connection, (await connection.DatabaseProvider.GetTablesAsync(DatabaseCommand.Create(connection, options)).ConfigureAwait(false))?.Select(c => c.Name).ToList(), entityType, fields, options));
+                await connection.DatabaseProvider.MigrateAsync(GetDeleteFieldCommand(connection, (await connection.DatabaseProvider.GetTablesAsync(DatabaseCommand.Create(connection, options)).ConfigureAwait(false))?.Select(c => c.GetDatabaseObjectName()).ToList(), entityType, fields, options));
             }
         }
 
@@ -958,7 +958,7 @@ namespace Sixnet.Development.Command
             ValidateConnections(connections);
             foreach (var connection in connections)
             {
-                await connection.DatabaseProvider.MigrateAsync(GetAlterFieldCommand(connection, (await connection.DatabaseProvider.GetTablesAsync(DatabaseCommand.Create(connection, options)).ConfigureAwait(false))?.Select(c => c.Name).ToList(), entityType, fields, options));
+                await connection.DatabaseProvider.MigrateAsync(GetAlterFieldCommand(connection, (await connection.DatabaseProvider.GetTablesAsync(DatabaseCommand.Create(connection, options)).ConfigureAwait(false))?.Select(c => c.GetDatabaseObjectName()).ToList(), entityType, fields, options));
             }
         }
 

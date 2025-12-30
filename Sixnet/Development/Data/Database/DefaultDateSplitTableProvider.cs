@@ -17,36 +17,36 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="parameter">Get split table name options</param>
         /// <returns></returns>
-        public List<string> ResolveTableNames(ResolveSplitTableNameParameter parameter)
+        public List<DatabaseObjectName> ResolveTableNames(ResolveSplitTableNameParameter parameter)
         {
             SixnetDirectThrower.ThrowArgNullIf(parameter == null, nameof(parameter));
             SixnetDirectThrower.ThrowArgNullIf(parameter.EntityConfiguration == null, nameof(ResolveSplitTableNameParameter.EntityConfiguration));
             SixnetDirectThrower.ThrowArgNullIf(parameter.SplitBehavior == null, nameof(ResolveSplitTableNameParameter.SplitBehavior));
-            SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(parameter.RootTableName), nameof(ResolveSplitTableNameParameter.RootTableName));
+            SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(parameter.RootTableName.Name), nameof(ResolveSplitTableNameParameter.RootTableName.Name));
 
             var splitBehavior = parameter.SplitBehavior;
             if (splitBehavior.SplitValues.IsNullOrEmpty())
             {
-                return new List<string>(0);
+                return new List<DatabaseObjectName>(0);
             }
 
-            var tableNames = new List<string>();
+            var tableNames = new HashSet<string>();
             foreach (var splitValue in splitBehavior.SplitValues)
             {
                 var splitDate = GetSplitTableDate((splitValue is DateTimeOffset splitOffsetValue)
                     ? splitOffsetValue.DateTime
                     : splitValue, parameter.EntityConfiguration.SplitTableType);
-                tableNames.Add(GetSplitTable(parameter.EntityConfiguration, splitDate));
+                tableNames.Add(GetSplitTable(parameter, splitDate));
                 if (parameter.ExpansionNum > 0)
                 {
                     for (var i = 1; i <= parameter.ExpansionNum; i++)
                     {
                         var expansionSplitDate = GetExpansionSplitTableDate(splitDate, parameter.EntityConfiguration.SplitTableType, i);
-                        tableNames.Add(GetSplitTable(parameter.EntityConfiguration, expansionSplitDate));
+                        tableNames.Add(GetSplitTable(parameter, expansionSplitDate));
                     }
                 }
             }
-            return tableNames.Distinct().ToList();
+            return tableNames.Select(t => DatabaseObjectName.Create(t, DatabaseObjectType.Table, parameter.RootTableName.SchemaName)).ToList();
         }
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="parameter">Parameter</param>
         /// <returns></returns>
-        public List<string> GetTableNames(GetSplitTableNameParameter parameter)
+        public List<DatabaseObjectName> GetTableNames(GetSplitTableNameParameter parameter)
         {
             SixnetDirectThrower.ThrowArgNullIf(parameter == null, nameof(parameter));
 
@@ -71,12 +71,21 @@ namespace Sixnet.Development.Data.Database
                 {
                     case SplitTableNameSelectionPattern.Range:
                         var sortedAllTableNames = allTableNames.OrderBy(t => t).ToList();
-                        var sortedResolvedTableNames = resolvedTableNames.OrderBy(t => t);
-                        var minTableName = sortedResolvedTableNames.First();
-                        var maxTableName = sortedResolvedTableNames.Last();
-                        var minTableNameIndex = sortedAllTableNames.FindIndex(t => string.Equals(t, minTableName, StringComparison.OrdinalIgnoreCase));
-                        var maxTableNameIndex = sortedAllTableNames.FindIndex(t => string.Equals(t, maxTableName, StringComparison.OrdinalIgnoreCase));
-                        resolvedTableNames = sortedAllTableNames.GetRange(minTableNameIndex, (maxTableNameIndex - minTableNameIndex) + 1);
+                        var sortedResolvedTableNames = resolvedTableNames.OrderBy(t => t).ToList();
+
+                        var resolvedMinTableName = sortedResolvedTableNames.First();
+                        var actualMinTableName = sortedAllTableNames.First();
+
+                        var resolvedMaxTableName = sortedResolvedTableNames.Last();
+                        var actualMaxTableName = sortedAllTableNames.Last();
+
+                        actualMinTableName = resolvedMinTableName.CompareTo(actualMinTableName) >= 0 ? resolvedMinTableName : actualMinTableName;
+                        actualMaxTableName = resolvedMaxTableName.CompareTo(actualMaxTableName) >= 0 ? actualMaxTableName : resolvedMaxTableName;
+
+                        var actualMinTableNameIndex = sortedAllTableNames.FindIndex(t => t.Equals(actualMinTableName));
+                        var actualMaxTableNameIndex = sortedAllTableNames.FindIndex(t => t.Equals(actualMaxTableName));
+
+                        resolvedTableNames = sortedAllTableNames.GetRange(actualMinTableNameIndex, (actualMaxTableNameIndex - actualMinTableNameIndex) + 1);
                         break;
                 }
             }
@@ -88,14 +97,14 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="parameter">Parameter</param>
         /// <returns></returns>
-        public List<string> FilterAllTableNames(FilterAllSplitTableNameParameter parameter)
+        public List<DatabaseObjectName> FilterAllTableNames(FilterAllSplitTableNameParameter parameter)
         {
             if (parameter?.AllTableNames.IsNullOrEmpty() ?? true)
             {
-                return new List<string>(0);
+                return new List<DatabaseObjectName>(0);
             }
-            var tableNameRegex = new Regex(@$"^{parameter.RootTableName}_\d+$");
-            return parameter.AllTableNames?.Where(tn => !string.IsNullOrWhiteSpace(tn) && tableNameRegex.IsMatch(tn)).ToList();
+            var tableNameRegex = new Regex(@$"^{parameter.RootTableName.FullName}_\d+$", RegexOptions.IgnoreCase);
+            return parameter.AllTableNames?.Where(tn => !string.IsNullOrWhiteSpace(tn.Name) && tableNameRegex.IsMatch($"{tn.FullName}")).ToList();
         }
 
         /// <summary>
@@ -104,10 +113,10 @@ namespace Sixnet.Development.Data.Database
         /// <param name="entityConfig"></param>
         /// <param name="splitTableDate"></param>
         /// <returns></returns>
-        string GetSplitTable(EntityConfiguration entityConfig, DateTime splitTableDate)
+        static string GetSplitTable(ResolveSplitTableNameParameter parameter, DateTime splitTableDate)
         {
-            var rootTableName = entityConfig.TableName;
-            return $"{rootTableName}_{splitTableDate.ToString("yyyyMMdd")}";
+            var rootTableName = parameter.RootTableName.Name;
+            return $"{rootTableName}_{splitTableDate:yyyyMMdd}";
         }
 
         /// <summary>
@@ -117,14 +126,14 @@ namespace Sixnet.Development.Data.Database
         /// <param name="splitTableType">Split table type</param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        DateTime GetSplitTableDate(DateTime splitDateTime, SplitTableType splitTableType)
+        static DateTime GetSplitTableDate(DateTime splitDateTime, SplitTableType splitTableType)
         {
             return splitTableType switch
             {
                 SplitTableType.Day => System.Convert.ToDateTime(splitDateTime.ToString("yyyy-MM-dd")),
-                SplitTableType.Week => GetMondayDateTime(splitDateTime),
+                SplitTableType.Week => DefaultDateSplitTableProvider.GetMondayDateTime(splitDateTime),
                 SplitTableType.Month => System.Convert.ToDateTime(splitDateTime.ToString("yyyy-MM-01")),
-                SplitTableType.Season => GetSeasonDateTime(splitDateTime),
+                SplitTableType.Season => DefaultDateSplitTableProvider.GetSeasonDateTime(splitDateTime),
                 SplitTableType.Year => System.Convert.ToDateTime(splitDateTime.ToString("yyyy-01-01")),
                 _ => throw new Exception($"Not support {splitTableType}"),
             };
@@ -137,7 +146,7 @@ namespace Sixnet.Development.Data.Database
         /// <param name="splitTableType"></param>
         /// <param name="expansionValue"></param>
         /// <returns></returns>
-        DateTime GetExpansionSplitTableDate(DateTime splitDateTime, SplitTableType splitTableType, int expansionValue)
+        static DateTime GetExpansionSplitTableDate(DateTime splitDateTime, SplitTableType splitTableType, int expansionValue)
         {
             return splitTableType switch
             {
@@ -155,7 +164,7 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="splitDateTime">Split date time</param>
         /// <returns></returns>
-        DateTime GetMondayDateTime(DateTime splitDateTime)
+        static DateTime GetMondayDateTime(DateTime splitDateTime)
         {
             var day = (int)splitDateTime.DayOfWeek - 1;
             day = day == -1 ? 6 : day;
@@ -168,7 +177,7 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="splitDateTime">Split date time</param>
         /// <returns></returns>
-        DateTime GetSeasonDateTime(DateTime splitDateTime)
+        static DateTime GetSeasonDateTime(DateTime splitDateTime)
         {
             var month = splitDateTime.Month;
             month = ((month / 4) * 3) + 1;

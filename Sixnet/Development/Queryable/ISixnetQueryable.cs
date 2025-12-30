@@ -738,7 +738,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="splitTableNameFilter">Split table name filter</param>
         /// <returns></returns>
-        ISixnetQueryable SplitTable(Func<IEnumerable<string>, IEnumerable<string>, IEnumerable<string>> splitTableNameFilter);
+        ISixnetQueryable SplitTable(Func<IEnumerable<DatabaseObjectName>, IEnumerable<DatabaseObjectName>, IEnumerable<DatabaseObjectName>> splitTableNameFilter);
 
         #endregion
 
@@ -1823,7 +1823,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="splitTableNameFilter">Split table name filter</param>
         /// <returns></returns>
-        new ISixnetQueryable<TFirst> SplitTable(Func<IEnumerable<string>, IEnumerable<string>, IEnumerable<string>> splitTableNameFilter);
+        new ISixnetQueryable<TFirst> SplitTable(Func<IEnumerable<DatabaseObjectName>, IEnumerable<DatabaseObjectName>, IEnumerable<DatabaseObjectName>> splitTableNameFilter);
 
         #endregion
 
@@ -2551,7 +2551,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="splitTableNameFilter">Split table name filter</param>
         /// <returns></returns>
-        new ISixnetQueryable<TFirst, TSecond> SplitTable(Func<IEnumerable<string>, IEnumerable<string>, IEnumerable<string>> splitTableNameFilter);
+        new ISixnetQueryable<TFirst, TSecond> SplitTable(Func<IEnumerable<DatabaseObjectName>, IEnumerable<DatabaseObjectName>, IEnumerable<DatabaseObjectName>> splitTableNameFilter);
 
         #endregion
 
@@ -3374,7 +3374,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="splitTableNameFilter">Split table name filter</param>
         /// <returns></returns>
-        new ISixnetQueryable<TFirst, TSecond, TThird> SplitTable(Func<IEnumerable<string>, IEnumerable<string>, IEnumerable<string>> splitTableNameFilter);
+        new ISixnetQueryable<TFirst, TSecond, TThird> SplitTable(Func<IEnumerable<DatabaseObjectName>, IEnumerable<DatabaseObjectName>, IEnumerable<DatabaseObjectName>> splitTableNameFilter);
 
         #endregion
 
@@ -4283,7 +4283,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="splitTableNameFilter">Split table name filter</param>
         /// <returns></returns>
-        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth> SplitTable(Func<IEnumerable<string>, IEnumerable<string>, IEnumerable<string>> splitTableNameFilter);
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth> SplitTable(Func<IEnumerable<DatabaseObjectName>, IEnumerable<DatabaseObjectName>, IEnumerable<DatabaseObjectName>> splitTableNameFilter);
 
         #endregion
 
@@ -5274,7 +5274,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="splitTableNameFilter">Split table name filter</param>
         /// <returns></returns>
-        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> SplitTable(Func<IEnumerable<string>, IEnumerable<string>, IEnumerable<string>> splitTableNameFilter);
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> SplitTable(Func<IEnumerable<DatabaseObjectName>, IEnumerable<DatabaseObjectName>, IEnumerable<DatabaseObjectName>> splitTableNameFilter);
 
         #endregion
 
@@ -6347,7 +6347,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="splitTableNameFilter">Split table name filter</param>
         /// <returns></returns>
-        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> SplitTable(Func<IEnumerable<string>, IEnumerable<string>, IEnumerable<string>> splitTableNameFilter);
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> SplitTable(Func<IEnumerable<DatabaseObjectName>, IEnumerable<DatabaseObjectName>, IEnumerable<DatabaseObjectName>> splitTableNameFilter);
 
         #endregion
 
@@ -7286,7 +7286,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="splitTableNameFilter">Split table name filter</param>
         /// <returns></returns>
-        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> SplitTable(Func<IEnumerable<string>, IEnumerable<string>, IEnumerable<string>> splitTableNameFilter);
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> SplitTable(Func<IEnumerable<DatabaseObjectName>, IEnumerable<DatabaseObjectName>, IEnumerable<DatabaseObjectName>> splitTableNameFilter);
 
         #endregion
 

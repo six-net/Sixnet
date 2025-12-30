@@ -20,6 +20,13 @@ namespace Sixnet.Development.Data.Database
         /// <returns>Database connection</returns>
         IDbConnection GetDbConnection(DatabaseServer server);
 
+        /// <summary>
+        /// Get db connection meta
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
+        DatabaseConnectionMeta GetDbConnectionMeta(IDbConnection connection);
+
         #endregion
 
         #region Execution

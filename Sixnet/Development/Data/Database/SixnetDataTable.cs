@@ -41,6 +41,11 @@ namespace Sixnet.Development.Data.Database
         {
             return $"{SchemaName}_{Name}".GetHashCode();
         }
+
+        public DatabaseObjectName GetDatabaseObjectName()
+        {
+            return DatabaseObjectName.Create(Name, DatabaseObjectType.Table, SchemaName);
+        }
     }
 
     public class SixnetDataTableNameComparer : IEqualityComparer<string>

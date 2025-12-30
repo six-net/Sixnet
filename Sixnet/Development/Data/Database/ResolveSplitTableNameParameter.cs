@@ -17,7 +17,7 @@ namespace Sixnet.Development.Data.Database
         /// <summary>
         /// Gets or sets the root table name
         /// </summary>
-        public string RootTableName { get; set; }
+        public DatabaseObjectName RootTableName { get; set; }
 
         /// <summary>
         /// Gets or sets the split behavior

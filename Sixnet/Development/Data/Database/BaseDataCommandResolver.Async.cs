@@ -408,14 +408,14 @@ namespace Sixnet.Development.Data.Database
                     string targetScript;
                     if (tableNames.Count == 1)
                     {
-                        targetScript = $"{FormatAndWrapKeywordFunc(tableNames.FirstOrDefault(), DatabaseObjectNameType.TableName)}{(applyTablePetName ? $"{TablePetNameKeyword}{tablePetName}" : "")}";
+                        targetScript = $"{FormatAndWrapObjectName(tableNames.FirstOrDefault())}{(applyTablePetName ? $"{TablePetNameKeyword}{tablePetName}" : "")}";
                     }
                     else
                     {
                         var targetScripts = new List<string>(tableNames.Count);
                         foreach (var tableName in tableNames)
                         {
-                            targetScripts.Add($"SELECT * FROM {FormatAndWrapKeywordFunc(tableName, DatabaseObjectNameType.TableName)}");
+                            targetScripts.Add($"SELECT * FROM {FormatAndWrapObjectName(tableName)}");
                         }
                         targetScript = $"({string.Join(" UNION ", targetScripts)}){(applyTablePetName ? $"{TablePetNameKeyword}{tablePetName}" : "")}";
                         complexTarget = true;
@@ -1077,8 +1077,9 @@ namespace Sixnet.Development.Data.Database
                 }
                 else
                 {
-                    fieldName = FormatKeywordFunc(regularField.FieldName, DatabaseObjectNameType.ColumnName);
-                    formatedFieldName = WrapKeywordFunc(fieldName, DatabaseObjectNameType.ColumnName);
+                    var formatObjectName = FormatObjectName(DatabaseObjectName.Create(regularField.FieldName, DatabaseObjectType.Column));
+                    fieldName = formatObjectName.Name;
+                    formatedFieldName = GetObjectFullName(WrapObjectName(formatObjectName));
                 }
                 if (!string.IsNullOrWhiteSpace(tablePetName) && fieldLocation != FieldLocation.InsertValue)
                 {
@@ -1161,9 +1162,9 @@ namespace Sixnet.Development.Data.Database
 
             var fieldPetName = (queryableLocation == QueryableLocation.Top || queryableLocation == QueryableLocation.From)
                 && fieldLocation == FieldLocation.Output && !string.IsNullOrWhiteSpace(propertyName)
-                    ? WrapKeywordFunc(propertyName, DatabaseObjectNameType.ColumnName)
+                    ? GetObjectFullName(WrapObjectName(DatabaseObjectName.Create(propertyName, DatabaseObjectType.Column)))
                     : !string.IsNullOrWhiteSpace(fieldName)
-                      ? WrapKeywordFunc(fieldName, DatabaseObjectNameType.ColumnName)
+                      ? GetObjectFullName(WrapObjectName(DatabaseObjectName.Create(fieldName, DatabaseObjectType.Column)))
                       : string.Empty;
             formatedFieldName = !string.IsNullOrWhiteSpace(fieldPetName)
                 && (fieldLocation == FieldLocation.Output || fieldLocation == FieldLocation.InnerOutput)

@@ -335,7 +335,7 @@ namespace Sixnet.Development.Data.Command
         /// <param name="activityQueryable">Activity queryable</param>
         /// <param name="queryableLocation">Activity queryable location</param>
         /// <returns>Return table name</returns>
-        public List<string> GetTableNames(ISixnetQueryable activityQueryable, QueryableLocation queryableLocation)
+        public List<DatabaseObjectName> GetTableNames(ISixnetQueryable activityQueryable, QueryableLocation queryableLocation)
         {
             return DataCommandExecutionContext.GetTableNames(activityQueryable, queryableLocation);
         }
@@ -346,7 +346,7 @@ namespace Sixnet.Development.Data.Command
         /// <param name="activityQueryable">Activity queryable</param>
         /// <param name="queryableLocation">Activity queryable location</param>
         /// <returns>Return table name</returns>
-        public async Task<List<string>> GetTableNamesAsync(ISixnetQueryable activityQueryable, QueryableLocation queryableLocation)
+        public async Task<List<DatabaseObjectName>> GetTableNamesAsync(ISixnetQueryable activityQueryable, QueryableLocation queryableLocation)
         {
             return await DataCommandExecutionContext.GetTableNamesAsync(activityQueryable, queryableLocation).ConfigureAwait(false);
         }

@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Xml;
 
 using Sixnet.Development.Data;
+using Sixnet.Development.Data.Command;
 using Sixnet.Development.Data.Database;
 using Sixnet.Development.Data.Field;
 using Sixnet.Development.Entity;
@@ -264,7 +265,7 @@ namespace System.Collections.Generic
             var entityConfig = SixnetEntityManager.GetEntityConfig(dataType);
             table.TableName = entityConfig == null
                 ? dataType.Name
-                : SixnetDataManager.GetDefaultTableName(databaseType, entityConfig);
+                : SixnetDataManager.GetDefaultTableName(DataCommandExecutionContext.Create(null, null), entityConfig).FullName;
             var columnNameDict = new Dictionary<string, string>();
             foreach (var property in properties)
             {

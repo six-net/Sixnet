@@ -1,6 +1,7 @@
 ﻿// "Company © 2025. All rights reserved."
 
 using Sixnet.Development.Data;
+using Sixnet.Development.Data.Database;
 using Sixnet.Development.Data.Field;
 using Sixnet.Expressions.Linq;
 
@@ -1376,7 +1377,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="splitTableNameFilter">Split table name filter</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> SplitTable(Func<IEnumerable<string>, IEnumerable<string>, IEnumerable<string>> splitTableNameFilter)
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> SplitTable(Func<IEnumerable<DatabaseObjectName>, IEnumerable<DatabaseObjectName>, IEnumerable<DatabaseObjectName>> splitTableNameFilter)
         {
             base.SplitTable(splitTableNameFilter);
             return this;

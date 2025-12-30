@@ -2,6 +2,7 @@
 
 using System.Threading.Tasks;
 
+using Sixnet.Development.Data.Database;
 using Sixnet.Development.Queryable;
 using Sixnet.Exceptions;
 
@@ -17,7 +18,7 @@ namespace Sixnet.Development.Data.Command
         /// </summary>
         /// <param name="command">Command</param>
         /// <returns>Return table name</returns>
-        public Task<List<string>> GetTableNamesAsync(SixnetDataCommand command = null)
+        public Task<List<DatabaseObjectName>> GetTableNamesAsync(SixnetDataCommand command = null)
         {
             if (command != null)
             {
@@ -32,7 +33,7 @@ namespace Sixnet.Development.Data.Command
         /// <param name="activityQueryable">Activity query</param>
         /// <param name="queryableLocation">Activity query location</param>
         /// <returns>Return table name</returns>
-        public Task<List<string>> GetTableNamesAsync(ISixnetQueryable activityQueryable, QueryableLocation queryableLocation)
+        public Task<List<DatabaseObjectName>> GetTableNamesAsync(ISixnetQueryable activityQueryable, QueryableLocation queryableLocation)
         {
             if (Command == null)
             {

@@ -822,8 +822,21 @@ namespace Sixnet.Development.Command
         static MigrationDatabaseCommand GetCreateTableCommand(DatabaseConnection connection, Type entityType, SixnetDataOperationOptions options = null)
         {
             var entityConfig = SixnetEntityManager.GetEntityConfig(entityType);
-            var rootTableName = SixnetDataManager.GetDefaultTableName(connection.DatabaseServer.DatabaseType, entityConfig);
-            List<string> tableNames = null;
+            var migCmd = DatabaseCommand.Create<MigrationDatabaseCommand>(connection, options, cmd =>
+            {
+                cmd.MigrationInfo = new MigrationInfo()
+                {
+                    NewTables =
+                    [
+                        new NewTableInfo()
+                        {
+                            EntityType = entityType,
+                        }
+                    ]
+                };
+            });
+            var rootTableName = SixnetDataManager.GetDefaultTableName(DataCommandExecutionContext.Create(connection), entityConfig);
+            List<DatabaseObjectName> tableNames = null;
             if (entityConfig.IsSplitTable)
             {
                 var splitProvider = SixnetDataManager.GetSplitTableProvider(SixnetDataManager.GetDataOptions(), SixnetEntityManager.GetEntityConfig(entityType));
@@ -843,20 +856,8 @@ namespace Sixnet.Development.Command
             {
                 tableNames = [rootTableName];
             }
-            return DatabaseCommand.Create<MigrationDatabaseCommand>(connection, options, cmd =>
-            {
-                cmd.MigrationInfo = new MigrationInfo()
-                {
-                    NewTables =
-                    [
-                        new NewTableInfo()
-                        {
-                            EntityType = entityType,
-                            TableNames = tableNames
-                        }
-                    ]
-                };
-            });
+            migCmd.MigrationInfo.NewTables[0].TableNames = tableNames;
+            return migCmd;
         }
 
         /// <summary>
@@ -866,32 +867,45 @@ namespace Sixnet.Development.Command
         /// <param name="entityType"></param>
         /// <param name="options"></param>
         /// <returns></returns>
-        static MigrationDatabaseCommand GetDeleteTableCommand(DatabaseConnection connection, List<string> allTableNames, Type entityType, SixnetDataOperationOptions options = null)
+        static MigrationDatabaseCommand GetDeleteTableCommand(DatabaseConnection connection, List<DatabaseObjectName> allTableNames, Type entityType, SixnetDataOperationOptions options = null)
         {
             var entityConfig = SixnetEntityManager.GetEntityConfig(entityType);
-            var rootTableName = SixnetDataManager.GetDefaultTableName(connection.DatabaseServer.DatabaseType, entityConfig);
-            List<string> tableNames = null;
+            var migCmd = DatabaseCommand.Create<MigrationDatabaseCommand>(connection, options, cmd =>
+            {
+                cmd.MigrationInfo = new MigrationInfo();
+            });
+            var rootTableName = SixnetDataManager.GetDefaultTableName(DataCommandExecutionContext.Create(connection), entityConfig);
+            List<DatabaseObjectName> tableNames = null;
             if (entityConfig.IsSplitTable)
             {
                 var splitProvider = SixnetDataManager.GetSplitTableProvider(SixnetDataManager.GetDataOptions(), SixnetEntityManager.GetEntityConfig(entityType));
-                tableNames = splitProvider.FilterAllTableNames(new FilterAllSplitTableNameParameter()
+                var splitBehavior = options?.SplitTableBehavior ?? new SplitTableBehavior();
+                allTableNames = splitProvider.FilterAllTableNames(new FilterAllSplitTableNameParameter() 
+                {
+                    AllTableNames = allTableNames,
+                    Behavior = splitBehavior,
+                    RootTableName = rootTableName,
+                });
+                var splitTableNames = splitProvider.ResolveTableNames(new ResolveSplitTableNameParameter()
+                {
+                    EntityConfiguration = entityConfig,
+                    RootTableName = rootTableName,
+                    SplitBehavior = splitBehavior
+                });
+                tableNames = splitProvider.GetTableNames(new GetSplitTableNameParameter()
                 {
                     AllTableNames = allTableNames,
                     RootTableName = rootTableName,
-                    Behavior = options?.SplitTableBehavior ?? new SplitTableBehavior()
+                    ResolvedTableNames = splitTableNames,
+                    Behavior = splitBehavior
                 });
             }
             else
             {
                 tableNames = [rootTableName];
             }
-            return DatabaseCommand.Create<MigrationDatabaseCommand>(connection, options, cmd =>
-            {
-                cmd.MigrationInfo = new MigrationInfo()
-                {
-                    DeletableTableNames = tableNames
-                };
-            });
+            migCmd.MigrationInfo.DeletableTableNames = tableNames;
+            return migCmd;
         }
 
         /// <summary>
@@ -903,11 +917,15 @@ namespace Sixnet.Development.Command
         /// <param name="fields"></param>
         /// <param name="options"></param>
         /// <returns></returns>
-        static MigrationDatabaseCommand GetAddFieldCommand(DatabaseConnection connection, List<string> allTableNames, Type entityType, List<DataField> fields, SixnetDataOperationOptions options = null)
+        static MigrationDatabaseCommand GetAddFieldCommand(DatabaseConnection connection, List<DatabaseObjectName> allTableNames, Type entityType, List<DataField> fields, SixnetDataOperationOptions options = null)
         {
             var entityConfig = SixnetEntityManager.GetEntityConfig(entityType);
-            var rootTableName = SixnetDataManager.GetDefaultTableName(connection.DatabaseServer.DatabaseType, entityConfig);
-            List<string> tableNames = null;
+            var migCmd = DatabaseCommand.Create<MigrationDatabaseCommand>(connection, options, cmd =>
+            {
+                cmd.MigrationInfo = new MigrationInfo();
+            });
+            var rootTableName = SixnetDataManager.GetDefaultTableName(DataCommandExecutionContext.Create(connection), entityConfig);
+            List<DatabaseObjectName> tableNames = null;
             if (entityConfig.IsSplitTable)
             {
                 var splitProvider = SixnetDataManager.GetSplitTableProvider(SixnetDataManager.GetDataOptions(), SixnetEntityManager.GetEntityConfig(entityType));
@@ -922,18 +940,13 @@ namespace Sixnet.Development.Command
             {
                 tableNames = [rootTableName];
             }
-            var newFieldDict = new Dictionary<string, List<DataField>>();
+            var newFieldDict = new Dictionary<DatabaseObjectName, List<DataField>>();
             foreach (var tableName in tableNames)
             {
                 newFieldDict[tableName] = fields;
             }
-            return DatabaseCommand.Create<MigrationDatabaseCommand>(connection, options, cmd =>
-            {
-                cmd.MigrationInfo = new MigrationInfo()
-                {
-                    NewFields = newFieldDict
-                };
-            });
+            migCmd.MigrationInfo.NewFields = newFieldDict;
+            return migCmd;
         }
 
         /// <summary>
@@ -945,11 +958,15 @@ namespace Sixnet.Development.Command
         /// <param name="fields"></param>
         /// <param name="options"></param>
         /// <returns></returns>
-        static MigrationDatabaseCommand GetDeleteFieldCommand(DatabaseConnection connection, List<string> allTableNames, Type entityType, List<DataField> fields, SixnetDataOperationOptions options = null)
+        static MigrationDatabaseCommand GetDeleteFieldCommand(DatabaseConnection connection, List<DatabaseObjectName> allTableNames, Type entityType, List<DataField> fields, SixnetDataOperationOptions options = null)
         {
             var entityConfig = SixnetEntityManager.GetEntityConfig(entityType);
-            var rootTableName = SixnetDataManager.GetDefaultTableName(connection.DatabaseServer.DatabaseType, entityConfig);
-            List<string> tableNames = null;
+            var migCmd = DatabaseCommand.Create<MigrationDatabaseCommand>(connection, options, cmd =>
+            {
+                cmd.MigrationInfo = new MigrationInfo();
+            });
+            var rootTableName = SixnetDataManager.GetDefaultTableName(DataCommandExecutionContext.Create(connection), entityConfig);
+            List<DatabaseObjectName> tableNames = null;
             if (entityConfig.IsSplitTable)
             {
                 var splitProvider = SixnetDataManager.GetSplitTableProvider(SixnetDataManager.GetDataOptions(), SixnetEntityManager.GetEntityConfig(entityType));
@@ -964,18 +981,13 @@ namespace Sixnet.Development.Command
             {
                 tableNames = [rootTableName];
             }
-            var tableFieldDict = new Dictionary<string, List<DataField>>();
+            var tableFieldDict = new Dictionary<DatabaseObjectName, List<DataField>>();
             foreach (var tableName in tableNames)
             {
                 tableFieldDict[tableName] = fields;
             }
-            return DatabaseCommand.Create<MigrationDatabaseCommand>(connection, options, cmd =>
-            {
-                cmd.MigrationInfo = new MigrationInfo()
-                {
-                    DeletableFields = tableFieldDict
-                };
-            });
+            migCmd.MigrationInfo.DeletableFields = tableFieldDict;
+            return migCmd;
         }
 
         /// <summary>
@@ -987,11 +999,15 @@ namespace Sixnet.Development.Command
         /// <param name="fields"></param>
         /// <param name="options"></param>
         /// <returns></returns>
-        static MigrationDatabaseCommand GetAlterFieldCommand(DatabaseConnection connection, List<string> allTableNames, Type entityType, Dictionary<string, DataField> fields, SixnetDataOperationOptions options = null)
+        static MigrationDatabaseCommand GetAlterFieldCommand(DatabaseConnection connection, List<DatabaseObjectName> allTableNames, Type entityType, Dictionary<string, DataField> fields, SixnetDataOperationOptions options = null)
         {
             var entityConfig = SixnetEntityManager.GetEntityConfig(entityType);
-            var rootTableName = SixnetDataManager.GetDefaultTableName(connection.DatabaseServer.DatabaseType, entityConfig);
-            List<string> tableNames = null;
+            var migCmd = DatabaseCommand.Create<MigrationDatabaseCommand>(connection, options, cmd =>
+            {
+                cmd.MigrationInfo = new MigrationInfo();
+            });
+            var rootTableName = SixnetDataManager.GetDefaultTableName(DataCommandExecutionContext.Create(connection), entityConfig);
+            List<DatabaseObjectName> tableNames = null;
             if (entityConfig.IsSplitTable)
             {
                 var splitProvider = SixnetDataManager.GetSplitTableProvider(SixnetDataManager.GetDataOptions(), SixnetEntityManager.GetEntityConfig(entityType));
@@ -1006,18 +1022,13 @@ namespace Sixnet.Development.Command
             {
                 tableNames = [rootTableName];
             }
-            var tableFieldDict = new Dictionary<string, Dictionary<string, DataField>>();
+            var tableFieldDict = new Dictionary<DatabaseObjectName, Dictionary<string, DataField>>();
             foreach (var tableName in tableNames)
             {
                 tableFieldDict[tableName] = fields;
             }
-            return DatabaseCommand.Create<MigrationDatabaseCommand>(connection, options, cmd =>
-            {
-                cmd.MigrationInfo = new MigrationInfo()
-                {
-                    UpdatableFields = tableFieldDict
-                };
-            });
+            migCmd.MigrationInfo.UpdatableFields = tableFieldDict;
+            return migCmd;
         }
 
         #endregion
@@ -1056,7 +1067,7 @@ namespace Sixnet.Development.Command
             {
                 foreach (var entityType in entityTypes)
                 {
-                    var allTableNames = connection.DatabaseProvider.GetTables(DatabaseCommand.Create(connection, options))?.Select(c => c.Name).ToList();
+                    var allTableNames = connection.DatabaseProvider.GetTables(DatabaseCommand.Create(connection, options))?.Select(c => c.GetDatabaseObjectName()).ToList();
                     connection.DatabaseProvider.Migrate(GetDeleteTableCommand(connection, allTableNames, entityType, options));
                 }
             }
@@ -1078,7 +1089,7 @@ namespace Sixnet.Development.Command
             ValidateConnections(connections);
             foreach (var connection in connections)
             {
-                connection.DatabaseProvider.Migrate(GetAddFieldCommand(connection, connection.DatabaseProvider.GetTables(DatabaseCommand.Create(connection, options))?.Select(c => c.Name).ToList(), entityType, fields, options));
+                connection.DatabaseProvider.Migrate(GetAddFieldCommand(connection, connection.DatabaseProvider.GetTables(DatabaseCommand.Create(connection, options))?.Select(c => c.GetDatabaseObjectName()).ToList(), entityType, fields, options));
             }
         }
 
@@ -1098,7 +1109,7 @@ namespace Sixnet.Development.Command
             ValidateConnections(connections);
             foreach (var connection in connections)
             {
-                connection.DatabaseProvider.Migrate(GetDeleteFieldCommand(connection, connection.DatabaseProvider.GetTables(DatabaseCommand.Create(connection, options))?.Select(c => c.Name).ToList(), entityType, fields, options));
+                connection.DatabaseProvider.Migrate(GetDeleteFieldCommand(connection, connection.DatabaseProvider.GetTables(DatabaseCommand.Create(connection, options))?.Select(c => c.GetDatabaseObjectName()).ToList(), entityType, fields, options));
             }
         }
 
@@ -1117,7 +1128,7 @@ namespace Sixnet.Development.Command
             ValidateConnections(connections);
             foreach (var connection in connections)
             {
-                connection.DatabaseProvider.Migrate(GetAlterFieldCommand(connection, connection.DatabaseProvider.GetTables(DatabaseCommand.Create(connection, options))?.Select(c => c.Name).ToList(), entityType, fields, options));
+                connection.DatabaseProvider.Migrate(GetAlterFieldCommand(connection, connection.DatabaseProvider.GetTables(DatabaseCommand.Create(connection, options))?.Select(c => c.GetDatabaseObjectName()).ToList(), entityType, fields, options));
             }
         }
 

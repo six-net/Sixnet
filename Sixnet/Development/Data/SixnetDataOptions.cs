@@ -2,6 +2,7 @@
 
 using System.Data;
 
+using Sixnet.Cache.String.Parameters;
 using Sixnet.Development.Data.Command;
 using Sixnet.Development.Data.Command.Event;
 using Sixnet.Development.Data.Database;
@@ -38,10 +39,15 @@ namespace Sixnet.Development.Data
             { DataIsolationLevel.Snapshot, IsolationLevel.Snapshot },
             { DataIsolationLevel.Unspecified, IsolationLevel.Unspecified }
         };
+        readonly Dictionary<DatabaseType, string> _databaseDefaultSchemas = new()
+        {
+            { DatabaseType.SQLServer, "dbo" }
+        };
         FieldRole _ignoreFilterFieldRole = FieldRole.None;
-        Func<SixnetDataCommand, List<DatabaseServer>> _getDataCommandDatabaseServers;
-        Func<DatabaseServer, IDbConnection> _getDatabaseConnection;
-        Func<QueryableFilterContext, ISixnetQueryable> _getCustomContextFilter;
+        Func<SixnetDataCommand, List<DatabaseServer>> _getDataCommandDatabaseServersFunc;
+        Func<DatabaseServer, IDbConnection> _getDatabaseConnectionFunc;
+        Func<QueryableFilterContext, ISixnetQueryable> _getCustomContextFilterFunc;
+        Func<DataCommandExecutionContext, EntityConfiguration, string> _getDatabaseSchemaFunc;
 
         #endregion
 
@@ -51,11 +57,6 @@ namespace Sixnet.Development.Data
         /// Gets or sets the Database servers
         /// </summary>
         public List<DatabaseServer> Servers { get; set; }
-
-        /// <summary>
-        /// Gets or sets the default schema
-        /// </summary>
-        public string DefaultSchema { get; set; }
 
         /// <summary>
         /// Whether disable logical delete.
@@ -109,7 +110,7 @@ namespace Sixnet.Development.Data
         /// <summary>
         /// Gets or sets the default default command timeout(in seconds)
         /// </summary>
-        public int? DefaultCommandTimeout {  get; set; }
+        public int? DefaultCommandTimeout { get; set; }
 
         #endregion
 
@@ -131,7 +132,7 @@ namespace Sixnet.Development.Data
         /// <param name="configure">Configure</param>
         public void ConfigureConnection(Func<DatabaseServer, IDbConnection> configure)
         {
-            _getDatabaseConnection = configure;
+            _getDatabaseConnectionFunc = configure;
         }
 
         /// <summary>
@@ -141,7 +142,7 @@ namespace Sixnet.Development.Data
         /// <returns></returns>
         internal IDbConnection GetConnection(DatabaseServer server)
         {
-            return _getDatabaseConnection?.Invoke(server);
+            return _getDatabaseConnectionFunc?.Invoke(server);
         }
 
         #endregion
@@ -154,7 +155,7 @@ namespace Sixnet.Development.Data
         /// <param name="configure">Configure</param>
         public void ConfigureDataCommandServers(Func<SixnetDataCommand, List<DatabaseServer>> configure)
         {
-            _getDataCommandDatabaseServers = configure;
+            _getDataCommandDatabaseServersFunc = configure;
         }
 
         /// <summary>
@@ -165,7 +166,7 @@ namespace Sixnet.Development.Data
         internal List<DatabaseServer> GetDataCommandDatabaseServers(SixnetDataCommand command)
         {
             List<DatabaseServer> servers = null;
-            if (_getDataCommandDatabaseServers == null)
+            if (_getDataCommandDatabaseServersFunc == null)
             {
                 switch (DatabaseServerMatchPattern)
                 {
@@ -179,7 +180,7 @@ namespace Sixnet.Development.Data
             }
             else
             {
-                servers = _getDataCommandDatabaseServers.Invoke(command);
+                servers = _getDataCommandDatabaseServersFunc.Invoke(command);
             }
             return servers ?? new List<DatabaseServer>(0);
         }
@@ -373,7 +374,7 @@ namespace Sixnet.Development.Data
         /// <param name="configure">Configure</param>
         public void ConfigureCustomFilter(Func<QueryableFilterContext, ISixnetQueryable> configure)
         {
-            _getCustomContextFilter = configure;
+            _getCustomContextFilterFunc = configure;
         }
 
         /// <summary>
@@ -450,7 +451,7 @@ namespace Sixnet.Development.Data
         /// <returns></returns>
         internal Func<QueryableFilterContext, ISixnetQueryable> GetCustomFilter()
         {
-            return _getCustomContextFilter;
+            return _getCustomContextFilterFunc;
         }
 
         #endregion
@@ -719,13 +720,14 @@ namespace Sixnet.Development.Data
         /// Format database word and name
         /// </summary>
         /// <param name="databaseType">Databae type</param>
-        /// <param name="orginalValue">Orginal value</param>
+        /// <param name="objectName">Object name</param>
         /// <returns></returns>
-        public string FormatDatabaseWordAndName(DatabaseType databaseType, string orginalValue)
+        public DatabaseObjectName FormatDatabaseObjectName(DatabaseType databaseType, DatabaseObjectName objectName)
         {
+            var orginalValue = objectName.Name;
             if (string.IsNullOrWhiteSpace(orginalValue))
             {
-                return string.Empty;
+                return objectName;
             }
             var namePattern = DatabaseWordAndNamePattern;
             var nameSeparator = DatabaseWordAndNameSeparator;
@@ -769,7 +771,9 @@ namespace Sixnet.Development.Data
                     formattedValue = new string(orginalValue.ToSeparatorCase(nameSeparator, false).Reverse().ToArray());
                     break;
             }
-            return formattedValue;
+            var newObjectName = objectName.Clone();
+            newObjectName.Name = formattedValue;
+            return newObjectName;
         }
 
         #endregion
@@ -795,6 +799,72 @@ namespace Sixnet.Development.Data
                 }
             }
             return setting;
+        }
+
+        #endregion
+
+        #region Schemas
+
+        /// <summary>
+        /// Set default schema
+        /// </summary>
+        /// <param name="databaseType"></param>
+        /// <param name="schema"></param>
+        public void SetDatabaseDefaultSchema(DatabaseType databaseType, string schema)
+        {
+            _databaseDefaultSchemas[databaseType] = schema;
+        }
+
+        /// <summary>
+        /// Get default schema
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        string GetDatabaseDefaultSchema(DataCommandExecutionContext context)
+        {
+            if (context?.DatabaseConnection == null)
+            {
+                return string.Empty;
+            }
+            _databaseDefaultSchemas.TryGetValue(context.DatabaseConnection.DatabaseServer.DatabaseType, out var schema);
+            if (string.IsNullOrWhiteSpace(schema))
+            {
+                schema = context.DatabaseConnection.DatabaseServer.DatabaseType switch
+                {
+                    DatabaseType.SQLServer => "dbo",
+                    DatabaseType.PostgreSQL => "public",
+                    DatabaseType.Oracle => context.DatabaseConnection.Meta.UserName,
+                    DatabaseType.DaMeng => context.DatabaseConnection.Meta.UserName,
+                    DatabaseType.Kingbase => "public",
+                    _ => string.Empty,
+                };
+            }
+            return schema;
+        }
+
+        /// <summary>
+        /// Configure database schema
+        /// </summary>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        public void ConfigureDatabaseSchema(Func<DataCommandExecutionContext, EntityConfiguration, string> configure)
+        {
+            _getDatabaseSchemaFunc = configure;
+        }
+
+        /// <summary>
+        /// Get database schema
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public string GetDatabaseSchema(DataCommandExecutionContext context, EntityConfiguration entityConfiguration)
+        {
+            var schema = _getDatabaseSchemaFunc?.Invoke(context, entityConfiguration);
+            if (string.IsNullOrWhiteSpace(schema))
+            {
+                schema = GetDatabaseDefaultSchema(context);
+            }
+            return schema;
         }
 
         #endregion

@@ -12,16 +12,16 @@ namespace Sixnet.Development.Data.Database
         /// <summary>
         /// Root table name
         /// </summary>
-        public string RootTableName { get; set; }
+        public DatabaseObjectName RootTableName { get; set; }
 
         /// <summary>
         /// All table names
         /// </summary>
-        public List<string> AllTableNames { get; set; }
+        public List<DatabaseObjectName> AllTableNames { get; set; }
 
         /// <summary>
         /// Resolved table names
         /// </summary>
-        public List<string> ResolvedTableNames { get; set; }
+        public List<DatabaseObjectName> ResolvedTableNames { get; set; }
     }
 }

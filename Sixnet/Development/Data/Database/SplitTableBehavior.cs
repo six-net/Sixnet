@@ -24,7 +24,7 @@ namespace Sixnet.Development.Data.Database
         /// Arg1: All table names,
         /// Arg2: Resolved table names
         /// </summary>
-        public Func<IEnumerable<string>, IEnumerable<string>, IEnumerable<string>> SplitTableNameFilter { get; set; }
+        public Func<IEnumerable<DatabaseObjectName>, IEnumerable<DatabaseObjectName>, IEnumerable<DatabaseObjectName>> SplitTableNameFilter { get; set; }
 
         public SplitTableBehavior Clone()
         {
@@ -36,7 +36,7 @@ namespace Sixnet.Development.Data.Database
             };
         }
 
-        public bool IsTakeAllSplitTables(IEnumerable<string> splitTableNames)
+        public bool IsTakeAllSplitTables(IEnumerable<DatabaseObjectName> splitTableNames)
         {
             return splitTableNames.IsNullOrEmpty() && SplitValues.IsNullOrEmpty() && SplitTableNameFilter == null;
         }

@@ -1,6 +1,7 @@
 ﻿// "Company © 2025. All rights reserved."
 
 using System.Data;
+using System.Data.Common;
 
 using Sixnet.Threading.Locking;
 
@@ -48,6 +49,11 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         private LockInstance? ConnectionLock { get; set; }
 
+        /// <summary>
+        /// Gets or sets the meta
+        /// </summary>
+        public DatabaseConnectionMeta Meta { get; private set; }
+
         #endregion
 
         #region Constructor
@@ -71,6 +77,7 @@ namespace Sixnet.Development.Data.Database
             DataIsolationLevel = isolationLevel;
             UseTransaction = useTransaction;
             ConnectionLock = connLock;
+            Meta = DatabaseProvider.GetDbConnectionMeta(DbConnection);
         }
 
         #endregion

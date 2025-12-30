@@ -12,20 +12,20 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="parameter">Parameter</param>
         /// <returns></returns>
-        List<string> ResolveTableNames(ResolveSplitTableNameParameter parameter);
+        List<DatabaseObjectName> ResolveTableNames(ResolveSplitTableNameParameter parameter);
 
         /// <summary>
         /// Get split table names
         /// </summary>
         /// <param name="parameter">Parameter</param>
         /// <returns></returns>
-        List<string> GetTableNames(GetSplitTableNameParameter parameter);
+        List<DatabaseObjectName> GetTableNames(GetSplitTableNameParameter parameter);
 
         /// <summary>
         /// Filter all table names
         /// </summary>
         /// <param name="parameter">Parameter</param>
         /// <returns></returns>
-        List<string> FilterAllTableNames(FilterAllSplitTableNameParameter parameter);
+        List<DatabaseObjectName> FilterAllTableNames(FilterAllSplitTableNameParameter parameter);
     }
 }

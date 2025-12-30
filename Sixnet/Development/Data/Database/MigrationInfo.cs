@@ -22,30 +22,30 @@ namespace Sixnet.Development.Data.Database
         /// <summary>
         /// Rename tables
         /// </summary>
-        public Dictionary<string, string> RenameTables { get; set; }
+        public Dictionary<DatabaseObjectName, DatabaseObjectName> RenameTables { get; set; }
 
         /// <summary>
         /// Gets or sets the deletable table names
         /// </summary>
-        public List<string> DeletableTableNames { get; set; }
+        public List<DatabaseObjectName> DeletableTableNames { get; set; }
 
         /// <summary>
         /// Gets or sets the new fields
         /// Key: table name
         /// </summary>
-        public Dictionary<string, List<DataField>> NewFields { get; set; }
+        public Dictionary<DatabaseObjectName, List<DataField>> NewFields { get; set; }
 
         /// <summary>
         /// Gets or sets the updatable fields
         /// Key: table name
         /// Value => key: old field name
         /// </summary>
-        public Dictionary<string, Dictionary<string, DataField>> UpdatableFields { get; set; }
+        public Dictionary<DatabaseObjectName, Dictionary<string, DataField>> UpdatableFields { get; set; }
 
         /// <summary>
         /// Gets or sets the deletable fields
         /// Key: table name
         /// </summary>
-        public Dictionary<string, List<DataField>> DeletableFields { get; set; }
+        public Dictionary<DatabaseObjectName, List<DataField>> DeletableFields { get; set; }
     }
 }

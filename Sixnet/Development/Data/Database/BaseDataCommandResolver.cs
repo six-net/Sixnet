@@ -20,6 +20,8 @@ namespace Sixnet.Development.Data.Database
     {
         #region Properties
 
+        public string KeywordPrefix { get; set; }
+        public string KeywordSuffix { get; set; }
         public string ConditionStartKeyword { get; set; } = " WHERE ";
         public string AndConnector { get; set; } = "AND";
         public string OrConnector { get; set; } = "OR";
@@ -73,8 +75,9 @@ namespace Sixnet.Development.Data.Database
         public int DefaultDecimalLength { get; set; } = 20;
         public int DefaultDecimalPrecision { get; set; } = 4;
         public Dictionary<DbType, string> DbTypeDefaultValues { get; set; }
-        public Func<string, DatabaseObjectNameType, string> FormatKeywordFunc { get; set; }
-        public Func<string, DatabaseObjectNameType, string> WrapKeywordFunc { get; set; }
+        public Func<DatabaseObjectName, DatabaseObjectName> FormatObjectNameFunc { get; set; }
+        public Func<DatabaseObjectName, DatabaseObjectName> WrapObjectNameFunc { get; set; }
+        public Func<DatabaseObjectName, string> GetObjectFullNameFunc { get; set; }
         public string RecursiveKeyword { get; set; }
         public bool UseFieldForRecursive { get; set; } = false;
         public bool SplitWrapParameter { get; set; } = false;
@@ -579,7 +582,7 @@ namespace Sixnet.Development.Data.Database
         /// <returns></returns>
         protected virtual string GetFieldDefinition(DataField field, MigrationInfo options)
         {
-            return $"{GetSqlDataType(field, options)}{GetFieldIdentity(field, options)}{GetFieldNullable(field, options)}{GetSqlDefaultValue(field, options)}";
+            return $" {GetSqlDataType(field, options)}{GetFieldIdentity(field, options)}{GetFieldNullable(field, options)}{GetSqlDefaultValue(field, options)}";
         }
 
         #endregion
@@ -688,14 +691,14 @@ namespace Sixnet.Development.Data.Database
                     string targetScript;
                     if (tableNames.Count == 1)
                     {
-                        targetScript = $"{FormatAndWrapKeywordFunc(tableNames.FirstOrDefault(), DatabaseObjectNameType.TableName)}{(applyTablePetName ? $"{TablePetNameKeyword}{tablePetName}" : "")}";
+                        targetScript = $"{FormatAndWrapObjectName(tableNames.FirstOrDefault())}{(applyTablePetName ? $"{TablePetNameKeyword}{tablePetName}" : "")}";
                     }
                     else
                     {
                         var targetScripts = new List<string>(tableNames.Count);
                         foreach (var tableName in tableNames)
                         {
-                            targetScripts.Add($"SELECT * FROM {FormatAndWrapKeywordFunc(tableName, DatabaseObjectNameType.TableName)}");
+                            targetScripts.Add($"SELECT * FROM {FormatAndWrapObjectName(tableName)}");
                         }
                         targetScript = $"({string.Join(" UNION ", targetScripts)}){(applyTablePetName ? $"{TablePetNameKeyword}{tablePetName}" : "")}";
                         complexTarget = true;
@@ -1498,8 +1501,9 @@ namespace Sixnet.Development.Data.Database
                 }
                 else
                 {
-                    fieldName = FormatKeywordFunc(regularField.FieldName, DatabaseObjectNameType.ColumnName);
-                    formatedFieldName = WrapKeywordFunc(fieldName, DatabaseObjectNameType.ColumnName);
+                    var formatObjectName = FormatObjectName(DatabaseObjectName.Create(regularField.FieldName, DatabaseObjectType.Column));
+                    fieldName = formatObjectName.Name;
+                    formatedFieldName = GetObjectFullName(WrapObjectName(formatObjectName));
                 }
                 if (!string.IsNullOrWhiteSpace(tablePetName) && fieldLocation != FieldLocation.InsertValue)
                 {
@@ -1580,9 +1584,9 @@ namespace Sixnet.Development.Data.Database
 
             var fieldPetName = (queryableLocation == QueryableLocation.Top || queryableLocation == QueryableLocation.From)
                 && fieldLocation == FieldLocation.Output && !string.IsNullOrWhiteSpace(propertyName)
-                    ? WrapKeywordFunc(propertyName, DatabaseObjectNameType.ColumnName)
+                    ? GetObjectFullName(WrapObjectName(DatabaseObjectName.Create(propertyName, DatabaseObjectType.Column)))
                     : !string.IsNullOrWhiteSpace(fieldName)
-                      ? WrapKeywordFunc(fieldName, DatabaseObjectNameType.ColumnName)
+                      ? GetObjectFullName(WrapObjectName(DatabaseObjectName.Create(fieldName, DatabaseObjectType.Column)))
                       : string.Empty;
             formatedFieldName = !string.IsNullOrWhiteSpace(fieldPetName)
                 && (fieldLocation == FieldLocation.Output || fieldLocation == FieldLocation.InnerOutput)
@@ -1629,17 +1633,7 @@ namespace Sixnet.Development.Data.Database
         {
             return fields.IsNullOrEmpty()
                 ? string.Empty
-                : string.Join(",", fields.Select(f => FormatAndWrapKeywordFunc(f.GetFieldName(context.DataCommandExecutionContext.Server.DatabaseType), DatabaseObjectNameType.ColumnName)));
-        }
-
-        /// <summary>
-        /// Format and wrap keyword func
-        /// </summary>
-        /// <param name="originalValue"></param>
-        /// <returns></returns>
-        protected string FormatAndWrapKeywordFunc(string originalValue, DatabaseObjectNameType nameType)
-        {
-            return WrapKeywordFunc(FormatKeywordFunc(originalValue, nameType), nameType);
+                : string.Join(",", fields.Select(f => FormatAndWrapObjectName(f.GetFieldName(context.DataCommandExecutionContext.Server.DatabaseType), DatabaseObjectType.Column)));
         }
 
         /// <summary>
@@ -1875,6 +1869,106 @@ namespace Sixnet.Development.Data.Database
                 return string.Empty;
             }
             return $"{NegationKeyword} {conditionString}";
+        }
+
+        #endregion
+
+        #region Object name
+
+        /// <summary>
+        /// Format object name
+        /// </summary>
+        /// <param name="objectName">Object name</param>
+        /// <returns></returns>
+        public DatabaseObjectName FormatObjectName(DatabaseObjectName objectName)
+        {
+            if (FormatObjectNameFunc == null)
+            {
+                return DefaultFormatObjectName(objectName);
+            }
+            else
+            {
+                return FormatObjectNameFunc(objectName);
+            }
+        }
+
+        internal protected DatabaseObjectName DefaultFormatObjectName(DatabaseObjectName objectName)
+        {
+            return SixnetDataManager.FormatDatabaseObjectName(DatabaseType, objectName);
+        }
+
+        /// <summary>
+        /// Wrap object name
+        /// </summary>
+        /// <param name="objectName">Object name</param>
+        /// <returns></returns>
+        public DatabaseObjectName WrapObjectName(DatabaseObjectName objectName)
+        {
+            if (WrapObjectNameFunc == null)
+            {
+                return DefaultWrapObjectName(objectName);
+            }
+            else
+            {
+                return WrapObjectNameFunc(objectName);
+            }
+        }
+
+        internal protected DatabaseObjectName DefaultWrapObjectName(DatabaseObjectName objectName)
+        {
+            if (!string.IsNullOrWhiteSpace(objectName.Name))
+            {
+                var newObjectName = objectName.Clone();
+                newObjectName.Name = $"{KeywordPrefix}{objectName.Name}{KeywordSuffix}";
+                return newObjectName;
+            }
+            return objectName;
+        }
+
+        /// <summary>
+        /// Get object full name
+        /// </summary>
+        /// <param name="objectName">Object name</param>
+        /// <returns></returns>
+        public string GetObjectFullName(DatabaseObjectName objectName)
+        {
+            if (GetObjectFullNameFunc == null)
+            {
+                return DefaultGetObjectFullName(objectName);
+            }
+            else
+            {
+                return GetObjectFullNameFunc(objectName);
+            }
+        }
+
+        internal protected string DefaultGetObjectFullName(DatabaseObjectName objectName)
+        {
+            if (!string.IsNullOrWhiteSpace(objectName.SchemaName))
+            {
+                return $"{objectName.SchemaName}.{objectName.Name}";
+            }
+            return objectName.Name;
+        }
+
+        /// <summary>
+        /// Format and wrap keyword object name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public string FormatAndWrapObjectName(string name, DatabaseObjectType nameType)
+        {
+            return FormatAndWrapObjectName(DatabaseObjectName.Create(name, nameType));
+        }
+
+        /// <summary>
+        /// Format and wrap keyword object name
+        /// </summary>
+        /// <param name="objectName"></param>
+        /// <returns></returns>
+        public string FormatAndWrapObjectName(DatabaseObjectName objectName)
+        {
+            return GetObjectFullName(WrapObjectName(FormatObjectName(objectName)));
         }
 
         #endregion

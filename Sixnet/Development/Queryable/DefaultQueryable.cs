@@ -1235,7 +1235,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="splitTableNameFilter">Split table name filter</param>
         /// <returns></returns>
-        public ISixnetQueryable SplitTable(Func<IEnumerable<string>, IEnumerable<string>, IEnumerable<string>> splitTableNameFilter)
+        public ISixnetQueryable SplitTable(Func<IEnumerable<DatabaseObjectName>, IEnumerable<DatabaseObjectName>, IEnumerable<DatabaseObjectName>> splitTableNameFilter)
         {
             queryableContext.SplitTable(splitTableNameFilter);
             return this;
