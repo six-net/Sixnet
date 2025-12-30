@@ -17,6 +17,7 @@ using Sixnet.Development.Entity;
 using Sixnet.Development.Message;
 using Sixnet.Development.Repository;
 using Sixnet.Development.Work;
+using Sixnet.Diagnostics;
 using Sixnet.Exceptions;
 using Sixnet.Extensions;
 using Sixnet.IO;
@@ -519,6 +520,11 @@ namespace Sixnet.DependencyInjection
                 lifeTime.ApplicationStarted.Register(() =>
                 {
                     SixnetLogger.LogInformation($"Application:{SixnetApplication.Current?.Title} is started");
+
+                    if (options.TraceFrameworkLog)
+                    {
+                        SixnetSwitches.TraceFramework();
+                    }
 
                     if (!options.NotAutoExecuteInitializable)
                     {
