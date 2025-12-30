@@ -543,7 +543,7 @@ namespace Sixnet.Development.Data.Database
             {
                 var deleteStatement = new ExecutionDatabaseStatement()
                 {
-                    Script = $"DROP TABLE IF EXISTS {tableName};"
+                    Script = $"DROP TABLE IF EXISTS {FormatAndWrapObjectName(tableName)};"
                 };
                 statements.Add(deleteStatement);
 

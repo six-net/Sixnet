@@ -525,7 +525,6 @@ namespace Sixnet.DependencyInjection
                     {
                         SixnetSwitches.TraceFramework();
                     }
-
                     if (!options.NotAutoExecuteInitializable)
                     {
                         SixnetApplication.ExecuteInitializable();

@@ -880,7 +880,7 @@ namespace Sixnet.Development.Command
             {
                 var splitProvider = SixnetDataManager.GetSplitTableProvider(SixnetDataManager.GetDataOptions(), SixnetEntityManager.GetEntityConfig(entityType));
                 var splitBehavior = options?.SplitTableBehavior ?? new SplitTableBehavior();
-                allTableNames = splitProvider.FilterAllTableNames(new FilterAllSplitTableNameParameter() 
+                allTableNames = splitProvider.FilterAllTableNames(new FilterAllSplitTableNameParameter()
                 {
                     AllTableNames = allTableNames,
                     Behavior = splitBehavior,
@@ -892,13 +892,20 @@ namespace Sixnet.Development.Command
                     RootTableName = rootTableName,
                     SplitBehavior = splitBehavior
                 });
-                tableNames = splitProvider.GetTableNames(new GetSplitTableNameParameter()
+                if (options?.SplitTableBehavior.IsTakeAllSplitTables(splitTableNames) ?? true)
                 {
-                    AllTableNames = allTableNames,
-                    RootTableName = rootTableName,
-                    ResolvedTableNames = splitTableNames,
-                    Behavior = splitBehavior
-                });
+                    tableNames = allTableNames;
+                }
+                else
+                {
+                    tableNames = splitProvider.GetTableNames(new GetSplitTableNameParameter()
+                    {
+                        AllTableNames = allTableNames,
+                        RootTableName = rootTableName,
+                        ResolvedTableNames = splitTableNames,
+                        Behavior = splitBehavior
+                    });
+                }
             }
             else
             {
