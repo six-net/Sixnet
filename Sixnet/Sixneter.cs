@@ -109,7 +109,7 @@ namespace Sixnet
         {
             if (options.HostBuilder == null)
             {
-                SixnetLogger.LogDebug($"Init sixnet through new self host");
+                SixnetLogger.LogInformation($"Init sixnet through new self host");
                 var hostBuilder = Host.CreateDefaultBuilder(options.Args)
                     .UseServiceProviderFactory(new SixnetServiceProviderFactory(options));
                 options.ConfigureHostBuilder(hostBuilder);

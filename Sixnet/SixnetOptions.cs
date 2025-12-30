@@ -66,6 +66,11 @@ namespace Sixnet
         /// </summary>
         public IServiceCollection Services { get; set; }
 
+        /// <summary>
+        /// Whether trace framework log
+        /// </summary>
+        public bool TraceFrameworkLog { get; set; }
+
         #endregion
 
         #region Methods

@@ -25,7 +25,7 @@ namespace Sixnet.Logging
 
         static readonly string NewLine = $"{Environment.NewLine}";
 
-        internal static LogLevel LogLevel = LogLevel.Debug;
+        internal static LogLevel LogLevel = LogLevel.Information;
 
         static bool EnableTraceLog = false;
 

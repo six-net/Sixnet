@@ -518,7 +518,7 @@ namespace Sixnet.DependencyInjection
             {
                 lifeTime.ApplicationStarted.Register(() =>
                 {
-                    SixnetLogger.LogDebug($"Application:{SixnetApplication.Current?.Title} is started");
+                    SixnetLogger.LogInformation($"Application:{SixnetApplication.Current?.Title} is started");
 
                     if (!options.NotAutoExecuteInitializable)
                     {
@@ -541,14 +541,14 @@ namespace Sixnet.DependencyInjection
 
                 lifeTime.ApplicationStopping.Register(() =>
                 {
-                    SixnetLogger.LogDebug($"Application:{SixnetApplication.Current?.Title} is stopping");
+                    SixnetLogger.LogInformation($"Application:{SixnetApplication.Current?.Title} is stopping");
 
                     options.ApplicationStopping(options);
                 });
 
                 lifeTime.ApplicationStopped.Register(() =>
                 {
-                    SixnetLogger.LogDebug($"Application:{SixnetApplication.Current?.Title} is stopped");
+                    SixnetLogger.LogInformation($"Application:{SixnetApplication.Current?.Title} is stopped");
 
                     options.ApplicationStopped(options);
                 });
