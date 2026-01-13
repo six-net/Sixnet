@@ -76,14 +76,25 @@ namespace Sixnet.Development.Data.Database
                     context.CurrentVersion = Version;
                 }
                 var recordRepository = SixnetContainer.GetService<ISixnetRepository<SixnetAppUpdateRecordEntity>>();
-                var recordVersion = context.CurrentVersion >= Version ? context.CurrentVersion : Version;
-                await recordRepository.AddAsync(new SixnetAppUpdateRecordEntity()
+                var currentRecord = await recordRepository.GetAsync(c => c.Id == Id).ConfigureAwait(false);
+                if (currentRecord != null)
                 {
-                    Id = Id,
-                    AppVersion = recordVersion.ToString(),
-                    AppVersionId = recordVersion.VersionToLong(),
-                    Note = Note
-                }).ConfigureAwait(false);
+                    currentRecord.ExecuteCount++;
+                    await recordRepository.UpdateAsync(currentRecord).ConfigureAwait(false);
+                }
+                else
+                {
+                    await recordRepository.AddAsync(new SixnetAppUpdateRecordEntity()
+                    {
+                        Id = Id,
+                        CurrentAppVersion = context.CurrentVersion.ToString(),
+                        CurrentAppVersionId = context.CurrentVersion.VersionToLong(),
+                        RecordAppVersion = Version.ToString(),
+                        RecordAppVersionId = Version.VersionToLong(),
+                        ExecuteCount = 1,
+                        Note = Note
+                    }).ConfigureAwait(false);
+                }
                 await workContext.CommitAsync().ConfigureAwait(false);
             }).ConfigureAwait(false);
         }

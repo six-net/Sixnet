@@ -308,7 +308,7 @@ namespace Sixnet.Development.Data
                 var lastRecord = await client.QueryFirstAsync<SixnetAppUpdateRecordEntity>(lastRecordQueryable);
                 if (lastRecord != null)
                 {
-                    currentVersion = Version.Parse(lastRecord.AppVersion);
+                    currentVersion = Version.Parse(lastRecord.CurrentAppVersion);
                     currentRecordId = lastRecord.Id;
                 }
             }

@@ -973,10 +973,10 @@ namespace Sixnet.Development.Data
         }
 
         /// <summary>
-        /// Get database update records
+        /// Get all database update records
         /// </summary>
         /// <returns></returns>
-        public static SortedDictionary<Version, SortedSet<ISixnetDatabaseUpdateRecord>> GetDatabaseUpdateRecords()
+        public static SortedDictionary<Version, SortedSet<ISixnetDatabaseUpdateRecord>> GetAllDatabaseUpdateRecords()
         {
             return _updateRecords;
         }
@@ -993,33 +993,74 @@ namespace Sixnet.Development.Data
             {
                 reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Begin, parameter));
 
-                reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.BeginGettingCurrentInfo, parameter));
-                var recordRes = GetDatabaseUpdateRecordsCore(parameter);
-                var context = recordRes.Item1;
-                reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.EndGettingCurrentInfo, parameter, null, context.CurrentVersion, context.CurrentRecordId));
-
-                if (recordRes.Item2.IsNullOrEmpty())
+                if (parameter.ExecuteRecordDirectly)
                 {
-                    reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.NoneRecords, parameter));
-                }
-                else
-                {
-                    foreach (var record in recordRes.Item2)
+                    if (!parameter.Records.IsNullOrEmpty())
                     {
-                        if (recordRes.Item3)
+                        var sortedRecords = parameter.Records.OrderBy(c => c.Id);
+                        var currentVersion = new Version(0, 0, 0);
+                        var currentRecordId = 0L;
+                        var lastRecordQueryable = SixnetQuerier.Create<SixnetAppUpdateRecordEntity>().OrderBy(c => c.Id, true);
+                        var lastRecord = GetClient(parameter.DatabaseServer).QueryFirst<SixnetAppUpdateRecordEntity>(lastRecordQueryable);
+                        if (lastRecord != null)
                         {
-                            reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Update, parameter, record));
-                            record.UpdateAsync(context).Wait();
-                            reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.UpdateFinished, parameter, record));
+                            currentVersion = Version.Parse(lastRecord.CurrentAppVersion);
+                            currentRecordId = lastRecord.Id;
                         }
-                        else
+                        var context = new SixnetUpdateDatabaseContext()
                         {
-                            reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Rollback, parameter, record));
-                            record.RollbackAsync(context).Wait();
-                            reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.RollbackFinished, parameter, record));
+                            UpdateParameter = parameter,
+                            CurrentRecordId = currentRecordId,
+                            CurrentVersion = currentVersion,
+                        };
+                        foreach (var record in sortedRecords)
+                        {
+                            if (!parameter.ExecuteRecordForRollback)
+                            {
+                                reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Update, parameter, record));
+                                record.UpdateAsync(context).Wait();
+                                reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.UpdateFinished, parameter, record));
+                            }
+                            else
+                            {
+                                reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Rollback, parameter, record));
+                                record.RollbackAsync(context).Wait();
+                                reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.RollbackFinished, parameter, record));
+                            }
                         }
                     }
                 }
+                else
+                {
+                    reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.BeginGettingCurrentInfo, parameter));
+                    var recordRes = GetDatabaseUpdateRecordsCore(parameter);
+                    var context = recordRes.Item1;
+                    reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.EndGettingCurrentInfo, parameter, null, context.CurrentVersion, context.CurrentRecordId));
+
+                    if (recordRes.Item2.IsNullOrEmpty())
+                    {
+                        reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.NoneRecords, parameter));
+                    }
+                    else
+                    {
+                        foreach (var record in recordRes.Item2)
+                        {
+                            if (recordRes.Item3)
+                            {
+                                reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Update, parameter, record));
+                                record.UpdateAsync(context).Wait();
+                                reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.UpdateFinished, parameter, record));
+                            }
+                            else
+                            {
+                                reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Rollback, parameter, record));
+                                record.RollbackAsync(context).Wait();
+                                reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.RollbackFinished, parameter, record));
+                            }
+                        }
+                    }
+                }
+
                 reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.End, parameter));
             }
             catch (Exception ex)
@@ -1032,11 +1073,11 @@ namespace Sixnet.Development.Data
         }
 
         /// <summary>
-        /// Get database update records
+        /// Get executable database update records
         /// </summary>
         /// <param name="parameter"></param>
         /// <returns></returns>
-        public static List<ISixnetDatabaseUpdateRecord> GetDatabaseUpdateRecords(SixnetUpdateDatabaseParameter parameter)
+        public static List<ISixnetDatabaseUpdateRecord> GetExecutableDatabaseUpdateRecords(SixnetUpdateDatabaseParameter parameter)
         {
             return GetDatabaseUpdateRecordsCore(parameter).Item2;
         }
@@ -1062,7 +1103,7 @@ namespace Sixnet.Development.Data
                 var lastRecord = client.QueryFirst<SixnetAppUpdateRecordEntity>(lastRecordQueryable);
                 if (lastRecord != null)
                 {
-                    currentVersion = Version.Parse(lastRecord.AppVersion);
+                    currentVersion = Version.Parse(lastRecord.CurrentAppVersion);
                     currentRecordId = lastRecord.Id;
                 }
             }

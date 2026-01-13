@@ -23,10 +23,20 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         public Version TargetVersion { get; set; }
 
-        ///// <summary>
-        ///// Records
-        ///// </summary>
-        //public List<ISixnetDatabaseUpdateRecord> Records { get; set; }
+        /// <summary>
+        /// Database update records
+        /// </summary>
+        public List<ISixnetDatabaseUpdateRecord> Records { get; set; }
+
+        /// <summary>
+        /// Whether execute record directly
+        /// </summary>
+        public bool ExecuteRecordDirectly {  get; set; }
+
+        /// <summary>
+        /// Whether execute record for rollback
+        /// </summary>
+        public bool ExecuteRecordForRollback { get; set; }
 
         /// <summary>
         /// Report process

@@ -6,13 +6,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using AutoMapper.Configuration.Conventions;
+
 namespace Sixnet.Development.Entity
 {
     /// <summary>
     /// Sixnet app update record entity
     /// </summary>
     [Entity(TableName = "SIXNET_APPLICATION_UPDATE_RECORD", Module = "", Description = "App update record", IsSystem = true)]
-    public class SixnetAppUpdateRecordEntity : CreateDateEntity<SixnetAppUpdateRecordEntity>
+    public class SixnetAppUpdateRecordEntity : CreateUpdateDateEntity<SixnetAppUpdateRecordEntity>
     {
         /// <summary>
         /// Id
@@ -21,16 +23,34 @@ namespace Sixnet.Development.Entity
         public long Id { get; set; }
 
         /// <summary>
-        /// App version
+        /// Record app version
         /// </summary>
         [EntityField(Length = 30)]
-        public string AppVersion { get; set; }
+        public string RecordAppVersion { get; set; }
 
         /// <summary>
-        /// App version id
+        /// Record app version id
+        /// </summary>
+        [EntityField()]
+        public long RecordAppVersionId { get; set; }
+
+        /// <summary>
+        /// Current app version
         /// </summary>
         [EntityField(Length = 30)]
-        public long AppVersionId {  get; set; } 
+        public string CurrentAppVersion { get; set; }
+
+        /// <summary>
+        /// Current app version id
+        /// </summary>
+        [EntityField()]
+        public long CurrentAppVersionId { get; set; }
+
+        /// <summary>
+        /// Execute count
+        /// </summary>
+        [EntityField()]
+        public int ExecuteCount {  get; set; }
 
         /// <summary>
         /// Note

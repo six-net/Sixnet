@@ -2,7 +2,6 @@
 
 using System.Data;
 using System.Runtime.InteropServices;
-
 using Sixnet.Development.Data;
 using Sixnet.Development.Data.Command;
 using Sixnet.Development.Data.Database;
