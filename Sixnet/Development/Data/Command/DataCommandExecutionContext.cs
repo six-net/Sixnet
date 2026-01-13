@@ -15,7 +15,7 @@ namespace Sixnet.Development.Data.Command
 
         private DataCommandExecutionContext(DatabaseConnection connection, SixnetDataCommand command)
         {
-            Server = connection?.DatabaseServer ?? throw new ArgumentNullException(nameof(DatabaseConnection.DatabaseServer));
+            Server = connection?.DatabaseServer;
             DatabaseConnection = connection;
             if (command != null)
             {
