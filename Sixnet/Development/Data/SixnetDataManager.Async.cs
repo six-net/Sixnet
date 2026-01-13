@@ -238,31 +238,70 @@ namespace Sixnet.Development.Data
             try
             {
                 reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Begin, parameter));
-
-                reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.BeginGettingCurrentInfo, parameter));
-                var recordRes = await GetDatabaseUpdateRecordsCoreAsync(parameter).ConfigureAwait(false);
-                var context = recordRes.Item1;
-                reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.EndGettingCurrentInfo, parameter, null, context.CurrentVersion, context.CurrentRecordId));
-
-                if (recordRes.Item2.IsNullOrEmpty())
+                if (parameter.ExecuteRecordDirectly)
                 {
-                    reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.NoneRecords, parameter));
+                    if (!parameter.Records.IsNullOrEmpty())
+                    {
+                        var sortedRecords = parameter.Records.OrderBy(c => c.Id);
+                        var currentVersion = new Version(0, 0, 0);
+                        var currentRecordId = 0L;
+                        var lastRecordQueryable = SixnetQuerier.Create<SixnetAppUpdateRecordEntity>().OrderBy(c => c.Id, true);
+                        var lastRecord = GetClient(parameter.DatabaseServer).QueryFirst<SixnetAppUpdateRecordEntity>(lastRecordQueryable);
+                        if (lastRecord != null)
+                        {
+                            currentVersion = Version.Parse(lastRecord.CurrentAppVersion);
+                            currentRecordId = lastRecord.Id;
+                        }
+                        var context = new SixnetUpdateDatabaseContext()
+                        {
+                            UpdateParameter = parameter,
+                            CurrentRecordId = currentRecordId,
+                            CurrentVersion = currentVersion,
+                        };
+                        foreach (var record in sortedRecords)
+                        {
+                            if (!parameter.ExecuteRecordForRollback)
+                            {
+                                reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Update, parameter, record));
+                                await record.UpdateAsync(context).ConfigureAwait(false);
+                                reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.UpdateFinished, parameter, record));
+                            }
+                            else
+                            {
+                                reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Rollback, parameter, record));
+                                await record.RollbackAsync(context).ConfigureAwait(false);
+                                reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.RollbackFinished, parameter, record));
+                            }
+                        }
+                    }
                 }
                 else
                 {
-                    foreach (var record in recordRes.Item2)
+                    reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.BeginGettingCurrentInfo, parameter));
+                    var recordRes = await GetDatabaseUpdateRecordsCoreAsync(parameter).ConfigureAwait(false);
+                    var context = recordRes.Item1;
+                    reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.EndGettingCurrentInfo, parameter, null, context.CurrentVersion, context.CurrentRecordId));
+
+                    if (recordRes.Item2.IsNullOrEmpty())
                     {
-                        if (recordRes.Item3)
+                        reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.NoneRecords, parameter));
+                    }
+                    else
+                    {
+                        foreach (var record in recordRes.Item2)
                         {
-                            reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Update, parameter, record));
-                            await record.UpdateAsync(context).ConfigureAwait(false);
-                            reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.UpdateFinished, parameter, record));
-                        }
-                        else
-                        {
-                            reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Rollback, parameter, record));
-                            await record.RollbackAsync(context).ConfigureAwait(false);
-                            reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.RollbackFinished, parameter, record));
+                            if (recordRes.Item3)
+                            {
+                                reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Update, parameter, record));
+                                await record.UpdateAsync(context).ConfigureAwait(false);
+                                reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.UpdateFinished, parameter, record));
+                            }
+                            else
+                            {
+                                reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Rollback, parameter, record));
+                                await record.RollbackAsync(context).ConfigureAwait(false);
+                                reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.RollbackFinished, parameter, record));
+                            }
                         }
                     }
                 }
@@ -282,7 +321,7 @@ namespace Sixnet.Development.Data
         /// </summary>
         /// <param name="parameter"></param>
         /// <returns></returns>
-        public static async Task<List<ISixnetDatabaseUpdateRecord>> GetDatabaseUpdateRecordsAsync(SixnetUpdateDatabaseParameter parameter)
+        public static async Task<List<ISixnetDatabaseUpdateRecord>> GetExecutableDatabaseUpdateRecordsAsync(SixnetUpdateDatabaseParameter parameter)
         {
             return (await GetDatabaseUpdateRecordsCoreAsync(parameter).ConfigureAwait(false)).Item2;
         }
@@ -327,7 +366,5 @@ namespace Sixnet.Development.Data
                 return new Tuple<SixnetUpdateDatabaseContext, List<ISixnetDatabaseUpdateRecord>, bool>(context, GetRollbackRecords(context), false);
             }
         }
-
-
     }
 }
