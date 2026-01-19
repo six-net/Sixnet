@@ -32,7 +32,7 @@ namespace Sixnet.Development.Data.Command.Event
             // Version condition for update
             if (operationType == DataOperationType.Update && !oldValues.IsNullOrEmpty())
             {
-                var versionFieldName = SixnetEntityManager.GetFieldName(entityType, FieldRole.Version);
+                var versionFieldName = SixnetEntityManager.GetFieldName(entityType, FieldRole.Revision);
                 if (!string.IsNullOrWhiteSpace(versionFieldName) && oldValues.ContainsKey(versionFieldName))
                 {
                     var versionValue = oldValues[versionFieldName];

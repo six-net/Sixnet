@@ -25,7 +25,7 @@ namespace Sixnet.Development.Entity
         None = 0,
         PrimaryKey = 2,
         Increment = 4,
-        Version = 8,
+        Revision = 8,
         Sequence = 16,
         Archive = 32,
         Isolation = 64,

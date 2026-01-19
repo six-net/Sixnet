@@ -277,7 +277,7 @@ namespace Sixnet.Development.Data.Field
                 || InRole(FieldRole.CreateUserDisplayName)
                 || InRole(FieldRole.PrimaryKey)
                 || InRole(FieldRole.Increment)
-                || InRole(FieldRole.Version)
+                || InRole(FieldRole.Revision)
                 || InRole(FieldRole.SplitValue)
                 || InRole(FieldRole.Archive)
                 || InRole(FieldRole.Isolation);
@@ -386,7 +386,7 @@ namespace Sixnet.Development.Data.Field
         /// <returns></returns>
         public bool IsNecessaryField()
         {
-            return InRole(FieldRole.PrimaryKey) || InRole(FieldRole.Version);
+            return InRole(FieldRole.PrimaryKey) || InRole(FieldRole.Revision);
         }
 
         #endregion
