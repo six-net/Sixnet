@@ -23,13 +23,13 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Create user name
         /// </summary>
-        [EntityField(Description = "Create user name", Role = FieldRole.CreateUserName)]
+        [EntityField(Description = "Create user name", Role = FieldRole.CreateUserName, Length = 50)]
         public string CreateUserName { get; set; }
 
         /// <summary>
         /// Create user display name
         /// </summary>
-        [EntityField(Description = "Create user display name", Role = FieldRole.CreateUserDisplayName)]
+        [EntityField(Description = "Create user display name", Role = FieldRole.CreateUserDisplayName, Length = 200)]
         public string CreateUserDisplayName { get; set; }
     }
 
@@ -67,13 +67,13 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Update user name
         /// </summary>
-        [EntityField(Description = "Update user name", Role = FieldRole.UpdateUserName)]
+        [EntityField(Description = "Update user name", Role = FieldRole.UpdateUserName, Length = 50)]
         public string UpdateUserName { get; set; }
 
         /// <summary>
         /// Update user display name
         /// </summary>
-        [EntityField(Description = "Update user display name", Role = FieldRole.UpdateUserDisplayName)]
+        [EntityField(Description = "Update user display name", Role = FieldRole.UpdateUserDisplayName, Length = 200)]
         public string UpdateUserDisplayName { get; set; }
     }
 
@@ -111,13 +111,13 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Update user name
         /// </summary>
-        [EntityField(Description = "Update user name", Role = FieldRole.UpdateUserName)]
+        [EntityField(Description = "Update user name", Role = FieldRole.UpdateUserName, Length = 50)]
         public string UpdateUserName { get; set; }
 
         /// <summary>
         /// Update display name
         /// </summary>
-        [EntityField(Description = "Update display name", Role = FieldRole.UpdateUserDisplayName)]
+        [EntityField(Description = "Update display name", Role = FieldRole.UpdateUserDisplayName, Length = 200)]
         public string UpdateUserDisplayName { get; set; }
     }
 
