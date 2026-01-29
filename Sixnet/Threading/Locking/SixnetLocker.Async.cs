@@ -27,15 +27,15 @@ namespace Sixnet.Threading.Locking
         {
             SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(lockName), nameof(lockName));
             SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(lockValue), nameof(lockValue));
-            var lockParameter = new StringSetParameter()
+            var lockParameter = new SixnetStringSetParameter()
             {
-                CacheObject = new CacheObject()
+                CacheObject = new SixnetCacheObject()
                 {
                     ObjectName = lockObject
                 },
-                Items = new List<CacheEntry>()
+                Items = new List<SixnetCacheEntry>()
                 {
-                    new CacheEntry()
+                    new SixnetCacheEntry()
                     {
                         Value = lockValue,
                         Key = ConstantCacheKey.Create(lockName),
@@ -51,7 +51,7 @@ namespace Sixnet.Threading.Locking
             {
                 lockParameter.Items.ForEach(ce =>
                 {
-                    ce.Expiration = expSeconds > 0 ? new CacheExpiration()
+                    ce.Expiration = expSeconds > 0 ? new SixnetCacheExpiration()
                     {
                         SlidingExpiration = false,
                         AbsoluteExpiration = DateTimeOffset.Now.AddSeconds(expSeconds)
@@ -94,22 +94,22 @@ namespace Sixnet.Threading.Locking
         /// <returns></returns>
         public static async Task<bool> ReleaseLockAsync(string lockObject, string lockName, string lockValue)
         {
-            var cacheObject = new CacheObject()
+            var cacheObject = new SixnetCacheObject()
             {
                 ObjectName = lockObject
             };
-            var getLockParameter = new StringGetParameter()
+            var getLockParameter = new SixnetStringGetParameter()
             {
-                Keys = new List<CacheKey>() { lockName },
+                Keys = new List<SixnetCacheKey>() { lockName },
                 CacheObject = cacheObject
             };
             HandleLockParameter(getLockParameter);
             var currentLockValue = (await SixnetCacher.String.GetAsync(getLockParameter).ConfigureAwait(false))?.Values?.FirstOrDefault()?.Value?.ToString();
             if (currentLockValue == lockValue)
             {
-                var delLockParameter = new DeleteParameter()
+                var delLockParameter = new SixnetDeleteParameter()
                 {
-                    Keys = new List<CacheKey>() { lockName },
+                    Keys = new List<SixnetCacheKey>() { lockName },
                     CacheObject = cacheObject
                 };
                 HandleLockParameter(delLockParameter);

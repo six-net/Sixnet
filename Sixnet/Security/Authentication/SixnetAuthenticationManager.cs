@@ -27,12 +27,12 @@ namespace Sixnet.Security.Authentication
 
             var token = string.IsNullOrWhiteSpace(setting.Token) ? Guid.NewGuid().ToString() : setting.Token;
             var userKey = GetUserKey(setting);
-            await SixnetCacher.String.SetAsync(new StringSetParameter()
+            await SixnetCacher.String.SetAsync(new SixnetStringSetParameter()
             {
                 CacheObject = GetCacheObject(),
                 Items =
                 [
-                    new CacheEntry()
+                    new SixnetCacheEntry()
                     {
                         Key = userKey,
                         Value = token
@@ -52,16 +52,16 @@ namespace Sixnet.Security.Authentication
 
             var token = string.IsNullOrWhiteSpace(setting.Token) ? Guid.NewGuid().ToString() : setting.Token;
             var userKey = GetUserKey(setting);
-            SixnetCacher.String.Set(new StringSetParameter()
+            SixnetCacher.String.Set(new SixnetStringSetParameter()
             {
                 CacheObject = GetCacheObject(),
                 Items =
                 [
-                    new CacheEntry()
+                    new SixnetCacheEntry()
                     {
                         Key = userKey,
                         Value = token,
-                        Expiration = new CacheExpiration()
+                        Expiration = new SixnetCacheExpiration()
                         {
                             AbsoluteExpiration = DateTimeOffset.Now.AddSeconds(setting.ExpireSeconds)
                         }
@@ -81,7 +81,7 @@ namespace Sixnet.Security.Authentication
             configure?.Invoke(setting);
 
             var userKey = GetUserKey(setting);
-            await SixnetCacher.Keys.DeleteAsync(new DeleteParameter()
+            await SixnetCacher.Keys.DeleteAsync(new SixnetDeleteParameter()
             {
                 CacheObject = GetCacheObject(),
                 Keys = [userKey]
@@ -99,7 +99,7 @@ namespace Sixnet.Security.Authentication
             configure?.Invoke(setting);
 
             var userKey = GetUserKey(setting);
-            SixnetCacher.Keys.Delete(new DeleteParameter()
+            SixnetCacher.Keys.Delete(new SixnetDeleteParameter()
             {
                 CacheObject = GetCacheObject(),
                 Keys = [userKey]
@@ -115,10 +115,10 @@ namespace Sixnet.Security.Authentication
             var setting = new AuthenticationTokenSetting();
             configure?.Invoke(setting);
             var userKey = GetUserKey(setting);
-            var token = (await SixnetCacher.String.GetAsync(new StringGetParameter()
+            var token = (await SixnetCacher.String.GetAsync(new SixnetStringGetParameter()
             {
                 CacheObject = GetCacheObject(),
-                Keys = new List<CacheKey>() { userKey }
+                Keys = new List<SixnetCacheKey>() { userKey }
             }).ConfigureAwait(false)).Values?.FirstOrDefault()?.Value?.ToString();
 
             if (string.IsNullOrWhiteSpace(token))
@@ -148,10 +148,10 @@ namespace Sixnet.Security.Authentication
             var setting = new AuthenticationTokenSetting();
             configure?.Invoke(setting);
             var userKey = GetUserKey(setting);
-            var token = SixnetCacher.String.Get(new StringGetParameter()
+            var token = SixnetCacher.String.Get(new SixnetStringGetParameter()
             {
                 CacheObject = GetCacheObject(),
-                Keys = new List<CacheKey>() { userKey }
+                Keys = new List<SixnetCacheKey>() { userKey }
             }).Values?.FirstOrDefault()?.Value?.ToString();
             if (string.IsNullOrWhiteSpace(token))
             {
@@ -191,10 +191,10 @@ namespace Sixnet.Security.Authentication
             };
             configure?.Invoke(tokenSetting);
             var userKey = GetUserKey(tokenSetting);
-            return SixnetCacher.String.Get(new StringGetParameter()
+            return SixnetCacher.String.Get(new SixnetStringGetParameter()
             {
                 CacheObject = GetCacheObject(),
-                Keys = new List<CacheKey>() { userKey }
+                Keys = new List<SixnetCacheKey>() { userKey }
             }).Values?.FirstOrDefault()?.Value?.ToString();
         }
 
@@ -218,10 +218,10 @@ namespace Sixnet.Security.Authentication
             };
             configure?.Invoke(tokenSetting);
             var userKey = GetUserKey(tokenSetting);
-            return (await SixnetCacher.String.GetAsync(new StringGetParameter()
+            return (await SixnetCacher.String.GetAsync(new SixnetStringGetParameter()
             {
                 CacheObject = GetCacheObject(),
-                Keys = new List<CacheKey>() { userKey }
+                Keys = new List<SixnetCacheKey>() { userKey }
             })).Values?.FirstOrDefault()?.Value?.ToString();
         }
 
@@ -248,9 +248,9 @@ namespace Sixnet.Security.Authentication
         /// Get cache object
         /// </summary>
         /// <returns></returns>
-        static CacheObject GetCacheObject()
+        static SixnetCacheObject GetCacheObject()
         {
-            return new CacheObject()
+            return new SixnetCacheObject()
             {
                 ObjectName = nameof(SixnetAuthenticationManager)
             };

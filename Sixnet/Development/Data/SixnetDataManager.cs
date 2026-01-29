@@ -318,7 +318,7 @@ namespace Sixnet.Development.Data
             }) ?? new List<DatabaseObjectName>(0);
             if (!allTableNames.IsNullOrEmpty())
             {
-                var setAddParameter = new SetAddParameter()
+                var setAddParameter = new SixnetSetAddParameter()
                 {
                     Key = serverTableKey,
                     Members = allTableNames.Select(c => c.Name).ToList()
@@ -402,7 +402,7 @@ namespace Sixnet.Development.Data
         /// <returns></returns>
         static List<DatabaseObjectName> GetCachedTableNames(string serverTableKey, DatabaseObjectName rootTableName)
         {
-            var setMembersParameter = new SetMembersParameter()
+            var setMembersParameter = new SixnetSetMembersParameter()
             {
                 Key = serverTableKey
             };
@@ -418,7 +418,7 @@ namespace Sixnet.Development.Data
         /// <param name="parameter"></param>
         static void HandleSplitTableCacheParameter(ISixnetCacheParameter parameter)
         {
-            parameter.CacheObject = new CacheObject()
+            parameter.CacheObject = new SixnetCacheObject()
             {
                 ObjectName = SixnetCacher.SplitTableCacheObjectName
             };

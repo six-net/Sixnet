@@ -53,7 +53,7 @@ namespace Sixnet.Code
 
     public static class ObjectIdHelper
     {
-        static readonly CacheObject _idCacheObject = new();
+        static readonly SixnetCacheObject _idCacheObject = new();
 
         #region Long
 
@@ -71,7 +71,7 @@ namespace Sixnet.Code
             SixnetDirectThrower.ThrowArgErrorIf(size < 1, nameof(ObjectIdOptions.Size));
 
             var objectKey = GetObjectIdKey(objectIdOptions.ObjectName, objectIdOptions.FieldName);
-            var incrResponse = await SixnetCacher.String.IncrementAsync(new StringIncrementParameter()
+            var incrResponse = await SixnetCacher.String.IncrementAsync(new SixnetStringIncrementParameter()
             {
                 CacheObject = _idCacheObject,
                 Key = objectKey,
@@ -137,7 +137,7 @@ namespace Sixnet.Code
             SixnetDirectThrower.ThrowArgErrorIf(size < 1, nameof(ObjectIdOptions.Size));
 
             var objectKey = GetObjectIdKey(objectIdOptions.ObjectName, objectIdOptions.FieldName);
-            var incrResponse = SixnetCacher.String.Increment(new StringIncrementParameter()
+            var incrResponse = SixnetCacher.String.Increment(new SixnetStringIncrementParameter()
             {
                 CacheObject = _idCacheObject,
                 Key = objectKey,
@@ -207,7 +207,7 @@ namespace Sixnet.Code
             SixnetDirectThrower.ThrowArgErrorIf(size < 1, nameof(ObjectIdOptions.Size));
 
             var objectKey = GetObjectIdKey(objectIdOptions.ObjectName, objectIdOptions.FieldName);
-            var incrResponse = await SixnetCacher.String.IncrementAsync(new StringIncrementParameter()
+            var incrResponse = await SixnetCacher.String.IncrementAsync(new SixnetStringIncrementParameter()
             {
                 CacheObject = _idCacheObject,
                 Key = objectKey,
@@ -274,7 +274,7 @@ namespace Sixnet.Code
             SixnetDirectThrower.ThrowArgErrorIf(size < 1, nameof(ObjectIdOptions.Size));
 
             var objectKey = GetObjectIdKey(objectIdOptions.ObjectName, objectIdOptions.FieldName);
-            var incrResponse = SixnetCacher.String.Increment(new StringIncrementParameter()
+            var incrResponse = SixnetCacher.String.Increment(new SixnetStringIncrementParameter()
             {
                 CacheObject = _idCacheObject,
                 Key = objectKey,
@@ -341,10 +341,10 @@ namespace Sixnet.Code
             {
                 return;
             }
-            var parameter = new StringSetParameter()
+            var parameter = new SixnetStringSetParameter()
             {
                 CacheObject = _idCacheObject,
-                Items = entries.Select(c => new CacheEntry
+                Items = entries.Select(c => new SixnetCacheEntry
                 {
                     Key = GetObjectIdKey(c.ObjectName, c.FieldName),
                     Value = c.Value.ToString()

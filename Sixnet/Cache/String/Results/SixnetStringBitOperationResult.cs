@@ -1,0 +1,15 @@
+﻿// "Company © 2025. All rights reserved."
+
+namespace Sixnet.Cache.String.Results
+{
+    /// <summary>
+    /// String bit operation response
+    /// </summary>
+    public class SixnetStringBitOperationResult : SixnetCacheResult
+    {
+        /// <summary>
+        /// Gets or sets the size of the string stored in the destination key
+        /// </summary>
+        public long DestinationValueLength { get; set; }
+    }
+}

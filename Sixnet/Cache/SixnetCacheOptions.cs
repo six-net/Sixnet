@@ -14,7 +14,7 @@ namespace Sixnet.Cache
         #region Fields
 
         readonly Dictionary<CacheServerType, ISixnetCacheProvider> _providers = new();
-        internal static CacheServer DefaultInMemoryServer = new()
+        internal static SixnetCacheServer DefaultInMemoryServer = new()
         {
             Name = "SIXNET_DEFAULT_IN_MEMORY_SERVER_NAME",
             Type = CacheServerType.InMemory
@@ -28,7 +28,7 @@ namespace Sixnet.Cache
         /// <summary>
         /// Get cache servers operation func
         /// </summary>
-        public Func<ISixnetCacheParameter, CacheServer> GetCacheServersFunc { get; set; }
+        public Func<ISixnetCacheParameter, SixnetCacheServer> GetCacheServersFunc { get; set; }
 
         /// <summary>
         /// Get global cache key prefixs func
@@ -38,7 +38,7 @@ namespace Sixnet.Cache
         /// <summary>
         /// Get cache object prefixs func
         /// </summary>
-        public Func<CacheObject, List<string>> GetCacheObjectPrefixsFunc { get; set; }
+        public Func<SixnetCacheObject, List<string>> GetCacheObjectPrefixsFunc { get; set; }
 
         /// <summary>
         /// Gets or sets the each key name split char
@@ -63,7 +63,7 @@ namespace Sixnet.Cache
         /// <summary>
         /// Gets or sets the default cache server
         /// </summary>
-        public CacheServer Server { get; set; }
+        public SixnetCacheServer Server { get; set; }
 
         /// <summary>
         /// Whether lowercase key
@@ -118,7 +118,7 @@ namespace Sixnet.Cache
         /// </summary>
         /// <param name="parameter">Cache parameter</param>
         /// <returns>Return cache server</returns>
-        public CacheServer GetCacheServer<T>(CacheParameter<T> parameter) where T : CacheResult, new()
+        public SixnetCacheServer GetCacheServer<T>(SixnetCacheParameter<T> parameter) where T : SixnetCacheResult, new()
         {
             return GetCacheServersFunc?.Invoke(parameter) ?? Server;
         }
@@ -141,7 +141,7 @@ namespace Sixnet.Cache
         /// </summary>
         /// <param name="cacheObject">Cache object</param>
         /// <returns>Return cache object prefixs</returns>
-        public List<string> GetObjectPrefixs(CacheObject cacheObject)
+        public List<string> GetObjectPrefixs(SixnetCacheObject cacheObject)
         {
             return GetCacheObjectPrefixsFunc?.Invoke(cacheObject) ?? new List<string>(0);
         }

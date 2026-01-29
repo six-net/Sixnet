@@ -45,20 +45,20 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return string set range result</returns>
-        public StringSetRangeResult StringSetRange(CacheServer server, StringSetRangeParameter parameter)
+        public SixnetStringSetRangeResult StringSetRange(SixnetCacheServer server, SixnetStringSetRangeParameter parameter)
         {
             string key = parameter?.Key?.GetActualKey();
 
-            SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(key), $"{nameof(StringSetRangeParameter)}.{nameof(StringSetRangeParameter.Key)}");
-            SixnetDirectThrower.ThrowArgErrorIf(parameter.Offset < 0, $"{nameof(StringSetRangeParameter)}.{nameof(StringSetRangeParameter.Offset)} can't be less than 0");
+            SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(key), $"{nameof(SixnetStringSetRangeParameter)}.{nameof(SixnetStringSetRangeParameter.Key)}");
+            SixnetDirectThrower.ThrowArgErrorIf(parameter.Offset < 0, $"{nameof(SixnetStringSetRangeParameter)}.{nameof(SixnetStringSetRangeParameter.Offset)} can't be less than 0");
             if (parameter.Offset < 0)
             {
-                return CacheResult.FailResponse<StringSetRangeResult>(SixnetCacheCodes.OffsetLessZero);
+                return SixnetCacheResult.FailResponse<SixnetStringSetRangeResult>(SixnetCacheCodes.OffsetLessZero);
             }
             var database = GetDatabase(server);
             if (database == null)
             {
-                return CacheResult.FailResponse<StringSetRangeResult>(SixnetCacheCodes.DatabaseIsNull);
+                return SixnetCacheResult.FailResponse<SixnetStringSetRangeResult>(SixnetCacheCodes.DatabaseIsNull);
             }
             lock (database)
             {
@@ -90,7 +90,7 @@ namespace Sixnet.Cache.Provider.Memory
                         SetExpiration(newEntry, parameter.Expiration);
                     }
                 }
-                var response = CacheResult.SuccessResponse<StringSetRangeResult>(server, database);
+                var response = SixnetCacheResult.SuccessResponse<SixnetStringSetRangeResult>(server, database);
                 response.NewValueLength = cacheValue?.Length ?? 0;
                 return response;
             }
@@ -109,16 +109,16 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return string set bit result</returns>
-        public StringSetBitResult StringSetBit(CacheServer server, StringSetBitParameter parameter)
+        public SixnetStringSetBitResult StringSetBit(SixnetCacheServer server, SixnetStringSetBitParameter parameter)
         {
             var key = parameter?.Key?.GetActualKey() ?? string.Empty;
             if (string.IsNullOrWhiteSpace(key))
             {
-                return CacheResult.FailResponse<StringSetBitResult>(SixnetCacheCodes.KeyIsNullOrEmpty);
+                return SixnetCacheResult.FailResponse<SixnetStringSetBitResult>(SixnetCacheCodes.KeyIsNullOrEmpty);
             }
             if (parameter.Offset < 0)
             {
-                return CacheResult.FailResponse<StringSetBitResult>(SixnetCacheCodes.OffsetLessZero);
+                return SixnetCacheResult.FailResponse<SixnetStringSetBitResult>(SixnetCacheCodes.OffsetLessZero);
             }
             var database = GetDatabase(server);
             lock (database)
@@ -161,7 +161,7 @@ namespace Sixnet.Cache.Provider.Memory
                         SetExpiration(entry, parameter.Expiration);
                     }
                 }
-                var response = CacheResult.SuccessResponse<StringSetBitResult>(server, database);
+                var response = SixnetCacheResult.SuccessResponse<SixnetStringSetBitResult>(server, database);
                 response.OldBitValue = oldBitValue;
                 return response;
             }
@@ -178,16 +178,16 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return string set result</returns>
-        public StringSetResult StringSet(CacheServer server, StringSetParameter parameter)
+        public SixnetStringSetResult StringSet(SixnetCacheServer server, SixnetStringSetParameter parameter)
         {
             if (parameter?.Items.IsNullOrEmpty() ?? true)
             {
-                return CacheResult.FailResponse<StringSetResult>(SixnetCacheCodes.ValuesIsNullOrEmpty);
+                return SixnetCacheResult.FailResponse<SixnetStringSetResult>(SixnetCacheCodes.ValuesIsNullOrEmpty);
             }
             var database = GetDatabase(server);
             lock (database)
             {
-                var results = new List<StringEntrySetResult>(parameter.Items.Count);
+                var results = new List<SixnetStringEntrySetResult>(parameter.Items.Count);
                 foreach (var data in parameter.Items)
                 {
                     var cacheKey = data.Key?.GetActualKey() ?? string.Empty;
@@ -218,14 +218,14 @@ namespace Sixnet.Cache.Provider.Memory
                             entry.Value = data.Value?.ToString() ?? string.Empty;
                             SetExpiration(entry, data.Expiration);
                         }
-                        results.Add(new StringEntrySetResult()
+                        results.Add(new SixnetStringEntrySetResult()
                         {
                             Key = cacheKey,
                             SetSuccess = true
                         });
                     }
                 }
-                var response = CacheResult.SuccessResponse<StringSetResult>(server, database);
+                var response = SixnetCacheResult.SuccessResponse<SixnetStringSetResult>(server, database);
                 response.Results = results;
                 return response;
             }
@@ -241,15 +241,15 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return string length result</returns>
-        public StringLengthResult StringLength(CacheServer server, StringLengthParameter parameter)
+        public SixnetStringLengthResult StringLength(SixnetCacheServer server, SixnetStringLengthParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<StringLengthResult>(SixnetCacheCodes.KeyIsNullOrEmpty);
+                return SixnetCacheResult.FailResponse<SixnetStringLengthResult>(SixnetCacheCodes.KeyIsNullOrEmpty);
             }
             var database = GetDatabase(server);
-            var response = CacheResult.SuccessResponse<StringLengthResult>(server, database);
+            var response = SixnetCacheResult.SuccessResponse<SixnetStringLengthResult>(server, database);
             if (database.Store.TryGetValue<string>(cacheKey, out var value))
             {
                 response.Length = value?.Length ?? 0;
@@ -271,15 +271,15 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return string increment result</returns>
-        public StringIncrementResult StringIncrement(CacheServer server, StringIncrementParameter parameter)
+        public SixnetStringIncrementResult StringIncrement(SixnetCacheServer server, SixnetStringIncrementParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<StringIncrementResult>(SixnetCacheCodes.KeyIsNullOrEmpty);
+                return SixnetCacheResult.FailResponse<SixnetStringIncrementResult>(SixnetCacheCodes.KeyIsNullOrEmpty);
             }
             var database = GetDatabase(server);
-            StringIncrementResult response = null;
+            SixnetStringIncrementResult response = null;
             long nowValue = 0;
             lock (database)
             {
@@ -292,7 +292,7 @@ namespace Sixnet.Cache.Provider.Memory
                     }
                     else
                     {
-                        response = CacheResult.FailResponse<StringIncrementResult>(SixnetCacheCodes.ValueCannotBeCalculated, server: server, database: database);
+                        response = SixnetCacheResult.FailResponse<SixnetStringIncrementResult>(SixnetCacheCodes.ValueCannotBeCalculated, server: server, database: database);
                         return response;
                     }
                 }
@@ -306,7 +306,7 @@ namespace Sixnet.Cache.Provider.Memory
                     }
                 }
             }
-            response = CacheResult.SuccessResponse<StringIncrementResult>(server, database);
+            response = SixnetCacheResult.SuccessResponse<SixnetStringIncrementResult>(server, database);
             response.NewValue = nowValue;
             return response;
         }
@@ -323,12 +323,12 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return string get with expiry result</returns>
-        public StringGetWithExpiryResult StringGetWithExpiry(CacheServer server, StringGetWithExpiryParameter parameter)
+        public SixnetStringGetWithExpiryResult StringGetWithExpiry(SixnetCacheServer server, SixnetStringGetWithExpiryParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<StringGetWithExpiryResult>(SixnetCacheCodes.KeyIsNullOrEmpty);
+                return SixnetCacheResult.FailResponse<SixnetStringGetWithExpiryResult>(SixnetCacheCodes.KeyIsNullOrEmpty);
             }
             var nowValue = string.Empty;
             TimeSpan? expriy = null;
@@ -338,7 +338,7 @@ namespace Sixnet.Cache.Provider.Memory
                 nowValue = entry.Value?.ToString() ?? string.Empty;
                 expriy = GetExpiration(entry).Item2;
             }
-            var response = CacheResult.SuccessResponse<StringGetWithExpiryResult>(server, database);
+            var response = SixnetCacheResult.SuccessResponse<SixnetStringGetWithExpiryResult>(server, database);
             response.Value = nowValue;
             response.Expiry = expriy;
             return response;
@@ -354,12 +354,12 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return string get set result</returns>
-        public StringGetSetResult StringGetSet(CacheServer server, StringGetSetParameter parameter)
+        public SixnetStringGetSetResult StringGetSet(SixnetCacheServer server, SixnetStringGetSetParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<StringGetSetResult>(SixnetCacheCodes.KeyIsNullOrEmpty);
+                return SixnetCacheResult.FailResponse<SixnetStringGetSetResult>(SixnetCacheCodes.KeyIsNullOrEmpty);
             }
             var oldValue = string.Empty;
             var database = GetDatabase(server);
@@ -378,7 +378,7 @@ namespace Sixnet.Cache.Provider.Memory
                     }
                 }
             }
-            var response = CacheResult.SuccessResponse<StringGetSetResult>(server, database);
+            var response = SixnetCacheResult.SuccessResponse<SixnetStringGetSetResult>(server, database);
             response.OldValue = oldValue;
             return response;
         }
@@ -396,16 +396,16 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return string get range result</returns>
-        public StringGetRangeResult StringGetRange(CacheServer server, StringGetRangeParameter parameter)
+        public SixnetStringGetRangeResult StringGetRange(SixnetCacheServer server, SixnetStringGetRangeParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<StringGetRangeResult>(SixnetCacheCodes.KeyIsNullOrEmpty);
+                return SixnetCacheResult.FailResponse<SixnetStringGetRangeResult>(SixnetCacheCodes.KeyIsNullOrEmpty);
             }
             var subValue = string.Empty;
             var database = GetDatabase(server);
-            StringGetRangeResult response = null;
+            SixnetStringGetRangeResult response = null;
             if (database.Store.TryGetValue<string>(cacheKey, out var value) && !string.IsNullOrWhiteSpace(value))
             {
                 int start = parameter.Start;
@@ -417,7 +417,7 @@ namespace Sixnet.Cache.Provider.Memory
                 }
                 if (start < 0 || start >= valueLength)
                 {
-                    response = CacheResult.FailResponse<StringGetRangeResult>(SixnetCacheCodes.OffsetError, server: server, database: database);
+                    response = SixnetCacheResult.FailResponse<SixnetStringGetRangeResult>(SixnetCacheCodes.OffsetError, server: server, database: database);
                     return response;
                 }
                 if (end < 0)
@@ -426,12 +426,12 @@ namespace Sixnet.Cache.Provider.Memory
                 }
                 if (end < 0 || end >= valueLength)
                 {
-                    response = CacheResult.FailResponse<StringGetRangeResult>(SixnetCacheCodes.OffsetError, server: server, database: database);
+                    response = SixnetCacheResult.FailResponse<SixnetStringGetRangeResult>(SixnetCacheCodes.OffsetError, server: server, database: database);
                     return response;
                 }
                 subValue = value.Substring(Math.Min(start, end), Math.Abs(end - start) + 1);
             }
-            response = CacheResult.SuccessResponse<StringGetRangeResult>(server, database);
+            response = SixnetCacheResult.SuccessResponse<SixnetStringGetRangeResult>(server, database);
             response.Value = subValue;
             return response;
         }
@@ -448,15 +448,15 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return string get bit result</returns>
-        public StringGetBitResult StringGetBit(CacheServer server, StringGetBitParameter parameter)
+        public SixnetStringGetBitResult StringGetBit(SixnetCacheServer server, SixnetStringGetBitParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<StringGetBitResult>(SixnetCacheCodes.KeyIsNullOrEmpty);
+                return SixnetCacheResult.FailResponse<SixnetStringGetBitResult>(SixnetCacheCodes.KeyIsNullOrEmpty);
             }
             var database = GetDatabase(server);
-            StringGetBitResult response = null;
+            SixnetStringGetBitResult response = null;
             char bit = '0';
             if (database.Store.TryGetValue<string>(cacheKey, out var value) && !string.IsNullOrWhiteSpace(value))
             {
@@ -468,12 +468,12 @@ namespace Sixnet.Cache.Provider.Memory
                 }
                 if (offset < 0 || offset >= binaryArray.LongLength)
                 {
-                    response = CacheResult.FailResponse<StringGetBitResult>(SixnetCacheCodes.OffsetError, server: server, database: database);
+                    response = SixnetCacheResult.FailResponse<SixnetStringGetBitResult>(SixnetCacheCodes.OffsetError, server: server, database: database);
                     return response;
                 }
                 bit = binaryArray[offset];
             }
-            response = CacheResult.SuccessResponse<StringGetBitResult>(server, database);
+            response = SixnetCacheResult.SuccessResponse<SixnetStringGetBitResult>(server, database);
             response.Bit = bit == '1';
             return response;
         }
@@ -489,14 +489,14 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return string get result</returns>
-        public StringGetResult StringGet(CacheServer server, StringGetParameter parameter)
+        public SixnetStringGetResult StringGet(SixnetCacheServer server, SixnetStringGetParameter parameter)
         {
             if (parameter?.Keys.IsNullOrEmpty() ?? true)
             {
-                return CacheResult.FailResponse<StringGetResult>(SixnetCacheCodes.KeyIsNullOrEmpty);
+                return SixnetCacheResult.FailResponse<SixnetStringGetResult>(SixnetCacheCodes.KeyIsNullOrEmpty);
             }
             var database = GetDatabase(server);
-            var datas = new List<CacheEntry>();
+            var datas = new List<SixnetCacheEntry>();
             foreach (var key in parameter.Keys)
             {
                 var cacheKey = key.GetActualKey();
@@ -506,11 +506,11 @@ namespace Sixnet.Cache.Provider.Memory
                 }
                 if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
-                    datas.Add(new CacheEntry()
+                    datas.Add(new SixnetCacheEntry()
                     {
                         Key = key,
                         Value = entry.Value?.ToString() ?? string.Empty,
-                        Expiration = new CacheExpiration()
+                        Expiration = new SixnetCacheExpiration()
                         {
                             AbsoluteExpiration = entry.AbsoluteExpiration,
                             AbsoluteExpirationRelativeToNow = entry.AbsoluteExpirationRelativeToNow,
@@ -519,7 +519,7 @@ namespace Sixnet.Cache.Provider.Memory
                     });
                 }
             }
-            var response = CacheResult.SuccessResponse<StringGetResult>(server, database);
+            var response = SixnetCacheResult.SuccessResponse<SixnetStringGetResult>(server, database);
             response.Values = datas;
             return response;
         }
@@ -537,16 +537,16 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return string decrement result</returns>
-        public StringDecrementResult StringDecrement(CacheServer server, StringDecrementParameter parameter)
+        public SixnetStringDecrementResult StringDecrement(SixnetCacheServer server, SixnetStringDecrementParameter parameter)
         {
             string cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<StringDecrementResult>(SixnetCacheCodes.KeyIsNullOrEmpty);
+                return SixnetCacheResult.FailResponse<SixnetStringDecrementResult>(SixnetCacheCodes.KeyIsNullOrEmpty);
             }
             var database = GetDatabase(server);
             long nowValue = 0;
-            StringDecrementResult response = null;
+            SixnetStringDecrementResult response = null;
             lock (database)
             {
                 if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
@@ -558,7 +558,7 @@ namespace Sixnet.Cache.Provider.Memory
                     }
                     else
                     {
-                        response = CacheResult.FailResponse<StringDecrementResult>(SixnetCacheCodes.ValueCannotBeCalculated, server: server, database: database);
+                        response = SixnetCacheResult.FailResponse<SixnetStringDecrementResult>(SixnetCacheCodes.ValueCannotBeCalculated, server: server, database: database);
                         return response;
                     }
                 }
@@ -572,7 +572,7 @@ namespace Sixnet.Cache.Provider.Memory
                     }
                 }
             }
-            response = CacheResult.SuccessResponse<StringDecrementResult>(server, database);
+            response = SixnetCacheResult.SuccessResponse<SixnetStringDecrementResult>(server, database);
             response.NewValue = nowValue;
             return response;
         }
@@ -593,19 +593,19 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return string bit position result</returns>
-        public StringBitPositionResult StringBitPosition(CacheServer server, StringBitPositionParameter parameter)
+        public SixnetStringBitPositionResult StringBitPosition(SixnetCacheServer server, SixnetStringBitPositionParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<StringBitPositionResult>(SixnetCacheCodes.KeyIsNullOrEmpty);
+                return SixnetCacheResult.FailResponse<SixnetStringBitPositionResult>(SixnetCacheCodes.KeyIsNullOrEmpty);
             }
             if ((parameter.Start >= 0 && parameter.End < parameter.Start) || (parameter.Start < 0 && parameter.End > parameter.Start))
             {
-                return CacheResult.FailResponse<StringBitPositionResult>(SixnetCacheCodes.OffsetError);
+                return SixnetCacheResult.FailResponse<SixnetStringBitPositionResult>(SixnetCacheCodes.OffsetError);
             }
             var database = GetDatabase(server);
-            StringBitPositionResult response = null;
+            SixnetStringBitPositionResult response = null;
             bool hasValue = false;
             long position = 0;
             if (database.Store.TryGetValue<string>(cacheKey, out var value) && !string.IsNullOrWhiteSpace(value))
@@ -621,7 +621,7 @@ namespace Sixnet.Cache.Provider.Memory
                 }
                 if (start < 0 || start >= length)
                 {
-                    response = CacheResult.FailResponse<StringBitPositionResult>(SixnetCacheCodes.OffsetError, server: server, database: database);
+                    response = SixnetCacheResult.FailResponse<SixnetStringBitPositionResult>(SixnetCacheCodes.OffsetError, server: server, database: database);
                     return response;
                 }
                 if (end < 0)
@@ -630,7 +630,7 @@ namespace Sixnet.Cache.Provider.Memory
                 }
                 if (end < 0 || end >= length)
                 {
-                    response = CacheResult.FailResponse<StringBitPositionResult>(SixnetCacheCodes.OffsetError, server: server, database: database);
+                    response = SixnetCacheResult.FailResponse<SixnetStringBitPositionResult>(SixnetCacheCodes.OffsetError, server: server, database: database);
                     return response;
                 }
                 var begin = Math.Min(start, end);
@@ -645,7 +645,7 @@ namespace Sixnet.Cache.Provider.Memory
                     }
                 }
             }
-            response = CacheResult.SuccessResponse<StringBitPositionResult>(server, database);
+            response = SixnetCacheResult.SuccessResponse<SixnetStringBitPositionResult>(server, database);
             response.HasValue = hasValue;
             response.Position = position;
             return response;
@@ -665,11 +665,11 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return string bit operation result</returns>
-        public StringBitOperationResult StringBitOperation(CacheServer server, StringBitOperationParameter parameter)
+        public SixnetStringBitOperationResult StringBitOperation(SixnetCacheServer server, SixnetStringBitOperationParameter parameter)
         {
             if (parameter.Keys.IsNullOrEmpty() || string.IsNullOrWhiteSpace(parameter.DestinationKey))
             {
-                return CacheResult.FailResponse<StringBitOperationResult>(SixnetCacheCodes.KeyIsNullOrEmpty);
+                return SixnetCacheResult.FailResponse<SixnetStringBitOperationResult>(SixnetCacheCodes.KeyIsNullOrEmpty);
             }
             if (parameter.Keys.Count > 1 && parameter.Bitwise == CacheBitwise.Not)
             {
@@ -677,7 +677,7 @@ namespace Sixnet.Cache.Provider.Memory
             }
             var database = GetDatabase(server);
             BitArray bitArray = null;
-            StringBitOperationResult response = null;
+            SixnetStringBitOperationResult response = null;
             foreach (var key in parameter.Keys)
             {
                 if (database.Store.TryGetEntry(key, out ICacheEntry cacheEntry))
@@ -703,15 +703,15 @@ namespace Sixnet.Cache.Provider.Memory
             }
             if (bitArray == null)
             {
-                return CacheResult.FailResponse<StringBitOperationResult>(SixnetCacheCodes.ValuesIsNullOrEmpty, server: server, database: database);
+                return SixnetCacheResult.FailResponse<SixnetStringBitOperationResult>(SixnetCacheCodes.ValuesIsNullOrEmpty, server: server, database: database);
             }
             var bitString = string.Join("", bitArray.Cast<bool>().Select(c => c ? 1 : 0));
             var originalString = bitString.ToOriginalString(GetEncoding());
-            var setRes = StringSet(server, new StringSetParameter()
+            var setRes = StringSet(server, new SixnetStringSetParameter()
             {
-                Items = new List<CacheEntry>()
+                Items = new List<SixnetCacheEntry>()
                 {
-                    new CacheEntry()
+                    new SixnetCacheEntry()
                     {
                         Key=parameter.DestinationKey,
                         Type=CacheKeyType.String,
@@ -722,7 +722,7 @@ namespace Sixnet.Cache.Provider.Memory
             });
             if (setRes?.Success ?? false)
             {
-                response = new StringBitOperationResult()
+                response = new SixnetStringBitOperationResult()
                 {
                     Success = true,
                     DestinationValueLength = originalString.Length,
@@ -732,7 +732,7 @@ namespace Sixnet.Cache.Provider.Memory
             }
             else
             {
-                response = CacheResult.FailResponse<StringBitOperationResult>(setRes.Code, setRes.Message, server, database);
+                response = SixnetCacheResult.FailResponse<SixnetStringBitOperationResult>(setRes.Code, setRes.Message, server, database);
             }
             return response;
         }
@@ -752,11 +752,11 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return string bit count result</returns>
-        public StringBitCountResult StringBitCount(CacheServer server, StringBitCountParameter parameter)
+        public SixnetStringBitCountResult StringBitCount(SixnetCacheServer server, SixnetStringBitCountParameter parameter)
         {
             if (string.IsNullOrWhiteSpace(parameter?.Key))
             {
-                throw new ArgumentNullException($"{nameof(StringBitCountParameter)}.{nameof(StringBitCountParameter.Key)}");
+                throw new ArgumentNullException($"{nameof(SixnetStringBitCountParameter)}.{nameof(SixnetStringBitCountParameter.Key)}");
             }
             var cacheKey = parameter.Key.GetActualKey();
             var bitCount = 0;
@@ -766,7 +766,7 @@ namespace Sixnet.Cache.Provider.Memory
                 var value = entry.Value?.ToString() ?? string.Empty;
                 bitCount = value.ToBinaryString(GetEncoding()).Count(c => c == '1');
             }
-            var response = new StringBitCountResult()
+            var response = new SixnetStringBitCountResult()
             {
                 Success = true,
                 BitNum = bitCount
@@ -786,12 +786,12 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return string append result</returns>
-        public StringAppendResult StringAppend(CacheServer server, StringAppendParameter parameter)
+        public SixnetStringAppendResult StringAppend(SixnetCacheServer server, SixnetStringAppendParameter parameter)
         {
             string cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<StringAppendResult>(SixnetCacheCodes.KeyIsNullOrEmpty);
+                return SixnetCacheResult.FailResponse<SixnetStringAppendResult>(SixnetCacheCodes.KeyIsNullOrEmpty);
             }
             long valueLength = 0;
             var database = GetDatabase(server);
@@ -813,7 +813,7 @@ namespace Sixnet.Cache.Provider.Memory
                     }
                 }
             }
-            var response = CacheResult.SuccessResponse<StringAppendResult>(server, database);
+            var response = SixnetCacheResult.SuccessResponse<SixnetStringAppendResult>(server, database);
             response.NewValueLength = valueLength;
             return response;
         }
@@ -838,22 +838,22 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return list trim result</returns>
-        public ListTrimResult ListTrim(CacheServer server, ListTrimParameter parameter)
+        public SixnetListTrimResult ListTrim(SixnetCacheServer server, SixnetListTrimParameter parameter)
         {
             string cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<ListTrimResult>(SixnetCacheCodes.KeyIsNullOrEmpty);
+                return SixnetCacheResult.FailResponse<SixnetListTrimResult>(SixnetCacheCodes.KeyIsNullOrEmpty);
             }
             var database = GetDatabase(server);
-            ListTrimResult response = null;
+            SixnetListTrimResult response = null;
             lock (database)
             {
                 if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
                     if (entry.Value is not List<string> list)
                     {
-                        response = CacheResult.FailResponse<ListTrimResult>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
+                        response = SixnetCacheResult.FailResponse<SixnetListTrimResult>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
                         return response;
                     }
                     var start = parameter.Start;
@@ -865,7 +865,7 @@ namespace Sixnet.Cache.Provider.Memory
                     }
                     if (start < 0 || start >= count)
                     {
-                        response = CacheResult.FailResponse<ListTrimResult>(SixnetCacheCodes.OffsetError, server: server, database: database);
+                        response = SixnetCacheResult.FailResponse<SixnetListTrimResult>(SixnetCacheCodes.OffsetError, server: server, database: database);
                         return response;
                     }
                     if (end < 0)
@@ -874,18 +874,18 @@ namespace Sixnet.Cache.Provider.Memory
                     }
                     if (end < 0 || end >= count)
                     {
-                        response = CacheResult.FailResponse<ListTrimResult>(SixnetCacheCodes.OffsetError, server: server, database: database);
+                        response = SixnetCacheResult.FailResponse<SixnetListTrimResult>(SixnetCacheCodes.OffsetError, server: server, database: database);
                         return response;
                     }
                     var begin = Math.Min(start, end);
                     var takeCount = Math.Abs(end - start) + 1;
                     var nowList = list.Skip(begin).Take(takeCount).ToList();
                     entry.SetValue(nowList);
-                    response = CacheResult.SuccessResponse<ListTrimResult>();
+                    response = SixnetCacheResult.SuccessResponse<SixnetListTrimResult>();
                 }
                 else
                 {
-                    response = CacheResult.FailResponse<ListTrimResult>(SixnetCacheCodes.KeyIsNotExist);
+                    response = SixnetCacheResult.FailResponse<SixnetListTrimResult>(SixnetCacheCodes.KeyIsNotExist);
                 }
             }
             response.CacheServer = server;
@@ -904,22 +904,22 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return list set by index result</returns>
-        public ListSetByIndexResult ListSetByIndex(CacheServer server, ListSetByIndexParameter parameter)
+        public SixnetListSetByIndexResult ListSetByIndex(SixnetCacheServer server, SixnetListSetByIndexParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<ListSetByIndexResult>(SixnetCacheCodes.KeyIsNullOrEmpty);
+                return SixnetCacheResult.FailResponse<SixnetListSetByIndexResult>(SixnetCacheCodes.KeyIsNullOrEmpty);
             }
             var database = GetDatabase(server);
-            ListSetByIndexResult response = null;
+            SixnetListSetByIndexResult response = null;
             lock (database)
             {
                 if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
                     if (entry.Value is not List<string> list)
                     {
-                        response = CacheResult.FailResponse<ListSetByIndexResult>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
+                        response = SixnetCacheResult.FailResponse<SixnetListSetByIndexResult>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
                         return response;
                     }
                     var index = parameter.Index;
@@ -929,15 +929,15 @@ namespace Sixnet.Cache.Provider.Memory
                     }
                     if (index < 0 || index >= list.Count)
                     {
-                        response = CacheResult.FailResponse<ListSetByIndexResult>(SixnetCacheCodes.OffsetError, server: server, database: database);
+                        response = SixnetCacheResult.FailResponse<SixnetListSetByIndexResult>(SixnetCacheCodes.OffsetError, server: server, database: database);
                         return response;
                     }
                     list[index] = parameter.Value;
-                    response = CacheResult.SuccessResponse<ListSetByIndexResult>();
+                    response = SixnetCacheResult.SuccessResponse<SixnetListSetByIndexResult>();
                 }
                 else
                 {
-                    response = CacheResult.FailResponse<ListSetByIndexResult>(SixnetCacheCodes.KeyIsNotExist);
+                    response = SixnetCacheResult.FailResponse<SixnetListSetByIndexResult>(SixnetCacheCodes.KeyIsNotExist);
                 }
             }
             response.CacheServer = server;
@@ -960,31 +960,31 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return list right push</returns>
-        public ListRightPushResult ListRightPush(CacheServer server, ListRightPushParameter parameter)
+        public SixnetListRightPushResult ListRightPush(SixnetCacheServer server, SixnetListRightPushParameter parameter)
         {
             string cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<ListRightPushResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetListRightPushResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             if (parameter.Values.IsNullOrEmpty())
             {
-                return CacheResult.FailResponse<ListRightPushResult>(SixnetCacheCodes.ValuesIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetListRightPushResult>(SixnetCacheCodes.ValuesIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
-            ListRightPushResult response;
+            SixnetListRightPushResult response;
             lock (database)
             {
                 if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
                     if (!(entry.Value is List<string> list))
                     {
-                        response = CacheResult.FailResponse<ListRightPushResult>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
+                        response = SixnetCacheResult.FailResponse<SixnetListRightPushResult>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
                         return response;
                     }
                     list = list.Concat(parameter.Values).ToList();
                     entry.SetValue(list);
-                    response = CacheResult.SuccessResponse<ListRightPushResult>();
+                    response = SixnetCacheResult.SuccessResponse<SixnetListRightPushResult>();
                     response.NewListLength = list.Count;
                 }
                 else
@@ -994,7 +994,7 @@ namespace Sixnet.Cache.Provider.Memory
                         entry.SetValue(new List<string>(parameter.Values));
                         SetExpiration(entry, parameter.Expiration);
                     }
-                    response = CacheResult.SuccessResponse<ListRightPushResult>();
+                    response = SixnetCacheResult.SuccessResponse<SixnetListRightPushResult>();
                     response.NewListLength = parameter.Values.Count;
                 }
             }
@@ -1015,28 +1015,28 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return list right pop left result</returns>
-        public ListRightPopLeftPushResult ListRightPopLeftPush(CacheServer server, ListRightPopLeftPushParameter parameter)
+        public SixnetListRightPopLeftPushResult ListRightPopLeftPush(SixnetCacheServer server, SixnetListRightPopLeftPushParameter parameter)
         {
             var sourceCacheKey = parameter?.SourceKey?.GetActualKey();
             var destionationCacheKey = parameter?.DestinationKey?.GetActualKey();
             if (string.IsNullOrWhiteSpace(sourceCacheKey) || string.IsNullOrWhiteSpace(destionationCacheKey))
             {
-                return CacheResult.FailResponse<ListRightPopLeftPushResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetListRightPopLeftPushResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
-            ListRightPopLeftPushResult response = null;
+            SixnetListRightPopLeftPushResult response = null;
             lock (database)
             {
                 if (database.Store.TryGetEntry(sourceCacheKey, out var entry) && entry != null)
                 {
                     if (entry.Value is not List<string> list)
                     {
-                        response = CacheResult.FailResponse<ListRightPopLeftPushResult>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
+                        response = SixnetCacheResult.FailResponse<SixnetListRightPopLeftPushResult>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
                         return response;
                     }
                     if (list.Count < 1)
                     {
-                        response = CacheResult.FailResponse<ListRightPopLeftPushResult>(SixnetCacheCodes.ListIsEmpty, server: server, database: database);
+                        response = SixnetCacheResult.FailResponse<SixnetListRightPopLeftPushResult>(SixnetCacheCodes.ListIsEmpty, server: server, database: database);
                         return response;
                     }
                     List<string> desList = null;
@@ -1045,7 +1045,7 @@ namespace Sixnet.Cache.Provider.Memory
                         desList = desEntry.Value as List<string>;
                         if (desList == null)
                         {
-                            response = CacheResult.FailResponse<ListRightPopLeftPushResult>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
+                            response = SixnetCacheResult.FailResponse<SixnetListRightPopLeftPushResult>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
                             return response;
                         }
                     }
@@ -1064,12 +1064,12 @@ namespace Sixnet.Cache.Provider.Memory
                     {
                         desList.Insert(0, value);
                     }
-                    response = CacheResult.SuccessResponse<ListRightPopLeftPushResult>();
+                    response = SixnetCacheResult.SuccessResponse<SixnetListRightPopLeftPushResult>();
                     response.PopValue = value;
                 }
                 else
                 {
-                    response = CacheResult.FailResponse<ListRightPopLeftPushResult>(SixnetCacheCodes.KeyIsNotExist);
+                    response = SixnetCacheResult.FailResponse<SixnetListRightPopLeftPushResult>(SixnetCacheCodes.KeyIsNotExist);
                 }
             }
             response.CacheServer = server;
@@ -1087,15 +1087,15 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return list right pop result</returns>
-        public ListRightPopResult ListRightPop(CacheServer server, ListRightPopParameter parameter)
+        public SixnetListRightPopResult ListRightPop(SixnetCacheServer server, SixnetListRightPopParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<ListRightPopResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetListRightPopResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
-            ListRightPopResult response = null;
+            SixnetListRightPopResult response = null;
             lock (database)
             {
                 var value = string.Empty;
@@ -1103,23 +1103,23 @@ namespace Sixnet.Cache.Provider.Memory
                 {
                     if (!(entry.Value is List<string> list))
                     {
-                        response = CacheResult.FailResponse<ListRightPopResult>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
+                        response = SixnetCacheResult.FailResponse<SixnetListRightPopResult>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
                         return response;
                     }
                     if (list.Count < 1)
                     {
-                        response = CacheResult.FailResponse<ListRightPopResult>(SixnetCacheCodes.ListIsEmpty, server: server, database: database);
+                        response = SixnetCacheResult.FailResponse<SixnetListRightPopResult>(SixnetCacheCodes.ListIsEmpty, server: server, database: database);
                         return response;
                     }
                     var index = list.Count - 1;
                     value = list[index];
                     list.RemoveAt(index);
-                    response = CacheResult.SuccessResponse<ListRightPopResult>();
+                    response = SixnetCacheResult.SuccessResponse<SixnetListRightPopResult>();
                     response.PopValue = value;
                 }
                 else
                 {
-                    response = CacheResult.FailResponse<ListRightPopResult>(SixnetCacheCodes.KeyIsNotExist);
+                    response = SixnetCacheResult.FailResponse<SixnetListRightPopResult>(SixnetCacheCodes.KeyIsNotExist);
                 }
             }
             response.CacheServer = server;
@@ -1141,22 +1141,22 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return list remove result</returns>
-        public ListRemoveResult ListRemove(CacheServer server, ListRemoveParameter parameter)
+        public SixnetListRemoveResult ListRemove(SixnetCacheServer server, SixnetListRemoveParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<ListRemoveResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetListRemoveResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
-            ListRemoveResult response = null;
+            SixnetListRemoveResult response = null;
             lock (database)
             {
                 if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
                     if (entry.Value is not List<string> list)
                     {
-                        response = CacheResult.FailResponse<ListRemoveResult>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
+                        response = SixnetCacheResult.FailResponse<SixnetListRemoveResult>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
                         return response;
                     }
                     var removeCount = 0;
@@ -1179,12 +1179,12 @@ namespace Sixnet.Cache.Provider.Memory
                             list.RemoveAt(index);
                         }
                     }
-                    response = CacheResult.SuccessResponse<ListRemoveResult>();
+                    response = SixnetCacheResult.SuccessResponse<SixnetListRemoveResult>();
                     response.RemoveCount = removeCount;
                 }
                 else
                 {
-                    response = CacheResult.FailResponse<ListRemoveResult>(SixnetCacheCodes.KeyIsNotExist);
+                    response = SixnetCacheResult.FailResponse<SixnetListRemoveResult>(SixnetCacheCodes.KeyIsNotExist);
                 }
             }
             response.CacheServer = server;
@@ -1208,20 +1208,20 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return list range result</returns>
-        public ListRangeResult ListRange(CacheServer server, ListRangeParameter parameter)
+        public SixnetListRangeResult ListRange(SixnetCacheServer server, SixnetListRangeParameter parameter)
         {
             string cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<ListRangeResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetListRangeResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
-            ListRangeResult response;
+            SixnetListRangeResult response;
             if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
             {
                 if (entry.Value is not List<string> list)
                 {
-                    response = CacheResult.FailResponse<ListRangeResult>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
+                    response = SixnetCacheResult.FailResponse<SixnetListRangeResult>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
                     return response;
                 }
                 var start = parameter.Start;
@@ -1231,7 +1231,7 @@ namespace Sixnet.Cache.Provider.Memory
                 }
                 if (start < 0 || start >= list.Count)
                 {
-                    response = CacheResult.FailResponse<ListRangeResult>(SixnetCacheCodes.OffsetError, server: server, database: database);
+                    response = SixnetCacheResult.FailResponse<SixnetListRangeResult>(SixnetCacheCodes.OffsetError, server: server, database: database);
                     return response;
                 }
                 var end = parameter.Stop;
@@ -1241,16 +1241,16 @@ namespace Sixnet.Cache.Provider.Memory
                 }
                 if (end < 0 || end >= list.Count)
                 {
-                    response = CacheResult.FailResponse<ListRangeResult>(SixnetCacheCodes.OffsetError, server: server, database: database);
+                    response = SixnetCacheResult.FailResponse<SixnetListRangeResult>(SixnetCacheCodes.OffsetError, server: server, database: database);
                     return response;
                 }
                 var begin = Math.Min(start, end);
-                response = CacheResult.SuccessResponse<ListRangeResult>();
+                response = SixnetCacheResult.SuccessResponse<SixnetListRangeResult>();
                 response.Values = list.GetRange(begin, Math.Abs(end - start) + 1).ToList();
             }
             else
             {
-                response = CacheResult.FailResponse<ListRangeResult>(SixnetCacheCodes.KeyIsNotExist);
+                response = SixnetCacheResult.FailResponse<SixnetListRangeResult>(SixnetCacheCodes.KeyIsNotExist);
             }
             response.CacheServer = server;
             response.Database = database;
@@ -1268,26 +1268,26 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return list length result</returns>
-        public ListLengthResult ListLength(CacheServer server, ListLengthParameter parameter)
+        public SixnetListLengthResult ListLength(SixnetCacheServer server, SixnetListLengthParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<ListLengthResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetListLengthResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             var length = 0;
-            ListLengthResult response;
+            SixnetListLengthResult response;
             if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
             {
                 if (entry.Value is not List<string> list)
                 {
-                    response = CacheResult.FailResponse<ListLengthResult>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
+                    response = SixnetCacheResult.FailResponse<SixnetListLengthResult>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
                     return response;
                 }
                 length = list.Count;
             }
-            response = CacheResult.SuccessResponse<ListLengthResult>();
+            response = SixnetCacheResult.SuccessResponse<SixnetListLengthResult>();
             response.Length = length;
             response.CacheServer = server;
             response.Database = database;
@@ -1305,31 +1305,31 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return list left push result</returns>
-        public ListLeftPushResult ListLeftPush(CacheServer server, ListLeftPushParameter parameter)
+        public SixnetListLeftPushResult ListLeftPush(SixnetCacheServer server, SixnetListLeftPushParameter parameter)
         {
             string cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<ListLeftPushResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetListLeftPushResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             if (parameter.Values.IsNullOrEmpty())
             {
-                return CacheResult.FailResponse<ListLeftPushResult>(SixnetCacheCodes.ValuesIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetListLeftPushResult>(SixnetCacheCodes.ValuesIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
-            ListLeftPushResult response;
+            SixnetListLeftPushResult response;
             lock (database)
             {
                 if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
                     if (entry.Value is not List<string> list)
                     {
-                        response = CacheResult.FailResponse<ListLeftPushResult>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
+                        response = SixnetCacheResult.FailResponse<SixnetListLeftPushResult>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
                         return response;
                     }
                     list = parameter.Values.Concat(list).ToList();
                     entry.SetValue(list);
-                    response = CacheResult.SuccessResponse<ListLeftPushResult>();
+                    response = SixnetCacheResult.SuccessResponse<SixnetListLeftPushResult>();
                     response.NewListLength = list.Count;
                 }
                 else
@@ -1339,7 +1339,7 @@ namespace Sixnet.Cache.Provider.Memory
                         entry.SetValue(new List<string>(parameter.Values));
                         SetExpiration(entry, parameter.Expiration);
                     }
-                    response = CacheResult.SuccessResponse<ListLeftPushResult>();
+                    response = SixnetCacheResult.SuccessResponse<SixnetListLeftPushResult>();
                     response.NewListLength = parameter.Values.Count;
                 }
             }
@@ -1358,15 +1358,15 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return list left pop result</returns>
-        public ListLeftPopResult ListLeftPop(CacheServer server, ListLeftPopParameter parameter)
+        public SixnetListLeftPopResult ListLeftPop(SixnetCacheServer server, SixnetListLeftPopParameter parameter)
         {
             string cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<ListLeftPopResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetListLeftPopResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
-            ListLeftPopResult response = null;
+            SixnetListLeftPopResult response = null;
             lock (database)
             {
                 var value = string.Empty;
@@ -1374,23 +1374,23 @@ namespace Sixnet.Cache.Provider.Memory
                 {
                     if (entry.Value is not List<string> list)
                     {
-                        response = CacheResult.FailResponse<ListLeftPopResult>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
+                        response = SixnetCacheResult.FailResponse<SixnetListLeftPopResult>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
                         return response;
                     }
                     if (list.Count < 1)
                     {
-                        response = CacheResult.FailResponse<ListLeftPopResult>(SixnetCacheCodes.ListIsEmpty, server: server, database: database);
+                        response = SixnetCacheResult.FailResponse<SixnetListLeftPopResult>(SixnetCacheCodes.ListIsEmpty, server: server, database: database);
                         return response;
                     }
                     value = list[0];
                     list.RemoveAt(0);
                     entry.SetValue(list);
-                    response = CacheResult.SuccessResponse<ListLeftPopResult>();
+                    response = SixnetCacheResult.SuccessResponse<SixnetListLeftPopResult>();
                     response.PopValue = value;
                 }
                 else
                 {
-                    response = CacheResult.FailResponse<ListLeftPopResult>(SixnetCacheCodes.KeyIsNotExist);
+                    response = SixnetCacheResult.FailResponse<SixnetListLeftPopResult>(SixnetCacheCodes.KeyIsNotExist);
                 }
             }
             response.CacheServer = server;
@@ -1410,24 +1410,24 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return list insert begore result</returns>
-        public ListInsertBeforeResult ListInsertBefore(CacheServer server, ListInsertBeforeParameter parameter)
+        public SixnetListInsertBeforeResult ListInsertBefore(SixnetCacheServer server, SixnetListInsertBeforeParameter parameter)
         {
             string cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<ListInsertBeforeResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetListInsertBeforeResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             int newLength = 0;
             bool hasInsertValue = false;
-            ListInsertBeforeResult response;
+            SixnetListInsertBeforeResult response;
             lock (database)
             {
                 if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
                     if (entry.Value is not List<string> list)
                     {
-                        response = CacheResult.FailResponse<ListInsertBeforeResult>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
+                        response = SixnetCacheResult.FailResponse<SixnetListInsertBeforeResult>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
                         return response;
                     }
                     var index = list.FindIndex(c => c == parameter.PivotValue);
@@ -1440,7 +1440,7 @@ namespace Sixnet.Cache.Provider.Memory
                     newLength = list.Count;
                 }
             }
-            response = new ListInsertBeforeResult()
+            response = new SixnetListInsertBeforeResult()
             {
                 Success = hasInsertValue,
                 NewListLength = newLength,
@@ -1462,17 +1462,17 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return list insert after result</returns>
-        public ListInsertAfterResult ListInsertAfter(CacheServer server, ListInsertAfterParameter parameter)
+        public SixnetListInsertAfterResult ListInsertAfter(SixnetCacheServer server, SixnetListInsertAfterParameter parameter)
         {
             string cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<ListInsertAfterResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetListInsertAfterResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             var newLength = 0;
             var hasInsertValue = false;
-            ListInsertAfterResult response;
+            SixnetListInsertAfterResult response;
             lock (database)
             {
                 if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
@@ -1480,7 +1480,7 @@ namespace Sixnet.Cache.Provider.Memory
                     var list = entry.Value as List<string>;
                     if (list == null)
                     {
-                        response = CacheResult.FailResponse<ListInsertAfterResult>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
+                        response = SixnetCacheResult.FailResponse<SixnetListInsertAfterResult>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
                         return response;
                     }
                     var index = list.FindIndex(c => c == parameter.PivotValue);
@@ -1493,7 +1493,7 @@ namespace Sixnet.Cache.Provider.Memory
                     newLength = list.Count;
                 }
             }
-            response = new ListInsertAfterResult()
+            response = new SixnetListInsertAfterResult()
             {
                 NewListLength = newLength,
                 Success = hasInsertValue,
@@ -1516,21 +1516,21 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return list get by index result</returns>
-        public ListGetByIndexResult ListGetByIndex(CacheServer server, ListGetByIndexParameter parameter)
+        public SixnetListGetByIndexResult ListGetByIndex(SixnetCacheServer server, SixnetListGetByIndexParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<ListGetByIndexResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetListGetByIndexResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             var value = "";
-            ListGetByIndexResult response;
+            SixnetListGetByIndexResult response;
             if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
             {
                 if (entry.Value is not List<string> list)
                 {
-                    response = CacheResult.FailResponse<ListGetByIndexResult>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
+                    response = SixnetCacheResult.FailResponse<SixnetListGetByIndexResult>(SixnetCacheCodes.ValueIsNotList, server: server, database: database);
                     return response;
                 }
                 var index = parameter.Index;
@@ -1540,12 +1540,12 @@ namespace Sixnet.Cache.Provider.Memory
                 }
                 if (index < 0 || index >= list.Count)
                 {
-                    response = CacheResult.FailResponse<ListGetByIndexResult>(SixnetCacheCodes.OffsetError, server: server, database: database);
+                    response = SixnetCacheResult.FailResponse<SixnetListGetByIndexResult>(SixnetCacheCodes.OffsetError, server: server, database: database);
                     return response;
                 }
                 value = list[index];
             }
-            response = CacheResult.SuccessResponse<ListGetByIndexResult>();
+            response = SixnetCacheResult.SuccessResponse<SixnetListGetByIndexResult>();
             response.Value = value;
             response.CacheServer = server;
             response.Database = database;
@@ -1566,27 +1566,27 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return hash values result</returns>
-        public HashValuesResult HashValues(CacheServer server, HashValuesParameter parameter)
+        public SixnetHashValuesResult HashValues(SixnetCacheServer server, SixnetHashValuesParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<HashValuesResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetHashValuesResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             List<dynamic> values = null;
-            HashValuesResult response;
+            SixnetHashValuesResult response;
             if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
             {
                 if (entry.Value is not ConcurrentDictionary<string, dynamic> dict)
                 {
-                    response = CacheResult.FailResponse<HashValuesResult>(SixnetCacheCodes.ValueIsNotDict, server: server, database: database);
+                    response = SixnetCacheResult.FailResponse<SixnetHashValuesResult>(SixnetCacheCodes.ValueIsNotDict, server: server, database: database);
                     return response;
                 }
                 values = dict.Values.ToList();
             }
             values ??= new List<dynamic>(0);
-            response = CacheResult.SuccessResponse<HashValuesResult>(server, database);
+            response = SixnetCacheResult.SuccessResponse<SixnetHashValuesResult>(server, database);
             response.Values = values;
             return response;
         }
@@ -1602,22 +1602,22 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return hash set result</returns>
-        public HashSetResult HashSet(CacheServer server, HashSetParameter parameter)
+        public SixnetHashSetResult HashSet(SixnetCacheServer server, SixnetHashSetParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<HashSetResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetHashSetResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
-            HashSetResult response;
+            SixnetHashSetResult response;
             lock (database)
             {
                 if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
                     if (entry.Value is not ConcurrentDictionary<string, dynamic> dict)
                     {
-                        response = CacheResult.FailResponse<HashSetResult>(SixnetCacheCodes.ValueIsNotDict, server: server, database: database);
+                        response = SixnetCacheResult.FailResponse<SixnetHashSetResult>(SixnetCacheCodes.ValueIsNotDict, server: server, database: database);
                         return response;
                     }
                     foreach (var item in parameter.Items)
@@ -1635,7 +1635,7 @@ namespace Sixnet.Cache.Provider.Memory
                     }
                 }
             }
-            response = CacheResult.SuccessResponse<HashSetResult>(server, database);
+            response = SixnetCacheResult.SuccessResponse<SixnetHashSetResult>(server, database);
             return response;
         }
 
@@ -1649,26 +1649,26 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return hash length result</returns>
-        public HashLengthResult HashLength(CacheServer server, HashLengthParameter parameter)
+        public SixnetHashLengthResult HashLength(SixnetCacheServer server, SixnetHashLengthParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<HashLengthResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetHashLengthResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             int length = 0;
-            HashLengthResult response;
+            SixnetHashLengthResult response;
             if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
             {
                 if (entry.Value is not ConcurrentDictionary<string, dynamic> dict)
                 {
-                    response = CacheResult.FailResponse<HashLengthResult>(SixnetCacheCodes.ValueIsNotDict, server: server, database: database);
+                    response = SixnetCacheResult.FailResponse<SixnetHashLengthResult>(SixnetCacheCodes.ValueIsNotDict, server: server, database: database);
                     return response;
                 }
                 length = dict.Keys.Count;
             }
-            response = CacheResult.SuccessResponse<HashLengthResult>(server, database);
+            response = SixnetCacheResult.SuccessResponse<SixnetHashLengthResult>(server, database);
             response.Length = length;
             return response;
         }
@@ -1683,27 +1683,27 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return hash keys result</returns>
-        public HashKeysResult HashKeys(CacheServer server, HashKeysParameter parameter)
+        public SixnetHashKeysResult HashKeys(SixnetCacheServer server, SixnetHashKeysParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<HashKeysResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetHashKeysResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
-            HashKeysResult response;
+            SixnetHashKeysResult response;
             List<string> keys = null;
             if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
             {
                 if (entry.Value is not ConcurrentDictionary<string, dynamic> dict)
                 {
-                    response = CacheResult.FailResponse<HashKeysResult>(SixnetCacheCodes.ValueIsNotDict, server: server, database: database);
+                    response = SixnetCacheResult.FailResponse<SixnetHashKeysResult>(SixnetCacheCodes.ValueIsNotDict, server: server, database: database);
                     return response;
                 }
                 keys = dict.Keys.ToList();
             }
             keys ??= new List<string>(0);
-            response = CacheResult.SuccessResponse<HashKeysResult>(server, database);
+            response = SixnetCacheResult.SuccessResponse<SixnetHashKeysResult>(server, database);
             response.HashKeys = keys;
             return response;
         }
@@ -1721,23 +1721,23 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return hash increment result</returns>
-        public HashIncrementResult HashIncrement(CacheServer server, HashIncrementParameter parameter)
+        public SixnetHashIncrementResult HashIncrement(SixnetCacheServer server, SixnetHashIncrementParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<HashIncrementResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetHashIncrementResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             var newValue = parameter.IncrementValue;
-            HashIncrementResult response;
+            SixnetHashIncrementResult response;
             lock (database)
             {
                 if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
                     if (entry.Value is not ConcurrentDictionary<string, dynamic> dict)
                     {
-                        response = CacheResult.FailResponse<HashIncrementResult>(SixnetCacheCodes.ValueIsNotDict, server: server, database: database);
+                        response = SixnetCacheResult.FailResponse<SixnetHashIncrementResult>(SixnetCacheCodes.ValueIsNotDict, server: server, database: database);
                         return response;
                     }
                     if (dict.TryGetValue(parameter.HashField, out var value))
@@ -1760,7 +1760,7 @@ namespace Sixnet.Cache.Provider.Memory
                     }
                 }
             }
-            response = CacheResult.SuccessResponse<HashIncrementResult>(server, database);
+            response = SixnetCacheResult.SuccessResponse<SixnetHashIncrementResult>(server, database);
             response.HashField = parameter.HashField;
             response.NewValue = newValue;
             return response;
@@ -1776,26 +1776,26 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return hash get result</returns>
-        public HashGetResult HashGet(CacheServer server, HashGetParameter parameter)
+        public SixnetHashGetResult HashGet(SixnetCacheServer server, SixnetHashGetParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<HashGetResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetHashGetResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             dynamic value = null;
-            HashGetResult response;
+            SixnetHashGetResult response;
             if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
             {
                 if (entry.Value is not ConcurrentDictionary<string, dynamic> dict)
                 {
-                    response = CacheResult.FailResponse<HashGetResult>(SixnetCacheCodes.ValueIsNotDict, server: server, database: database);
+                    response = SixnetCacheResult.FailResponse<SixnetHashGetResult>(SixnetCacheCodes.ValueIsNotDict, server: server, database: database);
                     return response;
                 }
                 dict.TryGetValue(parameter.HashField, out value);
             }
-            response = CacheResult.SuccessResponse<HashGetResult>(server, database);
+            response = SixnetCacheResult.SuccessResponse<SixnetHashGetResult>(server, database);
             response.Value = value;
             return response;
         }
@@ -1810,26 +1810,26 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return hash get all result</returns>
-        public HashGetAllResult HashGetAll(CacheServer server, HashGetAllParameter parameter)
+        public SixnetHashGetAllResult HashGetAll(SixnetCacheServer server, SixnetHashGetAllParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<HashGetAllResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetHashGetAllResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             ConcurrentDictionary<string, dynamic> values = null;
-            HashGetAllResult response;
+            SixnetHashGetAllResult response;
             if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
             {
                 if (entry.Value is not ConcurrentDictionary<string, dynamic> dict)
                 {
-                    response = CacheResult.FailResponse<HashGetAllResult>(SixnetCacheCodes.ValueIsNotDict, server: server, database: database);
+                    response = SixnetCacheResult.FailResponse<SixnetHashGetAllResult>(SixnetCacheCodes.ValueIsNotDict, server: server, database: database);
                     return response; ;
                 }
                 values = new ConcurrentDictionary<string, dynamic>(dict);
             }
-            response = CacheResult.SuccessResponse<HashGetAllResult>(server, database);
+            response = SixnetCacheResult.SuccessResponse<SixnetHashGetAllResult>(server, database);
             response.HashValues = values?.ToDictionary(c => c.Key, c => c.Value) ?? new Dictionary<string, dynamic>(0);
             return response;
         }
@@ -1844,26 +1844,26 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return hash exists result</returns>
-        public HashExistsResult HashExist(CacheServer server, HashExistsParameter parameter)
+        public SixnetHashExistsResult HashExist(SixnetCacheServer server, SixnetHashExistsParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<HashExistsResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetHashExistsResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             var existKey = false;
-            HashExistsResult response;
+            SixnetHashExistsResult response;
             if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
             {
                 if (entry.Value is not ConcurrentDictionary<string, dynamic> dict)
                 {
-                    response = CacheResult.FailResponse<HashExistsResult>(SixnetCacheCodes.ValueIsNotDict, server: server, database: database);
+                    response = SixnetCacheResult.FailResponse<SixnetHashExistsResult>(SixnetCacheCodes.ValueIsNotDict, server: server, database: database);
                     return response;
                 }
                 existKey = dict.ContainsKey(parameter.HashField);
             }
-            response = CacheResult.SuccessResponse<HashExistsResult>(server, database);
+            response = SixnetCacheResult.SuccessResponse<SixnetHashExistsResult>(server, database);
             response.HasField = existKey;
             return response;
         }
@@ -1879,15 +1879,15 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return hash delete result</returns>
-        public HashDeleteResult HashDelete(CacheServer server, HashDeleteParameter parameter)
+        public SixnetHashDeleteResult HashDelete(SixnetCacheServer server, SixnetHashDeleteParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<HashDeleteResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetHashDeleteResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
-            HashDeleteResult response;
+            SixnetHashDeleteResult response;
             var remove = false;
             lock (database)
             {
@@ -1895,7 +1895,7 @@ namespace Sixnet.Cache.Provider.Memory
                 {
                     if (entry.Value is not ConcurrentDictionary<string, dynamic> dict)
                     {
-                        response = CacheResult.FailResponse<HashDeleteResult>(SixnetCacheCodes.ValueIsNotDict, server: server, database: database);
+                        response = SixnetCacheResult.FailResponse<SixnetHashDeleteResult>(SixnetCacheCodes.ValueIsNotDict, server: server, database: database);
                         return response;
                     }
                     foreach (var field in parameter.HashFields)
@@ -1904,7 +1904,7 @@ namespace Sixnet.Cache.Provider.Memory
                     }
                 }
             }
-            response = new HashDeleteResult()
+            response = new SixnetHashDeleteResult()
             {
                 Success = remove,
                 CacheServer = server,
@@ -1925,23 +1925,23 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return hash decrement result</returns>
-        public HashDecrementResult HashDecrement(CacheServer server, HashDecrementParameter parameter)
+        public SixnetHashDecrementResult HashDecrement(SixnetCacheServer server, SixnetHashDecrementParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<HashDecrementResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetHashDecrementResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             var newValue = parameter.DecrementValue;
-            HashDecrementResult response;
+            SixnetHashDecrementResult response;
             lock (database)
             {
                 if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
                     if (entry.Value is not ConcurrentDictionary<string, dynamic> dict)
                     {
-                        response = CacheResult.FailResponse<HashDecrementResult>(SixnetCacheCodes.ValueIsNotDict, server: server, database: database);
+                        response = SixnetCacheResult.FailResponse<SixnetHashDecrementResult>(SixnetCacheCodes.ValueIsNotDict, server: server, database: database);
                         return response;
                     }
                     if (dict.TryGetValue(parameter.HashField, out var value))
@@ -1965,7 +1965,7 @@ namespace Sixnet.Cache.Provider.Memory
                     }
                 }
             }
-            response = CacheResult.SuccessResponse<HashDecrementResult>(server, database);
+            response = SixnetCacheResult.SuccessResponse<SixnetHashDecrementResult>(server, database);
             response.HashField = parameter.HashField;
             response.NewValue = newValue;
             return response;
@@ -1981,22 +1981,22 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return hash scan result</returns>
-        public HashScanResult HashScan(CacheServer server, HashScanParameter parameter)
+        public SixnetHashScanResult HashScan(SixnetCacheServer server, SixnetHashScanParameter parameter)
         {
             string cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                CacheResult.FailResponse<HashScanResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                SixnetCacheResult.FailResponse<SixnetHashScanResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             var values = new Dictionary<string, dynamic>();
-            HashScanResult response;
+            SixnetHashScanResult response;
             if (parameter.PageSize > 0 && database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
             {
                 var dict = entry.Value as ConcurrentDictionary<string, dynamic>;
                 if (dict == null)
                 {
-                    response = CacheResult.FailResponse<HashScanResult>(SixnetCacheCodes.ValueIsNotDict, server: server, database: database);
+                    response = SixnetCacheResult.FailResponse<SixnetHashScanResult>(SixnetCacheCodes.ValueIsNotDict, server: server, database: database);
                     return response;
                 }
                 var pageSize = parameter.PageSize;
@@ -2025,7 +2025,7 @@ namespace Sixnet.Cache.Provider.Memory
                     }
                 }
             }
-            response = CacheResult.SuccessResponse<HashScanResult>(server, database);
+            response = SixnetCacheResult.SuccessResponse<SixnetHashScanResult>(server, database);
             response.HashValues = values;
             return response;
         }
@@ -2045,23 +2045,23 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return set remove result</returns>
-        public SetRemoveResult SetRemove(CacheServer server, SetRemoveParameter parameter)
+        public SixnetSetRemoveResult SetRemove(SixnetCacheServer server, SixnetSetRemoveParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<SetRemoveResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetSetRemoveResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             var removeCount = 0;
-            SetRemoveResult response;
+            SixnetSetRemoveResult response;
             lock (database)
             {
                 if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null && !parameter.Members.IsNullOrEmpty())
                 {
                     if (entry.Value is not ConcurrentDictionary<string, byte> dict)
                     {
-                        response = CacheResult.FailResponse<SetRemoveResult>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
+                        response = SixnetCacheResult.FailResponse<SixnetSetRemoveResult>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
                         return response;
                     }
                     foreach (var member in parameter.Members)
@@ -2073,7 +2073,7 @@ namespace Sixnet.Cache.Provider.Memory
                     }
                 }
             }
-            response = CacheResult.SuccessResponse<SetRemoveResult>(server, database);
+            response = SixnetCacheResult.SuccessResponse<SixnetSetRemoveResult>(server, database);
             response.RemoveCount = removeCount;
             return response;
         }
@@ -2091,21 +2091,21 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return set random members result</returns>
-        public SetRandomMembersResult SetRandomMembers(CacheServer server, SetRandomMembersParameter parameter)
+        public SixnetSetRandomMembersResult SetRandomMembers(SixnetCacheServer server, SixnetSetRandomMembersParameter parameter)
         {
             string cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<SetRandomMembersResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetSetRandomMembersResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             var members = new List<string>();
-            SetRandomMembersResult response;
+            SixnetSetRandomMembersResult response;
             if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null && parameter.Count != 0)
             {
                 if (entry.Value is not ConcurrentDictionary<string, byte> dict)
                 {
-                    response = CacheResult.FailResponse<SetRandomMembersResult>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
+                    response = SixnetCacheResult.FailResponse<SixnetSetRandomMembersResult>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
                     return response;
                 }
                 var allowSame = parameter.Count < 0;
@@ -2131,7 +2131,7 @@ namespace Sixnet.Cache.Provider.Memory
                     members.AddRange(shuffle.TakeNextValues(count));
                 }
             }
-            response = CacheResult.SuccessResponse<SetRandomMembersResult>(server, database);
+            response = SixnetCacheResult.SuccessResponse<SixnetSetRandomMembersResult>(server, database);
             response.Members = members;
             return response;
         }
@@ -2146,21 +2146,21 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return set random member</returns>
-        public SetRandomMemberResult SetRandomMember(CacheServer server, SetRandomMemberParameter parameter)
+        public SixnetSetRandomMemberResult SetRandomMember(SixnetCacheServer server, SixnetSetRandomMemberParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<SetRandomMemberResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetSetRandomMemberResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             var member = string.Empty;
-            SetRandomMemberResult response;
+            SixnetSetRandomMemberResult response;
             if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
             {
                 if (entry.Value is not ConcurrentDictionary<string, byte> dict)
                 {
-                    response = CacheResult.FailResponse<SetRandomMemberResult>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
+                    response = SixnetCacheResult.FailResponse<SixnetSetRandomMemberResult>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
                     return response;
                 }
                 var keys = dict.Keys.ToList();
@@ -2170,7 +2170,7 @@ namespace Sixnet.Cache.Provider.Memory
                     member = keys.ElementAt(ranIndex);
                 }
             }
-            response = CacheResult.SuccessResponse<SetRandomMemberResult>(server, database);
+            response = SixnetCacheResult.SuccessResponse<SixnetSetRandomMemberResult>(server, database);
             response.Member = member;
             return response;
         }
@@ -2185,23 +2185,23 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return set pop result</returns>
-        public SetPopResult SetPop(CacheServer server, SetPopParameter parameter)
+        public SixnetSetPopResult SetPop(SixnetCacheServer server, SixnetSetPopParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<SetPopResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetSetPopResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             var member = string.Empty;
-            SetPopResult response;
+            SixnetSetPopResult response;
             lock (database)
             {
                 if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
                     if (entry.Value is not ConcurrentDictionary<string, byte> dict)
                     {
-                        response = CacheResult.FailResponse<SetPopResult>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
+                        response = SixnetCacheResult.FailResponse<SixnetSetPopResult>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
                         return response;
                     }
                     var keys = dict.Keys;
@@ -2213,7 +2213,7 @@ namespace Sixnet.Cache.Provider.Memory
                     }
                 }
             }
-            response = CacheResult.SuccessResponse<SetPopResult>(server, database);
+            response = SixnetCacheResult.SuccessResponse<SixnetSetPopResult>(server, database);
             response.PopValue = member;
             return response;
         }
@@ -2231,24 +2231,24 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return set move result</returns>
-        public SetMoveResult SetMove(CacheServer server, SetMoveParameter parameter)
+        public SixnetSetMoveResult SetMove(SixnetCacheServer server, SixnetSetMoveParameter parameter)
         {
             var cacheKey = parameter?.SourceKey?.GetActualKey();
             var desKey = parameter?.DestinationKey?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey) || string.IsNullOrWhiteSpace(desKey))
             {
-                return CacheResult.FailResponse<SetMoveResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetSetMoveResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             var isRemove = false;
-            SetMoveResult response;
+            SixnetSetMoveResult response;
             lock (database)
             {
                 if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
                     if (entry.Value is not ConcurrentDictionary<string, byte> dict)
                     {
-                        response = CacheResult.FailResponse<SetMoveResult>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
+                        response = SixnetCacheResult.FailResponse<SixnetSetMoveResult>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
                         return response;
                     }
                     database.Store.TryGetEntry(desKey, out var desEntry);
@@ -2258,7 +2258,7 @@ namespace Sixnet.Cache.Provider.Memory
                         desDict = desEntry.Value as ConcurrentDictionary<string, byte>;
                         if (desDict == null)
                         {
-                            response = CacheResult.FailResponse<SetMoveResult>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
+                            response = SixnetCacheResult.FailResponse<SixnetSetMoveResult>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
                             return response;
                         }
                     }
@@ -2282,7 +2282,7 @@ namespace Sixnet.Cache.Provider.Memory
                     }
                 }
             }
-            response = new SetMoveResult()
+            response = new SixnetSetMoveResult()
             {
                 Success = isRemove,
                 CacheServer = server,
@@ -2301,28 +2301,28 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return set members result</returns>
-        public SetMembersResult SetMembers(CacheServer server, SetMembersParameter parameter)
+        public SixnetSetMembersResult SetMembers(SixnetCacheServer server, SixnetSetMembersParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<SetMembersResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetSetMembersResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             List<string> members = null;
-            SetMembersResult response;
+            SixnetSetMembersResult response;
             if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
             {
                 if (entry.Value is not ConcurrentDictionary<string, byte> dict)
                 {
-                    response = CacheResult.FailResponse<SetMembersResult>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
+                    response = SixnetCacheResult.FailResponse<SixnetSetMembersResult>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
                     return response;
                 }
                 members = new List<string>(dict.Count);
                 members.AddRange(dict.Keys.ToList());
             }
             members ??= new List<string>(0);
-            response = CacheResult.SuccessResponse<SetMembersResult>(server, database);
+            response = SixnetCacheResult.SuccessResponse<SixnetSetMembersResult>(server, database);
             response.Members = members;
             return response;
         }
@@ -2337,26 +2337,26 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return set length result</returns>
-        public SetLengthResult SetLength(CacheServer server, SetLengthParameter parameter)
+        public SixnetSetLengthResult SetLength(SixnetCacheServer server, SixnetSetLengthParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<SetLengthResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetSetLengthResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             var length = 0;
-            SetLengthResult response;
+            SixnetSetLengthResult response;
             if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
             {
                 if (entry.Value is not ConcurrentDictionary<string, byte> dict)
                 {
-                    response = CacheResult.FailResponse<SetLengthResult>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
+                    response = SixnetCacheResult.FailResponse<SixnetSetLengthResult>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
                     return response;
                 }
                 length = dict.Count;
             }
-            response = CacheResult.SuccessResponse<SetLengthResult>(server, database);
+            response = SixnetCacheResult.SuccessResponse<SixnetSetLengthResult>(server, database);
             response.Length = length;
             return response;
         }
@@ -2371,26 +2371,26 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return set contains result</returns>
-        public SetContainsResult SetContains(CacheServer server, SetContainsParameter parameter)
+        public SixnetSetContainsResult SetContains(SixnetCacheServer server, SixnetSetContainsParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<SetContainsResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetSetContainsResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             var existMember = false;
-            SetContainsResult response;
+            SixnetSetContainsResult response;
             if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
             {
                 if (entry.Value is not ConcurrentDictionary<string, byte> dict)
                 {
-                    response = CacheResult.FailResponse<SetContainsResult>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
+                    response = SixnetCacheResult.FailResponse<SixnetSetContainsResult>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
                     return response;
                 }
                 existMember = dict.ContainsKey(parameter.Member);
             }
-            response = CacheResult.SuccessResponse<SetContainsResult>(server, database);
+            response = SixnetCacheResult.SuccessResponse<SixnetSetContainsResult>(server, database);
             response.ContainsValue = existMember;
             return response;
         }
@@ -2406,11 +2406,11 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return set combine result</returns>
-        public SetCombineResult SetCombine(CacheServer server, SetCombineParameter parameter)
+        public SixnetSetCombineResult SetCombine(SixnetCacheServer server, SixnetSetCombineParameter parameter)
         {
             if (parameter?.Keys.IsNullOrEmpty() ?? true)
             {
-                return CacheResult.FailResponse<SetCombineResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetSetCombineResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             var allKeyValues = new List<IEnumerable<string>>();
@@ -2461,7 +2461,7 @@ namespace Sixnet.Cache.Provider.Memory
                 }
             }
             members ??= Array.Empty<string>();
-            var response = CacheResult.SuccessResponse<SetCombineResult>(server, database);
+            var response = SixnetCacheResult.SuccessResponse<SixnetSetCombineResult>(server, database);
             response.CombineValues = members.ToList();
             return response;
         }
@@ -2477,16 +2477,16 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return set combine and store result</returns>
-        public SetCombineAndStoreResult SetCombineAndStore(CacheServer server, SetCombineAndStoreParameter parameter)
+        public SixnetSetCombineAndStoreResult SetCombineAndStore(SixnetCacheServer server, SixnetSetCombineAndStoreParameter parameter)
         {
             var desCacheKey = parameter.DestinationKey?.GetActualKey() ?? string.Empty;
             if (string.IsNullOrWhiteSpace(desCacheKey) || (parameter?.SourceKeys.IsNullOrEmpty() ?? true))
             {
-                return CacheResult.FailResponse<SetCombineAndStoreResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetSetCombineAndStoreResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             List<string> members = null;
-            SetCombineAndStoreResult response;
+            SixnetSetCombineAndStoreResult response;
             foreach (var key in parameter.SourceKeys)
             {
                 var cacheKey = key?.GetActualKey() ?? string.Empty;
@@ -2498,7 +2498,7 @@ namespace Sixnet.Cache.Provider.Memory
                 {
                     if (nowEntry.Value is not ConcurrentDictionary<string, byte> nowDict)
                     {
-                        response = CacheResult.FailResponse<SetCombineAndStoreResult>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
+                        response = SixnetCacheResult.FailResponse<SixnetSetCombineAndStoreResult>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
                         return response;
                     }
                     if (nowDict.IsNullOrEmpty())
@@ -2535,7 +2535,7 @@ namespace Sixnet.Cache.Provider.Memory
                 {
                     if (desEntry.Value is not ConcurrentDictionary<string, byte> desDict)
                     {
-                        response = CacheResult.FailResponse<SetCombineAndStoreResult>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
+                        response = SixnetCacheResult.FailResponse<SixnetSetCombineAndStoreResult>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
                         return response;
                     }
                     foreach (var mem in members)
@@ -2557,7 +2557,7 @@ namespace Sixnet.Cache.Provider.Memory
                     }
                 }
             }
-            response = CacheResult.SuccessResponse<SetCombineAndStoreResult>(server, database);
+            response = SixnetCacheResult.SuccessResponse<SixnetSetCombineAndStoreResult>(server, database);
             response.Count = members.Count;
             return response;
         }
@@ -2574,22 +2574,22 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return set add result</returns>
-        public SetAddResult SetAdd(CacheServer server, SetAddParameter parameter)
+        public SixnetSetAddResult SetAdd(SixnetCacheServer server, SixnetSetAddParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<SetAddResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetSetAddResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
-            SetAddResult response;
+            SixnetSetAddResult response;
             lock (database)
             {
                 if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
                     if (entry.Value is not ConcurrentDictionary<string, byte> dict)
                     {
-                        response = CacheResult.FailResponse<SetAddResult>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
+                        response = SixnetCacheResult.FailResponse<SixnetSetAddResult>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
                         return response;
                     }
                     foreach (var member in parameter.Members)
@@ -2611,7 +2611,7 @@ namespace Sixnet.Cache.Provider.Memory
                     }
                 }
             }
-            response = new SetAddResult()
+            response = new SixnetSetAddResult()
             {
                 Success = true,
                 CacheServer = server,
@@ -2635,21 +2635,21 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return sorted set score result</returns>
-        public SortedSetScoreResult SortedSetScore(CacheServer server, SortedSetScoreParameter parameter)
+        public SixnetSortedSetScoreResult SortedSetScore(SixnetCacheServer server, SixnetSortedSetScoreParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<SortedSetScoreResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetSortedSetScoreResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             double? score = null;
-            SortedSetScoreResult response;
+            SixnetSortedSetScoreResult response;
             if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
             {
                 if (entry.Value is not ConcurrentDictionary<string, double> dict)
                 {
-                    response = CacheResult.FailResponse<SortedSetScoreResult>(SixnetCacheCodes.ValueIsNotSortedSet, server: server, database: database);
+                    response = SixnetCacheResult.FailResponse<SixnetSortedSetScoreResult>(SixnetCacheCodes.ValueIsNotSortedSet, server: server, database: database);
                     return response;
                 }
                 if (dict.TryGetValue(parameter.Member, out var memberScore))
@@ -2657,7 +2657,7 @@ namespace Sixnet.Cache.Provider.Memory
                     score = memberScore;
                 }
             }
-            response = CacheResult.SuccessResponse<SortedSetScoreResult>(server, database);
+            response = SixnetCacheResult.SuccessResponse<SixnetSortedSetScoreResult>(server, database);
             response.Score = score;
             return response;
         }
@@ -2674,23 +2674,23 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return sorted set remove range by value result</returns>
-        public SortedSetRemoveRangeByValueResult SortedSetRemoveRangeByValue(CacheServer server, SortedSetRemoveRangeByValueParameter parameter)
+        public SixnetSortedSetRemoveRangeByValueResult SortedSetRemoveRangeByValue(SixnetCacheServer server, SixnetSortedSetRemoveRangeByValueParameter parameter)
         {
             string cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<SortedSetRemoveRangeByValueResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetSortedSetRemoveRangeByValueResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             var removeCount = 0;
-            SortedSetRemoveRangeByValueResult response;
+            SixnetSortedSetRemoveRangeByValueResult response;
             lock (database)
             {
                 if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
                     if (entry.Value is not ConcurrentDictionary<string, double> dict)
                     {
-                        response = CacheResult.FailResponse<SortedSetRemoveRangeByValueResult>(SixnetCacheCodes.ValueIsNotSortedSet, server: server, database: database);
+                        response = SixnetCacheResult.FailResponse<SixnetSortedSetRemoveRangeByValueResult>(SixnetCacheCodes.ValueIsNotSortedSet, server: server, database: database);
                         return response;
                     }
                     var min = parameter.MinValue;
@@ -2728,7 +2728,7 @@ namespace Sixnet.Cache.Provider.Memory
                     }
                 }
             }
-            response = CacheResult.SuccessResponse<SortedSetRemoveRangeByValueResult>(server, database);
+            response = SixnetCacheResult.SuccessResponse<SixnetSortedSetRemoveRangeByValueResult>(server, database);
             response.RemoveCount = removeCount;
             return response;
         }
@@ -2744,23 +2744,23 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return sorted set remove range by score result</returns>
-        public SortedSetRemoveRangeByScoreResult SortedSetRemoveRangeByScore(CacheServer server, SortedSetRemoveRangeByScoreParameter parameter)
+        public SixnetSortedSetRemoveRangeByScoreResult SortedSetRemoveRangeByScore(SixnetCacheServer server, SixnetSortedSetRemoveRangeByScoreParameter parameter)
         {
             string cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<SortedSetRemoveRangeByScoreResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetSortedSetRemoveRangeByScoreResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             var removeCount = 0;
-            SortedSetRemoveRangeByScoreResult response;
+            SixnetSortedSetRemoveRangeByScoreResult response;
             lock (database)
             {
                 if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
                     if (entry.Value is not ConcurrentDictionary<string, double> dict)
                     {
-                        response = CacheResult.FailResponse<SortedSetRemoveRangeByScoreResult>(SixnetCacheCodes.ValueIsNotSortedSet, server: server, database: database);
+                        response = SixnetCacheResult.FailResponse<SixnetSortedSetRemoveRangeByScoreResult>(SixnetCacheCodes.ValueIsNotSortedSet, server: server, database: database);
                         return response;
                     }
                     var min = parameter.Start;
@@ -2795,7 +2795,7 @@ namespace Sixnet.Cache.Provider.Memory
                     }
                 }
             }
-            response = CacheResult.SuccessResponse<SortedSetRemoveRangeByScoreResult>(server, database);
+            response = SixnetCacheResult.SuccessResponse<SixnetSortedSetRemoveRangeByScoreResult>(server, database);
             response.RemoveCount = removeCount;
             return response;
         }
@@ -2815,23 +2815,23 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return sorted set remove range by rank result</returns>
-        public SortedSetRemoveRangeByRankResult SortedSetRemoveRangeByRank(CacheServer server, SortedSetRemoveRangeByRankParameter parameter)
+        public SixnetSortedSetRemoveRangeByRankResult SortedSetRemoveRangeByRank(SixnetCacheServer server, SixnetSortedSetRemoveRangeByRankParameter parameter)
         {
             string cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<SortedSetRemoveRangeByRankResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetSortedSetRemoveRangeByRankResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             int removeCount = 0;
-            SortedSetRemoveRangeByRankResult response;
+            SixnetSortedSetRemoveRangeByRankResult response;
             lock (database)
             {
                 if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
                     if (entry.Value is not ConcurrentDictionary<string, double> dict)
                     {
-                        response = CacheResult.FailResponse<SortedSetRemoveRangeByRankResult>(SixnetCacheCodes.ValueIsNotSortedSet, server: server, database: database);
+                        response = SixnetCacheResult.FailResponse<SixnetSortedSetRemoveRangeByRankResult>(SixnetCacheCodes.ValueIsNotSortedSet, server: server, database: database);
                         return response;
                     }
                     var min = parameter.Start;
@@ -2865,7 +2865,7 @@ namespace Sixnet.Cache.Provider.Memory
                     }
                 }
             }
-            response = CacheResult.SuccessResponse<SortedSetRemoveRangeByRankResult>(server, database);
+            response = SixnetCacheResult.SuccessResponse<SixnetSortedSetRemoveRangeByRankResult>(server, database);
             response.RemoveCount = removeCount;
             return response;
         }
@@ -2881,23 +2881,23 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return sorted set remove result</returns>
-        public SortedSetRemoveResult SortedSetRemove(CacheServer server, SortedSetRemoveParameter parameter)
+        public SixnetSortedSetRemoveResult SortedSetRemove(SixnetCacheServer server, SixnetSortedSetRemoveParameter parameter)
         {
             string cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<SortedSetRemoveResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetSortedSetRemoveResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             var removeCount = 0;
-            SortedSetRemoveResult response;
+            SixnetSortedSetRemoveResult response;
             lock (database)
             {
                 if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null && !parameter.RemoveMembers.IsNullOrEmpty())
                 {
                     if (entry.Value is not ConcurrentDictionary<string, double> dict)
                     {
-                        response = CacheResult.FailResponse<SortedSetRemoveResult>(SixnetCacheCodes.ValueIsNotSortedSet, server: server, database: database);
+                        response = SixnetCacheResult.FailResponse<SixnetSortedSetRemoveResult>(SixnetCacheCodes.ValueIsNotSortedSet, server: server, database: database);
                         return response;
                     }
                     foreach (var rmem in parameter.RemoveMembers)
@@ -2909,7 +2909,7 @@ namespace Sixnet.Cache.Provider.Memory
                     }
                 }
             }
-            response = CacheResult.SuccessResponse<SortedSetRemoveResult>(server, database);
+            response = SixnetCacheResult.SuccessResponse<SixnetSortedSetRemoveResult>(server, database);
             response.RemoveCount = removeCount;
             return response;
         }
@@ -2926,21 +2926,21 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return sorted set rank result</returns>
-        public SortedSetRankResult SortedSetRank(CacheServer server, SortedSetRankParameter parameter)
+        public SixnetSortedSetRankResult SortedSetRank(SixnetCacheServer server, SixnetSortedSetRankParameter parameter)
         {
             string cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<SortedSetRankResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetSortedSetRankResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             long? rank = null;
-            SortedSetRankResult response;
+            SixnetSortedSetRankResult response;
             if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
             {
                 if (entry.Value is not ConcurrentDictionary<string, double> dict)
                 {
-                    response = CacheResult.FailResponse<SortedSetRankResult>(SixnetCacheCodes.ValueIsNotSortedSet, server: server, database: database);
+                    response = SixnetCacheResult.FailResponse<SixnetSortedSetRankResult>(SixnetCacheCodes.ValueIsNotSortedSet, server: server, database: database);
                     return response;
                 }
                 if (!dict.IsNullOrEmpty() && dict.ContainsKey(parameter.Member))
@@ -2965,7 +2965,7 @@ namespace Sixnet.Cache.Provider.Memory
                     }
                 }
             }
-            response = CacheResult.SuccessResponse<SortedSetRankResult>(server, database);
+            response = SixnetCacheResult.SuccessResponse<SixnetSortedSetRankResult>(server, database);
             response.Rank = rank;
             return response;
         }
@@ -2982,22 +2982,22 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return sorted set range by value result</returns>
-        public SortedSetRangeByValueResult SortedSetRangeByValue(CacheServer server, SortedSetRangeByValueParameter parameter)
+        public SixnetSortedSetRangeByValueResult SortedSetRangeByValue(SixnetCacheServer server, SixnetSortedSetRangeByValueParameter parameter)
         {
             string cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<SortedSetRangeByValueResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetSortedSetRangeByValueResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             List<string> members = null;
-            SortedSetRangeByValueResult response;
+            SixnetSortedSetRangeByValueResult response;
             if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
             {
                 var dict = entry.Value as ConcurrentDictionary<string, double>;
                 if (dict == null)
                 {
-                    response = CacheResult.FailResponse<SortedSetRangeByValueResult>(SixnetCacheCodes.ValueIsNotSortedSet, server: server, database: database);
+                    response = SixnetCacheResult.FailResponse<SixnetSortedSetRangeByValueResult>(SixnetCacheCodes.ValueIsNotSortedSet, server: server, database: database);
                     return response;
                 }
                 var min = parameter.MinValue;
@@ -3035,7 +3035,7 @@ namespace Sixnet.Cache.Provider.Memory
                 }
                 members = values.Select(c => c.Key).ToList();
             }
-            response = CacheResult.SuccessResponse<SortedSetRangeByValueResult>(server, database);
+            response = SixnetCacheResult.SuccessResponse<SixnetSortedSetRangeByValueResult>(server, database);
             response.Members = members ?? new List<string>(0);
             return response;
         }
@@ -3054,21 +3054,21 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return sorted set range by score with scores result</returns>
-        public SortedSetRangeByScoreWithScoresResult SortedSetRangeByScoreWithScores(CacheServer server, SortedSetRangeByScoreWithScoresParameter parameter)
+        public SixnetSortedSetRangeByScoreWithScoresResult SortedSetRangeByScoreWithScores(SixnetCacheServer server, SixnetSortedSetRangeByScoreWithScoresParameter parameter)
         {
             string cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<SortedSetRangeByScoreWithScoresResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetSortedSetRangeByScoreWithScoresResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
-            List<SortedSetMember> members = null;
-            SortedSetRangeByScoreWithScoresResult response;
+            List<SixnetSortedSetMember> members = null;
+            SixnetSortedSetRangeByScoreWithScoresResult response;
             if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
             {
                 if (entry.Value is not ConcurrentDictionary<string, double> dict)
                 {
-                    response = CacheResult.FailResponse<SortedSetRangeByScoreWithScoresResult>(SixnetCacheCodes.ValueIsNotSortedSet, server: server, database: database);
+                    response = SixnetCacheResult.FailResponse<SixnetSortedSetRangeByScoreWithScoresResult>(SixnetCacheCodes.ValueIsNotSortedSet, server: server, database: database);
                     return response;
                 }
                 var min = parameter.Start;
@@ -3104,13 +3104,13 @@ namespace Sixnet.Cache.Provider.Memory
                 {
                     values = values.Take(parameter.Count);
                 }
-                members = values.Select(c => new SortedSetMember()
+                members = values.Select(c => new SixnetSortedSetMember()
                 {
                     Value = c.Key,
                     Score = c.Value
                 }).ToList();
             }
-            response = CacheResult.SuccessResponse<SortedSetRangeByScoreWithScoresResult>(server, database);
+            response = SixnetCacheResult.SuccessResponse<SixnetSortedSetRangeByScoreWithScoresResult>(server, database);
             response.Members = members;
             return response;
         }
@@ -3129,9 +3129,9 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return sorted set range by score result</returns>
-        public SortedSetRangeByScoreResult SortedSetRangeByScore(CacheServer server, SortedSetRangeByScoreParameter parameter)
+        public SixnetSortedSetRangeByScoreResult SortedSetRangeByScore(SixnetCacheServer server, SixnetSortedSetRangeByScoreParameter parameter)
         {
-            var setResponse = SortedSetRangeByScoreWithScores(server, new SortedSetRangeByScoreWithScoresParameter()
+            var setResponse = SortedSetRangeByScoreWithScores(server, new SixnetSortedSetRangeByScoreWithScoresParameter()
             {
                 CacheObject = parameter.CacheObject,
                 CommandFlags = parameter.CommandFlags,
@@ -3143,15 +3143,15 @@ namespace Sixnet.Cache.Provider.Memory
                 Start = parameter.Start,
                 Stop = parameter.Stop
             });
-            SortedSetRangeByScoreResult response;
+            SixnetSortedSetRangeByScoreResult response;
             if (setResponse?.Success ?? false)
             {
-                response = CacheResult.SuccessResponse<SortedSetRangeByScoreResult>(server, setResponse?.Database);
+                response = SixnetCacheResult.SuccessResponse<SixnetSortedSetRangeByScoreResult>(server, setResponse?.Database);
                 response.Members = setResponse?.Members?.Select(c => c.Value).ToList() ?? new List<string>(0);
             }
             else
             {
-                response = CacheResult.FailResponse<SortedSetRangeByScoreResult>(setResponse.Code, setResponse.Message);
+                response = SixnetCacheResult.FailResponse<SixnetSortedSetRangeByScoreResult>(setResponse.Code, setResponse.Message);
             }
             return response;
         }
@@ -3172,21 +3172,21 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return sorted set range by rank with scores result</returns>
-        public SortedSetRangeByRankWithScoresResult SortedSetRangeByRankWithScores(CacheServer server, SortedSetRangeByRankWithScoresParameter parameter)
+        public SixnetSortedSetRangeByRankWithScoresResult SortedSetRangeByRankWithScores(SixnetCacheServer server, SixnetSortedSetRangeByRankWithScoresParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<SortedSetRangeByRankWithScoresResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetSortedSetRangeByRankWithScoresResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
-            List<SortedSetMember> members = null;
-            SortedSetRangeByRankWithScoresResult response;
+            List<SixnetSortedSetMember> members = null;
+            SixnetSortedSetRangeByRankWithScoresResult response;
             if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
             {
                 if (entry.Value is not ConcurrentDictionary<string, double> dict)
                 {
-                    response = CacheResult.FailResponse<SortedSetRangeByRankWithScoresResult>(SixnetCacheCodes.ValueIsNotSortedSet, server: server, database: database);
+                    response = SixnetCacheResult.FailResponse<SixnetSortedSetRangeByRankWithScoresResult>(SixnetCacheCodes.ValueIsNotSortedSet, server: server, database: database);
                     return response;
                 }
                 var min = parameter.Start;
@@ -3219,15 +3219,15 @@ namespace Sixnet.Cache.Provider.Memory
                         valueDict = dict.OrderBy(c => c.Value);
                     }
                     var items = valueDict.Skip(skipCount).Take(takeCount < 0 ? int.MaxValue : takeCount);
-                    members = items.Select(c => new SortedSetMember()
+                    members = items.Select(c => new SixnetSortedSetMember()
                     {
                         Score = c.Value,
                         Value = c.Key
                     }).ToList();
                 }
             }
-            response = CacheResult.SuccessResponse<SortedSetRangeByRankWithScoresResult>(server, database);
-            response.Members = members ?? new List<SortedSetMember>(0);
+            response = SixnetCacheResult.SuccessResponse<SixnetSortedSetRangeByRankWithScoresResult>(server, database);
+            response.Members = members ?? new List<SixnetSortedSetMember>(0);
             return response;
         }
 
@@ -3247,9 +3247,9 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return sorted set range by rank result</returns>
-        public SortedSetRangeByRankResult SortedSetRangeByRank(CacheServer server, SortedSetRangeByRankParameter parameter)
+        public SixnetSortedSetRangeByRankResult SortedSetRangeByRank(SixnetCacheServer server, SixnetSortedSetRangeByRankParameter parameter)
         {
-            var setResponse = SortedSetRangeByRankWithScores(server, new SortedSetRangeByRankWithScoresParameter()
+            var setResponse = SortedSetRangeByRankWithScores(server, new SixnetSortedSetRangeByRankWithScoresParameter()
             {
                 CacheObject = parameter.CacheObject,
                 CommandFlags = parameter.CommandFlags,
@@ -3258,15 +3258,15 @@ namespace Sixnet.Cache.Provider.Memory
                 Start = parameter.Start,
                 Stop = parameter.Stop
             });
-            SortedSetRangeByRankResult response;
+            SixnetSortedSetRangeByRankResult response;
             if (setResponse?.Success ?? false)
             {
-                response = CacheResult.SuccessResponse<SortedSetRangeByRankResult>(server, setResponse.Database);
+                response = SixnetCacheResult.SuccessResponse<SixnetSortedSetRangeByRankResult>(server, setResponse.Database);
                 response.Members = setResponse.Members?.Select(c => c.Value).ToList() ?? new List<string>(0);
             }
             else
             {
-                response = CacheResult.FailResponse<SortedSetRangeByRankResult>(setResponse.Code, setResponse.Message);
+                response = SixnetCacheResult.FailResponse<SixnetSortedSetRangeByRankResult>(setResponse.Code, setResponse.Message);
             }
             return response;
         }
@@ -3283,9 +3283,9 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="options">response</param>
         /// <returns>Return sorted set lenght by value result</returns>
-        public SortedSetLengthByValueResult SortedSetLengthByValue(CacheServer server, SortedSetLengthByValueParameter parameter)
+        public SixnetSortedSetLengthByValueResult SortedSetLengthByValue(SixnetCacheServer server, SixnetSortedSetLengthByValueParameter parameter)
         {
-            var setResponse = SortedSetRangeByValue(server, new SortedSetRangeByValueParameter()
+            var setResponse = SortedSetRangeByValue(server, new SixnetSortedSetRangeByValueParameter()
             {
                 CacheObject = parameter.CacheObject,
                 CommandFlags = parameter.CommandFlags,
@@ -3295,15 +3295,15 @@ namespace Sixnet.Cache.Provider.Memory
                 Offset = 0,
                 Count = -1
             });
-            SortedSetLengthByValueResult response;
+            SixnetSortedSetLengthByValueResult response;
             if (setResponse?.Success ?? false)
             {
-                response = CacheResult.SuccessResponse<SortedSetLengthByValueResult>(server, setResponse.Database);
+                response = SixnetCacheResult.SuccessResponse<SixnetSortedSetLengthByValueResult>(server, setResponse.Database);
                 response.Length = setResponse.Members?.Count ?? 0;
             }
             else
             {
-                response = CacheResult.FailResponse<SortedSetLengthByValueResult>(setResponse.Code, setResponse.Message);
+                response = SixnetCacheResult.FailResponse<SixnetSortedSetLengthByValueResult>(setResponse.Code, setResponse.Message);
             }
             return response;
         }
@@ -3319,9 +3319,9 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return sorted set length result</returns>
-        public SortedSetLengthResult SortedSetLength(CacheServer server, SortedSetLengthParameter parameter)
+        public SixnetSortedSetLengthResult SortedSetLength(SixnetCacheServer server, SixnetSortedSetLengthParameter parameter)
         {
-            var setResponse = SortedSetRangeByScore(server, new SortedSetRangeByScoreParameter()
+            var setResponse = SortedSetRangeByScore(server, new SixnetSortedSetRangeByScoreParameter()
             {
                 CacheObject = parameter.CacheObject,
                 CommandFlags = parameter.CommandFlags,
@@ -3329,15 +3329,15 @@ namespace Sixnet.Cache.Provider.Memory
                 Offset = 0,
                 Count = -1,
             });
-            SortedSetLengthResult response;
+            SixnetSortedSetLengthResult response;
             if (setResponse?.Success ?? false)
             {
-                response = CacheResult.SuccessResponse<SortedSetLengthResult>(server, setResponse.Database);
+                response = SixnetCacheResult.SuccessResponse<SixnetSortedSetLengthResult>(server, setResponse.Database);
                 response.Length = setResponse.Members?.Count ?? 0;
             }
             else
             {
-                response = CacheResult.FailResponse<SortedSetLengthResult>(setResponse.Code, setResponse.Message);
+                response = SixnetCacheResult.FailResponse<SixnetSortedSetLengthResult>(setResponse.Code, setResponse.Message);
             }
             return response;
         }
@@ -3354,23 +3354,23 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return sorted set increment result</returns>
-        public SortedSetIncrementResult SortedSetIncrement(CacheServer server, SortedSetIncrementParameter parameter)
+        public SixnetSortedSetIncrementResult SortedSetIncrement(SixnetCacheServer server, SixnetSortedSetIncrementParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<SortedSetIncrementResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetSortedSetIncrementResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             double score = 0;
-            SortedSetIncrementResult response;
+            SixnetSortedSetIncrementResult response;
             lock (database)
             {
                 if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
                     if (entry.Value is not ConcurrentDictionary<string, double> dict)
                     {
-                        response = CacheResult.FailResponse<SortedSetIncrementResult>(SixnetCacheCodes.ValueIsNotSortedSet, server: server, database: database);
+                        response = SixnetCacheResult.FailResponse<SixnetSortedSetIncrementResult>(SixnetCacheCodes.ValueIsNotSortedSet, server: server, database: database);
                         return response;
                     }
                     if (dict.TryGetValue(parameter.Member, out var memberScore))
@@ -3380,7 +3380,7 @@ namespace Sixnet.Cache.Provider.Memory
                     }
                 }
             }
-            response = CacheResult.SuccessResponse<SortedSetIncrementResult>(server, database);
+            response = SixnetCacheResult.SuccessResponse<SixnetSortedSetIncrementResult>(server, database);
             response.NewScore = score;
             return response;
         }
@@ -3397,15 +3397,15 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return sorted set decrement result</returns>
-        public SortedSetDecrementResult SortedSetDecrement(CacheServer server, SortedSetDecrementParameter parameter)
+        public SixnetSortedSetDecrementResult SortedSetDecrement(SixnetCacheServer server, SixnetSortedSetDecrementParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<SortedSetDecrementResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetSortedSetDecrementResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
-            SortedSetDecrementResult response;
+            SixnetSortedSetDecrementResult response;
             double score = 0;
             lock (database)
             {
@@ -3413,7 +3413,7 @@ namespace Sixnet.Cache.Provider.Memory
                 {
                     if (entry.Value is not ConcurrentDictionary<string, double> dict)
                     {
-                        response = CacheResult.FailResponse<SortedSetDecrementResult>(SixnetCacheCodes.ValueIsNotSortedSet, server: server, database: database);
+                        response = SixnetCacheResult.FailResponse<SixnetSortedSetDecrementResult>(SixnetCacheCodes.ValueIsNotSortedSet, server: server, database: database);
                         return response;
                     }
                     if (dict.TryGetValue(parameter.Member, out var memberScore))
@@ -3423,7 +3423,7 @@ namespace Sixnet.Cache.Provider.Memory
                     }
                 }
             }
-            response = CacheResult.SuccessResponse<SortedSetDecrementResult>(server, database);
+            response = SixnetCacheResult.SuccessResponse<SixnetSortedSetDecrementResult>(server, database);
             response.NewScore = score;
             return response;
         }
@@ -3440,17 +3440,17 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return sorted set combine and store result</returns>
-        public SortedSetCombineAndStoreResult SortedSetCombineAndStore(CacheServer server, SortedSetCombineAndStoreParameter parameter)
+        public SixnetSortedSetCombineAndStoreResult SortedSetCombineAndStore(SixnetCacheServer server, SixnetSortedSetCombineAndStoreParameter parameter)
         {
             var desCacheKey = parameter.DestinationKey?.GetActualKey() ?? string.Empty;
             if (string.IsNullOrWhiteSpace(desCacheKey) || (parameter?.SourceKeys.IsNullOrEmpty() ?? true))
             {
-                return CacheResult.FailResponse<SortedSetCombineAndStoreResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetSortedSetCombineAndStoreResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             HashSet<string> members = null;
             var allMembers = new Dictionary<string, List<double>>();
-            SortedSetCombineAndStoreResult response;
+            SixnetSortedSetCombineAndStoreResult response;
             for (int i = 0; i < parameter.SourceKeys.Count; i++)
             {
                 var key = parameter.SourceKeys[i];
@@ -3464,7 +3464,7 @@ namespace Sixnet.Cache.Provider.Memory
                     var nowDict = nowEntry.Value as ConcurrentDictionary<string, double>;
                     if (nowDict == null)
                     {
-                        response = CacheResult.FailResponse<SortedSetCombineAndStoreResult>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
+                        response = SixnetCacheResult.FailResponse<SixnetSortedSetCombineAndStoreResult>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
                         return response;
                     }
                     if (nowDict.IsNullOrEmpty())
@@ -3530,7 +3530,7 @@ namespace Sixnet.Cache.Provider.Memory
                 {
                     if (desEntry.Value is not ConcurrentDictionary<string, double> desDict)
                     {
-                        response = CacheResult.FailResponse<SortedSetCombineAndStoreResult>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
+                        response = SixnetCacheResult.FailResponse<SixnetSortedSetCombineAndStoreResult>(SixnetCacheCodes.ValueIsNotSet, server: server, database: database);
                         return response;
                     }
                     desEntry.Value = resultItems;
@@ -3544,7 +3544,7 @@ namespace Sixnet.Cache.Provider.Memory
                     }
                 }
             }
-            response = CacheResult.SuccessResponse<SortedSetCombineAndStoreResult>(server, database);
+            response = SixnetCacheResult.SuccessResponse<SixnetSortedSetCombineAndStoreResult>(server, database);
             response.NewSetLength = resultItems.Count;
             return response;
         }
@@ -3562,27 +3562,27 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return sorted set add result</returns>
-        public SortedSetAddResult SortedSetAdd(CacheServer server, SortedSetAddParameter parameter)
+        public SixnetSortedSetAddResult SortedSetAdd(SixnetCacheServer server, SixnetSortedSetAddParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<SortedSetAddResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetSortedSetAddResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             if (parameter.Members.IsNullOrEmpty())
             {
-                return CacheResult.FailResponse<SortedSetAddResult>(SixnetCacheCodes.ValuesIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetSortedSetAddResult>(SixnetCacheCodes.ValuesIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             long length = 0;
-            SortedSetAddResult response;
+            SixnetSortedSetAddResult response;
             lock (database)
             {
                 if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
                 {
                     if (entry.Value is not ConcurrentDictionary<string, double> dict)
                     {
-                        response = CacheResult.FailResponse<SortedSetAddResult>(SixnetCacheCodes.ValueIsNotSortedSet, server: server, database: database);
+                        response = SixnetCacheResult.FailResponse<SixnetSortedSetAddResult>(SixnetCacheCodes.ValueIsNotSortedSet, server: server, database: database);
                         return response;
                     }
                     foreach (var mem in parameter.Members)
@@ -3606,7 +3606,7 @@ namespace Sixnet.Cache.Provider.Memory
                     }
                 }
             }
-            response = CacheResult.SuccessResponse<SortedSetAddResult>(server, database);
+            response = SixnetCacheResult.SuccessResponse<SixnetSortedSetAddResult>(server, database);
             response.Length = length;
             return response;
         }
@@ -3632,15 +3632,15 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return sort result</returns>
-        public SortResult Sort(CacheServer server, SortParameter parameter)
+        public SixnetSortResult Sort(SixnetCacheServer server, SixnetSortParameter parameter)
         {
-            var keyTypeResponse = KeyType(server, new TypeParameter()
+            var keyTypeResponse = KeyType(server, new SixnetTypeParameter()
             {
                 CacheObject = parameter.CacheObject,
                 CommandFlags = parameter.CommandFlags,
                 Key = parameter.Key
             });
-            SortResult response;
+            SixnetSortResult response;
             if (keyTypeResponse?.Success ?? false)
             {
                 Func<IEnumerable<string>, IEnumerable<string>> filterValueFuc = (originalValues) =>
@@ -3672,7 +3672,7 @@ namespace Sixnet.Cache.Provider.Memory
                 switch (keyTypeResponse.KeyType)
                 {
                     case CacheKeyType.List:
-                        var listResponse = ListRange(server, new ListRangeParameter()
+                        var listResponse = ListRange(server, new SixnetListRangeParameter()
                         {
                             CacheObject = parameter.CacheObject,
                             CommandFlags = parameter.CommandFlags,
@@ -3681,7 +3681,7 @@ namespace Sixnet.Cache.Provider.Memory
                             Stop = -1
                         });
                         values = filterValueFuc(listResponse?.Values);
-                        response = new SortResult()
+                        response = new SixnetSortResult()
                         {
                             Success = true,
                             Values = values?.ToList() ?? new List<string>(0),
@@ -3690,14 +3690,14 @@ namespace Sixnet.Cache.Provider.Memory
                         };
                         break;
                     case CacheKeyType.Set:
-                        var setResponse = SetMembers(server, new SetMembersParameter()
+                        var setResponse = SetMembers(server, new SixnetSetMembersParameter()
                         {
                             CacheObject = parameter.CacheObject,
                             CommandFlags = parameter.CommandFlags,
                             Key = parameter.Key
                         });
                         values = filterValueFuc(setResponse?.Members);
-                        response = new SortResult()
+                        response = new SixnetSortResult()
                         {
                             Success = true,
                             Values = values?.ToList() ?? new List<string>(0),
@@ -3706,7 +3706,7 @@ namespace Sixnet.Cache.Provider.Memory
                         };
                         break;
                     case CacheKeyType.SortedSet:
-                        var sortedSetResponse = SortedSetRangeByRankWithScores(server, new SortedSetRangeByRankWithScoresParameter()
+                        var sortedSetResponse = SortedSetRangeByRankWithScores(server, new SixnetSortedSetRangeByRankWithScoresParameter()
                         {
                             CacheObject = parameter.CacheObject,
                             CommandFlags = parameter.CommandFlags,
@@ -3715,7 +3715,7 @@ namespace Sixnet.Cache.Provider.Memory
                             Start = 0,
                             Stop = -1
                         });
-                        IEnumerable<SortedSetMember> sortedSetMembers = sortedSetResponse?.Members ?? new List<SortedSetMember>(0);
+                        IEnumerable<SixnetSortedSetMember> sortedSetMembers = sortedSetResponse?.Members ?? new List<SixnetSortedSetMember>(0);
                         if (sortedSetMembers.GetCount() <= parameter.Offset)
                         {
                             values = Array.Empty<string>();
@@ -3732,7 +3732,7 @@ namespace Sixnet.Cache.Provider.Memory
                             }
                             values = sortedSetMembers.Select(c => c.Value).ToList();
                         }
-                        response = new SortResult()
+                        response = new SixnetSortResult()
                         {
                             Success = true,
                             Values = values?.ToList() ?? new List<string>(0),
@@ -3746,7 +3746,7 @@ namespace Sixnet.Cache.Provider.Memory
             }
             else
             {
-                response = CacheResult.FailResponse<SortResult>(keyTypeResponse?.Code, keyTypeResponse?.Message, server: server, database: keyTypeResponse?.Database);
+                response = SixnetCacheResult.FailResponse<SixnetSortResult>(keyTypeResponse?.Code, keyTypeResponse?.Message, server: server, database: keyTypeResponse?.Database);
             }
             return response;
         }
@@ -3768,17 +3768,17 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return sort and store result</returns>
-        public SortAndStoreResult SortAndStore(CacheServer server, SortAndStoreParameter parameter)
+        public SixnetSortAndStoreResult SortAndStore(SixnetCacheServer server, SixnetSortAndStoreParameter parameter)
         {
             if (string.IsNullOrWhiteSpace(parameter?.SourceKey))
             {
-                throw new ArgumentNullException($"{nameof(SortAndStoreParameter)}.{nameof(SortAndStoreParameter.SourceKey)}");
+                throw new ArgumentNullException($"{nameof(SixnetSortAndStoreParameter)}.{nameof(SixnetSortAndStoreParameter.SourceKey)}");
             }
             if (string.IsNullOrWhiteSpace(parameter?.DestinationKey))
             {
-                throw new ArgumentNullException($"{nameof(SortAndStoreParameter)}.{nameof(SortAndStoreParameter.DestinationKey)}");
+                throw new ArgumentNullException($"{nameof(SixnetSortAndStoreParameter)}.{nameof(SixnetSortAndStoreParameter.DestinationKey)}");
             }
-            var sortResponse = Sort(server, new SortParameter()
+            var sortResponse = Sort(server, new SixnetSortParameter()
             {
                 CacheObject = parameter.CacheObject,
                 CommandFlags = parameter.CommandFlags,
@@ -3790,11 +3790,11 @@ namespace Sixnet.Cache.Provider.Memory
                 Offset = parameter.Offset,
                 Order = parameter.Order
             });
-            SortAndStoreResult response;
+            SixnetSortAndStoreResult response;
             if (sortResponse?.Success ?? false)
             {
                 var values = sortResponse?.Values;
-                ListLeftPush(server, new ListLeftPushParameter()
+                ListLeftPush(server, new SixnetListLeftPushParameter()
                 {
                     CacheObject = parameter.CacheObject,
                     CommandFlags = parameter.CommandFlags,
@@ -3802,11 +3802,11 @@ namespace Sixnet.Cache.Provider.Memory
                     Key = parameter.DestinationKey,
                     Values = values
                 });
-                response = CacheResult.SuccessResponse<SortAndStoreResult>(server, sortResponse.Database);
+                response = SixnetCacheResult.SuccessResponse<SixnetSortAndStoreResult>(server, sortResponse.Database);
             }
             else
             {
-                response = CacheResult.FailResponse<SortAndStoreResult>(sortResponse.Code, sortResponse.Message);
+                response = SixnetCacheResult.FailResponse<SixnetSortAndStoreResult>(sortResponse.Code, sortResponse.Message);
             }
             return response;
         }
@@ -3826,15 +3826,15 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return key type result</returns>
-        public TypeResult KeyType(CacheServer server, TypeParameter parameter)
+        public SixnetTypeResult KeyType(SixnetCacheServer server, SixnetTypeParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<TypeResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetTypeResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
-            TypeResult response = null;
+            SixnetTypeResult response = null;
             if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
             {
                 CacheKeyType cacheKeyType = CacheKeyType.String;
@@ -3854,12 +3854,12 @@ namespace Sixnet.Cache.Provider.Memory
                 {
                     cacheKeyType = CacheKeyType.SortedSet;
                 }
-                response = CacheResult.SuccessResponse<TypeResult>(server, database);
+                response = SixnetCacheResult.SuccessResponse<SixnetTypeResult>(server, database);
                 response.KeyType = cacheKeyType;
             }
             else
             {
-                response = CacheResult.FailResponse<TypeResult>(SixnetCacheCodes.KeyIsNotExist, server: server, database: database);
+                response = SixnetCacheResult.FailResponse<SixnetTypeResult>(SixnetCacheCodes.KeyIsNotExist, server: server, database: database);
             }
             return response;
         }
@@ -3876,24 +3876,24 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return key time to live result</returns>
-        public TimeToLiveResult KeyTimeToLive(CacheServer server, TimeToLiveParameter parameter)
+        public SixnetTimeToLiveResult KeyTimeToLive(SixnetCacheServer server, SixnetTimeToLiveParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<TimeToLiveResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetTimeToLiveResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
-            TimeToLiveResult response = null;
+            SixnetTimeToLiveResult response = null;
             if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
             {
-                response = CacheResult.SuccessResponse<TimeToLiveResult>();
+                response = SixnetCacheResult.SuccessResponse<SixnetTimeToLiveResult>();
                 var expiration = GetExpiration(entry);
                 response.TimeToLiveSeconds = (long)(expiration.Item2?.TotalSeconds ?? 0);
             }
             else
             {
-                response = CacheResult.FailResponse<TimeToLiveResult>(SixnetCacheCodes.KeyIsNotExist);
+                response = SixnetCacheResult.FailResponse<SixnetTimeToLiveResult>(SixnetCacheCodes.KeyIsNotExist);
             }
             response.CacheServer = server;
             response.Database = database;
@@ -3912,12 +3912,12 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return key restore result</returns>
-        public RestoreResult KeyRestore(CacheServer server, RestoreParameter parameter)
+        public SixnetRestoreResult KeyRestore(SixnetCacheServer server, SixnetRestoreParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<RestoreResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetRestoreResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             lock (database)
@@ -3928,7 +3928,7 @@ namespace Sixnet.Cache.Provider.Memory
                     SetExpiration(entry, parameter.Expiration);
                 }
             }
-            return CacheResult.SuccessResponse<RestoreResult>(server, database);
+            return SixnetCacheResult.SuccessResponse<SixnetRestoreResult>(server, database);
         }
 
         #endregion
@@ -3942,16 +3942,16 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return key rename result</returns>
-        public RenameResult KeyRename(CacheServer server, RenameParameter parameter)
+        public SixnetRenameResult KeyRename(SixnetCacheServer server, SixnetRenameParameter parameter)
         {
             string cacheKey = parameter?.Key?.GetActualKey();
             string newCacheKey = parameter?.NewKey?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey) || string.IsNullOrWhiteSpace(newCacheKey))
             {
-                return CacheResult.FailResponse<RenameResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetRenameResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
-            RenameResult response = null;
+            SixnetRenameResult response = null;
             lock (database)
             {
                 if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
@@ -3966,11 +3966,11 @@ namespace Sixnet.Cache.Provider.Memory
                         newEntry.SlidingExpiration = entry.SlidingExpiration;
                     }
                     database.Store.Remove(cacheKey);
-                    response = CacheResult.SuccessResponse<RenameResult>();
+                    response = SixnetCacheResult.SuccessResponse<SixnetRenameResult>();
                 }
                 else
                 {
-                    response = CacheResult.FailResponse<RenameResult>(SixnetCacheCodes.KeyIsNotExist);
+                    response = SixnetCacheResult.FailResponse<SixnetRenameResult>(SixnetCacheCodes.KeyIsNotExist);
                 }
             }
             response.CacheServer = server;
@@ -3988,10 +3988,10 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return key random result</returns>
-        public RandomResult KeyRandom(CacheServer server, RandomParameter parameter)
+        public SixnetRandomResult KeyRandom(SixnetCacheServer server, SixnetRandomParameter parameter)
         {
             var database = GetDatabase(server);
-            var response = CacheResult.SuccessResponse<RandomResult>(server, database);
+            var response = SixnetCacheResult.SuccessResponse<SixnetRandomResult>(server, database);
             response.Key = database.Store.GetRandomKey();
             return response;
         }
@@ -4007,15 +4007,15 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return key persist result</returns>
-        public PersistResult KeyPersist(CacheServer server, PersistParameter parameter)
+        public SixnetPersistResult KeyPersist(SixnetCacheServer server, SixnetPersistParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<PersistResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetPersistResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
-            PersistResult response = null;
+            SixnetPersistResult response = null;
             lock (database)
             {
                 if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
@@ -4024,11 +4024,11 @@ namespace Sixnet.Cache.Provider.Memory
                     {
                         newEntry.SetValue(entry.Value);
                     }
-                    response = CacheResult.SuccessResponse<PersistResult>();
+                    response = SixnetCacheResult.SuccessResponse<SixnetPersistResult>();
                 }
                 else
                 {
-                    response = CacheResult.FailResponse<PersistResult>(SixnetCacheCodes.KeyIsNotExist);
+                    response = SixnetCacheResult.FailResponse<SixnetPersistResult>(SixnetCacheCodes.KeyIsNotExist);
                 }
             }
             response.CacheServer = server;
@@ -4049,20 +4049,20 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return key move result</returns>
-        public MoveResult KeyMove(CacheServer server, MoveParameter parameter)
+        public SixnetMoveResult KeyMove(SixnetCacheServer server, SixnetMoveParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<MoveResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetMoveResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var desDatabase = GetDatabase(parameter.DatabaseName);
             if (desDatabase == null)
             {
-                return CacheResult.FailResponse<MoveResult>("", "Destination database not find", server: server);
+                return SixnetCacheResult.FailResponse<SixnetMoveResult>("", "Destination database not find", server: server);
             }
             var database = GetDatabase(server);
-            MoveResult response;
+            SixnetMoveResult response;
             lock (desDatabase)
             {
                 if (database.Store.TryGetEntry(cacheKey, out var entry))
@@ -4072,11 +4072,11 @@ namespace Sixnet.Cache.Provider.Memory
                         desEntry.Value = entry.Value;
                         SetExpiration(desEntry, GetCacheExpiration(entry));
                     }
-                    response = CacheResult.SuccessResponse<MoveResult>(server, database);
+                    response = SixnetCacheResult.SuccessResponse<SixnetMoveResult>(server, database);
                 }
                 else
                 {
-                    response = CacheResult.FailResponse<MoveResult>("", $"Not find key:{cacheKey}", server, database);
+                    response = SixnetCacheResult.FailResponse<SixnetMoveResult>("", $"Not find key:{cacheKey}", server, database);
                 }
             }
             return response;
@@ -4094,9 +4094,9 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return key migrate result</returns>
-        public MigrateKeyResult KeyMigrate(CacheServer server, MigrateKeyParameter parameter)
+        public SixnetMigrateKeyResult KeyMigrate(SixnetCacheServer server, SixnetMigrateKeyParameter parameter)
         {
-            return CacheResult.FailResponse<MigrateKeyResult>(SixnetCacheCodes.OperationIsNotSupported, server: server);
+            return SixnetCacheResult.FailResponse<SixnetMigrateKeyResult>(SixnetCacheCodes.OperationIsNotSupported, server: server);
         }
 
         #endregion
@@ -4111,23 +4111,23 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return key expire result</returns>
-        public ExpireResult KeyExpire(CacheServer server, ExpireParameter parameter)
+        public SixnetExpireResult KeyExpire(SixnetCacheServer server, SixnetExpireParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<ExpireResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetExpireResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
-            ExpireResult response = null;
+            SixnetExpireResult response = null;
             if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
             {
                 SetExpiration(entry, parameter.Expiration);
-                response = CacheResult.SuccessResponse<ExpireResult>();
+                response = SixnetCacheResult.SuccessResponse<SixnetExpireResult>();
             }
             else
             {
-                response = CacheResult.FailResponse<ExpireResult>(SixnetCacheCodes.KeyIsNotExist);
+                response = SixnetCacheResult.FailResponse<SixnetExpireResult>(SixnetCacheCodes.KeyIsNotExist);
             }
             response.CacheServer = server;
             response.Database = database;
@@ -4146,23 +4146,23 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return key dump result</returns>
-        public DumpResult KeyDump(CacheServer server, DumpParameter parameter)
+        public SixnetDumpResult KeyDump(SixnetCacheServer server, SixnetDumpParameter parameter)
         {
             var cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<DumpResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetDumpResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
-            DumpResult response = null;
+            SixnetDumpResult response = null;
             if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
             {
-                response = CacheResult.SuccessResponse<DumpResult>();
+                response = SixnetCacheResult.SuccessResponse<SixnetDumpResult>();
                 response.ByteValues = GetEncoding().GetBytes(entry.Value?.ToString() ?? string.Empty);
             }
             else
             {
-                response = CacheResult.FailResponse<DumpResult>(SixnetCacheCodes.KeyIsNotExist);
+                response = SixnetCacheResult.FailResponse<SixnetDumpResult>(SixnetCacheCodes.KeyIsNotExist);
             }
             response.CacheServer = server;
             response.Database = database;
@@ -4179,11 +4179,11 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return key delete result</returns>
-        public DeleteResult KeyDelete(CacheServer server, DeleteParameter parameter)
+        public SixnetDeleteResult KeyDelete(SixnetCacheServer server, SixnetDeleteParameter parameter)
         {
             if (parameter.Keys?.IsNullOrEmpty() ?? true)
             {
-                return CacheResult.FailResponse<DeleteResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetDeleteResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             long deleteCount = 0;
@@ -4199,7 +4199,7 @@ namespace Sixnet.Cache.Provider.Memory
                     }
                 }
             }
-            var response = CacheResult.SuccessResponse<DeleteResult>(server, database);
+            var response = SixnetCacheResult.SuccessResponse<SixnetDeleteResult>(server, database);
             response.DeleteCount = deleteCount;
             return response;
         }
@@ -4214,11 +4214,11 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return exists result</returns>
-        public ExistResult KeyExist(CacheServer server, ExistParameter parameter)
+        public SixnetExistResult KeyExist(SixnetCacheServer server, SixnetExistParameter parameter)
         {
             if (parameter.Keys?.IsNullOrEmpty() ?? true)
             {
-                return CacheResult.FailResponse<ExistResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetExistResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
             long count = 0;
@@ -4230,7 +4230,7 @@ namespace Sixnet.Cache.Provider.Memory
                     count++;
                 }
             }
-            var response = CacheResult.SuccessResponse<ExistResult>(server, database);
+            var response = SixnetCacheResult.SuccessResponse<SixnetExistResult>(server, database);
             response.KeyCount = count;
             return response;
         }
@@ -4245,15 +4245,15 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">server</param>
         /// <param name="parameter">parameter</param>
         /// <returns></returns>
-        public ScanResult KeyScan(CacheServer server, ScanParameter parameter)
+        public SixnetScanResult KeyScan(SixnetCacheServer server, SixnetScanParameter parameter)
         {
             var database = GetDatabase(server);
             var keyPattern = new Regex(parameter.Pattern);
             var resultKeys = database.Store.GetAllKeys()?.Where(c => keyPattern.IsMatch(c)).ToList();
-            return new ScanResult()
+            return new SixnetScanResult()
             {
                 Cursor = 0,
-                Keys = resultKeys?.Select(c => { CacheKey key = ConstantCacheKey.Create(c); return key; }).ToList()
+                Keys = resultKeys?.Select(c => { SixnetCacheKey key = ConstantCacheKey.Create(c); return key; }).ToList()
             };
         }
 
@@ -4271,10 +4271,10 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return get all database result</returns>
-        public GetAllDataBaseResult GetAllDataBase(CacheServer server, GetAllDataBaseParameter parameter)
+        public SixnetGetAllDataBaseResult GetAllDataBase(SixnetCacheServer server, SixnetGetAllDataBaseParameter parameter)
         {
-            var response = CacheResult.SuccessResponse<GetAllDataBaseResult>(server);
-            response.Databases = MemoryCacheCollection.Select(c => c.Value as CacheDatabase).ToList();
+            var response = SixnetCacheResult.SuccessResponse<SixnetGetAllDataBaseResult>(server);
+            response.Databases = MemoryCacheCollection.Select(c => c.Value as SixnetCacheDatabase).ToList();
             return response;
         }
 
@@ -4288,7 +4288,7 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return get keys result</returns>
-        public GetKeysResult GetKeys(CacheServer server, GetKeysParameter parameter)
+        public SixnetGetKeysResult GetKeys(SixnetCacheServer server, SixnetGetKeysParameter parameter)
         {
             var database = GetDatabase(server);
             var allKeys = database.Store.GetAllKeys();
@@ -4313,8 +4313,8 @@ namespace Sixnet.Cache.Provider.Memory
                 }
             }
             var keys = allKeys.Where(c => where(c)).Skip(skip).Take(count).Select(c => ConstantCacheKey.Create(c)).ToList();
-            var response = CacheResult.SuccessResponse<GetKeysResult>(server, database);
-            response.Keys = new CachePaging<CacheKey>(parameter.Query?.Page ?? 1, parameter.Query?.PageSize ?? allKeys.Count, allKeys.Count, keys);
+            var response = SixnetCacheResult.SuccessResponse<SixnetGetKeysResult>(server, database);
+            response.Keys = new SixnetCachePaging<SixnetCacheKey>(parameter.Query?.Page ?? 1, parameter.Query?.PageSize ?? allKeys.Count, allKeys.Count, keys);
             return response;
         }
 
@@ -4328,14 +4328,14 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return clear data result</returns>
-        public ClearDataResult ClearData(CacheServer server, ClearDataParameter parameter)
+        public SixnetClearDataResult ClearData(SixnetCacheServer server, SixnetClearDataParameter parameter)
         {
             var database = GetDatabase(server);
             lock (database)
             {
                 database.Store.Compact(1);
             }
-            return CacheResult.SuccessResponse<ClearDataResult>(server, database);
+            return SixnetCacheResult.SuccessResponse<SixnetClearDataResult>(server, database);
         }
 
         #endregion
@@ -4348,15 +4348,15 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return get key detail result</returns>
-        public GetDetailResult GetKeyDetail(CacheServer server, GetDetailParameter parameter)
+        public SixnetGetDetailResult GetKeyDetail(SixnetCacheServer server, SixnetGetDetailParameter parameter)
         {
             string cacheKey = parameter?.Key?.GetActualKey();
             if (string.IsNullOrWhiteSpace(cacheKey))
             {
-                return CacheResult.FailResponse<GetDetailResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
+                return SixnetCacheResult.FailResponse<SixnetGetDetailResult>(SixnetCacheCodes.KeyIsNullOrEmpty, server: server);
             }
             var database = GetDatabase(server);
-            GetDetailResult response = null;
+            SixnetGetDetailResult response = null;
             if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
             {
                 var cacheKeyType = CacheKeyType.String;
@@ -4376,14 +4376,14 @@ namespace Sixnet.Cache.Provider.Memory
                 {
                     cacheKeyType = CacheKeyType.SortedSet;
                 }
-                response = CacheResult.SuccessResponse<GetDetailResult>();
-                response.CacheEntry = new CacheEntry()
+                response = SixnetCacheResult.SuccessResponse<SixnetGetDetailResult>();
+                response.CacheEntry = new SixnetCacheEntry()
                 {
                     Key = parameter.Key,
                     Value = entry.Value,
                     Type = cacheKeyType,
                     When = CacheSetWhen.Always,
-                    Expiration = new CacheExpiration()
+                    Expiration = new SixnetCacheExpiration()
                     {
                         AbsoluteExpiration = entry.AbsoluteExpiration,
                         AbsoluteExpirationRelativeToNow = entry.AbsoluteExpirationRelativeToNow,
@@ -4393,7 +4393,7 @@ namespace Sixnet.Cache.Provider.Memory
             }
             else
             {
-                response = CacheResult.FailResponse<GetDetailResult>(SixnetCacheCodes.KeyIsNotExist);
+                response = SixnetCacheResult.FailResponse<SixnetGetDetailResult>(SixnetCacheCodes.KeyIsNotExist);
             }
             response.CacheServer = server;
             response.Database = database;
@@ -4410,9 +4410,9 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return get server config result</returns>
-        public GetServerConfigurationResult GetServerConfiguration(CacheServer server, GetServerConfigurationParameter parameter)
+        public SixnetGetServerConfigurationResult GetServerConfiguration(SixnetCacheServer server, SixnetGetServerConfigurationParameter parameter)
         {
-            return CacheResult.FailResponse<GetServerConfigurationResult>(SixnetCacheCodes.OperationIsNotSupported);
+            return SixnetCacheResult.FailResponse<SixnetGetServerConfigurationResult>(SixnetCacheCodes.OperationIsNotSupported);
         }
 
         #endregion
@@ -4425,9 +4425,9 @@ namespace Sixnet.Cache.Provider.Memory
         /// <param name="server">Server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return save server config result</returns>
-        public SaveServerConfigurationResult SaveServerConfiguration(CacheServer server, SaveServerConfigurationParameter parameter)
+        public SixnetSaveServerConfigurationResult SaveServerConfiguration(SixnetCacheServer server, SixnetSaveServerConfigurationParameter parameter)
         {
-            return CacheResult.FailResponse<SaveServerConfigurationResult>(SixnetCacheCodes.OperationIsNotSupported);
+            return SixnetCacheResult.FailResponse<SixnetSaveServerConfigurationResult>(SixnetCacheCodes.OperationIsNotSupported);
         }
 
         #endregion

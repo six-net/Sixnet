@@ -150,7 +150,7 @@ namespace Sixnet.Development.Data
         /// <returns></returns>
         static async Task<List<DatabaseObjectName>> GetCachedTableNamesAsync(string serverTableKey, DatabaseObjectName rootTableName)
         {
-            var setMembersParameter = new SetMembersParameter()
+            var setMembersParameter = new SixnetSetMembersParameter()
             {
                 Key = serverTableKey
             };
@@ -183,7 +183,7 @@ namespace Sixnet.Development.Data
             }) ?? new List<DatabaseObjectName>(0);
             if (!allTableNames.IsNullOrEmpty())
             {
-                var setAddParameter = new SetAddParameter()
+                var setAddParameter = new SixnetSetAddParameter()
                 {
                     Key = serverTableKey,
                     Members = allTableNames.Select(c => c.Name).ToList()

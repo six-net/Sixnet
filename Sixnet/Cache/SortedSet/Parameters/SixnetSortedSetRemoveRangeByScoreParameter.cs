@@ -1,0 +1,56 @@
+﻿// "Company © 2025. All rights reserved."
+
+using System.Threading.Tasks;
+
+using Sixnet.Cache.SortedSet.Results;
+
+namespace Sixnet.Cache.SortedSet.Parameters
+{
+    /// <summary>
+    /// Sorted set remove range by score parameter
+    /// </summary>
+    public class SixnetSortedSetRemoveRangeByScoreParameter : SixnetCacheParameter<SixnetSortedSetRemoveRangeByScoreResult>
+    {
+        /// <summary>
+        /// Gets or sets the cache key
+        /// </summary>
+        public SixnetCacheKey Key { get; set; }
+
+        /// <summary>
+        /// Gets or sets the start score value
+        /// </summary>
+        public double Start { get; set; }
+
+        /// <summary>
+        /// Gets or sets the stop score value
+        /// </summary>
+        public double Stop { get; set; }
+
+        /// <summary>
+        /// Gets or sets the exclude type
+        /// </summary>
+        public BoundaryExclude Exclude { get; set; } = BoundaryExclude.None;
+
+        /// <summary>
+        /// Execute cache operation
+        /// </summary>
+        /// <param name="cacheProvider">Cache provider</param>
+        /// <param name="server">Cache server</param>
+        /// <returns>Return sorted set remove range by score response</returns>
+        protected override async Task<SixnetSortedSetRemoveRangeByScoreResult> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, SixnetCacheServer server)
+        {
+            return await cacheProvider.SortedSetRemoveRangeByScoreAsync(server, this).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Execute cache operation
+        /// </summary>
+        /// <param name="cacheProvider">Cache provider</param>
+        /// <param name="server">Cache server</param>
+        /// <returns>Return sorted set remove range by score response</returns>
+        protected override SixnetSortedSetRemoveRangeByScoreResult ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, SixnetCacheServer server)
+        {
+            return cacheProvider.SortedSetRemoveRangeByScore(server, this);
+        }
+    }
+}

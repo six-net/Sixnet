@@ -73,12 +73,12 @@ namespace Sixnet.Cache
         /// <param name="when">Cache setting conditions</param>
         /// <param name="cacheObject">The data belongs to the cache object</param>
         /// <returns>Return cache set result</returns>
-        public static StringSetResult Store<T>(CacheKey key, T data, DateTimeOffset? absoluteExpiration = null, CacheSetWhen when = CacheSetWhen.Always, CacheObject cacheObject = null)
+        public static SixnetStringSetResult Store<T>(SixnetCacheKey key, T data, DateTimeOffset? absoluteExpiration = null, CacheSetWhen when = CacheSetWhen.Always, SixnetCacheObject cacheObject = null)
         {
             var value = SixnetJsonSerializer.Serialize(data);
             if (string.IsNullOrWhiteSpace(value))
             {
-                return CacheResult.FailResponse<StringSetResult>(SixnetCacheCodes.ValuesIsNullOrEmpty);
+                return SixnetCacheResult.FailResponse<SixnetStringSetResult>(SixnetCacheCodes.ValuesIsNullOrEmpty);
             }
             return String.Set(key, value, absoluteExpiration, when, cacheObject);
         }
@@ -94,12 +94,12 @@ namespace Sixnet.Cache
         /// <param name="when">Cache setting conditions</param>
         /// <param name="cacheObject">The data belongs to the cache object</param>
         /// <returns>Return cache set result</returns>
-        public static StringSetResult Store<T>(CacheKey key, T data, TimeSpan? absoluteExpirationRelativeToNow = null, bool slidingExpiration = true, CacheSetWhen when = CacheSetWhen.Always, CacheObject cacheObject = null)
+        public static SixnetStringSetResult Store<T>(SixnetCacheKey key, T data, TimeSpan? absoluteExpirationRelativeToNow = null, bool slidingExpiration = true, CacheSetWhen when = CacheSetWhen.Always, SixnetCacheObject cacheObject = null)
         {
             var value = SixnetJsonSerializer.Serialize(data);
             if (string.IsNullOrWhiteSpace(value))
             {
-                return CacheResult.FailResponse<StringSetResult>(SixnetCacheCodes.ValuesIsNullOrEmpty);
+                return SixnetCacheResult.FailResponse<SixnetStringSetResult>(SixnetCacheCodes.ValuesIsNullOrEmpty);
             }
             return String.Set(key, value, absoluteExpirationRelativeToNow, slidingExpiration, when, cacheObject);
         }
@@ -115,7 +115,7 @@ namespace Sixnet.Cache
         /// <param name="key">Cache key</param>
         /// <param name="cacheObject">Cache object</param>
         /// <returns>Return data object</returns>
-        public static T Get<T>(CacheKey key, CacheObject cacheObject = null)
+        public static T Get<T>(SixnetCacheKey key, SixnetCacheObject cacheObject = null)
         {
             return String.Get<T>(key, cacheObject);
         }
@@ -130,7 +130,7 @@ namespace Sixnet.Cache
         /// <param name="cacheKeys">Cache keys</param>
         /// <param name="cacheObject">Cache object</param>
         /// <returns>Return data list</returns>
-        public static List<T> GetList<T>(IEnumerable<CacheKey> cacheKeys, CacheObject cacheObject = null)
+        public static List<T> GetList<T>(IEnumerable<SixnetCacheKey> cacheKeys, SixnetCacheObject cacheObject = null)
         {
             return String.Get<T>(cacheKeys, cacheObject);
         }
@@ -156,7 +156,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="stringSetRangeParameter">Set range parameter</param>
             /// <returns>Return cache set result</returns>
-            public static StringSetRangeResult SetRange(StringSetRangeParameter stringSetRangeParameter)
+            public static SixnetStringSetRangeResult SetRange(SixnetStringSetRangeParameter stringSetRangeParameter)
             {
                 return ExecuteCacheOperation(stringSetRangeParameter);
             }
@@ -173,7 +173,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="stringSetBitParameter">Set bit parameter</param>
             /// <returns>Return cache set result</returns>
-            public static StringSetBitResult SetBit(StringSetBitParameter stringSetBitParameter)
+            public static SixnetStringSetBitResult SetBit(SixnetStringSetBitParameter stringSetBitParameter)
             {
                 return ExecuteCacheOperation(stringSetBitParameter);
             }
@@ -189,7 +189,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="stringSetParameter">String set parameter</param>
             /// <returns>Return cache result</returns>
-            public static StringSetResult Set(StringSetParameter stringSetParameter)
+            public static SixnetStringSetResult Set(SixnetStringSetParameter stringSetParameter)
             {
                 return ExecuteCacheOperation(stringSetParameter);
             }
@@ -205,19 +205,19 @@ namespace Sixnet.Cache
             /// <param name="when">Set value conditions</param>
             /// <param name="cacheObject">Cache object</param>
             /// <returns>Return cache result</returns>
-            public static StringSetResult Set(CacheKey key, string value, DateTimeOffset? absoluteExpiration = null, CacheSetWhen when = CacheSetWhen.Always, CacheObject cacheObject = null)
+            public static SixnetStringSetResult Set(SixnetCacheKey key, string value, DateTimeOffset? absoluteExpiration = null, CacheSetWhen when = CacheSetWhen.Always, SixnetCacheObject cacheObject = null)
             {
-                return Set(new StringSetParameter()
+                return Set(new SixnetStringSetParameter()
                 {
                     CacheObject = cacheObject,
-                    Items = new List<CacheEntry>()
+                    Items = new List<SixnetCacheEntry>()
                     {
-                        new CacheEntry ()
+                        new SixnetCacheEntry ()
                         {
                             Key=key,
                             Value=value,
                             When=when,
-                            Expiration = new CacheExpiration ()
+                            Expiration = new SixnetCacheExpiration ()
                             {
                                 AbsoluteExpiration=absoluteExpiration,
                                 SlidingExpiration=false
@@ -239,19 +239,19 @@ namespace Sixnet.Cache
             /// <param name="when">Set value conditions</param>
             /// <param name="cacheObject">Cache object</param>
             /// <returns>Return cache result</returns>
-            public static StringSetResult Set(CacheKey key, string value, TimeSpan? absoluteExpirationRelativeToNow = null, bool slidingExpiration = true, CacheSetWhen when = CacheSetWhen.Always, CacheObject cacheObject = null)
+            public static SixnetStringSetResult Set(SixnetCacheKey key, string value, TimeSpan? absoluteExpirationRelativeToNow = null, bool slidingExpiration = true, CacheSetWhen when = CacheSetWhen.Always, SixnetCacheObject cacheObject = null)
             {
-                return Set(new StringSetParameter()
+                return Set(new SixnetStringSetParameter()
                 {
                     CacheObject = cacheObject,
-                    Items = new List<CacheEntry>()
+                    Items = new List<SixnetCacheEntry>()
                     {
-                        new CacheEntry ()
+                        new SixnetCacheEntry ()
                         {
                             Key=key,
                             Value=value,
                             When=when,
-                            Expiration = new CacheExpiration ()
+                            Expiration = new SixnetCacheExpiration ()
                             {
                                 AbsoluteExpirationRelativeToNow=absoluteExpirationRelativeToNow,
                                 SlidingExpiration=slidingExpiration
@@ -270,7 +270,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="stringLengthParameter">String length parameter</param>
             /// <returns>Return cache result</returns>
-            public static StringLengthResult Length(StringLengthParameter stringLengthParameter)
+            public static SixnetStringLengthResult Length(SixnetStringLengthParameter stringLengthParameter)
             {
                 return ExecuteCacheOperation(stringLengthParameter);
             }
@@ -286,7 +286,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="stringIncrementParameter">String increment parameter</param>
             /// <returns>Return cache result</returns>
-            public static StringIncrementResult Increment(StringIncrementParameter stringIncrementParameter)
+            public static SixnetStringIncrementResult Increment(SixnetStringIncrementParameter stringIncrementParameter)
             {
                 return ExecuteCacheOperation(stringIncrementParameter);
             }
@@ -302,7 +302,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="stringGetWithExpiryParameter">String get with expiry parameter</param>
             /// <returns>Return cache result</returns>
-            public static StringGetWithExpiryResult GetWithExpiry(StringGetWithExpiryParameter stringGetWithExpiryParameter)
+            public static SixnetStringGetWithExpiryResult GetWithExpiry(SixnetStringGetWithExpiryParameter stringGetWithExpiryParameter)
             {
                 return ExecuteCacheOperation(stringGetWithExpiryParameter);
             }
@@ -317,7 +317,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="stringGetSetParameter">String get set parameter</param>
             /// <returns>Return cache result</returns>
-            public static StringGetSetResult GetSet(StringGetSetParameter stringGetSetParameter)
+            public static SixnetStringGetSetResult GetSet(SixnetStringGetSetParameter stringGetSetParameter)
             {
                 return ExecuteCacheOperation(stringGetSetParameter);
             }
@@ -332,7 +332,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="stringGetRangeParameter">String get range parameter</param>
             /// <returns>Return cache result</returns>
-            public static StringGetRangeResult GetRange(StringGetRangeParameter stringGetRangeParameter)
+            public static SixnetStringGetRangeResult GetRange(SixnetStringGetRangeParameter stringGetRangeParameter)
             {
                 return ExecuteCacheOperation(stringGetRangeParameter);
             }
@@ -347,7 +347,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="stringGetBitParameter">String get bit parameter</param>
             /// <returns>Return cache result</returns>
-            public static StringGetBitResult GetBit(StringGetBitParameter stringGetBitParameter)
+            public static SixnetStringGetBitResult GetBit(SixnetStringGetBitParameter stringGetBitParameter)
             {
                 return ExecuteCacheOperation(stringGetBitParameter);
             }
@@ -361,7 +361,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="stringGetParameter">String get parameter</param>
             /// <returns>Return cache result</returns>
-            public static StringGetResult Get(StringGetParameter stringGetParameter)
+            public static SixnetStringGetResult Get(SixnetStringGetParameter stringGetParameter)
             {
                 return ExecuteCacheOperation(stringGetParameter);
             }
@@ -374,13 +374,13 @@ namespace Sixnet.Cache
             /// <param name="key">Cache key</param>
             /// <param name="cacheObject">Cache object</param>
             /// <returns>Return cache result</returns>
-            public static string Get(CacheKey key, CacheObject cacheObject = null)
+            public static string Get(SixnetCacheKey key, SixnetCacheObject cacheObject = null)
             {
                 if (string.IsNullOrWhiteSpace(key))
                 {
                     return string.Empty;
                 }
-                var values = Get(new List<CacheKey>() { key }, cacheObject);
+                var values = Get(new List<SixnetCacheKey>() { key }, cacheObject);
                 return values?.FirstOrDefault() ?? string.Empty;
             }
 
@@ -390,7 +390,7 @@ namespace Sixnet.Cache
             /// <param name="key">Cache key</param>
             /// <param name="cacheObject">Cache object information</param>
             /// <returns>Return cache result</returns>
-            public static T Get<T>(CacheKey key, CacheObject cacheObject = null)
+            public static T Get<T>(SixnetCacheKey key, SixnetCacheObject cacheObject = null)
             {
                 var cacheValue = Get(key, cacheObject);
                 if (string.IsNullOrWhiteSpace(cacheValue))
@@ -406,13 +406,13 @@ namespace Sixnet.Cache
             /// <param name="keys">Cache keys​​</param>
             /// <param name="cacheObject">Cache object</param>
             /// <returns>Return values</returns>
-            public static List<string> Get(IEnumerable<CacheKey> keys, CacheObject cacheObject = null)
+            public static List<string> Get(IEnumerable<SixnetCacheKey> keys, SixnetCacheObject cacheObject = null)
             {
                 if (keys.IsNullOrEmpty())
                 {
                     return new List<string>(0);
                 }
-                var result = Get(new StringGetParameter()
+                var result = Get(new SixnetStringGetParameter()
                 {
                     CacheObject = cacheObject,
                     Keys = keys.ToList()
@@ -427,7 +427,7 @@ namespace Sixnet.Cache
             /// <param name="keys">Cache key</param>
             /// <param name="cacheObject">Cache object</param>
             /// <returns>Return datas</returns>
-            public static List<T> Get<T>(IEnumerable<CacheKey> keys, CacheObject cacheObject = null)
+            public static List<T> Get<T>(IEnumerable<SixnetCacheKey> keys, SixnetCacheObject cacheObject = null)
             {
                 var values = Get(keys, cacheObject);
                 if (values.IsNullOrEmpty())
@@ -454,7 +454,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="stringDecrementParameter">String decrement parameter</param>
             /// <returns>Return cache result</returns>
-            public static StringDecrementResult Decrement(StringDecrementParameter stringDecrementParameter)
+            public static SixnetStringDecrementResult Decrement(SixnetStringDecrementParameter stringDecrementParameter)
             {
                 return ExecuteCacheOperation(stringDecrementParameter);
             }
@@ -469,7 +469,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="stringBitPositionParameter">String bit position parameter</param>
             /// <returns>Return cache result</returns>
-            public static StringBitPositionResult BitPosition(StringBitPositionParameter stringBitPositionParameter)
+            public static SixnetStringBitPositionResult BitPosition(SixnetStringBitPositionParameter stringBitPositionParameter)
             {
                 return ExecuteCacheOperation(stringBitPositionParameter);
             }
@@ -484,7 +484,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="stringBitOperationParameter">String bit operation parameter</param>
             /// <returns>Return cache result</returns>
-            public static StringBitOperationResult BitOperation(StringBitOperationParameter stringBitOperationParameter)
+            public static SixnetStringBitOperationResult BitOperation(SixnetStringBitOperationParameter stringBitOperationParameter)
             {
                 return ExecuteCacheOperation(stringBitOperationParameter);
             }
@@ -499,7 +499,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="stringBitCountParameter">String bit count parameter</param>
             /// <returns>Return cache result</returns>
-            public static StringBitCountResult BitCount(StringBitCountParameter stringBitCountParameter)
+            public static SixnetStringBitCountResult BitCount(SixnetStringBitCountParameter stringBitCountParameter)
             {
                 return ExecuteCacheOperation(stringBitCountParameter);
             }
@@ -514,7 +514,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="stringAppendParameter">String append parameter</param>
             /// <returns>Return cache result</returns>
-            public static StringAppendResult Append(StringAppendParameter stringAppendParameter)
+            public static SixnetStringAppendResult Append(SixnetStringAppendParameter stringAppendParameter)
             {
                 return ExecuteCacheOperation(stringAppendParameter);
             }
@@ -541,7 +541,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="listTrimParameter">List trim parameter</param>
             /// <returns>Return cache result</returns>
-            public static ListTrimResult Trim(ListTrimParameter listTrimParameter)
+            public static SixnetListTrimResult Trim(SixnetListTrimParameter listTrimParameter)
             {
                 return ExecuteCacheOperation(listTrimParameter);
             }
@@ -556,7 +556,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="listSetByIndexParameter">List set by index parameter</param>
             /// <returns>Return cache result</returns>
-            public static ListSetByIndexResult SetByIndex(ListSetByIndexParameter listSetByIndexParameter)
+            public static SixnetListSetByIndexResult SetByIndex(SixnetListSetByIndexParameter listSetByIndexParameter)
             {
                 return ExecuteCacheOperation(listSetByIndexParameter);
             }
@@ -571,7 +571,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="listRightPushParameter">List right push parameter</param>
             /// <returns>Return cache result</returns>
-            public static ListRightPushResult RightPush(ListRightPushParameter listRightPushParameter)
+            public static SixnetListRightPushResult RightPush(SixnetListRightPushParameter listRightPushParameter)
             {
                 return ExecuteCacheOperation(listRightPushParameter);
             }
@@ -586,7 +586,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="listRightPopLeftPushParameter">List right pop left push parameter</param>
             /// <returns>Return cache result</returns>
-            public static ListRightPopLeftPushResult RightPopLeftPush(ListRightPopLeftPushParameter listRightPopLeftPushParameter)
+            public static SixnetListRightPopLeftPushResult RightPopLeftPush(SixnetListRightPopLeftPushParameter listRightPopLeftPushParameter)
             {
                 return ExecuteCacheOperation(listRightPopLeftPushParameter);
             }
@@ -600,7 +600,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="listRightPopParameter">List right pop parameter</param>
             /// <returns>Return cache result</returns>
-            public static ListRightPopResult RightPop(ListRightPopParameter listRightPopParameter)
+            public static SixnetListRightPopResult RightPop(SixnetListRightPopParameter listRightPopParameter)
             {
                 return ExecuteCacheOperation(listRightPopParameter);
             }
@@ -617,7 +617,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="listRemoveParameter">List remove parameter</param>
             /// <returns>Return cache result</returns>
-            public static ListRemoveResult Remove(ListRemoveParameter listRemoveParameter)
+            public static SixnetListRemoveResult Remove(SixnetListRemoveParameter listRemoveParameter)
             {
                 return ExecuteCacheOperation(listRemoveParameter);
             }
@@ -633,7 +633,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="listRangeParameter">List range parameter</param>
             /// <returns>Return cache result</returns>
-            public static ListRangeResult Range(ListRangeParameter listRangeParameter)
+            public static SixnetListRangeResult Range(SixnetListRangeParameter listRangeParameter)
             {
                 return ExecuteCacheOperation(listRangeParameter);
             }
@@ -649,7 +649,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="listLengthParameter">List length parameter</param>
             /// <returns>Return cache result</returns>
-            public static ListLengthResult Length(ListLengthParameter listLengthParameter)
+            public static SixnetListLengthResult Length(SixnetListLengthParameter listLengthParameter)
             {
                 return ExecuteCacheOperation(listLengthParameter);
             }
@@ -664,7 +664,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="listLeftPushParameter">List left push parameter</param>
             /// <returns>Return cache result</returns>
-            public static ListLeftPushResult LeftPush(ListLeftPushParameter listLeftPushParameter)
+            public static SixnetListLeftPushResult LeftPush(SixnetListLeftPushParameter listLeftPushParameter)
             {
                 return ExecuteCacheOperation(listLeftPushParameter);
             }
@@ -678,7 +678,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="listLeftPopParameter">List left pop parameter</param>
             /// <returns>Return cache result</returns>
-            public static ListLeftPopResult LeftPop(ListLeftPopParameter listLeftPopParameter)
+            public static SixnetListLeftPopResult LeftPop(SixnetListLeftPopParameter listLeftPopParameter)
             {
                 return ExecuteCacheOperation(listLeftPopParameter);
             }
@@ -692,7 +692,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="listInsertBeforeParameter">List insert before parameter</param>
             /// <returns>Return cache result</returns>
-            public static ListInsertBeforeResult InsertBefore(ListInsertBeforeParameter listInsertBeforeParameter)
+            public static SixnetListInsertBeforeResult InsertBefore(SixnetListInsertBeforeParameter listInsertBeforeParameter)
             {
                 return ExecuteCacheOperation(listInsertBeforeParameter);
             }
@@ -706,7 +706,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="listInsertAfterParameter">List insert after parameter</param>
             /// <returns>Return cache result</returns>
-            public static ListInsertAfterResult InsertAfter(ListInsertAfterParameter listInsertAfterParameter)
+            public static SixnetListInsertAfterResult InsertAfter(SixnetListInsertAfterParameter listInsertAfterParameter)
             {
                 return ExecuteCacheOperation(listInsertAfterParameter);
             }
@@ -722,7 +722,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="listGetByIndexParameter">List get by index parameter</param>
             /// <returns>Return cache result</returns>
-            public static ListGetByIndexResult GetByIndex(ListGetByIndexParameter listGetByIndexParameter)
+            public static SixnetListGetByIndexResult GetByIndex(SixnetListGetByIndexParameter listGetByIndexParameter)
             {
                 return ExecuteCacheOperation(listGetByIndexParameter);
             }
@@ -746,7 +746,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="hashValuesParameter">Hash values parameter</param>
             /// <returns>Return cache result</returns>
-            public static HashValuesResult Values(HashValuesParameter hashValuesParameter)
+            public static SixnetHashValuesResult Values(SixnetHashValuesParameter hashValuesParameter)
             {
                 return ExecuteCacheOperation(hashValuesParameter);
             }
@@ -762,7 +762,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="hashSetParameter">Hash set parameter</param>
             /// <returns>Return cache result</returns>
-            public static HashSetResult Set(HashSetParameter hashSetParameter)
+            public static SixnetHashSetResult Set(SixnetHashSetParameter hashSetParameter)
             {
                 return ExecuteCacheOperation(hashSetParameter);
             }
@@ -776,7 +776,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="hashLengthParameter">Hash length parameter</param>
             /// <returns>Return cache result</returns>
-            public static HashLengthResult Length(HashLengthParameter hashLengthParameter)
+            public static SixnetHashLengthResult Length(SixnetHashLengthParameter hashLengthParameter)
             {
                 return ExecuteCacheOperation(hashLengthParameter);
             }
@@ -790,7 +790,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="hashKeysParameter">Hash keys parameter</param>
             /// <returns>Return cache result</returns>
-            public static HashKeysResult Keys(HashKeysParameter hashKeysParameter)
+            public static SixnetHashKeysResult Keys(SixnetHashKeysParameter hashKeysParameter)
             {
                 return ExecuteCacheOperation(hashKeysParameter);
             }
@@ -804,7 +804,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="hashIncrementParameter">Hash increment parameter</param>
             /// <returns>Return cache result</returns>
-            public static HashIncrementResult Increment(HashIncrementParameter hashIncrementParameter)
+            public static SixnetHashIncrementResult Increment(SixnetHashIncrementParameter hashIncrementParameter)
             {
                 return ExecuteCacheOperation(hashIncrementParameter);
             }
@@ -818,7 +818,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="hashGetParameter">Hash get parameter</param>
             /// <returns>Return cache result</returns>
-            public static HashGetResult Get(HashGetParameter hashGetParameter)
+            public static SixnetHashGetResult Get(SixnetHashGetParameter hashGetParameter)
             {
                 return ExecuteCacheOperation(hashGetParameter);
             }
@@ -832,7 +832,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="hashGetAllParameter">Hash get all parameter</param>
             /// <returns>Return cache result</returns>
-            public static HashGetAllResult GetAll(HashGetAllParameter hashGetAllParameter)
+            public static SixnetHashGetAllResult GetAll(SixnetHashGetAllParameter hashGetAllParameter)
             {
                 return ExecuteCacheOperation(hashGetAllParameter);
             }
@@ -846,7 +846,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="hashExistsParameter">Hash exists parameter</param>
             /// <returns>Return cache result</returns>
-            public static HashExistsResult Exist(HashExistsParameter hashExistsParameter)
+            public static SixnetHashExistsResult Exist(SixnetHashExistsParameter hashExistsParameter)
             {
                 return ExecuteCacheOperation(hashExistsParameter);
             }
@@ -860,7 +860,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="hashDeleteParameter">Hash delete parameter</param>
             /// <returns>Return cache result</returns>
-            public static HashDeleteResult Delete(HashDeleteParameter hashDeleteParameter)
+            public static SixnetHashDeleteResult Delete(SixnetHashDeleteParameter hashDeleteParameter)
             {
                 return ExecuteCacheOperation(hashDeleteParameter);
             }
@@ -874,7 +874,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="hashDecrementParameter">Hash decrement parameter</param>
             /// <returns>Return cache result</returns>
-            public static HashDecrementResult Decrement(HashDecrementParameter hashDecrementParameter)
+            public static SixnetHashDecrementResult Decrement(SixnetHashDecrementParameter hashDecrementParameter)
             {
                 return ExecuteCacheOperation(hashDecrementParameter);
             }
@@ -888,7 +888,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="hashScanParameter">Hash scan parameter</param>
             /// <returns>Return cache result</returns>
-            public static HashScanResult Scan(HashScanParameter hashScanParameter)
+            public static SixnetHashScanResult Scan(SixnetHashScanParameter hashScanParameter)
             {
                 return ExecuteCacheOperation(hashScanParameter);
             }
@@ -912,7 +912,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="setRemoveParameter">Set remove parameter</param>
             /// <returns>Return cache result</returns>
-            public static SetRemoveResult Remove(SetRemoveParameter setRemoveParameter)
+            public static SixnetSetRemoveResult Remove(SixnetSetRemoveParameter setRemoveParameter)
             {
                 return ExecuteCacheOperation(setRemoveParameter);
             }
@@ -926,7 +926,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="setRandomMembersParameter">Set random members parameter</param>
             /// <returns>Return cache result</returns>
-            public static SetRandomMembersResult RandomMembers(SetRandomMembersParameter setRandomMembersParameter)
+            public static SixnetSetRandomMembersResult RandomMembers(SixnetSetRandomMembersParameter setRandomMembersParameter)
             {
                 return ExecuteCacheOperation(setRandomMembersParameter);
             }
@@ -940,7 +940,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="setRandomMemberParameter">Set random member parameter</param>
             /// <returns>Return cache result</returns>
-            public static SetRandomMemberResult RandomMember(SetRandomMemberParameter setRandomMemberParameter)
+            public static SixnetSetRandomMemberResult RandomMember(SixnetSetRandomMemberParameter setRandomMemberParameter)
             {
                 return ExecuteCacheOperation(setRandomMemberParameter);
             }
@@ -954,7 +954,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="setPopParameter">Set pop parameter</param>
             /// <returns>Return cache result</returns>
-            public static SetPopResult Pop(SetPopParameter setPopParameter)
+            public static SixnetSetPopResult Pop(SixnetSetPopParameter setPopParameter)
             {
                 return ExecuteCacheOperation(setPopParameter);
             }
@@ -968,7 +968,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="setMoveParameter">Set move parameter</param>
             /// <returns>Return cache result</returns>
-            public static SetMoveResult Move(SetMoveParameter setMoveParameter)
+            public static SixnetSetMoveResult Move(SixnetSetMoveParameter setMoveParameter)
             {
                 return ExecuteCacheOperation(setMoveParameter);
             }
@@ -982,7 +982,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="setMembersParameter">Set members parameter</param>
             /// <returns>Return cache result</returns>
-            public static SetMembersResult Members(SetMembersParameter setMembersParameter)
+            public static SixnetSetMembersResult Members(SixnetSetMembersParameter setMembersParameter)
             {
                 return ExecuteCacheOperation(setMembersParameter);
             }
@@ -996,7 +996,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="setLengthParameter">Set length parameter</param>
             /// <returns>Return cache result</returns>
-            public static SetLengthResult Length(SetLengthParameter setLengthParameter)
+            public static SixnetSetLengthResult Length(SixnetSetLengthParameter setLengthParameter)
             {
                 return ExecuteCacheOperation(setLengthParameter);
             }
@@ -1010,7 +1010,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="setContainsParameter">Set contaims parameter</param>
             /// <returns>Return cache result</returns>
-            public static SetContainsResult Contains(SetContainsParameter setContainsParameter)
+            public static SixnetSetContainsResult Contains(SixnetSetContainsParameter setContainsParameter)
             {
                 return ExecuteCacheOperation(setContainsParameter);
             }
@@ -1024,7 +1024,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="setCombineParameter">Set combine parameter</param>
             /// <returns>Return cache result</returns>
-            public static SetCombineResult Combine(SetCombineParameter setCombineParameter)
+            public static SixnetSetCombineResult Combine(SixnetSetCombineParameter setCombineParameter)
             {
                 return ExecuteCacheOperation(setCombineParameter);
             }
@@ -1038,7 +1038,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="setCombineAndStoreParameter">Set combine and store parameter</param>
             /// <returns>Return cache result</returns>
-            public static SetCombineAndStoreResult CombineAndStore(SetCombineAndStoreParameter setCombineAndStoreParameter)
+            public static SixnetSetCombineAndStoreResult CombineAndStore(SixnetSetCombineAndStoreParameter setCombineAndStoreParameter)
             {
                 return ExecuteCacheOperation(setCombineAndStoreParameter);
             }
@@ -1053,7 +1053,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="setAddParameter">Set add parameter</param>
             /// <returns>Return cache result</returns>
-            public static SetAddResult Add(SetAddParameter setAddParameter)
+            public static SixnetSetAddResult Add(SixnetSetAddParameter setAddParameter)
             {
                 return ExecuteCacheOperation(setAddParameter);
             }
@@ -1077,7 +1077,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="sortedSetScoreParameter">Sorted set score parameter</param>
             /// <returns>Return cache result</returns>
-            public static SortedSetScoreResult Score(SortedSetScoreParameter sortedSetScoreParameter)
+            public static SixnetSortedSetScoreResult Score(SixnetSortedSetScoreParameter sortedSetScoreParameter)
             {
                 return ExecuteCacheOperation(sortedSetScoreParameter);
             }
@@ -1091,7 +1091,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="sortedSetRemoveRangeByValueParameter">Sorted set remove range by value parameter</param>
             /// <returns>Return cache result</returns>
-            public static SortedSetRemoveRangeByValueResult RemoveRangeByValue(SortedSetRemoveRangeByValueParameter sortedSetRemoveRangeByValueParameter)
+            public static SixnetSortedSetRemoveRangeByValueResult RemoveRangeByValue(SixnetSortedSetRemoveRangeByValueParameter sortedSetRemoveRangeByValueParameter)
             {
                 return ExecuteCacheOperation(sortedSetRemoveRangeByValueParameter);
             }
@@ -1105,7 +1105,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="sortedSetRemoveRangeByScoreParameter">Sorted set remove range by score parameter</param>
             /// <returns>Return cache result</returns>
-            public static SortedSetRemoveRangeByScoreResult RemoveRangeByScore(SortedSetRemoveRangeByScoreParameter sortedSetRemoveRangeByScoreParameter)
+            public static SixnetSortedSetRemoveRangeByScoreResult RemoveRangeByScore(SixnetSortedSetRemoveRangeByScoreParameter sortedSetRemoveRangeByScoreParameter)
             {
                 return ExecuteCacheOperation(sortedSetRemoveRangeByScoreParameter);
             }
@@ -1121,7 +1121,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="sortedSetRemoveRangeByRankParameter">Sorted set range by rank parameter</param>
             /// <returns>Return cache result</returns>
-            public static SortedSetRemoveRangeByRankResult RemoveRangeByRank(SortedSetRemoveRangeByRankParameter sortedSetRemoveRangeByRankParameter)
+            public static SixnetSortedSetRemoveRangeByRankResult RemoveRangeByRank(SixnetSortedSetRemoveRangeByRankParameter sortedSetRemoveRangeByRankParameter)
             {
                 return ExecuteCacheOperation(sortedSetRemoveRangeByRankParameter);
             }
@@ -1135,7 +1135,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="sortedSetRemoveParameter">Sorted set remove parameter</param>
             /// <returns>Return cache result</returns>
-            public static SortedSetRemoveResult Remove(SortedSetRemoveParameter sortedSetRemoveParameter)
+            public static SixnetSortedSetRemoveResult Remove(SixnetSortedSetRemoveParameter sortedSetRemoveParameter)
             {
                 return ExecuteCacheOperation(sortedSetRemoveParameter);
             }
@@ -1150,7 +1150,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="sortedSetRankParameter">Sorted set rank parameter</param>
             /// <returns>Return cache result</returns>
-            public static SortedSetRankResult Rank(SortedSetRankParameter sortedSetRankParameter)
+            public static SixnetSortedSetRankResult Rank(SixnetSortedSetRankParameter sortedSetRankParameter)
             {
                 return ExecuteCacheOperation(sortedSetRankParameter);
             }
@@ -1164,7 +1164,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="sortedSetRangeByValueParameter">Sorted set range by value parameter</param>
             /// <returns>Return cache result</returns>
-            public static SortedSetRangeByValueResult RangeByValue(SortedSetRangeByValueParameter sortedSetRangeByValueParameter)
+            public static SixnetSortedSetRangeByValueResult RangeByValue(SixnetSortedSetRangeByValueParameter sortedSetRangeByValueParameter)
             {
                 return ExecuteCacheOperation(sortedSetRangeByValueParameter);
             }
@@ -1178,7 +1178,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="sortedSetRangeByScoreWithScoresParameter">Sorted set range by score with scores parameter</param>
             /// <returns>Return cache result</returns>
-            public static SortedSetRangeByScoreWithScoresResult RangeByScoreWithScores(SortedSetRangeByScoreWithScoresParameter sortedSetRangeByScoreWithScoresParameter)
+            public static SixnetSortedSetRangeByScoreWithScoresResult RangeByScoreWithScores(SixnetSortedSetRangeByScoreWithScoresParameter sortedSetRangeByScoreWithScoresParameter)
             {
                 return ExecuteCacheOperation(sortedSetRangeByScoreWithScoresParameter);
             }
@@ -1192,7 +1192,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="sortedSetRangeByScoreParameter">Sorted set range by score parameter</param>
             /// <returns>Return cache result</returns>
-            public static SortedSetRangeByScoreResult RangeByScore(SortedSetRangeByScoreParameter sortedSetRangeByScoreParameter)
+            public static SixnetSortedSetRangeByScoreResult RangeByScore(SixnetSortedSetRangeByScoreParameter sortedSetRangeByScoreParameter)
             {
                 return ExecuteCacheOperation(sortedSetRangeByScoreParameter);
             }
@@ -1206,7 +1206,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="sortedSetRangeByRankWithScoresParameter">Sorted set range by rank with scores parameter</param>
             /// <returns>Return cache result</returns>
-            public static SortedSetRangeByRankWithScoresResult RangeByRankWithScores(SortedSetRangeByRankWithScoresParameter sortedSetRangeByRankWithScoresParameter)
+            public static SixnetSortedSetRangeByRankWithScoresResult RangeByRankWithScores(SixnetSortedSetRangeByRankWithScoresParameter sortedSetRangeByRankWithScoresParameter)
             {
                 return ExecuteCacheOperation(sortedSetRangeByRankWithScoresParameter);
             }
@@ -1220,7 +1220,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="sortedSetRangeByRankParameter">Sorted set range by rank parameter</param>
             /// <returns>sorted set range by rank response</returns>
-            public static SortedSetRangeByRankResult RangeByRank(SortedSetRangeByRankParameter sortedSetRangeByRankParameter)
+            public static SixnetSortedSetRangeByRankResult RangeByRank(SixnetSortedSetRangeByRankParameter sortedSetRangeByRankParameter)
             {
                 return ExecuteCacheOperation(sortedSetRangeByRankParameter);
             }
@@ -1234,7 +1234,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="sortedSetLengthByValueParameter">Sorted set length by value parameter</param>
             /// <returns>Return cache result</returns>
-            public static SortedSetLengthByValueResult LengthByValue(SortedSetLengthByValueParameter sortedSetLengthByValueParameter)
+            public static SixnetSortedSetLengthByValueResult LengthByValue(SixnetSortedSetLengthByValueParameter sortedSetLengthByValueParameter)
             {
                 return ExecuteCacheOperation(sortedSetLengthByValueParameter);
             }
@@ -1248,7 +1248,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="sortedSetLengthParameter">Sorted set length parameter</param>
             /// <returns>Return cache result</returns>
-            public static SortedSetLengthResult Length(SortedSetLengthParameter sortedSetLengthParameter)
+            public static SixnetSortedSetLengthResult Length(SixnetSortedSetLengthParameter sortedSetLengthParameter)
             {
                 return ExecuteCacheOperation(sortedSetLengthParameter);
             }
@@ -1262,7 +1262,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="sortedSetIncrementParameter">Sorted set increment parameter</param>
             /// <returns>Return cache result</returns>
-            public static SortedSetIncrementResult Increment(SortedSetIncrementParameter sortedSetIncrementParameter)
+            public static SixnetSortedSetIncrementResult Increment(SixnetSortedSetIncrementParameter sortedSetIncrementParameter)
             {
                 return ExecuteCacheOperation(sortedSetIncrementParameter);
             }
@@ -1276,7 +1276,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="sortedSetDecrementParameter">Sorted set decrement parameter</param>
             /// <returns>Return cache result</returns>
-            public static SortedSetDecrementResult Decrement(SortedSetDecrementParameter sortedSetDecrementParameter)
+            public static SixnetSortedSetDecrementResult Decrement(SixnetSortedSetDecrementParameter sortedSetDecrementParameter)
             {
                 return ExecuteCacheOperation(sortedSetDecrementParameter);
             }
@@ -1290,7 +1290,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="sortedSetCombineAndStoreParameter">Sorted set combine and store parameter</param>
             /// <returns>Return cache result</returns>
-            public static SortedSetCombineAndStoreResult CombineAndStore(SortedSetCombineAndStoreParameter sortedSetCombineAndStoreParameter)
+            public static SixnetSortedSetCombineAndStoreResult CombineAndStore(SixnetSortedSetCombineAndStoreParameter sortedSetCombineAndStoreParameter)
             {
                 return ExecuteCacheOperation(sortedSetCombineAndStoreParameter);
             }
@@ -1304,7 +1304,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="sortedSetAddParameter">Sorted set add parameter</param>
             /// <returns>Return cache result</returns>
-            public static SortedSetAddResult Add(SortedSetAddParameter sortedSetAddParameter)
+            public static SixnetSortedSetAddResult Add(SixnetSortedSetAddParameter sortedSetAddParameter)
             {
                 return ExecuteCacheOperation(sortedSetAddParameter);
             }
@@ -1328,7 +1328,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="sortParameter">Sort parameter</param>
             /// <returns>Return cache result</returns>
-            public static SortResult Sort(SortParameter sortParameter)
+            public static SixnetSortResult Sort(SixnetSortParameter sortParameter)
             {
                 return ExecuteCacheOperation(sortParameter);
             }
@@ -1342,7 +1342,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="sortAndStoreParameter">Sort and store parameter</param>
             /// <returns>Return cache result</returns>
-            public static SortAndStoreResult SortAndStore(SortAndStoreParameter sortAndStoreParameter)
+            public static SixnetSortAndStoreResult SortAndStore(SixnetSortAndStoreParameter sortAndStoreParameter)
             {
                 return ExecuteCacheOperation(sortAndStoreParameter);
             }
@@ -1356,7 +1356,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="typeParameter">type parameter</param>
             /// <returns>Return cache result</returns>
-            public static TypeResult Type(TypeParameter typeParameter)
+            public static SixnetTypeResult Type(SixnetTypeParameter typeParameter)
             {
                 return ExecuteCacheOperation(typeParameter);
             }
@@ -1370,7 +1370,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="timeToLiveParameter">Time to live parameter</param>
             /// <returns>Return cache result</returns>
-            public static TimeToLiveResult TimeToLive(TimeToLiveParameter timeToLiveParameter)
+            public static SixnetTimeToLiveResult TimeToLive(SixnetTimeToLiveParameter timeToLiveParameter)
             {
                 return ExecuteCacheOperation(timeToLiveParameter);
             }
@@ -1384,7 +1384,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="restoreParameter">Restore parameter</param>
             /// <returns> Return cache result </returns>
-            public static RestoreResult Restore(RestoreParameter restoreParameter)
+            public static SixnetRestoreResult Restore(SixnetRestoreParameter restoreParameter)
             {
                 return ExecuteCacheOperation(restoreParameter);
             }
@@ -1400,7 +1400,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="renameParameter">Rename parameter</param>
             /// <returns>Return cache result</returns>
-            public static RenameResult Rename(RenameParameter renameParameter)
+            public static SixnetRenameResult Rename(SixnetRenameParameter renameParameter)
             {
                 return ExecuteCacheOperation(renameParameter);
             }
@@ -1414,7 +1414,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="randomParameter">Random parameter</param>
             /// <returns>Return cache result</returns>
-            public static RandomResult KeyRandom(RandomParameter randomParameter)
+            public static SixnetRandomResult KeyRandom(SixnetRandomParameter randomParameter)
             {
                 return ExecuteCacheOperation(randomParameter);
             }
@@ -1428,7 +1428,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="persistParameter">Persist parameter</param>
             /// <returns>Return cache result</returns>
-            public static PersistResult Persist(PersistParameter persistParameter)
+            public static SixnetPersistResult Persist(SixnetPersistParameter persistParameter)
             {
                 return ExecuteCacheOperation(persistParameter);
             }
@@ -1442,7 +1442,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="moveParameter">Move parameter</param>
             /// <returns>Return cache result</returns>
-            public static MoveResult Move(MoveParameter moveParameter)
+            public static SixnetMoveResult Move(SixnetMoveParameter moveParameter)
             {
                 return ExecuteCacheOperation(moveParameter);
             }
@@ -1456,7 +1456,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="migrateParameter">Migrate parameter</param>
             /// <returns>Return cache result</returns>
-            public static MigrateKeyResult Migrate(MigrateKeyParameter migrateParameter)
+            public static SixnetMigrateKeyResult Migrate(SixnetMigrateKeyParameter migrateParameter)
             {
                 return ExecuteCacheOperation(migrateParameter);
             }
@@ -1470,7 +1470,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="expireParameter">Expire parameter</param>
             /// <returns>Return cache result</returns>
-            public static ExpireResult Expire(ExpireParameter expireParameter)
+            public static SixnetExpireResult Expire(SixnetExpireParameter expireParameter)
             {
                 return ExecuteCacheOperation(expireParameter);
             }
@@ -1484,7 +1484,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="dumpParameter">Dump parameter</param>
             /// <returns>Return cache result</returns>
-            public static DumpResult Dump(DumpParameter dumpParameter)
+            public static SixnetDumpResult Dump(SixnetDumpParameter dumpParameter)
             {
                 return ExecuteCacheOperation(dumpParameter);
             }
@@ -1498,7 +1498,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="deleteParameter">Delete parameter</param>
             /// <returns>Return cache result</returns>
-            public static DeleteResult Delete(DeleteParameter deleteParameter)
+            public static SixnetDeleteResult Delete(SixnetDeleteParameter deleteParameter)
             {
                 return ExecuteCacheOperation(deleteParameter);
             }
@@ -1508,15 +1508,15 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="parameter">Parameter</param>
             /// <returns></returns>
-            public static DeleteResult DeleteByPattern(DeleteByPatternParameter parameter)
+            public static SixnetDeleteResult DeleteByPattern(SixnetDeleteByPatternParameter parameter)
             {
                 if (string.IsNullOrWhiteSpace(parameter?.Pattern))
                 {
-                    return CacheResult.SuccessResponse<DeleteResult>();
+                    return SixnetCacheResult.SuccessResponse<SixnetDeleteResult>();
                 }
                 long cursor = 0;
-                DeleteResult deleteResult = null;
-                var scanParameter = new ScanParameter()
+                SixnetDeleteResult deleteResult = null;
+                var scanParameter = new SixnetScanParameter()
                 {
                     CacheObject = parameter.CacheObject,
                     CommandFlags = parameter.CommandFlags,
@@ -1526,7 +1526,7 @@ namespace Sixnet.Cache
                     StructurePattern = parameter.StructurePattern,
                     Size = 100,
                 };
-                var deleteParameter = new DeleteParameter()
+                var deleteParameter = new SixnetDeleteParameter()
                 {
                     CacheObject = parameter.CacheObject,
                     CommandFlags = parameter.CommandFlags,
@@ -1543,7 +1543,7 @@ namespace Sixnet.Cache
                         deleteResult = Delete(deleteParameter);
                     }
                 } while (cursor > 0);
-                return deleteResult ?? CacheResult.SuccessResponse<DeleteResult>();
+                return deleteResult ?? SixnetCacheResult.SuccessResponse<SixnetDeleteResult>();
             }
 
             #endregion
@@ -1555,7 +1555,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="getKeysParameter">Get keys parameter</param>
             /// <returns>Return cache result</returns>
-            public static GetKeysResult GetKeys(GetKeysParameter getKeysParameter)
+            public static SixnetGetKeysResult GetKeys(SixnetGetKeysParameter getKeysParameter)
             {
                 return ExecuteCacheOperation(getKeysParameter);
             }
@@ -1569,7 +1569,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="scanParameter">Exist parameter</param>
             /// <returns>Return cache result</returns>
-            public static ExistResult Exist(ExistParameter scanParameter)
+            public static SixnetExistResult Exist(SixnetExistParameter scanParameter)
             {
                 return ExecuteCacheOperation(scanParameter);
             }
@@ -1583,7 +1583,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="scanParameter">Scan parameter</param>
             /// <returns>Return cache result</returns>
-            public static ScanResult Scan(ScanParameter scanParameter)
+            public static SixnetScanResult Scan(SixnetScanParameter scanParameter)
             {
                 return ExecuteCacheOperation(scanParameter);
             }
@@ -1608,7 +1608,7 @@ namespace Sixnet.Cache
             /// <param name="server"> server information </param>
             /// <param name="getAllDataBaseParameter">Get all database parameter</param>
             /// <returns>Return cache result</returns>
-            public static GetAllDataBaseResult GetAllDataBase(CacheServer server, GetAllDataBaseParameter getAllDataBaseParameter)
+            public static SixnetGetAllDataBaseResult GetAllDataBase(SixnetCacheServer server, SixnetGetAllDataBaseParameter getAllDataBaseParameter)
             {
                 return getAllDataBaseParameter.Execute(server);
             }
@@ -1623,7 +1623,7 @@ namespace Sixnet.Cache
             /// <param name="server"> server information </param>
             /// <param name="getKeysParameter"> Get keys options </param>
             /// <returns>Return cache result</returns>
-            public static GetKeysResult GetKeys(CacheServer server, GetKeysParameter getKeysParameter)
+            public static SixnetGetKeysResult GetKeys(SixnetCacheServer server, SixnetGetKeysParameter getKeysParameter)
             {
                 return getKeysParameter.Execute(server);
             }
@@ -1638,7 +1638,7 @@ namespace Sixnet.Cache
             /// <param name="server"> server information </param>
             /// <param name="clearDataParameter"> Clear data options </param>
             /// <returns>Return cache result</returns>
-            public static ClearDataResult ClearData(CacheServer server, ClearDataParameter clearDataParameter)
+            public static SixnetClearDataResult ClearData(SixnetCacheServer server, SixnetClearDataParameter clearDataParameter)
             {
                 return clearDataParameter.Execute(server);
             }
@@ -1653,7 +1653,7 @@ namespace Sixnet.Cache
             /// <param name="server"> server information </param>
             /// <param name="getDetailParameter"> Get detail options </param>
             /// <returns>Return cache result</returns>
-            public static GetDetailResult GetKeyDetail(CacheServer server, GetDetailParameter getDetailParameter)
+            public static SixnetGetDetailResult GetKeyDetail(SixnetCacheServer server, SixnetGetDetailParameter getDetailParameter)
             {
                 return getDetailParameter.Execute(server);
             }
@@ -1668,7 +1668,7 @@ namespace Sixnet.Cache
             /// <param name="server"> server information </param>
             /// <param name="getServerConfigurationParameter">Get server configuration parameter</param>
             /// <returns>Return cache result</returns>
-            public static GetServerConfigurationResult GetServerConfiguration(CacheServer server, GetServerConfigurationParameter getServerConfigurationParameter)
+            public static SixnetGetServerConfigurationResult GetServerConfiguration(SixnetCacheServer server, SixnetGetServerConfigurationParameter getServerConfigurationParameter)
             {
                 return getServerConfigurationParameter.Execute(server);
             }
@@ -1683,7 +1683,7 @@ namespace Sixnet.Cache
             /// <param name="server"> server information </param>
             /// <param name="saveServerConfigurationParameter"> Save server configuration options </param>
             /// <returns>Return cache result</returns>
-            public static SaveServerConfigurationResult SaveServerConfiguration(CacheServer server, SaveServerConfigurationParameter saveServerConfigurationParameter)
+            public static SixnetSaveServerConfigurationResult SaveServerConfiguration(SixnetCacheServer server, SixnetSaveServerConfigurationParameter saveServerConfigurationParameter)
             {
                 return saveServerConfigurationParameter.Execute(server);
             }
@@ -1718,7 +1718,7 @@ namespace Sixnet.Cache
         /// </summary>
         /// <param name="operationParameter">Cache operation parameter</param>
         /// <returns>Return cache server</returns>
-        internal static CacheServer GetCacheServer<T>(CacheParameter<T> operationParameter) where T : CacheResult, new()
+        internal static SixnetCacheServer GetCacheServer<T>(SixnetCacheParameter<T> operationParameter) where T : SixnetCacheResult, new()
         {
             return Options?.GetCacheServer(operationParameter);
         }
@@ -1727,7 +1727,7 @@ namespace Sixnet.Cache
         /// Get default in-memory server
         /// </summary>
         /// <returns></returns>
-        internal static CacheServer GetDefaultInMemoryServer()
+        internal static SixnetCacheServer GetDefaultInMemoryServer()
         {
             return SixnetCacheOptions.DefaultInMemoryServer;
         }
@@ -1750,7 +1750,7 @@ namespace Sixnet.Cache
         /// </summary>
         /// <param name="cacheObject">Cache object</param>
         /// <returns>Return cache object prefixs</returns>
-        internal static List<string> GetObjectPrefixs(CacheObject cacheObject)
+        internal static List<string> GetObjectPrefixs(SixnetCacheObject cacheObject)
         {
             return Options?.GetObjectPrefixs(cacheObject);
         }
@@ -1786,7 +1786,7 @@ namespace Sixnet.Cache
         /// </summary>
         /// <param name="options">Request parameter</param>
         /// <returns>Reurn cache result</returns>
-        static TResponse ExecuteCacheOperation<TResponse>(CacheParameter<TResponse> options) where TResponse : CacheResult, new()
+        static TResponse ExecuteCacheOperation<TResponse>(SixnetCacheParameter<TResponse> options) where TResponse : SixnetCacheResult, new()
         {
             SixnetDirectThrower.ThrowArgNullIf(options == null, nameof(options));
             return options.Execute();

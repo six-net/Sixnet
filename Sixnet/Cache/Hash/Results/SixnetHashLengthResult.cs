@@ -1,0 +1,15 @@
+﻿// "Company © 2025. All rights reserved."
+
+namespace Sixnet.Cache.Hash.Results
+{
+    /// <summary>
+    /// Hash length result
+    /// </summary>
+    public class SixnetHashLengthResult : SixnetCacheResult
+    {
+        /// <summary>
+        /// Gets or sets the length
+        /// </summary>
+        public long Length { get; set; }
+    }
+}

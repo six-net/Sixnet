@@ -34,7 +34,7 @@ namespace Sixnet.Security.Permission
             var operationKey = GetObjectPermissionKey(appTag, permissionObjectType, objectValue);
             if (permissions.IsNullOrEmpty())
             {
-                SixnetCacher.Keys.Delete(new DeleteParameter()
+                SixnetCacher.Keys.Delete(new SixnetDeleteParameter()
                 {
                     CacheObject = cacheObject,
                     Keys = [operationKey]
@@ -42,12 +42,12 @@ namespace Sixnet.Security.Permission
             }
             else
             {
-                var currentPermissions = SixnetCacher.Set.Members(new SetMembersParameter()
+                var currentPermissions = SixnetCacher.Set.Members(new SixnetSetMembersParameter()
                 {
                     CacheObject = cacheObject,
                     Key = operationKey,
                 })?.Members ?? [];
-                SixnetCacher.Set.Add(new SetAddParameter()
+                SixnetCacher.Set.Add(new SixnetSetAddParameter()
                 {
                     CacheObject = cacheObject,
                     Key = operationKey,
@@ -56,7 +56,7 @@ namespace Sixnet.Security.Permission
                 var removeMembers = currentPermissions.Except(permissions).ToList();
                 if (!removeMembers.IsNullOrEmpty())
                 {
-                    SixnetCacher.Set.Remove(new SetRemoveParameter()
+                    SixnetCacher.Set.Remove(new SixnetSetRemoveParameter()
                     {
                         CacheObject = cacheObject,
                         Key = operationKey,
@@ -94,20 +94,20 @@ namespace Sixnet.Security.Permission
             var operationKey = GetObjectPermissionKey(appTag, permissionObjectType, objectValue);
             if (permissions.IsNullOrEmpty())
             {
-                await SixnetCacher.Keys.DeleteAsync(new DeleteParameter()
+                await SixnetCacher.Keys.DeleteAsync(new SixnetDeleteParameter()
                 {
                     CacheObject = cacheObject,
-                    Keys = new List<CacheKey> { operationKey }
+                    Keys = new List<SixnetCacheKey> { operationKey }
                 }).ConfigureAwait(false);
             }
             else
             {
-                var currentPermissions = (await SixnetCacher.Set.MembersAsync(new SetMembersParameter()
+                var currentPermissions = (await SixnetCacher.Set.MembersAsync(new SixnetSetMembersParameter()
                 {
                     CacheObject = cacheObject,
                     Key = operationKey,
                 }).ConfigureAwait(false))?.Members ?? new List<string>();
-                await SixnetCacher.Set.AddAsync(new SetAddParameter()
+                await SixnetCacher.Set.AddAsync(new SixnetSetAddParameter()
                 {
                     CacheObject = cacheObject,
                     Key = operationKey,
@@ -116,7 +116,7 @@ namespace Sixnet.Security.Permission
                 var removeMembers = currentPermissions.Except(permissions).ToList();
                 if (!removeMembers.IsNullOrEmpty())
                 {
-                    await SixnetCacher.Set.RemoveAsync(new SetRemoveParameter()
+                    await SixnetCacher.Set.RemoveAsync(new SixnetSetRemoveParameter()
                     {
                         CacheObject = cacheObject,
                         Key = operationKey,
@@ -152,7 +152,7 @@ namespace Sixnet.Security.Permission
             }
             var cacheObject = GetCacheObject();
             var operationKey = GetObjectPermissionKey(appTag, permissionObjectType, objectValue);
-            await SixnetCacher.Set.AddAsync(new SetAddParameter()
+            await SixnetCacher.Set.AddAsync(new SixnetSetAddParameter()
             {
                 CacheObject = cacheObject,
                 Key = operationKey,
@@ -186,7 +186,7 @@ namespace Sixnet.Security.Permission
             }
             var cacheObject = GetCacheObject();
             var operationKey = GetObjectPermissionKey(appTag, permissionObjectType, objectValue);
-            SixnetCacher.Set.Add(new SetAddParameter()
+            SixnetCacher.Set.Add(new SixnetSetAddParameter()
             {
                 CacheObject = cacheObject,
                 Key = operationKey,
@@ -219,7 +219,7 @@ namespace Sixnet.Security.Permission
                 return false;
             }
             var operationAuthKey = GetObjectPermissionKey(appTag, PermissionObjectType.Operation, operation);
-            var authObjectAuthKeys = new List<CacheKey>() { operationAuthKey };
+            var authObjectAuthKeys = new List<SixnetCacheKey>() { operationAuthKey };
             foreach (var authObj in objects)
             {
                 if (authObj.Value.IsNullOrEmpty())
@@ -231,7 +231,7 @@ namespace Sixnet.Security.Permission
                     authObjectAuthKeys.Add(GetObjectPermissionKey(appTag, authObj.Key, authObjId));
                 }
             }
-            var combineResult = await SixnetCacher.Set.CombineAsync(new SetCombineParameter()
+            var combineResult = await SixnetCacher.Set.CombineAsync(new SixnetSetCombineParameter()
             {
                 CacheObject = GetCacheObject(),
                 CombineOperation = CombineOperation.Intersect,
@@ -265,7 +265,7 @@ namespace Sixnet.Security.Permission
                 return false;
             }
             var operationAuthKey = GetObjectPermissionKey(appTag, PermissionObjectType.Operation, operation);
-            var authObjectAuthKeys = new List<CacheKey>() { operationAuthKey };
+            var authObjectAuthKeys = new List<SixnetCacheKey>() { operationAuthKey };
             foreach (var authObj in objects)
             {
                 if (authObj.Value.IsNullOrEmpty())
@@ -277,7 +277,7 @@ namespace Sixnet.Security.Permission
                     authObjectAuthKeys.Add(GetObjectPermissionKey(appTag, authObj.Key, authObjId));
                 }
             }
-            var combineResult = SixnetCacher.Set.Combine(new SetCombineParameter()
+            var combineResult = SixnetCacher.Set.Combine(new SixnetSetCombineParameter()
             {
                 CacheObject = GetCacheObject(),
                 CombineOperation = CombineOperation.Intersect,
@@ -312,10 +312,10 @@ namespace Sixnet.Security.Permission
             }
             var cacheObject = GetCacheObject();
             var objectKey = GetObjectPermissionKey(appTag, permissionObjectType, objectValue);
-            await SixnetCacher.Keys.DeleteAsync(new DeleteParameter()
+            await SixnetCacher.Keys.DeleteAsync(new SixnetDeleteParameter()
             {
                 CacheObject = cacheObject,
-                Keys = new List<CacheKey> { objectKey }
+                Keys = new List<SixnetCacheKey> { objectKey }
             }).ConfigureAwait(false);
         }
 
@@ -345,10 +345,10 @@ namespace Sixnet.Security.Permission
             }
             var cacheObject = GetCacheObject();
             var objectKey = GetObjectPermissionKey(appTag, permissionObjectType, objectValue);
-            SixnetCacher.Keys.Delete(new DeleteParameter()
+            SixnetCacher.Keys.Delete(new SixnetDeleteParameter()
             {
                 CacheObject = cacheObject,
-                Keys = new List<CacheKey> { objectKey }
+                Keys = new List<SixnetCacheKey> { objectKey }
             });
         }
 
@@ -378,7 +378,7 @@ namespace Sixnet.Security.Permission
             }
             var cacheObject = GetCacheObject();
             var objectKey = GetObjectPermissionKey(appTag, permissionObjectType, objectValue);
-            await SixnetCacher.Set.RemoveAsync(new SetRemoveParameter()
+            await SixnetCacher.Set.RemoveAsync(new SixnetSetRemoveParameter()
             {
                 CacheObject = cacheObject,
                 Key = objectKey,
@@ -412,7 +412,7 @@ namespace Sixnet.Security.Permission
             }
             var cacheObject = GetCacheObject();
             var objectKey = GetObjectPermissionKey(appTag, permissionObjectType, objectValue);
-            SixnetCacher.Set.Remove(new SetRemoveParameter()
+            SixnetCacher.Set.Remove(new SixnetSetRemoveParameter()
             {
                 CacheObject = cacheObject,
                 Key = objectKey,
@@ -444,7 +444,7 @@ namespace Sixnet.Security.Permission
             {
                 keyPattern = keyPattern.ToLower();
             }
-            SixnetCacher.Keys.DeleteByPattern(new DeleteByPatternParameter()
+            SixnetCacher.Keys.DeleteByPattern(new SixnetDeleteByPatternParameter()
             {
                 CacheObject = GetCacheObject(),
                 Pattern = keyPattern,
@@ -473,7 +473,7 @@ namespace Sixnet.Security.Permission
             {
                 keyPattern = keyPattern.ToLower();
             }
-            return SixnetCacher.Keys.DeleteByPatternAsync(new DeleteByPatternParameter()
+            return SixnetCacher.Keys.DeleteByPatternAsync(new SixnetDeleteByPatternParameter()
             {
                 CacheObject = GetCacheObject(),
                 Pattern = keyPattern,
@@ -561,9 +561,9 @@ namespace Sixnet.Security.Permission
         /// Get cache object
         /// </summary>
         /// <returns></returns>
-        static CacheObject GetCacheObject()
+        static SixnetCacheObject GetCacheObject()
         {
-            return new CacheObject { ObjectName = nameof(SixnetPermissionManager) };
+            return new SixnetCacheObject { ObjectName = nameof(SixnetPermissionManager) };
         }
 
         /// <summary>

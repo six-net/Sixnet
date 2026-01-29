@@ -39,12 +39,12 @@ namespace Sixnet.Cache
         /// <param name="when">Cache setting conditions</param>
         /// <param name="cacheObject">The data belongs to the cache object</param>
         /// <returns>Return cache set result</returns>
-        public static async Task<StringSetResult> SetDataAsync<T>(CacheKey key, T data, DateTimeOffset? absoluteExpiration = null, CacheSetWhen when = CacheSetWhen.Always, CacheObject cacheObject = null)
+        public static async Task<SixnetStringSetResult> SetDataAsync<T>(SixnetCacheKey key, T data, DateTimeOffset? absoluteExpiration = null, CacheSetWhen when = CacheSetWhen.Always, SixnetCacheObject cacheObject = null)
         {
             var value = SixnetJsonSerializer.Serialize(data);
             if (string.IsNullOrWhiteSpace(value))
             {
-                return CacheResult.FailResponse<StringSetResult>(SixnetCacheCodes.ValuesIsNullOrEmpty);
+                return SixnetCacheResult.FailResponse<SixnetStringSetResult>(SixnetCacheCodes.ValuesIsNullOrEmpty);
             }
             return await String.SetAsync(key, value, absoluteExpiration, when, cacheObject).ConfigureAwait(false);
         }
@@ -60,12 +60,12 @@ namespace Sixnet.Cache
         /// <param name="when">Cache setting conditions</param>
         /// <param name="cacheObject">The data belongs to the cache object</param>
         /// <returns>Return cache set result</returns>
-        public static async Task<StringSetResult> SetDataByRelativeExpirationAsync<T>(CacheKey key, T data, TimeSpan? absoluteExpirationRelativeToNow = null, bool slidingExpiration = true, CacheSetWhen when = CacheSetWhen.Always, CacheObject cacheObject = null)
+        public static async Task<SixnetStringSetResult> SetDataByRelativeExpirationAsync<T>(SixnetCacheKey key, T data, TimeSpan? absoluteExpirationRelativeToNow = null, bool slidingExpiration = true, CacheSetWhen when = CacheSetWhen.Always, SixnetCacheObject cacheObject = null)
         {
             var value = SixnetJsonSerializer.Serialize(data);
             if (string.IsNullOrWhiteSpace(value))
             {
-                return CacheResult.FailResponse<StringSetResult>(SixnetCacheCodes.ValuesIsNullOrEmpty);
+                return SixnetCacheResult.FailResponse<SixnetStringSetResult>(SixnetCacheCodes.ValuesIsNullOrEmpty);
             }
             return await String.SetByRelativeExpirationAsync(key, value, absoluteExpirationRelativeToNow, slidingExpiration, when, cacheObject).ConfigureAwait(false);
         }
@@ -81,7 +81,7 @@ namespace Sixnet.Cache
         /// <param name="key">Cache key</param>
         /// <param name="cacheObject">Cache object</param>
         /// <returns>Return data object</returns>
-        public static async Task<T> GetDataAsync<T>(CacheKey key, CacheObject cacheObject = null)
+        public static async Task<T> GetDataAsync<T>(SixnetCacheKey key, SixnetCacheObject cacheObject = null)
         {
             return await String.GetAsync<T>(key, cacheObject).ConfigureAwait(false);
         }
@@ -96,7 +96,7 @@ namespace Sixnet.Cache
         /// <param name="cacheKeys">Cache keys</param>
         /// <param name="cacheObject">Cache object</param>
         /// <returns>Return data list</returns>
-        public static async Task<List<T>> GetDataListAsync<T>(IEnumerable<CacheKey> cacheKeys, CacheObject cacheObject = null)
+        public static async Task<List<T>> GetDataListAsync<T>(IEnumerable<SixnetCacheKey> cacheKeys, SixnetCacheObject cacheObject = null)
         {
             return await String.GetAsync<T>(cacheKeys, cacheObject).ConfigureAwait(false);
         }
@@ -122,7 +122,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="stringSetRangeParameter">Set range parameter</param>
             /// <returns>Return cache set result</returns>
-            public static async Task<StringSetRangeResult> SetRangeAsync(StringSetRangeParameter stringSetRangeParameter)
+            public static async Task<SixnetStringSetRangeResult> SetRangeAsync(SixnetStringSetRangeParameter stringSetRangeParameter)
             {
                 return await ExecuteCommandAsync(stringSetRangeParameter).ConfigureAwait(false);
             }
@@ -139,7 +139,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="stringSetBitParameter">Set bit parameter</param>
             /// <returns>Return cache set result</returns>
-            public static async Task<StringSetBitResult> SetBitAsync(StringSetBitParameter stringSetBitParameter)
+            public static async Task<SixnetStringSetBitResult> SetBitAsync(SixnetStringSetBitParameter stringSetBitParameter)
             {
                 return await ExecuteCommandAsync(stringSetBitParameter).ConfigureAwait(false);
             }
@@ -155,7 +155,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="stringSetParameter">String set parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<StringSetResult> SetAsync(StringSetParameter stringSetParameter)
+            public static async Task<SixnetStringSetResult> SetAsync(SixnetStringSetParameter stringSetParameter)
             {
                 return await ExecuteCommandAsync(stringSetParameter).ConfigureAwait(false);
             }
@@ -171,19 +171,19 @@ namespace Sixnet.Cache
             /// <param name="when">Set value conditions</param>
             /// <param name="cacheObject">Cache object</param>
             /// <returns>Return cache result</returns>
-            public static async Task<StringSetResult> SetAsync(CacheKey key, string value, DateTimeOffset? absoluteExpiration = null, CacheSetWhen when = CacheSetWhen.Always, CacheObject cacheObject = null)
+            public static async Task<SixnetStringSetResult> SetAsync(SixnetCacheKey key, string value, DateTimeOffset? absoluteExpiration = null, CacheSetWhen when = CacheSetWhen.Always, SixnetCacheObject cacheObject = null)
             {
-                return await SetAsync(new StringSetParameter()
+                return await SetAsync(new SixnetStringSetParameter()
                 {
                     CacheObject = cacheObject,
-                    Items = new List<CacheEntry>()
+                    Items = new List<SixnetCacheEntry>()
                     {
-                        new CacheEntry ()
+                        new SixnetCacheEntry ()
                         {
                             Key=key,
                             Value=value,
                             When=when,
-                            Expiration = new CacheExpiration ()
+                            Expiration = new SixnetCacheExpiration ()
                             {
                                 AbsoluteExpiration=absoluteExpiration,
                                 SlidingExpiration=false
@@ -205,19 +205,19 @@ namespace Sixnet.Cache
             /// <param name="when">Set value conditions</param>
             /// <param name="cacheObject">Cache object</param>
             /// <returns>Return cache result</returns>
-            public static async Task<StringSetResult> SetByRelativeExpirationAsync(CacheKey key, string value, TimeSpan? absoluteExpirationRelativeToNow = null, bool slidingExpiration = true, CacheSetWhen when = CacheSetWhen.Always, CacheObject cacheObject = null)
+            public static async Task<SixnetStringSetResult> SetByRelativeExpirationAsync(SixnetCacheKey key, string value, TimeSpan? absoluteExpirationRelativeToNow = null, bool slidingExpiration = true, CacheSetWhen when = CacheSetWhen.Always, SixnetCacheObject cacheObject = null)
             {
-                return await SetAsync(new StringSetParameter()
+                return await SetAsync(new SixnetStringSetParameter()
                 {
                     CacheObject = cacheObject,
-                    Items = new List<CacheEntry>()
+                    Items = new List<SixnetCacheEntry>()
                     {
-                        new CacheEntry ()
+                        new SixnetCacheEntry ()
                         {
                             Key=key,
                             Value=value,
                             When=when,
-                            Expiration = new CacheExpiration ()
+                            Expiration = new SixnetCacheExpiration ()
                             {
                                 AbsoluteExpirationRelativeToNow=absoluteExpirationRelativeToNow,
                                 SlidingExpiration=slidingExpiration
@@ -236,7 +236,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="stringLengthParameter">String length parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<StringLengthResult> LengthAsync(StringLengthParameter stringLengthParameter)
+            public static async Task<SixnetStringLengthResult> LengthAsync(SixnetStringLengthParameter stringLengthParameter)
             {
                 return await ExecuteCommandAsync(stringLengthParameter).ConfigureAwait(false);
             }
@@ -252,7 +252,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="stringIncrementParameter">String increment parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<StringIncrementResult> IncrementAsync(StringIncrementParameter stringIncrementParameter)
+            public static async Task<SixnetStringIncrementResult> IncrementAsync(SixnetStringIncrementParameter stringIncrementParameter)
             {
                 return await ExecuteCommandAsync(stringIncrementParameter).ConfigureAwait(false);
             }
@@ -268,7 +268,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="stringGetWithExpiryParameter">String get with expiry parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<StringGetWithExpiryResult> GetWithExpiryAsync(StringGetWithExpiryParameter stringGetWithExpiryParameter)
+            public static async Task<SixnetStringGetWithExpiryResult> GetWithExpiryAsync(SixnetStringGetWithExpiryParameter stringGetWithExpiryParameter)
             {
                 return await ExecuteCommandAsync(stringGetWithExpiryParameter).ConfigureAwait(false);
             }
@@ -283,7 +283,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="stringGetSetParameter">String get set parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<StringGetSetResult> GetSetAsync(StringGetSetParameter stringGetSetParameter)
+            public static async Task<SixnetStringGetSetResult> GetSetAsync(SixnetStringGetSetParameter stringGetSetParameter)
             {
                 return await ExecuteCommandAsync(stringGetSetParameter).ConfigureAwait(false);
             }
@@ -298,7 +298,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="stringGetRangeParameter">String get range parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<StringGetRangeResult> GetRangeAsync(StringGetRangeParameter stringGetRangeParameter)
+            public static async Task<SixnetStringGetRangeResult> GetRangeAsync(SixnetStringGetRangeParameter stringGetRangeParameter)
             {
                 return await ExecuteCommandAsync(stringGetRangeParameter).ConfigureAwait(false);
             }
@@ -313,7 +313,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="stringGetBitParameter">String get bit parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<StringGetBitResult> GetBitAsync(StringGetBitParameter stringGetBitParameter)
+            public static async Task<SixnetStringGetBitResult> GetBitAsync(SixnetStringGetBitParameter stringGetBitParameter)
             {
                 return await ExecuteCommandAsync(stringGetBitParameter).ConfigureAwait(false);
             }
@@ -327,7 +327,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="stringGetParameter">String get parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<StringGetResult> GetAsync(StringGetParameter stringGetParameter)
+            public static async Task<SixnetStringGetResult> GetAsync(SixnetStringGetParameter stringGetParameter)
             {
                 return await ExecuteCommandAsync(stringGetParameter).ConfigureAwait(false);
             }
@@ -340,13 +340,13 @@ namespace Sixnet.Cache
             /// <param name="key">Cache key</param>
             /// <param name="cacheObject">Cache object</param>
             /// <returns>Return cache result</returns>
-            public static async Task<string> GetAsync(CacheKey key, CacheObject cacheObject = null)
+            public static async Task<string> GetAsync(SixnetCacheKey key, SixnetCacheObject cacheObject = null)
             {
                 if (string.IsNullOrWhiteSpace(key))
                 {
                     return string.Empty;
                 }
-                var values = await GetAsync(new List<CacheKey>() { key }, cacheObject).ConfigureAwait(false);
+                var values = await GetAsync(new List<SixnetCacheKey>() { key }, cacheObject).ConfigureAwait(false);
                 return values?.FirstOrDefault() ?? string.Empty;
             }
 
@@ -356,7 +356,7 @@ namespace Sixnet.Cache
             /// <param name="key">Cache key</param>
             /// <param name="cacheObject">Cache object information</param>
             /// <returns>Return cache result</returns>
-            public static async Task<T> GetAsync<T>(CacheKey key, CacheObject cacheObject = null)
+            public static async Task<T> GetAsync<T>(SixnetCacheKey key, SixnetCacheObject cacheObject = null)
             {
                 var cacheValue = await GetAsync(key, cacheObject).ConfigureAwait(false);
                 if (string.IsNullOrWhiteSpace(cacheValue))
@@ -372,13 +372,13 @@ namespace Sixnet.Cache
             /// <param name="keys">Cache keys​​</param>
             /// <param name="cacheObject">Cache object</param>
             /// <returns>Return values</returns>
-            public static async Task<List<string>> GetAsync(IEnumerable<CacheKey> keys, CacheObject cacheObject = null)
+            public static async Task<List<string>> GetAsync(IEnumerable<SixnetCacheKey> keys, SixnetCacheObject cacheObject = null)
             {
                 if (keys.IsNullOrEmpty())
                 {
                     return new List<string>(0);
                 }
-                var result = await GetAsync(new StringGetParameter()
+                var result = await GetAsync(new SixnetStringGetParameter()
                 {
                     CacheObject = cacheObject,
                     Keys = keys.ToList()
@@ -393,7 +393,7 @@ namespace Sixnet.Cache
             /// <param name="keys">Cache key</param>
             /// <param name="cacheObject">Cache object</param>
             /// <returns>Return datas</returns>
-            public static async Task<List<T>> GetAsync<T>(IEnumerable<CacheKey> keys, CacheObject cacheObject = null)
+            public static async Task<List<T>> GetAsync<T>(IEnumerable<SixnetCacheKey> keys, SixnetCacheObject cacheObject = null)
             {
                 var values = await GetAsync(keys, cacheObject).ConfigureAwait(false);
                 if (values.IsNullOrEmpty())
@@ -420,7 +420,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="stringDecrementParameter">String decrement parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<StringDecrementResult> DecrementAsync(StringDecrementParameter stringDecrementParameter)
+            public static async Task<SixnetStringDecrementResult> DecrementAsync(SixnetStringDecrementParameter stringDecrementParameter)
             {
                 return await ExecuteCommandAsync(stringDecrementParameter).ConfigureAwait(false);
             }
@@ -435,7 +435,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="stringBitPositionParameter">String bit position parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<StringBitPositionResult> BitPositionAsync(StringBitPositionParameter stringBitPositionParameter)
+            public static async Task<SixnetStringBitPositionResult> BitPositionAsync(SixnetStringBitPositionParameter stringBitPositionParameter)
             {
                 return await ExecuteCommandAsync(stringBitPositionParameter).ConfigureAwait(false);
             }
@@ -450,7 +450,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="stringBitOperationParameter">String bit operation parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<StringBitOperationResult> BitOperationAsync(StringBitOperationParameter stringBitOperationParameter)
+            public static async Task<SixnetStringBitOperationResult> BitOperationAsync(SixnetStringBitOperationParameter stringBitOperationParameter)
             {
                 return await ExecuteCommandAsync(stringBitOperationParameter).ConfigureAwait(false);
             }
@@ -465,7 +465,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="stringBitCountParameter">String bit count parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<StringBitCountResult> BitCountAsync(StringBitCountParameter stringBitCountParameter)
+            public static async Task<SixnetStringBitCountResult> BitCountAsync(SixnetStringBitCountParameter stringBitCountParameter)
             {
                 return await ExecuteCommandAsync(stringBitCountParameter).ConfigureAwait(false);
             }
@@ -480,7 +480,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="stringAppendParameter">String append parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<StringAppendResult> AppendAsync(StringAppendParameter stringAppendParameter)
+            public static async Task<SixnetStringAppendResult> AppendAsync(SixnetStringAppendParameter stringAppendParameter)
             {
                 return await ExecuteCommandAsync(stringAppendParameter).ConfigureAwait(false);
             }
@@ -507,7 +507,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="listTrimParameter">List trim parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<ListTrimResult> TrimAsync(ListTrimParameter listTrimParameter)
+            public static async Task<SixnetListTrimResult> TrimAsync(SixnetListTrimParameter listTrimParameter)
             {
                 return await ExecuteCommandAsync(listTrimParameter).ConfigureAwait(false);
             }
@@ -522,7 +522,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="listSetByIndexParameter">List set by index parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<ListSetByIndexResult> SetByIndexAsync(ListSetByIndexParameter listSetByIndexParameter)
+            public static async Task<SixnetListSetByIndexResult> SetByIndexAsync(SixnetListSetByIndexParameter listSetByIndexParameter)
             {
                 return await ExecuteCommandAsync(listSetByIndexParameter).ConfigureAwait(false);
             }
@@ -537,7 +537,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="listRightPushParameter">List right push parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<ListRightPushResult> RightPushAsync(ListRightPushParameter listRightPushParameter)
+            public static async Task<SixnetListRightPushResult> RightPushAsync(SixnetListRightPushParameter listRightPushParameter)
             {
                 return await ExecuteCommandAsync(listRightPushParameter).ConfigureAwait(false);
             }
@@ -552,7 +552,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="listRightPopLeftPushParameter">List right pop left push parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<ListRightPopLeftPushResult> RightPopLeftPushAsync(ListRightPopLeftPushParameter listRightPopLeftPushParameter)
+            public static async Task<SixnetListRightPopLeftPushResult> RightPopLeftPushAsync(SixnetListRightPopLeftPushParameter listRightPopLeftPushParameter)
             {
                 return await ExecuteCommandAsync(listRightPopLeftPushParameter).ConfigureAwait(false);
             }
@@ -566,7 +566,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="listRightPopParameter">List right pop parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<ListRightPopResult> RightPopAsync(ListRightPopParameter listRightPopParameter)
+            public static async Task<SixnetListRightPopResult> RightPopAsync(SixnetListRightPopParameter listRightPopParameter)
             {
                 return await ExecuteCommandAsync(listRightPopParameter).ConfigureAwait(false);
             }
@@ -583,7 +583,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="listRemoveParameter">List remove parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<ListRemoveResult> RemoveAsync(ListRemoveParameter listRemoveParameter)
+            public static async Task<SixnetListRemoveResult> RemoveAsync(SixnetListRemoveParameter listRemoveParameter)
             {
                 return await ExecuteCommandAsync(listRemoveParameter).ConfigureAwait(false);
             }
@@ -599,7 +599,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="listRangeParameter">List range parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<ListRangeResult> RangeAsync(ListRangeParameter listRangeParameter)
+            public static async Task<SixnetListRangeResult> RangeAsync(SixnetListRangeParameter listRangeParameter)
             {
                 return await ExecuteCommandAsync(listRangeParameter).ConfigureAwait(false);
             }
@@ -615,7 +615,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="listLengthParameter">List length parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<ListLengthResult> LengthAsync(ListLengthParameter listLengthParameter)
+            public static async Task<SixnetListLengthResult> LengthAsync(SixnetListLengthParameter listLengthParameter)
             {
                 return await ExecuteCommandAsync(listLengthParameter).ConfigureAwait(false);
             }
@@ -630,7 +630,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="listLeftPushParameter">List left push parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<ListLeftPushResult> LeftPushAsync(ListLeftPushParameter listLeftPushParameter)
+            public static async Task<SixnetListLeftPushResult> LeftPushAsync(SixnetListLeftPushParameter listLeftPushParameter)
             {
                 return await ExecuteCommandAsync(listLeftPushParameter).ConfigureAwait(false);
             }
@@ -644,7 +644,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="listLeftPopParameter">List left pop parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<ListLeftPopResult> LeftPopAsync(ListLeftPopParameter listLeftPopParameter)
+            public static async Task<SixnetListLeftPopResult> LeftPopAsync(SixnetListLeftPopParameter listLeftPopParameter)
             {
                 return await ExecuteCommandAsync(listLeftPopParameter).ConfigureAwait(false);
             }
@@ -658,7 +658,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="listInsertBeforeParameter">List insert before parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<ListInsertBeforeResult> InsertBeforeAsync(ListInsertBeforeParameter listInsertBeforeParameter)
+            public static async Task<SixnetListInsertBeforeResult> InsertBeforeAsync(SixnetListInsertBeforeParameter listInsertBeforeParameter)
             {
                 return await ExecuteCommandAsync(listInsertBeforeParameter).ConfigureAwait(false);
             }
@@ -672,7 +672,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="listInsertAfterParameter">List insert after parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<ListInsertAfterResult> InsertAfterAsync(ListInsertAfterParameter listInsertAfterParameter)
+            public static async Task<SixnetListInsertAfterResult> InsertAfterAsync(SixnetListInsertAfterParameter listInsertAfterParameter)
             {
                 return await ExecuteCommandAsync(listInsertAfterParameter).ConfigureAwait(false);
             }
@@ -688,7 +688,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="listGetByIndexParameter">List get by index parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<ListGetByIndexResult> GetByIndexAsync(ListGetByIndexParameter listGetByIndexParameter)
+            public static async Task<SixnetListGetByIndexResult> GetByIndexAsync(SixnetListGetByIndexParameter listGetByIndexParameter)
             {
                 return await ExecuteCommandAsync(listGetByIndexParameter).ConfigureAwait(false);
             }
@@ -712,7 +712,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="hashValuesParameter">Hash values parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<HashValuesResult> ValuesAsync(HashValuesParameter hashValuesParameter)
+            public static async Task<SixnetHashValuesResult> ValuesAsync(SixnetHashValuesParameter hashValuesParameter)
             {
                 return await ExecuteCommandAsync(hashValuesParameter).ConfigureAwait(false);
             }
@@ -728,7 +728,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="hashSetParameter">Hash set parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<HashSetResult> SetAsync(HashSetParameter hashSetParameter)
+            public static async Task<SixnetHashSetResult> SetAsync(SixnetHashSetParameter hashSetParameter)
             {
                 return await ExecuteCommandAsync(hashSetParameter).ConfigureAwait(false);
             }
@@ -742,7 +742,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="hashLengthParameter">Hash length parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<HashLengthResult> LengthAsync(HashLengthParameter hashLengthParameter)
+            public static async Task<SixnetHashLengthResult> LengthAsync(SixnetHashLengthParameter hashLengthParameter)
             {
                 return await ExecuteCommandAsync(hashLengthParameter).ConfigureAwait(false);
             }
@@ -756,7 +756,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="hashKeysParameter">Hash keys parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<HashKeysResult> KeysAsync(HashKeysParameter hashKeysParameter)
+            public static async Task<SixnetHashKeysResult> KeysAsync(SixnetHashKeysParameter hashKeysParameter)
             {
                 return await ExecuteCommandAsync(hashKeysParameter).ConfigureAwait(false);
             }
@@ -770,7 +770,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="hashIncrementParameter">Hash increment parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<HashIncrementResult> IncrementAsync(HashIncrementParameter hashIncrementParameter)
+            public static async Task<SixnetHashIncrementResult> IncrementAsync(SixnetHashIncrementParameter hashIncrementParameter)
             {
                 return await ExecuteCommandAsync(hashIncrementParameter).ConfigureAwait(false);
             }
@@ -784,7 +784,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="hashGetParameter">Hash get parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<HashGetResult> GetAsync(HashGetParameter hashGetParameter)
+            public static async Task<SixnetHashGetResult> GetAsync(SixnetHashGetParameter hashGetParameter)
             {
                 return await ExecuteCommandAsync(hashGetParameter).ConfigureAwait(false);
             }
@@ -798,7 +798,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="hashGetAllParameter">Hash get all parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<HashGetAllResult> GetAllAsync(HashGetAllParameter hashGetAllParameter)
+            public static async Task<SixnetHashGetAllResult> GetAllAsync(SixnetHashGetAllParameter hashGetAllParameter)
             {
                 return await ExecuteCommandAsync(hashGetAllParameter).ConfigureAwait(false);
             }
@@ -812,7 +812,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="hashExistsParameter">Hash exists parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<HashExistsResult> ExistAsync(HashExistsParameter hashExistsParameter)
+            public static async Task<SixnetHashExistsResult> ExistAsync(SixnetHashExistsParameter hashExistsParameter)
             {
                 return await ExecuteCommandAsync(hashExistsParameter).ConfigureAwait(false);
             }
@@ -826,7 +826,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="hashDeleteParameter">Hash delete parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<HashDeleteResult> DeleteAsync(HashDeleteParameter hashDeleteParameter)
+            public static async Task<SixnetHashDeleteResult> DeleteAsync(SixnetHashDeleteParameter hashDeleteParameter)
             {
                 return await ExecuteCommandAsync(hashDeleteParameter).ConfigureAwait(false);
             }
@@ -840,7 +840,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="hashDecrementParameter">Hash decrement parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<HashDecrementResult> DecrementAsync(HashDecrementParameter hashDecrementParameter)
+            public static async Task<SixnetHashDecrementResult> DecrementAsync(SixnetHashDecrementParameter hashDecrementParameter)
             {
                 return await ExecuteCommandAsync(hashDecrementParameter).ConfigureAwait(false);
             }
@@ -854,7 +854,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="hashScanParameter">Hash scan parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<HashScanResult> ScanAsync(HashScanParameter hashScanParameter)
+            public static async Task<SixnetHashScanResult> ScanAsync(SixnetHashScanParameter hashScanParameter)
             {
                 return await ExecuteCommandAsync(hashScanParameter).ConfigureAwait(false);
             }
@@ -878,7 +878,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="setRemoveParameter">Set remove parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<SetRemoveResult> RemoveAsync(SetRemoveParameter setRemoveParameter)
+            public static async Task<SixnetSetRemoveResult> RemoveAsync(SixnetSetRemoveParameter setRemoveParameter)
             {
                 return await ExecuteCommandAsync(setRemoveParameter).ConfigureAwait(false);
             }
@@ -892,7 +892,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="setRandomMembersParameter">Set random members parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<SetRandomMembersResult> RandomMembersAsync(SetRandomMembersParameter setRandomMembersParameter)
+            public static async Task<SixnetSetRandomMembersResult> RandomMembersAsync(SixnetSetRandomMembersParameter setRandomMembersParameter)
             {
                 return await ExecuteCommandAsync(setRandomMembersParameter).ConfigureAwait(false);
             }
@@ -906,7 +906,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="setRandomMemberParameter">Set random member parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<SetRandomMemberResult> RandomMemberAsync(SetRandomMemberParameter setRandomMemberParameter)
+            public static async Task<SixnetSetRandomMemberResult> RandomMemberAsync(SixnetSetRandomMemberParameter setRandomMemberParameter)
             {
                 return await ExecuteCommandAsync(setRandomMemberParameter).ConfigureAwait(false);
             }
@@ -920,7 +920,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="setPopParameter">Set pop parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<SetPopResult> PopAsync(SetPopParameter setPopParameter)
+            public static async Task<SixnetSetPopResult> PopAsync(SixnetSetPopParameter setPopParameter)
             {
                 return await ExecuteCommandAsync(setPopParameter).ConfigureAwait(false);
             }
@@ -934,7 +934,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="setMoveParameter">Set move parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<SetMoveResult> MoveAsync(SetMoveParameter setMoveParameter)
+            public static async Task<SixnetSetMoveResult> MoveAsync(SixnetSetMoveParameter setMoveParameter)
             {
                 return await ExecuteCommandAsync(setMoveParameter).ConfigureAwait(false);
             }
@@ -948,7 +948,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="setMembersParameter">Set members parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<SetMembersResult> MembersAsync(SetMembersParameter setMembersParameter)
+            public static async Task<SixnetSetMembersResult> MembersAsync(SixnetSetMembersParameter setMembersParameter)
             {
                 return await ExecuteCommandAsync(setMembersParameter).ConfigureAwait(false);
             }
@@ -962,7 +962,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="setLengthParameter">Set length parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<SetLengthResult> LengthAsync(SetLengthParameter setLengthParameter)
+            public static async Task<SixnetSetLengthResult> LengthAsync(SixnetSetLengthParameter setLengthParameter)
             {
                 return await ExecuteCommandAsync(setLengthParameter).ConfigureAwait(false);
             }
@@ -976,7 +976,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="setContainsParameter">Set contaims parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<SetContainsResult> ContainsAsync(SetContainsParameter setContainsParameter)
+            public static async Task<SixnetSetContainsResult> ContainsAsync(SixnetSetContainsParameter setContainsParameter)
             {
                 return await ExecuteCommandAsync(setContainsParameter).ConfigureAwait(false);
             }
@@ -990,7 +990,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="setCombineParameter">Set combine parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<SetCombineResult> CombineAsync(SetCombineParameter setCombineParameter)
+            public static async Task<SixnetSetCombineResult> CombineAsync(SixnetSetCombineParameter setCombineParameter)
             {
                 return await ExecuteCommandAsync(setCombineParameter).ConfigureAwait(false);
             }
@@ -1004,7 +1004,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="setCombineAndStoreParameter">Set combine and store parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<SetCombineAndStoreResult> CombineAndStoreAsync(SetCombineAndStoreParameter setCombineAndStoreParameter)
+            public static async Task<SixnetSetCombineAndStoreResult> CombineAndStoreAsync(SixnetSetCombineAndStoreParameter setCombineAndStoreParameter)
             {
                 return await ExecuteCommandAsync(setCombineAndStoreParameter).ConfigureAwait(false);
             }
@@ -1019,7 +1019,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="setAddParameter">Set add parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<SetAddResult> AddAsync(SetAddParameter setAddParameter)
+            public static async Task<SixnetSetAddResult> AddAsync(SixnetSetAddParameter setAddParameter)
             {
                 return await ExecuteCommandAsync(setAddParameter).ConfigureAwait(false);
             }
@@ -1043,7 +1043,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="sortedSetScoreParameter">Sorted set score parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<SortedSetScoreResult> ScoreAsync(SortedSetScoreParameter sortedSetScoreParameter)
+            public static async Task<SixnetSortedSetScoreResult> ScoreAsync(SixnetSortedSetScoreParameter sortedSetScoreParameter)
             {
                 return await ExecuteCommandAsync(sortedSetScoreParameter).ConfigureAwait(false);
             }
@@ -1057,7 +1057,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="sortedSetRemoveRangeByValueParameter">Sorted set remove range by value parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<SortedSetRemoveRangeByValueResult> RemoveRangeByValueAsync(SortedSetRemoveRangeByValueParameter sortedSetRemoveRangeByValueParameter)
+            public static async Task<SixnetSortedSetRemoveRangeByValueResult> RemoveRangeByValueAsync(SixnetSortedSetRemoveRangeByValueParameter sortedSetRemoveRangeByValueParameter)
             {
                 return await ExecuteCommandAsync(sortedSetRemoveRangeByValueParameter).ConfigureAwait(false);
             }
@@ -1071,7 +1071,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="sortedSetRemoveRangeByScoreParameter">Sorted set remove range by score parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<SortedSetRemoveRangeByScoreResult> RemoveRangeByScoreAsync(SortedSetRemoveRangeByScoreParameter sortedSetRemoveRangeByScoreParameter)
+            public static async Task<SixnetSortedSetRemoveRangeByScoreResult> RemoveRangeByScoreAsync(SixnetSortedSetRemoveRangeByScoreParameter sortedSetRemoveRangeByScoreParameter)
             {
                 return await ExecuteCommandAsync(sortedSetRemoveRangeByScoreParameter).ConfigureAwait(false);
             }
@@ -1087,7 +1087,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="sortedSetRemoveRangeByRankParameter">Sorted set range by rank parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<SortedSetRemoveRangeByRankResult> RemoveRangeByRankAsync(SortedSetRemoveRangeByRankParameter sortedSetRemoveRangeByRankParameter)
+            public static async Task<SixnetSortedSetRemoveRangeByRankResult> RemoveRangeByRankAsync(SixnetSortedSetRemoveRangeByRankParameter sortedSetRemoveRangeByRankParameter)
             {
                 return await ExecuteCommandAsync(sortedSetRemoveRangeByRankParameter).ConfigureAwait(false);
             }
@@ -1101,7 +1101,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="sortedSetRemoveParameter">Sorted set remove parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<SortedSetRemoveResult> RemoveAsync(SortedSetRemoveParameter sortedSetRemoveParameter)
+            public static async Task<SixnetSortedSetRemoveResult> RemoveAsync(SixnetSortedSetRemoveParameter sortedSetRemoveParameter)
             {
                 return await ExecuteCommandAsync(sortedSetRemoveParameter).ConfigureAwait(false);
             }
@@ -1116,7 +1116,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="sortedSetRankParameter">Sorted set rank parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<SortedSetRankResult> RankAsync(SortedSetRankParameter sortedSetRankParameter)
+            public static async Task<SixnetSortedSetRankResult> RankAsync(SixnetSortedSetRankParameter sortedSetRankParameter)
             {
                 return await ExecuteCommandAsync(sortedSetRankParameter).ConfigureAwait(false);
             }
@@ -1130,7 +1130,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="sortedSetRangeByValueParameter">Sorted set range by value parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<SortedSetRangeByValueResult> RangeByValueAsync(SortedSetRangeByValueParameter sortedSetRangeByValueParameter)
+            public static async Task<SixnetSortedSetRangeByValueResult> RangeByValueAsync(SixnetSortedSetRangeByValueParameter sortedSetRangeByValueParameter)
             {
                 return await ExecuteCommandAsync(sortedSetRangeByValueParameter).ConfigureAwait(false);
             }
@@ -1144,7 +1144,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="sortedSetRangeByScoreWithScoresParameter">Sorted set range by score with scores parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<SortedSetRangeByScoreWithScoresResult> RangeByScoreWithScoresAsync(SortedSetRangeByScoreWithScoresParameter sortedSetRangeByScoreWithScoresParameter)
+            public static async Task<SixnetSortedSetRangeByScoreWithScoresResult> RangeByScoreWithScoresAsync(SixnetSortedSetRangeByScoreWithScoresParameter sortedSetRangeByScoreWithScoresParameter)
             {
                 return await ExecuteCommandAsync(sortedSetRangeByScoreWithScoresParameter).ConfigureAwait(false);
             }
@@ -1158,7 +1158,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="sortedSetRangeByScoreParameter">Sorted set range by score parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<SortedSetRangeByScoreResult> RangeByScoreAsync(SortedSetRangeByScoreParameter sortedSetRangeByScoreParameter)
+            public static async Task<SixnetSortedSetRangeByScoreResult> RangeByScoreAsync(SixnetSortedSetRangeByScoreParameter sortedSetRangeByScoreParameter)
             {
                 return await ExecuteCommandAsync(sortedSetRangeByScoreParameter).ConfigureAwait(false);
             }
@@ -1172,7 +1172,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="sortedSetRangeByRankWithScoresParameter">Sorted set range by rank with scores parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<SortedSetRangeByRankWithScoresResult> RangeByRankWithScoresAsync(SortedSetRangeByRankWithScoresParameter sortedSetRangeByRankWithScoresParameter)
+            public static async Task<SixnetSortedSetRangeByRankWithScoresResult> RangeByRankWithScoresAsync(SixnetSortedSetRangeByRankWithScoresParameter sortedSetRangeByRankWithScoresParameter)
             {
                 return await ExecuteCommandAsync(sortedSetRangeByRankWithScoresParameter).ConfigureAwait(false);
             }
@@ -1186,7 +1186,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="sortedSetRangeByRankParameter">Sorted set range by rank parameter</param>
             /// <returns>sorted set range by rank response</returns>
-            public static async Task<SortedSetRangeByRankResult> RangeByRankAsync(SortedSetRangeByRankParameter sortedSetRangeByRankParameter)
+            public static async Task<SixnetSortedSetRangeByRankResult> RangeByRankAsync(SixnetSortedSetRangeByRankParameter sortedSetRangeByRankParameter)
             {
                 return await ExecuteCommandAsync(sortedSetRangeByRankParameter).ConfigureAwait(false);
             }
@@ -1200,7 +1200,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="sortedSetLengthByValueParameter">Sorted set length by value parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<SortedSetLengthByValueResult> LengthByValueAsync(SortedSetLengthByValueParameter sortedSetLengthByValueParameter)
+            public static async Task<SixnetSortedSetLengthByValueResult> LengthByValueAsync(SixnetSortedSetLengthByValueParameter sortedSetLengthByValueParameter)
             {
                 return await ExecuteCommandAsync(sortedSetLengthByValueParameter).ConfigureAwait(false);
             }
@@ -1214,7 +1214,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="sortedSetLengthParameter">Sorted set length parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<SortedSetLengthResult> LengthAsync(SortedSetLengthParameter sortedSetLengthParameter)
+            public static async Task<SixnetSortedSetLengthResult> LengthAsync(SixnetSortedSetLengthParameter sortedSetLengthParameter)
             {
                 return await ExecuteCommandAsync(sortedSetLengthParameter).ConfigureAwait(false);
             }
@@ -1228,7 +1228,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="sortedSetIncrementParameter">Sorted set increment parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<SortedSetIncrementResult> IncrementAsync(SortedSetIncrementParameter sortedSetIncrementParameter)
+            public static async Task<SixnetSortedSetIncrementResult> IncrementAsync(SixnetSortedSetIncrementParameter sortedSetIncrementParameter)
             {
                 return await ExecuteCommandAsync(sortedSetIncrementParameter).ConfigureAwait(false);
             }
@@ -1242,7 +1242,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="sortedSetDecrementParameter">Sorted set decrement parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<SortedSetDecrementResult> DecrementAsync(SortedSetDecrementParameter sortedSetDecrementParameter)
+            public static async Task<SixnetSortedSetDecrementResult> DecrementAsync(SixnetSortedSetDecrementParameter sortedSetDecrementParameter)
             {
                 return await ExecuteCommandAsync(sortedSetDecrementParameter).ConfigureAwait(false);
             }
@@ -1256,7 +1256,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="sortedSetCombineAndStoreParameter">Sorted set combine and store parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<SortedSetCombineAndStoreResult> CombineAndStoreAsync(SortedSetCombineAndStoreParameter sortedSetCombineAndStoreParameter)
+            public static async Task<SixnetSortedSetCombineAndStoreResult> CombineAndStoreAsync(SixnetSortedSetCombineAndStoreParameter sortedSetCombineAndStoreParameter)
             {
                 return await ExecuteCommandAsync(sortedSetCombineAndStoreParameter).ConfigureAwait(false);
             }
@@ -1270,7 +1270,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="sortedSetAddParameter">Sorted set add parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<SortedSetAddResult> AddAsync(SortedSetAddParameter sortedSetAddParameter)
+            public static async Task<SixnetSortedSetAddResult> AddAsync(SixnetSortedSetAddParameter sortedSetAddParameter)
             {
                 return await ExecuteCommandAsync(sortedSetAddParameter).ConfigureAwait(false);
             }
@@ -1294,7 +1294,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="sortParameter">Sort parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<SortResult> SortAsync(SortParameter sortParameter)
+            public static async Task<SixnetSortResult> SortAsync(SixnetSortParameter sortParameter)
             {
                 return await ExecuteCommandAsync(sortParameter).ConfigureAwait(false);
             }
@@ -1308,7 +1308,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="sortAndStoreParameter">Sort and store parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<SortAndStoreResult> SortAndStoreAsync(SortAndStoreParameter sortAndStoreParameter)
+            public static async Task<SixnetSortAndStoreResult> SortAndStoreAsync(SixnetSortAndStoreParameter sortAndStoreParameter)
             {
                 return await ExecuteCommandAsync(sortAndStoreParameter).ConfigureAwait(false);
             }
@@ -1322,7 +1322,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="typeParameter">type parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<TypeResult> TypeAsync(TypeParameter typeParameter)
+            public static async Task<SixnetTypeResult> TypeAsync(SixnetTypeParameter typeParameter)
             {
                 return await ExecuteCommandAsync(typeParameter).ConfigureAwait(false);
             }
@@ -1336,7 +1336,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="timeToLiveParameter">Time to live parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<TimeToLiveResult> TimeToLiveAsync(TimeToLiveParameter timeToLiveParameter)
+            public static async Task<SixnetTimeToLiveResult> TimeToLiveAsync(SixnetTimeToLiveParameter timeToLiveParameter)
             {
                 return await ExecuteCommandAsync(timeToLiveParameter).ConfigureAwait(false);
             }
@@ -1350,7 +1350,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="restoreParameter">Restore parameter</param>
             /// <returns> Return cache result </returns>
-            public static async Task<RestoreResult> RestoreAsync(RestoreParameter restoreParameter)
+            public static async Task<SixnetRestoreResult> RestoreAsync(SixnetRestoreParameter restoreParameter)
             {
                 return await ExecuteCommandAsync(restoreParameter).ConfigureAwait(false);
             }
@@ -1366,7 +1366,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="renameParameter">Rename parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<RenameResult> RenameAsync(RenameParameter renameParameter)
+            public static async Task<SixnetRenameResult> RenameAsync(SixnetRenameParameter renameParameter)
             {
                 return await ExecuteCommandAsync(renameParameter).ConfigureAwait(false);
             }
@@ -1380,7 +1380,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="randomParameter">Random parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<RandomResult> KeyRandomAsync(RandomParameter randomParameter)
+            public static async Task<SixnetRandomResult> KeyRandomAsync(SixnetRandomParameter randomParameter)
             {
                 return await ExecuteCommandAsync(randomParameter).ConfigureAwait(false);
             }
@@ -1394,7 +1394,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="persistParameter">Persist parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<PersistResult> PersistAsync(PersistParameter persistParameter)
+            public static async Task<SixnetPersistResult> PersistAsync(SixnetPersistParameter persistParameter)
             {
                 return await ExecuteCommandAsync(persistParameter).ConfigureAwait(false);
             }
@@ -1408,7 +1408,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="moveParameter">Move parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<MoveResult> MoveAsync(MoveParameter moveParameter)
+            public static async Task<SixnetMoveResult> MoveAsync(SixnetMoveParameter moveParameter)
             {
                 return await ExecuteCommandAsync(moveParameter).ConfigureAwait(false);
             }
@@ -1422,7 +1422,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="migrateParameter">Migrate parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<MigrateKeyResult> MigrateAsync(MigrateKeyParameter migrateParameter)
+            public static async Task<SixnetMigrateKeyResult> MigrateAsync(SixnetMigrateKeyParameter migrateParameter)
             {
                 return await ExecuteCommandAsync(migrateParameter).ConfigureAwait(false);
             }
@@ -1436,7 +1436,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="expireParameter">Expire parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<ExpireResult> ExpireAsync(ExpireParameter expireParameter)
+            public static async Task<SixnetExpireResult> ExpireAsync(SixnetExpireParameter expireParameter)
             {
                 return await ExecuteCommandAsync(expireParameter).ConfigureAwait(false);
             }
@@ -1450,7 +1450,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="dumpParameter">Dump parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<DumpResult> DumpAsync(DumpParameter dumpParameter)
+            public static async Task<SixnetDumpResult> DumpAsync(SixnetDumpParameter dumpParameter)
             {
                 return await ExecuteCommandAsync(dumpParameter).ConfigureAwait(false);
             }
@@ -1464,7 +1464,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="deleteParameter">Delete parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<DeleteResult> DeleteAsync(DeleteParameter deleteParameter)
+            public static async Task<SixnetDeleteResult> DeleteAsync(SixnetDeleteParameter deleteParameter)
             {
                 return await ExecuteCommandAsync(deleteParameter).ConfigureAwait(false);
             }
@@ -1474,15 +1474,15 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="parameter">Parameter</param>
             /// <returns></returns>
-            public static async Task<DeleteResult> DeleteByPatternAsync(DeleteByPatternParameter parameter)
+            public static async Task<SixnetDeleteResult> DeleteByPatternAsync(SixnetDeleteByPatternParameter parameter)
             {
                 if (string.IsNullOrWhiteSpace(parameter?.Pattern))
                 {
-                    return CacheResult.SuccessResponse<DeleteResult>();
+                    return SixnetCacheResult.SuccessResponse<SixnetDeleteResult>();
                 }
                 long cursor = 0;
-                DeleteResult deleteResult = null;
-                var scanParameter = new ScanParameter()
+                SixnetDeleteResult deleteResult = null;
+                var scanParameter = new SixnetScanParameter()
                 {
                     CacheObject = parameter.CacheObject,
                     CommandFlags = parameter.CommandFlags,
@@ -1492,7 +1492,7 @@ namespace Sixnet.Cache
                     StructurePattern = parameter.StructurePattern,
                     Size = 100,
                 };
-                var deleteParameter = new DeleteParameter()
+                var deleteParameter = new SixnetDeleteParameter()
                 {
                     CacheObject = parameter.CacheObject,
                     CommandFlags = parameter.CommandFlags,
@@ -1509,7 +1509,7 @@ namespace Sixnet.Cache
                         deleteResult = await DeleteAsync(deleteParameter).ConfigureAwait(false);
                     }
                 } while (cursor > 0);
-                return deleteResult ?? CacheResult.SuccessResponse<DeleteResult>();
+                return deleteResult ?? SixnetCacheResult.SuccessResponse<SixnetDeleteResult>();
             }
 
             #endregion
@@ -1521,7 +1521,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="getKeysParameter">Get keys parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<GetKeysResult> GetKeysAsync(GetKeysParameter getKeysParameter)
+            public static async Task<SixnetGetKeysResult> GetKeysAsync(SixnetGetKeysParameter getKeysParameter)
             {
                 return await ExecuteCommandAsync(getKeysParameter).ConfigureAwait(false);
             }
@@ -1535,7 +1535,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="existParameter">Exist parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<ExistResult> ExistAsync(ExistParameter existParameter)
+            public static async Task<SixnetExistResult> ExistAsync(SixnetExistParameter existParameter)
             {
                 return await ExecuteCommandAsync(existParameter).ConfigureAwait(false);
             }
@@ -1549,7 +1549,7 @@ namespace Sixnet.Cache
             /// </summary>
             /// <param name="scanParameter">Scan parameter</param>
             /// <returns>Return cache result</returns>
-            public static Task<ScanResult> ScanAsync(ScanParameter scanParameter)
+            public static Task<SixnetScanResult> ScanAsync(SixnetScanParameter scanParameter)
             {
                 return ExecuteCommandAsync(scanParameter);
             }
@@ -1574,7 +1574,7 @@ namespace Sixnet.Cache
             /// <param name="server"> server information </param>
             /// <param name="getAllDataBaseParameter">Get all database parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<GetAllDataBaseResult> GetAllDataBaseAsync(CacheServer server, GetAllDataBaseParameter getAllDataBaseParameter)
+            public static async Task<SixnetGetAllDataBaseResult> GetAllDataBaseAsync(SixnetCacheServer server, SixnetGetAllDataBaseParameter getAllDataBaseParameter)
             {
                 return await getAllDataBaseParameter.ExecuteAsync(server).ConfigureAwait(false);
             }
@@ -1589,7 +1589,7 @@ namespace Sixnet.Cache
             /// <param name="server"> server information </param>
             /// <param name="getKeysParameter"> Get keys options </param>
             /// <returns>Return cache result</returns>
-            public static async Task<GetKeysResult> GetKeysAsync(CacheServer server, GetKeysParameter getKeysParameter)
+            public static async Task<SixnetGetKeysResult> GetKeysAsync(SixnetCacheServer server, SixnetGetKeysParameter getKeysParameter)
             {
                 return await getKeysParameter.ExecuteAsync(server).ConfigureAwait(false);
             }
@@ -1604,7 +1604,7 @@ namespace Sixnet.Cache
             /// <param name="server"> server information </param>
             /// <param name="clearDataParameter"> Clear data options </param>
             /// <returns>Return cache result</returns>
-            public static async Task<ClearDataResult> ClearDataAsync(CacheServer server, ClearDataParameter clearDataParameter)
+            public static async Task<SixnetClearDataResult> ClearDataAsync(SixnetCacheServer server, SixnetClearDataParameter clearDataParameter)
             {
                 return await clearDataParameter.ExecuteAsync(server).ConfigureAwait(false);
             }
@@ -1619,7 +1619,7 @@ namespace Sixnet.Cache
             /// <param name="server"> server information </param>
             /// <param name="getDetailParameter"> Get detail options </param>
             /// <returns>Return cache result</returns>
-            public static async Task<GetDetailResult> GetKeyDetailAsync(CacheServer server, GetDetailParameter getDetailParameter)
+            public static async Task<SixnetGetDetailResult> GetKeyDetailAsync(SixnetCacheServer server, SixnetGetDetailParameter getDetailParameter)
             {
                 return await getDetailParameter.ExecuteAsync(server).ConfigureAwait(false);
             }
@@ -1634,7 +1634,7 @@ namespace Sixnet.Cache
             /// <param name="server"> server information </param>
             /// <param name="getServerConfigurationParameter">Get server configuration parameter</param>
             /// <returns>Return cache result</returns>
-            public static async Task<GetServerConfigurationResult> GetServerConfigurationAsync(CacheServer server, GetServerConfigurationParameter getServerConfigurationParameter)
+            public static async Task<SixnetGetServerConfigurationResult> GetServerConfigurationAsync(SixnetCacheServer server, SixnetGetServerConfigurationParameter getServerConfigurationParameter)
             {
                 return await getServerConfigurationParameter.ExecuteAsync(server).ConfigureAwait(false);
             }
@@ -1649,7 +1649,7 @@ namespace Sixnet.Cache
             /// <param name="server"> server information </param>
             /// <param name="saveServerConfigurationParameter"> Save server configuration options </param>
             /// <returns>Return cache result</returns>
-            public static async Task<SaveServerConfigurationResult> SaveServerConfigurationAsync(CacheServer server, SaveServerConfigurationParameter saveServerConfigurationParameter)
+            public static async Task<SixnetSaveServerConfigurationResult> SaveServerConfigurationAsync(SixnetCacheServer server, SixnetSaveServerConfigurationParameter saveServerConfigurationParameter)
             {
                 return await saveServerConfigurationParameter.ExecuteAsync(server).ConfigureAwait(false);
             }
@@ -1666,7 +1666,7 @@ namespace Sixnet.Cache
         /// </summary>
         /// <param name="options">Request parameter</param>
         /// <returns>Reurn cache result</returns>
-        static async Task<TResponse> ExecuteCommandAsync<TResponse>(CacheParameter<TResponse> options) where TResponse : CacheResult, new()
+        static async Task<TResponse> ExecuteCommandAsync<TResponse>(SixnetCacheParameter<TResponse> options) where TResponse : SixnetCacheResult, new()
         {
             if (options == null)
             {

@@ -1,0 +1,56 @@
+﻿// "Company © 2025. All rights reserved."
+
+using System.Threading.Tasks;
+
+using Sixnet.Cache.SortedSet.Results;
+
+namespace Sixnet.Cache.SortedSet.Parameters
+{
+    /// <summary>
+    /// Sorted set range by rank with scores parameter
+    /// </summary>
+    public class SixnetSortedSetRangeByRankWithScoresParameter : SixnetCacheParameter<SixnetSortedSetRangeByRankWithScoresResult>
+    {
+        /// <summary>
+        /// Gets or sets the cache key
+        /// </summary>
+        public SixnetCacheKey Key { get; set; }
+
+        /// <summary>
+        /// Gets or sets the start value
+        /// </summary>
+        public int Start { get; set; } = 0;
+
+        /// <summary>
+        /// Gets or sets the stop value
+        /// </summary>
+        public int Stop { get; set; } = -1;
+
+        /// <summary>
+        /// Gets or sets the order type
+        /// </summary>
+        public CacheOrder Order { get; set; } = CacheOrder.Ascending;
+
+        /// <summary>
+        /// Execute cache operation
+        /// </summary>
+        /// <param name="cacheProvider">Cache provider</param>
+        /// <param name="server">Cache server</param>
+        /// <returns>Return sorted set range by rank with scores response</returns>
+        protected override async Task<SixnetSortedSetRangeByRankWithScoresResult> ExecuteCacheOperationAsync(ISixnetCacheProvider cacheProvider, SixnetCacheServer server)
+        {
+            return await cacheProvider.SortedSetRangeByRankWithScoresAsync(server, this).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Execute cache operation
+        /// </summary>
+        /// <param name="cacheProvider">Cache provider</param>
+        /// <param name="server">Cache server</param>
+        /// <returns>Return sorted set range by rank with scores response</returns>
+        protected override SixnetSortedSetRangeByRankWithScoresResult ExecuteCacheOperation(ISixnetCacheProvider cacheProvider, SixnetCacheServer server)
+        {
+            return cacheProvider.SortedSetRangeByRankWithScores(server, this);
+        }
+    }
+}

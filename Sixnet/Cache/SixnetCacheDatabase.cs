@@ -1,0 +1,20 @@
+﻿// "Company © 2025. All rights reserved."
+
+namespace Sixnet.Cache
+{
+    /// <summary>
+    /// Cache database
+    /// </summary>
+    public class SixnetCacheDatabase
+    {
+        /// <summary>
+        /// Gets or sets the database name
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
+        /// Gets or sets the database index
+        /// </summary>
+        public int Index { get; set; }
+    }
+}

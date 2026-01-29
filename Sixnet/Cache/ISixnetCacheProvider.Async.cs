@@ -38,7 +38,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return string set range result</returns>
-        Task<StringSetRangeResult> StringSetRangeAsync(CacheServer server, StringSetRangeParameter parameter);
+        Task<SixnetStringSetRangeResult> StringSetRangeAsync(SixnetCacheServer server, SixnetStringSetRangeParameter parameter);
 
         #endregion
 
@@ -53,7 +53,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return string set bit result</returns>
-        Task<StringSetBitResult> StringSetBitAsync(CacheServer server, StringSetBitParameter parameter);
+        Task<SixnetStringSetBitResult> StringSetBitAsync(SixnetCacheServer server, SixnetStringSetBitParameter parameter);
 
         #endregion
 
@@ -66,7 +66,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return string set result</returns>
-        Task<StringSetResult> StringSetAsync(CacheServer server, StringSetParameter parameter);
+        Task<SixnetStringSetResult> StringSetAsync(SixnetCacheServer server, SixnetStringSetParameter parameter);
 
         #endregion
 
@@ -78,7 +78,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return string length result</returns>
-        Task<StringLengthResult> StringLengthAsync(CacheServer server, StringLengthParameter parameter);
+        Task<SixnetStringLengthResult> StringLengthAsync(SixnetCacheServer server, SixnetStringLengthParameter parameter);
 
         #endregion
 
@@ -93,7 +93,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return string increment result</returns>
-        Task<StringIncrementResult> StringIncrementAsync(CacheServer server, StringIncrementParameter parameter);
+        Task<SixnetStringIncrementResult> StringIncrementAsync(SixnetCacheServer server, SixnetStringIncrementParameter parameter);
 
         #endregion
 
@@ -107,7 +107,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return string get with expiry result</returns>
-        Task<StringGetWithExpiryResult> StringGetWithExpiryAsync(CacheServer server, StringGetWithExpiryParameter parameter);
+        Task<SixnetStringGetWithExpiryResult> StringGetWithExpiryAsync(SixnetCacheServer server, SixnetStringGetWithExpiryParameter parameter);
 
         #endregion
 
@@ -119,7 +119,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return string get set result</returns>
-        Task<StringGetSetResult> StringGetSetAsync(CacheServer server, StringGetSetParameter parameter);
+        Task<SixnetStringGetSetResult> StringGetSetAsync(SixnetCacheServer server, SixnetStringGetSetParameter parameter);
 
         #endregion
 
@@ -134,7 +134,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return string get range result</returns>
-        Task<StringGetRangeResult> StringGetRangeAsync(CacheServer server, StringGetRangeParameter parameter);
+        Task<SixnetStringGetRangeResult> StringGetRangeAsync(SixnetCacheServer server, SixnetStringGetRangeParameter parameter);
 
         #endregion
 
@@ -148,7 +148,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return string get bit result</returns>
-        Task<StringGetBitResult> StringGetBitAsync(CacheServer server, StringGetBitParameter parameter);
+        Task<SixnetStringGetBitResult> StringGetBitAsync(SixnetCacheServer server, SixnetStringGetBitParameter parameter);
 
         #endregion
 
@@ -161,7 +161,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return string get result</returns>
-        Task<StringGetResult> StringGetAsync(CacheServer server, StringGetParameter parameter);
+        Task<SixnetStringGetResult> StringGetAsync(SixnetCacheServer server, SixnetStringGetParameter parameter);
 
         #endregion
 
@@ -176,7 +176,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return string decrement result</returns>
-        Task<StringDecrementResult> StringDecrementAsync(CacheServer server, StringDecrementParameter parameter);
+        Task<SixnetStringDecrementResult> StringDecrementAsync(SixnetCacheServer server, SixnetStringDecrementParameter parameter);
 
         #endregion
 
@@ -194,7 +194,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return string bit position result</returns>
-        Task<StringBitPositionResult> StringBitPositionAsync(CacheServer server, StringBitPositionParameter parameter);
+        Task<SixnetStringBitPositionResult> StringBitPositionAsync(SixnetCacheServer server, SixnetStringBitPositionParameter parameter);
 
         #endregion
 
@@ -210,7 +210,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return string bit operation result</returns>
-        Task<StringBitOperationResult> StringBitOperationAsync(CacheServer server, StringBitOperationParameter parameter);
+        Task<SixnetStringBitOperationResult> StringBitOperationAsync(SixnetCacheServer server, SixnetStringBitOperationParameter parameter);
 
         #endregion
 
@@ -227,7 +227,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return string bit count result</returns>
-        Task<StringBitCountResult> StringBitCountAsync(CacheServer server, StringBitCountParameter parameter);
+        Task<SixnetStringBitCountResult> StringBitCountAsync(SixnetCacheServer server, SixnetStringBitCountParameter parameter);
 
         #endregion
 
@@ -241,7 +241,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return string append result</returns>
-        Task<StringAppendResult> StringAppendAsync(CacheServer server, StringAppendParameter parameter);
+        Task<SixnetStringAppendResult> StringAppendAsync(SixnetCacheServer server, SixnetStringAppendParameter parameter);
 
         #endregion
 
@@ -263,7 +263,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return list trim result</returns>
-        Task<ListTrimResult> ListTrimAsync(CacheServer server, ListTrimParameter parameter);
+        Task<SixnetListTrimResult> ListTrimAsync(SixnetCacheServer server, SixnetListTrimParameter parameter);
 
         #endregion
 
@@ -276,7 +276,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return list set by index result</returns>
-        Task<ListSetByIndexResult> ListSetByIndexAsync(CacheServer server, ListSetByIndexParameter parameter);
+        Task<SixnetListSetByIndexResult> ListSetByIndexAsync(SixnetCacheServer server, SixnetListSetByIndexParameter parameter);
 
         #endregion
 
@@ -293,7 +293,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return list right push</returns>
-        Task<ListRightPushResult> ListRightPushAsync(CacheServer server, ListRightPushParameter parameter);
+        Task<SixnetListRightPushResult> ListRightPushAsync(SixnetCacheServer server, SixnetListRightPushParameter parameter);
 
         #endregion
 
@@ -307,7 +307,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return list right pop left result</returns>
-        Task<ListRightPopLeftPushResult> ListRightPopLeftPushAsync(CacheServer server, ListRightPopLeftPushParameter parameter);
+        Task<SixnetListRightPopLeftPushResult> ListRightPopLeftPushAsync(SixnetCacheServer server, SixnetListRightPopLeftPushParameter parameter);
 
         #endregion
 
@@ -319,7 +319,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return list right pop result</returns>
-        Task<ListRightPopResult> ListRightPopAsync(CacheServer server, ListRightPopParameter parameter);
+        Task<SixnetListRightPopResult> ListRightPopAsync(SixnetCacheServer server, SixnetListRightPopParameter parameter);
 
         #endregion
 
@@ -335,7 +335,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return list remove result</returns>
-        Task<ListRemoveResult> ListRemoveAsync(CacheServer server, ListRemoveParameter parameter);
+        Task<SixnetListRemoveResult> ListRemoveAsync(SixnetCacheServer server, SixnetListRemoveParameter parameter);
 
         #endregion
 
@@ -353,7 +353,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return list range result</returns>
-        Task<ListRangeResult> ListRangeAsync(CacheServer server, ListRangeParameter parameter);
+        Task<SixnetListRangeResult> ListRangeAsync(SixnetCacheServer server, SixnetListRangeParameter parameter);
 
         #endregion
 
@@ -366,7 +366,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return list length result</returns>
-        Task<ListLengthResult> ListLengthAsync(CacheServer server, ListLengthParameter parameter);
+        Task<SixnetListLengthResult> ListLengthAsync(SixnetCacheServer server, SixnetListLengthParameter parameter);
 
         #endregion
 
@@ -379,7 +379,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return list left push result</returns>
-        Task<ListLeftPushResult> ListLeftPushAsync(CacheServer server, ListLeftPushParameter parameter);
+        Task<SixnetListLeftPushResult> ListLeftPushAsync(SixnetCacheServer server, SixnetListLeftPushParameter parameter);
 
         #endregion
 
@@ -391,7 +391,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return list left pop result</returns>
-        Task<ListLeftPopResult> ListLeftPopAsync(CacheServer server, ListLeftPopParameter parameter);
+        Task<SixnetListLeftPopResult> ListLeftPopAsync(SixnetCacheServer server, SixnetListLeftPopParameter parameter);
 
         #endregion
 
@@ -405,7 +405,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return list insert begore result</returns>
-        Task<ListInsertBeforeResult> ListInsertBeforeAsync(CacheServer server, ListInsertBeforeParameter parameter);
+        Task<SixnetListInsertBeforeResult> ListInsertBeforeAsync(SixnetCacheServer server, SixnetListInsertBeforeParameter parameter);
 
         #endregion
 
@@ -419,7 +419,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return list insert after result</returns>
-        Task<ListInsertAfterResult> ListInsertAfterAsync(CacheServer server, ListInsertAfterParameter parameter);
+        Task<SixnetListInsertAfterResult> ListInsertAfterAsync(SixnetCacheServer server, SixnetListInsertAfterParameter parameter);
 
         #endregion
 
@@ -434,7 +434,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return list get by index result</returns>
-        Task<ListGetByIndexResult> ListGetByIndexAsync(CacheServer server, ListGetByIndexParameter parameter);
+        Task<SixnetListGetByIndexResult> ListGetByIndexAsync(SixnetCacheServer server, SixnetListGetByIndexParameter parameter);
 
         #endregion
 
@@ -450,7 +450,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return hash values result</returns>
-        Task<HashValuesResult> HashValuesAsync(CacheServer server, HashValuesParameter parameter);
+        Task<SixnetHashValuesResult> HashValuesAsync(SixnetCacheServer server, SixnetHashValuesParameter parameter);
 
         #endregion
 
@@ -463,7 +463,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return hash set result</returns>
-        Task<HashSetResult> HashSetAsync(CacheServer server, HashSetParameter parameter);
+        Task<SixnetHashSetResult> HashSetAsync(SixnetCacheServer server, SixnetHashSetParameter parameter);
 
         #endregion
 
@@ -475,7 +475,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return hash length result</returns>
-        Task<HashLengthResult> HashLengthAsync(CacheServer server, HashLengthParameter parameter);
+        Task<SixnetHashLengthResult> HashLengthAsync(SixnetCacheServer server, SixnetHashLengthParameter parameter);
 
         #endregion
 
@@ -487,7 +487,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return hash keys result</returns>
-        Task<HashKeysResult> HashKeysAsync(CacheServer server, HashKeysParameter parameter);
+        Task<SixnetHashKeysResult> HashKeysAsync(SixnetCacheServer server, SixnetHashKeysParameter parameter);
 
         #endregion
 
@@ -502,7 +502,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return hash increment result</returns>
-        Task<HashIncrementResult> HashIncrementAsync(CacheServer server, HashIncrementParameter parameter);
+        Task<SixnetHashIncrementResult> HashIncrementAsync(SixnetCacheServer server, SixnetHashIncrementParameter parameter);
 
         #endregion
 
@@ -514,7 +514,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return hash get result</returns>
-        Task<HashGetResult> HashGetAsync(CacheServer server, HashGetParameter parameter);
+        Task<SixnetHashGetResult> HashGetAsync(SixnetCacheServer server, SixnetHashGetParameter parameter);
 
         #endregion
 
@@ -526,7 +526,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return hash get all result</returns>
-        Task<HashGetAllResult> HashGetAllAsync(CacheServer server, HashGetAllParameter parameter);
+        Task<SixnetHashGetAllResult> HashGetAllAsync(SixnetCacheServer server, SixnetHashGetAllParameter parameter);
 
         #endregion
 
@@ -538,7 +538,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return hash exists result</returns>
-        Task<HashExistsResult> HashExistAsync(CacheServer server, HashExistsParameter parameter);
+        Task<SixnetHashExistsResult> HashExistAsync(SixnetCacheServer server, SixnetHashExistsParameter parameter);
 
         #endregion
 
@@ -551,7 +551,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return hash delete result</returns>
-        Task<HashDeleteResult> HashDeleteAsync(CacheServer server, HashDeleteParameter parameter);
+        Task<SixnetHashDeleteResult> HashDeleteAsync(SixnetCacheServer server, SixnetHashDeleteParameter parameter);
 
         #endregion
 
@@ -565,7 +565,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return hash decrement result</returns>
-        Task<HashDecrementResult> HashDecrementAsync(CacheServer server, HashDecrementParameter parameter);
+        Task<SixnetHashDecrementResult> HashDecrementAsync(SixnetCacheServer server, SixnetHashDecrementParameter parameter);
 
         #endregion
 
@@ -577,7 +577,7 @@ namespace Sixnet.Cache
         /// <param name="parameter">Parameter</param>
         /// <param name="server">Cache server</param>
         /// <returns>Return hash scan result</returns>
-        Task<HashScanResult> HashScanAsync(CacheServer server, HashScanParameter parameter);
+        Task<SixnetHashScanResult> HashScanAsync(SixnetCacheServer server, SixnetHashScanParameter parameter);
 
         #endregion
 
@@ -594,7 +594,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return set remove result</returns>
-        Task<SetRemoveResult> SetRemoveAsync(CacheServer server, SetRemoveParameter parameter);
+        Task<SixnetSetRemoveResult> SetRemoveAsync(SixnetCacheServer server, SixnetSetRemoveParameter parameter);
 
         #endregion
 
@@ -609,7 +609,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return set random members result</returns>
-        Task<SetRandomMembersResult> SetRandomMembersAsync(CacheServer server, SetRandomMembersParameter parameter);
+        Task<SixnetSetRandomMembersResult> SetRandomMembersAsync(SixnetCacheServer server, SixnetSetRandomMembersParameter parameter);
 
         #endregion
 
@@ -621,7 +621,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return set random member</returns>
-        Task<SetRandomMemberResult> SetRandomMemberAsync(CacheServer server, SetRandomMemberParameter parameter);
+        Task<SixnetSetRandomMemberResult> SetRandomMemberAsync(SixnetCacheServer server, SixnetSetRandomMemberParameter parameter);
 
         #endregion
 
@@ -633,7 +633,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return set pop result</returns>
-        Task<SetPopResult> SetPopAsync(CacheServer server, SetPopParameter parameter);
+        Task<SixnetSetPopResult> SetPopAsync(SixnetCacheServer server, SixnetSetPopParameter parameter);
 
         #endregion
 
@@ -648,7 +648,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return set move result</returns>
-        Task<SetMoveResult> SetMoveAsync(CacheServer server, SetMoveParameter parameter);
+        Task<SixnetSetMoveResult> SetMoveAsync(SixnetCacheServer server, SixnetSetMoveParameter parameter);
 
         #endregion
 
@@ -660,7 +660,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return set members result</returns>
-        Task<SetMembersResult> SetMembersAsync(CacheServer server, SetMembersParameter parameter);
+        Task<SixnetSetMembersResult> SetMembersAsync(SixnetCacheServer server, SixnetSetMembersParameter parameter);
 
         #endregion
 
@@ -672,7 +672,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return set length result</returns>
-        Task<SetLengthResult> SetLengthAsync(CacheServer server, SetLengthParameter parameter);
+        Task<SixnetSetLengthResult> SetLengthAsync(SixnetCacheServer server, SixnetSetLengthParameter parameter);
 
         #endregion
 
@@ -684,7 +684,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return set contains result</returns>
-        Task<SetContainsResult> SetContainsAsync(CacheServer server, SetContainsParameter parameter);
+        Task<SixnetSetContainsResult> SetContainsAsync(SixnetCacheServer server, SixnetSetContainsParameter parameter);
 
         #endregion
 
@@ -697,7 +697,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return set combine result</returns>
-        Task<SetCombineResult> SetCombineAsync(CacheServer server, SetCombineParameter parameter);
+        Task<SixnetSetCombineResult> SetCombineAsync(SixnetCacheServer server, SixnetSetCombineParameter parameter);
 
         #endregion
 
@@ -710,7 +710,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return set combine and store result</returns>
-        Task<SetCombineAndStoreResult> SetCombineAndStoreAsync(CacheServer server, SetCombineAndStoreParameter parameter);
+        Task<SixnetSetCombineAndStoreResult> SetCombineAndStoreAsync(SixnetCacheServer server, SixnetSetCombineAndStoreParameter parameter);
 
         #endregion
 
@@ -724,7 +724,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return set add result</returns>
-        Task<SetAddResult> SetAddAsync(CacheServer server, SetAddParameter parameter);
+        Task<SixnetSetAddResult> SetAddAsync(SixnetCacheServer server, SixnetSetAddParameter parameter);
 
         #endregion
 
@@ -741,7 +741,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return sorted set score result</returns>
-        Task<SortedSetScoreResult> SortedSetScoreAsync(CacheServer server, SortedSetScoreParameter parameter);
+        Task<SixnetSortedSetScoreResult> SortedSetScoreAsync(SixnetCacheServer server, SixnetSortedSetScoreParameter parameter);
 
         #endregion
 
@@ -755,7 +755,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return sorted set remove range by value result</returns>
-        Task<SortedSetRemoveRangeByValueResult> SortedSetRemoveRangeByValueAsync(CacheServer server, SortedSetRemoveRangeByValueParameter parameter);
+        Task<SixnetSortedSetRemoveRangeByValueResult> SortedSetRemoveRangeByValueAsync(SixnetCacheServer server, SixnetSortedSetRemoveRangeByValueParameter parameter);
 
         #endregion
 
@@ -768,7 +768,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return sorted set remove range by score result</returns>
-        Task<SortedSetRemoveRangeByScoreResult> SortedSetRemoveRangeByScoreAsync(CacheServer server, SortedSetRemoveRangeByScoreParameter parameter);
+        Task<SixnetSortedSetRemoveRangeByScoreResult> SortedSetRemoveRangeByScoreAsync(SixnetCacheServer server, SixnetSortedSetRemoveRangeByScoreParameter parameter);
 
         #endregion
 
@@ -785,7 +785,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return sorted set remove range by rank result</returns>
-        Task<SortedSetRemoveRangeByRankResult> SortedSetRemoveRangeByRankAsync(CacheServer server, SortedSetRemoveRangeByRankParameter parameter);
+        Task<SixnetSortedSetRemoveRangeByRankResult> SortedSetRemoveRangeByRankAsync(SixnetCacheServer server, SixnetSortedSetRemoveRangeByRankParameter parameter);
 
         #endregion
 
@@ -798,7 +798,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return sorted set remove result</returns>
-        Task<SortedSetRemoveResult> SortedSetRemoveAsync(CacheServer server, SortedSetRemoveParameter parameter);
+        Task<SixnetSortedSetRemoveResult> SortedSetRemoveAsync(SixnetCacheServer server, SixnetSortedSetRemoveParameter parameter);
 
         #endregion
 
@@ -812,7 +812,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return sorted set rank result</returns>
-        Task<SortedSetRankResult> SortedSetRankAsync(CacheServer server, SortedSetRankParameter parameter);
+        Task<SixnetSortedSetRankResult> SortedSetRankAsync(SixnetCacheServer server, SixnetSortedSetRankParameter parameter);
 
         #endregion
 
@@ -826,7 +826,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return sorted set range by value result</returns>
-        Task<SortedSetRangeByValueResult> SortedSetRangeByValueAsync(CacheServer server, SortedSetRangeByValueParameter parameter);
+        Task<SixnetSortedSetRangeByValueResult> SortedSetRangeByValueAsync(SixnetCacheServer server, SixnetSortedSetRangeByValueParameter parameter);
 
         #endregion
 
@@ -842,7 +842,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return sorted set range by score with scores result</returns>
-        Task<SortedSetRangeByScoreWithScoresResult> SortedSetRangeByScoreWithScoresAsync(CacheServer server, SortedSetRangeByScoreWithScoresParameter parameter);
+        Task<SixnetSortedSetRangeByScoreWithScoresResult> SortedSetRangeByScoreWithScoresAsync(SixnetCacheServer server, SixnetSortedSetRangeByScoreWithScoresParameter parameter);
 
         #endregion
 
@@ -858,7 +858,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return sorted set range by score result</returns>
-        Task<SortedSetRangeByScoreResult> SortedSetRangeByScoreAsync(CacheServer server, SortedSetRangeByScoreParameter parameter);
+        Task<SixnetSortedSetRangeByScoreResult> SortedSetRangeByScoreAsync(SixnetCacheServer server, SixnetSortedSetRangeByScoreParameter parameter);
 
         #endregion
 
@@ -876,7 +876,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return sorted set range by rank with scores result</returns>
-        Task<SortedSetRangeByRankWithScoresResult> SortedSetRangeByRankWithScoresAsync(CacheServer server, SortedSetRangeByRankWithScoresParameter parameter);
+        Task<SixnetSortedSetRangeByRankWithScoresResult> SortedSetRangeByRankWithScoresAsync(SixnetCacheServer server, SixnetSortedSetRangeByRankWithScoresParameter parameter);
 
         #endregion
 
@@ -894,7 +894,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return sorted set range by rank result</returns>
-        Task<SortedSetRangeByRankResult> SortedSetRangeByRankAsync(CacheServer server, SortedSetRangeByRankParameter parameter);
+        Task<SixnetSortedSetRangeByRankResult> SortedSetRangeByRankAsync(SixnetCacheServer server, SixnetSortedSetRangeByRankParameter parameter);
 
         #endregion
 
@@ -908,7 +908,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="options">response</param>
         /// <returns>Return sorted set lenght by value result</returns>
-        Task<SortedSetLengthByValueResult> SortedSetLengthByValueAsync(CacheServer server, SortedSetLengthByValueParameter parameter);
+        Task<SixnetSortedSetLengthByValueResult> SortedSetLengthByValueAsync(SixnetCacheServer server, SixnetSortedSetLengthByValueParameter parameter);
 
         #endregion
 
@@ -921,7 +921,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return sorted set length result</returns>
-        Task<SortedSetLengthResult> SortedSetLengthAsync(CacheServer server, SortedSetLengthParameter parameter);
+        Task<SixnetSortedSetLengthResult> SortedSetLengthAsync(SixnetCacheServer server, SixnetSortedSetLengthParameter parameter);
 
         #endregion
 
@@ -935,7 +935,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return sorted set increment result</returns>
-        Task<SortedSetIncrementResult> SortedSetIncrementAsync(CacheServer server, SortedSetIncrementParameter parameter);
+        Task<SixnetSortedSetIncrementResult> SortedSetIncrementAsync(SixnetCacheServer server, SixnetSortedSetIncrementParameter parameter);
 
         #endregion
 
@@ -949,7 +949,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return sorted set decrement result</returns>
-        Task<SortedSetDecrementResult> SortedSetDecrementAsync(CacheServer server, SortedSetDecrementParameter parameter);
+        Task<SixnetSortedSetDecrementResult> SortedSetDecrementAsync(SixnetCacheServer server, SixnetSortedSetDecrementParameter parameter);
 
         #endregion
 
@@ -963,7 +963,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return sorted set combine and store result</returns>
-        Task<SortedSetCombineAndStoreResult> SortedSetCombineAndStoreAsync(CacheServer server, SortedSetCombineAndStoreParameter parameter);
+        Task<SixnetSortedSetCombineAndStoreResult> SortedSetCombineAndStoreAsync(SixnetCacheServer server, SixnetSortedSetCombineAndStoreParameter parameter);
 
         #endregion
 
@@ -978,7 +978,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return sorted set add result</returns>
-        Task<SortedSetAddResult> SortedSetAddAsync(CacheServer server, SortedSetAddParameter parameter);
+        Task<SixnetSortedSetAddResult> SortedSetAddAsync(SixnetCacheServer server, SixnetSortedSetAddParameter parameter);
 
         #endregion
 
@@ -1001,7 +1001,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return sort result</returns>
-        Task<SortResult> SortAsync(CacheServer server, SortParameter parameter);
+        Task<SixnetSortResult> SortAsync(SixnetCacheServer server, SixnetSortParameter parameter);
 
         #endregion
 
@@ -1020,7 +1020,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return sort and store result</returns>
-        Task<SortAndStoreResult> SortAndStoreAsync(CacheServer server, SortAndStoreParameter parameter);
+        Task<SixnetSortAndStoreResult> SortAndStoreAsync(SixnetCacheServer server, SixnetSortAndStoreParameter parameter);
 
         #endregion
 
@@ -1037,7 +1037,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return key type result</returns>
-        Task<TypeResult> KeyTypeAsync(CacheServer server, TypeParameter parameter);
+        Task<SixnetTypeResult> KeyTypeAsync(SixnetCacheServer server, SixnetTypeParameter parameter);
 
         #endregion
 
@@ -1051,7 +1051,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return key time to live result</returns>
-        Task<TimeToLiveResult> KeyTimeToLiveAsync(CacheServer server, TimeToLiveParameter parameter);
+        Task<SixnetTimeToLiveResult> KeyTimeToLiveAsync(SixnetCacheServer server, SixnetTimeToLiveParameter parameter);
 
         #endregion
 
@@ -1065,7 +1065,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return key restore result</returns>
-        Task<RestoreResult> KeyRestoreAsync(CacheServer server, RestoreParameter parameter);
+        Task<SixnetRestoreResult> KeyRestoreAsync(SixnetCacheServer server, SixnetRestoreParameter parameter);
 
         #endregion
 
@@ -1078,7 +1078,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return key rename result</returns>
-        Task<RenameResult> KeyRenameAsync(CacheServer server, RenameParameter parameter);
+        Task<SixnetRenameResult> KeyRenameAsync(SixnetCacheServer server, SixnetRenameParameter parameter);
 
         #endregion
 
@@ -1090,7 +1090,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return key random result</returns>
-        Task<RandomResult> KeyRandomAsync(CacheServer server, RandomParameter parameter);
+        Task<SixnetRandomResult> KeyRandomAsync(SixnetCacheServer server, SixnetRandomParameter parameter);
 
         #endregion
 
@@ -1103,7 +1103,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return key persist result</returns>
-        Task<PersistResult> KeyPersistAsync(CacheServer server, PersistParameter parameter);
+        Task<SixnetPersistResult> KeyPersistAsync(SixnetCacheServer server, SixnetPersistParameter parameter);
 
         #endregion
 
@@ -1118,7 +1118,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return key move result</returns>
-        Task<MoveResult> KeyMoveAsync(CacheServer server, MoveParameter parameter);
+        Task<SixnetMoveResult> KeyMoveAsync(SixnetCacheServer server, SixnetMoveParameter parameter);
 
         #endregion
 
@@ -1132,7 +1132,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return key migrate result</returns>
-        Task<MigrateKeyResult> KeyMigrateAsync(CacheServer server, MigrateKeyParameter parameter);
+        Task<SixnetMigrateKeyResult> KeyMigrateAsync(SixnetCacheServer server, SixnetMigrateKeyParameter parameter);
 
         #endregion
 
@@ -1146,7 +1146,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return key expire result</returns>
-        Task<ExpireResult> KeyExpireAsync(CacheServer server, ExpireParameter parameter);
+        Task<SixnetExpireResult> KeyExpireAsync(SixnetCacheServer server, SixnetExpireParameter parameter);
 
         #endregion;
 
@@ -1160,7 +1160,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return key dump result</returns>
-        Task<DumpResult> KeyDumpAsync(CacheServer server, DumpParameter parameter);
+        Task<SixnetDumpResult> KeyDumpAsync(SixnetCacheServer server, SixnetDumpParameter parameter);
 
         #endregion
 
@@ -1172,7 +1172,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return key delete result</returns>
-        Task<DeleteResult> KeyDeleteAsync(CacheServer server, DeleteParameter parameter);
+        Task<SixnetDeleteResult> KeyDeleteAsync(SixnetCacheServer server, SixnetDeleteParameter parameter);
 
         #endregion
 
@@ -1184,7 +1184,7 @@ namespace Sixnet.Cache
         /// <param name="server">server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return exists key result</returns>
-        Task<ExistResult> KeyExistAsync(CacheServer server, ExistParameter parameter);
+        Task<SixnetExistResult> KeyExistAsync(SixnetCacheServer server, SixnetExistParameter parameter);
 
         #endregion
 
@@ -1196,7 +1196,7 @@ namespace Sixnet.Cache
         /// <param name="server">server</param>
         /// <param name="parameter">parameter</param>
         /// <returns></returns>
-        Task<ScanResult> KeyScanAsync(CacheServer server, ScanParameter parameter);
+        Task<SixnetScanResult> KeyScanAsync(SixnetCacheServer server, SixnetScanParameter parameter);
 
         #endregion
 
@@ -1212,7 +1212,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return get all database result</returns>
-        Task<GetAllDataBaseResult> GetAllDataBaseAsync(CacheServer server, GetAllDataBaseParameter parameter);
+        Task<SixnetGetAllDataBaseResult> GetAllDataBaseAsync(SixnetCacheServer server, SixnetGetAllDataBaseParameter parameter);
 
         #endregion
 
@@ -1224,7 +1224,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return get keys result</returns>
-        Task<GetKeysResult> GetKeysAsync(CacheServer server, GetKeysParameter parameter);
+        Task<SixnetGetKeysResult> GetKeysAsync(SixnetCacheServer server, SixnetGetKeysParameter parameter);
 
         #endregion
 
@@ -1236,7 +1236,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return clear data result</returns>
-        Task<ClearDataResult> ClearDataAsync(CacheServer server, ClearDataParameter parameter);
+        Task<SixnetClearDataResult> ClearDataAsync(SixnetCacheServer server, SixnetClearDataParameter parameter);
 
         #endregion
 
@@ -1248,7 +1248,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return get key detail result</returns>
-        Task<GetDetailResult> GetKeyDetailAsync(CacheServer server, GetDetailParameter parameter);
+        Task<SixnetGetDetailResult> GetKeyDetailAsync(SixnetCacheServer server, SixnetGetDetailParameter parameter);
 
         #endregion
 
@@ -1260,7 +1260,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return get server configuration result</returns>
-        Task<GetServerConfigurationResult> GetServerConfigurationAsync(CacheServer server, GetServerConfigurationParameter parameter);
+        Task<SixnetGetServerConfigurationResult> GetServerConfigurationAsync(SixnetCacheServer server, SixnetGetServerConfigurationParameter parameter);
 
         #endregion
 
@@ -1272,7 +1272,7 @@ namespace Sixnet.Cache
         /// <param name="server">Cache server</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return save server config result</returns>
-        Task<SaveServerConfigurationResult> SaveServerConfigurationAsync(CacheServer server, SaveServerConfigurationParameter parameter);
+        Task<SixnetSaveServerConfigurationResult> SaveServerConfigurationAsync(SixnetCacheServer server, SixnetSaveServerConfigurationParameter parameter);
 
         #endregion
 

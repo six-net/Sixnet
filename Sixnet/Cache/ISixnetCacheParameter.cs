@@ -10,7 +10,7 @@ namespace Sixnet.Cache
         /// <summary>
         /// Gets or sets the cache object
         /// </summary>
-        CacheObject CacheObject { get; set; }
+        SixnetCacheObject CacheObject { get; set; }
 
         /// <summary>
         /// Gets or sets the command flags

@@ -1,0 +1,15 @@
+﻿// "Company © 2025. All rights reserved."
+
+namespace Sixnet.Cache.String.Results
+{
+    /// <summary>
+    /// String get range response
+    /// </summary>
+    public class SixnetStringGetRangeResult : SixnetCacheResult
+    {
+        /// <summary>
+        /// Gets or sets the value
+        /// </summary>
+        public string Value { get; set; }
+    }
+}

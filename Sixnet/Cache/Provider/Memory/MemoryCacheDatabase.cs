@@ -2,7 +2,7 @@
 
 namespace Sixnet.Cache.Provider.Memory
 {
-    internal class MemoryCacheDatabase : CacheDatabase
+    internal class MemoryCacheDatabase : SixnetCacheDatabase
     {
         /// <summary>
         /// Gets or sets the data store
