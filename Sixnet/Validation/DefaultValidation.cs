@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 using Sixnet.Development.Data.Field;
 using Sixnet.Expressions.Linq;
+using Sixnet.Localization;
 using Sixnet.Validation.Validators;
 
 namespace Sixnet.Validation
@@ -41,6 +42,11 @@ namespace Sixnet.Validation
         readonly string errorMessage = string.Empty;
 
         /// <summary>
+        /// Display
+        /// </summary>
+        readonly string display = string.Empty;
+
+        /// <summary>
         /// Compare value
         /// </summary>
         readonly dynamic compareValue = null;
@@ -70,6 +76,7 @@ namespace Sixnet.Validation
             valueMethod = field.Field.Compile();
             this.validator = validator;
             fieldName = dataField.PropertyName;
+            display = (field.Display ?? fieldName).SplitByCapital().ToLower();
             fieldType = dataField.GetDataType();
             errorMessage = field.ErrorMessage;
             ignoreUseScenarios = new List<string>(field.IgnoreUseScenarios ?? Array.Empty<string>());
@@ -107,11 +114,21 @@ namespace Sixnet.Validation
                     SourceValue = value,
                     CompareValue = compareValue is Func<T, dynamic> ? ((Func<T, dynamic>)compareValue)(data) : compareValue
                 };
-                result = validator.Validate(operatorValue, errorMessage);
+                result = validator.Validate(new SixnetValidateParameter()
+                {
+                    Value = operatorValue,
+                    ErrorMessage = errorMessage,
+                    MessageArgs = [SixnetLocalizer.GetString(display)]
+                });
             }
             else
             {
-                result = validator.Validate(value, errorMessage);
+                result = validator.Validate(new SixnetValidateParameter()
+                {
+                    Value = value,
+                    ErrorMessage = errorMessage,
+                    MessageArgs = [SixnetLocalizer.GetString(display)]
+                });
             }
             return result;
         }
@@ -169,6 +186,7 @@ namespace Sixnet.Validation
         {
             var rule = validator?.CreateAsyncValidatorRule(new AsyncValidatorRuleParameter()
             {
+                MessageArgs = [SixnetLocalizer.GetString(display)],
                 ErrorMessage = errorMessage,
                 Required = ruleOptions.Required && !(ruleOptions.AllowNullFieldNames?.Contains(fieldName ?? string.Empty) ?? false),
                 FieldType = fieldType,

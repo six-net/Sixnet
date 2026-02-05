@@ -40,25 +40,27 @@ namespace Sixnet.Validation.Validators
         /// <summary>
         /// Validate value
         /// </summary>
-        /// <param name="value">Validate value</param>
-        /// <param name="errorMessage">Error message</param>
-        public override SixnetValidationResult Validate(dynamic value, string errorMessage = "")
+        /// <param name="parameter">Parameter</param>
+        public override SixnetValidationResult Validate(SixnetValidateParameter parameter)
         {
             // Check the lengths for legality
             EnsureLegalLengths();
 
             // Automatically pass if value is null. RequiredAttribute should be used to assert a value is not null.
             // We expect a cast exception if a non-string was passed in.
+            var value = parameter?.Value;
             var stringValue = value as string;
+            parameter.MessageArgs.Add(MinimumLength.ToString());
+            parameter.MessageArgs.Add(MaximumLength.ToString());
             if (stringValue == null)
             {
-                return SixnetValidationResult.ErrorResult(errorMessage);
+                return SixnetValidationResult.ErrorResult(parameter?.ErrorMessage, parameter?.MessageArgs);
             }
 
             var length = stringValue.Length;
             return length >= MinimumLength && length <= MaximumLength
                 ? SixnetValidationResult.SuccessResult()
-                : SixnetValidationResult.ErrorResult(errorMessage);
+                : SixnetValidationResult.ErrorResult(parameter?.ErrorMessage, parameter?.MessageArgs);
         }
 
         /// <summary>
@@ -92,6 +94,8 @@ namespace Sixnet.Validation.Validators
 
         public override AsyncValidatorRule CreateAsyncValidatorRule(AsyncValidatorRuleParameter parameter)
         {
+            parameter.MessageArgs.Add(MinimumLength.ToString());
+            parameter.MessageArgs.Add(MaximumLength.ToString());
             var rule = base.CreateAsyncValidatorRule(parameter);
 
             rule.Type = "string";

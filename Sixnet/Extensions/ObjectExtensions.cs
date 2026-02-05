@@ -221,7 +221,7 @@ namespace System
             if (obj != null)
             {
                 var verifyResults = SixnetValidations.Validate(obj, useCase);
-                var errorMessages = verifyResults.GetErrorMessages(true);
+                var errorMessages = verifyResults.GetErrorMessages();
                 SixnetDirectThrower.ThrowSixnetExceptionIf(!errorMessages.IsNullOrEmpty(), SixnetJsonSerializer.Serialize(errorMessages));
             }
         }

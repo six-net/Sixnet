@@ -37,20 +37,20 @@ namespace Sixnet.Validation.Validators
         /// <summary>
         /// Validate value
         /// </summary>
-        /// <param name="value">Value</param>
-        /// <param name="errorMessage">Error message</param>
-        public override SixnetValidationResult Validate(dynamic value, string errorMessage)
+        /// <param name="parameter">Parameter</param>
+        public override SixnetValidationResult Validate(SixnetValidateParameter parameter)
         {
             SetupRegex();
+            var value = parameter?.Value;
             var stringValue = value as string;
             if (string.IsNullOrEmpty(stringValue))
             {
-                return SixnetValidationResult.SuccessResult(errorMessage);
+                return SixnetValidationResult.SuccessResult(parameter?.ErrorMessage);
             }
             var matchResult = Regex.Match(stringValue);
             return matchResult.Success && matchResult.Index == 0 && matchResult.Length == stringValue.Length
                 ? SixnetValidationResult.SuccessResult()
-                : SixnetValidationResult.ErrorResult(errorMessage);
+                : SixnetValidationResult.ErrorResult(parameter?.ErrorMessage, parameter?.MessageArgs);
         }
 
         /// <summary>

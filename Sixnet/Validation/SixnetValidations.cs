@@ -851,8 +851,9 @@ namespace Sixnet.Validation
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="field">Field</param>
+        /// <param name="displayName">Display name</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> For<T>(Expression<Func<T, dynamic>> field)
+        public static ISixnetValidationRule<T> For<T>(Expression<Func<T, dynamic>> field, string displayName = "")
         {
             return DefaultValidationRule<T>.Create(field);
         }

@@ -26,17 +26,17 @@ namespace Sixnet.Validation.Validators
         /// <summary>
         /// Validate value
         /// </summary>
-        /// <param name="value">Value</param>
-        /// <param name="errorMessage">Error message</param>
-        public override SixnetValidationResult Validate(dynamic value, string errorMessage)
+        /// <param name="parameter">Parameter</param>
+        public override SixnetValidationResult Validate(SixnetValidateParameter parameter)
         {
+            var value = parameter?.Value;
             if (value == null)
             {
-                return SixnetValidationResult.ErrorResult(errorMessage);
+                return SixnetValidationResult.ErrorResult(parameter?.ErrorMessage, parameter?.MessageArgs);
             }
             return (value is string stringValue && (AllowEmptyString || !string.IsNullOrWhiteSpace(stringValue))) || value is not string
-                ? SixnetValidationResult.SuccessResult(errorMessage)
-                : SixnetValidationResult.ErrorResult(errorMessage);
+                ? SixnetValidationResult.SuccessResult()
+                : SixnetValidationResult.ErrorResult(parameter?.ErrorMessage, parameter?.MessageArgs);
         }
 
         /// <summary>

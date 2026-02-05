@@ -852,7 +852,7 @@ namespace System
         /// </summary>
         /// <param name="results">Results</param>
         /// <returns>Return the error messages</returns>
-        public static List<string> GetErrorMessages(this IEnumerable<Sixnet.Validation.SixnetValidationResult> results, bool local = true)
+        public static List<string> GetErrorMessages(this IEnumerable<SixnetValidationResult> results)
         {
             if (results == null)
             {
@@ -863,7 +863,7 @@ namespace System
             {
                 if (!result.Success)
                 {
-                    errorMessages.Add($"{result.FieldName}{SixnetValidations.FieldErrorMessageSeparator}{(local ? SixnetLocalizer.GetString(result.ErrorMessage) : result.ErrorMessage)}");
+                    errorMessages.Add($"{result.FieldName}{SixnetValidations.FieldErrorMessageSeparator}{result.Message}");
                 }
             }
             return errorMessages;

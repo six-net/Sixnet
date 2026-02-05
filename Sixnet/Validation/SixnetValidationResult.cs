@@ -1,5 +1,7 @@
 ﻿// "Company © 2025. All rights reserved."
 
+using Sixnet.Localization;
+
 namespace Sixnet.Validation
 {
     /// <summary>
@@ -16,9 +18,9 @@ namespace Sixnet.Validation
         public bool Success { get; set; }
 
         /// <summary>
-        /// Gets or sets the error message
+        /// Gets or sets the message
         /// </summary>
-        public string ErrorMessage { get; set; }
+        public string Message { get; set; }
 
         /// <summary>
         /// Gets or sets the field name
@@ -34,12 +36,12 @@ namespace Sixnet.Validation
         /// </summary>
         /// <param name="errorMessage">Error message</param>
         /// <returns>Return verify result</returns>
-        public static SixnetValidationResult ErrorResult(string errorMessage = "")
+        public static SixnetValidationResult ErrorResult(string errorMessage = "", IEnumerable<string> args = null)
         {
             return new SixnetValidationResult()
             {
                 Success = false,
-                ErrorMessage = errorMessage
+                Message = SixnetLocalizer.GetString(errorMessage, args?.ToArray())
             };
         }
 
@@ -53,7 +55,7 @@ namespace Sixnet.Validation
             return new SixnetValidationResult()
             {
                 Success = true,
-                ErrorMessage = successMessage
+                Message = SixnetLocalizer.GetString(successMessage)
             };
         }
 

@@ -2,6 +2,8 @@
 
 using System.ComponentModel.DataAnnotations;
 
+using Sixnet.Localization;
+
 namespace Sixnet.Validation.Validators
 {
     /// <summary>
@@ -26,15 +28,18 @@ namespace Sixnet.Validation.Validators
         /// <summary>
         /// Validate value
         /// </summary>
-        /// <param name="value">Value</param>
-        /// <param name="errorMessage">Error message</param>
-        public override SixnetValidationResult Validate(dynamic value, string errorMessage)
+        /// <param name="parameter">Parameter</param>
+        public override SixnetValidationResult Validate(SixnetValidateParameter parameter)
         {
-            errorMessage = string.IsNullOrWhiteSpace(errorMessage) ? DefaultErrorMessage : errorMessage;
+            var errorMessage = string.IsNullOrWhiteSpace(parameter?.ErrorMessage) ? DefaultErrorMessage : parameter.ErrorMessage;
+            var value = parameter.Value;
             if (value is not CompareVerificationValue compareValue)
             {
-                return SixnetValidationResult.ErrorResult(errorMessage);
+                return SixnetValidationResult.ErrorResult(errorMessage, parameter?.MessageArgs);
             }
+            parameter?.MessageArgs.Add(SixnetLocalizer.GetString(_compareOperator.GetEnumName()));
+            parameter?.MessageArgs.Add(SixnetLocalizer.GetString(compareValue.SourceValue.ToString()));
+            parameter?.MessageArgs.Add(SixnetLocalizer.GetString(compareValue.CompareValue.ToString()));
             var isValid = false;
             switch (_compareOperator)
             {
@@ -72,7 +77,7 @@ namespace Sixnet.Validation.Validators
                     }
                     break;
             }
-            return isValid ? SixnetValidationResult.SuccessResult() : SixnetValidationResult.ErrorResult(errorMessage);
+            return isValid ? SixnetValidationResult.SuccessResult() : SixnetValidationResult.ErrorResult(errorMessage, parameter?.MessageArgs);
         }
 
         /// <summary>

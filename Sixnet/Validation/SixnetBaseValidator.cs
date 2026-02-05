@@ -2,6 +2,8 @@
 
 using System.ComponentModel.DataAnnotations;
 
+using Sixnet.Localization;
+
 namespace Sixnet.Validation
 {
     /// <summary>
@@ -32,9 +34,8 @@ namespace Sixnet.Validation
         /// <summary>
         /// Validate
         /// </summary>
-        /// <param name="data">Data</param>
-        /// <param name="errorMessage">Error message</param>
-        public abstract SixnetValidationResult Validate(object data, string errorMessage);
+        /// <param name="parameter">Data</param>
+        public abstract SixnetValidationResult Validate(SixnetValidateParameter parameter);
 
         /// <summary>
         /// Create validation attribute
@@ -111,7 +112,7 @@ namespace Sixnet.Validation
             }
             return new AsyncValidatorRule()
             {
-                Message = FormatMessage(parameter.ErrorMessage),
+                Message = SixnetLocalizer.GetString(FormatMessage(parameter.ErrorMessage), parameter.MessageArgs?.ToArray()),
                 Type = type
             };
         }

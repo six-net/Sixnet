@@ -18,6 +18,11 @@ namespace Sixnet.Validation
         public string ErrorMessage { get; set; }
 
         /// <summary>
+        /// Gets or sets the display name
+        /// </summary>
+        public string Display {  get; set; }
+
+        /// <summary>
         /// Gets or sets the compare value
         /// </summary>
         internal dynamic CompareValue { get; set; }

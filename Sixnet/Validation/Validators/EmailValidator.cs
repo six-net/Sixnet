@@ -22,14 +22,14 @@ namespace Sixnet.Validation.Validators
         /// <summary>
         /// Validate data
         /// </summary>
-        /// <param name="value">Validate value</param>
-        /// <param name="errorMessage">Error message</param>
-        public override SixnetValidationResult Validate(dynamic value, string errorMessage = "")
+        /// <param name="parameter">Parameter</param>
+        public override SixnetValidationResult Validate(SixnetValidateParameter parameter)
         {
+            var value = parameter?.Value;
             var stringValue = value as string;
             return stringValue.IsEmailNullable()
                 ? SixnetValidationResult.SuccessResult()
-                : SixnetValidationResult.ErrorResult(errorMessage);
+                : SixnetValidationResult.ErrorResult(parameter?.ErrorMessage, parameter?.MessageArgs);
         }
 
         /// <summary>

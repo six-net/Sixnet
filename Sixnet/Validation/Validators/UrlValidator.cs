@@ -22,14 +22,14 @@ namespace Sixnet.Validation.Validators
         /// <summary>
         /// Validate value
         /// </summary>
-        /// <param name="value">Value</param>
-        /// <param name="errorMessage">Error message</param>
-        public override SixnetValidationResult Validate(dynamic value, string errorMessage)
+        /// <param name="parameter">Parameter</param>
+        public override SixnetValidationResult Validate(SixnetValidateParameter parameter)
         {
+            var value = parameter?.Value;
             var stringValue = value as string;
             return ValidationExtensions.IsUrlNullable(stringValue)
                 ? SixnetValidationResult.SuccessResult()
-                : SixnetValidationResult.ErrorResult(errorMessage);
+                : SixnetValidationResult.ErrorResult(parameter?.ErrorMessage, parameter?.MessageArgs);
         }
 
         /// <summary>

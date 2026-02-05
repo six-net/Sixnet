@@ -12,13 +12,14 @@ namespace Sixnet.Validation
         /// </summary>
         public SixnetValidationField<T> Field { get; set; }
 
-        public static DefaultValidationRule<T> Create(Expression<Func<T, dynamic>> field)
+        public static DefaultValidationRule<T> Create(Expression<Func<T, dynamic>> field, string displayName = "")
         {
             return new DefaultValidationRule<T>()
             {
                 Field = new SixnetValidationField<T>()
                 {
-                    Field = field
+                    Field = field,
+                    Display = displayName
                 }
             };
         }
