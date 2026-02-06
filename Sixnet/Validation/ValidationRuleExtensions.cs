@@ -1,5 +1,9 @@
 ﻿// "Company © 2025. All rights reserved."
 
+using System.IO;
+
+using Sixnet.Localization;
+
 namespace Sixnet.Validation
 {
     public static class ValidationRuleExtensions
@@ -11,13 +15,13 @@ namespace Sixnet.Validation
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="validationRule">Validation rule</param>
+        /// <param name="minLength">Min length</param>
         /// <param name="maxLength">Max length</param>
         /// <param name="errorMessage">Error message</param>
-        /// <param name="minLength">Min length</param>
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> Length<T>(this ISixnetValidationRule<T> validationRule, int maxLength, string errorMessage = "", int minLength = 0, bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> Length<T>(this ISixnetValidationRule<T> validationRule, int minLength, int maxLength, string errorMessage = SixnetResourceKeys.string_length, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.Length(maxLength, minLength, validationRule.Field);
@@ -37,7 +41,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> Email<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> Email<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = SixnetResourceKeys.wrong_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.Email(validationRule.Field);
@@ -58,7 +62,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> Equal<T>(this ISixnetValidationRule<T> validationRule, dynamic value, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> Equal<T>(this ISixnetValidationRule<T> validationRule, dynamic value, string errorMessage = SixnetResourceKeys.compare_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.Equal(value, validationRule.Field);
@@ -75,7 +79,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> Equal<T>(this ISixnetValidationRule<T> validationRule, Expression<Func<T, dynamic>> value, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> Equal<T>(this ISixnetValidationRule<T> validationRule, Expression<Func<T, dynamic>> value, string errorMessage = SixnetResourceKeys.compare_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.Equal(value, validationRule.Field);
@@ -96,7 +100,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> NotEqual<T>(this ISixnetValidationRule<T> validationRule, dynamic value, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> NotEqual<T>(this ISixnetValidationRule<T> validationRule, dynamic value, string errorMessage = SixnetResourceKeys.compare_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.NotEqual(value, validationRule.Field);
@@ -113,7 +117,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> NotEqual<T>(this ISixnetValidationRule<T> validationRule, Expression<Func<T, dynamic>> value, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> NotEqual<T>(this ISixnetValidationRule<T> validationRule, Expression<Func<T, dynamic>> value, string errorMessage = SixnetResourceKeys.compare_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.NotEqual(value, validationRule.Field);
@@ -134,7 +138,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> LessThanOrEqual<T>(this ISixnetValidationRule<T> validationRule, dynamic value, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> LessThanOrEqual<T>(this ISixnetValidationRule<T> validationRule, dynamic value, string errorMessage = SixnetResourceKeys.compare_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.LessThanOrEqual(value, validationRule.Field);
@@ -151,7 +155,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> LessThanOrEqual<T>(this ISixnetValidationRule<T> validationRule, Expression<Func<T, dynamic>> value, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> LessThanOrEqual<T>(this ISixnetValidationRule<T> validationRule, Expression<Func<T, dynamic>> value, string errorMessage = SixnetResourceKeys.compare_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.LessThanOrEqual(value, validationRule.Field);
@@ -172,7 +176,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> LessThan<T>(this ISixnetValidationRule<T> validationRule, dynamic value, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> LessThan<T>(this ISixnetValidationRule<T> validationRule, dynamic value, string errorMessage = SixnetResourceKeys.compare_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.LessThan(value, validationRule.Field);
@@ -189,7 +193,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> LessThan<T>(this ISixnetValidationRule<T> validationRule, Expression<Func<T, dynamic>> value, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> LessThan<T>(this ISixnetValidationRule<T> validationRule, Expression<Func<T, dynamic>> value, string errorMessage = SixnetResourceKeys.compare_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.LessThan(value, validationRule.Field);
@@ -210,7 +214,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> GreaterThan<T>(this ISixnetValidationRule<T> validationRule, dynamic value, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> GreaterThan<T>(this ISixnetValidationRule<T> validationRule, dynamic value, string errorMessage = SixnetResourceKeys.compare_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.GreaterThan(value, validationRule.Field);
@@ -227,7 +231,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> GreaterThan<T>(this ISixnetValidationRule<T> validationRule, Expression<Func<T, dynamic>> value, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> GreaterThan<T>(this ISixnetValidationRule<T> validationRule, Expression<Func<T, dynamic>> value, string errorMessage = SixnetResourceKeys.compare_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.GreaterThan(value, validationRule.Field);
@@ -248,7 +252,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> GreaterThanOrEqual<T>(this ISixnetValidationRule<T> validationRule, dynamic value, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> GreaterThanOrEqual<T>(this ISixnetValidationRule<T> validationRule, dynamic value, string errorMessage = SixnetResourceKeys.compare_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.GreaterThanOrEqual(value, validationRule.Field);
@@ -265,7 +269,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> GreaterThanOrEqual<T>(this ISixnetValidationRule<T> validationRule, Expression<Func<T, dynamic>> value, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> GreaterThanOrEqual<T>(this ISixnetValidationRule<T> validationRule, Expression<Func<T, dynamic>> value, string errorMessage = SixnetResourceKeys.compare_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.GreaterThanOrEqual(value, validationRule.Field);
@@ -286,7 +290,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> In<T>(this ISixnetValidationRule<T> validationRule, IEnumerable<dynamic> values, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> In<T>(this ISixnetValidationRule<T> validationRule, IEnumerable<dynamic> values, string errorMessage = SixnetResourceKeys.wrong_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.In(values, validationRule.Field);
@@ -307,7 +311,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> NotIn<T>(this ISixnetValidationRule<T> validationRule, IEnumerable<dynamic> values, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> NotIn<T>(this ISixnetValidationRule<T> validationRule, IEnumerable<dynamic> values, string errorMessage = SixnetResourceKeys.wrong_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.NotIn(values, validationRule.Field);
@@ -328,7 +332,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> In<T>(this ISixnetValidationRule<T> validationRule, Type enumType, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> In<T>(this ISixnetValidationRule<T> validationRule, Type enumType, string errorMessage = SixnetResourceKeys.wrong_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.EnumType(enumType, validationRule.Field);
@@ -349,7 +353,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> MaxLength<T>(this ISixnetValidationRule<T> validationRule, int length, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> MaxLength<T>(this ISixnetValidationRule<T> validationRule, int length, string errorMessage = SixnetResourceKeys.string_max_length, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.MaxLength(length, validationRule.Field);
@@ -370,7 +374,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> MinLength<T>(this ISixnetValidationRule<T> validationRule, int length, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> MinLength<T>(this ISixnetValidationRule<T> validationRule, int length, string errorMessage = SixnetResourceKeys.string_min_length, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.MinLength(length, validationRule.Field);
@@ -390,7 +394,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> Phone<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> Phone<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = SixnetResourceKeys.wrong_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.Phone(validationRule.Field);
@@ -413,7 +417,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> Range<T>(this ISixnetValidationRule<T> validationRule, Type valueType, object minValue, object maxValue, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> Range<T>(this ISixnetValidationRule<T> validationRule, Type valueType, object minValue, object maxValue, string errorMessage = SixnetResourceKeys.range_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.Range(valueType, minValue, maxValue, validationRule.Field);
@@ -433,7 +437,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> Required<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> Required<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = SixnetResourceKeys.required_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.Required(validationRule.Field);
@@ -453,7 +457,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> Url<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> Url<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = SixnetResourceKeys.wrong_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.Url(validationRule.Field);
@@ -473,7 +477,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> CreditCard<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> CreditCard<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = SixnetResourceKeys.wrong_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.CreditCard(validationRule.Field);
@@ -494,7 +498,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> RegularExpression<T>(this ISixnetValidationRule<T> validationRule, string pattern, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> RegularExpression<T>(this ISixnetValidationRule<T> validationRule, string pattern, string errorMessage = SixnetResourceKeys.wrong_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.RegularExpression(pattern, validationRule.Field);
@@ -514,7 +518,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> Integer<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> Integer<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = SixnetResourceKeys.integer_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.Integer(validationRule.Field);
@@ -534,7 +538,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> PositiveInteger<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> PositiveInteger<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = SixnetResourceKeys.positive_integer_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.PositiveInteger(validationRule.Field);
@@ -554,7 +558,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> PositiveIntegerOrZero<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> PositiveIntegerOrZero<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = SixnetResourceKeys.positive_integer_or_zero_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.PositiveIntegerOrZero(validationRule.Field);
@@ -574,7 +578,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> NegativeInteger<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> NegativeInteger<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = SixnetResourceKeys.negative_integer_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.NegativeInteger(validationRule.Field);
@@ -594,7 +598,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> NegativeIntegerOrZero<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> NegativeIntegerOrZero<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = SixnetResourceKeys.negative_integer_or_zero_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.NegativeIntegerOrZero(validationRule.Field);
@@ -614,7 +618,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> Fraction<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> Fraction<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = SixnetResourceKeys.fraction_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.Fraction(validationRule.Field);
@@ -634,7 +638,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> PositiveFraction<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> PositiveFraction<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = SixnetResourceKeys.positive_fraction_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.PositiveFraction(validationRule.Field);
@@ -654,7 +658,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> NegativeFraction<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> NegativeFraction<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = SixnetResourceKeys.negative_fraction_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.NegativeFraction(validationRule.Field);
@@ -674,7 +678,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> PositiveFractionOrZero<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> PositiveFractionOrZero<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = SixnetResourceKeys.positive_fraction_or_zero_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.PositiveFractionOrZero(validationRule.Field);
@@ -694,7 +698,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> NegativeFractionOrZero<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> NegativeFractionOrZero<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = SixnetResourceKeys.negative_fraction_or_zero_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.NegativeFractionOrZero(validationRule.Field);
@@ -714,7 +718,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> Number<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> Number<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = SixnetResourceKeys.number_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.Number(validationRule.Field);
@@ -734,7 +738,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> Color<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> Color<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = SixnetResourceKeys.wrong_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.Color(validationRule.Field);
@@ -754,7 +758,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> Chinese<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> Chinese<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = SixnetResourceKeys.chinese_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.Chinese(validationRule.Field);
@@ -774,7 +778,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> PostCode<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> PostCode<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = SixnetResourceKeys.wrong_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.PostCode(validationRule.Field);
@@ -794,7 +798,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> Mobile<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> Mobile<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = SixnetResourceKeys.wrong_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.Mobile(validationRule.Field);
@@ -814,7 +818,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> IPV4<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> IPV4<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = SixnetResourceKeys.wrong_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.IPV4(validationRule.Field);
@@ -834,7 +838,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> Date<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> Date<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = SixnetResourceKeys.wrong_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.Date(validationRule.Field);
@@ -854,7 +858,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> DateTime<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> DateTime<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = SixnetResourceKeys.wrong_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.DateTime(validationRule.Field);
@@ -874,7 +878,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> Letter<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> Letter<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = SixnetResourceKeys.letter_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.Letter(validationRule.Field);
@@ -894,7 +898,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> UpperLetter<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> UpperLetter<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = SixnetResourceKeys.upper_letter_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.UpperLetter(validationRule.Field);
@@ -914,7 +918,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> LowerLetter<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> LowerLetter<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = SixnetResourceKeys.lower_letter_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.LowerLetter(validationRule.Field);
@@ -934,7 +938,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> IdentityCard<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> IdentityCard<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = SixnetResourceKeys.wrong_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.IdentityCard(validationRule.Field);
@@ -954,7 +958,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> ImageFile<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> ImageFile<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = SixnetResourceKeys.wrong_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.ImageFile(validationRule.Field);
@@ -974,7 +978,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> CompressFile<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = "", bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> CompressFile<T>(this ISixnetValidationRule<T> validationRule, string errorMessage = SixnetResourceKeys.wrong_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.CompressFile(validationRule.Field);

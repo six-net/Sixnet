@@ -324,6 +324,24 @@ namespace System
 
         #endregion
 
+        #region To resource key
+
+        /// <summary>
+        /// To resource key
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static string ToResourceKey(this string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return string.Empty;
+            }
+            return value.SplitByCapital("_").ToLower();
+        }
+
+        #endregion
+
         #region To camel case
 
         public static string ToCamelCase(this string value)
