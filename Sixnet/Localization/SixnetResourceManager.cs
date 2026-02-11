@@ -102,10 +102,14 @@ namespace Sixnet.Localization
         public string GetString(string name, CultureInfo culture)
         {
             culture ??= CultureInfo.CurrentUICulture;
-            var localString = _jsonManager.GetString(name, culture);
+            var localString = _jsonManager?.GetString(name, culture);
             if (string.IsNullOrEmpty(localString))
             {
-                localString = _resxManager.GetString(name, culture);
+                localString = _databaseManager?.GetString(name, culture);
+            }
+            if (string.IsNullOrEmpty(localString))
+            {
+                localString = _resxManager?.GetString(name, culture);
             }
             return localString;
         }

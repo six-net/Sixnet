@@ -24,7 +24,7 @@ namespace Sixnet.Localization
         /// <summary>
         /// Gets or sets the resource source
         /// </summary>
-        public SixnetLocalizationResourceSource ResourceSource { get; set; } = SixnetLocalizationResourceSource.Resx | SixnetLocalizationResourceSource.JSON;
+        public SixnetLocalizationResourceSource ResourceSource { get; set; } = SixnetLocalizationResourceSource.JSON;
     }
 
     public enum SixnetLocalizationResourceSource

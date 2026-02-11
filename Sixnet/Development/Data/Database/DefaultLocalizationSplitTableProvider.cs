@@ -25,7 +25,7 @@ namespace Sixnet.Development.Data.Database
                 return new List<DatabaseObjectName>(0);
             }
             return parameter.AllTableNames?.Where(tn => !string.IsNullOrWhiteSpace(tn.Name)
-            && tn.Name.Contains("sys_localization", StringComparison.OrdinalIgnoreCase)).ToList();
+            && tn.Name.Contains("sixnet_localization", StringComparison.OrdinalIgnoreCase)).ToList();
         }
 
         public List<DatabaseObjectName> GetTableNames(GetSplitTableNameParameter parameter)
