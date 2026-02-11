@@ -48,6 +48,7 @@ namespace Sixnet.Development.Entity
                 }
             }
             ConfigureEntity(typeof(SixnetAppUpdateRecordEntity));
+            ConfigureEntity(typeof(SixnetLocalizationEntity));
         }
 
         #endregion

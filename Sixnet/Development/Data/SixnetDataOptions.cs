@@ -28,7 +28,10 @@ namespace Sixnet.Development.Data
         readonly List<ISixnetDataCommandStartingEventHandler> _dataCommandStartingEventHandlers = new();
         readonly List<ISixnetDataCommandCallbackEventHandler> _dataCommandCallbackEventHandlers = new();
         readonly Dictionary<Type, ISixnetCondition> _typeFilters = new();
-        readonly Dictionary<string, ISixnetSplitTableProvider> _splitTableProviders = new(); // key: provider name
+        readonly Dictionary<string, ISixnetSplitTableProvider> _splitTableProviders = new()
+        {
+            { DefaultLocalizationSplitTableProvider.Name, new DefaultLocalizationSplitTableProvider() }
+        }; // key: provider name
         readonly Dictionary<DataIsolationLevel, IsolationLevel> _systemDataIsolationLevels = new()
         {
             { DataIsolationLevel.Chaos, IsolationLevel.Chaos },

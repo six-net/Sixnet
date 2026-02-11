@@ -220,7 +220,7 @@ namespace Sixnet.Exceptions
             {
                 message = SixnetResourceKeys.delete_data_failed;
             }
-            ThrowAppExceptionIf(predicate, message, SixnetLocalizer.GetString(typeof(T).Name.ToResourceKey());
+            ThrowAppExceptionIf(predicate, message, SixnetLocalizer.GetString(typeof(T).Name.ToResourceKey()));
         }
 
         #endregion

@@ -4,6 +4,8 @@ using System.Collections.Concurrent;
 using System.Globalization;
 using System.Reflection;
 
+using Sixnet.DependencyInjection;
+using Sixnet.Localization.Database;
 using Sixnet.Localization.Json;
 using Sixnet.Localization.Resx;
 
@@ -17,11 +19,25 @@ namespace Sixnet.Localization
         readonly SixnetResxManager _resxManager;
         readonly SixnetJsonManager _jsonManager;
         readonly ResourcePrefix _resourcePrefix;
+        readonly SixnetDatabaseResourceManager _databaseManager;
 
         public SixnetResourceManager(ResourcePrefix resourcePrefix, Assembly assembly)
         {
-            _resxManager = new SixnetResxManager(resourcePrefix, assembly);
-            _jsonManager = new SixnetJsonManager(resourcePrefix);
+            var localizationOptions = SixnetContainer.GetOptions<SixnetLocalizationOptions>();
+            var resourceSource = localizationOptions.ResourceSource;
+
+            if ((resourceSource & SixnetLocalizationResourceSource.Resx) == SixnetLocalizationResourceSource.Resx)
+            {
+                _resxManager = new SixnetResxManager(resourcePrefix, assembly);
+            }
+            if ((resourceSource & SixnetLocalizationResourceSource.JSON) == SixnetLocalizationResourceSource.JSON)
+            {
+                _jsonManager = new SixnetJsonManager(resourcePrefix);
+            }
+            if ((resourceSource & SixnetLocalizationResourceSource.Database) == SixnetLocalizationResourceSource.Database)
+            {
+                _databaseManager = new SixnetDatabaseResourceManager(resourcePrefix);
+            }
             _resourcePrefix = resourcePrefix;
         }
 
@@ -35,25 +51,46 @@ namespace Sixnet.Localization
         public ConcurrentDictionary<string, string> GetResourceSet(CultureInfo culture, bool tryParents)
         {
             var resourceSet = new ConcurrentDictionary<string, string>();
-            var resxResourceSet = _resxManager.GetResourceSet(culture, tryParents);
-            if (!resxResourceSet.IsNullOrEmpty())
+
+            if (_resxManager != null)
             {
-                foreach (var resourceItem in resxResourceSet)
+                var resxResourceSet = _resxManager.GetResourceSet(culture, tryParents);
+                if (!resxResourceSet.IsNullOrEmpty())
                 {
-                    foreach (var resxResourceItem in resxResourceSet)
+                    foreach (var resourceItem in resxResourceSet)
                     {
-                        resourceSet.TryAdd(resxResourceItem.Key, resxResourceItem.Value);
+                        foreach (var resxResourceItem in resxResourceSet)
+                        {
+                            resourceSet.TryAdd(resxResourceItem.Key, resxResourceItem.Value);
+                        }
                     }
                 }
             }
-            var jsonResourceSet = _jsonManager.GetResourceSet(culture, tryParents);
-            if (!jsonResourceSet.IsNullOrEmpty())
+
+            if (_jsonManager != null)
             {
-                foreach (var jsonResourceItem in jsonResourceSet)
+                var jsonResourceSet = _jsonManager.GetResourceSet(culture, tryParents);
+                if (!jsonResourceSet.IsNullOrEmpty())
                 {
-                    resourceSet.TryAdd(jsonResourceItem.Key, jsonResourceItem.Value);
+                    foreach (var jsonResourceItem in jsonResourceSet)
+                    {
+                        resourceSet.TryAdd(jsonResourceItem.Key, jsonResourceItem.Value);
+                    }
                 }
             }
+
+            if (_databaseManager != null)
+            {
+                var databaseResourceSet = _databaseManager.GetResourceSet(culture, tryParents);
+                if (!databaseResourceSet.IsNullOrEmpty())
+                {
+                    foreach (var databaseResourceItem in databaseResourceSet)
+                    {
+                        resourceSet.TryAdd(databaseResourceItem.Key, databaseResourceItem.Value);
+                    }
+                }
+            }
+
             return resourceSet;
         }
 

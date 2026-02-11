@@ -20,5 +20,17 @@ namespace Sixnet.Localization
         /// Whether Auto localize throwed message
         /// </summary>
         public bool AutoLocalizeThrowMessage { get; set; } = true;
+
+        /// <summary>
+        /// Gets or sets the resource source
+        /// </summary>
+        public SixnetLocalizationResourceSource ResourceSource { get; set; } = SixnetLocalizationResourceSource.Resx | SixnetLocalizationResourceSource.JSON;
+    }
+
+    public enum SixnetLocalizationResourceSource
+    {
+        Resx = 2,
+        JSON = 4,
+        Database = 8
     }
 }
