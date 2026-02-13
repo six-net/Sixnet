@@ -12,12 +12,13 @@ namespace Sixnet.Localization
         public const string update_data_success = nameof(update_data_success);
         public const string unspecified_data = nameof(unspecified_data);
         public const string delete_data_failed = nameof(delete_data_failed);
+        public const string delete_data_success = nameof(delete_data_success);
         public const string update_failed = nameof(update_failed);
         public const string wrong_value = nameof(wrong_value);
         public const string required_value = nameof(required_value);
-        public const string string_length = nameof(string_length);
-        public const string string_max_length = nameof(string_max_length);
-        public const string string_min_length = nameof(string_min_length);
+        public const string string_length_value = nameof(string_length_value);
+        public const string string_max_length_value = nameof(string_max_length_value);
+        public const string string_min_length_value = nameof(string_min_length_value);
         public const string compare_value = nameof(compare_value);
         public const string range_value = nameof(range_value);
         public const string integer_value = nameof(integer_value);

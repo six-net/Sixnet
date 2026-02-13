@@ -21,7 +21,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> Length<T>(this ISixnetValidationRule<T> validationRule, int minLength, int maxLength, string errorMessage = SixnetResourceKeys.string_length, bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> Length<T>(this ISixnetValidationRule<T> validationRule, int minLength, int maxLength, string errorMessage = SixnetResourceKeys.string_length_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.Length(maxLength, minLength, validationRule.Field);
@@ -353,7 +353,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> MaxLength<T>(this ISixnetValidationRule<T> validationRule, int length, string errorMessage = SixnetResourceKeys.string_max_length, bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> MaxLength<T>(this ISixnetValidationRule<T> validationRule, int length, string errorMessage = SixnetResourceKeys.string_max_length_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.MaxLength(length, validationRule.Field);
@@ -374,7 +374,7 @@ namespace Sixnet.Validation
         /// <param name="tip">Indicates whether is tip message</param>
         /// <param name="ignoreScenarios">Ignore scenarios</param>
         /// <returns></returns>
-        public static ISixnetValidationRule<T> MinLength<T>(this ISixnetValidationRule<T> validationRule, int length, string errorMessage = SixnetResourceKeys.string_min_length, bool tip = false, params string[] ignoreScenarios)
+        public static ISixnetValidationRule<T> MinLength<T>(this ISixnetValidationRule<T> validationRule, int length, string errorMessage = SixnetResourceKeys.string_min_length_value, bool tip = false, params string[] ignoreScenarios)
         {
             ResetField(validationRule, errorMessage, tip, ignoreScenarios);
             SixnetValidations.MinLength(length, validationRule.Field);

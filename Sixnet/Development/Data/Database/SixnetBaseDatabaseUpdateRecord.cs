@@ -184,13 +184,14 @@ namespace Sixnet.Development.Data.Database
         /// Insert entity data
         /// </summary>
         /// <typeparam name="TEntity"></typeparam>
-        /// <param name="configure"></param>
+        /// <param name="dataConfigure"></param>
+        /// <param name="optionsConfigure"></param>
         /// <returns></returns>
-        protected virtual async Task<TEntity> InsertAsync<TEntity>(Action<TEntity> configure = null) where TEntity : class, ISixnetEntity<TEntity>, new()
+        protected virtual async Task<TEntity> InsertAsync<TEntity>(Action<TEntity> dataConfigure = null, Action<SixnetDataOperationOptions> optionsConfigure = null) where TEntity : class, ISixnetEntity<TEntity>, new()
         {
-            var instance = GetEntityInstance(configure);
+            var instance = GetEntityInstance(dataConfigure);
             var repository = SixnetContainer.GetRepository<TEntity>();
-            await repository.AddAsync(instance).ConfigureAwait(false);
+            await repository.AddAsync(instance, optionsConfigure).ConfigureAwait(false);
             return instance;
         }
 
@@ -198,14 +199,15 @@ namespace Sixnet.Development.Data.Database
         /// Insert entity data
         /// </summary>
         /// <typeparam name="TEntity"></typeparam>
-        /// <param name="configure"></param>
+        /// <param name="data"></param>
+        /// <param name="optionsConfigure"></param>
         /// <returns></returns>
-        protected virtual async Task<TEntity> InsertAsync<TEntity>(TEntity data) where TEntity : class, ISixnetEntity<TEntity>, new()
+        protected virtual async Task<TEntity> InsertAsync<TEntity>(TEntity data, Action<SixnetDataOperationOptions> optionsConfigure = null) where TEntity : class, ISixnetEntity<TEntity>, new()
         {
             if (data != null)
             {
                 var repository = SixnetContainer.GetRepository<TEntity>();
-                await repository.AddAsync(data).ConfigureAwait(false);
+                await repository.AddAsync(data, optionsConfigure).ConfigureAwait(false);
             }
             return data;
         }
@@ -214,9 +216,12 @@ namespace Sixnet.Development.Data.Database
         /// Insert entity data when not exists
         /// </summary>
         /// <typeparam name="TEntity"></typeparam>
-        /// <param name="configure"></param>
+        /// <param name="dataConfigure"></param>
         /// <returns></returns>
-        protected virtual async Task<TEntity> InsertWhenNotExistAsync<TEntity>(Expression<Func<TEntity, bool>> conditionExpression, Action<TEntity> configure = null, bool isIncludeArchived = true) where TEntity : class, ISixnetEntity<TEntity>, new()
+        protected virtual async Task<TEntity> InsertWhenNotExistAsync<TEntity>(Expression<Func<TEntity, bool>> conditionExpression
+            , Action<TEntity> dataConfigure = null
+            , Action<SixnetDataOperationOptions> optionsConfigure = null
+            , bool isIncludeArchived = true) where TEntity : class, ISixnetEntity<TEntity>, new()
         {
             var repository = SixnetContainer.GetRepository<TEntity>();
             var queryable = repository.AsQueryable(conditionExpression);
@@ -229,8 +234,8 @@ namespace Sixnet.Development.Data.Database
             {
                 return currentData;
             }
-            var instance = GetEntityInstance(configure);
-            await repository.AddAsync(instance).ConfigureAwait(false);
+            var instance = GetEntityInstance(dataConfigure);
+            await repository.AddAsync(instance, optionsConfigure).ConfigureAwait(false);
             return instance;
         }
 
@@ -238,9 +243,13 @@ namespace Sixnet.Development.Data.Database
         /// Insert entity data when not exists
         /// </summary>
         /// <typeparam name="TEntity"></typeparam>
-        /// <param name="configure"></param>
+        /// <param name="data"></param>
+        /// <param name="optionsConfigure"></param>
         /// <returns></returns>
-        protected virtual async Task<TEntity> InsertWhenNotExistAsync<TEntity>(Expression<Func<TEntity, bool>> conditionExpression, TEntity data, bool isIncludeArchived = true) where TEntity : class, ISixnetEntity<TEntity>, new()
+        protected virtual async Task<TEntity> InsertWhenNotExistAsync<TEntity>(Expression<Func<TEntity, bool>> conditionExpression
+            , TEntity data
+            , Action<SixnetDataOperationOptions> optionsConfigure = null
+            , bool isIncludeArchived = true) where TEntity : class, ISixnetEntity<TEntity>, new()
         {
             if (data != null)
             {
@@ -255,7 +264,7 @@ namespace Sixnet.Development.Data.Database
                 {
                     return currentData;
                 }
-                await repository.AddAsync(data).ConfigureAwait(false);
+                await repository.AddAsync(data, optionsConfigure).ConfigureAwait(false);
             }
             return data;
         }
@@ -267,7 +276,10 @@ namespace Sixnet.Development.Data.Database
         /// <param name="conditionExpression"></param>
         /// <param name="isIncludeArchived"></param>
         /// <returns></returns>
-        protected virtual async Task DeleteAsync<TEntity>(Expression<Func<TEntity, bool>> conditionExpression, bool isIncludeArchived = true, bool logicalDelete = false)
+        protected virtual async Task DeleteAsync<TEntity>(Expression<Func<TEntity, bool>> conditionExpression
+            , bool isIncludeArchived = true
+            , bool logicalDelete = false
+            , Action<SixnetDataOperationOptions> optionsConfigure = null)
         {
             var repository = SixnetContainer.GetRepository<TEntity>();
             var deleteQueryable = repository.AsQueryable(conditionExpression);
@@ -281,6 +293,7 @@ namespace Sixnet.Development.Data.Database
                 {
                     options.LogicalDeleteBehavior = DataOperationBehavior.Disable;
                 }
+                optionsConfigure?.Invoke(options);
             }).ConfigureAwait(false);
         }
 
@@ -291,7 +304,10 @@ namespace Sixnet.Development.Data.Database
         /// <param name="fieldsAssignmentExpression"></param>
         /// <param name="conditionExpression"></param>
         /// <returns></returns>
-        protected virtual async Task UpdateAsync<TEntity>(Expression<Func<TEntity, bool>> fieldsAssignmentExpression, Expression<Func<TEntity, bool>> conditionExpression, bool isIncludeArchived = true)
+        protected virtual async Task UpdateAsync<TEntity>(Expression<Func<TEntity, bool>> fieldsAssignmentExpression
+            , Expression<Func<TEntity, bool>> conditionExpression
+            , bool isIncludeArchived = true
+            , Action<SixnetDataOperationOptions> optionsConfigure = null)
         {
             var repository = SixnetContainer.GetRepository<TEntity>();
             var updateQueryable = repository.AsQueryable(conditionExpression);
@@ -299,7 +315,7 @@ namespace Sixnet.Development.Data.Database
             {
                 updateQueryable = updateQueryable.IncludeArchived();
             }
-            await updateQueryable.UpdateAsync(fieldsAssignmentExpression).ConfigureAwait(false);
+            await updateQueryable.UpdateAsync(fieldsAssignmentExpression, optionsConfigure).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -309,7 +325,9 @@ namespace Sixnet.Development.Data.Database
         /// <param name="conditionExpression"></param>
         /// <param name="isIncludeArchived"></param>
         /// <returns></returns>
-        protected virtual async Task<TEntity> GetAsync<TEntity>(Expression<Func<TEntity, bool>> conditionExpression, bool isIncludeArchived = true)
+        protected virtual async Task<TEntity> GetAsync<TEntity>(Expression<Func<TEntity, bool>> conditionExpression
+            , bool isIncludeArchived = true
+            , Action<SixnetDataOperationOptions> optionsConfigure = null)
         {
             var repository = SixnetContainer.GetRepository<TEntity>();
             var queryable = repository.AsQueryable(conditionExpression);
@@ -317,7 +335,7 @@ namespace Sixnet.Development.Data.Database
             {
                 queryable = queryable.IncludeArchived();
             }
-            return await queryable.FirstAsync().ConfigureAwait(false);
+            return await queryable.FirstAsync(optionsConfigure).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -327,7 +345,9 @@ namespace Sixnet.Development.Data.Database
         /// <param name="conditionExpression"></param>
         /// <param name="isIncludeArchived"></param>
         /// <returns></returns>
-        protected virtual async Task<List<TEntity>> GetListAsync<TEntity>(Expression<Func<TEntity, bool>> conditionExpression, bool isIncludeArchived = true)
+        protected virtual async Task<List<TEntity>> GetListAsync<TEntity>(Expression<Func<TEntity, bool>> conditionExpression
+            , bool isIncludeArchived = true
+            , Action<SixnetDataOperationOptions> optionsConfigure = null)
         {
             var repository = SixnetContainer.GetRepository<TEntity>();
             var queryable = repository.AsQueryable(conditionExpression);
@@ -335,7 +355,7 @@ namespace Sixnet.Development.Data.Database
             {
                 queryable = queryable.IncludeArchived();
             }
-            return await queryable.ToListAsync().ConfigureAwait(false);
+            return await queryable.ToListAsync(optionsConfigure).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -347,7 +367,11 @@ namespace Sixnet.Development.Data.Database
         /// <param name="conditionExpression"></param>
         /// <param name="isIncludeArchived"></param>
         /// <returns></returns>
-        protected virtual async Task<PagingInfo<TEntity>> GetPagingAsync<TEntity>(int page, int pageSize, Expression<Func<TEntity, bool>> conditionExpression, bool isIncludeArchived = true)
+        protected virtual async Task<PagingInfo<TEntity>> GetPagingAsync<TEntity>(int page, int pageSize
+            , Expression<Func<TEntity, bool>> conditionExpression
+            , bool isIncludeArchived = true
+            , Action<SixnetDataOperationOptions> optionsConfigure = null
+            )
         {
             var repository = SixnetContainer.GetRepository<TEntity>();
             var queryable = repository.AsQueryable(conditionExpression);
@@ -355,7 +379,7 @@ namespace Sixnet.Development.Data.Database
             {
                 queryable = queryable.IncludeArchived();
             }
-            return await queryable.ToPagingAsync(page, pageSize).ConfigureAwait(false);
+            return await queryable.ToPagingAsync(page, pageSize, optionsConfigure).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -365,7 +389,9 @@ namespace Sixnet.Development.Data.Database
         /// <param name="conditionExpression"></param>
         /// <param name="isIncludeArchived"></param>
         /// <returns></returns>
-        protected virtual async Task<bool> ExistsAsync<TEntity>(Expression<Func<TEntity, bool>> conditionExpression, bool isIncludeArchived = true)
+        protected virtual async Task<bool> ExistsAsync<TEntity>(Expression<Func<TEntity, bool>> conditionExpression
+            , bool isIncludeArchived = true
+            , Action<SixnetDataOperationOptions> optionsConfigure = null)
         {
             var repository = SixnetContainer.GetRepository<TEntity>();
             var queryable = repository.AsQueryable(conditionExpression);
@@ -373,7 +399,7 @@ namespace Sixnet.Development.Data.Database
             {
                 queryable = queryable.IncludeArchived();
             }
-            return await queryable.AnyAsync().ConfigureAwait(false);
+            return await queryable.AnyAsync(optionsConfigure).ConfigureAwait(false);
         }
 
         /// <summary>
