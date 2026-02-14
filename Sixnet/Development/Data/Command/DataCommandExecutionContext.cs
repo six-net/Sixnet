@@ -137,11 +137,12 @@ namespace Sixnet.Development.Data.Command
             switch (Command.OperationType)
             {
                 case DataOperationType.Insert:
-                    return new SplitTableBehavior()
-                    {
-                        SelectionPattern = SplitTableNameSelectionPattern.Precision,
-                        SplitValues = splitValues
-                    };
+                    return splitValues.IsNullOrEmpty() ? (Command.Options?.SplitTableBehavior ?? ActivityQueryable?.SplitTableBehavior) 
+                                                        : new SplitTableBehavior()
+                                                        {
+                                                            SelectionPattern = SplitTableNameSelectionPattern.Precision,
+                                                            SplitValues = splitValues
+                                                        };
                 case DataOperationType.BulkInsert:
                     throw new NotSupportedException($"Not support get split values for {DataOperationType.BulkInsert}");
                 default:
