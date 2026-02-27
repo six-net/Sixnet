@@ -11,15 +11,6 @@ namespace Sixnet.Exceptions
     /// </summary>
     public static partial class SixnetThrower
     {
-        #region Fields
-
-        /// <summary>
-        /// Exception constructor caches
-        /// </summary>
-        readonly static ConcurrentDictionary<string, Func<string, Exception, Exception>> _exceptionConstructorCaches = new();
-
-        #endregion
-
         #region Sixnet exception
 
         /// <summary>
@@ -28,7 +19,7 @@ namespace Sixnet.Exceptions
         /// <param name="predicate">Predicate</param>
         /// <param name="message">Message</param>
         /// <param name="args">Args</param>
-        public static void ThrowSixnetExceptionIf(bool predicate, string message = "", params string[] args)
+        public static void ThrowSixnetExceptionIf(bool predicate, string message = null, params string[] args)
         {
             ThrowIf<SixnetException>(predicate, message, args);
         }
@@ -39,7 +30,7 @@ namespace Sixnet.Exceptions
         /// <param name="predicate">Predicate</param>
         /// <param name="message">Message</param>
         /// <param name="args">Args</param>
-        public static void ThrowAppExceptionIf(bool predicate, string message = "", params string[] args)
+        public static void ThrowAppExceptionIf(bool predicate, string message = null, params string[] args)
         {
             ThrowIf<SixnetApplicationException>(predicate, message, args);
         }
@@ -50,7 +41,7 @@ namespace Sixnet.Exceptions
         /// <param name="predicate">Predicate</param>
         /// <param name="message">Message</param>
         /// <param name="args">Args</param>
-        public static void ThrowAppExceptionIf<TResource>(bool predicate, string message = "", params string[] args)
+        public static void ThrowAppExceptionIf<TResource>(bool predicate, string message = null, params string[] args)
         {
             ThrowIf<TResource, SixnetApplicationException>(predicate, message, args);
         }
@@ -64,7 +55,7 @@ namespace Sixnet.Exceptions
         /// </summary>
         /// <param name="predicate">Predicate</param>
         /// <param name="message">Message</param>
-        public static void ThrowArgNullIf(bool predicate, string message = "")
+        public static void ThrowArgNullIf(bool predicate, string message = null)
         {
             ThrowIf<ArgumentNullException>(predicate, message);
         }
@@ -74,7 +65,7 @@ namespace Sixnet.Exceptions
         /// </summary>
         /// <param name="predicate">Predicate</param>
         /// <param name="message">Message</param>
-        public static void ThrowArgNullIf<TResource>(bool predicate, string message = "")
+        public static void ThrowArgNullIf<TResource>(bool predicate, string message = null)
         {
             ThrowIf<TResource, ArgumentNullException>(predicate, message);
         }
@@ -84,7 +75,7 @@ namespace Sixnet.Exceptions
         /// </summary>
         /// <param name="predicate">Predicate</param>
         /// <param name="message">Exception message</param>
-        public static void ThrowArgErrorIf(bool predicate, string message = "")
+        public static void ThrowArgErrorIf(bool predicate, string message = null)
         {
             ThrowIf<ArgumentException>(predicate, message);
         }
@@ -94,7 +85,7 @@ namespace Sixnet.Exceptions
         /// </summary>
         /// <param name="predicate">Predicate</param>
         /// <param name="message">Exception message</param>
-        public static void ThrowArgErrorIf<TResource>(bool predicate, string message = "")
+        public static void ThrowArgErrorIf<TResource>(bool predicate, string message = null)
         {
             ThrowIf<TResource, ArgumentException>(predicate, message);
         }
@@ -108,7 +99,7 @@ namespace Sixnet.Exceptions
         /// </summary>
         /// <param name="predicate">Predicate</param>
         /// <param name="message">Message</param>
-        public static void ThrowInvalidOperationIf(bool predicate, string message = "")
+        public static void ThrowInvalidOperationIf(bool predicate, string message = null)
         {
             ThrowIf<InvalidOperationException>(predicate, message);
         }
@@ -118,7 +109,7 @@ namespace Sixnet.Exceptions
         /// </summary>
         /// <param name="predicate">Predicate</param>
         /// <param name="message">Message</param>
-        public static void ThrowInvalidOperationIf<TResource>(bool predicate, string message = "")
+        public static void ThrowInvalidOperationIf<TResource>(bool predicate, string message = null)
         {
             ThrowIf<TResource, InvalidOperationException>(predicate, message);
         }
@@ -132,7 +123,7 @@ namespace Sixnet.Exceptions
         /// </summary>
         /// <param name="predicate">Predicate</param>
         /// <param name="message">Message</param>
-        public static void ThrowNotSupportIf(bool predicate, string message = "")
+        public static void ThrowNotSupportIf(bool predicate, string message = null)
         {
             ThrowIf<NotSupportedException>(predicate, message);
         }
@@ -142,7 +133,7 @@ namespace Sixnet.Exceptions
         /// </summary>
         /// <param name="predicate">Predicate</param>
         /// <param name="message">Message</param>
-        public static void ThrowNotSupportIf<TResource>(bool predicate, string message = "")
+        public static void ThrowNotSupportIf<TResource>(bool predicate, string message = null)
         {
             ThrowIf<TResource, NotSupportedException>(predicate, message);
         }
@@ -157,7 +148,7 @@ namespace Sixnet.Exceptions
         /// <typeparam name="T"></typeparam>
         /// <param name="predicate"></param>
         /// <param name="message"></param>
-        public static void ThrowSaveFailedIf<T>(bool predicate, string message = "")
+        public static void ThrowSaveFailedIf<T>(bool predicate, string message = null)
         {
             if (predicate && string.IsNullOrWhiteSpace(message))
             {
@@ -176,7 +167,7 @@ namespace Sixnet.Exceptions
         /// <typeparam name="T"></typeparam>
         /// <param name="predicate"></param>
         /// <param name="message"></param>
-        public static void ThrowAddFailedIf<T>(bool predicate, string message = "")
+        public static void ThrowAddFailedIf<T>(bool predicate, string message = null)
         {
             if (predicate && string.IsNullOrWhiteSpace(message))
             {
@@ -195,7 +186,7 @@ namespace Sixnet.Exceptions
         /// <typeparam name="T"></typeparam>
         /// <param name="predicate"></param>
         /// <param name="message"></param>
-        public static void ThrowUpdateFailedIf<T>(bool predicate, string message = "")
+        public static void ThrowUpdateFailedIf<T>(bool predicate, string message = null)
         {
             if (predicate && string.IsNullOrWhiteSpace(message))
             {
@@ -214,7 +205,7 @@ namespace Sixnet.Exceptions
         /// <typeparam name="T"></typeparam>
         /// <param name="predicate"></param>
         /// <param name="message"></param>
-        public static void ThrowDeleteFailedIf<T>(bool predicate, string message)
+        public static void ThrowDeleteFailedIf<T>(bool predicate, string message = null)
         {
             if (predicate && string.IsNullOrWhiteSpace(message))
             {
@@ -233,7 +224,7 @@ namespace Sixnet.Exceptions
         /// <typeparam name="T"></typeparam>
         /// <param name="predicate"></param>
         /// <param name="message"></param>
-        public static void ThrowUnspecifiedIf<T>(bool predicate, string message = "")
+        public static void ThrowUnspecifiedIf<T>(bool predicate, string message = null)
         {
             if (predicate && string.IsNullOrWhiteSpace(message))
             {
@@ -252,7 +243,7 @@ namespace Sixnet.Exceptions
         /// <typeparam name="TException"></typeparam>
         /// <param name="predicate">Predicate</param>
         /// <param name="args">Args</param>
-        public static void ThrowIf<TException>(bool predicate, string message = "", params string[] args) where TException : Exception, new()
+        public static void ThrowIf<TException>(bool predicate, string message = null, params string[] args) where TException : Exception, new()
         {
             SixnetDirectThrower.ThrowCoreIf<TException>(predicate, true, message, args);
         }
@@ -263,7 +254,7 @@ namespace Sixnet.Exceptions
         /// <typeparam name="TException"></typeparam>
         /// <param name="predicate">Predicate</param>
         /// <param name="args">Args</param>
-        public static void ThrowIf<TResource, TException>(bool predicate, string message = "", params string[] args) where TException : Exception, new()
+        public static void ThrowIf<TResource, TException>(bool predicate, string message = null, params string[] args) where TException : Exception, new()
         {
             SixnetDirectThrower.ThrowCoreIf<TResource, TException>(predicate, true, message, args);
         }
