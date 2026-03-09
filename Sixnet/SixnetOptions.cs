@@ -2,6 +2,7 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 
 using Sixnet.App;
 using Sixnet.Cache;
@@ -94,9 +95,19 @@ namespace Sixnet
         /// Configure host builder
         /// </summary>
         /// <param name="hostBuilder"></param>
-        internal protected void ConfigureHostBuilder(IHostBuilder hostBuilder)
+        internal void ConfigureHostBuilder(IHostBuilder hostBuilder)
         {
             ConfigureHostBuilderAction?.Invoke(hostBuilder);
+        }
+
+        /// <summary>
+        /// Set host builder
+        /// </summary>
+        /// <param name="hostBuilder"></param>
+        public void SetHostBuilder(IHostBuilder hostBuilder)
+        {
+            ConfigureHostBuilder(hostBuilder);
+            HostBuilder = hostBuilder;
         }
 
         #endregion
