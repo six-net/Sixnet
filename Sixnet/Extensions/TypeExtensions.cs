@@ -67,15 +67,17 @@ namespace System
         /// Generate dictionary by enum
         /// </summary>
         /// <param name="enumType">Enum type</param>
-        /// <param name="options">Options</param>
+        /// <param name="configure">Configure options</param>
         /// <returns>Return the dictionary value</returns>
-        public static Dictionary<int, string> GetEnumValueAndNames(this Type enumType, SixnetEnumOptions options)
+        public static Dictionary<int, string> GetEnumValueAndNames(this Type enumType, Action<SixnetEnumOptions> configure = null)
         {
             if (enumType == null)
             {
                 return new Dictionary<int, string>(0);
             }
-            options ??= SixnetContainer.GetOptions<SixnetEnumOptions>();
+            var options = SixnetContainer.GetOptions<SixnetEnumOptions>();
+            options ??= new SixnetEnumOptions();
+            configure?.Invoke(options);
             var formatedKey = $"{enumType.GUID}_{options.GetOptionsIdentityKey()}";
             if (CacheEnumValueAndNames.TryGetValue(formatedKey, out var valueAndNames))
             {

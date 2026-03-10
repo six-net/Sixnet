@@ -12,11 +12,11 @@ namespace System
         /// </summary>
         /// <typeparam name="TEnum">Enum type</typeparam>
         /// <param name="enumValue">Enum value</param>
-        /// <param name="options">Options</param>
+        /// <param name="configure">Configure options</param>
         /// <returns>Return a dictionary</returns>
-        public static Dictionary<int, string> GetEnumDictionary<TEnum>(this TEnum enumValue, SixnetEnumOptions options = null) where TEnum : struct, Enum
+        public static Dictionary<int, string> GetEnumDictionary<TEnum>(this TEnum enumValue, Action<SixnetEnumOptions> configure = null) where TEnum : struct, Enum
         {
-            return enumValue.GetType().GetEnumValueAndNames(options);
+            return enumValue.GetType().GetEnumValueAndNames(configure);
         }
 
         /// <summary>
@@ -24,11 +24,11 @@ namespace System
         /// </summary>
         /// <typeparam name="TEnum">Enum type</typeparam>
         /// <param name="enumValue">Enum value</param>
-        /// <param name="options">Enum options</param>
+        /// <param name="configure">Configure options</param>
         /// <returns>Return a name code & value collection</returns>
-        public static List<NameValue<int>> GetEnumNameValues<TEnum>(this TEnum enumValue, SixnetEnumOptions options = null) where TEnum : struct, Enum
+        public static List<NameValue<int>> GetEnumNameValues<TEnum>(this TEnum enumValue, Action<SixnetEnumOptions> configure = null) where TEnum : struct, Enum
         {
-            var enumDict = enumValue.GetEnumDictionary(options);
+            var enumDict = enumValue.GetEnumDictionary(configure);
             return enumDict.Select(c => new NameValue<int>()
             {
                 Value = c.Key,
@@ -41,12 +41,12 @@ namespace System
         /// </summary>
         /// <typeparam name="TEnum">Enum type</typeparam>
         /// <param name="enumValue">Enum value</param>
-        /// <param name="options">Enum options</param>
+        /// <param name="configure">Configure options</param>
         /// <returns></returns>
-        public static string GetEnumName<TEnum>(this TEnum enumValue, SixnetEnumOptions options = null) where TEnum : struct, Enum
+        public static string GetEnumName<TEnum>(this TEnum enumValue, Action<SixnetEnumOptions> configure = null) where TEnum : struct, Enum
         {
             var intValue = Convert.ToInt32(enumValue);
-            var enumDict = enumValue.GetEnumDictionary(options);
+            var enumDict = enumValue.GetEnumDictionary(configure);
             if (enumDict?.ContainsKey(intValue) ?? false)
             {
                 return enumDict[intValue];
