@@ -36,5 +36,6 @@ namespace Sixnet.Localization
         public const string letter_value = nameof(letter_value);
         public const string upper_letter_value = nameof(upper_letter_value);
         public const string lower_letter_value = nameof(lower_letter_value);
+        public const string exist_value = nameof(exist_value);
     }
 }

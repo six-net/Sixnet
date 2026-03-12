@@ -147,14 +147,15 @@ namespace Sixnet.Exceptions
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="predicate"></param>
-        /// <param name="message"></param>
-        public static void ThrowSaveFailedIf<T>(bool predicate, string message = null)
+        /// <param name="args"></param>
+        public static void ThrowSaveFailedIf<T>(bool predicate, params string[] args)
         {
-            if (predicate && string.IsNullOrWhiteSpace(message))
+            var message = SixnetResourceKeys.save_data_failed;
+            if (args.IsNullOrEmpty())
             {
-                message = SixnetResourceKeys.save_data_failed;
+                args = [SixnetLocalizer.GetString(typeof(T).Name.ToResourceKey())];
             }
-            ThrowAppExceptionIf(predicate, message, SixnetLocalizer.GetString(typeof(T).Name.ToResourceKey()));
+            ThrowAppExceptionIf(predicate, message, args);
         }
 
         #endregion
@@ -166,14 +167,15 @@ namespace Sixnet.Exceptions
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="predicate"></param>
-        /// <param name="message"></param>
-        public static void ThrowAddFailedIf<T>(bool predicate, string message = null)
+        /// <param name="args"></param>
+        public static void ThrowAddFailedIf<T>(bool predicate, params string[] args)
         {
-            if (predicate && string.IsNullOrWhiteSpace(message))
+            var message = SixnetResourceKeys.add_data_failed;
+            if (args.IsNullOrEmpty())
             {
-                message = SixnetResourceKeys.add_data_failed;
+                args = [SixnetLocalizer.GetString(typeof(T).Name.ToResourceKey())];
             }
-            ThrowAppExceptionIf(predicate, message, SixnetLocalizer.GetString(typeof(T).Name.ToResourceKey()));
+            ThrowAppExceptionIf(predicate, message, args);
         }
 
         #endregion
@@ -185,14 +187,15 @@ namespace Sixnet.Exceptions
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="predicate"></param>
-        /// <param name="message"></param>
-        public static void ThrowUpdateFailedIf<T>(bool predicate, string message = null)
+        /// <param name="args"></param>
+        public static void ThrowUpdateFailedIf<T>(bool predicate, params string[] args)
         {
-            if (predicate && string.IsNullOrWhiteSpace(message))
+            var message = SixnetResourceKeys.update_data_failed;
+            if (args.IsNullOrEmpty())
             {
-                message = SixnetResourceKeys.update_data_failed;
+                args = [SixnetLocalizer.GetString(typeof(T).Name.ToResourceKey())];
             }
-            ThrowAppExceptionIf(predicate, message, SixnetLocalizer.GetString(typeof(T).Name.ToResourceKey()));
+            ThrowAppExceptionIf(predicate, message, args);
         }
 
         #endregion
@@ -204,14 +207,15 @@ namespace Sixnet.Exceptions
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="predicate"></param>
-        /// <param name="message"></param>
-        public static void ThrowDeleteFailedIf<T>(bool predicate, string message = null)
+        /// <param name="args"></param>
+        public static void ThrowDeleteFailedIf<T>(bool predicate, params string[] args)
         {
-            if (predicate && string.IsNullOrWhiteSpace(message))
+            var message = SixnetResourceKeys.delete_data_failed;
+            if (args.IsNullOrEmpty())
             {
-                message = SixnetResourceKeys.delete_data_failed;
+                args = [SixnetLocalizer.GetString(typeof(T).Name.ToResourceKey())];
             }
-            ThrowAppExceptionIf(predicate, message, SixnetLocalizer.GetString(typeof(T).Name.ToResourceKey()));
+            ThrowAppExceptionIf(predicate, message, args);
         }
 
         #endregion
@@ -223,14 +227,35 @@ namespace Sixnet.Exceptions
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="predicate"></param>
-        /// <param name="message"></param>
-        public static void ThrowUnspecifiedIf<T>(bool predicate, string message = null)
+        /// <param name="args"></param>
+        public static void ThrowUnspecifiedIf<T>(bool predicate, params string[] args)
         {
-            if (predicate && string.IsNullOrWhiteSpace(message))
+            var message = SixnetResourceKeys.unspecified_data;
+            if (args.IsNullOrEmpty())
             {
-                message = SixnetResourceKeys.unspecified_data;
+                args = [SixnetLocalizer.GetString(typeof(T).Name.ToResourceKey())];
             }
-            ThrowAppExceptionIf(predicate, message, SixnetLocalizer.GetString(typeof(T).Name.ToResourceKey()));
+            ThrowAppExceptionIf(predicate, message, args);
+        }
+
+        #endregion
+
+        #region Has data
+
+        /// <summary>
+        /// Throw exist data
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="predicate"></param>
+        /// <param name="args"></param>
+        public static void ThrowExistIf<T>(bool predicate, params string[] args)
+        {
+            var message = SixnetResourceKeys.exist_value;
+            if (args.IsNullOrEmpty())
+            {
+                args = [SixnetLocalizer.GetString(typeof(T).Name.ToResourceKey())];
+            }
+            ThrowAppExceptionIf(predicate, message, args);
         }
 
         #endregion
