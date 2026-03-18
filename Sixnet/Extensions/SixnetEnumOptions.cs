@@ -1,11 +1,13 @@
 ﻿// "Company © 2025. All rights reserved."
 
+using Sixnet.Model;
+
 namespace Sixnet.Extensions
 {
     /// <summary>
     /// Sixnet enum options
     /// </summary>
-    public class SixnetEnumOptions
+    public class SixnetEnumOptions : ISixnetCloneable<SixnetEnumOptions>
     {
         /// <summary>
         /// Not start by enum type name when output enum item name.
@@ -39,6 +41,18 @@ namespace Sixnet.Extensions
         internal string GetOptionsIdentityKey()
         {
             return $"{NotStartByTypeName}{NotOutputDisplayName}{UppercaseName}{NotSeparateName}{NameSeparateChar}";
+        }
+
+        public SixnetEnumOptions Clone()
+        {
+            return new SixnetEnumOptions()
+            {
+                NotStartByTypeName = NotStartByTypeName,
+                NotOutputDisplayName = NotOutputDisplayName,
+                UppercaseName = UppercaseName,
+                NotSeparateName = NotSeparateName,
+                NameSeparateChar = NameSeparateChar
+            };
         }
     }
 }

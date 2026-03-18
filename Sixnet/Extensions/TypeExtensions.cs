@@ -75,7 +75,7 @@ namespace System
             {
                 return new Dictionary<int, string>(0);
             }
-            var options = SixnetContainer.GetOptions<SixnetEnumOptions>();
+            var options = SixnetContainer.GetOptions<SixnetEnumOptions>()?.Clone();
             options ??= new SixnetEnumOptions();
             configure?.Invoke(options);
             var formatedKey = $"{enumType.GUID}_{options.GetOptionsIdentityKey()}";
