@@ -89,6 +89,7 @@ namespace System
             foreach (int val in values)
             {
                 var enumName = Enum.GetName(enumType, val);
+                var useDisplay = false;
                 // display
                 if (!options.NotOutputDisplayName)
                 {
@@ -97,11 +98,15 @@ namespace System
                     if (enumField != null && enumField.IsDefined(displayAttrType, false))
                     {
                         var displayName = (enumField.GetCustomAttributes(displayAttrType, false).First() as DisplayAttribute)?.Name;
-                        enumName = string.IsNullOrWhiteSpace(displayName) ? enumName : displayName;
+                        if (!string.IsNullOrWhiteSpace(displayName))
+                        {
+                            useDisplay = true;
+                            enumName = displayName;
+                        }
                     }
                 }
                 // type name
-                enumName = options.NotStartByTypeName ? enumName : $"{enumType.Name}{enumName}";
+                enumName = options.NotStartByTypeName || useDisplay ? enumName : $"{enumType.Name}{enumName}";
                 // separate
                 if (!options.NotSeparateName)
                 {
