@@ -180,6 +180,26 @@ namespace Sixnet.Exceptions
 
         #endregion
 
+        #region Get failed
+
+        /// <summary>
+        /// Throw get failed
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="predicate"></param>
+        /// <param name="args"></param>
+        public static void ThrowGetDataFailedIf<T>(bool predicate, params string[] args)
+        {
+            var message = SixnetResourceKeys.get_data_failed;
+            if (args.IsNullOrEmpty())
+            {
+                args = [SixnetLocalizer.GetString(typeof(T).Name.ToResourceKey())];
+            }
+            ThrowAppExceptionIf(predicate, message, args);
+        }
+
+        #endregion
+
         #region Update failed
 
         /// <summary>

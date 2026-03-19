@@ -8,6 +8,7 @@ namespace Sixnet.Localization
         public const string save_data_success = nameof(save_data_success);
         public const string add_data_failed = nameof(add_data_failed);
         public const string add_data_success = nameof(add_data_success);
+        public const string get_data_failed = nameof(get_data_failed);
         public const string update_data_failed = nameof(update_data_failed);
         public const string update_data_success = nameof(update_data_success);
         public const string unspecified_data = nameof(unspecified_data);
