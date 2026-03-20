@@ -68,7 +68,7 @@ namespace Sixnet.Development.Entity
     /// <summary>
     /// Defines entity contract
     /// </summary>
-    public interface ISixnetEntity<T> : ISixnetEntity where T : class, ISixnetEntity<T>
+    public interface ISixnetEntity<T> : ISixnetEntity, ISixnetCloneable<T> where T : class, ISixnetEntity<T>
     {
         /// <summary>
         /// Compare two objects

@@ -15,7 +15,7 @@ namespace Sixnet.Development.Entity
     /// <summary>
     /// Sixnet base entity
     /// </summary>
-    public abstract class SixnetBaseEntity<T> : ISixnetEntity<T> where T : class, ISixnetEntity<T>
+    public abstract class SixnetBaseEntity<T> : ISixnetEntity<T> where T : class, ISixnetEntity<T>, new()
     {
         #region Fields
 
@@ -746,6 +746,24 @@ namespace Sixnet.Development.Entity
                 allValues[field.Key] = field.Value.ValueProvider.Get(this);
             }
             return allValues;
+        }
+
+        #endregion
+
+        #region Clone
+
+        public T Clone()
+        {
+            var newData = new T();
+            var allValue = GetAllValues();
+            if (!allValue.IsNullOrEmpty())
+            {
+                foreach (var field in allValue)
+                {
+                    newData.SetValue(field.Key, field.Value);
+                }
+            }
+            return newData;
         }
 
         #endregion
