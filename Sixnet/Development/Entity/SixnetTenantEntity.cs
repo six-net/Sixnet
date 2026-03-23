@@ -6,7 +6,7 @@ namespace Sixnet.Development.Entity
     /// Tenant entity
     /// </summary>
     /// <typeparam name="TEntity"></typeparam>
-    public class TenantEntity<TEntity> : SixnetBaseEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>
+    public class TenantEntity<TEntity> : SixnetBaseEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Tenant id

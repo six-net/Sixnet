@@ -6,7 +6,7 @@ namespace Sixnet.Development.Entity
     /// Create date entity
     /// </summary>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class CreateDateEntity<TEntity> : SixnetBaseEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>
+    public abstract class CreateDateEntity<TEntity> : SixnetBaseEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Create date
@@ -37,7 +37,7 @@ namespace Sixnet.Development.Entity
     /// Tenant create date entity
     /// </summary>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class TenantCreateDateEntity<TEntity> : CreateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>
+    public abstract class TenantCreateDateEntity<TEntity> : CreateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Tenant id
@@ -50,7 +50,7 @@ namespace Sixnet.Development.Entity
     /// Update date entity
     /// </summary>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class UpdateDateEntity<TEntity> : SixnetBaseEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>
+    public abstract class UpdateDateEntity<TEntity> : SixnetBaseEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Update date
@@ -81,7 +81,7 @@ namespace Sixnet.Development.Entity
     /// Tenant update date entity
     /// </summary>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class TenantUpdateDateEntity<TEntity> : UpdateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>
+    public abstract class TenantUpdateDateEntity<TEntity> : UpdateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Tenant id
@@ -94,7 +94,7 @@ namespace Sixnet.Development.Entity
     /// Create & Update entity
     /// </summary>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class CreateUpdateDateEntity<TEntity> : CreateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>
+    public abstract class CreateUpdateDateEntity<TEntity> : CreateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Update date
@@ -125,7 +125,7 @@ namespace Sixnet.Development.Entity
     /// Center & Create & Update entity
     /// </summary>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class TenantCreateUpdateDateEntity<TEntity> : CreateUpdateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>
+    public abstract class TenantCreateUpdateDateEntity<TEntity> : CreateUpdateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Tenant id

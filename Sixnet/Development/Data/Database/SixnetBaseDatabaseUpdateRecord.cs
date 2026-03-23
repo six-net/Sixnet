@@ -144,7 +144,7 @@ namespace Sixnet.Development.Data.Database
         /// <typeparam name="TEntity"></typeparam>
         /// <param name="instance"></param>
         /// <returns></returns>
-        protected virtual TEntity SetBasicInfo<TEntity>(TEntity instance) where TEntity : class, ISixnetEntity<TEntity>
+        protected virtual TEntity SetBasicInfo<TEntity>(TEntity instance) where TEntity : class, ISixnetEntity<TEntity>, new()
         {
             if (instance != null)
             {
