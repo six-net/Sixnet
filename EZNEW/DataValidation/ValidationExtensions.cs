@@ -670,15 +670,17 @@ namespace System
         /// <param name="value">Value</param>
         /// <param name="maxLength">max length,must be greater than zero</param>
         /// <returns>Return whether the verification has passed</returns>
-        public static bool MaxLength(this object value, int maxLength)
-        {
-            if (maxLength < 1)
-            {
-                throw new ArgumentException($"{nameof(maxLength)} must be greater than zero");
-            }
-            var maxLengthAttribute = new MaxLengthAttribute(maxLength);
-            return maxLengthAttribute.IsValid(value);
-        }
+     
+      public static bool MaxLength(this string? value, int maxLength)
+{
+    if (maxLength < 1)
+        throw new ArgumentException($"{nameof(maxLength)} must be greater than zero");
+
+    if (value is null)
+        return false;
+
+    return value.Length <= maxLength;
+}
 
         #endregion
 
