@@ -119,55 +119,55 @@ namespace Sixnet.Validation
                         valueFieldArray.SetValue(fieldInstance, 0);
                         switch (rule.Type)
                         {
-                            case ValidatorType.EnumType:
+                            case SixnetValidatorType.EnumType:
                                 Type enumType = Type.GetType(rule.EnumType);
                                 BuildEnumValidation(modelType, enumType, valueFieldArray);
                                 break;
-                            case ValidatorType.MaxLength:
+                            case SixnetValidatorType.MaxLength:
                                 BuidMaxLengthValidation(modelType, System.Convert.ToInt32(rule.MaxValue), valueFieldArray);
                                 break;
-                            case ValidatorType.MinLength:
+                            case SixnetValidatorType.MinLength:
                                 BuildMinLengthValidation(modelType, System.Convert.ToInt32(rule.MinValue), valueFieldArray);
                                 break;
-                            case ValidatorType.Range:
+                            case SixnetValidatorType.Range:
                                 BuildRangeValidation(modelType, rule.MinValue, rule.MaxValue, rule.LowerBoundary, rule.UpperBoundary, valueFieldArray);
                                 break;
-                            case ValidatorType.RegularExpression:
+                            case SixnetValidatorType.RegularExpression:
                                 BuildRegularExpressionValidation(modelType, rule.Value, valueFieldArray);
                                 break;
-                            case ValidatorType.StringLength:
+                            case SixnetValidatorType.StringLength:
                                 BuildStringLengthValidation(modelType, System.Convert.ToInt32(rule.MinValue), System.Convert.ToInt32(rule.MaxValue), valueFieldArray);
                                 break;
-                            case ValidatorType.Compare:
+                            case SixnetValidatorType.Compare:
                                 BuildCompareValidation(modelType, rule.Value, rule.CompareType, parameterExpression, funcType, parameterArray, rule.Operator, fieldInstance);
                                 break;
-                            case ValidatorType.Email:
-                            case ValidatorType.CreditCard:
-                            case ValidatorType.Phone:
-                            case ValidatorType.Required:
-                            case ValidatorType.Url:
-                            case ValidatorType.Integer:
-                            case ValidatorType.PositiveInteger:
-                            case ValidatorType.PositiveIntegerOrZero:
-                            case ValidatorType.NegativeInteger:
-                            case ValidatorType.NegativeIntegerOrZero:
-                            case ValidatorType.Fraction:
-                            case ValidatorType.PositiveFraction:
-                            case ValidatorType.NegativeFraction:
-                            case ValidatorType.PositiveFractionOrZero:
-                            case ValidatorType.NegativeFractionOrZero:
-                            case ValidatorType.Number:
-                            case ValidatorType.Color:
-                            case ValidatorType.Chinese:
-                            case ValidatorType.PostCode:
-                            case ValidatorType.Mobile:
-                            case ValidatorType.IPV4:
-                            case ValidatorType.Date:
-                            case ValidatorType.DateTime:
-                            case ValidatorType.Letter:
-                            case ValidatorType.UpperLetter:
-                            case ValidatorType.LowerLetter:
-                            case ValidatorType.IdentityCard:
+                            case SixnetValidatorType.Email:
+                            case SixnetValidatorType.CreditCard:
+                            case SixnetValidatorType.Phone:
+                            case SixnetValidatorType.Required:
+                            case SixnetValidatorType.Url:
+                            case SixnetValidatorType.Integer:
+                            case SixnetValidatorType.PositiveInteger:
+                            case SixnetValidatorType.PositiveIntegerOrZero:
+                            case SixnetValidatorType.NegativeInteger:
+                            case SixnetValidatorType.NegativeIntegerOrZero:
+                            case SixnetValidatorType.Fraction:
+                            case SixnetValidatorType.PositiveFraction:
+                            case SixnetValidatorType.NegativeFraction:
+                            case SixnetValidatorType.PositiveFractionOrZero:
+                            case SixnetValidatorType.NegativeFractionOrZero:
+                            case SixnetValidatorType.Number:
+                            case SixnetValidatorType.Color:
+                            case SixnetValidatorType.Chinese:
+                            case SixnetValidatorType.PostCode:
+                            case SixnetValidatorType.Mobile:
+                            case SixnetValidatorType.IPV4:
+                            case SixnetValidatorType.Date:
+                            case SixnetValidatorType.DateTime:
+                            case SixnetValidatorType.Letter:
+                            case SixnetValidatorType.UpperLetter:
+                            case SixnetValidatorType.LowerLetter:
+                            case SixnetValidatorType.IdentityCard:
                                 BuildValidatorValidation(rule.Type.ToString(), modelType, valueFieldArray);
                                 break;
                         }
@@ -258,7 +258,7 @@ namespace Sixnet.Validation
         /// <param name="lowerBoundary">Lower boundary</param>
         /// <param name="upperBoundary">Upper boundary</param>
         /// <param name="valueFieldArray">Value field array</param>
-        void BuildRangeValidation(Type modelType, dynamic minValue, dynamic maxValue, RangeBoundary lowerBoundary, RangeBoundary upperBoundary, Array valueFieldArray)
+        void BuildRangeValidation(Type modelType, dynamic minValue, dynamic maxValue, SixnetRangeBoundary lowerBoundary, SixnetRangeBoundary upperBoundary, Array valueFieldArray)
         {
             MethodInfo rangeMethod = _validationMethods.FirstOrDefault(c => c.Name == "Range");
             if (rangeMethod == null)
@@ -333,7 +333,7 @@ namespace Sixnet.Validation
         /// <param name="parameterArray">Parameter array</param>
         /// <param name="compareOperator">Compare operator</param>
         /// <param name="fieldInstance">field instance</param>
-        void BuildCompareValidation(Type modelType, object compareValue, CompareObject compareType, ParameterExpression parameterExpression, Type funcType, Array parameterArray, CompareOperator compareOperator, object fieldInstance)
+        void BuildCompareValidation(Type modelType, object compareValue, CompareObject compareType, ParameterExpression parameterExpression, Type funcType, Array parameterArray, SixnetCompareOperator compareOperator, object fieldInstance)
         {
             MethodInfo compareMethod = _validationMethods.FirstOrDefault(c => c.Name == "SetCompareValidation");
             if (compareValue == null || compareMethod == null)
@@ -367,7 +367,7 @@ namespace Sixnet.Validation
                     compareValue = compareLambdaExpression;
                     break;
                 default:
-                    if (compareOperator == CompareOperator.In || compareOperator == CompareOperator.NotIn)
+                    if (compareOperator == SixnetCompareOperator.In || compareOperator == SixnetCompareOperator.NotIn)
                     {
                         IEnumerable<dynamic> valueArray = compareValue.ToString().LSplit(",");
                         compareValue = valueArray;

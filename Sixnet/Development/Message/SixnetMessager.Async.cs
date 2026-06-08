@@ -15,13 +15,13 @@ namespace Sixnet.Development.Message
         /// </summary>
         /// <param name="messages">Messages</param>
         /// <returns></returns>
-        public static Task SendAsync(params MessageInfo[] messages)
+        public static Task SendAsync(params SixnetMessageInfo[] messages)
         {
             SixnetDirectThrower.ThrowArgNullIf(messages.IsNullOrEmpty(), nameof(messages));
 
-            var parameter = new SendMessageParameter()
+            var parameter = new SixnetSendMessageParameter()
             {
-                Messages = new List<MessageInfo>(messages)
+                Messages = new List<SixnetMessageInfo>(messages)
             };
             var messageProvider = GetMessageProvider();
             return messageProvider.SendAsync(parameter);
@@ -42,7 +42,7 @@ namespace Sixnet.Development.Message
                 return;
             }
             var messageProvider = GetMessageProvider();
-            await messageProvider.SendAsync(new SendMessageParameter()
+            await messageProvider.SendAsync(new SixnetSendMessageParameter()
             {
                 Messages = MessageBox.Messages
             }).ConfigureAwait(false);

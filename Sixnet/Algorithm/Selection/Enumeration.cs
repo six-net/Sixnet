@@ -6,7 +6,7 @@ namespace Sixnet.Algorithm.Selection
     /// Selection matching pattern
     /// </summary>
     [Serializable]
-    public enum SelectionMatchPattern
+    public enum SixnetSelectionMatchPattern
     {
         /// <summary>
         /// The first data

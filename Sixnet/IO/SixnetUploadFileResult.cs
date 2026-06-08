@@ -77,7 +77,7 @@ namespace Sixnet.IO
         /// <summary>
         /// Gets or sets the upload location
         /// </summary>
-        public UploadLocation Location { get; set; }
+        public SixnetUploadLocation Location { get; set; }
 
         #endregion
     }

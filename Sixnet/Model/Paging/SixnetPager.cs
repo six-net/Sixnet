@@ -16,18 +16,18 @@ namespace Sixnet.Model.Paging
         /// <param name="totalCount">Total count</param>
         /// <param name="datas">Datas</param>
         /// <returns>Return a paging object</returns>
-        public static PagingInfo<T> Create<T>(int pageIndex, int pageSize, int totalCount, IEnumerable<T> datas)
+        public static SixnetPagingInfo<T> Create<T>(int pageIndex, int pageSize, int totalCount, IEnumerable<T> datas)
         {
-            return new PagingInfo<T>(pageIndex, pageSize, totalCount, datas);
+            return new SixnetPagingInfo<T>(pageIndex, pageSize, totalCount, datas);
         }
 
         /// <summary>
         /// Get a empty paging object
         /// </summary>
         /// <returns>Return a empty paging object</returns>
-        public static PagingInfo<T> Empty<T>()
+        public static SixnetPagingInfo<T> Empty<T>()
         {
-            return PagingInfo<T>.Empty();
+            return SixnetPagingInfo<T>.Empty();
         }
     }
 }

@@ -12,7 +12,7 @@ namespace Sixnet.Cache
         /// <summary>
         /// Gets or sets the server type
         /// </summary>
-        public CacheServerType Type { get; set; }
+        public SixnetCacheServerType Type { get; set; }
 
         /// <summary>
         /// Gets the server name

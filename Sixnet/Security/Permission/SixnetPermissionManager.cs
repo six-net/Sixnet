@@ -234,7 +234,7 @@ namespace Sixnet.Security.Permission
             var combineResult = await SixnetCacher.Set.CombineAsync(new SixnetSetCombineParameter()
             {
                 CacheObject = GetCacheObject(),
-                CombineOperation = CombineOperation.Intersect,
+                CombineOperation = SixnetCombineOperation.Intersect,
                 Keys = authObjectAuthKeys
             }).ConfigureAwait(false);
             return !(combineResult?.CombineValues?.IsNullOrEmpty() ?? true);
@@ -280,7 +280,7 @@ namespace Sixnet.Security.Permission
             var combineResult = SixnetCacher.Set.Combine(new SixnetSetCombineParameter()
             {
                 CacheObject = GetCacheObject(),
-                CombineOperation = CombineOperation.Intersect,
+                CombineOperation = SixnetCombineOperation.Intersect,
                 Keys = authObjectAuthKeys
             });
             return !(combineResult?.CombineValues?.IsNullOrEmpty() ?? true);
@@ -496,7 +496,7 @@ namespace Sixnet.Security.Permission
         /// <param name="userId">User id</param>
         /// <param name="getUserPermissionsFunc">Get user permissions func</param>
         /// <param name="configure">Auth configure</param>
-        public static void RefreshAuthenticatedUserPermission(string appTag, string userId, Func<string, List<string>> getUserPermissionsFunc, Action<AuthenticationTokenSetting> configure = null)
+        public static void RefreshAuthenticatedUserPermission(string appTag, string userId, Func<string, List<string>> getUserPermissionsFunc, Action<SixnetAuthenticationTokenSetting> configure = null)
         {
             if (string.IsNullOrWhiteSpace(userId))
             {
@@ -518,7 +518,7 @@ namespace Sixnet.Security.Permission
         /// <param name="userId">User id</param>
         /// <param name="getUserPermissionsFunc">Get user permissions func</param>
         /// <param name="configure">Auth configure</param>
-        public static void RefreshAuthenticatedUserPermission(string userId, Func<string, List<string>> getUserPermissionsFunc, Action<AuthenticationTokenSetting> configure = null)
+        public static void RefreshAuthenticatedUserPermission(string userId, Func<string, List<string>> getUserPermissionsFunc, Action<SixnetAuthenticationTokenSetting> configure = null)
         {
             RefreshAuthenticatedUserPermission(SixnetApplication.Current.GetDefaultAppTag(), userId, getUserPermissionsFunc, configure);
         }
@@ -530,7 +530,7 @@ namespace Sixnet.Security.Permission
         /// <param name="userId">User id</param>
         /// <param name="getUserPermissionsFunc">Get user permissions func</param>
         /// <param name="configure">Auth configure</param>
-        public static async Task RefreshAuthenticatedUserPermissionAsync(string appTag, string userId, Func<string, Task<List<string>>> getUserPermissionsFuncAsync, Action<AuthenticationTokenSetting> configure = null)
+        public static async Task RefreshAuthenticatedUserPermissionAsync(string appTag, string userId, Func<string, Task<List<string>>> getUserPermissionsFuncAsync, Action<SixnetAuthenticationTokenSetting> configure = null)
         {
             if (string.IsNullOrWhiteSpace(userId))
             {
@@ -552,7 +552,7 @@ namespace Sixnet.Security.Permission
         /// <param name="userId">User id</param>
         /// <param name="getUserPermissionsFunc">Get user permissions func</param>
         /// <param name="configure">Auth configure</param>
-        public static Task RefreshAuthenticatedUserPermissionAsync(string userId, Func<string, Task<List<string>>> getUserPermissionsFuncAsync, Action<AuthenticationTokenSetting> configure = null)
+        public static Task RefreshAuthenticatedUserPermissionAsync(string userId, Func<string, Task<List<string>>> getUserPermissionsFuncAsync, Action<SixnetAuthenticationTokenSetting> configure = null)
         {
             return RefreshAuthenticatedUserPermissionAsync(SixnetApplication.Current.GetDefaultAppTag(), userId, getUserPermissionsFuncAsync, configure);
         }

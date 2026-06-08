@@ -14,7 +14,7 @@ namespace Sixnet.Cache.String.Parameters
         /// <summary>
         /// Gets or sets the bit wise
         /// </summary>
-        public CacheBitwise Bitwise { get; set; }
+        public SixnetCacheBitwise Bitwise { get; set; }
 
         /// <summary>
         /// Gets or sets the destination key for store

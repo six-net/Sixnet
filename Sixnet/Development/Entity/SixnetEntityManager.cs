@@ -20,7 +20,7 @@ namespace Sixnet.Development.Entity
         /// Value: Entity configuration
         /// Key: Entity type guid
         /// </summary>
-        static readonly Dictionary<Guid, EntityConfiguration> _entityConfigurations = new();
+        static readonly Dictionary<Guid, SixnetEntityConfiguration> _entityConfigurations = new();
 
         /// <summary>
         /// Defines boolean type
@@ -30,7 +30,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// All field roles
         /// </summary>
-        static readonly List<FieldRole> _allFieldRoles = new();
+        static readonly List<SixnetFieldRole> _allFieldRoles = new();
 
         /// <summary>
         /// Func<> type
@@ -39,10 +39,10 @@ namespace Sixnet.Development.Entity
 
         static SixnetEntityManager()
         {
-            var fieldRoleValues = Enum.GetValues(typeof(FieldRole));
-            foreach (FieldRole roleVal in fieldRoleValues)
+            var fieldRoleValues = Enum.GetValues(typeof(SixnetFieldRole));
+            foreach (SixnetFieldRole roleVal in fieldRoleValues)
             {
-                if (roleVal != FieldRole.None)
+                if (roleVal != SixnetFieldRole.None)
                 {
                     _allFieldRoles.Add(roleVal);
                 }
@@ -72,7 +72,7 @@ namespace Sixnet.Development.Entity
             {
                 return;
             }
-            var entityAttribute = entityType.GetCustomAttribute<EntityAttribute>(false);
+            var entityAttribute = entityType.GetCustomAttribute<SixnetEntityAttribute>(false);
             if (entityAttribute == null)
             {
                 return;
@@ -81,9 +81,9 @@ namespace Sixnet.Development.Entity
             memberInfos = memberInfos.Union(entityType.GetProperties(BindingFlags.Public | BindingFlags.Instance));
             memberInfos = memberInfos.Union(entityType.GetFields(BindingFlags.Public | BindingFlags.Instance));
             var tableName = string.IsNullOrWhiteSpace(entityAttribute.TableName) ? entityType.Name : entityAttribute.TableName;
-            if (!_entityConfigurations.TryGetValue(typeGuid, out EntityConfiguration entityConfig))
+            if (!_entityConfigurations.TryGetValue(typeGuid, out SixnetEntityConfiguration entityConfig))
             {
-                entityConfig = new EntityConfiguration()
+                entityConfig = new SixnetEntityConfiguration()
                 {
                     Group = entityAttribute?.Module ?? string.Empty,
                     Schema = entityAttribute?.Schema ?? string.Empty,
@@ -95,29 +95,29 @@ namespace Sixnet.Development.Entity
                 entityConfig.TableName = tableName;
             }
             //fields
-            var allFields = new List<DataField>();
-            var roleFields = new Dictionary<FieldRole, List<DataField>>();
+            var allFields = new List<SixnetDataField>();
+            var roleFields = new Dictionary<SixnetFieldRole, List<SixnetDataField>>();
 
             //cache fields
             var cacheFieldNames = new List<string>();
             var cachePrefixFieldNames = new List<string>();
             var cacheIgnoreFieldNames = new List<string>();
 
-            var necessaryQueryableFields = new List<DataField>();
-            var editableFields = new List<DataField>();
-            var queryableFields = new List<DataField>();
+            var necessaryQueryableFields = new List<SixnetDataField>();
+            var editableFields = new List<SixnetDataField>();
+            var queryableFields = new List<SixnetDataField>();
             foreach (var member in memberInfos)
             {
-                var nonDataAttribute = member.GetCustomAttribute<NotEntityFieldAttribute>();
+                var nonDataAttribute = member.GetCustomAttribute<SixnetNotEntityFieldAttribute>();
                 if (nonDataAttribute != null)
                 {
                     continue;
                 }
                 var fieldName = member.Name;
                 var propertyName = fieldName;
-                var fieldRole = FieldRole.None;
-                var entityFieldAttribute = (member.GetCustomAttributes(typeof(EntityFieldAttribute), false)?.FirstOrDefault()) as EntityFieldAttribute;
-                fieldRole = entityFieldAttribute?.Role ?? FieldRole.None;
+                var fieldRole = SixnetFieldRole.None;
+                var entityFieldAttribute = (member.GetCustomAttributes(typeof(SixnetEntityFieldAttribute), false)?.FirstOrDefault()) as SixnetEntityFieldAttribute;
+                fieldRole = entityFieldAttribute?.Role ?? SixnetFieldRole.None;
                 fieldName = string.IsNullOrWhiteSpace(entityFieldAttribute?.FieldName) ? fieldName : entityFieldAttribute.FieldName;
                 Type memberType = null;
                 if (member is PropertyInfo propertyInfo)
@@ -134,27 +134,27 @@ namespace Sixnet.Development.Entity
                 {
                     fileObjectName = $"{entityType.Name}.{propertyName}".ToLower();
                 }
-                var propertyField = new DataField()
+                var propertyField = new SixnetDataField()
                 {
                     FieldName = fieldName,
                     PropertyName = propertyName,
-                    CacheRole = entityFieldAttribute?.CacheRole ?? FieldCacheRole.None,
+                    CacheRole = entityFieldAttribute?.CacheRole ?? SixnetFieldCacheRole.None,
                     Role = fieldRole,
-                    Behavior = entityFieldAttribute?.Behavior ?? FieldBehavior.None,
+                    Behavior = entityFieldAttribute?.Behavior ?? SixnetFieldBehavior.None,
                     DataType = memberType,
                     DbType = entityFieldAttribute?.DbType,
                     Length = entityFieldAttribute?.Length ?? 0,
                     Description = entityFieldAttribute?.Description ?? string.Empty,
                     FileObjectName = fileObjectName,
                     ModelType = entityType,
-                    DbFeature = entityFieldAttribute?.DbFeature ?? FieldDbFeature.None,
+                    DbFeature = entityFieldAttribute?.DbFeature ?? SixnetFieldDbFeature.None,
                     FormatSetting = entityFieldAttribute?.FormatSetting,
                     Precision = entityFieldAttribute?.Precision ?? 0,
                     DefaultValue = entityFieldAttribute?.DefaultValue ?? string.Empty,
                     IncrementValue = entityFieldAttribute?.IncrementValue ?? 0,
                 };
                 var fieldStartValue = entityFieldAttribute?.StartValue ?? 0;
-                if (propertyField.InRole(FieldRole.PrimaryKey) && fieldStartValue == 0)
+                if (propertyField.InRole(SixnetFieldRole.PrimaryKey) && fieldStartValue == 0)
                 {
                     fieldStartValue = entityAttribute.PrimaryKeyStartValue;
                 }
@@ -178,39 +178,39 @@ namespace Sixnet.Development.Entity
                 }
 
                 // cache role
-                if (!propertyField.InRole(FieldRole.PrimaryKey))
+                if (!propertyField.InRole(SixnetFieldRole.PrimaryKey))
                 {
-                    if (propertyField.InCacheRole(FieldCacheRole.CacheKey))
+                    if (propertyField.InCacheRole(SixnetFieldCacheRole.CacheKey))
                     {
                         cacheFieldNames.Add(propertyName);
                     }
-                    if (propertyField.InCacheRole(FieldCacheRole.CacheKeyPrefix))
+                    if (propertyField.InCacheRole(SixnetFieldCacheRole.CacheKeyPrefix))
                     {
                         cachePrefixFieldNames.Add(propertyName);
                     }
-                    if (propertyField.InCacheRole(FieldCacheRole.Ignore))
+                    if (propertyField.InCacheRole(SixnetFieldCacheRole.Ignore))
                     {
                         cacheIgnoreFieldNames.Add(propertyName);
                     }
                 }
 
                 //relation config
-                var relationAttributes = member.GetCustomAttributes<EntityRelationFieldAttribute>(false);
+                var relationAttributes = member.GetCustomAttributes<SixnetEntityRelationFieldAttribute>(false);
                 if (relationAttributes.IsNullOrEmpty())
                 {
                     continue;
                 }
                 if (entityConfig.RelationFields.IsNullOrEmpty())
                 {
-                    entityConfig.RelationFields = new Dictionary<Guid, Dictionary<string, EntityRelationFieldAttribute>>();
+                    entityConfig.RelationFields = new Dictionary<Guid, Dictionary<string, SixnetEntityRelationFieldAttribute>>();
                 }
                 foreach (var relationAttrObj in relationAttributes)
                 {
-                    if (relationAttrObj is EntityRelationFieldAttribute relationAttr && relationAttr.RelationType != null && !string.IsNullOrWhiteSpace(relationAttr.RelationField))
+                    if (relationAttrObj is SixnetEntityRelationFieldAttribute relationAttr && relationAttr.RelationType != null && !string.IsNullOrWhiteSpace(relationAttr.RelationField))
                     {
                         var relationTypeId = relationAttr.RelationType.GUID;
                         entityConfig.RelationFields.TryGetValue(relationTypeId, out var values);
-                        values ??= new Dictionary<string, EntityRelationFieldAttribute>();
+                        values ??= new Dictionary<string, SixnetEntityRelationFieldAttribute>();
                         if (!values.ContainsKey(propertyName))
                         {
                             values.Add(propertyName, relationAttr);
@@ -219,10 +219,10 @@ namespace Sixnet.Development.Entity
                     }
                 }
             }
-            allFields = allFields.OrderByDescending(f => f.InRole(FieldRole.PrimaryKey))
+            allFields = allFields.OrderByDescending(f => f.InRole(SixnetFieldRole.PrimaryKey))
                         .ThenByDescending(c => cacheFieldNames.Contains(c.PropertyName))
                         .ToList();
-            var allFieldDict = new Dictionary<string, DataField>(allFields.Count);
+            var allFieldDict = new Dictionary<string, SixnetDataField>(allFields.Count);
             foreach (var field in allFields)
             {
                 allFieldDict[field.PropertyName] = field;
@@ -231,11 +231,11 @@ namespace Sixnet.Development.Entity
                 {
                     necessaryQueryableFields.Add(field);
                 }
-                if (necessaryQueryField || !field.AllowBehavior(FieldBehavior.NotQuery))
+                if (necessaryQueryField || !field.AllowBehavior(SixnetFieldBehavior.NotQuery))
                 {
                     queryableFields.Add(field);
                 }
-                if (!field.AllowBehavior(FieldBehavior.NotInsert))
+                if (!field.AllowBehavior(SixnetFieldBehavior.NotInsert))
                 {
                     editableFields.Add(field);
                 }
@@ -266,15 +266,15 @@ namespace Sixnet.Development.Entity
         /// <param name="allRoleFields"></param>
         /// <param name="fieldRole"></param>
         /// <param name="field"></param>
-        static void AddRoleField(Dictionary<FieldRole, List<DataField>> allRoleFields, FieldRole fieldRole, DataField field)
+        static void AddRoleField(Dictionary<SixnetFieldRole, List<SixnetDataField>> allRoleFields, SixnetFieldRole fieldRole, SixnetDataField field)
         {
-            if (allRoleFields.TryGetValue(fieldRole, out List<DataField> fields))
+            if (allRoleFields.TryGetValue(fieldRole, out List<SixnetDataField> fields))
             {
                 fields.Add(field);
             }
             else
             {
-                allRoleFields[fieldRole] = new List<DataField>() { field };
+                allRoleFields[fieldRole] = new List<SixnetDataField>() { field };
             }
         }
 
@@ -287,7 +287,7 @@ namespace Sixnet.Development.Entity
         /// </summary>
         /// <param name="entityType">Entity type</param>
         /// <returns></returns>
-        public static EntityConfiguration GetEntityConfig(Type entityType)
+        public static SixnetEntityConfiguration GetEntityConfig(Type entityType)
         {
             if (entityType == null)
             {
@@ -302,7 +302,7 @@ namespace Sixnet.Development.Entity
         /// </summary>
         /// <typeparam name="TEntity">Entity type</typeparam>
         /// <returns></returns>
-        public static EntityConfiguration GetEntityConfig<TEntity>()
+        public static SixnetEntityConfiguration GetEntityConfig<TEntity>()
         {
             return GetEntityConfig(typeof(TEntity));
         }
@@ -312,7 +312,7 @@ namespace Sixnet.Development.Entity
         /// </summary>
         /// <param name="entityTypeId">Entity type id</param>
         /// <returns></returns>
-        public static EntityConfiguration GetEntityConfig(Guid entityTypeId)
+        public static SixnetEntityConfiguration GetEntityConfig(Guid entityTypeId)
         {
             _entityConfigurations.TryGetValue(entityTypeId, out var entityConfig);
             return entityConfig;
@@ -326,7 +326,7 @@ namespace Sixnet.Development.Entity
         /// Get all entity configs
         /// </summary>
         /// <returns></returns>
-        public static IEnumerable<EntityConfiguration> GetAllEntityConfigs()
+        public static IEnumerable<SixnetEntityConfiguration> GetAllEntityConfigs()
         {
             return _entityConfigurations.Values;
         }
@@ -344,10 +344,10 @@ namespace Sixnet.Development.Entity
         /// </summary>
         /// <param name="entityType">Entity type</param>
         /// <returns></returns>
-        public static List<DataField> GetQueryableFields(Type entityType)
+        public static List<SixnetDataField> GetQueryableFields(Type entityType)
         {
             var entityConfig = GetEntityConfig(entityType);
-            return entityConfig?.QueryableFields ?? new List<DataField>(0);
+            return entityConfig?.QueryableFields ?? new List<SixnetDataField>(0);
         }
 
         #endregion
@@ -359,10 +359,10 @@ namespace Sixnet.Development.Entity
         /// </summary>
         /// <param name="entityType">Entity type</param>
         /// <returns></returns>
-        public static List<DataField> GetNecessaryFields(Type entityType)
+        public static List<SixnetDataField> GetNecessaryFields(Type entityType)
         {
             var entityConfig = GetEntityConfig(entityType);
-            return entityConfig?.NecessaryQueryableFields ?? new List<DataField>(0);
+            return entityConfig?.NecessaryQueryableFields ?? new List<SixnetDataField>(0);
         }
 
         #endregion
@@ -375,13 +375,13 @@ namespace Sixnet.Development.Entity
         /// <param name="entityType">Entity type</param>
         /// <param name="propertyName">Property name</param>
         /// <returns></returns>
-        public static DataField GetField(Type entityType, string propertyName)
+        public static SixnetDataField GetField(Type entityType, string propertyName)
         {
             if (entityType == null || string.IsNullOrWhiteSpace(propertyName))
             {
                 return null;
             }
-            DataField field = null;
+            SixnetDataField field = null;
             GetEntityConfig(entityType)?.AllFields.TryGetValue(propertyName, out field);
             return field;
         }
@@ -392,7 +392,7 @@ namespace Sixnet.Development.Entity
         /// <param name="entityType">Entity type</param>
         /// <param name="fieldRole">Field role</param>
         /// <returns></returns>
-        public static DataField GetField(Type entityType, FieldRole fieldRole)
+        public static SixnetDataField GetField(Type entityType, SixnetFieldRole fieldRole)
         {
             var fieldName = GetFieldName(entityType, fieldRole);
             return GetField(entityType, fieldName);
@@ -408,16 +408,16 @@ namespace Sixnet.Development.Entity
         /// <param name="entityType">Entity type</param>
         /// <param name="fieldRole">Field role</param>
         /// <returns></returns>
-        public static List<DataField> GetFields(Type entityType, FieldRole fieldRole)
+        public static List<SixnetDataField> GetFields(Type entityType, SixnetFieldRole fieldRole)
         {
-            if (entityType == null || fieldRole == FieldRole.None)
+            if (entityType == null || fieldRole == SixnetFieldRole.None)
             {
-                return new List<DataField>(0);
+                return new List<SixnetDataField>(0);
             }
             var entityConfig = GetEntityConfig(entityType);
-            List<DataField> fields = null;
+            List<SixnetDataField> fields = null;
             entityConfig?.RoleFields?.TryGetValue(fieldRole, out fields);
-            return fields ?? new List<DataField>(0);
+            return fields ?? new List<SixnetDataField>(0);
         }
 
         /// <summary>
@@ -425,7 +425,7 @@ namespace Sixnet.Development.Entity
         /// </summary>
         /// <param name="fieldRole">Field role</param>
         /// <returns></returns>
-        public static List<DataField> GetFields<TEntity>(FieldRole fieldRole)
+        public static List<SixnetDataField> GetFields<TEntity>(SixnetFieldRole fieldRole)
         {
             return GetFields(typeof(TEntity), fieldRole);
         }
@@ -435,7 +435,7 @@ namespace Sixnet.Development.Entity
         /// </summary>
         /// <param name="fieldRole">Field role</param>
         /// <returns></returns>
-        public static List<string> GetFieldNames(Type entityType, FieldRole fieldRole)
+        public static List<string> GetFieldNames(Type entityType, SixnetFieldRole fieldRole)
         {
             return GetFields(entityType, fieldRole)?.Select(f => f.PropertyName).ToList() ?? new List<string>(0);
         }
@@ -445,7 +445,7 @@ namespace Sixnet.Development.Entity
         /// </summary>
         /// <param name="fieldRole">Field role</param>
         /// <returns></returns>
-        public static List<string> GetFieldNames<TEntity>(FieldRole fieldRole)
+        public static List<string> GetFieldNames<TEntity>(SixnetFieldRole fieldRole)
         {
             return GetFieldNames(typeof(TEntity), fieldRole);
         }
@@ -456,7 +456,7 @@ namespace Sixnet.Development.Entity
         /// <param name="entityType">Entity type</param>
         /// <param name="fieldRole">Field role</param>
         /// <returns></returns>
-        public static string GetFieldName(Type entityType, FieldRole fieldRole)
+        public static string GetFieldName(Type entityType, SixnetFieldRole fieldRole)
         {
             return GetFieldNames(entityType, fieldRole)?.FirstOrDefault() ?? string.Empty;
         }
@@ -466,7 +466,7 @@ namespace Sixnet.Development.Entity
         /// </summary>
         /// <param name="fieldRole">Field role</param>
         /// <returns></returns>
-        public static string GetFieldName<TEntity>(FieldRole fieldRole)
+        public static string GetFieldName<TEntity>(SixnetFieldRole fieldRole)
         {
             return GetFieldNames(typeof(TEntity), fieldRole)?.FirstOrDefault() ?? string.Empty;
         }
@@ -476,9 +476,9 @@ namespace Sixnet.Development.Entity
         /// </summary>
         /// <param name="entityType">Entity type</param>
         /// <returns></returns>
-        public static List<DataField> GetPrimaryKeyFields(Type entityType)
+        public static List<SixnetDataField> GetPrimaryKeyFields(Type entityType)
         {
-            return GetFields(entityType, FieldRole.PrimaryKey);
+            return GetFields(entityType, SixnetFieldRole.PrimaryKey);
         }
 
         /// <summary>
@@ -488,7 +488,7 @@ namespace Sixnet.Development.Entity
         /// <returns>Return all primary key property names</returns>
         public static IEnumerable<string> GetPrimaryKeyNames(Type entityType)
         {
-            return GetFieldNames(entityType, FieldRole.PrimaryKey);
+            return GetFieldNames(entityType, SixnetFieldRole.PrimaryKey);
         }
 
         /// <summary>
@@ -563,7 +563,7 @@ namespace Sixnet.Development.Entity
                 return new Dictionary<string, string>(0);
             }
             var sourceEntityConfig = GetEntityConfig(sourceEntityType);
-            Dictionary<string, EntityRelationFieldAttribute> sourceRelationFields = null;
+            Dictionary<string, SixnetEntityRelationFieldAttribute> sourceRelationFields = null;
             sourceEntityConfig?.RelationFields?.TryGetValue(relationEntityType.GUID, out sourceRelationFields);
             return sourceRelationFields?.ToDictionary(c => c.Key, c => c.Value.RelationField) ?? new Dictionary<string, string>(0);
         }
@@ -618,7 +618,7 @@ namespace Sixnet.Development.Entity
             {
                 Expression.Convert(propertyExpression,typeof(object)),parameterArray
             });
-            var propertyProviderType = typeof(DefaultEntityPropertyValueProvider<>).MakeGenericType(entityType);
+            var propertyProviderType = typeof(SixnetDefaultEntityPropertyValueProvider<>).MakeGenericType(entityType);
             var propertyProvider = Activator.CreateInstance(propertyProviderType);
             var setGetterMethod = propertyProviderType.GetMethod("SetGetter");
             setGetterMethod.Invoke(propertyProvider, new object[] { lambdaExpression });

@@ -311,7 +311,7 @@ namespace Sixnet.Net.Sms
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
-        public static SendSmsResult SendTemplateMessage(SendMessageContext context)
+        public static SendSmsResult SendTemplateMessage(SixnetSendMessageContext context)
         {
             return Send(GetSmsParameter(context.Template, context.Message, context.Receivers));
         }
@@ -320,7 +320,7 @@ namespace Sixnet.Net.Sms
 
         #region Util
 
-        static SendSmsParameter GetSmsParameter(MessageTemplate template, MessageInfo message, IEnumerable<string> mobiles)
+        static SendSmsParameter GetSmsParameter(SixnetMessageTemplate template, SixnetMessageInfo message, IEnumerable<string> mobiles)
         {
             SixnetDirectThrower.ThrowArgNullIf(message == null, nameof(message));
             SixnetDirectThrower.ThrowArgNullIf(mobiles.IsNullOrEmpty(), nameof(mobiles));

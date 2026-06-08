@@ -1,0 +1,20 @@
+﻿// "Company © 2025. All rights reserved."
+
+using Sixnet.Model;
+
+namespace Sixnet.Development.Queryable
+{
+    /// <summary>
+    /// Queryable filter
+    /// </summary>
+    [Serializable]
+    public abstract class SixnetQueryableFilter : SixnetLoadable, ISixnetMappable
+    {
+        /// <summary>
+        /// Generate a IQueryable instance 
+        /// </summary>
+        /// <param name="useForPaging">Indecates whether use for paging</param>
+        /// <returns>Return a IQuery instance</returns>
+        public abstract ISixnetQueryable CreateQueryable(bool useForPaging = false);
+    }
+}

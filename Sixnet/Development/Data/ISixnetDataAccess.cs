@@ -49,7 +49,7 @@ namespace Sixnet.Development.Data
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        int Update(FieldsAssignment fieldsAssignment, ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null);
+        int Update(SixnetFieldsAssignment fieldsAssignment, ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -185,7 +185,7 @@ namespace Sixnet.Development.Data
         /// <param name="pagingFilter">Paging filter</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Return entity paging</returns>
-        PagingInfo<TEntity> QueryPaging(ISixnetQueryable queryable, PagingFilter pagingFilter, Action<SixnetDataOperationOptions> configure = null);
+        SixnetPagingInfo<TEntity> QueryPaging(ISixnetQueryable queryable, SixnetPagingFilter pagingFilter, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Whether has data

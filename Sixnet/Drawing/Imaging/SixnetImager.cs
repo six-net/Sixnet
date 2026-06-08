@@ -22,11 +22,11 @@ namespace Sixnet.Drawing.Imaging
         /// <param name="originalImage">Original image</param>
         /// <param name="imageHandlingOptionsAction">Image handling options action</param>
         /// <returns>Return a new image object</returns>
-        public static Image Scale(Action<HandleImageOptions> imageHandlingOptionsAction)
+        public static Image Scale(Action<SixnetHandleImageOptions> imageHandlingOptionsAction)
         {
-            var imageHandlingOptions = new HandleImageOptions()
+            var imageHandlingOptions = new SixnetHandleImageOptions()
             {
-                ScalingType = ScalingType.Regular,
+                ScalingType = SixnetScalingType.Regular,
             };
             imageHandlingOptionsAction?.Invoke(imageHandlingOptions);
             return GetImageHandler().Scale(imageHandlingOptions);
@@ -45,7 +45,7 @@ namespace Sixnet.Drawing.Imaging
             {
                 option.ScalingWidth = scalingWidth;
                 option.ScalingHeight = scalingHeight;
-                option.ScalingType = ScalingType.Regular;
+                option.ScalingType = SixnetScalingType.Regular;
                 option.OriginalImage = image;
             });
         }
@@ -63,7 +63,7 @@ namespace Sixnet.Drawing.Imaging
             {
                 options.ScalingWidth = scalingWidth;
                 options.ScalingHeight = scalingHeight;
-                options.ScalingType = ScalingType.FixedSize;
+                options.ScalingType = SixnetScalingType.FixedSize;
                 options.OriginalImage = image;
             });
         }
@@ -78,7 +78,7 @@ namespace Sixnet.Drawing.Imaging
         {
             return Scale(option =>
             {
-                option.ScalingType = ScalingType.WidthFirst;
+                option.ScalingType = SixnetScalingType.WidthFirst;
                 option.ScalingWidth = scalingWidth;
                 option.OriginalImage = image;
 
@@ -95,7 +95,7 @@ namespace Sixnet.Drawing.Imaging
         {
             return Scale(option =>
             {
-                option.ScalingType = ScalingType.HeightFirst;
+                option.ScalingType = SixnetScalingType.HeightFirst;
                 option.ScalingHeight = scalingHeight;
                 option.OriginalImage = image;
 
@@ -108,7 +108,7 @@ namespace Sixnet.Drawing.Imaging
         /// <param name="filePath">File path</param>
         /// <param name="imageHandlingOptionsAction">Image handling options action</param>
         /// <returns>Return an new image object</returns>
-        public static Image Scale(string filePath, Action<HandleImageOptions> imageHandlingOptionsAction)
+        public static Image Scale(string filePath, Action<SixnetHandleImageOptions> imageHandlingOptionsAction)
         {
             if (string.IsNullOrWhiteSpace(filePath))
             {
@@ -130,7 +130,7 @@ namespace Sixnet.Drawing.Imaging
         /// <param name="imageHandlingOptionsAction">Image handling options action</param>
         /// <param name="imageSavingOptionsAction">Image saving options action</param>
         /// <returns>Return the new file path </returns>
-        public static string ScaleThenSave(Action<HandleImageOptions> imageHandlingOptionsAction, Action<SaveImageOptions> imageSavingOptionsAction)
+        public static string ScaleThenSave(Action<SixnetHandleImageOptions> imageHandlingOptionsAction, Action<SixnetSaveImageOptions> imageSavingOptionsAction)
         {
             var scaleImage = Scale(imageHandlingOptionsAction);
             if (scaleImage != null)
@@ -147,7 +147,7 @@ namespace Sixnet.Drawing.Imaging
         /// <param name="imageHandlingOptionsAction">Image handling options action</param>
         /// <param name="imageSavingOptionsAction">Image saving options action</param>
         /// <returns>Return the new file path </returns>
-        public static string ScaleThenSave(string filePath, Action<HandleImageOptions> imageHandlingOptionsAction, Action<SaveImageOptions> imageSavingOptionsAction)
+        public static string ScaleThenSave(string filePath, Action<SixnetHandleImageOptions> imageHandlingOptionsAction, Action<SixnetSaveImageOptions> imageSavingOptionsAction)
         {
             var scaleImage = Scale(filePath, imageHandlingOptionsAction);
             if (scaleImage != null)
@@ -166,9 +166,9 @@ namespace Sixnet.Drawing.Imaging
         /// </summary>
         /// <param name="imageHandlingOptionsAction"></param>
         /// <returns></returns>
-        public static Image Cut(Action<HandleImageOptions> imageHandlingOptionsAction)
+        public static Image Cut(Action<SixnetHandleImageOptions> imageHandlingOptionsAction)
         {
-            var imageHandlingOptions = new HandleImageOptions();
+            var imageHandlingOptions = new SixnetHandleImageOptions();
             imageHandlingOptionsAction?.Invoke(imageHandlingOptions);
             return GetImageHandler().Cut(imageHandlingOptions);
         }
@@ -200,7 +200,7 @@ namespace Sixnet.Drawing.Imaging
         /// <param name="filePath">File path</param>
         /// <param name="imageHandlingOptionsAction">Image handling options action</param>
         /// <returns>Return the new image object</returns>
-        public static Image Cut(string filePath, Action<HandleImageOptions> imageHandlingOptionsAction)
+        public static Image Cut(string filePath, Action<SixnetHandleImageOptions> imageHandlingOptionsAction)
         {
             if (string.IsNullOrWhiteSpace(filePath))
             {
@@ -234,7 +234,7 @@ namespace Sixnet.Drawing.Imaging
         /// </summary>
         /// <param name="imageHandlingOptionsAction">Image handling options action</param>
         /// <returns>Return a new image object</returns>
-        public static Image ScaleAndCut(Action<HandleImageOptions> imageHandlingOptionsAction)
+        public static Image ScaleAndCut(Action<SixnetHandleImageOptions> imageHandlingOptionsAction)
         {
             var scalImage = Scale(imageHandlingOptionsAction);
             if (scalImage != null)
@@ -253,7 +253,7 @@ namespace Sixnet.Drawing.Imaging
         /// </summary>
         /// <param name="imageHandlingOptionsAction">Image handling options action</param>
         /// <returns>Return a new image object</returns>
-        public static Image ScaleAndCutCenterPart(Action<HandleImageOptions> imageHandlingOptionsAction)
+        public static Image ScaleAndCutCenterPart(Action<SixnetHandleImageOptions> imageHandlingOptionsAction)
         {
             var scalImage = Scale(imageHandlingOptionsAction);
             if (scalImage != null)
@@ -276,7 +276,7 @@ namespace Sixnet.Drawing.Imaging
         /// <param name="filePath">File path</param>
         /// <param name="imageHandlingOptionsAction">Image handling options action</param>
         /// <returns>Return a new image object</returns>
-        public static Image ScaleAndCut(string filePath, Action<HandleImageOptions> imageHandlingOptionsAction)
+        public static Image ScaleAndCut(string filePath, Action<SixnetHandleImageOptions> imageHandlingOptionsAction)
         {
             var scalImage = Scale(filePath, imageHandlingOptionsAction);
             if (scalImage != null)
@@ -292,7 +292,7 @@ namespace Sixnet.Drawing.Imaging
         /// <param name="filePath">File path</param>
         /// <param name="imageHandlingOptionsAction">Image handling options action</param>
         /// <returns>Return a new image object</returns>
-        public static Image ScaleAndCutCenterPart(string filePath, Action<HandleImageOptions> imageHandlingOptionsAction)
+        public static Image ScaleAndCutCenterPart(string filePath, Action<SixnetHandleImageOptions> imageHandlingOptionsAction)
         {
             var scalImage = Scale(filePath, imageHandlingOptionsAction);
             if (scalImage != null)
@@ -316,7 +316,7 @@ namespace Sixnet.Drawing.Imaging
         /// <param name="imageHandlingOptionsAction">Image handling options action</param>
         /// <param name="imageSavingOptionsAction">Image saving options action</param>
         /// <returns>Return the new image path</returns>
-        public static string CutThenSave(Action<HandleImageOptions> imageHandlingOptionsAction, Action<SaveImageOptions> imageSavingOptionsAction)
+        public static string CutThenSave(Action<SixnetHandleImageOptions> imageHandlingOptionsAction, Action<SixnetSaveImageOptions> imageSavingOptionsAction)
         {
             var cutImage = Cut(imageHandlingOptionsAction);
             if (cutImage != null)
@@ -332,7 +332,7 @@ namespace Sixnet.Drawing.Imaging
         /// <param name="imageHandlingOptionsAction">Image handling options action</param>
         /// <param name="imageSavingOptionsAction">Image saving options action</param>
         /// <returns>Return the new image path</returns>
-        public static string CutCenterPartThenSave(Action<HandleImageOptions> imageHandlingOptionsAction, Action<SaveImageOptions> imageSavingOptionsAction)
+        public static string CutCenterPartThenSave(Action<SixnetHandleImageOptions> imageHandlingOptionsAction, Action<SixnetSaveImageOptions> imageSavingOptionsAction)
         {
             var cutImage = Cut(options =>
             {
@@ -355,7 +355,7 @@ namespace Sixnet.Drawing.Imaging
         /// <param name="imageHandlingOptionsAction">Image handling options action</param>
         /// <param name="imageSavingOptionsAction">Image saving options action</param>
         /// <returns>Return the new image path</returns>
-        public static string CutThenSave(string filePath, Action<HandleImageOptions> imageHandlingOptionsAction, Action<SaveImageOptions> imageSavingOptionsAction)
+        public static string CutThenSave(string filePath, Action<SixnetHandleImageOptions> imageHandlingOptionsAction, Action<SixnetSaveImageOptions> imageSavingOptionsAction)
         {
             var cutImage = Cut(filePath, imageHandlingOptionsAction);
             if (cutImage != null)
@@ -372,7 +372,7 @@ namespace Sixnet.Drawing.Imaging
         /// <param name="imageHandlingOptionsAction">Image handling options action</param>
         /// <param name="imageSavingOptionsAction">Image saving options action</param>
         /// <returns>Return the new image path</returns>
-        public static string CutCenterPartThenSave(string filePath, Action<HandleImageOptions> imageHandlingOptionsAction, Action<SaveImageOptions> imageSavingOptionsAction)
+        public static string CutCenterPartThenSave(string filePath, Action<SixnetHandleImageOptions> imageHandlingOptionsAction, Action<SixnetSaveImageOptions> imageSavingOptionsAction)
         {
             var cutImage = Cut(filePath, options =>
             {
@@ -394,7 +394,7 @@ namespace Sixnet.Drawing.Imaging
         /// <param name="imageHandlingOptionsAction">Image handling options action</param>
         /// <param name="imageSavingOptionsAction">Image saving options action</param>
         /// <returns>Return the new image path</returns>
-        public static string ScaleAndCutThenSave(Action<HandleImageOptions> imageHandlingOptionsAction, Action<SaveImageOptions> imageSavingOptionsAction)
+        public static string ScaleAndCutThenSave(Action<SixnetHandleImageOptions> imageHandlingOptionsAction, Action<SixnetSaveImageOptions> imageSavingOptionsAction)
         {
             var cutImage = ScaleAndCut(imageHandlingOptionsAction);
             if (cutImage != null)
@@ -410,7 +410,7 @@ namespace Sixnet.Drawing.Imaging
         /// <param name="imageHandlingOptionsAction">Image handling options action</param>
         /// <param name="imageSavingOptionsAction">Image saving options action</param>
         /// <returns>Return the new image path</returns>
-        public static string ScaleAndCutCenterPartThenSave(Action<HandleImageOptions> imageHandlingOptionsAction, Action<SaveImageOptions> imageSavingOptionsAction)
+        public static string ScaleAndCutCenterPartThenSave(Action<SixnetHandleImageOptions> imageHandlingOptionsAction, Action<SixnetSaveImageOptions> imageSavingOptionsAction)
         {
             var cutImage = ScaleAndCutCenterPart(imageHandlingOptionsAction);
             if (cutImage != null)
@@ -427,7 +427,7 @@ namespace Sixnet.Drawing.Imaging
         /// <param name="imageHandlingOptionsAction">Image handling options action</param>
         /// <param name="imageSavingOptionsAction">Image saving options action</param>
         /// <returns>Return the new image path</returns>
-        public static string ScaleAndCutThenSave(string filePath, Action<HandleImageOptions> imageHandlingOptionsAction, Action<SaveImageOptions> imageSavingOptionsAction)
+        public static string ScaleAndCutThenSave(string filePath, Action<SixnetHandleImageOptions> imageHandlingOptionsAction, Action<SixnetSaveImageOptions> imageSavingOptionsAction)
         {
             var cutImage = ScaleAndCut(filePath, imageHandlingOptionsAction);
             if (cutImage != null)
@@ -444,7 +444,7 @@ namespace Sixnet.Drawing.Imaging
         /// <param name="imageHandlingOptionsAction">Image handling options action</param>
         /// <param name="imageSavingOptionsAction">Image saving options action</param>
         /// <returns>Return the new image path</returns>
-        public static string ScaleAndCutCenterPartThenSave(string filePath, Action<HandleImageOptions> imageHandlingOptionsAction, Action<SaveImageOptions> imageSavingOptionsAction)
+        public static string ScaleAndCutCenterPartThenSave(string filePath, Action<SixnetHandleImageOptions> imageHandlingOptionsAction, Action<SixnetSaveImageOptions> imageSavingOptionsAction)
         {
             var cutImage = ScaleAndCutCenterPart(filePath, imageHandlingOptionsAction);
             if (cutImage != null)
@@ -463,18 +463,18 @@ namespace Sixnet.Drawing.Imaging
         /// </summary>
         /// <param name="imageSplitOptionsAction">Image split options action</param>
         /// <returns>Return an image list</returns>
-        public static List<Image> Split(Action<SplitImageOptions> imageSplitOptionsAction)
+        public static List<Image> Split(Action<SixnetSplitImageOptions> imageSplitOptionsAction)
         {
-            SplitImageOptions imageSpitOptions = new SplitImageOptions();
+            SixnetSplitImageOptions imageSpitOptions = new SixnetSplitImageOptions();
             imageSplitOptionsAction?.Invoke(imageSpitOptions);
 
             #region Horizontal
 
-            List<Image> HandleSplitByHorizontal(SplitImageOptions imageSpitOptions)
+            List<Image> HandleSplitByHorizontal(SixnetSplitImageOptions imageSpitOptions)
             {
                 if (imageSpitOptions?.OriginalImage == null)
                 {
-                    throw new ArgumentNullException(nameof(SplitImageOptions.OriginalImage));
+                    throw new ArgumentNullException(nameof(SixnetSplitImageOptions.OriginalImage));
                 }
 
                 if (imageSpitOptions.SplitBoundary > 0 && imageSpitOptions.OriginalImage.Width <= imageSpitOptions.SplitBoundary)
@@ -490,7 +490,7 @@ namespace Sixnet.Drawing.Imaging
                 for (int i = 0; i < count; i++)
                 {
                     int cindex = i;
-                    Action<HandleImageOptions> cutOptionsAction = options =>
+                    Action<SixnetHandleImageOptions> cutOptionsAction = options =>
                     {
                         options.OriginalImage = imageSpitOptions.OriginalImage;
                         options.CutWidth = imageSpitOptions.Size;
@@ -511,11 +511,11 @@ namespace Sixnet.Drawing.Imaging
 
             #region Vertical
 
-            List<Image> HandleSplitByVertical(SplitImageOptions imageSpitOptions)
+            List<Image> HandleSplitByVertical(SixnetSplitImageOptions imageSpitOptions)
             {
                 if (imageSpitOptions?.OriginalImage == null)
                 {
-                    throw new ArgumentNullException(nameof(SplitImageOptions.OriginalImage));
+                    throw new ArgumentNullException(nameof(SixnetSplitImageOptions.OriginalImage));
                 }
                 if (imageSpitOptions.SplitBoundary > 0 && imageSpitOptions.OriginalImage.Height <= imageSpitOptions.SplitBoundary)
                 {
@@ -530,7 +530,7 @@ namespace Sixnet.Drawing.Imaging
                 for (int i = 0; i < count; i++)
                 {
                     int cindex = i;
-                    Action<HandleImageOptions> cutOptionsAction = options =>
+                    Action<SixnetHandleImageOptions> cutOptionsAction = options =>
                     {
                         options.OriginalImage = imageSpitOptions.OriginalImage;
                         options.CutWidth = imageSpitOptions.OriginalImage.Width;
@@ -551,9 +551,9 @@ namespace Sixnet.Drawing.Imaging
 
             switch (imageSpitOptions.Direction)
             {
-                case ImageSplitDirection.Horizontal:
+                case SixnetImageSplitDirection.Horizontal:
                     return HandleSplitByHorizontal(imageSpitOptions);
-                case ImageSplitDirection.Vertical:
+                case SixnetImageSplitDirection.Vertical:
                     return HandleSplitByVertical(imageSpitOptions);
             }
             throw new InvalidOperationException("Invalid split operation");
@@ -565,7 +565,7 @@ namespace Sixnet.Drawing.Imaging
         /// <param name="filePath">Image file</param>
         /// <param name="imageSplitOptionsAction">Image split options action</param>
         /// <returns>Return an image list</returns>
-        public static List<Image> Split(string filePath, Action<SplitImageOptions> imageSplitOptionsAction)
+        public static List<Image> Split(string filePath, Action<SixnetSplitImageOptions> imageSplitOptionsAction)
         {
             using (var image = GetImageFromFile(filePath))
             {
@@ -583,7 +583,7 @@ namespace Sixnet.Drawing.Imaging
         /// <param name="imageSplitOptionsAction">Image split options action</param>
         /// <param name="imageSavingOptionsAction">Image saving options action</param>
         /// <returns>Return images paths</returns>
-        public static List<string> SplitThenSave(Action<SplitImageOptions> imageSplitOptionsAction, Action<SaveImageOptions> imageSavingOptionsAction)
+        public static List<string> SplitThenSave(Action<SixnetSplitImageOptions> imageSplitOptionsAction, Action<SixnetSaveImageOptions> imageSavingOptionsAction)
         {
             var images = Split(imageSplitOptionsAction);
             try
@@ -614,7 +614,7 @@ namespace Sixnet.Drawing.Imaging
         /// <param name="imageSplitOptionsAction">Image split options action</param>
         /// <param name="imageSavingOptionsAction">Image saving options action</param>
         /// <returns>Return image paths</returns>
-        public static List<string> SplitThenSave(string filePath, Action<SplitImageOptions> imageSplitOptionsAction, Action<SaveImageOptions> imageSavingOptionsAction)
+        public static List<string> SplitThenSave(string filePath, Action<SixnetSplitImageOptions> imageSplitOptionsAction, Action<SixnetSaveImageOptions> imageSavingOptionsAction)
         {
             if (string.IsNullOrWhiteSpace(filePath))
             {
@@ -637,7 +637,7 @@ namespace Sixnet.Drawing.Imaging
         /// <summary>
         /// Default image handler
         /// </summary>
-        static readonly ISixnetImageHandler DefaultImageHandler = new DefaultImageHandler();
+        static readonly ISixnetImageHandler DefaultImageHandler = new SixnetDefaultImageHandler();
 
         /// <summary>
         /// Default encoder parameters action
@@ -693,9 +693,9 @@ namespace Sixnet.Drawing.Imaging
         /// <param name="image">Image object</param>
         /// <param name="imageSavingOptionsAction">Image saving options action</param>
         /// <returns>Return file path</returns>
-        static string SaveImage(Image image, Action<SaveImageOptions> imageSavingOptionsAction)
+        static string SaveImage(Image image, Action<SixnetSaveImageOptions> imageSavingOptionsAction)
         {
-            var savingOptions = new SaveImageOptions();
+            var savingOptions = new SixnetSaveImageOptions();
             imageSavingOptionsAction?.Invoke(savingOptions);
             string path = savingOptions.Path;
             if (string.IsNullOrWhiteSpace(path))
@@ -713,7 +713,7 @@ namespace Sixnet.Drawing.Imaging
             string fileName = savingOptions.FileName;
             if (string.IsNullOrWhiteSpace(fileName))
             {
-                fileName = $"{GuidHelper.GetGuidUniqueCode()}.png";
+                fileName = $"{SixnetGuidHelper.GetGuidUniqueCode()}.png";
             }
             string fileFullPath = Path.Combine(path, fileName);
             string extension = Path.HasExtension(fileName) ? Path.GetExtension(fileName) : "png";
@@ -731,13 +731,13 @@ namespace Sixnet.Drawing.Imaging
         /// <param name="images">Image list</param>
         /// <param name="imageSavingOptionsAction">Image saving options action</param>
         /// <returns>Return file path</returns>
-        static List<string> SaveImage(List<Image> images, Action<SaveImageOptions> imageSavingOptionsAction)
+        static List<string> SaveImage(List<Image> images, Action<SixnetSaveImageOptions> imageSavingOptionsAction)
         {
             if (images.IsNullOrEmpty())
             {
                 return new List<string>(0);
             }
-            var savingOptions = new SaveImageOptions();
+            var savingOptions = new SixnetSaveImageOptions();
             imageSavingOptionsAction?.Invoke(savingOptions);
             string path = savingOptions.Path;
             if (string.IsNullOrWhiteSpace(path))

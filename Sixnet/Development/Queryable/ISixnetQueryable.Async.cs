@@ -24,7 +24,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="fieldsAssignment">Fields assignment</param>
         /// <param name="configure">Configure options</param>
         /// <returns>Affected rows</returns>
-        Task<int> UpdateAsync(FieldsAssignment fieldsAssignment, Action<SixnetDataOperationOptions> configure = null);
+        Task<int> UpdateAsync(SixnetFieldsAssignment fieldsAssignment, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -151,7 +151,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="pagingFilter">Paging filter</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Paging data</returns>
-        Task<PagingInfo<T>> ToPagingAsync<T>(PagingFilter pagingFilter, Action<SixnetDataOperationOptions> configure = null);
+        Task<SixnetPagingInfo<T>> ToPagingAsync<T>(SixnetPagingFilter pagingFilter, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get paging
@@ -160,7 +160,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="pageSize">Page size</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Paging data</returns>
-        Task<PagingInfo<T>> ToPagingAsync<T>(int page, int pageSize, Action<SixnetDataOperationOptions> configure = null);
+        Task<SixnetPagingInfo<T>> ToPagingAsync<T>(int page, int pageSize, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -287,7 +287,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="pagingFilter">Paging filter</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Paging data</returns>
-        Task<PagingInfo<TModel>> ToPagingAsync(PagingFilter pagingFilter, Action<SixnetDataOperationOptions> configure = null);
+        Task<SixnetPagingInfo<TModel>> ToPagingAsync(SixnetPagingFilter pagingFilter, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get paging
@@ -296,7 +296,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="pageSize">Page size</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Paging data</returns>
-        Task<PagingInfo<TModel>> ToPagingAsync(int page, int pageSize, Action<SixnetDataOperationOptions> configure = null);
+        Task<SixnetPagingInfo<TModel>> ToPagingAsync(int page, int pageSize, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion 
 

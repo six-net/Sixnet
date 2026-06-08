@@ -42,9 +42,9 @@ namespace Sixnet.Development.Data.Database
             return $"{SchemaName}_{Name}".GetHashCode();
         }
 
-        public DatabaseObjectName GetDatabaseObjectName()
+        public SixnetDatabaseObjectName GetDatabaseObjectName()
         {
-            return DatabaseObjectName.Create(Name, DatabaseObjectType.Table, SchemaName);
+            return SixnetDatabaseObjectName.Create(Name, SixnetDatabaseObjectType.Table, SchemaName);
         }
     }
 

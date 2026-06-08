@@ -117,8 +117,8 @@ namespace Sixnet.Security.License
             var licenseSigns = licenseCode.LSplit("$");
             SixnetDirectThrower.ThrowArgNullIf(licenseSigns.Length < 3, "License is invalid");
 
-            var signKey = RSAHelper.Decrypt(licenseSigns[1], LicenseSecurityKey);
-            var licenseDataString = AesHelper.Decrypt(string.Join("", licenseSigns.Skip(2)), signKey);
+            var signKey = SixnetRSAHelper.Decrypt(licenseSigns[1], LicenseSecurityKey);
+            var licenseDataString = SixnetAesHelper.Decrypt(string.Join("", licenseSigns.Skip(2)), signKey);
             return JsonSerializer.Deserialize<T>(licenseDataString);
         }
     }

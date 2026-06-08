@@ -7,7 +7,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     [Flags]
     [Serializable]
-    public enum FieldCacheRole
+    public enum SixnetFieldCacheRole
     {
         None = 0,
         CacheKey = 2,
@@ -20,7 +20,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     [Flags]
     [Serializable]
-    public enum FieldRole
+    public enum SixnetFieldRole
     {
         None = 0,
         PrimaryKey = 2,
@@ -47,7 +47,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     [Flags]
     [Serializable]
-    public enum FieldDbFeature
+    public enum SixnetFieldDbFeature
     {
         None = 0,
         NotFixedLength = 2,
@@ -60,7 +60,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     [Flags]
     [Serializable]
-    public enum FieldBehavior
+    public enum SixnetFieldBehavior
     {
         None = 0,
         NotQuery = 2,
@@ -72,7 +72,7 @@ namespace Sixnet.Development.Entity
     /// <summary>
     /// Defines field type fragment type
     /// </summary>
-    public enum FieldTypeFragmentType
+    public enum SixnetFieldTypeFragmentType
     {
         None = 0,
         DbType = 1,
@@ -84,7 +84,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     [Flags]
     [Serializable]
-    public enum RelationBehavior
+    public enum SixnetRelationBehavior
     {
         None = 0,
         CascadingDelete = 2
@@ -95,7 +95,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     [Flags]
     [Serializable]
-    public enum EntityStyle
+    public enum SixnetEntityStyle
     {
         Physical = 0,
         Virtual = 2
@@ -106,7 +106,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     [Flags]
     [Serializable]
-    public enum SplitTableType
+    public enum SixnetSplitTableType
     {
         None = 0,
         Year = 1,

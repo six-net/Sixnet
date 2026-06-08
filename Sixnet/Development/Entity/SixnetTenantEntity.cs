@@ -11,7 +11,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Tenant id
         /// </summary>
-        [EntityField(Description = "Tenant id", Role = FieldRole.Isolation)]
+        [SixnetEntityField(Description = "Tenant id", Role = SixnetFieldRole.Isolation)]
         public long TenantId { get; set; }
     }
 }

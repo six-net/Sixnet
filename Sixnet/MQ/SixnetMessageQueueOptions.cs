@@ -14,7 +14,7 @@ namespace Sixnet.MQ
         /// <summary>
         /// Message queue providers
         /// </summary>
-        readonly Dictionary<MessageQueueType, ISixnetMessageQueueProvider> _providers = new();
+        readonly Dictionary<SixnetMessageQueueType, ISixnetMessageQueueProvider> _providers = new();
         readonly Dictionary<string, Func<SixnetQueueMessage, Task<bool>>> _messageHandlers = new();
 
         #endregion
@@ -24,12 +24,12 @@ namespace Sixnet.MQ
         /// <summary>
         /// Get message queue endpoint
         /// </summary>
-        public Func<SixnetQueueMessage, MessageQueueEndpoint> GetMessageQueueEndpoint { get; set; }
+        public Func<SixnetQueueMessage, SixnetMessageQueueEndpoint> GetMessageQueueEndpoint { get; set; }
 
         /// <summary>
         /// Gets or sets the default message queue endpoint
         /// </summary>
-        public MessageQueueEndpoint Endpoint { get; set; }
+        public SixnetMessageQueueEndpoint Endpoint { get; set; }
 
         /// <summary>
         /// Whether auto consome internal queue.
@@ -62,7 +62,7 @@ namespace Sixnet.MQ
         /// <param name="messageQueueType">Message queue type</param>
         /// <param name="provider">Provider</param>
         /// <param name=""></param>
-        public void AddProvider(MessageQueueType messageQueueType, ISixnetMessageQueueProvider provider)
+        public void AddProvider(SixnetMessageQueueType messageQueueType, ISixnetMessageQueueProvider provider)
         {
             if (provider != null)
             {
@@ -75,7 +75,7 @@ namespace Sixnet.MQ
         /// </summary>
         /// <param name="messageQueueType">Message queue type</param>
         /// <returns></returns>
-        public ISixnetMessageQueueProvider GetProvider(MessageQueueType messageQueueType)
+        public ISixnetMessageQueueProvider GetProvider(SixnetMessageQueueType messageQueueType)
         {
             _providers.TryGetValue(messageQueueType, out var provider);
             return provider;
@@ -86,7 +86,7 @@ namespace Sixnet.MQ
         /// </summary>
         /// <param name="message">Message</param>
         /// <returns></returns>
-        public MessageQueueEndpoint GetEndpoint(SixnetQueueMessage message)
+        public SixnetMessageQueueEndpoint GetEndpoint(SixnetQueueMessage message)
         {
             return GetMessageQueueEndpoint(message) ?? Endpoint;
         }

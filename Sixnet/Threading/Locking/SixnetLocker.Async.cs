@@ -23,7 +23,7 @@ namespace Sixnet.Threading.Locking
         /// <param name="lockValue">Lock value</param>
         /// <param name="expirationSeconds">Expiration seconds</param>
         /// <returns></returns>
-        public static Task<LockInstance?> GetLockAsync(string lockObject, string lockName, string lockValue, int? expirationSeconds = null)
+        public static Task<SixnetLockInstance?> GetLockAsync(string lockObject, string lockName, string lockValue, int? expirationSeconds = null)
         {
             SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(lockName), nameof(lockName));
             SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(lockValue), nameof(lockValue));
@@ -39,8 +39,8 @@ namespace Sixnet.Threading.Locking
                     {
                         Value = lockValue,
                         Key = ConstantCacheKey.Create(lockName),
-                        Type = CacheKeyType.String,
-                        When = CacheSetWhen.NotExists,
+                        Type = SixnetCacheKeyType.String,
+                        When = SixnetCacheSetWhen.NotExists,
                     }
                 }
             };
@@ -61,7 +61,7 @@ namespace Sixnet.Threading.Locking
                 return setResponse?.Results?.FirstOrDefault()?.Key == lockName;
             }
             var setLockTask = setLockFunc();
-            LockInstance? lockObj = null;
+            SixnetLockInstance? lockObj = null;
             if (SpinWait.SpinUntil(() =>
             {
                 if (setLockTask.IsCompleted)
@@ -76,7 +76,7 @@ namespace Sixnet.Threading.Locking
                 return false;
             }, expSeconds < 1 ? -1 : (expSeconds + 1) * 1000))
             {
-                lockObj = new LockInstance(lockObject, lockName, lockValue);
+                lockObj = new SixnetLockInstance(lockObject, lockName, lockValue);
             }
             return Task.FromResult(lockObj);
         }
@@ -128,7 +128,7 @@ namespace Sixnet.Threading.Locking
         /// <param name="entityType">Entity type</param>
         /// <param name="expirationSeconds">Expiration seconds</param>
         /// <returns></returns>
-        public static Task<LockInstance?> GetCreateTableLockAsync(Type entityType, int? expirationSeconds = null)
+        public static Task<SixnetLockInstance?> GetCreateTableLockAsync(Type entityType, int? expirationSeconds = null)
         {
             var lockName = GetCreateTableLockName(entityType);
             return GetLockAsync(CreateTableLockObjectName, lockName, GetLockValue(), expirationSeconds);
@@ -144,7 +144,7 @@ namespace Sixnet.Threading.Locking
         /// <param name="server">Database server</param>
         /// <param name="expirationSeconds">Expiration seconds</param>
         /// <returns></returns>
-        public static Task<LockInstance?> GetCreateDatabaseConnectionLockAsync(DatabaseServer server, int? expirationSeconds = null)
+        public static Task<SixnetLockInstance?> GetCreateDatabaseConnectionLockAsync(SixnetDatabaseServer server, int? expirationSeconds = null)
         {
             var lockName = GetCreateDatabaseConnectionLockName(server);
             return GetLockAsync(CreateDatabaseConnectionLockName, lockName, GetLockValue(), expirationSeconds);

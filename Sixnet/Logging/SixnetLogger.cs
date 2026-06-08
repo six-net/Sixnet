@@ -22,7 +22,7 @@ namespace Sixnet.Logging
         /// <summary>
         /// Default log provider
         /// </summary>
-        static readonly DefaultLogProvider _defaultLogProvider = new();
+        static readonly SixnetDefaultLogProvider _defaultLogProvider = new();
 
         /// <summary>
         /// Log provider
@@ -58,7 +58,7 @@ namespace Sixnet.Logging
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         static void WriteLog(string categoryName, LogLevel level, EventId eventId, Exception exception, string message, params object[] args)
         {
-            var logMessage = new LoggingInternalQueueMessage()
+            var logMessage = new SixnetLoggingInternalQueueMessage()
             {
                 CategoryName = categoryName,
                 Level = level,

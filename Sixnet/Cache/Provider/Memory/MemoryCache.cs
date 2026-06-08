@@ -267,7 +267,7 @@ namespace Sixnet.Cache.Provider.Memory
                 return string.Empty;
             }
             var keys = _entries.Keys;
-            var ranIndex = RandomNumberHelper.GetRandomNumber(_entries.Count);
+            var ranIndex = SixnetRandomNumberHelper.GetRandomNumber(_entries.Count);
             return keys.ElementAt(ranIndex)?.ToString() ?? string.Empty;
         }
 

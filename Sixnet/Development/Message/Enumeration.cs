@@ -6,7 +6,7 @@ namespace Sixnet.Development.Message
     /// Message time
     /// </summary>
     [Serializable]
-    public enum MessageSendTime
+    public enum SixnetMessageSendTime
     {
         Immediately = 2,
         WorkCompleted = 4

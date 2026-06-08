@@ -6,7 +6,7 @@ namespace Sixnet.Development.Data.Command
     /// Defines command execution mode
     /// </summary>
     [Serializable]
-    public enum CommandExecutionMode
+    public enum SixnetCommandExecutionMode
     {
         /// <summary>
         /// Script
@@ -22,7 +22,7 @@ namespace Sixnet.Development.Data.Command
     /// Defines command execution result type
     /// </summary>
     [Serializable]
-    public enum CommandResultType
+    public enum SixnetCommandResultType
     {
         /// <summary>
         /// Affected rows
@@ -38,7 +38,7 @@ namespace Sixnet.Development.Data.Command
     /// Defines command behavior
     /// </summary>
     [Serializable]
-    public enum CommandBehavior
+    public enum SixnetCommandBehavior
     {
         /// <summary>
         /// Add

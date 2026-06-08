@@ -1,0 +1,63 @@
+﻿// "Company © 2025. All rights reserved."
+
+using System.Threading.Tasks;
+
+using Sixnet.MQ;
+using Sixnet.Serialization.Json;
+
+namespace Sixnet.Development.Message
+{
+    /// <summary>
+    /// Default message provider
+    /// </summary>
+    internal class SixnetDefaultMessageProvider : ISixnetMessageProvider
+    {
+        /// <summary>
+        /// Send message
+        /// </summary>
+        /// <param name="parameter">Send message parameter</param>
+        /// <returns>Return send result</returns>
+        public void Send(SixnetSendMessageParameter parameter)
+        {
+            if (parameter?.Messages.IsNullOrEmpty() ?? true)
+            {
+                return;
+            }
+            var queueMessages = parameter.Messages.Select(msg =>
+            {
+                return new SixnetQueueMessage()
+                {
+                    Topic = msg.Subject,
+                    Group = SixnetMQ.QueueMessageGroupNames.DomainMessage,
+                    Id = msg.Id,
+                    Content = SixnetJsonSerializer.Serialize(msg),
+                };
+            }).ToList();
+            SixnetMQ.Enqueue(queueMessages);
+        }
+
+        /// <summary>
+        /// Send message
+        /// </summary>
+        /// <param name="options">Send message options</param>
+        /// <returns>Return send result</returns>
+        public Task SendAsync(SixnetSendMessageParameter parameter)
+        {
+            if (parameter?.Messages.IsNullOrEmpty() ?? true)
+            {
+                return Task.CompletedTask;
+            }
+            var queueMessages = parameter.Messages.Select(msg =>
+            {
+                return new SixnetQueueMessage()
+                {
+                    Topic = msg.Subject,
+                    Group = string.Empty,
+                    Id = msg.Id,
+                    Content = SixnetJsonSerializer.Serialize(msg),
+                };
+            }).ToList();
+            return SixnetMQ.EnqueueAsync(queueMessages);
+        }
+    }
+}

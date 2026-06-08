@@ -48,7 +48,7 @@ namespace Sixnet.Model
             string currentWorkId = workId;
             if (string.IsNullOrWhiteSpace(currentWorkId))
             {
-                currentWorkId = UnitOfWork.Current?.WorkId;
+                currentWorkId = SixnetUnitOfWork.Current?.WorkId;
             }
             AddParameter(parameterModel, SixnetExtraParameterNames.WorkId, currentWorkId, overCurrent);
         }

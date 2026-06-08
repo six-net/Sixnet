@@ -32,7 +32,7 @@ namespace Sixnet.DependencyInjection
         /// <summary>
         /// Gets or sets rsa options
         /// </summary>
-        public SixnetRsaOptions Rsa { get; set; }
+        public SixnetRsations Rsa { get; set; }
 
         /// <summary>
         /// Gets or sets data options

@@ -18,7 +18,7 @@ namespace Sixnet.Development.Queryable
         /// <returns></returns>
         public static ISixnetQueryable Create(ISixnetQueryable sourceQueryable = null)
         {
-            return new DefaultQueryable(sourceQueryable).SetModelType(typeof(ExpandoObject));
+            return new SixnetDefaultQueryable(sourceQueryable).SetModelType(typeof(ExpandoObject));
         }
 
         /// <summary>
@@ -29,7 +29,7 @@ namespace Sixnet.Development.Queryable
         /// <returns></returns>
         public static ISixnetQueryable<TFirst> Create<TFirst>(ISixnetQueryable sourceQueryable = null)
         {
-            return new DefaultQueryableOne<TFirst>(sourceQueryable);
+            return new SixnetDefaultQueryableOne<TFirst>(sourceQueryable);
         }
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace Sixnet.Development.Queryable
         /// <returns></returns>
         public static ISixnetQueryable<TFirst, TSecond> Create<TFirst, TSecond>(ISixnetQueryable sourceQueryable = null)
         {
-            return new DefaultQueryableTwo<TFirst, TSecond>(sourceQueryable);
+            return new SixnetDefaultQueryableTwo<TFirst, TSecond>(sourceQueryable);
         }
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace Sixnet.Development.Queryable
         /// <returns></returns>
         public static ISixnetQueryable<TFirst, TSecond, TThird> Create<TFirst, TSecond, TThird>(ISixnetQueryable sourceQueryable = null)
         {
-            return new DefaultQueryableThree<TFirst, TSecond, TThird>(sourceQueryable);
+            return new SixnetDefaultQueryableThree<TFirst, TSecond, TThird>(sourceQueryable);
         }
 
         /// <summary>
@@ -68,7 +68,7 @@ namespace Sixnet.Development.Queryable
         /// <returns></returns>
         public static ISixnetQueryable<TFirst, TSecond, TThird, TFourth> Create<TFirst, TSecond, TThird, TFourth>(ISixnetQueryable sourceQueryable = null)
         {
-            return new DefaultQueryableFour<TFirst, TSecond, TThird, TFourth>(sourceQueryable);
+            return new SixnetDefaultQueryableFour<TFirst, TSecond, TThird, TFourth>(sourceQueryable);
         }
 
         /// <summary>
@@ -83,7 +83,7 @@ namespace Sixnet.Development.Queryable
         /// <returns></returns>
         public static ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> Create<TFirst, TSecond, TThird, TFourth, TFifth>(ISixnetQueryable sourceQueryable = null)
         {
-            return new DefaultQueryableFive<TFirst, TSecond, TThird, TFourth, TFifth>(sourceQueryable);
+            return new SixnetDefaultQueryableFive<TFirst, TSecond, TThird, TFourth, TFifth>(sourceQueryable);
         }
 
         /// <summary>
@@ -99,7 +99,7 @@ namespace Sixnet.Development.Queryable
         /// <returns></returns>
         public static ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Create<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(ISixnetQueryable sourceQueryable = null)
         {
-            return new DefaultQueryableSix<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(sourceQueryable);
+            return new SixnetDefaultQueryableSix<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(sourceQueryable);
         }
 
         /// <summary>
@@ -116,7 +116,7 @@ namespace Sixnet.Development.Queryable
         /// <returns></returns>
         public static ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> Create<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(ISixnetQueryable sourceQueryable = null)
         {
-            return new DefaultQueryableSeven<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(sourceQueryable);
+            return new SixnetDefaultQueryableSeven<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(sourceQueryable);
         }
 
         /// <summary>

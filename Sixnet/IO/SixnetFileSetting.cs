@@ -56,10 +56,10 @@ namespace Sixnet.IO
         /// <summary>
         /// Gets or sets the access path select mode
         /// </summary>
-        public SelectionMatchPattern AccessPathSelectionMode
+        public SixnetSelectionMatchPattern AccessPathSelectionMode
         {
             get; set;
-        } = SelectionMatchPattern.EquiprobableRandom;
+        } = SixnetSelectionMatchPattern.EquiprobableRandom;
 
         /// <summary>
         /// Gets or sets whether to use remote upload
@@ -121,7 +121,7 @@ namespace Sixnet.IO
         /// Gets or sets the remove upload setting choice pattern
         /// Default value is 'Equiprobable random' pattern
         /// </summary>
-        public SelectionMatchPattern RemoteUploadSettingSelectionPattern { get; set; } = SelectionMatchPattern.EquiprobableRandom;
+        public SixnetSelectionMatchPattern RemoteUploadSettingSelectionPattern { get; set; } = SixnetSelectionMatchPattern.EquiprobableRandom;
 
         #endregion
 

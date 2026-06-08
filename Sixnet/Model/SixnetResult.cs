@@ -43,7 +43,7 @@ namespace Sixnet.Model
         /// <summary>
         /// Gets or sets the operation response message
         /// </summary>
-        [LocalString]
+        [SixnetLocalString]
         public string Message { get; set; }
 
         /// <summary>
@@ -146,7 +146,7 @@ namespace Sixnet.Model
         /// <summary>
         /// Gets or sets the operation response message
         /// </summary>
-        [LocalString]
+        [SixnetLocalString]
         public string Message { get; set; }
 
         /// <summary>

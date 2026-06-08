@@ -55,7 +55,7 @@ namespace Sixnet.Algorithm.Selection
             if (!values.IsNullOrEmpty())
             {
                 var maxIndex = values.Count - 1;
-                var randomIndex = RandomNumberHelper.GetRandomNumber(maxIndex);
+                var randomIndex = SixnetRandomNumberHelper.GetRandomNumber(maxIndex);
                 return values[randomIndex];
             }
             return default;
@@ -97,24 +97,24 @@ namespace Sixnet.Algorithm.Selection
         /// </summary>
         /// <param name="selectMatchMode">Select match mode</param>
         /// <returns>Return thhe selected data</returns>
-        public T Get(SelectionMatchPattern selectMatchMode)
+        public T Get(SixnetSelectionMatchPattern selectMatchMode)
         {
             T data = default;
             switch (selectMatchMode)
             {
-                case SelectionMatchPattern.First:
+                case SixnetSelectionMatchPattern.First:
                     data = GetFirst();
                     break;
-                case SelectionMatchPattern.Latest:
+                case SixnetSelectionMatchPattern.Latest:
                     data = GetLatest();
                     break;
-                case SelectionMatchPattern.Random:
+                case SixnetSelectionMatchPattern.Random:
                     data = GetByRandom();
                     break;
-                case SelectionMatchPattern.EquiprobableRandom:
+                case SixnetSelectionMatchPattern.EquiprobableRandom:
                     data = GetByEquiprobableRandom();
                     break;
-                case SelectionMatchPattern.Polling:
+                case SixnetSelectionMatchPattern.Polling:
                     data = GetByPolling();
                     break;
             }

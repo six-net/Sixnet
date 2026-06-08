@@ -6,7 +6,7 @@ namespace Sixnet.IO
     /// Defines the location to upload to
     /// </summary>
     [Serializable]
-    public enum UploadLocation
+    public enum SixnetUploadLocation
     {
         /// <summary>
         /// Upload file to local

@@ -15,7 +15,7 @@ namespace Sixnet.Cache
         /// <summary>
         /// Gets or sets the data type
         /// </summary>
-        public CacheKeyType Type { get; set; }
+        public SixnetCacheKeyType Type { get; set; }
 
         /// <summary>
         /// Gets or sets the value
@@ -30,6 +30,6 @@ namespace Sixnet.Cache
         /// <summary>
         /// Gets or sets set value condition
         /// </summary>
-        public CacheSetWhen When { get; set; } = CacheSetWhen.Always;
+        public SixnetCacheSetWhen When { get; set; } = SixnetCacheSetWhen.Always;
     }
 }

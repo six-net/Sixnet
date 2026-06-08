@@ -67,9 +67,9 @@ namespace Sixnet.Development.Data.Database
         public async Task UpdateAsync(SixnetUpdateDatabaseContext context)
         {
             Context = context;
-            await UnitOfWork.ExecuteAsync(new List<DatabaseServer>() { context.UpdateParameter.DatabaseServer }, async workContext =>
+            await SixnetUnitOfWork.ExecuteAsync(new List<SixnetDatabaseServer>() { context.UpdateParameter.DatabaseServer }, async workContext =>
             {
-                DataClient = UnitOfWork.Current.DataClient;
+                DataClient = SixnetUnitOfWork.Current.DataClient;
                 await ExecuteUpdateAsync().ConfigureAwait(false);
                 if (Version > context.CurrentVersion)
                 {
@@ -107,9 +107,9 @@ namespace Sixnet.Development.Data.Database
         public async Task RollbackAsync(SixnetUpdateDatabaseContext context)
         {
             Context = context;
-            await UnitOfWork.ExecuteAsync(new List<DatabaseServer>() { context.UpdateParameter.DatabaseServer }, async workContext =>
+            await SixnetUnitOfWork.ExecuteAsync(new List<SixnetDatabaseServer>() { context.UpdateParameter.DatabaseServer }, async workContext =>
             {
-                DataClient = UnitOfWork.Current.DataClient;
+                DataClient = SixnetUnitOfWork.Current.DataClient;
                 await ExecuteRollbackAsync().ConfigureAwait(false);
                 var recordRepository = SixnetContainer.GetService<ISixnetRepository<SixnetAppUpdateRecordEntity>>();
                 await recordRepository.DeleteAsync(r => r.Id == Id).ConfigureAwait(false);
@@ -134,7 +134,7 @@ namespace Sixnet.Development.Data.Database
         /// <param name="message"></param>
         protected void ReportMessage(string message)
         {
-            Context?.UpdateParameter?.ReportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Message, Context.UpdateParameter
+            Context?.UpdateParameter?.ReportProcess?.Invoke(SixnetUpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Message, Context.UpdateParameter
                 , this, Context.CurrentVersion, Context.CurrentRecordId, null, message));
         }
 
@@ -291,7 +291,7 @@ namespace Sixnet.Development.Data.Database
             {
                 if (!logicalDelete)
                 {
-                    options.LogicalDeleteBehavior = DataOperationBehavior.Disable;
+                    options.LogicalDeleteBehavior = SixnetDataOperationBehavior.Disable;
                 }
                 optionsConfigure?.Invoke(options);
             }).ConfigureAwait(false);
@@ -367,7 +367,7 @@ namespace Sixnet.Development.Data.Database
         /// <param name="conditionExpression"></param>
         /// <param name="isIncludeArchived"></param>
         /// <returns></returns>
-        protected virtual async Task<PagingInfo<TEntity>> GetPagingAsync<TEntity>(int page, int pageSize
+        protected virtual async Task<SixnetPagingInfo<TEntity>> GetPagingAsync<TEntity>(int page, int pageSize
             , Expression<Func<TEntity, bool>> conditionExpression
             , bool isIncludeArchived = true
             , Action<SixnetDataOperationOptions> optionsConfigure = null

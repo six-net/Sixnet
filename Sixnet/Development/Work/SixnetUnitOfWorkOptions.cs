@@ -19,7 +19,7 @@ namespace Sixnet.Development.Work
         /// <summary>
         /// Determines whether to retry
         /// </summary>
-        public Func<RetryContext, bool> ToRetry { get; set; }
+        public Func<SixnetRetryContext, bool> ToRetry { get; set; }
 
         /// <summary>
         /// Whether disable default sql retry
@@ -31,14 +31,14 @@ namespace Sixnet.Development.Work
         /// </summary>
         public bool NotRetry { get; set; }
 
-        bool DefaultSqlToRetry(RetryContext context)
+        bool DefaultSqlToRetry(SixnetRetryContext context)
         {
             var exp = context.Exception;
             return (exp is SixnetSqlAlreadExistsException)
                 || (exp is AggregateException aggExp && (aggExp.InnerExceptions?.Any(c => c is SixnetSqlAlreadExistsException) ?? false));
         }
 
-        internal bool AllowRetry(RetryContext context)
+        internal bool AllowRetry(SixnetRetryContext context)
         {
             return (!DisableDefaultSqlRetry && DefaultSqlToRetry(context))
                 || (ToRetry != null && ToRetry(context));

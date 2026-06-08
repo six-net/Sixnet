@@ -15,9 +15,9 @@ namespace Sixnet.MQ
     {
         #region Fields
 
-        static readonly InternalMessageQueueProvider _internalProvider = new();
+        static readonly SixnetInternalMessageQueueProvider _internalProvider = new();
         static readonly SixnetMessageQueueOptions _defaultMessageQueueOptions = new();
-        static readonly MessageQueueServer _defaultInternalServer = new() { Type = MessageQueueType.Internal };
+        static readonly SixnetMessageQueueServer _defaultInternalServer = new() { Type = SixnetMessageQueueType.Internal };
 
         #endregion
 
@@ -49,7 +49,7 @@ namespace Sixnet.MQ
                 var endpoint = GetMessageQueueEndpoint(message);
                 var provider = GetMessageQueueProvider(endpoint.Server.Type);
 
-                messageTasks.Add(provider.EnqueueAsync(new EnqueueParameter()
+                messageTasks.Add(provider.EnqueueAsync(new SixnetEnqueueParameter()
                 {
                     Endpoint = endpoint,
                     Message = message
@@ -83,7 +83,7 @@ namespace Sixnet.MQ
                 var endpoint = GetMessageQueueEndpoint(message);
                 var provider = GetMessageQueueProvider(endpoint.Server.Type);
 
-                provider.Enqueue(new EnqueueParameter()
+                provider.Enqueue(new SixnetEnqueueParameter()
                 {
                     Endpoint = endpoint,
                     Message = message
@@ -99,9 +99,9 @@ namespace Sixnet.MQ
         /// Consume message queue
         /// </summary>
         /// <param name="parameter">Consume parameter</param>
-        public static Task ConsumeAsync(ConsumeParameter parameter)
+        public static Task ConsumeAsync(SixnetConsumeParameter parameter)
         {
-            SixnetDirectThrower.ThrowArgNullIf(parameter?.Server == null, nameof(ConsumeParameter.Server));
+            SixnetDirectThrower.ThrowArgNullIf(parameter?.Server == null, nameof(SixnetConsumeParameter.Server));
 
             var provider = GetMessageQueueProvider(parameter.Server.Type);
             return provider.ConsumeAsync(parameter);
@@ -111,9 +111,9 @@ namespace Sixnet.MQ
         /// Consume message queue
         /// </summary>
         /// <param name="parameter">Consume parameter</param>
-        public static void Consume(ConsumeParameter parameter)
+        public static void Consume(SixnetConsumeParameter parameter)
         {
-            SixnetDirectThrower.ThrowArgNullIf(parameter?.Server == null, nameof(ConsumeParameter.Server));
+            SixnetDirectThrower.ThrowArgNullIf(parameter?.Server == null, nameof(SixnetConsumeParameter.Server));
 
             var provider = GetMessageQueueProvider(parameter.Server.Type);
             provider.Consume(parameter);
@@ -127,9 +127,9 @@ namespace Sixnet.MQ
         /// Abort consume message queue
         /// </summary>
         /// <param name="parameter">Consume parameter</param>
-        public static Task AbortConsumeAsync(AbortConsumeParameter parameter)
+        public static Task AbortConsumeAsync(SixnetAbortConsumeParameter parameter)
         {
-            SixnetDirectThrower.ThrowArgNullIf(parameter?.Server == null, nameof(ConsumeParameter.Server));
+            SixnetDirectThrower.ThrowArgNullIf(parameter?.Server == null, nameof(SixnetConsumeParameter.Server));
 
             var provider = GetMessageQueueProvider(parameter.Server.Type);
             return provider.AbortConsumeAsync(parameter);
@@ -139,9 +139,9 @@ namespace Sixnet.MQ
         /// Abort consume message queue
         /// </summary>
         /// <param name="parameter">Consume parameter</param>
-        public static void AbortConsume(AbortConsumeParameter parameter)
+        public static void AbortConsume(SixnetAbortConsumeParameter parameter)
         {
-            SixnetDirectThrower.ThrowArgNullIf(parameter?.Server == null, nameof(ConsumeParameter.Server));
+            SixnetDirectThrower.ThrowArgNullIf(parameter?.Server == null, nameof(SixnetConsumeParameter.Server));
 
             var provider = GetMessageQueueProvider(parameter.Server.Type);
             provider.AbortConsume(parameter);
@@ -156,9 +156,9 @@ namespace Sixnet.MQ
         /// </summary>
         /// <param name="parameter">Add queue parameter</param>
         /// <returns></returns>
-        public static Task AddQueueAsync(AddQueueParameter parameter)
+        public static Task AddQueueAsync(SixnetAddQueueParameter parameter)
         {
-            SixnetDirectThrower.ThrowArgNullIf(parameter?.Server == null, nameof(ConsumeParameter.Server));
+            SixnetDirectThrower.ThrowArgNullIf(parameter?.Server == null, nameof(SixnetConsumeParameter.Server));
 
             var provider = GetMessageQueueProvider(parameter.Server.Type);
             return provider.AddQueueAsync(parameter);
@@ -169,9 +169,9 @@ namespace Sixnet.MQ
         /// </summary>
         /// <param name="parameter">Add queue parameter</param>
         /// <returns></returns>
-        public static void AddQueue(AddQueueParameter parameter)
+        public static void AddQueue(SixnetAddQueueParameter parameter)
         {
-            SixnetDirectThrower.ThrowArgNullIf(parameter?.Server == null, nameof(ConsumeParameter.Server));
+            SixnetDirectThrower.ThrowArgNullIf(parameter?.Server == null, nameof(SixnetConsumeParameter.Server));
 
             var provider = GetMessageQueueProvider(parameter.Server.Type);
             provider.AddQueue(parameter);
@@ -186,9 +186,9 @@ namespace Sixnet.MQ
         /// </summary>
         /// <param name="parameter">Delete queue parameter</param>
         /// <returns></returns>
-        public static Task DeleteQueueAsync(DeleteQueueParameter parameter)
+        public static Task DeleteQueueAsync(SixnetDeleteQueueParameter parameter)
         {
-            SixnetDirectThrower.ThrowArgNullIf(parameter?.Server == null, nameof(ConsumeParameter.Server));
+            SixnetDirectThrower.ThrowArgNullIf(parameter?.Server == null, nameof(SixnetConsumeParameter.Server));
 
             var provider = GetMessageQueueProvider(parameter.Server.Type);
             return provider.DeleteQueueAsync(parameter);
@@ -199,9 +199,9 @@ namespace Sixnet.MQ
         /// </summary>
         /// <param name="parameter">Delete queue parameter</param>
         /// <returns></returns>
-        public static void DeleteQueue(DeleteQueueParameter parameter)
+        public static void DeleteQueue(SixnetDeleteQueueParameter parameter)
         {
-            SixnetDirectThrower.ThrowArgNullIf(parameter?.Server == null, nameof(ConsumeParameter.Server));
+            SixnetDirectThrower.ThrowArgNullIf(parameter?.Server == null, nameof(SixnetConsumeParameter.Server));
 
             var provider = GetMessageQueueProvider(parameter.Server.Type);
             provider.DeleteQueue(parameter);
@@ -222,7 +222,7 @@ namespace Sixnet.MQ
             {
                 return Task.FromResult(false);
             }
-            if (message is IInternalQueueMessage executableMessage)
+            if (message is ISixnetInternalQueueMessage executableMessage)
             {
                 return executableMessage.ExecuteAsync();
             }
@@ -240,11 +240,11 @@ namespace Sixnet.MQ
         /// </summary>
         /// <param name="message">Message</param>
         /// <returns></returns>
-        static MessageQueueEndpoint GetMessageQueueEndpoint(SixnetQueueMessage message)
+        static SixnetMessageQueueEndpoint GetMessageQueueEndpoint(SixnetQueueMessage message)
         {
-            if (message is IInternalQueueMessage inProcessMessage)
+            if (message is ISixnetInternalQueueMessage inProcessMessage)
             {
-                return new MessageQueueEndpoint()
+                return new SixnetMessageQueueEndpoint()
                 {
                     Server = _defaultInternalServer,
                     QueueNames = new List<string>() { inProcessMessage.QueueName }
@@ -253,7 +253,7 @@ namespace Sixnet.MQ
             var endpoint = GetMessageQueueOptions()?.GetEndpoint(message);
             if (endpoint == null && message?.Group == QueueMessageGroupNames.DomainMessage)
             {
-                return new MessageQueueEndpoint()
+                return new SixnetMessageQueueEndpoint()
                 {
                     Server = _defaultInternalServer,
                     QueueNames = new List<string>() { InternalQueueNames.DomainMessage }
@@ -287,9 +287,9 @@ namespace Sixnet.MQ
         /// </summary>
         /// <param name="messageQueueType">Message queue type</param>
         /// <returns></returns>
-        internal static ISixnetMessageQueueProvider GetMessageQueueProvider(MessageQueueType messageQueueType)
+        internal static ISixnetMessageQueueProvider GetMessageQueueProvider(SixnetMessageQueueType messageQueueType)
         {
-            if (messageQueueType == MessageQueueType.Internal)
+            if (messageQueueType == SixnetMessageQueueType.Internal)
             {
                 return _internalProvider;
             }

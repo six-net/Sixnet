@@ -73,7 +73,7 @@ namespace Sixnet.Cache
         /// <param name="when">Cache setting conditions</param>
         /// <param name="cacheObject">The data belongs to the cache object</param>
         /// <returns>Return cache set result</returns>
-        public static SixnetStringSetResult Store<T>(SixnetCacheKey key, T data, DateTimeOffset? absoluteExpiration = null, CacheSetWhen when = CacheSetWhen.Always, SixnetCacheObject cacheObject = null)
+        public static SixnetStringSetResult Store<T>(SixnetCacheKey key, T data, DateTimeOffset? absoluteExpiration = null, SixnetCacheSetWhen when = SixnetCacheSetWhen.Always, SixnetCacheObject cacheObject = null)
         {
             var value = SixnetJsonSerializer.Serialize(data);
             if (string.IsNullOrWhiteSpace(value))
@@ -94,7 +94,7 @@ namespace Sixnet.Cache
         /// <param name="when">Cache setting conditions</param>
         /// <param name="cacheObject">The data belongs to the cache object</param>
         /// <returns>Return cache set result</returns>
-        public static SixnetStringSetResult Store<T>(SixnetCacheKey key, T data, TimeSpan? absoluteExpirationRelativeToNow = null, bool slidingExpiration = true, CacheSetWhen when = CacheSetWhen.Always, SixnetCacheObject cacheObject = null)
+        public static SixnetStringSetResult Store<T>(SixnetCacheKey key, T data, TimeSpan? absoluteExpirationRelativeToNow = null, bool slidingExpiration = true, SixnetCacheSetWhen when = SixnetCacheSetWhen.Always, SixnetCacheObject cacheObject = null)
         {
             var value = SixnetJsonSerializer.Serialize(data);
             if (string.IsNullOrWhiteSpace(value))
@@ -205,7 +205,7 @@ namespace Sixnet.Cache
             /// <param name="when">Set value conditions</param>
             /// <param name="cacheObject">Cache object</param>
             /// <returns>Return cache result</returns>
-            public static SixnetStringSetResult Set(SixnetCacheKey key, string value, DateTimeOffset? absoluteExpiration = null, CacheSetWhen when = CacheSetWhen.Always, SixnetCacheObject cacheObject = null)
+            public static SixnetStringSetResult Set(SixnetCacheKey key, string value, DateTimeOffset? absoluteExpiration = null, SixnetCacheSetWhen when = SixnetCacheSetWhen.Always, SixnetCacheObject cacheObject = null)
             {
                 return Set(new SixnetStringSetParameter()
                 {
@@ -239,7 +239,7 @@ namespace Sixnet.Cache
             /// <param name="when">Set value conditions</param>
             /// <param name="cacheObject">Cache object</param>
             /// <returns>Return cache result</returns>
-            public static SixnetStringSetResult Set(SixnetCacheKey key, string value, TimeSpan? absoluteExpirationRelativeToNow = null, bool slidingExpiration = true, CacheSetWhen when = CacheSetWhen.Always, SixnetCacheObject cacheObject = null)
+            public static SixnetStringSetResult Set(SixnetCacheKey key, string value, TimeSpan? absoluteExpirationRelativeToNow = null, bool slidingExpiration = true, SixnetCacheSetWhen when = SixnetCacheSetWhen.Always, SixnetCacheObject cacheObject = null)
             {
                 return Set(new SixnetStringSetParameter()
                 {
@@ -1700,7 +1700,7 @@ namespace Sixnet.Cache
         /// </summary>
         /// <param name="databaseType">Server type</param>
         /// <returns>Return cache provider</returns>
-        internal static ISixnetCacheProvider GetCacheProvider(CacheServerType databaseType)
+        internal static ISixnetCacheProvider GetCacheProvider(SixnetCacheServerType databaseType)
         {
             var provider = Options?.GetCacheProvider(databaseType);
 

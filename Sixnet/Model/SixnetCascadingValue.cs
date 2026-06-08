@@ -14,7 +14,7 @@ namespace Sixnet.Model
         /// <summary>
         /// Gets or sets the label
         /// </summary>
-        [LocalString]
+        [SixnetLocalString]
         public string Label { get; set; }
 
         /// <summary>

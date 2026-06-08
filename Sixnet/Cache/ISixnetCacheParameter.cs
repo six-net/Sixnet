@@ -15,12 +15,12 @@ namespace Sixnet.Cache
         /// <summary>
         /// Gets or sets the command flags
         /// </summary>
-        CacheCommandFlags CommandFlags { get; set; }
+        SixnetCacheCommandFlags CommandFlags { get; set; }
 
         /// <summary>
         /// Gets or sets the cache structure pattern
         /// </summary>
-        CacheStructurePattern StructurePattern { get; set; }
+        SixnetCacheStructurePattern StructurePattern { get; set; }
 
         ///// <summary>
         ///// Whether in memory cache first

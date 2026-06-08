@@ -19,7 +19,7 @@ namespace Sixnet.Cache.Set.Parameters
         /// <summary>
         /// Gets or sets the combine operation
         /// </summary>
-        public CombineOperation CombineOperation { get; set; } = CombineOperation.Union;
+        public SixnetCombineOperation CombineOperation { get; set; } = SixnetCombineOperation.Union;
 
         /// <summary>
         /// Execute cache operation

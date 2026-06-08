@@ -17,7 +17,7 @@ namespace Sixnet.Net.Email
         /// <summary>
         /// Email provider
         /// </summary>
-        static readonly ISixnetEmailProvider _defaultEmailProvider = new DefaultEmailProvider();
+        static readonly ISixnetEmailProvider _defaultEmailProvider = new SixnetDefaultEmailProvider();
 
         /// <summary>
         /// Default email options
@@ -33,17 +33,17 @@ namespace Sixnet.Net.Email
         /// </summary>
         /// <param name="emails">Emails</param>
         /// <returns></returns>
-        public static List<SendEmailResult> Send(IEnumerable<EmailInfo> emails)
+        public static List<SixnetSendEmailResult> Send(IEnumerable<SixnetEmailInfo> emails)
         {
             if (emails.IsNullOrEmpty())
             {
-                return new List<SendEmailResult>(0);
+                return new List<SixnetSendEmailResult>(0);
             }
 
             var emailProvider = GetEmailProvider();
-            var emailGroups = new Dictionary<EmailAccount, List<EmailInfo>>();
+            var emailGroups = new Dictionary<SixnetEmailAccount, List<SixnetEmailInfo>>();
             var emailOptions = GetEmailOptions();
-            EmailAccount emailAccount = null;
+            SixnetEmailAccount emailAccount = null;
 
             #region Gets email account
 
@@ -72,7 +72,7 @@ namespace Sixnet.Net.Email
                 }
                 else
                 {
-                    emailGroups.Add(emailAccount, new List<EmailInfo>() { email });
+                    emailGroups.Add(emailAccount, new List<SixnetEmailInfo>() { email });
                 }
             }
 
@@ -80,7 +80,7 @@ namespace Sixnet.Net.Email
 
             #region Execute send
 
-            List<SendEmailResult> sendResults = null;
+            List<SixnetSendEmailResult> sendResults = null;
             if (emailGroups.Count == 1)
             {
                 var firstGroup = emailGroups.First();
@@ -89,7 +89,7 @@ namespace Sixnet.Net.Email
             }
             else
             {
-                sendResults ??= new List<SendEmailResult>();
+                sendResults ??= new List<SixnetSendEmailResult>();
                 foreach (var emailGroup in emailGroups)
                 {
                     var account = emailGroup.Key;
@@ -109,7 +109,7 @@ namespace Sixnet.Net.Email
 
             #endregion
 
-            return sendResults ?? new List<SendEmailResult>(0);
+            return sendResults ?? new List<SixnetSendEmailResult>(0);
         }
 
         /// <summary>
@@ -117,9 +117,9 @@ namespace Sixnet.Net.Email
         /// </summary>
         /// <param name="emails">Emails</param>
         /// <returns></returns>
-        public static List<SendEmailResult> Send(params EmailInfo[] emails)
+        public static List<SixnetSendEmailResult> Send(params SixnetEmailInfo[] emails)
         {
-            IEnumerable<EmailInfo> emailCollection = emails;
+            IEnumerable<SixnetEmailInfo> emailCollection = emails;
             return Send(emailCollection);
         }
 
@@ -131,13 +131,13 @@ namespace Sixnet.Net.Email
         /// <param name="content">Content</param>
         /// <param name="addresses">Email addresses</param>
         /// <returns></returns>
-        public static SendEmailResult Send(string subject, string title, string content, params string[] addresses)
+        public static SixnetSendEmailResult Send(string subject, string title, string content, params string[] addresses)
         {
             SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(subject), nameof(subject));
             SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(content), nameof(content));
             SixnetDirectThrower.ThrowArgNullIf(addresses.IsNullOrEmpty(), nameof(addresses));
 
-            return Send(new EmailInfo()
+            return Send(new SixnetEmailInfo()
             {
                 Subject = subject,
                 Title = title,
@@ -153,7 +153,7 @@ namespace Sixnet.Net.Email
         /// <param name="content">Content</param>
         /// <param name="addresses">Email addresses</param>
         /// <returns></returns>
-        public static SendEmailResult Send(string title, string content, params string[] addresses)
+        public static SixnetSendEmailResult Send(string title, string content, params string[] addresses)
         {
             return Send(string.Empty, title, content, addresses);
         }
@@ -164,19 +164,19 @@ namespace Sixnet.Net.Email
         /// <param name="account">Email account</param>
         /// <param name="emails">Emails</param>
         /// <returns></returns>
-        public static List<SendEmailResult> Send(EmailAccount account, IEnumerable<EmailInfo> emails)
+        public static List<SixnetSendEmailResult> Send(SixnetEmailAccount account, IEnumerable<SixnetEmailInfo> emails)
         {
             SixnetDirectThrower.ThrowArgNullIf(account == null, nameof(account));
 
             if (emails.IsNullOrEmpty())
             {
-                return new List<SendEmailResult>(0);
+                return new List<SixnetSendEmailResult>(0);
             }
             var emailOptions = GetEmailOptions();
             var emailProvider = GetEmailProvider();
             var results = emailProvider.Send(account, emails);
             emailOptions.SendCallback?.Invoke(results);
-            return results ?? new List<SendEmailResult>(0);
+            return results ?? new List<SixnetSendEmailResult>(0);
         }
 
         /// <summary>
@@ -185,9 +185,9 @@ namespace Sixnet.Net.Email
         /// <param name="account">Email account</param>
         /// <param name="emails">Emails</param>
         /// <returns></returns>
-        public static List<SendEmailResult> Send(EmailAccount account, params EmailInfo[] emails)
+        public static List<SixnetSendEmailResult> Send(SixnetEmailAccount account, params SixnetEmailInfo[] emails)
         {
-            IEnumerable<EmailInfo> emailCollection = emails;
+            IEnumerable<SixnetEmailInfo> emailCollection = emails;
             return Send(account, emailCollection);
         }
 
@@ -200,14 +200,14 @@ namespace Sixnet.Net.Email
         /// <param name="content">Content</param>
         /// <param name="addresses">Email addresses</param>
         /// <returns></returns>
-        public static SendEmailResult Send(EmailAccount account, string subject, string title
+        public static SixnetSendEmailResult Send(SixnetEmailAccount account, string subject, string title
             , string content, params string[] addresses)
         {
             SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(title), nameof(title));
             SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(content), nameof(content));
             SixnetDirectThrower.ThrowArgNullIf(addresses.IsNullOrEmpty(), nameof(addresses));
 
-            return Send(account, new EmailInfo()
+            return Send(account, new SixnetEmailInfo()
             {
                 Subject = subject,
                 Title = title,
@@ -224,7 +224,7 @@ namespace Sixnet.Net.Email
         /// <param name="content">Content</param>>
         /// <param name="addresses">Email addresses</param>
         /// <returns></returns>
-        public static SendEmailResult Send(EmailAccount account, string title, string content, params string[] addresses)
+        public static SixnetSendEmailResult Send(SixnetEmailAccount account, string title, string content, params string[] addresses)
         {
             return Send(account, string.Empty, title, content, addresses);
         }
@@ -234,7 +234,7 @@ namespace Sixnet.Net.Email
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
-        public static SendEmailResult SendTemplateMessage(SendMessageContext context)
+        public static SixnetSendEmailResult SendTemplateMessage(SixnetSendMessageContext context)
         {
             return Send(GetEmailInfo(context.Template, context.Message, context.Receivers))?.FirstOrDefault();
         }
@@ -263,7 +263,7 @@ namespace Sixnet.Net.Email
         /// <param name="emailOptions">Email options</param>
         /// <param name="email">Email info</param>
         /// <returns></returns>
-        static EmailAccount GetEmailAccount(SixnetEmailOptions emailOptions, EmailInfo email)
+        static SixnetEmailAccount GetEmailAccount(SixnetEmailOptions emailOptions, SixnetEmailInfo email)
         {
             SixnetDirectThrower.ThrowArgNullIf(email == null, nameof(email));
 
@@ -287,7 +287,7 @@ namespace Sixnet.Net.Email
         /// Get email info
         /// </summary>
         /// <returns></returns>
-        static EmailInfo GetEmailInfo(MessageTemplate template, MessageInfo message, IEnumerable<string> emails)
+        static SixnetEmailInfo GetEmailInfo(SixnetMessageTemplate template, SixnetMessageInfo message, IEnumerable<string> emails)
         {
             SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(template.Title), "Message template title is null or empty");
             SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(template.Content), "Message template content is null or empty");
@@ -315,7 +315,7 @@ namespace Sixnet.Net.Email
             }
 
             // Email info
-            var email = new EmailInfo()
+            var email = new SixnetEmailInfo()
             {
                 Subject = message.Subject,
                 Content = contentResolveResult.NewContent,

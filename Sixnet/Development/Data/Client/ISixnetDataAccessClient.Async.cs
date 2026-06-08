@@ -42,7 +42,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="parameters">Parameters</param>
         /// <param name="options">Options</param>
         /// <returns>Data list</returns>
-        Task<List<T>> QueryAsync<T>(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null);
+        Task<List<T>> QueryAsync<T>(string script, object parameters = null, SixnetDataScriptType scriptType = SixnetDataScriptType.Text, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Query the first data
@@ -67,7 +67,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="parameters">Parameters</param>
         /// <param name="options">Options</param>
         /// <returns>Data list</returns>
-        Task<T> QueryFirstAsync<T>(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null);
+        Task<T> QueryFirstAsync<T>(string script, object parameters = null, SixnetDataScriptType scriptType = SixnetDataScriptType.Text, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Query paging data
@@ -76,7 +76,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="pagingFilter">Paging filter</param>
         /// <param name="options">Options</param>
         /// <returns>Paging data</returns>
-        Task<PagingInfo<T>> QueryPagingAsync<T>(Expression<Func<T, bool>> conditionExpression, PagingFilter pagingFilter, SixnetDataOperationOptions options = null);
+        Task<SixnetPagingInfo<T>> QueryPagingAsync<T>(Expression<Func<T, bool>> conditionExpression, SixnetPagingFilter pagingFilter, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Query paging data
@@ -85,7 +85,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="pagingFilter">Paging filter</param>
         /// <param name="options">Options</param>
         /// <returns>Paging data</returns>
-        Task<PagingInfo<T>> QueryPagingAsync<T>(Expression<Func<T, bool>> conditionExpression, int page, int pageSize, SixnetDataOperationOptions options = null);
+        Task<SixnetPagingInfo<T>> QueryPagingAsync<T>(Expression<Func<T, bool>> conditionExpression, int page, int pageSize, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Query paging data
@@ -94,7 +94,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="pagingFilter">Paging filter</param>
         /// <param name="options">Options</param>
         /// <returns>Dynamic object paging</returns>
-        Task<PagingInfo<T>> QueryPagingAsync<T>(ISixnetQueryable queryable, PagingFilter pagingFilter, SixnetDataOperationOptions options = null);
+        Task<SixnetPagingInfo<T>> QueryPagingAsync<T>(ISixnetQueryable queryable, SixnetPagingFilter pagingFilter, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Query paging data
@@ -104,7 +104,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="pageSize">Page size</param>
         /// <param name="options">Options</param>
         /// <returns>Dynamic object paging</returns>
-        Task<PagingInfo<T>> QueryPagingAsync<T>(ISixnetQueryable queryable, int page, int pageSize, SixnetDataOperationOptions options = null);
+        Task<SixnetPagingInfo<T>> QueryPagingAsync<T>(ISixnetQueryable queryable, int page, int pageSize, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Query datas
@@ -129,7 +129,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="options">Options</param>
         /// <returns>Return the datas</returns>
-        Task<List<TReturn>> QueryMappingAsync<TFirst, TSecond, TReturn>(string script, object parameters, Func<TFirst, TSecond, TReturn> dataMappingFunc, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null);
+        Task<List<TReturn>> QueryMappingAsync<TFirst, TSecond, TReturn>(string script, object parameters, Func<TFirst, TSecond, TReturn> dataMappingFunc, SixnetDataScriptType scriptType = SixnetDataScriptType.Text, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Query datas
@@ -156,7 +156,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="options">Options</param>
         /// <returns>Return the datas</returns>
-        Task<List<TReturn>> QueryMappingAsync<TFirst, TSecond, TThird, TReturn>(string script, object parameters, Func<TFirst, TSecond, TThird, TReturn> dataMappingFunc, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null);
+        Task<List<TReturn>> QueryMappingAsync<TFirst, TSecond, TThird, TReturn>(string script, object parameters, Func<TFirst, TSecond, TThird, TReturn> dataMappingFunc, SixnetDataScriptType scriptType = SixnetDataScriptType.Text, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Query datas
@@ -185,7 +185,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="options">Options</param>
         /// <returns>Return the datas</returns>
-        Task<List<TReturn>> QueryMappingAsync<TFirst, TSecond, TThird, TFourth, TReturn>(string script, object parameters, Func<TFirst, TSecond, TThird, TFourth, TReturn> dataMappingFunc, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null);
+        Task<List<TReturn>> QueryMappingAsync<TFirst, TSecond, TThird, TFourth, TReturn>(string script, object parameters, Func<TFirst, TSecond, TThird, TFourth, TReturn> dataMappingFunc, SixnetDataScriptType scriptType = SixnetDataScriptType.Text, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Query datas
@@ -216,7 +216,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="options">Options</param>
         /// <returns>Return the datas</returns>
-        Task<List<TReturn>> QueryMappingAsync<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(string script, object parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> dataMappingFunc, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null);
+        Task<List<TReturn>> QueryMappingAsync<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(string script, object parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> dataMappingFunc, SixnetDataScriptType scriptType = SixnetDataScriptType.Text, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Query datas
@@ -249,7 +249,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="options">Options</param>
         /// <returns>Return the datas</returns>
-        Task<List<TReturn>> QueryMappingAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(string script, object parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> dataMappingFunc, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null);
+        Task<List<TReturn>> QueryMappingAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(string script, object parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> dataMappingFunc, SixnetDataScriptType scriptType = SixnetDataScriptType.Text, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Query datas
@@ -284,7 +284,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="dataMappingFunc">Data mapping function</param>
         /// <param name="options">Options</param>
         /// <returns>Return the datas</returns>
-        Task<List<TReturn>> QueryMappingAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(string script, object parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> dataMappingFunc, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null);
+        Task<List<TReturn>> QueryMappingAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(string script, object parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> dataMappingFunc, SixnetDataScriptType scriptType = SixnetDataScriptType.Text, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Whether has data
@@ -403,7 +403,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="parameters">Parameters</param>
         /// <param name="options">Options</param>
         /// <returns>Return the data</returns>
-        Task<TValue> ScalarAsync<TValue>(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null);
+        Task<TValue> ScalarAsync<TValue>(string script, object parameters = null, SixnetDataScriptType scriptType = SixnetDataScriptType.Text, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Query multiple data
@@ -420,7 +420,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="parameters">Parameters</param>
         /// <param name="options">Options</param>
         /// <returns>Return the dataset</returns>
-        Task<DataSet> QueryMultipleAsync(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null);
+        Task<DataSet> QueryMultipleAsync(string script, object parameters = null, SixnetDataScriptType scriptType = SixnetDataScriptType.Text, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Query multiple data
@@ -441,7 +441,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="parameters">Parameters</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        Task<Tuple<List<TFirst>, List<TSecond>>> QueryMultipleAsync<TFirst, TSecond>(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null);
+        Task<Tuple<List<TFirst>, List<TSecond>>> QueryMultipleAsync<TFirst, TSecond>(string script, object parameters = null, SixnetDataScriptType scriptType = SixnetDataScriptType.Text, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Query multiple data
@@ -464,7 +464,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="parameters">Parameters</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        Task<Tuple<List<TFirst>, List<TSecond>, List<TThird>>> QueryMultipleAsync<TFirst, TSecond, TThird>(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null);
+        Task<Tuple<List<TFirst>, List<TSecond>, List<TThird>>> QueryMultipleAsync<TFirst, TSecond, TThird>(string script, object parameters = null, SixnetDataScriptType scriptType = SixnetDataScriptType.Text, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Query multiple data
@@ -489,7 +489,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="parameters">Parameters</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        Task<Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>>> QueryMultipleAsync<TFirst, TSecond, TThird, TFourth>(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null);
+        Task<Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>>> QueryMultipleAsync<TFirst, TSecond, TThird, TFourth>(string script, object parameters = null, SixnetDataScriptType scriptType = SixnetDataScriptType.Text, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Query multiple data
@@ -516,7 +516,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="parameters">Parameters</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        Task<Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>>> QueryMultipleAsync<TFirst, TSecond, TThird, TFourth, TFifth>(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null);
+        Task<Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>>> QueryMultipleAsync<TFirst, TSecond, TThird, TFourth, TFifth>(string script, object parameters = null, SixnetDataScriptType scriptType = SixnetDataScriptType.Text, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Query multiple data
@@ -545,7 +545,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="parameters">Parameters</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        Task<Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>>> QueryMultipleAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null);
+        Task<Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>>> QueryMultipleAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(string script, object parameters = null, SixnetDataScriptType scriptType = SixnetDataScriptType.Text, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Query multiple data
@@ -576,7 +576,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="parameters">Parameters</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        Task<Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>, List<TSeventh>>> QueryMultipleAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null);
+        Task<Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>, List<TSeventh>>> QueryMultipleAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(string script, object parameters = null, SixnetDataScriptType scriptType = SixnetDataScriptType.Text, SixnetDataOperationOptions options = null);
 
         #endregion
 
@@ -674,7 +674,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="conditionExpression">Condition expression</param>
         /// <param name="options">Options</param>
         /// <returns>Affected data number</returns>
-        Task<int> UpdateAsync<T>(FieldsAssignment fieldsAssignment, Expression<Func<T, bool>> conditionExpression, SixnetDataOperationOptions options = null);
+        Task<int> UpdateAsync<T>(SixnetFieldsAssignment fieldsAssignment, Expression<Func<T, bool>> conditionExpression, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Update
@@ -683,7 +683,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="queryable">Queryable</param>
         /// <param name="options">Options</param>
         /// <returns>Affected data number</returns>
-        Task<int> UpdateAsync(FieldsAssignment fieldsAssignment, ISixnetQueryable queryable, SixnetDataOperationOptions options = null);
+        Task<int> UpdateAsync(SixnetFieldsAssignment fieldsAssignment, ISixnetQueryable queryable, SixnetDataOperationOptions options = null);
 
         #endregion
 
@@ -749,7 +749,7 @@ namespace Sixnet.Development.Data.Client
         /// </summary>
         /// <param name="migrationInfo">Migration info</param>
         /// <param name="options">Data operation options</param>
-        Task MigrateAsync(MigrationInfo migrationInfo, SixnetDataOperationOptions options = null);
+        Task MigrateAsync(SixnetMigrationInfo migrationInfo, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Create all entity tables
@@ -807,7 +807,7 @@ namespace Sixnet.Development.Data.Client
         /// <typeparam name="TEntity"></typeparam>
         /// <param name="field"></param>
         /// <param name="options"></param>
-        Task AlterFieldAsync<TEntity>(Expression<Func<TEntity, object>> field, Action<DataField> configureField = null, SixnetDataOperationOptions options = null);
+        Task AlterFieldAsync<TEntity>(Expression<Func<TEntity, object>> field, Action<SixnetDataField> configureField = null, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Alter field
@@ -816,7 +816,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="fieldName"></param>
         /// <param name="field"></param>
         /// <param name="options"></param>
-        Task AlterFieldAsync<TEntity>(string fieldName, DataField field, SixnetDataOperationOptions options = null);
+        Task AlterFieldAsync<TEntity>(string fieldName, SixnetDataField field, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Create table
@@ -837,14 +837,14 @@ namespace Sixnet.Development.Data.Client
         /// </summary>
         /// <param name="entityType"></param>
         /// <param name="options"></param>
-        Task AddFieldAsync(Type entityType, List<DataField> fields, SixnetDataOperationOptions options = null);
+        Task AddFieldAsync(Type entityType, List<SixnetDataField> fields, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Delete field
         /// </summary>
         /// <param name="entityType"></param>
         /// <param name="options"></param>
-        Task DeleteFieldAsync(Type entityType, List<DataField> fields, SixnetDataOperationOptions options = null);
+        Task DeleteFieldAsync(Type entityType, List<SixnetDataField> fields, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Alter fields
@@ -852,7 +852,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="entityType"></param>
         /// <param name="fields"></param>
         /// <param name="options"></param>
-        Task AlterFieldAsync(Type entityType, Dictionary<string, DataField> fields, SixnetDataOperationOptions options);
+        Task AlterFieldAsync(Type entityType, Dictionary<string, SixnetDataField> fields, SixnetDataOperationOptions options);
 
         #endregion
 

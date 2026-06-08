@@ -43,7 +43,7 @@ namespace Sixnet.Environments
         {
             try
             {
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                if (OperatingSystem.IsWindows())
                 {
                     static string readMachineGuidValue(RegistryView view)
                     {
@@ -59,7 +59,7 @@ namespace Sixnet.Environments
                     machineId = readMachineGuidValue(RegistryView.Registry32);
                     return machineId ?? string.Empty;
                 }
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                if (OperatingSystem.IsLinux())
                 {
                     string[] paths =
                     {
@@ -76,7 +76,7 @@ namespace Sixnet.Environments
                     }
                 }
 
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                if (OperatingSystem.IsMacOS())
                 {
                     var psi = new System.Diagnostics.ProcessStartInfo
                     {

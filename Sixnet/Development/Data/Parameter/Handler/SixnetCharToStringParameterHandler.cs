@@ -1,0 +1,42 @@
+﻿// "Company © 2025. All rights reserved."
+
+using System.Collections;
+using System.Data;
+
+using Sixnet.Development.Data.Parameter.Handler;
+
+namespace Sixnet.Development.Data.ParameterHandler.Handler
+{
+    public class SixnetCharToStringParameterHandler : ISixnetDataCommandParameterHandler
+    {
+        public DataCommandParameterItem Parse(DataCommandParameterItem originalParameter)
+        {
+            if (originalParameter != null)
+            {
+                if (originalParameter.Value is IEnumerable values)
+                {
+                    List<string> stringValues = new();
+                    foreach (var val in values)
+                    {
+                        if (val is char charValue)
+                        {
+                            stringValues.Add(charValue.ToString());
+                        }
+                        else
+                        {
+                            return originalParameter;
+                        }
+                    }
+                    originalParameter.DbType = null;
+                    originalParameter.Value = stringValues;
+                }
+                else if (originalParameter.Value is char || originalParameter.DbType == DbType.StringFixedLength)
+                {
+                    originalParameter.DbType = DbType.String;
+                    originalParameter.Value = originalParameter.Value.ToString();
+                }
+            }
+            return originalParameter;
+        }
+    }
+}

@@ -5,6 +5,9 @@ using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
+using Sixnet.DependencyInjection;
+using Sixnet.Development.Domain.Events;
+using Sixnet.Development.Events;
 using Sixnet.Environments;
 using Sixnet.Logging;
 using Sixnet.Model;
@@ -47,6 +50,11 @@ namespace Sixnet.App
         static List<ISixnetConfigurable> _configModels = null;
 
         /// <summary>
+        /// Event handler types
+        /// </summary>
+        static List<Type> _eventHandlerTypes = null;
+
+        /// <summary>
         /// Default application options
         /// </summary>
         internal static SixnetApplicationOptions Options = new();
@@ -58,7 +66,7 @@ namespace Sixnet.App
         /// <summary>
         /// Gets or sets the information about the currently running application
         /// </summary>
-        public static ApplicationInfo Current { get; internal set; }
+        public static SixnetApplicationInfo Current { get; internal set; }
 
         /// <summary>
         /// Gets the current application root path
@@ -88,7 +96,7 @@ namespace Sixnet.App
         /// </summary>
         internal static void Init()
         {
-            ApplicationInitializer.Init();
+            SixnetApplicationInitializer.Init();
         }
 
         /// <summary>
@@ -114,11 +122,11 @@ namespace Sixnet.App
         /// Get current application info
         /// </summary>
         /// <returns></returns>
-        internal static ApplicationInfo GetCurrentApplicationInfo()
+        internal static SixnetApplicationInfo GetCurrentApplicationInfo()
         {
             var entryAssembly = Assembly.GetEntryAssembly();
             var assemblyName = entryAssembly.GetName().Name;
-            return new ApplicationInfo()
+            return new SixnetApplicationInfo()
             {
                 Code = "",
                 Name = assemblyName,
@@ -255,6 +263,72 @@ namespace Sixnet.App
                 }
                 _configModels?.Clear();
                 _configModels = null;
+            }
+        }
+
+        /// <summary>
+        /// Add event handler configurable
+        /// </summary>
+        internal static void AddEventHandlerConfigurable(Type eventHandlerType)
+        {
+            if (eventHandlerType != null)
+            {
+                _eventHandlerTypes ??= [];
+                _eventHandlerTypes.Add(eventHandlerType);
+            }
+        }
+
+        /// <summary>
+        /// Execute event handler configurable
+        /// </summary>
+        internal static void ExecuteEventHandlerConfigurable()
+        {
+            if (_eventHandlerTypes?.IsNullOrEmpty() ?? true)
+            {
+                return;
+            }
+            var _eventHandlerContractType = typeof(ISixnetEventHandler);
+            foreach (var eventHandlerType in _eventHandlerTypes)
+            {
+                var handler = eventHandlerType.IsInterface
+                                ? SixnetContainer.GetService(eventHandlerType)
+                                : Activator.CreateInstance(eventHandlerType);
+
+                var classAttributes = eventHandlerType.GetCustomAttributes(false);
+                foreach (var classAttr in classAttributes)
+                {
+                    var classAttrType = classAttr.GetType();
+                    if (classAttrType.IsGenericType
+                        && classAttrType.GetGenericTypeDefinition() == typeof(SixnetEventHandlerAttribute<>)
+                        && classAttr is ISixnetEventHandlerAttribute eventHandlerAttr)
+                    {
+                        SixnetEventBus.Subscribe(classAttrType.GenericTypeArguments[0], handler as ISixnetEventHandler, options =>
+                        {
+                            options.Async = eventHandlerAttr.Async;
+                            options.TriggerTime = eventHandlerAttr.TriggerTime;
+                        });
+                    }
+                }
+
+                var methods = eventHandlerType.GetMethods(BindingFlags.Instance | BindingFlags.Public);
+                foreach (var method in methods)
+                {
+                    var methodAttributes = method.GetCustomAttributes(false);
+                    foreach (var methodAttr in methodAttributes)
+                    {
+                        var methodAttrType = methodAttr.GetType();
+                        if (methodAttrType.IsGenericType
+                            && methodAttrType.GetGenericTypeDefinition() == typeof(SixnetEventHandlerAttribute<>)
+                            && methodAttr is ISixnetEventHandlerAttribute eventHandlerAttr)
+                        {
+                            SixnetEventBus.Subscribe(methodAttrType.GenericTypeArguments[0], handler as ISixnetEventHandler, options =>
+                            {
+                                options.Async = eventHandlerAttr.Async;
+                                options.TriggerTime = eventHandlerAttr.TriggerTime;
+                            });
+                        }
+                    }
+                }
             }
         }
 

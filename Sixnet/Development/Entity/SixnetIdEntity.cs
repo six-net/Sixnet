@@ -14,7 +14,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Id
         /// </summary>
-        [EntityField(Role = FieldRole.PrimaryKey | FieldRole.GeneratedId)]
+        [SixnetEntityField(Role = SixnetFieldRole.PrimaryKey | SixnetFieldRole.GeneratedId)]
         public TId Id { get; set; }
     }
 
@@ -28,7 +28,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Id
         /// </summary>
-        [EntityField(Role = FieldRole.PrimaryKey | FieldRole.GeneratedId)]
+        [SixnetEntityField(Role = SixnetFieldRole.PrimaryKey | SixnetFieldRole.GeneratedId)]
         public TId Id { get; set; }
     }
 
@@ -42,7 +42,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Id
         /// </summary>
-        [EntityField(Role = FieldRole.PrimaryKey | FieldRole.GeneratedId)]
+        [SixnetEntityField(Role = SixnetFieldRole.PrimaryKey | SixnetFieldRole.GeneratedId)]
         public TId Id { get; set; }
     }
 
@@ -56,7 +56,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Id
         /// </summary>
-        [EntityField(Role = FieldRole.PrimaryKey | FieldRole.GeneratedId)]
+        [SixnetEntityField(Role = SixnetFieldRole.PrimaryKey | SixnetFieldRole.GeneratedId)]
         public TId Id { get; set; }
     }
 
@@ -70,7 +70,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Id
         /// </summary>
-        [EntityField(Role = FieldRole.PrimaryKey | FieldRole.GeneratedId)]
+        [SixnetEntityField(Role = SixnetFieldRole.PrimaryKey | SixnetFieldRole.GeneratedId)]
         public TId Id { get; set; }
     }
 
@@ -84,7 +84,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Id
         /// </summary>
-        [EntityField(Role = FieldRole.PrimaryKey | FieldRole.GeneratedId)]
+        [SixnetEntityField(Role = SixnetFieldRole.PrimaryKey | SixnetFieldRole.GeneratedId)]
         public TId Id { get; set; }
     }
 
@@ -98,7 +98,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Id
         /// </summary>
-        [EntityField(Role = FieldRole.PrimaryKey | FieldRole.GeneratedId)]
+        [SixnetEntityField(Role = SixnetFieldRole.PrimaryKey | SixnetFieldRole.GeneratedId)]
         public TId Id { get; set; }
     }
 
@@ -112,7 +112,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Id
         /// </summary>
-        [EntityField(Role = FieldRole.PrimaryKey | FieldRole.GeneratedId)]
+        [SixnetEntityField(Role = SixnetFieldRole.PrimaryKey | SixnetFieldRole.GeneratedId)]
         public TId Id { get; set; }
     }
 
@@ -126,7 +126,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Archived
         /// </summary>
-        [EntityField(Description = "Archived", Role = FieldRole.Archive)]
+        [SixnetEntityField(Description = "Archived", Role = SixnetFieldRole.Archive)]
         public bool IsArchived { get; set; }
     }
 
@@ -140,7 +140,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Archived
         /// </summary>
-        [EntityField(Description = "Archived", Role = FieldRole.Archive)]
+        [SixnetEntityField(Description = "Archived", Role = SixnetFieldRole.Archive)]
         public bool IsArchived { get; set; }
     }
 
@@ -154,7 +154,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Archived
         /// </summary>
-        [EntityField(Description = "Archived", Role = FieldRole.Archive)]
+        [SixnetEntityField(Description = "Archived", Role = SixnetFieldRole.Archive)]
         public bool IsArchived { get; set; }
     }
 
@@ -168,7 +168,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Archived
         /// </summary>
-        [EntityField(Description = "Archived", Role = FieldRole.Archive)]
+        [SixnetEntityField(Description = "Archived", Role = SixnetFieldRole.Archive)]
         public bool IsArchived { get; set; }
     }
 
@@ -182,7 +182,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Archived
         /// </summary>
-        [EntityField(Description = "Archived", Role = FieldRole.Archive)]
+        [SixnetEntityField(Description = "Archived", Role = SixnetFieldRole.Archive)]
         public bool IsArchived { get; set; }
     }
 
@@ -196,7 +196,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Archived
         /// </summary>
-        [EntityField(Description = "Archived", Role = FieldRole.Archive)]
+        [SixnetEntityField(Description = "Archived", Role = SixnetFieldRole.Archive)]
         public bool IsArchived { get; set; }
     }
 
@@ -210,7 +210,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Archived
         /// </summary>
-        [EntityField(Description = "Archived", Role = FieldRole.Archive)]
+        [SixnetEntityField(Description = "Archived", Role = SixnetFieldRole.Archive)]
         public bool IsArchived { get; set; }
     }
 
@@ -224,7 +224,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Archived
         /// </summary>
-        [EntityField(Description = "Archived", Role = FieldRole.Archive)]
+        [SixnetEntityField(Description = "Archived", Role = SixnetFieldRole.Archive)]
         public bool IsArchived { get; set; }
     }
 
@@ -242,7 +242,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Id
         /// </summary>
-        [EntityField(Role = FieldRole.PrimaryKey | FieldRole.Increment)]
+        [SixnetEntityField(Role = SixnetFieldRole.PrimaryKey | SixnetFieldRole.Increment)]
         public TId Id { get; set; }
     }
 
@@ -256,7 +256,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Id
         /// </summary>
-        [EntityField(Role = FieldRole.PrimaryKey | FieldRole.Increment)]
+        [SixnetEntityField(Role = SixnetFieldRole.PrimaryKey | SixnetFieldRole.Increment)]
         public TId Id { get; set; }
     }
 
@@ -270,7 +270,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Id
         /// </summary>
-        [EntityField(Role = FieldRole.PrimaryKey | FieldRole.Increment)]
+        [SixnetEntityField(Role = SixnetFieldRole.PrimaryKey | SixnetFieldRole.Increment)]
         public TId Id { get; set; }
     }
 
@@ -284,7 +284,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Id
         /// </summary>
-        [EntityField(Role = FieldRole.PrimaryKey | FieldRole.Increment)]
+        [SixnetEntityField(Role = SixnetFieldRole.PrimaryKey | SixnetFieldRole.Increment)]
         public TId Id { get; set; }
     }
 
@@ -298,7 +298,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Id
         /// </summary>
-        [EntityField(Role = FieldRole.PrimaryKey | FieldRole.Increment)]
+        [SixnetEntityField(Role = SixnetFieldRole.PrimaryKey | SixnetFieldRole.Increment)]
         public TId Id { get; set; }
     }
 
@@ -312,7 +312,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Id
         /// </summary>
-        [EntityField(Role = FieldRole.PrimaryKey | FieldRole.Increment)]
+        [SixnetEntityField(Role = SixnetFieldRole.PrimaryKey | SixnetFieldRole.Increment)]
         public TId Id { get; set; }
     }
 
@@ -326,7 +326,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Id
         /// </summary>
-        [EntityField(Role = FieldRole.PrimaryKey | FieldRole.Increment)]
+        [SixnetEntityField(Role = SixnetFieldRole.PrimaryKey | SixnetFieldRole.Increment)]
         public TId Id { get; set; }
     }
 
@@ -340,7 +340,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Id
         /// </summary>
-        [EntityField(Role = FieldRole.PrimaryKey | FieldRole.Increment)]
+        [SixnetEntityField(Role = SixnetFieldRole.PrimaryKey | SixnetFieldRole.Increment)]
         public TId Id { get; set; }
     }
 
@@ -354,7 +354,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Archived
         /// </summary>
-        [EntityField(Description = "Archived", Role = FieldRole.Archive)]
+        [SixnetEntityField(Description = "Archived", Role = SixnetFieldRole.Archive)]
         public bool IsArchived { get; set; }
     }
 
@@ -368,7 +368,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Archived
         /// </summary>
-        [EntityField(Description = "Archived", Role = FieldRole.Archive)]
+        [SixnetEntityField(Description = "Archived", Role = SixnetFieldRole.Archive)]
         public bool IsArchived { get; set; }
     }
 
@@ -382,7 +382,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Archived
         /// </summary>
-        [EntityField(Description = "Archived", Role = FieldRole.Archive)]
+        [SixnetEntityField(Description = "Archived", Role = SixnetFieldRole.Archive)]
         public bool IsArchived { get; set; }
     }
 
@@ -396,7 +396,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Archived
         /// </summary>
-        [EntityField(Description = "Archived", Role = FieldRole.Archive)]
+        [SixnetEntityField(Description = "Archived", Role = SixnetFieldRole.Archive)]
         public bool IsArchived { get; set; }
     }
 
@@ -410,7 +410,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Archived
         /// </summary>
-        [EntityField(Description = "Archived", Role = FieldRole.Archive)]
+        [SixnetEntityField(Description = "Archived", Role = SixnetFieldRole.Archive)]
         public bool IsArchived { get; set; }
     }
 
@@ -424,7 +424,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Archived
         /// </summary>
-        [EntityField(Description = "Archived", Role = FieldRole.Archive)]
+        [SixnetEntityField(Description = "Archived", Role = SixnetFieldRole.Archive)]
         public bool IsArchived { get; set; }
     }
 
@@ -438,7 +438,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Archived
         /// </summary>
-        [EntityField(Description = "Archived", Role = FieldRole.Archive)]
+        [SixnetEntityField(Description = "Archived", Role = SixnetFieldRole.Archive)]
         public bool IsArchived { get; set; }
     }
 
@@ -452,7 +452,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Archived
         /// </summary>
-        [EntityField(Description = "Archived", Role = FieldRole.Archive)]
+        [SixnetEntityField(Description = "Archived", Role = SixnetFieldRole.Archive)]
         public bool IsArchived { get; set; }
     }
 

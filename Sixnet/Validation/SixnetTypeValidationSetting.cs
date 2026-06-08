@@ -15,6 +15,6 @@ namespace Sixnet.Validation
         /// <summary>
         /// Gets or set the property rules
         /// </summary>
-        public List<PropertyValidationSetting> Properties { get; set; }
+        public List<SixnetPropertyValidationSetting> Properties { get; set; }
     }
 }

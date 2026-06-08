@@ -1,0 +1,20 @@
+﻿// "Company © 2025. All rights reserved."
+
+namespace Sixnet.Validation
+{
+    /// <summary>
+    /// Property validation setting
+    /// </summary>
+    public class SixnetPropertyValidationSetting
+    {
+        /// <summary>
+        /// Gets or sets the property name
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
+        /// Gets or sets the rules
+        /// </summary>
+        public List<SixnetValidatorSetting> Rules { get; set; }
+    }
+}

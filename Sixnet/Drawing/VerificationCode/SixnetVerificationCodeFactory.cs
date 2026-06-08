@@ -22,7 +22,7 @@ namespace Sixnet.Drawing.VerificationCode
         /// Generate verification code
         /// </summary>
         /// <returns>Return thee verification code value</returns>
-        public static VerificationCodeValue GenerateVerificationCode()
+        public static SixnetVerificationCodeValue GenerateVerificationCode()
         {
             var codeProvider = GetVerificationCodeProvider();
             if (codeProvider == null)

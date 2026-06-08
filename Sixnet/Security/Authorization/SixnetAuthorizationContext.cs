@@ -19,12 +19,12 @@ namespace Sixnet.Security.Authorization
         /// <summary>
         /// Gets or sets the application info
         /// </summary>
-        public ApplicationInfo Application { get; set; }
+        public SixnetApplicationInfo Application { get; set; }
 
         /// <summary>
         /// Gets or sets the user info
         /// </summary>
-        public UserInfo User { get; set; }
+        public SixnetUserInfo User { get; set; }
 
         /// <summary>
         /// Gets or sets the claims

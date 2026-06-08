@@ -6,7 +6,7 @@ namespace Sixnet.Development.Queryable
     /// Defines criterion operator
     /// </summary>
     [Serializable]
-    public enum CriterionOperator
+    public enum SixnetCriterionOperator
     {
         Equal,              //=  
         NotEqual,      //<>  
@@ -32,7 +32,7 @@ namespace Sixnet.Development.Queryable
     /// Defines criterion connector
     /// </summary>
     [Serializable]
-    public enum CriterionConnector
+    public enum SixnetCriterionConnector
     {
         And,
         Or
@@ -42,7 +42,7 @@ namespace Sixnet.Development.Queryable
     /// Defines queryable execution mode
     /// </summary>
     [Serializable]
-    public enum QueryableExecutionMode
+    public enum SixnetQueryableExecutionMode
     {
         Regular,
         Script
@@ -52,7 +52,7 @@ namespace Sixnet.Development.Queryable
     /// Defines join type
     /// </summary>
     [Serializable]
-    public enum JoinType
+    public enum SixnetJoinType
     {
         InnerJoin = 2,
         LeftJoin = 4,
@@ -65,7 +65,7 @@ namespace Sixnet.Development.Queryable
     /// Defines join field type
     /// </summary>
     [Serializable]
-    public enum JoinFieldType
+    public enum SixnetJoinFieldType
     {
         Field = 2,
         Constant = 4,
@@ -76,7 +76,7 @@ namespace Sixnet.Development.Queryable
     /// Defines combine type
     /// </summary>
     [Serializable]
-    public enum CombineType
+    public enum SixnetCombineType
     {
         UnionAll,
         Union,
@@ -88,7 +88,7 @@ namespace Sixnet.Development.Queryable
     /// Defines queryable location
     /// </summary>
     [Serializable]
-    public enum QueryableLocation
+    public enum SixnetQueryableLocation
     {
         PreScript = 0,
         Top = 2,
@@ -107,7 +107,7 @@ namespace Sixnet.Development.Queryable
     /// Defines queryable usage scene
     /// </summary>
     [Serializable]
-    public enum QueryableUsageScene
+    public enum SixnetQueryableUsageScene
     {
         Remove = 2001,
         Modify = 2005,
@@ -125,7 +125,7 @@ namespace Sixnet.Development.Queryable
     /// Tree matching direction
     /// </summary>
     [Serializable]
-    public enum TreeMatchingDirection
+    public enum SixnetTreeMatchingDirection
     {
         Up = 210,
         Down = 220
@@ -134,7 +134,7 @@ namespace Sixnet.Development.Queryable
     /// <summary>
     /// Defines queryable from type
     /// </summary>
-    public enum QueryableFromType
+    public enum SixnetQueryableFromType
     {
         Table = 310,
         Queryable = 320
@@ -143,7 +143,7 @@ namespace Sixnet.Development.Queryable
     /// <summary>
     /// Defines queryable output type
     /// </summary>
-    public enum QueryableOutputType
+    public enum SixnetQueryableOutputType
     {
         Data = 2,
         Count = 4,

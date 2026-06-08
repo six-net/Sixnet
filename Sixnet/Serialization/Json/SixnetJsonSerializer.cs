@@ -12,7 +12,7 @@ namespace Sixnet.Serialization.Json
         /// <summary>
         /// Default json serialization provider
         /// </summary>
-        static readonly IJsonSerializationProvider _defaultJsonSerializationProvider = new DefaultJsonSerializationProvider();
+        static readonly ISixnetJsonSerializationProvider _defaultJsonSerializationProvider = new SixnetDefaultJsonSerializationProvider();
 
         /// <summary>
         /// Serialize an object to a json string
@@ -41,9 +41,9 @@ namespace Sixnet.Serialization.Json
         /// Get json serialization provider
         /// </summary>
         /// <returns></returns>
-        static IJsonSerializationProvider GetJsonSerializationProvider()
+        static ISixnetJsonSerializationProvider GetJsonSerializationProvider()
         {
-            return SixnetContainer.GetService<IJsonSerializationProvider>() ?? _defaultJsonSerializationProvider;
+            return SixnetContainer.GetService<ISixnetJsonSerializationProvider>() ?? _defaultJsonSerializationProvider;
         }
 
         /// <summary>

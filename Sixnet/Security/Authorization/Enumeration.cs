@@ -6,7 +6,7 @@ namespace Sixnet.Security.Authorization
     /// Defines authorization status
     /// </summary>
     [Serializable]
-    public enum AuthorizationStatus
+    public enum SixnetAuthorizationStatus
     {
         /// <summary>
         /// not log in
@@ -25,7 +25,7 @@ namespace Sixnet.Security.Authorization
     /// <summary>
     /// Defines authorize redirect type
     /// </summary>
-    public enum AuthorizeRedirectType
+    public enum SixnetAuthorizeRedirectType
     {
         Default = 0,
         RedirectToAction = 10,

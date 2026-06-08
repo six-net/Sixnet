@@ -1,0 +1,18 @@
+﻿// "Company © 2025. All rights reserved."
+
+namespace Sixnet.Net.Http
+{
+    /// <summary>
+    /// Http constants
+    /// </summary>
+    internal static class SixnetHttpConstants
+    {
+        /// <summary>
+        /// Authorization schemes
+        /// </summary>
+        public static class AuthorizationSchemes
+        {
+            public const string Bearer = nameof(Bearer);
+        }
+    }
+}

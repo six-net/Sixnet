@@ -5,7 +5,7 @@ namespace Sixnet.MQ
     /// <summary>
     /// Message queue exchange type
     /// </summary>
-    public enum MessageQueueExchangeType
+    public enum SixnetMessageQueueExchangeType
     {
         /// <summary>
         /// Direct
@@ -28,7 +28,7 @@ namespace Sixnet.MQ
     /// <summary>
     /// Message queue type
     /// </summary>
-    public enum MessageQueueType
+    public enum SixnetMessageQueueType
     {
         /// <summary>
         /// Internal
@@ -51,7 +51,7 @@ namespace Sixnet.MQ
     /// <summary>
     /// Queue scope
     /// </summary>
-    public enum QueueScope
+    public enum SixnetQueueScope
     {
         Server = 100,
         Queues = 110

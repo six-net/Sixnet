@@ -1,19 +1,17 @@
 ﻿// "Company © 2025. All rights reserved."
 
 using System.Runtime;
-
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-
 using Sixnet.App;
 using Sixnet.Cache;
 using Sixnet.Cache.Provider.Memory;
 using Sixnet.Code;
 using Sixnet.Development.Data;
-using Sixnet.Development.Data.Event;
 using Sixnet.Development.Entity;
+using Sixnet.Development.Events;
 using Sixnet.Development.Message;
 using Sixnet.Development.Repository;
 using Sixnet.Development.Work;
@@ -103,8 +101,8 @@ namespace Sixnet.DependencyInjection
             options.ConfigureService(_serviceCollection);
 
             // Container
-            var container = SixnetApplication.Options.DIContainer ?? new DefaultServiceProviderContainer();
-            if (_serviceCollection != null && container is not DefaultServiceProviderContainer)
+            var container = SixnetApplication.Options.DIContainer ?? new SixnetDefaultServiceProviderContainer();
+            if (_serviceCollection != null && container is not SixnetDefaultServiceProviderContainer)
             {
                 container.AddService(_serviceCollection.ToArray());
             }
@@ -119,8 +117,11 @@ namespace Sixnet.DependencyInjection
             // Object mapper
             SixnetMapper.BuildMapper();
 
-            // Event
-            SixnetDataEventBus.SubscribeDefaultDataEvent();
+            // Data event
+            SixnetEventBus.SubscribeDefaultDataEvent();
+
+            // Event handler
+            SixnetApplication.ExecuteEventHandlerConfigurable();
 
             // Application life time
             RegisterApplicationLifetime(options);
@@ -295,7 +296,7 @@ namespace Sixnet.DependencyInjection
             if (ServiceProvider == null || refresh)
             {
                 ServiceProvider = null;
-                if (Container != null && Container is not DefaultServiceProviderContainer)
+                if (Container != null && Container is not SixnetDefaultServiceProviderContainer)
                 {
                     ServiceProvider = Container.BuildServiceProvider();
                 }
@@ -404,7 +405,7 @@ namespace Sixnet.DependencyInjection
             // File
             services.ConfigureIfNotNull<SixnetFileOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.File)));
             // Rsa key
-            services.ConfigureIfNotNull<SixnetRsaOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Rsa)));
+            services.ConfigureIfNotNull<SixnetRsations>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Rsa)));
             // Database
             services.ConfigureIfNotNull<SixnetDataOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Data)));
             // Cache
@@ -449,7 +450,7 @@ namespace Sixnet.DependencyInjection
                     {
                         if (server.Encrypt)
                         {
-                            server.ConnectionString = AesHelper.Decrypt(server.ConnectionString, server.SecretKey, server.SecretIV);
+                            server.ConnectionString = SixnetAesHelper.Decrypt(server.ConnectionString, server.SecretKey, server.SecretIV);
                         }
                     }
                 }
@@ -459,7 +460,7 @@ namespace Sixnet.DependencyInjection
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureValidationAction);
             services.PostConfigureIfNotNull<SixnetCacheOptions>((options) =>
             {
-                options.AddCacheProvider(CacheServerType.InMemory, new MemoryProvider());
+                options.AddCacheProvider(SixnetCacheServerType.InMemory, new MemoryProvider());
                 sixnetOptions.ConfigureCache(options);
             });
             services.PostConfigureIfNotNull(sixnetOptions.ConfigureAuthorizationAction);
@@ -495,9 +496,9 @@ namespace Sixnet.DependencyInjection
         /// <param name="services">Service collection</param>
         static void AddProjectDefaultService(IServiceCollection services, SixnetOptions sixnetOptions)
         {
-            services.AddSingleton<ISixnetMessageProvider, DefaultMessageProvider>();
-            services.AddSingleton(typeof(ISixnetDataAccess<>), typeof(DefaultDataAccess<>));
-            services.AddSingleton(typeof(ISixnetRepository<>), typeof(DefaultRepository<>));
+            services.AddSingleton<ISixnetMessageProvider, SixnetDefaultMessageProvider>();
+            services.AddSingleton(typeof(ISixnetDataAccess<>), typeof(SixnetDefaultDataAccess<>));
+            services.AddSingleton(typeof(ISixnetRepository<>), typeof(SixnetDefaultRepository<>));
             services.AddSixnetLocalization(options => 
             {
                 sixnetOptions?.ConfigureLocalization(options);
@@ -531,7 +532,7 @@ namespace Sixnet.DependencyInjection
                     }
                     if (!options.NotAutoInitEntityId)
                     {
-                        ObjectIdHelper.InitAppObjectIds();
+                        SixnetObjectIdHelper.InitAppObjectIds();
                     }
                     if (SixnetApplication.Options.EnableLicense)
                     {

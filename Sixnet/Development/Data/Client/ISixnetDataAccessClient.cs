@@ -46,7 +46,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="scriptType">Script type</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        List<T> Query<T>(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null);
+        List<T> Query<T>(string script, object parameters = null, SixnetDataScriptType scriptType = SixnetDataScriptType.Text, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Query the first data
@@ -73,7 +73,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="scriptType">Script type</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        T QueryFirst<T>(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null);
+        T QueryFirst<T>(string script, object parameters = null, SixnetDataScriptType scriptType = SixnetDataScriptType.Text, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Query paging data
@@ -82,7 +82,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="pagingFilter">Paging filter</param>
         /// <param name="options">Options</param>
         /// <returns>Paging data</returns>
-        PagingInfo<T> QueryPaging<T>(Expression<Func<T, bool>> conditionExpression, PagingFilter pagingFilter, SixnetDataOperationOptions options = null);
+        SixnetPagingInfo<T> QueryPaging<T>(Expression<Func<T, bool>> conditionExpression, SixnetPagingFilter pagingFilter, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Query paging data
@@ -92,7 +92,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="pageSize">Page size</param>
         /// <param name="options">Options</param>
         /// <returns>Paging data</returns>
-        PagingInfo<T> QueryPaging<T>(Expression<Func<T, bool>> conditionExpression, int page, int pageSize, SixnetDataOperationOptions options = null);
+        SixnetPagingInfo<T> QueryPaging<T>(Expression<Func<T, bool>> conditionExpression, int page, int pageSize, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Query paging data
@@ -101,7 +101,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="pagingFilter">Paging filter</param>
         /// <param name="options">Options</param>
         /// <returns>Paging data</returns>
-        PagingInfo<T> QueryPaging<T>(ISixnetQueryable queryable, PagingFilter pagingFilter, SixnetDataOperationOptions options = null);
+        SixnetPagingInfo<T> QueryPaging<T>(ISixnetQueryable queryable, SixnetPagingFilter pagingFilter, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Query paging data
@@ -111,7 +111,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="pageSize">Page size</param>
         /// <param name="options">Options</param>
         /// <returns>Paging data</returns>
-        PagingInfo<T> QueryPaging<T>(ISixnetQueryable queryable, int page, int pageSize, SixnetDataOperationOptions options = null);
+        SixnetPagingInfo<T> QueryPaging<T>(ISixnetQueryable queryable, int page, int pageSize, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Query datas
@@ -137,7 +137,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="scriptType">Script type</param>
         /// <param name="options">Options</param>
         /// <returns>Return the datas</returns>
-        List<TReturn> QueryMapping<TFirst, TSecond, TReturn>(string script, object parameters, Func<TFirst, TSecond, TReturn> dataMappingFunc, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null);
+        List<TReturn> QueryMapping<TFirst, TSecond, TReturn>(string script, object parameters, Func<TFirst, TSecond, TReturn> dataMappingFunc, SixnetDataScriptType scriptType = SixnetDataScriptType.Text, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Query datas
@@ -165,7 +165,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="scriptType">Script type</param>
         /// <param name="options">Options</param>
         /// <returns>Return the datas</returns>
-        List<TReturn> QueryMapping<TFirst, TSecond, TThird, TReturn>(string script, object parameters, Func<TFirst, TSecond, TThird, TReturn> dataMappingFunc, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null);
+        List<TReturn> QueryMapping<TFirst, TSecond, TThird, TReturn>(string script, object parameters, Func<TFirst, TSecond, TThird, TReturn> dataMappingFunc, SixnetDataScriptType scriptType = SixnetDataScriptType.Text, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Query datas
@@ -195,7 +195,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="scriptType">Script type</param>
         /// <param name="options">Options</param>
         /// <returns>Return the datas</returns>
-        List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TReturn>(string script, object parameters, Func<TFirst, TSecond, TThird, TFourth, TReturn> dataMappingFunc, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null);
+        List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TReturn>(string script, object parameters, Func<TFirst, TSecond, TThird, TFourth, TReturn> dataMappingFunc, SixnetDataScriptType scriptType = SixnetDataScriptType.Text, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Query datas
@@ -227,7 +227,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="scriptType">Script type</param>
         /// <param name="options">Options</param>
         /// <returns>Return the datas</returns>
-        List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(string script, object parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> dataMappingFunc, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null);
+        List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(string script, object parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> dataMappingFunc, SixnetDataScriptType scriptType = SixnetDataScriptType.Text, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Query datas
@@ -261,7 +261,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="scriptType">Script type</param>
         /// <param name="options">Options</param>
         /// <returns>Return the datas</returns>
-        List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(string script, object parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> dataMappingFunc, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null);
+        List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(string script, object parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> dataMappingFunc, SixnetDataScriptType scriptType = SixnetDataScriptType.Text, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Query datas
@@ -297,7 +297,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="scriptType">Script type</param>
         /// <param name="options">Options</param>
         /// <returns>Return the datas</returns>
-        List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(string script, object parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> dataMappingFunc, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null);
+        List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(string script, object parameters, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> dataMappingFunc, SixnetDataScriptType scriptType = SixnetDataScriptType.Text, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Whether has data
@@ -417,7 +417,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="scriptType">Script type</param>
         /// <param name="options">Options</param>
         /// <returns>Return the data</returns>
-        TValue Scalar<TValue>(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null);
+        TValue Scalar<TValue>(string script, object parameters = null, SixnetDataScriptType scriptType = SixnetDataScriptType.Text, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Query multiple data
@@ -435,7 +435,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="scriptType">Script type</param>
         /// <param name="options">Options</param>
         /// <returns>Return the dataset</returns>
-        DataSet QueryMultiple(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null);
+        DataSet QueryMultiple(string script, object parameters = null, SixnetDataScriptType scriptType = SixnetDataScriptType.Text, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Query multiple data
@@ -457,7 +457,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="scriptType">Script type</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        Tuple<List<TFirst>, List<TSecond>> QueryMultiple<TFirst, TSecond>(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null);
+        Tuple<List<TFirst>, List<TSecond>> QueryMultiple<TFirst, TSecond>(string script, object parameters = null, SixnetDataScriptType scriptType = SixnetDataScriptType.Text, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Query multiple data
@@ -481,7 +481,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="scriptType">Script type</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        Tuple<List<TFirst>, List<TSecond>, List<TThird>> QueryMultiple<TFirst, TSecond, TThird>(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null);
+        Tuple<List<TFirst>, List<TSecond>, List<TThird>> QueryMultiple<TFirst, TSecond, TThird>(string script, object parameters = null, SixnetDataScriptType scriptType = SixnetDataScriptType.Text, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Query multiple data
@@ -507,7 +507,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="scriptType">Script type</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>> QueryMultiple<TFirst, TSecond, TThird, TFourth>(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null);
+        Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>> QueryMultiple<TFirst, TSecond, TThird, TFourth>(string script, object parameters = null, SixnetDataScriptType scriptType = SixnetDataScriptType.Text, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Query multiple data
@@ -535,7 +535,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="scriptType">Script type</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>> QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth>(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null);
+        Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>> QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth>(string script, object parameters = null, SixnetDataScriptType scriptType = SixnetDataScriptType.Text, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Query multiple data
@@ -565,7 +565,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="scriptType">Script type</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>> QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null);
+        Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>> QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(string script, object parameters = null, SixnetDataScriptType scriptType = SixnetDataScriptType.Text, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Query multiple data
@@ -597,7 +597,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="scriptType">Script type</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>, List<TSeventh>> QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null);
+        Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>, List<TSeventh>> QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(string script, object parameters = null, SixnetDataScriptType scriptType = SixnetDataScriptType.Text, SixnetDataOperationOptions options = null);
 
         #endregion
 
@@ -695,7 +695,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="conditionExpression">Condition expression</param>
         /// <param name="options">Options</param>
         /// <returns>Affected data number</returns>
-        int Update<T>(FieldsAssignment fieldsAssignment, Expression<Func<T, bool>> conditionExpression, SixnetDataOperationOptions options = null);
+        int Update<T>(SixnetFieldsAssignment fieldsAssignment, Expression<Func<T, bool>> conditionExpression, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Update
@@ -704,7 +704,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="queryable">Queryable</param>
         /// <param name="options">Options</param>
         /// <returns>Affected data number</returns>
-        int Update(FieldsAssignment fieldsAssignment, ISixnetQueryable queryable, SixnetDataOperationOptions options = null);
+        int Update(SixnetFieldsAssignment fieldsAssignment, ISixnetQueryable queryable, SixnetDataOperationOptions options = null);
 
         #endregion
 
@@ -769,7 +769,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="scriptType">Script type</param>
         /// <param name="options">Options</param>
         /// <returns></returns>
-        int Execute(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text, SixnetDataOperationOptions options = null);
+        int Execute(string script, object parameters = null, SixnetDataScriptType scriptType = SixnetDataScriptType.Text, SixnetDataOperationOptions options = null);
 
         #endregion
 
@@ -780,7 +780,7 @@ namespace Sixnet.Development.Data.Client
         /// </summary>
         /// <param name="migrationInfo">Migration info</param>
         /// <param name="options">Data operation options</param>
-        void Migrate(MigrationInfo migrationInfo, SixnetDataOperationOptions options = null);
+        void Migrate(SixnetMigrationInfo migrationInfo, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Create all entity tables
@@ -838,7 +838,7 @@ namespace Sixnet.Development.Data.Client
         /// <typeparam name="TEntity"></typeparam>
         /// <param name="field"></param>
         /// <param name="options"></param>
-        void AlterField<TEntity>(Expression<Func<TEntity, object>> field, Action<DataField> configureField = null, SixnetDataOperationOptions options = null);
+        void AlterField<TEntity>(Expression<Func<TEntity, object>> field, Action<SixnetDataField> configureField = null, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Alter field
@@ -847,7 +847,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="fieldName"></param>
         /// <param name="field"></param>
         /// <param name="options"></param>
-        void AlterField<TEntity>(string fieldName, DataField field, SixnetDataOperationOptions options = null);
+        void AlterField<TEntity>(string fieldName, SixnetDataField field, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Create table
@@ -868,14 +868,14 @@ namespace Sixnet.Development.Data.Client
         /// </summary>
         /// <param name="entityType"></param>
         /// <param name="options"></param>
-        void AddField(Type entityType, List<DataField> fields, SixnetDataOperationOptions options = null);
+        void AddField(Type entityType, List<SixnetDataField> fields, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Delete field
         /// </summary>
         /// <param name="entityType"></param>
         /// <param name="options"></param>
-        void DeleteField(Type entityType, List<DataField> fields, SixnetDataOperationOptions options = null);
+        void DeleteField(Type entityType, List<SixnetDataField> fields, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Alter fields
@@ -883,7 +883,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="entityType"></param>
         /// <param name="fields"></param>
         /// <param name="options"></param>
-        void AlterField(Type entityType, Dictionary<string, DataField> fields, SixnetDataOperationOptions options);
+        void AlterField(Type entityType, Dictionary<string, SixnetDataField> fields, SixnetDataOperationOptions options);
 
         #endregion
 

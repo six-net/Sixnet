@@ -26,7 +26,7 @@ namespace Sixnet.Development.Data
         /// Gets or sets the data operation behavior.
         /// Default is 'default'
         /// </summary>
-        public DataOperationBehavior LogicalDeleteBehavior { get; set; } = DataOperationBehavior.Default;
+        public SixnetDataOperationBehavior LogicalDeleteBehavior { get; set; } = SixnetDataOperationBehavior.Default;
 
         /// <summary>
         /// Not overwrite fields
@@ -48,7 +48,7 @@ namespace Sixnet.Development.Data
         /// Gets or sets the increment field behavior.
         /// Default is 'default'
         /// </summary>
-        public DataOperationBehavior InsertIncrementFieldBehavior { get; set; } = DataOperationBehavior.Default;
+        public SixnetDataOperationBehavior InsertIncrementFieldBehavior { get; set; } = SixnetDataOperationBehavior.Default;
 
         /// <summary>
         /// Create data operation options
@@ -97,8 +97,8 @@ namespace Sixnet.Development.Data
         /// <returns></returns>
         public bool AllowLogicalDelete(bool globalAllowLogicalDelete)
         {
-            return LogicalDeleteBehavior != DataOperationBehavior.Disable
-               && (globalAllowLogicalDelete || LogicalDeleteBehavior == DataOperationBehavior.Enable);
+            return LogicalDeleteBehavior != SixnetDataOperationBehavior.Disable
+               && (globalAllowLogicalDelete || LogicalDeleteBehavior == SixnetDataOperationBehavior.Enable);
         }
 
         /// <summary>
@@ -108,14 +108,14 @@ namespace Sixnet.Development.Data
         /// <returns></returns>
         public bool AllowInsertIncrementField(bool globalAllowInsertIncrementField)
         {
-            return InsertIncrementFieldBehavior != DataOperationBehavior.Disable
-                && (globalAllowInsertIncrementField || InsertIncrementFieldBehavior == DataOperationBehavior.Enable);
+            return InsertIncrementFieldBehavior != SixnetDataOperationBehavior.Disable
+                && (globalAllowInsertIncrementField || InsertIncrementFieldBehavior == SixnetDataOperationBehavior.Enable);
         }
 
         /// <summary>
         /// Gets or sets the split table behavior
         /// </summary>
-        public SplitTableBehavior SplitTableBehavior { get; set; }
+        public SixnetSplitTableBehavior SplitTableBehavior { get; set; }
 
         /// <summary>
         /// timeout (in seconds)

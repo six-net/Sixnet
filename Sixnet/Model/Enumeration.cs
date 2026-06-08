@@ -8,7 +8,7 @@ namespace Sixnet.Model
     /// Constellation
     /// </summary>
     [Serializable]
-    public enum Constellation
+    public enum SixnetConstellation
     {
         Aquarius = 120218,
         Pisces = 219320,
@@ -32,7 +32,7 @@ namespace Sixnet.Model
     /// Defines object clone method
     /// </summary>
     [Serializable]
-    public enum ObjectCloneMethod
+    public enum SixnetObjectCloneMethod
     {
         Binary = 2,
         Json = 4

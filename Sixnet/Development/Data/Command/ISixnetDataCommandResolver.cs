@@ -16,76 +16,76 @@ namespace Sixnet.Development.Data.Command
         /// </summary>
         /// <param name="command">Database single command</param>
         /// <returns></returns>
-        QueryDatabaseStatement GenerateDatabaseQueryStatement(SingleDatabaseCommand command);
+        SixnetQueryDatabaseStatement GenerateDatabaseQueryStatement(SixnetSingleDatabaseCommand command);
 
         /// <summary>
         /// Generate a query statement
         /// </summary>
         /// <param name="command">Database single command</param>
         /// <returns></returns>
-        Task<QueryDatabaseStatement> GenerateDatabaseQueryStatementAsync(SingleDatabaseCommand command);
+        Task<SixnetQueryDatabaseStatement> GenerateDatabaseQueryStatementAsync(SixnetSingleDatabaseCommand command);
 
         /// <summary>
         /// Generate a query statement
         /// </summary>
         /// <param name="command">Database multiple command</param>
         /// <returns></returns>
-        QueryDatabaseStatement GenerateDatabaseQueryStatement(MultipleDatabaseCommand command);
+        SixnetQueryDatabaseStatement GenerateDatabaseQueryStatement(SixnetMultipleDatabaseCommand command);
 
         /// <summary>
         /// Generate a query statement
         /// </summary>
         /// <param name="command">Database multiple command</param>
         /// <returns></returns>
-        Task<QueryDatabaseStatement> GenerateDatabaseQueryStatementAsync(MultipleDatabaseCommand command);
+        Task<SixnetQueryDatabaseStatement> GenerateDatabaseQueryStatementAsync(SixnetMultipleDatabaseCommand command);
 
         /// <summary>
         /// Generate a paging statement
         /// </summary>
         /// <param name="command">Database single command</param>
         /// <returns></returns>
-        QueryDatabaseStatement GenerateDatabaseQueryPagingStatement(SingleDatabaseCommand command);
+        SixnetQueryDatabaseStatement GenerateDatabaseQueryPagingStatement(SixnetSingleDatabaseCommand command);
 
         /// <summary>
         /// Generate a paging statement
         /// </summary>
         /// <param name="command">Database single command</param>
         /// <returns></returns>
-        Task<QueryDatabaseStatement> GenerateDatabaseQueryPagingStatementAsync(SingleDatabaseCommand command);
+        Task<SixnetQueryDatabaseStatement> GenerateDatabaseQueryPagingStatementAsync(SixnetSingleDatabaseCommand command);
 
         /// <summary>
         /// Generate a execution statement
         /// </summary>
         /// <param name="command">Database single command</param>
         /// <returns></returns>
-        List<ExecutionDatabaseStatement> GenerateDatabaseExecutionStatements(SingleDatabaseCommand command);
+        List<SixnetExecutionDatabaseStatement> GenerateDatabaseExecutionStatements(SixnetSingleDatabaseCommand command);
 
         /// <summary>
         /// Generate a execution statement
         /// </summary>
         /// <param name="command">Database single command</param>
         /// <returns></returns>
-        Task<List<ExecutionDatabaseStatement>> GenerateDatabaseExecutionStatementsAsync(SingleDatabaseCommand command);
+        Task<List<SixnetExecutionDatabaseStatement>> GenerateDatabaseExecutionStatementsAsync(SixnetSingleDatabaseCommand command);
 
         /// <summary>
         /// Generate a execution statement
         /// </summary>
         /// <param name="command">Database multiple command</param>
         /// <returns></returns>
-        List<ExecutionDatabaseStatement> GenerateDatabaseExecutionStatements(MultipleDatabaseCommand command);
+        List<SixnetExecutionDatabaseStatement> GenerateDatabaseExecutionStatements(SixnetMultipleDatabaseCommand command);
 
         /// <summary>
         /// Generate a execution statement
         /// </summary>
         /// <param name="command">Database multiple command</param>
         /// <returns></returns>
-        Task<List<ExecutionDatabaseStatement>> GenerateDatabaseExecutionStatementsAsync(MultipleDatabaseCommand command);
+        Task<List<SixnetExecutionDatabaseStatement>> GenerateDatabaseExecutionStatementsAsync(SixnetMultipleDatabaseCommand command);
 
         /// <summary>
         /// Generate database migration statement
         /// </summary>
         /// <param name="command">Database migration command</param>
         /// <returns></returns>
-        List<ExecutionDatabaseStatement> GenerateDatabaseMigrationStatements(MigrationDatabaseCommand command);
+        List<SixnetExecutionDatabaseStatement> GenerateDatabaseMigrationStatements(SixnetMigrationDatabaseCommand command);
     }
 }

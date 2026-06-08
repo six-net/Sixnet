@@ -23,7 +23,7 @@ namespace Sixnet.Net.Http
         /// </summary>
         /// <param name="httpRequestOptions">Http request options</param>
         /// <returns>Return the http response message</returns>
-        public static async Task<HttpResponseMessage> SendAsync(HttpRequestOptions httpRequestOptions)
+        public static async Task<HttpResponseMessage> SendAsync(SixnetHttpRequestOptions httpRequestOptions)
         {
             var httpClient = GetHttpClient(httpRequestOptions?.HttpClientConfigName);
             httpRequestOptions = HandleHttpRequestOptions(httpClient, httpRequestOptions);
@@ -50,7 +50,7 @@ namespace Sixnet.Net.Http
                 Method = httpMethod,
                 RequestUri = string.IsNullOrWhiteSpace(url) ? null : new Uri(url, UriKind.RelativeOrAbsolute),
             };
-            return await SendAsync(new HttpRequestOptions()
+            return await SendAsync(new SixnetHttpRequestOptions()
             {
                 CancellationToken = cancellationToken,
                 HttpClientConfigName = httpClientConfigName,
@@ -654,7 +654,7 @@ namespace Sixnet.Net.Http
         {
             var content = new StringContent(jsonData, Encoding.UTF8);
             content.Headers.ContentType = new MediaTypeWithQualityHeaderValue("application/json");
-            return await SendAsync(new HttpRequestOptions()
+            return await SendAsync(new SixnetHttpRequestOptions()
             {
                 HttpClientConfigName = httpClientConfigName,
                 HttpCompletionOption = HttpCompletionOption.ResponseHeadersRead,
@@ -760,7 +760,7 @@ namespace Sixnet.Net.Http
             var result = SixnetJsonSerializer.Deserialize<SixnetUploadResult>(valueAsString);
             result?.Files?.ForEach(file =>
             {
-                file.Location = UploadLocation.Remote;
+                file.Location = SixnetUploadLocation.Remote;
             });
             return result;
         }

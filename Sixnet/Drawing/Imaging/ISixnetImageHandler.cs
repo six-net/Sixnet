@@ -14,13 +14,13 @@ namespace Sixnet.Drawing.Imaging
         /// </summary>
         /// <param name="imageHandlingOptions">Image handling options</param>
         /// <returns>Return a new Image object </returns>
-        Image Scale(HandleImageOptions imageHandlingOptions);
+        Image Scale(SixnetHandleImageOptions imageHandlingOptions);
 
         /// <summary>
         /// Cut the image
         /// </summary>
         /// <param name="imageHandlingOptions">Image handling options</param>
         /// <returns>Return a new Image object </returns>
-        Image Cut(HandleImageOptions imageHandlingOptions);
+        Image Cut(SixnetHandleImageOptions imageHandlingOptions);
     }
 }

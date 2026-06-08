@@ -25,7 +25,7 @@ namespace Sixnet.Development.Data
         /// </summary>
         /// <param name="context">Data command execution context</param>
         /// <returns></returns>
-        internal static async Task<List<DatabaseObjectName>> GetTableNamesAsync(DataCommandExecutionContext context)
+        internal static async Task<List<SixnetDatabaseObjectName>> GetTableNamesAsync(SixnetDataCommandExecutionContext context)
         {
             var entityType = context.ActivityQueryable.GetModelType();
             entityType ??= (context?.Command?.GetEntityType());
@@ -33,14 +33,14 @@ namespace Sixnet.Development.Data
             SixnetDirectThrower.ThrowArgNullIf(entityType == null, $"Entity type is null");
 
             var entityConfig = SixnetEntityManager.GetEntityConfig(entityType);
-            if (entityConfig != null && entityConfig.SplitTableType != SplitTableType.None) // split table name
+            if (entityConfig != null && entityConfig.SplitTableType != SixnetSplitTableType.None) // split table name
             {
                 return await GetSplitTableNamesAsync(context, entityConfig).ConfigureAwait(false);
             }
             else // default table name
             {
                 var tableName = GetDefaultTableName(context, entityConfig);
-                return new List<DatabaseObjectName>(1) { tableName };
+                return new List<SixnetDatabaseObjectName>(1) { tableName };
             }
         }
 
@@ -50,11 +50,11 @@ namespace Sixnet.Development.Data
         /// <param name="context"></param>
         /// <param name="entityConfig"></param>
         /// <returns></returns>
-        internal static async Task<List<DatabaseObjectName>> GetSplitTableNamesAsync(DataCommandExecutionContext context, EntityConfiguration entityConfig)
+        internal static async Task<List<SixnetDatabaseObjectName>> GetSplitTableNamesAsync(SixnetDataCommandExecutionContext context, SixnetEntityConfiguration entityConfig)
         {
             SixnetDirectThrower.ThrowArgNullIf(context == null, nameof(context));
             SixnetDirectThrower.ThrowArgNullIf(entityConfig == null, nameof(entityConfig));
-            SixnetDirectThrower.ThrowNotSupportIf(entityConfig.SplitTableType == SplitTableType.None, $"{entityConfig.EntityType.Name} not support split table.");
+            SixnetDirectThrower.ThrowNotSupportIf(entityConfig.SplitTableType == SixnetSplitTableType.None, $"{entityConfig.EntityType.Name} not support split table.");
 
             var dataOptions = GetDataOptions();
             var provider = GetSplitTableProvider(dataOptions, entityConfig);
@@ -62,7 +62,7 @@ namespace Sixnet.Development.Data
 
             var splitBehavior = context.GetSplitTableBehavior() ?? _defaultSplitTableBehavior;
             var rootTableName = GetDefaultTableName(context, entityConfig, context.Command?.TableName);
-            var splitTableNames = provider.ResolveTableNames(new ResolveSplitTableNameParameter()
+            var splitTableNames = provider.ResolveTableNames(new SixnetResolveSplitTableNameParameter()
             {
                 EntityConfiguration = entityConfig,
                 RootTableName = rootTableName,
@@ -78,7 +78,7 @@ namespace Sixnet.Development.Data
             }
 
             // split table names
-            if (context.Command?.OperationType == DataOperationType.Insert)
+            if (context.Command?.OperationType == SixnetDataOperationType.Insert)
             {
                 SixnetDirectThrower.ThrowInvalidOperationIf(splitTableNames.IsNullOrEmpty(), $"Not assign split table for {entityConfig.EntityType.Name}");
                 var diffTables = splitTableNames.Except(allTableNames);
@@ -132,7 +132,7 @@ namespace Sixnet.Development.Data
                 {
                     splitTableNames = splitTableNames.Except(diffTables).ToList();
                 }
-                splitTableNames = provider.GetTableNames(new GetSplitTableNameParameter()
+                splitTableNames = provider.GetTableNames(new SixnetGetSplitTableNameParameter()
                 {
                     ResolvedTableNames = splitTableNames,
                     AllTableNames = allTableNames,
@@ -148,7 +148,7 @@ namespace Sixnet.Development.Data
         /// </summary>
         /// <param name="serverTableKey">Server table key</param>
         /// <returns></returns>
-        static async Task<List<DatabaseObjectName>> GetCachedTableNamesAsync(string serverTableKey, DatabaseObjectName rootTableName)
+        static async Task<List<SixnetDatabaseObjectName>> GetCachedTableNamesAsync(string serverTableKey, SixnetDatabaseObjectName rootTableName)
         {
             var setMembersParameter = new SixnetSetMembersParameter()
             {
@@ -156,8 +156,8 @@ namespace Sixnet.Development.Data
             };
             HandleSplitTableCacheParameter(setMembersParameter);
             return (await SixnetCacher.Set.MembersAsync(setMembersParameter).ConfigureAwait(false))?.Members
-                .Select(m => DatabaseObjectName.Create(m, DatabaseObjectType.Table, rootTableName.SchemaName)).ToList()
-                ?? new List<DatabaseObjectName>(0);
+                .Select(m => SixnetDatabaseObjectName.Create(m, SixnetDatabaseObjectType.Table, rootTableName.SchemaName)).ToList()
+                ?? new List<SixnetDatabaseObjectName>(0);
         }
 
         /// <summary>
@@ -167,20 +167,20 @@ namespace Sixnet.Development.Data
         /// <param name="rootTableName"></param>
         /// <param name="serverTableKey"></param>
         /// <returns></returns>
-        static async Task<List<DatabaseObjectName>> RefreshTablesAsync(DataCommandExecutionContext context, DatabaseObjectName rootTableName, string serverTableKey
-            , SplitTableBehavior splitTableBehavior, ISixnetSplitTableProvider splitTableProvider)
+        static async Task<List<SixnetDatabaseObjectName>> RefreshTablesAsync(SixnetDataCommandExecutionContext context, SixnetDatabaseObjectName rootTableName, string serverTableKey
+            , SixnetSplitTableBehavior splitTableBehavior, ISixnetSplitTableProvider splitTableProvider)
         {
-            List<DatabaseObjectName> allTableNames;
+            List<SixnetDatabaseObjectName> allTableNames;
             using (var dataClient = GetClientForConnection(context.DatabaseConnection, true, true, false, context.DatabaseConnection.DataIsolationLevel))
             {
-                allTableNames = (await dataClient.GetTablesAsync().ConfigureAwait(false))?.Select(c => DatabaseObjectName.Create(c.Name, DatabaseObjectType.Table, c.SchemaName)).ToList();
+                allTableNames = (await dataClient.GetTablesAsync().ConfigureAwait(false))?.Select(c => SixnetDatabaseObjectName.Create(c.Name, SixnetDatabaseObjectType.Table, c.SchemaName)).ToList();
             }
-            allTableNames = splitTableProvider.FilterAllTableNames(new FilterAllSplitTableNameParameter()
+            allTableNames = splitTableProvider.FilterAllTableNames(new SixnetFilterAllSplitTableNameParameter()
             {
                 AllTableNames = allTableNames,
                 RootTableName = rootTableName,
                 Behavior = splitTableBehavior
-            }) ?? new List<DatabaseObjectName>(0);
+            }) ?? new List<SixnetDatabaseObjectName>(0);
             if (!allTableNames.IsNullOrEmpty())
             {
                 var setAddParameter = new SixnetSetAddParameter()
@@ -191,7 +191,7 @@ namespace Sixnet.Development.Data
                 HandleSplitTableCacheParameter(setAddParameter);
                 await SixnetCacher.Set.AddAsync(setAddParameter).ConfigureAwait(false);
             }
-            return allTableNames ?? new List<DatabaseObjectName>(0);
+            return allTableNames ?? new List<SixnetDatabaseObjectName>(0);
         }
 
         /// <summary>
@@ -203,19 +203,19 @@ namespace Sixnet.Development.Data
         /// <param name="entityType">Entity type</param>
         /// <param name="newTableNames">New table names</param>
         /// <returns></returns>
-        static async Task AutoCreateTablesAsync(DataCommandExecutionContext context, DatabaseObjectName rootTableName, string serverTableKey
-            , EntityConfiguration entityConfig, IEnumerable<DatabaseObjectName> newTableNames, SplitTableBehavior splitTableBehavior
+        static async Task AutoCreateTablesAsync(SixnetDataCommandExecutionContext context, SixnetDatabaseObjectName rootTableName, string serverTableKey
+            , SixnetEntityConfiguration entityConfig, IEnumerable<SixnetDatabaseObjectName> newTableNames, SixnetSplitTableBehavior splitTableBehavior
             , ISixnetSplitTableProvider splitTableProvider)
         {
             SixnetDirectThrower.ThrowArgNullIf(newTableNames.IsNullOrEmpty(), nameof(newTableNames));
 
             using (var dataClient = GetClientForConnection(context.DatabaseConnection, true, true, true, context.DatabaseConnection.DataIsolationLevel))
             {
-                await dataClient.MigrateAsync(new MigrationInfo()
+                await dataClient.MigrateAsync(new SixnetMigrationInfo()
                 {
-                    NewTables = new List<NewTableInfo>()
+                    NewTables = new List<SixnetNewTableInfo>()
                     {
-                        new NewTableInfo()
+                        new SixnetNewTableInfo()
                         {
                             TableNames = newTableNames?.ToList(),
                             EntityType = entityConfig.EntityType
@@ -232,12 +232,12 @@ namespace Sixnet.Development.Data
         /// </summary>
         /// <param name="parameter"></param>
         /// <returns></returns>
-        public static async Task<UpdateDatabaseResult> UpdateDatabaseAsync(SixnetUpdateDatabaseParameter parameter)
+        public static async Task<SixnetUpdateDatabaseResult> UpdateDatabaseAsync(SixnetUpdateDatabaseParameter parameter)
         {
             var reportProcess = parameter.ReportProcess;
             try
             {
-                reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Begin, parameter));
+                reportProcess?.Invoke(SixnetUpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Begin, parameter));
                 if (parameter.ExecuteRecordDirectly)
                 {
                     if (!parameter.Records.IsNullOrEmpty())
@@ -262,29 +262,29 @@ namespace Sixnet.Development.Data
                         {
                             if (!parameter.ExecuteRecordForRollback)
                             {
-                                reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Update, parameter, record));
+                                reportProcess?.Invoke(SixnetUpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Update, parameter, record));
                                 await record.UpdateAsync(context).ConfigureAwait(false);
-                                reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.UpdateFinished, parameter, record));
+                                reportProcess?.Invoke(SixnetUpdateDatabaseProcess.Create(UpdateDatabaseProcessState.UpdateFinished, parameter, record));
                             }
                             else
                             {
-                                reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Rollback, parameter, record));
+                                reportProcess?.Invoke(SixnetUpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Rollback, parameter, record));
                                 await record.RollbackAsync(context).ConfigureAwait(false);
-                                reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.RollbackFinished, parameter, record));
+                                reportProcess?.Invoke(SixnetUpdateDatabaseProcess.Create(UpdateDatabaseProcessState.RollbackFinished, parameter, record));
                             }
                         }
                     }
                 }
                 else
                 {
-                    reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.BeginGettingCurrentInfo, parameter));
+                    reportProcess?.Invoke(SixnetUpdateDatabaseProcess.Create(UpdateDatabaseProcessState.BeginGettingCurrentInfo, parameter));
                     var recordRes = await GetDatabaseUpdateRecordsCoreAsync(parameter).ConfigureAwait(false);
                     var context = recordRes.Item1;
-                    reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.EndGettingCurrentInfo, parameter, null, context.CurrentVersion, context.CurrentRecordId));
+                    reportProcess?.Invoke(SixnetUpdateDatabaseProcess.Create(UpdateDatabaseProcessState.EndGettingCurrentInfo, parameter, null, context.CurrentVersion, context.CurrentRecordId));
 
                     if (recordRes.Item2.IsNullOrEmpty())
                     {
-                        reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.NoneRecords, parameter));
+                        reportProcess?.Invoke(SixnetUpdateDatabaseProcess.Create(UpdateDatabaseProcessState.NoneRecords, parameter));
                     }
                     else
                     {
@@ -292,28 +292,28 @@ namespace Sixnet.Development.Data
                         {
                             if (recordRes.Item3)
                             {
-                                reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Update, parameter, record));
+                                reportProcess?.Invoke(SixnetUpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Update, parameter, record));
                                 await record.UpdateAsync(context).ConfigureAwait(false);
-                                reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.UpdateFinished, parameter, record));
+                                reportProcess?.Invoke(SixnetUpdateDatabaseProcess.Create(UpdateDatabaseProcessState.UpdateFinished, parameter, record));
                             }
                             else
                             {
-                                reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Rollback, parameter, record));
+                                reportProcess?.Invoke(SixnetUpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Rollback, parameter, record));
                                 await record.RollbackAsync(context).ConfigureAwait(false);
-                                reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.RollbackFinished, parameter, record));
+                                reportProcess?.Invoke(SixnetUpdateDatabaseProcess.Create(UpdateDatabaseProcessState.RollbackFinished, parameter, record));
                             }
                         }
                     }
                 }
-                reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.End, parameter));
+                reportProcess?.Invoke(SixnetUpdateDatabaseProcess.Create(UpdateDatabaseProcessState.End, parameter));
             }
             catch (Exception ex)
             {
-                reportProcess?.Invoke(UpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Error, parameter, ex: ex));
+                reportProcess?.Invoke(SixnetUpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Error, parameter, ex: ex));
                 throw;
             }
 
-            return UpdateDatabaseResult.SuccessResult("");
+            return SixnetUpdateDatabaseResult.SuccessResult("");
         }
 
         /// <summary>

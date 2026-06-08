@@ -4,7 +4,7 @@ using System.Data;
 
 using Sixnet.Cache.String.Parameters;
 using Sixnet.Development.Data.Command;
-using Sixnet.Development.Data.Command.Event;
+using Sixnet.Development.Data.Command.Events;
 using Sixnet.Development.Data.Database;
 using Sixnet.Development.Data.Field.Formatting;
 using Sixnet.Development.Data.Parameter.Handler;
@@ -23,34 +23,34 @@ namespace Sixnet.Development.Data
     {
         #region Fields
 
-        readonly Dictionary<DatabaseType, DatabaseSetting> _databaseSettings = new();
+        readonly Dictionary<SixnetDatabaseType, SixnetDatabaseSetting> _databaseSettings = new();
         readonly Dictionary<string, ISixnetFieldFormatter> _fieldFormatters = new();
         readonly List<ISixnetDataCommandStartingEventHandler> _dataCommandStartingEventHandlers = new();
         readonly List<ISixnetDataCommandCallbackEventHandler> _dataCommandCallbackEventHandlers = new();
         readonly Dictionary<Type, ISixnetCondition> _typeFilters = new();
         readonly Dictionary<string, ISixnetSplitTableProvider> _splitTableProviders = new()
         {
-            { DefaultLocalizationSplitTableProvider.Name, new DefaultLocalizationSplitTableProvider() }
+            { SixnetDefaultLocalizationSplitTableProvider.Name, new SixnetDefaultLocalizationSplitTableProvider() }
         }; // key: provider name
-        readonly Dictionary<DataIsolationLevel, IsolationLevel> _systemDataIsolationLevels = new()
+        readonly Dictionary<SixnetDataIsolationLevel, IsolationLevel> _systemDataIsolationLevels = new()
         {
-            { DataIsolationLevel.Chaos, IsolationLevel.Chaos },
-            { DataIsolationLevel.ReadCommitted, IsolationLevel.ReadCommitted },
-            { DataIsolationLevel.ReadUncommitted, IsolationLevel.ReadUncommitted },
-            { DataIsolationLevel.RepeatableRead, IsolationLevel.RepeatableRead },
-            { DataIsolationLevel.Serializable, IsolationLevel.Serializable },
-            { DataIsolationLevel.Snapshot, IsolationLevel.Snapshot },
-            { DataIsolationLevel.Unspecified, IsolationLevel.Unspecified }
+            { SixnetDataIsolationLevel.Chaos, IsolationLevel.Chaos },
+            { SixnetDataIsolationLevel.ReadCommitted, IsolationLevel.ReadCommitted },
+            { SixnetDataIsolationLevel.ReadUncommitted, IsolationLevel.ReadUncommitted },
+            { SixnetDataIsolationLevel.RepeatableRead, IsolationLevel.RepeatableRead },
+            { SixnetDataIsolationLevel.Serializable, IsolationLevel.Serializable },
+            { SixnetDataIsolationLevel.Snapshot, IsolationLevel.Snapshot },
+            { SixnetDataIsolationLevel.Unspecified, IsolationLevel.Unspecified }
         };
-        readonly Dictionary<DatabaseType, string> _databaseDefaultSchemas = new()
+        readonly Dictionary<SixnetDatabaseType, string> _databaseDefaultSchemas = new()
         {
-            { DatabaseType.SQLServer, "dbo" }
+            { SixnetDatabaseType.SQLServer, "dbo" }
         };
-        FieldRole _ignoreFilterFieldRole = FieldRole.None;
-        Func<SixnetDataCommand, List<DatabaseServer>> _getDataCommandDatabaseServersFunc;
-        Func<DatabaseServer, IDbConnection> _getDatabaseConnectionFunc;
-        Func<QueryableFilterContext, ISixnetQueryable> _getCustomContextFilterFunc;
-        Func<DataCommandExecutionContext, EntityConfiguration, string> _getDatabaseSchemaFunc;
+        SixnetFieldRole _ignoreFilterFieldRole = SixnetFieldRole.None;
+        Func<SixnetDataCommand, List<SixnetDatabaseServer>> _getDataCommandDatabaseServersFunc;
+        Func<SixnetDatabaseServer, IDbConnection> _getDatabaseConnectionFunc;
+        Func<SixnetQueryableFilterContext, ISixnetQueryable> _getCustomContextFilterFunc;
+        Func<SixnetDataCommandExecutionContext, SixnetEntityConfiguration, string> _getDatabaseSchemaFunc;
 
         #endregion
 
@@ -59,7 +59,7 @@ namespace Sixnet.Development.Data
         /// <summary>
         /// Gets or sets the Database servers
         /// </summary>
-        public List<DatabaseServer> Servers { get; set; }
+        public List<SixnetDatabaseServer> Servers { get; set; }
 
         /// <summary>
         /// Whether disable logical delete.
@@ -86,7 +86,7 @@ namespace Sixnet.Development.Data
         /// <summary>
         /// Gets or sets the data command database server match pattern
         /// </summary>
-        public DatabaseServerMatchPattern DatabaseServerMatchPattern { get; set; } = DatabaseServerMatchPattern.Default;
+        public SixnetDatabaseServerMatchPattern DatabaseServerMatchPattern { get; set; } = SixnetDatabaseServerMatchPattern.Default;
 
         /// <summary>
         /// Whether auto create split table
@@ -103,7 +103,7 @@ namespace Sixnet.Development.Data
         /// <summary>
         /// Gets or sets the default database word and name pattern
         /// </summary>
-        public DatabaseWordAndNamePattern DatabaseWordAndNamePattern { get; set; } = DatabaseWordAndNamePattern.Original;
+        public SixnetDatabaseWordAndNamePattern DatabaseWordAndNamePattern { get; set; } = SixnetDatabaseWordAndNamePattern.Original;
 
         /// <summary>
         /// Gets or sets the default database word and name separator
@@ -133,7 +133,7 @@ namespace Sixnet.Development.Data
         /// Configure connection
         /// </summary>
         /// <param name="configure">Configure</param>
-        public void ConfigureConnection(Func<DatabaseServer, IDbConnection> configure)
+        public void ConfigureConnection(Func<SixnetDatabaseServer, IDbConnection> configure)
         {
             _getDatabaseConnectionFunc = configure;
         }
@@ -143,7 +143,7 @@ namespace Sixnet.Development.Data
         /// </summary>
         /// <param name="server">Database server</param>
         /// <returns></returns>
-        internal IDbConnection GetConnection(DatabaseServer server)
+        internal IDbConnection GetConnection(SixnetDatabaseServer server)
         {
             return _getDatabaseConnectionFunc?.Invoke(server);
         }
@@ -156,7 +156,7 @@ namespace Sixnet.Development.Data
         /// Configure data command servers
         /// </summary>
         /// <param name="configure">Configure</param>
-        public void ConfigureDataCommandServers(Func<SixnetDataCommand, List<DatabaseServer>> configure)
+        public void ConfigureDataCommandServers(Func<SixnetDataCommand, List<SixnetDatabaseServer>> configure)
         {
             _getDataCommandDatabaseServersFunc = configure;
         }
@@ -166,17 +166,17 @@ namespace Sixnet.Development.Data
         /// </summary>
         /// <param name="command">Command</param>
         /// <returns></returns>
-        internal List<DatabaseServer> GetDataCommandDatabaseServers(SixnetDataCommand command)
+        internal List<SixnetDatabaseServer> GetDataCommandDatabaseServers(SixnetDataCommand command)
         {
-            List<DatabaseServer> servers = null;
+            List<SixnetDatabaseServer> servers = null;
             if (_getDataCommandDatabaseServersFunc == null)
             {
                 switch (DatabaseServerMatchPattern)
                 {
-                    case DatabaseServerMatchPattern.Default:
+                    case SixnetDatabaseServerMatchPattern.Default:
                         servers = GetDefaultDatabaseServers();
                         break;
-                    case DatabaseServerMatchPattern.All:
+                    case SixnetDatabaseServerMatchPattern.All:
                         servers = GetAllDatabaseServers();
                         break;
                 }
@@ -185,35 +185,35 @@ namespace Sixnet.Development.Data
             {
                 servers = _getDataCommandDatabaseServersFunc.Invoke(command);
             }
-            return servers ?? new List<DatabaseServer>(0);
+            return servers ?? new List<SixnetDatabaseServer>(0);
         }
 
         /// <summary>
         /// Get default database servers
         /// </summary>
         /// <returns></returns>
-        internal List<DatabaseServer> GetDefaultDatabaseServers()
+        internal List<SixnetDatabaseServer> GetDefaultDatabaseServers()
         {
             var allServers = GetAllDatabaseServers();
             if (allServers.IsNullOrEmpty())
             {
-                return new List<DatabaseServer>(0);
+                return new List<SixnetDatabaseServer>(0);
             }
-            var defaultServers = allServers.Where(c => c != null && c.Role == DatabaseServerRole.Default);
+            var defaultServers = allServers.Where(c => c != null && c.Role == SixnetDatabaseServerRole.Default);
             if (defaultServers.IsNullOrEmpty() && allServers.Count == 1)
             {
-                return new List<DatabaseServer>(1) { allServers.First() };
+                return new List<SixnetDatabaseServer>(1) { allServers.First() };
             }
-            return defaultServers?.ToList() ?? new List<DatabaseServer>(0);
+            return defaultServers?.ToList() ?? new List<SixnetDatabaseServer>(0);
         }
 
         /// <summary>
         /// Get all config database servers
         /// </summary>
         /// <returns></returns>
-        internal List<DatabaseServer> GetAllDatabaseServers()
+        internal List<SixnetDatabaseServer> GetAllDatabaseServers()
         {
-            return Servers ?? new List<DatabaseServer>(0);
+            return Servers ?? new List<SixnetDatabaseServer>(0);
         }
 
         /// <summary>
@@ -221,7 +221,7 @@ namespace Sixnet.Development.Data
         /// </summary>
         /// <param name="serverName">Database server name</param>
         /// <returns></returns>
-        internal List<DatabaseServer> GetDatabaseServers(string serverName)
+        internal List<SixnetDatabaseServer> GetDatabaseServers(string serverName)
         {
             return GetDatabaseServers(new string[1] { serverName });
         }
@@ -231,15 +231,15 @@ namespace Sixnet.Development.Data
         /// </summary>
         /// <param name="serverNames">Database server names</param>
         /// <returns></returns>
-        internal List<DatabaseServer> GetDatabaseServers(IEnumerable<string> serverNames)
+        internal List<SixnetDatabaseServer> GetDatabaseServers(IEnumerable<string> serverNames)
         {
             if (serverNames.IsNullOrEmpty())
             {
-                return new List<DatabaseServer>(0);
+                return new List<SixnetDatabaseServer>(0);
             }
             var allServers = GetAllDatabaseServers();
             return allServers?.Where(s => serverNames.Contains(s.Name)).ToList()
-                ?? new List<DatabaseServer>(0);
+                ?? new List<SixnetDatabaseServer>(0);
         }
 
         #endregion
@@ -251,7 +251,7 @@ namespace Sixnet.Development.Data
         /// </summary>
         /// <param name="databaseType"></param>
         /// <param name="databaseProvider"></param>
-        public void AddDatabaseProvider(DatabaseType databaseType, ISixnetDatabaseProvider databaseProvider)
+        public void AddDatabaseProvider(SixnetDatabaseType databaseType, ISixnetDatabaseProvider databaseProvider)
         {
             SixnetDirectThrower.ThrowArgNullIf(databaseProvider == null, nameof(databaseProvider));
 
@@ -263,7 +263,7 @@ namespace Sixnet.Development.Data
         /// </summary>
         /// <param name="databaseType">Database type</param>
         /// <returns></returns>
-        internal ISixnetDatabaseProvider GetDatabaseProvider(DatabaseType databaseType)
+        internal ISixnetDatabaseProvider GetDatabaseProvider(SixnetDatabaseType databaseType)
         {
             return GetDatabaseSetting(databaseType).DatabaseProvider;
         }
@@ -277,11 +277,11 @@ namespace Sixnet.Development.Data
         /// </summary>
         /// <param name="formatterName"></param>
         /// <param name="formatter"></param>
-        public void AddFieldFormatter(string formatterName, Func<FormatFieldContext, string> formatter)
+        public void AddFieldFormatter(string formatterName, Func<SixnetFormatFieldContext, string> formatter)
         {
             if (!string.IsNullOrWhiteSpace(formatterName) && formatter != null)
             {
-                AddFieldFormatter(formatterName, new DefaultFieldFormatter(formatter));
+                AddFieldFormatter(formatterName, new SixnetDefaultFieldFormatter(formatter));
             }
         }
 
@@ -363,8 +363,8 @@ namespace Sixnet.Development.Data
         /// </summary>
         void SubscribeDefaultCommandStartingEvent()
         {
-            _dataCommandStartingEventHandlers.Add(new InterceptParameterDataCommandStartingHandler());
-            _dataCommandStartingEventHandlers.Add(new HandleQueryableDataCommandStartingEventHandler());
+            _dataCommandStartingEventHandlers.Add(new SixnetInterceptParameterDataCommandStartingHandler());
+            _dataCommandStartingEventHandlers.Add(new SixnetHandleQueryableDataCommandStartingEventHandler());
         }
 
         #endregion
@@ -375,7 +375,7 @@ namespace Sixnet.Development.Data
         /// Configure custom filter
         /// </summary>
         /// <param name="configure">Configure</param>
-        public void ConfigureCustomFilter(Func<QueryableFilterContext, ISixnetQueryable> configure)
+        public void ConfigureCustomFilter(Func<SixnetQueryableFilterContext, ISixnetQueryable> configure)
         {
             _getCustomContextFilterFunc = configure;
         }
@@ -384,7 +384,7 @@ namespace Sixnet.Development.Data
         /// Ignore role filter
         /// </summary>
         /// <param name="fieldRoles">Field roles</param>
-        public void IgnoreRoleFilter(params FieldRole[] fieldRoles)
+        public void IgnoreRoleFilter(params SixnetFieldRole[] fieldRoles)
         {
             if (!fieldRoles.IsNullOrEmpty())
             {
@@ -400,7 +400,7 @@ namespace Sixnet.Development.Data
         /// </summary>
         /// <param name="fieldRole">Field role</param>
         /// <returns></returns>
-        public bool HasIgnoredRoleFilter(FieldRole fieldRole)
+        public bool HasIgnoredRoleFilter(SixnetFieldRole fieldRole)
         {
             return (_ignoreFilterFieldRole & fieldRole) == fieldRole;
         }
@@ -425,7 +425,7 @@ namespace Sixnet.Development.Data
         /// <param name="filter">Filter expression</param>
         public void AddFilter<TFilter>(Expression<Func<TFilter, bool>> filter)
         {
-            var condition = SixnetExpressionHelper.GetQueryable(filter, CriterionConnector.And);
+            var condition = SixnetExpressionHelper.GetQueryable(filter, SixnetCriterionConnector.And);
             AddFilter<TFilter>(condition);
         }
 
@@ -452,7 +452,7 @@ namespace Sixnet.Development.Data
         /// Get custom filter
         /// </summary>
         /// <returns></returns>
-        internal Func<QueryableFilterContext, ISixnetQueryable> GetCustomFilter()
+        internal Func<SixnetQueryableFilterContext, ISixnetQueryable> GetCustomFilter()
         {
             return _getCustomContextFilterFunc;
         }
@@ -467,7 +467,7 @@ namespace Sixnet.Development.Data
         /// <param name="databaseType">Database type</param>
         /// <param name="dbType">Database data type</param>
         /// <param name="parameterHandler">Parameter handler</param>
-        public void AddParameterHandler(DatabaseType databaseType, DbType dbType, ISixnetDataCommandParameterHandler handler)
+        public void AddParameterHandler(SixnetDatabaseType databaseType, DbType dbType, ISixnetDataCommandParameterHandler handler)
         {
             SixnetDirectThrower.ThrowArgNullIf(handler == null, nameof(handler));
             GetDatabaseSetting(databaseType).AddParameterHandler(dbType, handler);
@@ -478,7 +478,7 @@ namespace Sixnet.Development.Data
         /// </summary>
         /// <param name="databaseType">Database type</param>
         /// <param name="dbType">Database data type</param>
-        public void RemoveParameterHandler(DatabaseType databaseType, DbType dbType)
+        public void RemoveParameterHandler(SixnetDatabaseType databaseType, DbType dbType)
         {
             GetDatabaseSetting(databaseType).RemoveParameterHandler(dbType);
         }
@@ -489,7 +489,7 @@ namespace Sixnet.Development.Data
         /// <param name="databaseType">Database type</param>
         /// <param name="dbType">dbType</param>
         /// <returns></returns>
-        internal ISixnetDataCommandParameterHandler GetParameterHandler(DatabaseType databaseType, DbType dbType)
+        internal ISixnetDataCommandParameterHandler GetParameterHandler(SixnetDatabaseType databaseType, DbType dbType)
         {
             return GetDatabaseSetting(databaseType).GetParameterHandler(dbType);
         }
@@ -499,81 +499,81 @@ namespace Sixnet.Development.Data
         /// </summary>
         void AddDefaultParameterHandler()
         {
-            var datetimeOffsetHandler = new DateTimeOffsetParameterHandler();
-            var boolToIntegerHandler = new BooleanToIntegerParameterHandler();
-            var guidHandler = new GuidFormattingParameterHandler();
-            var sbyteHandler = new SByteToShortParameterHandler();
-            var uintHandler = new UIntToLongParameterHandler();
-            var ushortHandler = new UShortToIntParameterHandler();
-            var ulongHandler = new ULongToDecimalParameterHandler();
-            var timespanHandler = new TimeSpanParameterHandler();
-            var charHandler = new CharToStringParameterHandler();
-            var ulongToStringHandler = new ULongToStringParameterHandler();
-            var nullCharHandler = new NullCharacterParameterHandler();
+            var datetimeOffsetHandler = new SixnetDateTimeOffsetParameterHandler();
+            var boolToIntegerHandler = new SixnetBooleanToIntegerParameterHandler();
+            var guidHandler = new SixnetGuidFormattingParameterHandler();
+            var sbyteHandler = new SixnetSByteToShortParameterHandler();
+            var uintHandler = new SixnetUIntToLongParameterHandler();
+            var ushortHandler = new SixnetUShortToIntParameterHandler();
+            var ulongHandler = new SixnetULongToDecimalParameterHandler();
+            var timespanHandler = new SixnetTimeSpanParameterHandler();
+            var charHandler = new SixnetCharToStringParameterHandler();
+            var ulongToStringHandler = new SixnetULongToStringParameterHandler();
+            var nullCharHandler = new SixnetNullCharacterParameterHandler();
 
             #region MySQL
 
             //DateTimeOffset
-            AddParameterHandler(DatabaseType.MySQL, DbType.DateTimeOffset, datetimeOffsetHandler);
+            AddParameterHandler(SixnetDatabaseType.MySQL, DbType.DateTimeOffset, datetimeOffsetHandler);
 
             #endregion
 
             #region Oracle
 
             //boolean
-            AddParameterHandler(DatabaseType.Oracle, DbType.Boolean, boolToIntegerHandler);
+            AddParameterHandler(SixnetDatabaseType.Oracle, DbType.Boolean, boolToIntegerHandler);
             //Guid
-            AddParameterHandler(DatabaseType.Oracle, DbType.Guid, guidHandler);
+            AddParameterHandler(SixnetDatabaseType.Oracle, DbType.Guid, guidHandler);
             //SByte
-            AddParameterHandler(DatabaseType.Oracle, DbType.SByte, sbyteHandler);
+            AddParameterHandler(SixnetDatabaseType.Oracle, DbType.SByte, sbyteHandler);
             //UInt
-            AddParameterHandler(DatabaseType.Oracle, DbType.UInt32, uintHandler);
+            AddParameterHandler(SixnetDatabaseType.Oracle, DbType.UInt32, uintHandler);
             //UShort
-            AddParameterHandler(DatabaseType.Oracle, DbType.UInt16, ushortHandler);
+            AddParameterHandler(SixnetDatabaseType.Oracle, DbType.UInt16, ushortHandler);
             //ULong
-            AddParameterHandler(DatabaseType.Oracle, DbType.UInt64, ulongHandler);
+            AddParameterHandler(SixnetDatabaseType.Oracle, DbType.UInt64, ulongHandler);
             //Timespan
-            AddParameterHandler(DatabaseType.Oracle, DbType.Time, timespanHandler);
+            AddParameterHandler(SixnetDatabaseType.Oracle, DbType.Time, timespanHandler);
             //Char
-            AddParameterHandler(DatabaseType.Oracle, DbType.StringFixedLength, charHandler);
+            AddParameterHandler(SixnetDatabaseType.Oracle, DbType.StringFixedLength, charHandler);
 
             #endregion
 
             #region SQLite
 
             //DateTimeOffset
-            AddParameterHandler(DatabaseType.SQLite, DbType.DateTimeOffset, datetimeOffsetHandler);
+            AddParameterHandler(SixnetDatabaseType.SQLite, DbType.DateTimeOffset, datetimeOffsetHandler);
             //ULong
-            AddParameterHandler(DatabaseType.SQLite, DbType.UInt64, ulongToStringHandler);
+            AddParameterHandler(SixnetDatabaseType.SQLite, DbType.UInt64, ulongToStringHandler);
 
             #endregion
 
             #region SQL Server
 
             //SByte
-            AddParameterHandler(DatabaseType.SQLServer, DbType.SByte, sbyteHandler);
+            AddParameterHandler(SixnetDatabaseType.SQLServer, DbType.SByte, sbyteHandler);
             //UInt
-            AddParameterHandler(DatabaseType.SQLServer, DbType.UInt32, uintHandler);
+            AddParameterHandler(SixnetDatabaseType.SQLServer, DbType.UInt32, uintHandler);
             //UShort
-            AddParameterHandler(DatabaseType.SQLServer, DbType.UInt16, ushortHandler);
+            AddParameterHandler(SixnetDatabaseType.SQLServer, DbType.UInt16, ushortHandler);
             //ULong
-            AddParameterHandler(DatabaseType.SQLServer, DbType.UInt64, ulongHandler);
+            AddParameterHandler(SixnetDatabaseType.SQLServer, DbType.UInt64, ulongHandler);
 
             #endregion
 
             #region PostgreSQL
 
             //UInt
-            AddParameterHandler(DatabaseType.PostgreSQL, DbType.UInt32, uintHandler);
+            AddParameterHandler(SixnetDatabaseType.PostgreSQL, DbType.UInt32, uintHandler);
             //ULong
-            AddParameterHandler(DatabaseType.PostgreSQL, DbType.UInt64, ulongHandler);
+            AddParameterHandler(SixnetDatabaseType.PostgreSQL, DbType.UInt64, ulongHandler);
             //UShort
-            AddParameterHandler(DatabaseType.PostgreSQL, DbType.UInt16, ushortHandler);
+            AddParameterHandler(SixnetDatabaseType.PostgreSQL, DbType.UInt16, ushortHandler);
             //null char
-            AddParameterHandler(DatabaseType.PostgreSQL, DbType.AnsiString, nullCharHandler);
-            AddParameterHandler(DatabaseType.PostgreSQL, DbType.AnsiStringFixedLength, nullCharHandler);
-            AddParameterHandler(DatabaseType.PostgreSQL, DbType.String, nullCharHandler);
-            AddParameterHandler(DatabaseType.PostgreSQL, DbType.StringFixedLength, nullCharHandler);
+            AddParameterHandler(SixnetDatabaseType.PostgreSQL, DbType.AnsiString, nullCharHandler);
+            AddParameterHandler(SixnetDatabaseType.PostgreSQL, DbType.AnsiStringFixedLength, nullCharHandler);
+            AddParameterHandler(SixnetDatabaseType.PostgreSQL, DbType.String, nullCharHandler);
+            AddParameterHandler(SixnetDatabaseType.PostgreSQL, DbType.StringFixedLength, nullCharHandler);
 
             #endregion
         }
@@ -587,7 +587,7 @@ namespace Sixnet.Development.Data
         /// </summary>
         /// <param name="databaseType">Database type</param>
         /// <param name="setting">Batch setting</param>
-        public void SetBatchSetting(DatabaseType databaseType, DatabaseBatchSetting setting)
+        public void SetBatchSetting(SixnetDatabaseType databaseType, SixnetDatabaseBatchSetting setting)
         {
             GetDatabaseSetting(databaseType).BatchSetting = setting;
         }
@@ -597,7 +597,7 @@ namespace Sixnet.Development.Data
         /// </summary>
         /// <param name="databaseType">Database type</param>
         /// <returns></returns>
-        internal DatabaseBatchSetting GetBatchSetting(DatabaseType databaseType)
+        internal SixnetDatabaseBatchSetting GetBatchSetting(SixnetDatabaseType databaseType)
         {
             return GetDatabaseSetting(databaseType).BatchSetting;
         }
@@ -611,7 +611,7 @@ namespace Sixnet.Development.Data
         /// </summary>
         /// <param name="databaseType">Database type</param>
         /// <param name="dataIsolationLevel">Data isolation level</param>
-        public void SetDefaultIsolationLevel(DatabaseType databaseType, DataIsolationLevel dataIsolationLevel)
+        public void SetDefaultIsolationLevel(SixnetDatabaseType databaseType, SixnetDataIsolationLevel dataIsolationLevel)
         {
             GetDatabaseSetting(databaseType).IsolationLevel = dataIsolationLevel;
         }
@@ -621,7 +621,7 @@ namespace Sixnet.Development.Data
         /// </summary>
         /// <param name="databaseType">Database type</param>
         /// <returns></returns>
-        internal DataIsolationLevel? GetDefaultIsolationLevel(DatabaseType databaseType)
+        internal SixnetDataIsolationLevel? GetDefaultIsolationLevel(SixnetDatabaseType databaseType)
         {
             return GetDatabaseSetting(databaseType).IsolationLevel;
         }
@@ -631,7 +631,7 @@ namespace Sixnet.Development.Data
         /// </summary>
         /// <param name="dataIsolationLevel">Data isolation level</param>
         /// <returns></returns>
-        internal IsolationLevel? GetSystemIsolationLevel(DataIsolationLevel? dataIsolationLevel)
+        internal IsolationLevel? GetSystemIsolationLevel(SixnetDataIsolationLevel? dataIsolationLevel)
         {
             IsolationLevel? isolationLevel = null;
             if (dataIsolationLevel.HasValue && _systemDataIsolationLevels.ContainsKey(dataIsolationLevel.Value))
@@ -651,7 +651,7 @@ namespace Sixnet.Development.Data
         /// <param name="databaseType">Database type</param>
         /// <param name="entityType">Entity type</param>
         /// <param name="configure">Configure</param>
-        public void ConfigureEntity(DatabaseType databaseType, Type entityType, Action<EntitySetting> configure)
+        public void ConfigureEntity(SixnetDatabaseType databaseType, Type entityType, Action<SixnetEntitySetting> configure)
         {
             GetDatabaseSetting(databaseType).ConfigureEntity(entityType, configure);
         }
@@ -662,7 +662,7 @@ namespace Sixnet.Development.Data
         /// <param name="databaseType">Database type</param>
         /// <param name="entityType">Entity type</param>
         /// <returns></returns>
-        internal EntitySetting GetEntitySetting(DatabaseType databaseType, Type entityType)
+        internal SixnetEntitySetting GetEntitySetting(SixnetDatabaseType databaseType, Type entityType)
         {
             return GetDatabaseSetting(databaseType).GetEntitySetting(entityType);
         }
@@ -676,7 +676,7 @@ namespace Sixnet.Development.Data
         /// </summary>
         /// <param name="commandExecutionContext">Command execution context</param>
         /// <returns></returns>
-        internal bool AllowInsertIncrementField(DataCommandExecutionContext commandExecutionContext)
+        internal bool AllowInsertIncrementField(SixnetDataCommandExecutionContext commandExecutionContext)
         {
             var databaseSetting = GetDatabaseSetting(commandExecutionContext.Server.DatabaseType);
             var isInsert = databaseSetting.InsertIncrementField.HasValue ? databaseSetting.InsertIncrementField.Value : InsertIncrementField;
@@ -725,7 +725,7 @@ namespace Sixnet.Development.Data
         /// <param name="databaseType">Databae type</param>
         /// <param name="objectName">Object name</param>
         /// <returns></returns>
-        public DatabaseObjectName FormatDatabaseObjectName(DatabaseType databaseType, DatabaseObjectName objectName)
+        public SixnetDatabaseObjectName FormatDatabaseObjectName(SixnetDatabaseType databaseType, SixnetDatabaseObjectName objectName)
         {
             var orginalValue = objectName.Name;
             if (string.IsNullOrWhiteSpace(orginalValue))
@@ -746,31 +746,31 @@ namespace Sixnet.Development.Data
             var formattedValue = orginalValue;
             switch (namePattern)
             {
-                case DatabaseWordAndNamePattern.Uppercase:
+                case SixnetDatabaseWordAndNamePattern.Uppercase:
                     formattedValue = orginalValue.ToUpper();
                     break;
-                case DatabaseWordAndNamePattern.Lowercase:
+                case SixnetDatabaseWordAndNamePattern.Lowercase:
                     formattedValue = orginalValue.ToLower();
                     break;
-                case DatabaseWordAndNamePattern.UppercaseWithSeparator:
+                case SixnetDatabaseWordAndNamePattern.UppercaseWithSeparator:
                     formattedValue = orginalValue.ToSeparatorCase(nameSeparator, true);
                     break;
-                case DatabaseWordAndNamePattern.LowercaseWithSeparator:
+                case SixnetDatabaseWordAndNamePattern.LowercaseWithSeparator:
                     formattedValue = orginalValue.ToSeparatorCase(nameSeparator, false);
                     break;
-                case DatabaseWordAndNamePattern.Reverse:
+                case SixnetDatabaseWordAndNamePattern.Reverse:
                     formattedValue = new string(orginalValue.Reverse().ToArray());
                     break;
-                case DatabaseWordAndNamePattern.UppercaseReverse:
+                case SixnetDatabaseWordAndNamePattern.UppercaseReverse:
                     formattedValue = new string(orginalValue.Reverse().ToArray()).ToUpper();
                     break;
-                case DatabaseWordAndNamePattern.LowercaseReverse:
+                case SixnetDatabaseWordAndNamePattern.LowercaseReverse:
                     formattedValue = new string(orginalValue.Reverse().ToArray()).ToLower();
                     break;
-                case DatabaseWordAndNamePattern.UppercaseReverseWithSeparator:
+                case SixnetDatabaseWordAndNamePattern.UppercaseReverseWithSeparator:
                     formattedValue = new string(orginalValue.ToSeparatorCase(nameSeparator, true).Reverse().ToArray());
                     break;
-                case DatabaseWordAndNamePattern.LowercaseReverseWithSeparator:
+                case SixnetDatabaseWordAndNamePattern.LowercaseReverseWithSeparator:
                     formattedValue = new string(orginalValue.ToSeparatorCase(nameSeparator, false).Reverse().ToArray());
                     break;
             }
@@ -788,7 +788,7 @@ namespace Sixnet.Development.Data
         /// </summary>
         /// <param name="databaseType">Database type</param>
         /// <returns></returns>
-        DatabaseSetting GetDatabaseSetting(DatabaseType databaseType)
+        SixnetDatabaseSetting GetDatabaseSetting(SixnetDatabaseType databaseType)
         {
             if (!_databaseSettings.TryGetValue(databaseType, out var setting) || setting == null)
             {
@@ -796,7 +796,7 @@ namespace Sixnet.Development.Data
                 {
                     if (!_databaseSettings.TryGetValue(databaseType, out setting) || setting == null)
                     {
-                        setting = new DatabaseSetting();
+                        setting = new SixnetDatabaseSetting();
                         _databaseSettings[databaseType] = setting;
                     }
                 }
@@ -813,7 +813,7 @@ namespace Sixnet.Development.Data
         /// </summary>
         /// <param name="databaseType"></param>
         /// <param name="schema"></param>
-        public void SetDatabaseDefaultSchema(DatabaseType databaseType, string schema)
+        public void SetDatabaseDefaultSchema(SixnetDatabaseType databaseType, string schema)
         {
             _databaseDefaultSchemas[databaseType] = schema;
         }
@@ -823,7 +823,7 @@ namespace Sixnet.Development.Data
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
-        string GetDatabaseDefaultSchema(DataCommandExecutionContext context)
+        string GetDatabaseDefaultSchema(SixnetDataCommandExecutionContext context)
         {
             if (context?.DatabaseConnection == null)
             {
@@ -834,11 +834,11 @@ namespace Sixnet.Development.Data
             {
                 schema = context.DatabaseConnection.DatabaseServer.DatabaseType switch
                 {
-                    DatabaseType.SQLServer => "dbo",
-                    DatabaseType.PostgreSQL => "public",
-                    DatabaseType.Oracle => context.DatabaseConnection.Meta.UserName,
-                    DatabaseType.DaMeng => context.DatabaseConnection.Meta.UserName,
-                    DatabaseType.Kingbase => "public",
+                    SixnetDatabaseType.SQLServer => "dbo",
+                    SixnetDatabaseType.PostgreSQL => "public",
+                    SixnetDatabaseType.Oracle => context.DatabaseConnection.Meta.UserName,
+                    SixnetDatabaseType.DaMeng => context.DatabaseConnection.Meta.UserName,
+                    SixnetDatabaseType.Kingbase => "public",
                     _ => string.Empty,
                 };
             }
@@ -850,7 +850,7 @@ namespace Sixnet.Development.Data
         /// </summary>
         /// <param name="configure"></param>
         /// <returns></returns>
-        public void ConfigureDatabaseSchema(Func<DataCommandExecutionContext, EntityConfiguration, string> configure)
+        public void ConfigureDatabaseSchema(Func<SixnetDataCommandExecutionContext, SixnetEntityConfiguration, string> configure)
         {
             _getDatabaseSchemaFunc = configure;
         }
@@ -860,7 +860,7 @@ namespace Sixnet.Development.Data
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
-        public string GetDatabaseSchema(DataCommandExecutionContext context, EntityConfiguration entityConfiguration)
+        public string GetDatabaseSchema(SixnetDataCommandExecutionContext context, SixnetEntityConfiguration entityConfiguration)
         {
             var schema = _getDatabaseSchemaFunc?.Invoke(context, entityConfiguration);
             if (string.IsNullOrWhiteSpace(schema))

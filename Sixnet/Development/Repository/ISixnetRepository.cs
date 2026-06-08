@@ -18,7 +18,7 @@ namespace Sixnet.Development.Repository
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        int Update(FieldsAssignment fieldsAssignment, ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null);
+        int Update(SixnetFieldsAssignment fieldsAssignment, ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Update
@@ -26,7 +26,7 @@ namespace Sixnet.Development.Repository
         /// <param name="fieldsAssignment">Fields assignment</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        int Update(FieldsAssignment fieldsAssignment, Action<SixnetDataOperationOptions> configure = null);
+        int Update(SixnetFieldsAssignment fieldsAssignment, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -222,7 +222,7 @@ namespace Sixnet.Development.Repository
         /// <param name="conditionExpression">Condition expression</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Affected data number</returns>
-        int Update(FieldsAssignment fieldsAssignment, Expression<Func<TModel, bool>> conditionExpression, Action<SixnetDataOperationOptions> configure = null);
+        int Update(SixnetFieldsAssignment fieldsAssignment, Expression<Func<TModel, bool>> conditionExpression, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Update
@@ -424,7 +424,7 @@ namespace Sixnet.Development.Repository
         /// <param name="pagingFilter">Paging filter</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Paging data</returns>
-        PagingInfo<TModel> GetPaging(ISixnetQueryable queryable, PagingFilter pagingFilter, Action<SixnetDataOperationOptions> configure = null);
+        SixnetPagingInfo<TModel> GetPaging(ISixnetQueryable queryable, SixnetPagingFilter pagingFilter, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get paging
@@ -434,7 +434,7 @@ namespace Sixnet.Development.Repository
         /// <param name="pageSize">Page size</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Paging data</returns>
-        PagingInfo<TModel> GetPaging(ISixnetQueryable queryable, int page, int pageSize, Action<SixnetDataOperationOptions> configure = null);
+        SixnetPagingInfo<TModel> GetPaging(ISixnetQueryable queryable, int page, int pageSize, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get paging
@@ -443,7 +443,7 @@ namespace Sixnet.Development.Repository
         /// <param name="pagingFilter">Paging filter</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Paging data</returns>
-        PagingInfo<TModel> GetPaging(Expression<Func<TModel, bool>> conditionExpression, PagingFilter pagingFilter, Action<SixnetDataOperationOptions> configure = null);
+        SixnetPagingInfo<TModel> GetPaging(Expression<Func<TModel, bool>> conditionExpression, SixnetPagingFilter pagingFilter, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get paging
@@ -453,7 +453,7 @@ namespace Sixnet.Development.Repository
         /// <param name="pageSize">Page size</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Paging data</returns>
-        PagingInfo<TModel> GetPaging(Expression<Func<TModel, bool>> conditionExpression, int page, int pageSize, Action<SixnetDataOperationOptions> configure = null);
+        SixnetPagingInfo<TModel> GetPaging(Expression<Func<TModel, bool>> conditionExpression, int page, int pageSize, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get paging
@@ -461,7 +461,7 @@ namespace Sixnet.Development.Repository
         /// <param name="pagingFilter">Paging filter</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Paging data</returns>
-        PagingInfo<TModel> GetPaging(PagingFilter pagingFilter, Action<SixnetDataOperationOptions> configure = null);
+        SixnetPagingInfo<TModel> GetPaging(SixnetPagingFilter pagingFilter, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get paging
@@ -470,7 +470,7 @@ namespace Sixnet.Development.Repository
         /// <param name="pageSize">Page size</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Paging data</returns>
-        PagingInfo<TModel> GetPaging(int page, int pageSize, Action<SixnetDataOperationOptions> configure = null);
+        SixnetPagingInfo<TModel> GetPaging(int page, int pageSize, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
@@ -618,7 +618,7 @@ namespace Sixnet.Development.Repository
         /// <param name="field">Field</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Value</returns>
-        TValue Scalar<TValue>(DataField field, Action<SixnetDataOperationOptions> configure = null);
+        TValue Scalar<TValue>(SixnetDataField field, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get scalar value
@@ -628,7 +628,7 @@ namespace Sixnet.Development.Repository
         /// <param name="conditionExpression">Conditionv expression</param>
         /// <param name="configure">Confirure options </param>
         /// <returns>Value</returns>
-        TValue Scalar<TValue>(DataField field, Expression<Func<TModel, bool>> conditionExpression, Action<SixnetDataOperationOptions> configure = null);
+        TValue Scalar<TValue>(SixnetDataField field, Expression<Func<TModel, bool>> conditionExpression, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 

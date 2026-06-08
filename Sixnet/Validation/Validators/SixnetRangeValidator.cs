@@ -1,0 +1,79 @@
+﻿// "Company © 2025. All rights reserved."
+
+using System.ComponentModel.DataAnnotations;
+
+namespace Sixnet.Validation.Validators
+{
+    /// <summary>
+    /// Range validator
+    /// </summary>
+    public class SixnetRangeValidator : SixnetBaseValidator
+    {
+        /// <summary>
+        /// Gets the minimum
+        /// </summary>
+        public object Minimum { get; }
+
+        /// <summary>
+        /// Gets the maximum
+        /// </summary>
+        public object Maximum { get; }
+
+        /// <summary>
+        /// Gets the data type
+        /// </summary>
+        public Type DataType { get; }
+
+        /// <summary>
+        /// Initialize a range validator
+        /// </summary>
+        /// <param name="dataType">Data type</param>
+        /// <param name="minimum">Minimum</param>
+        /// <param name="maximum">Maximum</param>
+        public SixnetRangeValidator(Type dataType, object minimum, object maximum)
+        {
+            DataType = dataType;
+            Minimum = minimum;
+            Maximum = maximum;
+            defaultErrorMessageValue = "Value out of range";
+        }
+
+        /// <summary>
+        /// Validate value
+        /// </summary>
+        /// <param name="parameter">Parameter</param>
+        public override SixnetValidationResult Validate(SixnetValidateParameter parameter)
+        {
+            var value = parameter?.Value;
+            parameter?.MessageArgs.Add(Minimum.ToString());
+            parameter?.MessageArgs.Add(Maximum.ToString());
+            return SixnetValidationExtensions.IsInRangeNullable(value, Minimum, Maximum)
+                ? SixnetValidationResult.SuccessResult()
+                : SixnetValidationResult.ErrorResult(parameter?.ErrorMessage, parameter?.MessageArgs);
+        }
+
+        /// <summary>
+        /// Create validation attribute
+        /// </summary>
+        /// <returns>Return the validation attribute</returns>
+        public override ValidationAttribute CreateValidationAttribute(SixnetValidationAttributeParameter parameter)
+        {
+            return new RangeAttribute(DataType, Minimum?.ToString(), Maximum?.ToString())
+            {
+                ErrorMessage = FormatMessage(parameter.ErrorMessage)
+            };
+        }
+
+        public override SixnetAsyncValidatorRule CreateAsyncValidatorRule(SixnetAsyncValidatorRuleParameter parameter)
+        {
+            parameter.MessageArgs.Add(Minimum.ToString());
+            parameter.MessageArgs.Add(Maximum.ToString());
+            var rule = base.CreateAsyncValidatorRule(parameter);
+
+            rule.Min = Minimum;
+            rule.Max = Maximum;
+
+            return rule;
+        }
+    }
+}

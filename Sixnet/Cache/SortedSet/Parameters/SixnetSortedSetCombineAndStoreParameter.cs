@@ -24,7 +24,7 @@ namespace Sixnet.Cache.SortedSet.Parameters
         /// <summary>
         /// Gets or sets the set operation
         /// </summary>
-        public CombineOperation CombineOperation { get; set; } = CombineOperation.Union;
+        public SixnetCombineOperation CombineOperation { get; set; } = SixnetCombineOperation.Union;
 
         /// <summary>
         /// Gets or sets the weights
@@ -34,7 +34,7 @@ namespace Sixnet.Cache.SortedSet.Parameters
         /// <summary>
         /// Gets or sets the set aggregate
         /// </summary>
-        public SetAggregate Aggregate { get; set; } = SetAggregate.Sum;
+        public SixnetSetAggregate Aggregate { get; set; } = SixnetSetAggregate.Sum;
 
         /// <summary>
         /// Gets or sets the cache entry expiration

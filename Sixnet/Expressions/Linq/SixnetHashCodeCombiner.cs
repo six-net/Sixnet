@@ -1,0 +1,58 @@
+﻿// "Company © 2025. All rights reserved."
+
+using System.Collections;
+
+namespace Sixnet.Expressions.Linq
+{
+    // based on System.Web.Util.HashCodeCombiner
+    public class SixnetHashCodeCombiner
+    {
+        private long _combinedHash64 = 0x1505L;
+
+        public int CombinedHash
+        {
+            get { return _combinedHash64.GetHashCode(); }
+        }
+
+        public void AddFingerprint(SixnetExpressionFingerprint fingerprint)
+        {
+            if (fingerprint != null)
+            {
+                fingerprint.AddToHashCodeCombiner(this);
+            }
+            else
+            {
+                AddInt32(0);
+            }
+        }
+
+        public void AddEnumerable(IEnumerable e)
+        {
+            if (e == null)
+            {
+                AddInt32(0);
+            }
+            else
+            {
+                int count = 0;
+                foreach (object o in e)
+                {
+                    AddObject(o);
+                    count++;
+                }
+                AddInt32(count);
+            }
+        }
+
+        public void AddInt32(int i)
+        {
+            _combinedHash64 = (_combinedHash64 << 5) + _combinedHash64 ^ i;
+        }
+
+        public void AddObject(object o)
+        {
+            int hashCode = o != null ? o.GetHashCode() : 0;
+            AddInt32(hashCode);
+        }
+    }
+}

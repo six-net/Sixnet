@@ -6,7 +6,7 @@ namespace Sixnet.Validation
     /// Defines compare operator
     /// </summary>
     [Serializable]
-    public enum CompareOperator
+    public enum SixnetCompareOperator
     {
         Equal,
         NotEqual,
@@ -22,7 +22,7 @@ namespace Sixnet.Validation
     /// Defines range boundary
     /// </summary>
     [Serializable]
-    public enum RangeBoundary
+    public enum SixnetRangeBoundary
     {
         Include,
         NotInclude
@@ -32,7 +32,7 @@ namespace Sixnet.Validation
     /// Defines validator type
     /// </summary>
     [Serializable]
-    public enum ValidatorType
+    public enum SixnetValidatorType
     {
         Compare,
         CreditCard,

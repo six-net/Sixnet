@@ -10,12 +10,12 @@ namespace Sixnet.Validation
         /// <summary>
         /// Gets or sets the validate type
         /// </summary>
-        public ValidatorType Type { get; set; }
+        public SixnetValidatorType Type { get; set; }
 
         /// <summary>
         /// Gets or sets the operator
         /// </summary>
-        public CompareOperator Operator { get; set; }
+        public SixnetCompareOperator Operator { get; set; }
 
         /// <summary>
         /// Gets or sets the value
@@ -40,12 +40,12 @@ namespace Sixnet.Validation
         /// <summary>
         /// Gets or sets the lower boundary
         /// </summary>
-        public RangeBoundary LowerBoundary { get; set; }
+        public SixnetRangeBoundary LowerBoundary { get; set; }
 
         /// <summary>
         /// Gets or sets the upper boundary
         /// </summary>
-        public RangeBoundary UpperBoundary { get; set; }
+        public SixnetRangeBoundary UpperBoundary { get; set; }
 
         /// <summary>
         /// Gets or sets the error message

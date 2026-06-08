@@ -13,11 +13,11 @@ namespace Sixnet.Cache
     {
         #region Fields
 
-        readonly Dictionary<CacheServerType, ISixnetCacheProvider> _providers = new();
+        readonly Dictionary<SixnetCacheServerType, ISixnetCacheProvider> _providers = new();
         internal static SixnetCacheServer DefaultInMemoryServer = new()
         {
             Name = "SIXNET_DEFAULT_IN_MEMORY_SERVER_NAME",
-            Type = CacheServerType.InMemory
+            Type = SixnetCacheServerType.InMemory
         };
         internal static MemoryProvider _defaultMemoryProvider = new();
 
@@ -86,7 +86,7 @@ namespace Sixnet.Cache
         /// </summary>
         /// <param name="serverType">Cache server type</param>
         /// <param name="cacheProvider">Cache provider</param>
-        public void AddCacheProvider(CacheServerType serverType, ISixnetCacheProvider cacheProvider)
+        public void AddCacheProvider(SixnetCacheServerType serverType, ISixnetCacheProvider cacheProvider)
         {
             if (cacheProvider != null)
             {
@@ -99,10 +99,10 @@ namespace Sixnet.Cache
         /// </summary>
         /// <param name="serverType">Server type</param>
         /// <returns>Return cache provider</returns>
-        public ISixnetCacheProvider GetCacheProvider(CacheServerType serverType)
+        public ISixnetCacheProvider GetCacheProvider(SixnetCacheServerType serverType)
         {
             _providers.TryGetValue(serverType, out var provider);
-            if (provider == null && serverType == CacheServerType.InMemory)
+            if (provider == null && serverType == SixnetCacheServerType.InMemory)
             {
                 provider = _defaultMemoryProvider;
             }

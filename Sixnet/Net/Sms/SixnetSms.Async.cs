@@ -297,7 +297,7 @@ namespace Sixnet.Net.Sms
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
-        public static Task<SendSmsResult> SendTemplateMessageAsync(SendMessageContext context)
+        public static Task<SendSmsResult> SendTemplateMessageAsync(SixnetSendMessageContext context)
         {
             return SendAsync(GetSmsParameter(context.Template, context.Message, context.Receivers));
         }

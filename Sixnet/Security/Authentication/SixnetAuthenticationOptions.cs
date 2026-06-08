@@ -49,9 +49,9 @@ namespace Sixnet.Security.Authentication
         /// </summary>
         public bool IgnoreServerValidation {  get; set; }
 
-        internal JwtSetting GetJwtSetting()
+        internal SixnetJwtSetting GetJwtSetting()
         {
-            return new JwtSetting()
+            return new SixnetJwtSetting()
             {
                 TokenExpirationSeconds = ExpireSeconds,
                 ClockSkewSeconds = JwtClockSkewSeconds,

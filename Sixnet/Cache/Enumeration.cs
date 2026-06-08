@@ -5,7 +5,7 @@ namespace Sixnet.Cache
     /// <summary>
     /// Defines cache operation type
     /// </summary>
-    public enum CacheOperationType
+    public enum SixnetCacheOperationType
     {
         Data = 110,
         Command = 120
@@ -14,7 +14,7 @@ namespace Sixnet.Cache
     /// <summary>
     /// Defines cache server type
     /// </summary>
-    public enum CacheServerType
+    public enum SixnetCacheServerType
     {
         InMemory = 310,
         Redis = 320,
@@ -24,7 +24,7 @@ namespace Sixnet.Cache
     /// <summary>
     /// Defines remove target type
     /// </summary>
-    public enum RemoveTarget
+    public enum SixnetRemoveTarget
     {
         Object = 110,
         Key = 120
@@ -33,7 +33,7 @@ namespace Sixnet.Cache
     /// <summary>
     /// Defines list insert type
     /// </summary>
-    public enum ListInsertType
+    public enum SixnetListInsertType
     {
         Before = 210,
         After = 220
@@ -42,7 +42,7 @@ namespace Sixnet.Cache
     /// <summary>
     /// Defines combine operation
     /// </summary>
-    public enum CombineOperation
+    public enum SixnetCombineOperation
     {
         Union = 0,
         Intersect = 1,
@@ -52,7 +52,7 @@ namespace Sixnet.Cache
     /// <summary>
     /// Defines boundary exclude type
     /// </summary>
-    public enum BoundaryExclude
+    public enum SixnetBoundaryExclude
     {
         None = 0,
         Start = 1,
@@ -63,7 +63,7 @@ namespace Sixnet.Cache
     /// <summary>
     /// Defines cache order
     /// </summary>
-    public enum CacheOrder
+    public enum SixnetCacheOrder
     {
         Ascending = 0,
         Descending = 1
@@ -72,7 +72,7 @@ namespace Sixnet.Cache
     /// <summary>
     /// Defines key type
     /// </summary>
-    public enum CacheKeyType
+    public enum SixnetCacheKeyType
     {
         Unknown = 0,
         String = 1,
@@ -85,7 +85,7 @@ namespace Sixnet.Cache
     /// <summary>
     /// Defines log level
     /// </summary>
-    public enum CacheLogLevel
+    public enum SixnetCacheLogLevel
     {
         Debug = 101,
         Verbose = 105,
@@ -96,7 +96,7 @@ namespace Sixnet.Cache
     /// <summary>
     /// Defines appendf sync
     /// </summary>
-    public enum AppendfSync
+    public enum SixnetAppendfSync
     {
         No = 101,
         Always = 105,
@@ -107,7 +107,7 @@ namespace Sixnet.Cache
     /// Defines cache command flags
     /// </summary>
     [Flags]
-    public enum CacheCommandFlags
+    public enum SixnetCacheCommandFlags
     {
         None = 0,
         PreferMaster = 0,
@@ -124,7 +124,7 @@ namespace Sixnet.Cache
     /// Defines cache set when
     /// </summary>
     [Flags]
-    public enum CacheSetWhen
+    public enum SixnetCacheSetWhen
     {
         Always = 0,
         Exists = 1,
@@ -134,7 +134,7 @@ namespace Sixnet.Cache
     /// <summary>
     /// Defines cache bit wise
     /// </summary>
-    public enum CacheBitwise
+    public enum SixnetCacheBitwise
     {
         And = 0,
         Or = 1,
@@ -145,7 +145,7 @@ namespace Sixnet.Cache
     /// <summary>
     /// Defines set aggregate
     /// </summary>
-    public enum SetAggregate
+    public enum SixnetSetAggregate
     {
         Sum = 0,
         Min = 1,
@@ -155,7 +155,7 @@ namespace Sixnet.Cache
     /// <summary>
     /// Defines cache sort type
     /// </summary>
-    public enum CacheSortType
+    public enum SixnetCacheSortType
     {
         Numeric = 0,
         Alphabetic = 1
@@ -164,7 +164,7 @@ namespace Sixnet.Cache
     /// <summary>
     /// Defines key match pattern
     /// </summary>
-    public enum KeyMatchPattern
+    public enum SixnetKeyMatchPattern
     {
         Include = 2,
         StartWith = 4,
@@ -176,7 +176,7 @@ namespace Sixnet.Cache
     /// Defines cache structure pattern
     /// </summary>
     [Flags]
-    public enum CacheStructurePattern
+    public enum SixnetCacheStructurePattern
     {
         InMemory = 2,
         Distribute = 4,

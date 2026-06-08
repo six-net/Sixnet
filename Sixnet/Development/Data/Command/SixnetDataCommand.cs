@@ -2,7 +2,7 @@
 
 using System.Data;
 
-using Sixnet.Development.Data.Command.Event;
+using Sixnet.Development.Data.Command.Events;
 using Sixnet.Development.Data.Field;
 using Sixnet.Development.Entity;
 using Sixnet.Development.Queryable;
@@ -35,12 +35,12 @@ namespace Sixnet.Development.Data.Command
         /// <summary>
         /// Gets or sets the script parameters
         /// </summary>
-        public DataCommandParameters ScriptParameters { get; private set; }
+        public SixnetDataCommandParameters ScriptParameters { get; private set; }
 
         /// <summary>
         /// Gets or sets the data script type
         /// </summary>
-        public DataScriptType ScriptType { get; set; } = DataScriptType.Text;
+        public SixnetDataScriptType ScriptType { get; set; } = SixnetDataScriptType.Text;
 
         /// <summary>
         /// Gets or sets the table name
@@ -60,7 +60,7 @@ namespace Sixnet.Development.Data.Command
         /// <summary>
         /// Gets or sets execute mode
         /// </summary>
-        public CommandExecutionMode ExecutionMode { get; set; } = CommandExecutionMode.Transform;
+        public SixnetCommandExecutionMode ExecutionMode { get; set; } = SixnetCommandExecutionMode.Transform;
 
         /// <summary>
         /// Gets or sets the queryable object
@@ -70,7 +70,7 @@ namespace Sixnet.Development.Data.Command
         /// <summary>
         /// Gets or sets the command operation type
         /// </summary>
-        public DataOperationType OperationType { get; set; } = DataOperationType.Query;
+        public SixnetDataOperationType OperationType { get; set; } = SixnetDataOperationType.Query;
 
         /// <summary>
         /// Gets or sets the data
@@ -80,7 +80,7 @@ namespace Sixnet.Development.Data.Command
         /// <summary>
         /// Gets or sets the fields assignment
         /// </summary>
-        public FieldsAssignment FieldsAssignment { get; set; }
+        public SixnetFieldsAssignment FieldsAssignment { get; set; }
 
         /// <summary>
         /// Gets or sets the entity type
@@ -95,7 +95,7 @@ namespace Sixnet.Development.Data.Command
         /// <summary>
         /// Gets or sets the paging filter
         /// </summary>
-        public PagingFilter PagingFilter { get; set; }
+        public SixnetPagingFilter PagingFilter { get; set; }
 
         /// <summary>
         /// Gets or sets the options
@@ -124,7 +124,7 @@ namespace Sixnet.Development.Data.Command
         /// <typeparam name="TEntity">Entity type</typeparam>
         /// <param name="operationType">Operation type</param>
         /// <returns>Return a default command</returns>
-        public static SixnetDataCommand Create<TEntity>(DataOperationType operationType)
+        public static SixnetDataCommand Create<TEntity>(SixnetDataOperationType operationType)
         {
             var entityType = typeof(TEntity);
             var command = new SixnetDataCommand()
@@ -141,7 +141,7 @@ namespace Sixnet.Development.Data.Command
         /// <param name="operationType">Operation type</param>
         /// <param name="queryable">Queryable</param>
         /// <returns></returns>
-        public static SixnetDataCommand Create(DataOperationType operationType, ISixnetQueryable queryable)
+        public static SixnetDataCommand Create(SixnetDataOperationType operationType, ISixnetQueryable queryable)
         {
             var entityType = queryable?.GetModelType();
             return new SixnetDataCommand()
@@ -166,7 +166,7 @@ namespace Sixnet.Development.Data.Command
             }
             return new SixnetDataCommand()
             {
-                OperationType = DataOperationType.Query,
+                OperationType = SixnetDataOperationType.Query,
                 Queryable = queryable,
                 EntityType = entityType
             };
@@ -182,7 +182,7 @@ namespace Sixnet.Development.Data.Command
             var entityType = queryable?.GetModelType();
             return new SixnetDataCommand()
             {
-                OperationType = DataOperationType.Query,
+                OperationType = SixnetDataOperationType.Query,
                 Queryable = queryable,
                 EntityType = entityType
             };
@@ -197,7 +197,7 @@ namespace Sixnet.Development.Data.Command
         {
             return new SixnetDataCommand()
             {
-                OperationType = DataOperationType.BulkInsert,
+                OperationType = SixnetDataOperationType.BulkInsert,
                 DataTable = dataTable
             };
         }
@@ -209,14 +209,14 @@ namespace Sixnet.Development.Data.Command
         /// <param name="parameters">Parameters</param>
         /// <param name="scriptType">Script type</param>
         /// <returns></returns>
-        public static SixnetDataCommand CreateScriptCommand(string script, object parameters = null, DataScriptType scriptType = DataScriptType.Text)
+        public static SixnetDataCommand CreateScriptCommand(string script, object parameters = null, SixnetDataScriptType scriptType = SixnetDataScriptType.Text)
         {
             return new SixnetDataCommand()
             {
                 Script = script,
-                ExecutionMode = CommandExecutionMode.Script,
+                ExecutionMode = SixnetCommandExecutionMode.Script,
                 ScriptType = scriptType,
-                ScriptParameters = DataCommandParameters.Parse(parameters)
+                ScriptParameters = SixnetDataCommandParameters.Parse(parameters)
             };
         }
 
@@ -316,7 +316,7 @@ namespace Sixnet.Development.Data.Command
         /// Set parameters
         /// </summary>
         /// <param name="parameters">Parameters</param>
-        public void SetParameters(DataCommandParameters parameters)
+        public void SetParameters(SixnetDataCommandParameters parameters)
         {
             ScriptParameters = parameters;
             ResetIdentityValues();

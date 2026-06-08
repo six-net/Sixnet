@@ -29,7 +29,7 @@ namespace Sixnet.Cache.SortedSet.Parameters
         /// <summary>
         /// Gets or sets the exclude type
         /// </summary>
-        public BoundaryExclude Exclude { get; set; } = BoundaryExclude.None;
+        public SixnetBoundaryExclude Exclude { get; set; } = SixnetBoundaryExclude.None;
 
         /// <summary>
         /// Execute cache operation

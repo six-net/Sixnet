@@ -6,7 +6,7 @@ namespace Sixnet.Model
     /// Cloneable model
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public interface ISixnetCloneable<T> where T : class
+    public interface ISixnetCloneable<T>
     {
         /// <summary>
         /// Clone an object

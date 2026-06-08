@@ -15,6 +15,6 @@ namespace Sixnet.Cache.Keys
         /// <summary>
         /// Gets or sets the key pattern type
         /// </summary>
-        public KeyMatchPattern Type { get; set; }
+        public SixnetKeyMatchPattern Type { get; set; }
     }
 }

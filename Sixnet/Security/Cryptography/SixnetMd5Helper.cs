@@ -1,0 +1,69 @@
+﻿// "Company © 2025. All rights reserved."
+
+using System.Security.Cryptography;
+using System.Text;
+
+namespace Sixnet.Security.Cryptography
+{
+    /// <summary>
+    /// MD5 algorithm helper
+    /// </summary>
+    public static class SixnetMD5Helper
+    {
+        /// <summary>
+        /// md5 provider
+        /// </summary>
+        static readonly MD5CryptoServiceProvider MD5CryptoServiceProvider = new();
+
+        #region Encrypts string
+
+        /// <summary>
+        /// Encrypts string
+        /// </summary>
+        /// <param name="originalValue">Original value</param>
+        /// <returns>Return the encrypted value</returns>
+        public static string Encrypt(string originalValue, string salt = "")
+        {
+            if (string.IsNullOrWhiteSpace(originalValue))
+            {
+                return string.Empty;
+            }
+            if (!string.IsNullOrWhiteSpace(salt))
+            {
+                originalValue = $"{originalValue}{salt}";
+            }
+            var valueBytes = Encoding.UTF8.GetBytes(originalValue);
+            var md5Bytes = MD5CryptoServiceProvider.ComputeHash(valueBytes);
+            var encryptString = BitConverter.ToString(md5Bytes);
+            return encryptString.Replace("-", string.Empty).ToLower();
+        }
+
+        #endregion
+
+        #region Specifies the number of times to encrypt a string
+
+        /// <summary>
+        /// Specifies the number of times to encrypt a string
+        /// </summary>
+        /// <param name="originalValue">Original value</param>
+        /// <param name="times">Encrypt times</param>
+        /// <returns>Return the encrypted value</returns>
+        public static string Encrypt(string originalValue, int times)
+        {
+            if (string.IsNullOrWhiteSpace(originalValue))
+            {
+                return string.Empty;
+            }
+
+            string encryptValue;
+            do
+            {
+                encryptValue = Encrypt(originalValue);
+                times--;
+            } while (times > 0);
+            return encryptValue;
+        }
+
+        #endregion
+    }
+}

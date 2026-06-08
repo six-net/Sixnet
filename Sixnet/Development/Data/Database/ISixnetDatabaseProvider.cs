@@ -18,14 +18,14 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="server">Database server</param>
         /// <returns>Database connection</returns>
-        IDbConnection GetDbConnection(DatabaseServer server);
+        IDbConnection GetDbConnection(SixnetDatabaseServer server);
 
         /// <summary>
         /// Get db connection meta
         /// </summary>
         /// <param name="connection"></param>
         /// <returns></returns>
-        DatabaseConnectionMeta GetDbConnectionMeta(IDbConnection connection);
+        SixnetDatabaseConnectionMeta GetDbConnectionMeta(IDbConnection connection);
 
         #endregion
 
@@ -36,7 +36,7 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="command">Database multiple command</param>
         /// <returns>Affected data numbers</returns>
-        int Execute(MultipleDatabaseCommand command);
+        int Execute(SixnetMultipleDatabaseCommand command);
 
         #endregion
 
@@ -48,7 +48,7 @@ namespace Sixnet.Development.Data.Database
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="command">Database single command</param>
         /// <returns>Return the datas</returns>
-        List<T> Query<T>(SingleDatabaseCommand command);
+        List<T> Query<T>(SixnetSingleDatabaseCommand command);
 
         /// <summary>
         /// Query data
@@ -56,7 +56,7 @@ namespace Sixnet.Development.Data.Database
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="command">Database single command</param>
         /// <returns>Return the datas</returns>
-        T QueryFirst<T>(SingleDatabaseCommand command);
+        T QueryFirst<T>(SixnetSingleDatabaseCommand command);
 
         /// <summary>
         /// Query datas
@@ -66,7 +66,7 @@ namespace Sixnet.Development.Data.Database
         /// <typeparam name="TReturn">Return data type</typeparam>
         /// <param name="command">Database query mapping command</param>
         /// <returns>Return the datas</returns>
-        List<TReturn> QueryMapping<TFirst, TSecond, TReturn>(QueryMappingDatabaseCommand<TFirst, TSecond, TReturn> command);
+        List<TReturn> QueryMapping<TFirst, TSecond, TReturn>(SixnetQueryMappingDatabaseCommand<TFirst, TSecond, TReturn> command);
 
         /// <summary>
         /// Query datas
@@ -139,21 +139,21 @@ namespace Sixnet.Development.Data.Database
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="command">Database single command</param>
         /// <returns>Return the datas</returns>
-        PagingInfo<T> QueryPaging<T>(SingleDatabaseCommand command);
+        SixnetPagingInfo<T> QueryPaging<T>(SixnetSingleDatabaseCommand command);
 
         /// <summary>
         /// Whether has data
         /// </summary>
         /// <param name="command">Database single command</param>
         /// <returns>Return whether has data</returns>
-        bool Exists(SingleDatabaseCommand command);
+        bool Exists(SixnetSingleDatabaseCommand command);
 
         /// <summary>
         /// Count data
         /// </summary>
         /// <param name="command">Database single command</param>
         /// <returns></returns>
-        int Count(SingleDatabaseCommand command);
+        int Count(SixnetSingleDatabaseCommand command);
 
         /// <summary>
         /// Scalar value
@@ -161,14 +161,14 @@ namespace Sixnet.Development.Data.Database
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="command">Database single command</param>
         /// <returns>Return the data</returns>
-        T Scalar<T>(SingleDatabaseCommand command);
+        T Scalar<T>(SixnetSingleDatabaseCommand command);
 
         /// <summary>
         /// Query multiple data
         /// </summary>
         /// <param name="command">Database multiple command</param>
         /// <returns>Return the dataset</returns>
-        DataSet QueryMultiple(MultipleDatabaseCommand command);
+        DataSet QueryMultiple(SixnetMultipleDatabaseCommand command);
 
         /// <summary>
         /// Query multiple data
@@ -177,7 +177,7 @@ namespace Sixnet.Development.Data.Database
         /// <typeparam name="TSecond">Second data type</typeparam>
         /// <param name="command">Database multiple command</param>
         /// <returns></returns>
-        Tuple<List<TFirst>, List<TSecond>> QueryMultiple<TFirst, TSecond>(MultipleDatabaseCommand command);
+        Tuple<List<TFirst>, List<TSecond>> QueryMultiple<TFirst, TSecond>(SixnetMultipleDatabaseCommand command);
 
         /// <summary>
         /// Query multiple data
@@ -187,7 +187,7 @@ namespace Sixnet.Development.Data.Database
         /// <typeparam name="TThird">Third data type</typeparam>
         /// <param name="command">Database multiple command</param>
         /// <returns></returns>
-        Tuple<List<TFirst>, List<TSecond>, List<TThird>> QueryMultiple<TFirst, TSecond, TThird>(MultipleDatabaseCommand command);
+        Tuple<List<TFirst>, List<TSecond>, List<TThird>> QueryMultiple<TFirst, TSecond, TThird>(SixnetMultipleDatabaseCommand command);
 
         /// <summary>
         /// Query multiple data
@@ -198,7 +198,7 @@ namespace Sixnet.Development.Data.Database
         /// <typeparam name="TFourth">Fourth data type</typeparam>
         /// <param name="command">Database multiple command</param>
         /// <returns></returns>
-        Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>> QueryMultiple<TFirst, TSecond, TThird, TFourth>(MultipleDatabaseCommand command);
+        Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>> QueryMultiple<TFirst, TSecond, TThird, TFourth>(SixnetMultipleDatabaseCommand command);
 
         /// <summary>
         /// Query multiple data
@@ -210,7 +210,7 @@ namespace Sixnet.Development.Data.Database
         /// <typeparam name="TFifth">Fifth data type</typeparam>
         /// <param name="command">Database multiple command</param>
         /// <returns></returns>
-        Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>> QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth>(MultipleDatabaseCommand command);
+        Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>> QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth>(SixnetMultipleDatabaseCommand command);
 
         /// <summary>
         /// Query multiple data
@@ -223,7 +223,7 @@ namespace Sixnet.Development.Data.Database
         /// <typeparam name="TSixth">Sixth data type</typeparam>
         /// <param name="command">Database multiple command</param>
         /// <returns></returns>
-        Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>> QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(MultipleDatabaseCommand command);
+        Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>> QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(SixnetMultipleDatabaseCommand command);
 
         /// <summary>
         /// Query multiple data
@@ -237,7 +237,7 @@ namespace Sixnet.Development.Data.Database
         /// <typeparam name="TSeventh">Seventh data type</typeparam>
         /// <param name="command">Database multiple command</param>
         /// <returns></returns>
-        Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>, List<TSeventh>> QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(MultipleDatabaseCommand command);
+        Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>, List<TSeventh>> QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(SixnetMultipleDatabaseCommand command);
 
         #endregion
 
@@ -248,13 +248,13 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="command">Database multiple command</param>
         /// <returns>Added data identities,Key: command id, Value: identity value</returns>
-        Dictionary<string, TIdentity> InsertAndReturnIdentity<TIdentity>(MultipleDatabaseCommand command);
+        Dictionary<string, TIdentity> InsertAndReturnIdentity<TIdentity>(SixnetMultipleDatabaseCommand command);
 
         /// <summary>
         /// Bulk insert
         /// </summary>
         /// <param name="command">Database bulk insert command</param>
-        void BulkInsert(BulkInsertDatabaseCommand command);
+        void BulkInsert(SixnetBulkInsertDatabaseCommand command);
 
         #endregion
 
@@ -265,7 +265,7 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="command">command</param>
         /// <returns></returns>
-        void Migrate(MigrationDatabaseCommand command);
+        void Migrate(SixnetMigrationDatabaseCommand command);
 
         #endregion
 
@@ -276,7 +276,7 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="command">Command</param>
         /// <returns></returns>
-        List<SixnetDatabase> GetDatabases(DatabaseCommand command);
+        List<SixnetDatabase> GetDatabases(SixnetDatabaseCommand command);
 
         #endregion
 
@@ -287,7 +287,7 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="command">Command</param>
         /// <returns></returns>
-        List<SixnetDataTable> GetTables(DatabaseCommand command);
+        List<SixnetDataTable> GetTables(SixnetDatabaseCommand command);
 
         #endregion
 
@@ -298,7 +298,7 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="command"></param>
         /// <returns></returns>
-        List<SixnetView> GetViews(DatabaseCommand command);
+        List<SixnetView> GetViews(SixnetDatabaseCommand command);
 
         #endregion
 
@@ -309,7 +309,7 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="command"></param>
         /// <returns></returns>
-        List<SixnetStoredProcedure> GetStoredProcedures(DatabaseCommand command);
+        List<SixnetStoredProcedure> GetStoredProcedures(SixnetDatabaseCommand command);
 
         #endregion
 
@@ -320,7 +320,7 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="command"></param>
         /// <returns></returns>
-        List<SixnetColumn> GetColumns(DatabaseCommand command);
+        List<SixnetColumn> GetColumns(SixnetDatabaseCommand command);
 
         #endregion
     }

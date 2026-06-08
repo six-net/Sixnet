@@ -15,21 +15,21 @@ namespace Sixnet.Session
         /// <summary>
         /// Gets or sets the isolation info
         /// </summary>
-        public IsolationInfo Isolation { get; set; }
+        public SixnetIsolationInfo Isolation { get; set; }
 
         /// <summary>
         /// Gets or sets the user info
         /// </summary>
-        public UserInfo User { get; set; }
+        public SixnetUserInfo User { get; set; }
 
         internal SixnetSession()
         {
-            SessionContext.Current = this;
+            SixnetSessionContext.Current = this;
         }
 
         public void Dispose()
         {
-            SessionContext.Current = null;
+            SixnetSessionContext.Current = null;
         }
     }
 }

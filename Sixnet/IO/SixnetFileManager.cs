@@ -16,8 +16,8 @@ namespace Sixnet.IO
 
         internal static string DefaultContentFolder { get; set; } = "wwwroot";
         internal static string DefaultTempFolder { get; set; } = "sntemp";
-        static readonly ISixnetUploadProvider _localUploadProvider = new DefaultLocalUploadProvider();
-        static readonly ISixnetUploadProvider _remoteUploadProvider = new DefaultRemoteUploadProvider();
+        static readonly ISixnetUploadProvider _localUploadProvider = new SixnetDefaultLocalUploadProvider();
+        static readonly ISixnetUploadProvider _remoteUploadProvider = new SixnetDefaultRemoteUploadProvider();
 
         #endregion
 

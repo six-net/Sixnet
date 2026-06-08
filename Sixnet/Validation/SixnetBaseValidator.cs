@@ -54,7 +54,7 @@ namespace Sixnet.Validation
             return string.IsNullOrWhiteSpace(errorMessage) ? defaultErrorMessageValue : errorMessage;
         }
 
-        public virtual AsyncValidatorRule CreateAsyncValidatorRule(AsyncValidatorRuleParameter parameter)
+        public virtual SixnetAsyncValidatorRule CreateAsyncValidatorRule(SixnetAsyncValidatorRuleParameter parameter)
         {
             var type = "string";
             if (parameter.FieldType != null)
@@ -110,7 +110,7 @@ namespace Sixnet.Validation
                         break;
                 }
             }
-            return new AsyncValidatorRule()
+            return new SixnetAsyncValidatorRule()
             {
                 Message = SixnetLocalizer.GetString(FormatMessage(parameter.ErrorMessage), parameter.MessageArgs?.ToArray()),
                 Type = type

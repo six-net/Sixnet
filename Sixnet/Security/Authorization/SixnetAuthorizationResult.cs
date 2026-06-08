@@ -11,7 +11,7 @@ namespace Sixnet.Security.Authorization
         /// <summary>
         /// Gets or sets the authorization status
         /// </summary>
-        public AuthorizationStatus Status { get; set; }
+        public SixnetAuthorizationStatus Status { get; set; }
 
         /// <summary>
         /// Gets or sets the controller
@@ -41,12 +41,12 @@ namespace Sixnet.Security.Authorization
         /// <summary>
         /// Gets or sets how redirect when authorization failed
         /// </summary>
-        public AuthorizeRedirectType RedirectType { get; set; } = AuthorizeRedirectType.Default;
+        public SixnetAuthorizeRedirectType RedirectType { get; set; } = SixnetAuthorizeRedirectType.Default;
 
         /// <summary>
         /// Gets or sets whether allow to access
         /// </summary>
-        public bool AllowAccess => Status == AuthorizationStatus.Success;
+        public bool AllowAccess => Status == SixnetAuthorizationStatus.Success;
 
         /// <summary>
         /// Gets verify authorization result with challenge status
@@ -54,7 +54,7 @@ namespace Sixnet.Security.Authorization
         /// <returns></returns>
         public static SixnetAuthorizationResult ChallengeResult()
         {
-            return GetAuthorizationResult(AuthorizationStatus.Challenge);
+            return GetAuthorizationResult(SixnetAuthorizationStatus.Challenge);
         }
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace Sixnet.Security.Authorization
         /// <returns></returns>
         public static SixnetAuthorizationResult ForbidResult()
         {
-            return GetAuthorizationResult(AuthorizationStatus.Forbid);
+            return GetAuthorizationResult(SixnetAuthorizationStatus.Forbid);
         }
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace Sixnet.Security.Authorization
         /// <returns></returns>
         public static SixnetAuthorizationResult SuccessResult()
         {
-            return GetAuthorizationResult(AuthorizationStatus.Success);
+            return GetAuthorizationResult(SixnetAuthorizationStatus.Success);
         }
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace Sixnet.Security.Authorization
         /// </summary>
         /// <param name="status">Verification status</param>
         /// <returns></returns>
-        public static SixnetAuthorizationResult GetAuthorizationResult(AuthorizationStatus status = AuthorizationStatus.Forbid)
+        public static SixnetAuthorizationResult GetAuthorizationResult(SixnetAuthorizationStatus status = SixnetAuthorizationStatus.Forbid)
         {
             return new SixnetAuthorizationResult()
             {

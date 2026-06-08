@@ -34,14 +34,14 @@ namespace Sixnet.Development.Data.Field
         /// <summary>
         /// Gets or sets the field format options
         /// </summary>
-        FieldFormatSetting FormatSetting { get; set; }
+        SixnetFieldFormatSetting FormatSetting { get; set; }
 
         /// <summary>
         /// Whether in field role
         /// </summary>
         /// <param name="fieldRole">Field role</param>
         /// <returns></returns>
-        bool InRole(FieldRole fieldRole);
+        bool InRole(SixnetFieldRole fieldRole);
 
         /// <summary>
         /// Get model type
@@ -60,6 +60,6 @@ namespace Sixnet.Development.Data.Field
         /// </summary>
         /// <param name="databaseType">Database type</param>
         /// <returns></returns>
-        string GetFieldName(DatabaseType databaseType);
+        string GetFieldName(SixnetDatabaseType databaseType);
     }
 }

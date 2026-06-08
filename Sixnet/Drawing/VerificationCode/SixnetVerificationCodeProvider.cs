@@ -45,7 +45,7 @@ namespace Sixnet.Drawing.VerificationCode
         /// <summary>
         /// Gets or sets the verification code type
         /// </summary>
-        public VerificationCodeType CodeType { get; set; } = VerificationCodeType.NumberAndLetter;
+        public SixnetVerificationCodeType CodeType { get; set; } = SixnetVerificationCodeType.NumberAndLetter;
 
         /// <summary>
         /// Gets or sets the font size
@@ -114,7 +114,7 @@ namespace Sixnet.Drawing.VerificationCode
         /// Generate code
         /// </summary>
         /// <returns>Return the code image bytes</returns>
-        public abstract VerificationCodeValue CreateCode();
+        public abstract SixnetVerificationCodeValue CreateCode();
 
         #endregion
 

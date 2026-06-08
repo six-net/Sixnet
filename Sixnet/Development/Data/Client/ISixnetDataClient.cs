@@ -54,13 +54,13 @@ namespace Sixnet.Development.Data.Client
         /// Get connections
         /// </summary>
         /// <returns></returns>
-        Dictionary<string, DatabaseConnection> GetConnections();
+        Dictionary<string, SixnetDatabaseConnection> GetConnections();
 
         /// <summary>
         /// Get database servers
         /// </summary>
         /// <returns></returns>
-        List<DatabaseServer> GetDatabaseServers();
+        List<SixnetDatabaseServer> GetDatabaseServers();
 
         #endregion
     }

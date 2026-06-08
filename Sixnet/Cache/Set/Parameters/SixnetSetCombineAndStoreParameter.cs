@@ -24,7 +24,7 @@ namespace Sixnet.Cache.Set.Parameters
         /// <summary>
         /// Gets or sets the set combine operation
         /// </summary>
-        public CombineOperation CombineOperation { get; set; } = CombineOperation.Union;
+        public SixnetCombineOperation CombineOperation { get; set; } = SixnetCombineOperation.Union;
 
         /// <summary>
         /// Gets or sets the cache entry expiration

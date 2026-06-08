@@ -10,6 +10,6 @@ namespace Sixnet.Cache.Keys.Results
         /// <summary>
         /// Gets or sets the cache key type
         /// </summary>
-        public CacheKeyType KeyType { get; set; }
+        public SixnetCacheKeyType KeyType { get; set; }
     }
 }

@@ -16,9 +16,9 @@ namespace Sixnet.Development.Message
     {
         #region Fields
 
-        static readonly AsyncLocal<MessageBox> _messageBox = new();
+        static readonly AsyncLocal<SixnetMessageBox> _messageBox = new();
         static readonly SixnetMessageOptions _defaultOptions = new();
-        static readonly DefaultMessageProvider _defaultMessageProvider = new();
+        static readonly SixnetDefaultMessageProvider _defaultMessageProvider = new();
 
         #endregion
 
@@ -27,7 +27,7 @@ namespace Sixnet.Development.Message
         /// <summary>
         /// Gets or sets the current message box
         /// </summary>
-        internal static MessageBox MessageBox
+        internal static SixnetMessageBox MessageBox
         {
             get
             {
@@ -50,7 +50,7 @@ namespace Sixnet.Development.Message
         /// </summary>
         internal static void Init()
         {
-            MessageBox = MessageBox.Create();
+            MessageBox = SixnetMessageBox.Create();
         }
 
 
@@ -63,15 +63,15 @@ namespace Sixnet.Development.Message
         /// </summary>
         /// <param name="messages">Messages</param>
         /// <returns></returns>
-        public static void Send(IEnumerable<MessageInfo> messages)
+        public static void Send(IEnumerable<SixnetMessageInfo> messages)
         {
             SixnetDirectThrower.ThrowArgNullIf(messages.IsNullOrEmpty(), nameof(messages));
 
-            var imdiateMessages = new List<MessageInfo>();
-            var workMessages = new List<MessageInfo>();
+            var imdiateMessages = new List<SixnetMessageInfo>();
+            var workMessages = new List<SixnetMessageInfo>();
             foreach (var msg in messages)
             {
-                if (msg.SendTime == MessageSendTime.Immediately)
+                if (msg.SendTime == SixnetMessageSendTime.Immediately)
                 {
                     imdiateMessages.Add(msg);
                 }
@@ -83,7 +83,7 @@ namespace Sixnet.Development.Message
 
             if (!imdiateMessages.IsNullOrEmpty())
             {
-                var parameter = new SendMessageParameter()
+                var parameter = new SixnetSendMessageParameter()
                 {
                     Messages = imdiateMessages
                 };
@@ -104,10 +104,10 @@ namespace Sixnet.Development.Message
         /// <param name="subject">Message subject</param>
         /// <param name="data">Message data</param>
         /// <param name="sendTime">Send time</param>
-        public static void Send(string subject, object data, MessageSendTime sendTime = MessageSendTime.WorkCompleted)
+        public static void Send(string subject, object data, SixnetMessageSendTime sendTime = SixnetMessageSendTime.WorkCompleted)
         {
-            Send(new List<MessageInfo>(1) {
-                new MessageInfo()
+            Send(new List<SixnetMessageInfo>(1) {
+                new SixnetMessageInfo()
                 {
                     Subject = subject,
                     Data = data,
@@ -121,15 +121,15 @@ namespace Sixnet.Development.Message
         /// </summary>
         /// <param name="messages">Messages</param>
         /// <returns></returns>
-        public static Task SendAsync(IEnumerable<MessageInfo> messages)
+        public static Task SendAsync(IEnumerable<SixnetMessageInfo> messages)
         {
             SixnetDirectThrower.ThrowArgNullIf(messages.IsNullOrEmpty(), nameof(messages));
 
-            var imdiateMessages = new List<MessageInfo>();
-            var workMessages = new List<MessageInfo>();
+            var imdiateMessages = new List<SixnetMessageInfo>();
+            var workMessages = new List<SixnetMessageInfo>();
             foreach (var msg in messages)
             {
-                if (msg.SendTime == MessageSendTime.Immediately)
+                if (msg.SendTime == SixnetMessageSendTime.Immediately)
                 {
                     imdiateMessages.Add(msg);
                 }
@@ -148,7 +148,7 @@ namespace Sixnet.Development.Message
             }
             if (!imdiateMessages.IsNullOrEmpty())
             {
-                var parameter = new SendMessageParameter()
+                var parameter = new SixnetSendMessageParameter()
                 {
                     Messages = imdiateMessages
                 };
@@ -164,10 +164,10 @@ namespace Sixnet.Development.Message
         /// <param name="subject">Message subject</param>
         /// <param name="data">Message data</param>
         /// <param name="sendTime">Send time</param>
-        public static Task SendAsync(string subject, object data, MessageSendTime sendTime = MessageSendTime.WorkCompleted)
+        public static Task SendAsync(string subject, object data, SixnetMessageSendTime sendTime = SixnetMessageSendTime.WorkCompleted)
         {
-            return SendAsync(new List<MessageInfo>(1) {
-                new MessageInfo()
+            return SendAsync(new List<SixnetMessageInfo>(1) {
+                new SixnetMessageInfo()
                 {
                     Subject = subject,
                     Data = data,
@@ -191,9 +191,9 @@ namespace Sixnet.Development.Message
                 return;
             }
             var messageProvider = GetMessageProvider();
-            _ = messageProvider.SendAsync(new SendMessageParameter()
+            _ = messageProvider.SendAsync(new SixnetSendMessageParameter()
             {
-                Messages = new List<MessageInfo>(MessageBox.Messages)
+                Messages = new List<SixnetMessageInfo>(MessageBox.Messages)
             });
             MessageBox.Clear();
         }
@@ -230,11 +230,11 @@ namespace Sixnet.Development.Message
         /// <param name="template">Template</param>
         /// <param name="parameters">Parameters</param>
         /// <returns></returns>
-        public static ResolveMessageTemplateResult ResolveTemplate(string template, Dictionary<string, string> parameters)
+        public static SixnetResolveMessageTemplateResult ResolveTemplate(string template, Dictionary<string, string> parameters)
         {
             if (string.IsNullOrWhiteSpace(template))
             {
-                return ResolveMessageTemplateResult.Create(true);
+                return SixnetResolveMessageTemplateResult.Create(true);
             }
             var matchEvaluator = new MatchEvaluator(c =>
             {
@@ -250,11 +250,11 @@ namespace Sixnet.Development.Message
             {
                 if (!(parameters?.ContainsKey(matchVal.Value) ?? false))
                 {
-                    return ResolveMessageTemplateResult.Create(false, matchVal.Value);
+                    return SixnetResolveMessageTemplateResult.Create(false, matchVal.Value);
                 }
             }
             var newValue = matchRegex.Replace(template, matchEvaluator);
-            return ResolveMessageTemplateResult.Create(true, string.Empty, newValue);
+            return SixnetResolveMessageTemplateResult.Create(true, string.Empty, newValue);
         }
 
         /// <summary>

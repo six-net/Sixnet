@@ -21,7 +21,7 @@ namespace Sixnet.Security.Authorization
         /// <summary>
         /// Gets or sets the server select mode
         /// </summary>
-        public SelectionMatchPattern ServerSelectMode { get; set; } = SelectionMatchPattern.EquiprobableRandom;
+        public SixnetSelectionMatchPattern ServerSelectMode { get; set; } = SixnetSelectionMatchPattern.EquiprobableRandom;
 
         /// <summary>
         /// Gets or sets whether enable remote authorization verify

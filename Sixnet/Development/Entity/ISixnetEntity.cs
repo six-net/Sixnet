@@ -105,27 +105,27 @@ namespace Sixnet.Development.Entity
         /// </summary>
         /// <param name="newData">New data</param>
         /// <param name="configure">Configure</param>
-        Task ModifyFromAsync(T newData, Action<ModifyEntityOptions> configure = null);
+        Task ModifyFromAsync(T newData, Action<SixnetModifyEntityOptions> configure = null);
 
         /// <summary>
         /// Modify from new data
         /// </summary>
         /// <param name="newData">New data</param>
         /// <param name="configure">Configure</param>
-        void ModifyFrom(T newData, Action<ModifyEntityOptions> configure = null);
+        void ModifyFrom(T newData, Action<SixnetModifyEntityOptions> configure = null);
 
         /// <summary>
         /// Get modification assignment
         /// </summary>
         /// <param name="newData">New data</param>
         /// <param name="configure">Configure</param>
-        Task<FieldsAssignment> GetModificationAssignmentAsync(T newData, Action<ModifyEntityOptions> configure = null);
+        Task<SixnetFieldsAssignment> GetModificationAssignmentAsync(T newData, Action<SixnetModifyEntityOptions> configure = null);
 
         /// <summary>
         /// Get modification assignment
         /// </summary>
         /// <param name="newData">New data</param>
         /// <param name="configure">Configure</param>
-        FieldsAssignment GetModificationAssignment(T newData, Action<ModifyEntityOptions> configure = null);
+        SixnetFieldsAssignment GetModificationAssignment(T newData, Action<SixnetModifyEntityOptions> configure = null);
     }
 }

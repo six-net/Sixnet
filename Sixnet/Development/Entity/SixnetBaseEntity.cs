@@ -19,11 +19,11 @@ namespace Sixnet.Development.Entity
     {
         #region Fields
 
-        [NotEntityField]
+        [SixnetNotEntityField]
         protected string identityRealValue = string.Empty;
-        [NotEntityField]
+        [SixnetNotEntityField]
         protected bool loadedIdentityValue = false;
-        [NotEntityField]
+        [SixnetNotEntityField]
         protected static Type entityType = typeof(T);
 
         #endregion
@@ -90,37 +90,37 @@ namespace Sixnet.Development.Entity
             foreach (var pk in primaryKeys)
             {
                 var field = SixnetEntityManager.GetField(typeof(T), pk);
-                if (field != null && !field.InRole(FieldRole.Increment))
+                if (field != null && !field.InRole(SixnetFieldRole.Increment))
                 {
                     var valueType = field.DataType?.GetRealValueType();
                     var typeCode = Type.GetTypeCode(valueType);
                     switch (typeCode)
                     {
                         case TypeCode.Byte:
-                            SetValue(pk, RandomNumberHelper.GetRandomNumber(byte.MaxValue - 1, 1));
+                            SetValue(pk, SixnetRandomNumberHelper.GetRandomNumber(byte.MaxValue - 1, 1));
                             break;
                         case TypeCode.SByte:
-                            SetValue(pk, RandomNumberHelper.GetRandomNumber(sbyte.MaxValue - 1, 1));
+                            SetValue(pk, SixnetRandomNumberHelper.GetRandomNumber(sbyte.MaxValue - 1, 1));
                             break;
                         case TypeCode.Int16:
-                            SetValue(pk, RandomNumberHelper.GetRandomNumber(short.MaxValue - 1, 1));
+                            SetValue(pk, SixnetRandomNumberHelper.GetRandomNumber(short.MaxValue - 1, 1));
                             break;
                         case TypeCode.UInt16:
-                            SetValue(pk, RandomNumberHelper.GetRandomNumber(ushort.MaxValue - 1, 1));
+                            SetValue(pk, SixnetRandomNumberHelper.GetRandomNumber(ushort.MaxValue - 1, 1));
                             break;
                         case TypeCode.Int32:
                         case TypeCode.UInt32:
-                            SetValue(pk, RandomNumberHelper.GetRandomNumber(int.MaxValue - 1, 1));
+                            SetValue(pk, SixnetRandomNumberHelper.GetRandomNumber(int.MaxValue - 1, 1));
                             break;
                         case TypeCode.Int64:
                         case TypeCode.UInt64:
                         case TypeCode.Double:
                         case TypeCode.Single:
                         case TypeCode.Decimal:
-                            SetValue(pk, SerialNumber.GenerateSerialNumber<T>());
+                            SetValue(pk, SixnetSerialNumber.GenerateSerialNumber<T>());
                             break;
                         case TypeCode.String:
-                            SetValue(pk, SerialNumber.GenerateSerialNumber<T>().ToString());
+                            SetValue(pk, SixnetSerialNumber.GenerateSerialNumber<T>().ToString());
                             break;
                         case TypeCode.DateTime:
                             SetValue(pk, DateTime.Now);
@@ -296,7 +296,7 @@ namespace Sixnet.Development.Entity
         /// </summary>
         /// <param name="newData">New data</param>
         /// <param name="configure">Configure</param>
-        public virtual async Task ModifyFromAsync(T newData, Action<ModifyEntityOptions> configure = null)
+        public virtual async Task ModifyFromAsync(T newData, Action<SixnetModifyEntityOptions> configure = null)
         {
             if (newData != null && newData != this)
             {
@@ -314,7 +314,7 @@ namespace Sixnet.Development.Entity
         /// </summary>
         /// <param name="newData">New data</param>
         /// <param name="configure">Configure</param>
-        public virtual void ModifyFrom(T newData, Action<ModifyEntityOptions> configure = null)
+        public virtual void ModifyFrom(T newData, Action<SixnetModifyEntityOptions> configure = null)
         {
             if (newData != null && newData != this)
             {
@@ -332,13 +332,13 @@ namespace Sixnet.Development.Entity
         /// </summary>
         /// <param name="newData">New data</param>
         /// <param name="configure">Configure</param>
-        public virtual async Task<FieldsAssignment> GetModificationAssignmentAsync(T newData, Action<ModifyEntityOptions> configure = null)
+        public virtual async Task<SixnetFieldsAssignment> GetModificationAssignmentAsync(T newData, Action<SixnetModifyEntityOptions> configure = null)
         {
             if (newData != null)
             {
                 await newData.OnDataUpdatingAsync().ConfigureAwait(false);
             }
-            var fieldsAssignment = FieldsAssignment.Create();
+            var fieldsAssignment = SixnetFieldsAssignment.Create();
             var modificationValues = GetModificationValues(newData?.GetAllValues(), configure, newData == this, out var oldValues);
             foreach (var valueItem in modificationValues)
             {
@@ -353,10 +353,10 @@ namespace Sixnet.Development.Entity
         /// </summary>
         /// <param name="newData">New data</param>
         /// <param name="configure">Configure</param>
-        public virtual FieldsAssignment GetModificationAssignment(T newData, Action<ModifyEntityOptions> configure = null)
+        public virtual SixnetFieldsAssignment GetModificationAssignment(T newData, Action<SixnetModifyEntityOptions> configure = null)
         {
             newData?.OnDataUpdating();
-            var fieldsAssignment = FieldsAssignment.Create();
+            var fieldsAssignment = SixnetFieldsAssignment.Create();
             var modificationValues = GetModificationValues(newData?.GetAllValues(), configure, newData == this, out var oldValues);
             foreach (var valueItem in modificationValues)
             {
@@ -374,7 +374,7 @@ namespace Sixnet.Development.Entity
         /// <param name="selfData"></param>
         /// <param name="oldValues"></param>
         /// <returns></returns>
-        Dictionary<string, dynamic> GetModificationValues(Dictionary<string, dynamic> newValues, Action<ModifyEntityOptions> configure
+        Dictionary<string, dynamic> GetModificationValues(Dictionary<string, dynamic> newValues, Action<SixnetModifyEntityOptions> configure
             , bool selfData, out Dictionary<string, dynamic> oldValues)
         {
             oldValues = selfData ? newValues : GetAllValues();
@@ -382,7 +382,7 @@ namespace Sixnet.Development.Entity
             {
                 return new Dictionary<string, dynamic>(0);
             }
-            var modifyOptions = new ModifyEntityOptions();
+            var modifyOptions = new SixnetModifyEntityOptions();
             configure?.Invoke(modifyOptions);
             var modificationValues = new Dictionary<string, dynamic>();
             foreach (var valueItem in newValues)
@@ -448,7 +448,7 @@ namespace Sixnet.Development.Entity
             #region Generate id
             if (!entityOptions.NotAutoGenerageId)
             {
-                var generatedIdFields = SixnetEntityManager.GetFields<T>(FieldRole.GeneratedId);
+                var generatedIdFields = SixnetEntityManager.GetFields<T>(SixnetFieldRole.GeneratedId);
                 if (!generatedIdFields.IsNullOrEmpty())
                 {
                     foreach (var field in generatedIdFields)
@@ -463,14 +463,14 @@ namespace Sixnet.Development.Entity
                                 case TypeCode.UInt16:
                                 case TypeCode.Int32:
                                 case TypeCode.UInt32:
-                                    SetValue(field.PropertyName, await ObjectIdHelper.GetIntIdAsync<T>(field.PropertyName).ConfigureAwait(false));
+                                    SetValue(field.PropertyName, await SixnetObjectIdHelper.GetIntIdAsync<T>(field.PropertyName).ConfigureAwait(false));
                                     break;
                                 case TypeCode.Int64:
                                 case TypeCode.UInt64:
                                 case TypeCode.Double:
                                 case TypeCode.Single:
                                 case TypeCode.Decimal:
-                                    SetValue(field.PropertyName, await ObjectIdHelper.GetLongIdAsync<T>(field.PropertyName).ConfigureAwait(false));
+                                    SetValue(field.PropertyName, await SixnetObjectIdHelper.GetLongIdAsync<T>(field.PropertyName).ConfigureAwait(false));
                                     break;
                                 default:
                                     SixnetDirectThrower.ThrowIf<NotSupportedException>(true, typeCode.ToString());
@@ -511,7 +511,7 @@ namespace Sixnet.Development.Entity
 
             if (!entityOptions.NotAutoGenerageId)
             {
-                var generatedIdFields = SixnetEntityManager.GetFields<T>(FieldRole.GeneratedId);
+                var generatedIdFields = SixnetEntityManager.GetFields<T>(SixnetFieldRole.GeneratedId);
                 if (!generatedIdFields.IsNullOrEmpty())
                 {
                     foreach (var field in generatedIdFields)
@@ -526,14 +526,14 @@ namespace Sixnet.Development.Entity
                                 case TypeCode.UInt16:
                                 case TypeCode.Int32:
                                 case TypeCode.UInt32:
-                                    SetValue(field.PropertyName, ObjectIdHelper.GetIntId<T>(field.PropertyName));
+                                    SetValue(field.PropertyName, SixnetObjectIdHelper.GetIntId<T>(field.PropertyName));
                                     break;
                                 case TypeCode.Int64:
                                 case TypeCode.UInt64:
                                 case TypeCode.Double:
                                 case TypeCode.Single:
                                 case TypeCode.Decimal:
-                                    SetValue(field.PropertyName, ObjectIdHelper.GetIntId<T>(field.PropertyName));
+                                    SetValue(field.PropertyName, SixnetObjectIdHelper.GetIntId<T>(field.PropertyName));
                                     break;
                                 default:
                                     SixnetDirectThrower.ThrowIf<NotSupportedException>(true, typeCode.ToString());
@@ -577,13 +577,13 @@ namespace Sixnet.Development.Entity
             {
                 return;
             }
-            var uploadFields = SixnetEntityManager.GetFields<T>(FieldRole.UploadPath);
+            var uploadFields = SixnetEntityManager.GetFields<T>(SixnetFieldRole.UploadPath);
             if (!uploadFields.IsNullOrEmpty())
             {
                 foreach (var field in uploadFields)
                 {
                     var fieldValue = GetValue(field.PropertyName);
-                    if (string.IsNullOrWhiteSpace(fieldValue) || field.AllowBehavior(FieldBehavior.NotMoveUploadPath))
+                    if (string.IsNullOrWhiteSpace(fieldValue) || field.AllowBehavior(SixnetFieldBehavior.NotMoveUploadPath))
                     {
                         continue;
                     }
@@ -608,13 +608,13 @@ namespace Sixnet.Development.Entity
             {
                 return;
             }
-            var uploadFields = SixnetEntityManager.GetFields<T>(FieldRole.UploadPath);
+            var uploadFields = SixnetEntityManager.GetFields<T>(SixnetFieldRole.UploadPath);
             if (!uploadFields.IsNullOrEmpty())
             {
                 foreach (var field in uploadFields)
                 {
                     var fieldValue = GetValue(field.PropertyName);
-                    if (string.IsNullOrWhiteSpace(fieldValue) || field.AllowBehavior(FieldBehavior.NotMoveUploadPath))
+                    if (string.IsNullOrWhiteSpace(fieldValue) || field.AllowBehavior(SixnetFieldBehavior.NotMoveUploadPath))
                     {
                         continue;
                     }

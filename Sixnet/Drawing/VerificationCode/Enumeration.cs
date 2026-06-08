@@ -6,7 +6,7 @@ namespace Sixnet.Drawing.VerificationCode
     /// Defines verification code type
     /// </summary>
     [Serializable]
-    public enum VerificationCodeType
+    public enum SixnetVerificationCodeType
     {
         Number = 2,
         Letter = 4,

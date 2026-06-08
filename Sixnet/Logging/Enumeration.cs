@@ -2,7 +2,7 @@
 
 namespace Sixnet.Logging
 {
-    public enum LogFileRollingInterval
+    public enum SixnetLogFileRollingInterval
     {
         //
         // Summary:

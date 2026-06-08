@@ -31,7 +31,7 @@ namespace Sixnet.App
         /// <summary>
         /// Gets the current application info
         /// </summary>
-        public ApplicationInfo Current => SixnetApplication.Current;
+        public SixnetApplicationInfo Current => SixnetApplication.Current;
 
         /// <summary>
         /// Whether register default service

@@ -226,9 +226,9 @@ namespace Sixnet.Cache.Provider.Memory
                         continue;
                     }
                     var found = database.Store.TryGetEntry(cacheKey, out var nowEntry);
-                    var setCache = data.When == CacheSetWhen.Always
-                        || data.When == CacheSetWhen.Exists && found
-                        || data.When == CacheSetWhen.NotExists && !found;
+                    var setCache = data.When == SixnetCacheSetWhen.Always
+                        || data.When == SixnetCacheSetWhen.Exists && found
+                        || data.When == SixnetCacheSetWhen.NotExists && !found;
                     if (!setCache)
                     {
                         continue;
@@ -691,7 +691,7 @@ namespace Sixnet.Cache.Provider.Memory
             {
                 return SixnetCacheResult.FailResponse<SixnetStringBitOperationResult>(SixnetCacheCodes.KeyIsNullOrEmpty);
             }
-            if (parameter.Keys.Count > 1 && parameter.Bitwise == CacheBitwise.Not)
+            if (parameter.Keys.Count > 1 && parameter.Bitwise == SixnetCacheBitwise.Not)
             {
                 throw new NotSupportedException($" CacheBitwise.Not can only operate on one key");
             }
@@ -712,10 +712,10 @@ namespace Sixnet.Cache.Provider.Memory
                     {
                         bitArray = parameter.Bitwise switch
                         {
-                            CacheBitwise.And => bitArray.And(binaryArray),
-                            CacheBitwise.Or => bitArray.Or(binaryArray),
-                            CacheBitwise.Xor => bitArray.Xor(binaryArray),
-                            CacheBitwise.Not => binaryArray.Not(),
+                            SixnetCacheBitwise.And => bitArray.And(binaryArray),
+                            SixnetCacheBitwise.Or => bitArray.Or(binaryArray),
+                            SixnetCacheBitwise.Xor => bitArray.Xor(binaryArray),
+                            SixnetCacheBitwise.Not => binaryArray.Not(),
                             _ => throw new NotSupportedException()
                         };
                     }
@@ -734,7 +734,7 @@ namespace Sixnet.Cache.Provider.Memory
                     new SixnetCacheEntry()
                     {
                         Key=parameter.DestinationKey,
-                        Type=CacheKeyType.String,
+                        Type=SixnetCacheKeyType.String,
                         Value=originalString,
                         Expiration=parameter.Expiration
                     }
@@ -2025,13 +2025,13 @@ namespace Sixnet.Cache.Provider.Memory
                     bool accordWith = false;
                     switch (parameter.PatternType)
                     {
-                        case KeyMatchPattern.StartWith:
+                        case SixnetKeyMatchPattern.StartWith:
                             accordWith = item.Key.StartsWith(parameter.Pattern);
                             break;
-                        case KeyMatchPattern.EndWith:
+                        case SixnetKeyMatchPattern.EndWith:
                             accordWith = item.Key.EndsWith(parameter.Pattern);
                             break;
-                        case KeyMatchPattern.Include:
+                        case SixnetKeyMatchPattern.Include:
                             accordWith = item.Key.Contains(parameter.Pattern);
                             break;
                     }
@@ -2140,7 +2140,7 @@ namespace Sixnet.Cache.Provider.Memory
 
                     for (var c = 0; c < count; c++)
                     {
-                        var ranIndex = RandomNumberHelper.GetRandomNumber(keys.Count - 1);
+                        var ranIndex = SixnetRandomNumberHelper.GetRandomNumber(keys.Count - 1);
                         var ranMember = keys.ElementAt(ranIndex);
                         members.Add(ranMember);
                     }
@@ -2186,7 +2186,7 @@ namespace Sixnet.Cache.Provider.Memory
                 var keys = dict.Keys.ToList();
                 if (!keys.IsNullOrEmpty())
                 {
-                    var ranIndex = RandomNumberHelper.GetRandomNumber(keys.Count - 1);
+                    var ranIndex = SixnetRandomNumberHelper.GetRandomNumber(keys.Count - 1);
                     member = keys.ElementAt(ranIndex);
                 }
             }
@@ -2227,7 +2227,7 @@ namespace Sixnet.Cache.Provider.Memory
                     var keys = dict.Keys;
                     if (!keys.IsNullOrEmpty())
                     {
-                        var ranIndex = RandomNumberHelper.GetRandomNumber(keys.Count - 1);
+                        var ranIndex = SixnetRandomNumberHelper.GetRandomNumber(keys.Count - 1);
                         member = keys.ElementAt(ranIndex);
                         dict.TryRemove(member, out var value);
                     }
@@ -2469,13 +2469,13 @@ namespace Sixnet.Cache.Provider.Memory
                 }
                 switch (parameter.CombineOperation)
                 {
-                    case CombineOperation.Union:
+                    case SixnetCombineOperation.Union:
                         members = members.Union(keyValue);
                         break;
-                    case CombineOperation.Intersect:
+                    case SixnetCombineOperation.Intersect:
                         members = members.Intersect(keyValue);
                         break;
-                    case CombineOperation.Difference:
+                    case SixnetCombineOperation.Difference:
                         members = members.Except(keyValue);
                         break;
                 }
@@ -2534,13 +2534,13 @@ namespace Sixnet.Cache.Provider.Memory
                     {
                         switch (parameter.CombineOperation)
                         {
-                            case CombineOperation.Union:
+                            case SixnetCombineOperation.Union:
                                 members = members.Union(nowDict.Keys).ToList();
                                 break;
-                            case CombineOperation.Intersect:
+                            case SixnetCombineOperation.Intersect:
                                 members = members.Intersect(nowDict.Keys).ToList();
                                 break;
-                            case CombineOperation.Difference:
+                            case SixnetCombineOperation.Difference:
                                 members = members.Except(nowDict.Keys).ToList();
                                 break;
                         }
@@ -2728,15 +2728,15 @@ namespace Sixnet.Cache.Provider.Memory
                     {
                         switch (parameter.Exclude)
                         {
-                            case BoundaryExclude.Both:
+                            case SixnetBoundaryExclude.Both:
                                 if (removeItem.Key == min || removeItem.Key == max)
                                     continue;
                                 break;
-                            case BoundaryExclude.Start:
+                            case SixnetBoundaryExclude.Start:
                                 if (removeItem.Key == min)
                                     continue;
                                 break;
-                            case BoundaryExclude.Stop:
+                            case SixnetBoundaryExclude.Stop:
                                 if (removeItem.Key == max)
                                     continue;
                                 break;
@@ -2795,15 +2795,15 @@ namespace Sixnet.Cache.Provider.Memory
                     {
                         switch (parameter.Exclude)
                         {
-                            case BoundaryExclude.Both:
+                            case SixnetBoundaryExclude.Both:
                                 if (removeItem.Value == min || removeItem.Value == max)
                                     continue;
                                 break;
-                            case BoundaryExclude.Start:
+                            case SixnetBoundaryExclude.Start:
                                 if (removeItem.Value == min)
                                     continue;
                                 break;
-                            case BoundaryExclude.Stop:
+                            case SixnetBoundaryExclude.Stop:
                                 if (removeItem.Value == max)
                                     continue;
                                 break;
@@ -2967,7 +2967,7 @@ namespace Sixnet.Cache.Provider.Memory
                 {
                     rank = -1;
                     IOrderedEnumerable<KeyValuePair<string, double>> ranks = null;
-                    if (parameter.Order == CacheOrder.Ascending)
+                    if (parameter.Order == SixnetCacheOrder.Ascending)
                     {
                         ranks = dict.OrderBy(c => c.Value);
                     }
@@ -3031,13 +3031,13 @@ namespace Sixnet.Cache.Provider.Memory
                 {
                     return parameter.Exclude switch
                     {
-                        BoundaryExclude.Both => string.Compare(c.Key, min) > 0 && string.Compare(c.Key, max) < 0,
-                        BoundaryExclude.Start => string.Compare(c.Key, min) > 0 && string.Compare(c.Key, max) <= 0,
-                        BoundaryExclude.Stop => string.Compare(c.Key, min) >= 0 && string.Compare(c.Key, max) < 0,
+                        SixnetBoundaryExclude.Both => string.Compare(c.Key, min) > 0 && string.Compare(c.Key, max) < 0,
+                        SixnetBoundaryExclude.Start => string.Compare(c.Key, min) > 0 && string.Compare(c.Key, max) <= 0,
+                        SixnetBoundaryExclude.Stop => string.Compare(c.Key, min) >= 0 && string.Compare(c.Key, max) < 0,
                         _ => string.Compare(c.Key, min) >= 0 && string.Compare(c.Key, max) <= 0
                     };
                 });
-                if (parameter.Order == CacheOrder.Descending)
+                if (parameter.Order == SixnetCacheOrder.Descending)
                 {
                     values = values.OrderByDescending(c => c.Key);
                 }
@@ -3102,13 +3102,13 @@ namespace Sixnet.Cache.Provider.Memory
                 {
                     return parameter.Exclude switch
                     {
-                        BoundaryExclude.Both => c.Value > min && c.Value < max,
-                        BoundaryExclude.Start => c.Value > min && c.Value <= max,
-                        BoundaryExclude.Stop => c.Value >= min && c.Value < max,
+                        SixnetBoundaryExclude.Both => c.Value > min && c.Value < max,
+                        SixnetBoundaryExclude.Start => c.Value > min && c.Value <= max,
+                        SixnetBoundaryExclude.Stop => c.Value >= min && c.Value < max,
                         _ => c.Value >= min && c.Value <= max,
                     };
                 });
-                if (parameter.Order == CacheOrder.Descending)
+                if (parameter.Order == SixnetCacheOrder.Descending)
                 {
                     values = values.OrderByDescending(c => c.Value);
                 }
@@ -3230,7 +3230,7 @@ namespace Sixnet.Cache.Provider.Memory
                     int skipCount = min;
                     int takeCount = max - min + 1;
                     IEnumerable<KeyValuePair<string, double>> valueDict = dict;
-                    if (parameter.Order == CacheOrder.Descending)
+                    if (parameter.Order == SixnetCacheOrder.Descending)
                     {
                         valueDict = dict.OrderByDescending(c => c.Value);
                     }
@@ -3499,13 +3499,13 @@ namespace Sixnet.Cache.Provider.Memory
                     {
                         switch (parameter.CombineOperation)
                         {
-                            case CombineOperation.Union:
+                            case SixnetCombineOperation.Union:
                                 members.UnionWith(nowDict.Keys);
                                 break;
-                            case CombineOperation.Intersect:
+                            case SixnetCombineOperation.Intersect:
                                 members.IntersectWith(nowDict.Keys);
                                 break;
-                            case CombineOperation.Difference:
+                            case SixnetCombineOperation.Difference:
                                 members.ExceptWith(nowDict.Keys);
                                 break;
                         }
@@ -3536,9 +3536,9 @@ namespace Sixnet.Cache.Provider.Memory
                 {
                     memberScore = parameter.Aggregate switch
                     {
-                        SetAggregate.Max => scores.Max(),
-                        SetAggregate.Min => scores.Min(),
-                        SetAggregate.Sum => scores.Sum(),
+                        SixnetSetAggregate.Max => scores.Max(),
+                        SixnetSetAggregate.Min => scores.Min(),
+                        SixnetSetAggregate.Sum => scores.Sum(),
                         _ => 0
                     };
                 }
@@ -3669,7 +3669,7 @@ namespace Sixnet.Cache.Provider.Memory
                     {
                         return Array.Empty<string>();
                     }
-                    if (parameter.Order == CacheOrder.Descending)
+                    if (parameter.Order == SixnetCacheOrder.Descending)
                     {
                         originalValues = originalValues.OrderByDescending(c => c);
                     }
@@ -3691,7 +3691,7 @@ namespace Sixnet.Cache.Provider.Memory
                 IEnumerable<string> values = null;
                 switch (keyTypeResponse.KeyType)
                 {
-                    case CacheKeyType.List:
+                    case SixnetCacheKeyType.List:
                         var listResponse = await ListRangeAsync(server, new SixnetListRangeParameter()
                         {
                             CacheObject = parameter.CacheObject,
@@ -3709,7 +3709,7 @@ namespace Sixnet.Cache.Provider.Memory
                             Database = listResponse.Database
                         };
                         break;
-                    case CacheKeyType.Set:
+                    case SixnetCacheKeyType.Set:
                         var setResponse = await SetMembersAsync(server, new SixnetSetMembersParameter()
                         {
                             CacheObject = parameter.CacheObject,
@@ -3725,7 +3725,7 @@ namespace Sixnet.Cache.Provider.Memory
                             Database = setResponse.Database
                         };
                         break;
-                    case CacheKeyType.SortedSet:
+                    case SixnetCacheKeyType.SortedSet:
                         var sortedSetResponse = await SortedSetRangeByRankWithScoresAsync(server, new SixnetSortedSetRangeByRankWithScoresParameter()
                         {
                             CacheObject = parameter.CacheObject,
@@ -3857,22 +3857,22 @@ namespace Sixnet.Cache.Provider.Memory
             SixnetTypeResult response = null;
             if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
             {
-                CacheKeyType cacheKeyType = CacheKeyType.String;
+                SixnetCacheKeyType cacheKeyType = SixnetCacheKeyType.String;
                 if (entry.Value is List<string>)
                 {
-                    cacheKeyType = CacheKeyType.List;
+                    cacheKeyType = SixnetCacheKeyType.List;
                 }
                 else if (entry.Value is ConcurrentDictionary<string, dynamic>)
                 {
-                    cacheKeyType = CacheKeyType.Hash;
+                    cacheKeyType = SixnetCacheKeyType.Hash;
                 }
                 else if (entry.Value is ConcurrentDictionary<string, byte>)
                 {
-                    cacheKeyType = CacheKeyType.Set;
+                    cacheKeyType = SixnetCacheKeyType.Set;
                 }
                 else if (entry.Value is ConcurrentDictionary<string, double>)
                 {
-                    cacheKeyType = CacheKeyType.SortedSet;
+                    cacheKeyType = SixnetCacheKeyType.SortedSet;
                 }
                 response = SixnetCacheResult.SuccessResponse<SixnetTypeResult>(server, database);
                 response.KeyType = cacheKeyType;
@@ -4318,13 +4318,13 @@ namespace Sixnet.Cache.Provider.Memory
                 count = parameter.Query.PageSize;
                 switch (parameter.Query.Type)
                 {
-                    case KeyMatchPattern.EndWith:
+                    case SixnetKeyMatchPattern.EndWith:
                         where = c => c.EndsWith(parameter.Query.MateKey);
                         break;
-                    case KeyMatchPattern.StartWith:
+                    case SixnetKeyMatchPattern.StartWith:
                         where = c => c.StartsWith(parameter.Query.MateKey);
                         break;
-                    case KeyMatchPattern.Include:
+                    case SixnetKeyMatchPattern.Include:
                         where = c => c.Contains(parameter.Query.MateKey);
                         break;
                 }
@@ -4376,22 +4376,22 @@ namespace Sixnet.Cache.Provider.Memory
             SixnetGetDetailResult response = null;
             if (database.Store.TryGetEntry(cacheKey, out var entry) && entry != null)
             {
-                var cacheKeyType = CacheKeyType.String;
+                var cacheKeyType = SixnetCacheKeyType.String;
                 if (entry.Value is List<string>)
                 {
-                    cacheKeyType = CacheKeyType.List;
+                    cacheKeyType = SixnetCacheKeyType.List;
                 }
                 else if (entry.Value is ConcurrentDictionary<string, dynamic>)
                 {
-                    cacheKeyType = CacheKeyType.Hash;
+                    cacheKeyType = SixnetCacheKeyType.Hash;
                 }
                 else if (entry.Value is ConcurrentDictionary<string, byte>)
                 {
-                    cacheKeyType = CacheKeyType.Set;
+                    cacheKeyType = SixnetCacheKeyType.Set;
                 }
                 else if (entry.Value is ConcurrentDictionary<string, double>)
                 {
-                    cacheKeyType = CacheKeyType.SortedSet;
+                    cacheKeyType = SixnetCacheKeyType.SortedSet;
                 }
                 response = SixnetCacheResult.SuccessResponse<SixnetGetDetailResult>();
                 response.CacheEntry = new SixnetCacheEntry()
@@ -4399,7 +4399,7 @@ namespace Sixnet.Cache.Provider.Memory
                     Key = parameter.Key,
                     Value = entry.Value,
                     Type = cacheKeyType,
-                    When = CacheSetWhen.Always,
+                    When = SixnetCacheSetWhen.Always,
                     Expiration = new SixnetCacheExpiration()
                     {
                         AbsoluteExpiration = entry.AbsoluteExpiration,

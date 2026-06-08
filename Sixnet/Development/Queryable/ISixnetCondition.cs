@@ -10,7 +10,7 @@ namespace Sixnet.Development.Queryable
         /// <summary>
         /// Gets the connector
         /// </summary>
-        CriterionConnector Connector { get; set; }
+        SixnetCriterionConnector Connector { get; set; }
 
         /// <summary>
         /// Whether is none

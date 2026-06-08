@@ -8,7 +8,7 @@ namespace Sixnet.Serialization.Json
     /// Defines json property naming policy
     /// </summary>
     [Serializable]
-    public enum JsonPropertyNamingPolicy
+    public enum SixnetJsonPropertyNamingPolicy
     {
         Default = 0,
         Original = 2,

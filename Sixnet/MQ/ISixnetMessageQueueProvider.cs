@@ -14,67 +14,67 @@ namespace Sixnet.MQ
         /// </summary>
         /// <param name="parameter">Add queue parameter</param>
         /// <returns></returns>
-        Task AddQueueAsync(AddQueueParameter parameter);
+        Task AddQueueAsync(SixnetAddQueueParameter parameter);
 
         /// <summary>
         /// Add queue
         /// </summary>
         /// <param name="parameter">Add queue parameter</param>
         /// <returns></returns>
-        void AddQueue(AddQueueParameter parameter);
+        void AddQueue(SixnetAddQueueParameter parameter);
 
         /// <summary>
         /// Delete queue
         /// </summary>
         /// <param name="parameter">Delete queue parameter</param>
         /// <returns></returns>
-        Task DeleteQueueAsync(DeleteQueueParameter parameter);
+        Task DeleteQueueAsync(SixnetDeleteQueueParameter parameter);
 
         /// <summary>
         /// Delete queue
         /// </summary>
         /// <param name="parameter">Delete queue parameter</param>
         /// <returns></returns>
-        void DeleteQueue(DeleteQueueParameter parameter);
+        void DeleteQueue(SixnetDeleteQueueParameter parameter);
 
         /// <summary>
         /// Enqueue
         /// </summary>
         /// <param name="parameter">Enqueue parameter</param>
         /// <returns></returns>
-        Task EnqueueAsync(EnqueueParameter parameter);
+        Task EnqueueAsync(SixnetEnqueueParameter parameter);
 
         /// <summary>
         /// Enqueue
         /// </summary>
         /// <param name="parameter">Enqueue parameter</param>
         /// <returns></returns>
-        void Enqueue(EnqueueParameter parameter);
+        void Enqueue(SixnetEnqueueParameter parameter);
 
         /// <summary>
         /// Consume
         /// </summary>
         /// <param name="parameter">Consume parameter</param>
         /// <returns></returns>
-        Task ConsumeAsync(ConsumeParameter parameter);
+        Task ConsumeAsync(SixnetConsumeParameter parameter);
 
         /// <summary>
         /// Consume
         /// </summary>
         /// <param name="parameter">Consume parameter</param>
         /// <returns></returns>
-        void Consume(ConsumeParameter parameter);
+        void Consume(SixnetConsumeParameter parameter);
 
         /// <summary>
         /// Abort consume
         /// </summary>
         /// <param name="parameter">Abort consume parameter</param>
-        Task AbortConsumeAsync(AbortConsumeParameter parameter);
+        Task AbortConsumeAsync(SixnetAbortConsumeParameter parameter);
 
         /// <summary>
         /// Abort consume
         /// </summary>
         /// <param name="parameter">Abort consume parameter</param>
-        void AbortConsume(AbortConsumeParameter parameter);
+        void AbortConsume(SixnetAbortConsumeParameter parameter);
     }
 }

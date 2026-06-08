@@ -1,0 +1,26 @@
+﻿// "Company © 2025. All rights reserved."
+
+using System.Data;
+
+using Sixnet.Development.Data.Dapper;
+
+namespace Sixnet.Development.Data.DataType.Handler
+{
+    public class SixnetTimeSpanHandler : SqlMapper.TypeHandler<TimeSpan>
+    {
+        public override TimeSpan Parse(object value)
+        {
+            if (value is TimeSpan timeSpan)
+            {
+                return timeSpan;
+            }
+            TimeSpan.TryParse(value?.ToString(), out var timeSpanValue);
+            return timeSpanValue;
+        }
+
+        public override void SetValue(IDbDataParameter parameter, TimeSpan value)
+        {
+            parameter.Value = value;
+        }
+    }
+}

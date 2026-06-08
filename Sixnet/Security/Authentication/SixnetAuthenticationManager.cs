@@ -20,9 +20,9 @@ namespace Sixnet.Security.Authentication
         /// Set authentication token
         /// </summary>
         /// <param name="configure"></param>
-        public static async Task SetAuthenticationTokenAsync(Action<AuthenticationTokenSetting> configure)
+        public static async Task SetAuthenticationTokenAsync(Action<SixnetAuthenticationTokenSetting> configure)
         {
-            var setting = new AuthenticationTokenSetting();
+            var setting = new SixnetAuthenticationTokenSetting();
             configure?.Invoke(setting);
 
             var token = string.IsNullOrWhiteSpace(setting.Token) ? Guid.NewGuid().ToString() : setting.Token;
@@ -45,9 +45,9 @@ namespace Sixnet.Security.Authentication
         /// Set authentication token
         /// </summary>
         /// <param name="configure"></param>
-        public static void SetAuthenticationToken(Action<AuthenticationTokenSetting> configure)
+        public static void SetAuthenticationToken(Action<SixnetAuthenticationTokenSetting> configure)
         {
-            var setting = new AuthenticationTokenSetting();
+            var setting = new SixnetAuthenticationTokenSetting();
             configure?.Invoke(setting);
 
             var token = string.IsNullOrWhiteSpace(setting.Token) ? Guid.NewGuid().ToString() : setting.Token;
@@ -75,9 +75,9 @@ namespace Sixnet.Security.Authentication
         /// </summary>
         /// <param name="configure"></param>
         /// <returns></returns>
-        public static async Task RemoveAuthenticationTokenAsync(Action<AuthenticationTokenSetting> configure)
+        public static async Task RemoveAuthenticationTokenAsync(Action<SixnetAuthenticationTokenSetting> configure)
         {
-            var setting = new AuthenticationTokenSetting();
+            var setting = new SixnetAuthenticationTokenSetting();
             configure?.Invoke(setting);
 
             var userKey = GetUserKey(setting);
@@ -93,9 +93,9 @@ namespace Sixnet.Security.Authentication
         /// </summary>
         /// <param name="configure"></param>
         /// <returns></returns>
-        public static void RemoveAuthenticationToken(Action<AuthenticationTokenSetting> configure)
+        public static void RemoveAuthenticationToken(Action<SixnetAuthenticationTokenSetting> configure)
         {
-            var setting = new AuthenticationTokenSetting();
+            var setting = new SixnetAuthenticationTokenSetting();
             configure?.Invoke(setting);
 
             var userKey = GetUserKey(setting);
@@ -110,9 +110,9 @@ namespace Sixnet.Security.Authentication
         /// Validate authentication token
         /// </summary>
         /// <param name="configure"></param>
-        public static async Task<bool> ValidateAuthenticationTokenAsync(Action<AuthenticationTokenSetting> configure)
+        public static async Task<bool> ValidateAuthenticationTokenAsync(Action<SixnetAuthenticationTokenSetting> configure)
         {
-            var setting = new AuthenticationTokenSetting();
+            var setting = new SixnetAuthenticationTokenSetting();
             configure?.Invoke(setting);
             var userKey = GetUserKey(setting);
             var token = (await SixnetCacher.String.GetAsync(new SixnetStringGetParameter()
@@ -143,9 +143,9 @@ namespace Sixnet.Security.Authentication
         /// Validate authentication token
         /// </summary>
         /// <param name="configure"></param>
-        public static bool ValidateAuthenticationToken(Action<AuthenticationTokenSetting> configure)
+        public static bool ValidateAuthenticationToken(Action<SixnetAuthenticationTokenSetting> configure)
         {
-            var setting = new AuthenticationTokenSetting();
+            var setting = new SixnetAuthenticationTokenSetting();
             configure?.Invoke(setting);
             var userKey = GetUserKey(setting);
             var token = SixnetCacher.String.Get(new SixnetStringGetParameter()
@@ -176,14 +176,14 @@ namespace Sixnet.Security.Authentication
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public static string GetAuthenticationToken(string userId, Action<AuthenticationTokenSetting> configure = null)
+        public static string GetAuthenticationToken(string userId, Action<SixnetAuthenticationTokenSetting> configure = null)
         {
             if (string.IsNullOrWhiteSpace(userId))
             {
                 return string.Empty;
             }
             var authOptions = SixnetContainer.GetOptions<SixnetAuthenticationOptions>() ?? new SixnetAuthenticationOptions();
-            var tokenSetting = new AuthenticationTokenSetting()
+            var tokenSetting = new SixnetAuthenticationTokenSetting()
             {
                 AppTag = SixnetApplication.Current.GetDefaultAppTag(),
                 Score = authOptions.Score,
@@ -203,14 +203,14 @@ namespace Sixnet.Security.Authentication
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public static async Task<string> GetAuthenticationTokenAsync(string userId, Action<AuthenticationTokenSetting> configure = null)
+        public static async Task<string> GetAuthenticationTokenAsync(string userId, Action<SixnetAuthenticationTokenSetting> configure = null)
         {
             if (string.IsNullOrWhiteSpace(userId))
             {
                 return string.Empty;
             }
             var authOptions = SixnetContainer.GetOptions<SixnetAuthenticationOptions>() ?? new SixnetAuthenticationOptions();
-            var tokenSetting = new AuthenticationTokenSetting()
+            var tokenSetting = new SixnetAuthenticationTokenSetting()
             {
                 AppTag = SixnetApplication.Current.GetDefaultAppTag(),
                 Score = authOptions.Score,
@@ -230,7 +230,7 @@ namespace Sixnet.Security.Authentication
         /// </summary>
         /// <param name="setting"></param>
         /// <returns></returns>
-        static string GetUserKey(AuthenticationTokenSetting setting)
+        static string GetUserKey(SixnetAuthenticationTokenSetting setting)
         {
             var keyNameSplitChar = SixnetCacher.GetKeyNameSplitChar();
             var authorizationObject = PermissionObjectType.User;

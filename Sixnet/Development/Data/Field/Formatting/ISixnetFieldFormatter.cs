@@ -12,6 +12,6 @@ namespace Sixnet.Development.Data.Field.Formatting
         /// </summary>
         /// <param name="fieldConversionContext">Field conversion context</param>
         /// <returns>Return new field format</returns>
-        string Format(FormatFieldContext fieldConversionContext);
+        string Format(SixnetFormatFieldContext fieldConversionContext);
     }
 }

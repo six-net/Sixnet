@@ -29,12 +29,12 @@ namespace Sixnet.Cache.Keys.Parameters
         /// <summary>
         /// Gets or sets order
         /// </summary>
-        public CacheOrder Order { get; set; } = CacheOrder.Ascending;
+        public SixnetCacheOrder Order { get; set; } = SixnetCacheOrder.Ascending;
 
         /// <summary>
         /// Gets or sets the sort type
         /// </summary>
-        public CacheSortType SortType { get; set; } = CacheSortType.Numeric;
+        public SixnetCacheSortType SortType { get; set; } = SixnetCacheSortType.Numeric;
 
         /// <summary>
         /// Gets or sets the sort by value

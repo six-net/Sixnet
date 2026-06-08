@@ -8,7 +8,7 @@ namespace Sixnet.Development.Data
     /// Data operation type
     /// </summary>
     [Serializable]
-    public enum DataOperationType
+    public enum SixnetDataOperationType
     {
         None = 0,
         /// <summary>
@@ -49,7 +49,7 @@ namespace Sixnet.Development.Data
     /// Database type
     /// </summary>
     [Serializable]
-    public enum DatabaseType
+    public enum SixnetDatabaseType
     {
         Others = 0,
         SQLServer = 110,
@@ -65,7 +65,7 @@ namespace Sixnet.Development.Data
     /// Database type
     /// </summary>
     [Serializable]
-    public enum DatabaseServerRole
+    public enum SixnetDatabaseServerRole
     {
         /// <summary>
         /// Default
@@ -85,7 +85,7 @@ namespace Sixnet.Development.Data
     /// Calculation operator
     /// </summary>
     [Serializable]
-    public enum CalculationOperator
+    public enum SixnetCalculationOperator
     {
         Add,
         Subtract,
@@ -100,7 +100,7 @@ namespace Sixnet.Development.Data
     /// <summary>
     /// Database server match pattern
     /// </summary>
-    public enum DatabaseServerMatchPattern
+    public enum SixnetDatabaseServerMatchPattern
     {
         None = 0,
         Default = 2,
@@ -115,7 +115,7 @@ namespace Sixnet.Development.Data
     /// Data isolation level
     /// </summary>
     [Serializable]
-    public enum DataIsolationLevel
+    public enum SixnetDataIsolationLevel
     {
         /// <summary>
         /// A different isolation level than the one specified is being used, but the level cannot be determined.
@@ -167,7 +167,7 @@ namespace Sixnet.Development.Data
     /// <summary>
     /// Field location
     /// </summary>
-    public enum FieldLocation
+    public enum SixnetFieldLocation
     {
         Output = 310,
         InnerOutput = 315,
@@ -187,7 +187,7 @@ namespace Sixnet.Development.Data
     /// <summary>
     /// Data intercept scene
     /// </summary>
-    public enum DataInterceptScene
+    public enum SixnetDataInterceptScene
     {
         Add = 1100,
         Modify = 1200,
@@ -202,7 +202,7 @@ namespace Sixnet.Development.Data
     /// Data script type
     /// </summary>
     [Serializable]
-    public enum DataScriptType
+    public enum SixnetDataScriptType
     {
         /// <summary>
         /// SQL text
@@ -225,7 +225,7 @@ namespace Sixnet.Development.Data
     /// <summary>
     /// Split table name selection pattern
     /// </summary>
-    public enum SplitTableNameSelectionPattern
+    public enum SixnetSplitTableNameSelectionPattern
     {
         /// <summary>
         /// Range
@@ -244,7 +244,7 @@ namespace Sixnet.Development.Data
     /// <summary>
     /// Data operation behavior
     /// </summary>
-    public enum DataOperationBehavior
+    public enum SixnetDataOperationBehavior
     {
         /// <summary>
         /// Default
@@ -267,7 +267,7 @@ namespace Sixnet.Development.Data
     /// <summary>
     /// Database word and name pattern
     /// </summary>
-    public enum DatabaseWordAndNamePattern
+    public enum SixnetDatabaseWordAndNamePattern
     {
         Original = 1,
         Uppercase = 2,
@@ -289,7 +289,7 @@ namespace Sixnet.Development.Data
     /// <summary>
     /// Database object type
     /// </summary>
-    public enum DatabaseObjectType
+    public enum SixnetDatabaseObjectType
     {
         Table = 1,
         Column = 2

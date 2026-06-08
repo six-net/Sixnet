@@ -16,7 +16,7 @@ namespace Sixnet.Development.Data.Database
         /// <summary>
         /// Database server
         /// </summary>
-        public DatabaseServer DatabaseServer { get; set; }
+        public SixnetDatabaseServer DatabaseServer { get; set; }
 
         /// <summary>
         /// Target version
@@ -41,6 +41,6 @@ namespace Sixnet.Development.Data.Database
         /// <summary>
         /// Report process
         /// </summary>
-        public Action<UpdateDatabaseProcess> ReportProcess { get; set; }
+        public Action<SixnetUpdateDatabaseProcess> ReportProcess { get; set; }
     }
 }

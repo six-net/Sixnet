@@ -1,0 +1,1049 @@
+﻿// "Company © 2025. All rights reserved."
+
+using Sixnet.Development.Data;
+using Sixnet.Development.Data.Field;
+using Sixnet.Development.Data.Field.Formatting;
+using Sixnet.Development.Entity;
+using Sixnet.Development.Queryable;
+using Sixnet.Exceptions;
+using Sixnet.Model.Paging;
+
+namespace Sixnet.Development.Repository
+{
+    /// <summary>
+    /// Defines default root repository
+    /// </summary>
+    /// <typeparam name="TModel">Model type</typeparam>
+    public abstract partial class SixnetDefaultRootRepository<TModel> : SixnetBaseRepository<TModel> where TModel : class, ISixnetEntity<TModel>
+    {
+        #region Impl
+
+        #region Add
+
+        /// <summary>
+        /// Add data
+        /// </summary>
+        /// <param name="data">Data</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Affected data number</returns>
+        public sealed override int Add(TModel data, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return Add(new List<TModel>(1) { data }, configure);
+        }
+
+        /// <summary>
+        /// Add datas
+        /// </summary>
+        /// <param name="datas">Datas</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Affected data number</returns>
+        public sealed override int Add(IEnumerable<TModel> datas, Action<SixnetDataOperationOptions> configure = null)
+        {
+            SixnetException.ThrowIf(datas.IsNullOrEmpty(), $"{nameof(datas)} is null or empty");
+            return AddData(datas, configure);
+        }
+
+        /// <summary>
+        /// Add data and return identity
+        /// </summary>
+        /// <typeparam name="TIdentity">Identity type</typeparam>
+        /// <param name="data">Data</param>
+        /// <param name="configure">Confirure options</param>
+        /// <returns>Identity</returns>
+        public sealed override TIdentity AddReturnIdentity<TIdentity>(TModel data, Action<SixnetDataOperationOptions> configure = null)
+        {
+            var identities = AddReturnIdentities<TIdentity>(new List<TModel>(1) { data }, configure);
+            if (!identities.IsNullOrEmpty())
+            {
+                return identities.FirstOrDefault();
+            }
+            return default;
+        }
+
+        /// <summary>
+        /// Add datas and return identities
+        /// </summary>
+        /// <typeparam name="TIdentity">Identity type</typeparam>
+        /// <param name="datas">Datas</param>
+        /// <param name="configure">Confirure options</param>
+        /// <returns>Identities</returns>
+        public sealed override List<TIdentity> AddReturnIdentities<TIdentity>(IEnumerable<TModel> datas, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return AddDataReturnIdentities<TIdentity>(datas, configure);
+        }
+
+        #endregion
+
+        #region Update
+
+        /// <summary>
+        /// Update data
+        /// </summary>
+        /// <param name="data">Data</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Affected data number</returns>
+        public sealed override int Update(TModel data, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return Update(new List<TModel>(1) { data }, configure);
+        }
+
+        /// <summary>
+        /// Update datas
+        /// </summary>
+        /// <param name="datas">Datas</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Affected data number</returns>
+        public sealed override int Update(IEnumerable<TModel> datas, Action<SixnetDataOperationOptions> configure = null)
+        {
+            SixnetException.ThrowIf(datas.IsNullOrEmpty(), $"{nameof(datas)} is null or empty");
+            return UpdateData(datas, configure);
+        }
+
+        /// <summary>
+        /// Update
+        /// </summary>
+        /// <param name="fieldsAssignment">Fields assignment</param>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Affected data number</returns>
+        public sealed override int Update(SixnetFieldsAssignment fieldsAssignment, ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return UpdateFields(fieldsAssignment, queryable, configure);
+        }
+
+        /// <summary>
+        /// Update
+        /// </summary>
+        /// <param name="fieldsAssignment">Fields assignment</param>
+        /// <param name="conditionExpression">Condition expression</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Affected data number</returns>
+        public sealed override int Update(SixnetFieldsAssignment fieldsAssignment, Expression<Func<TModel, bool>> conditionExpression, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return Update(fieldsAssignment, conditionExpression.GetQueryable<TModel>(), configure);
+        }
+
+        /// <summary>
+        /// Update
+        /// </summary>
+        /// <param name="fieldsAssignment">Fields assignment</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Affected data number</returns>
+        public sealed override int Update(SixnetFieldsAssignment fieldsAssignment, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return Update(fieldsAssignment, SixnetQuerier.Create<TModel>(), configure);
+        }
+
+        /// <summary>
+        /// Update
+        /// </summary>
+        /// <param name="fieldsAssignmentExpression">Fields assignment expression</param>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Affected data number</returns>
+        public sealed override int Update(Expression<Func<TModel, bool>> fieldsAssignmentExpression, ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return Update(fieldsAssignmentExpression.GetFieldsAssignment(), queryable, configure);
+        }
+
+        /// <summary>
+        /// Update
+        /// </summary>
+        /// <param name="fieldsAssignmentExpression">Fields assignment expression</param>
+        /// <param name="conditionExpression">Condition expression</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Affected data number</returns>
+        public sealed override int Update(Expression<Func<TModel, bool>> fieldsAssignmentExpression, Expression<Func<TModel, bool>> conditionExpression, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return Update(fieldsAssignmentExpression, conditionExpression.GetQueryable<TModel>(), configure);
+        }
+
+        /// <summary>
+        /// Update
+        /// </summary>
+        /// <param name="fieldsAssignmentExpression">Fields assignment expression</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Affected data number</returns>
+        public sealed override int Update(Expression<Func<TModel, bool>> fieldsAssignmentExpression, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return Update(fieldsAssignmentExpression, SixnetQuerier.Create<TModel>(), configure);
+        }
+
+        #endregion
+
+        #region Delete
+
+        /// <summary>
+        /// Delete data
+        /// </summary>
+        /// <param name="data">Data</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Affected data number</returns>
+        public sealed override int Delete(TModel data, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return Delete(new TModel[1] { data }, configure);
+        }
+
+        /// <summary>
+        /// Delete datas
+        /// </summary>
+        /// <param name="datas">Datas</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Affected data number</returns>
+        public sealed override int Delete(IEnumerable<TModel> datas, Action<SixnetDataOperationOptions> configure = null)
+        {
+            SixnetException.ThrowIf(datas.IsNullOrEmpty(), $"{nameof(datas)} is null or empty");
+
+            foreach (var data in datas)
+            {
+                SixnetException.ThrowIf(!(data?.AllowToDelete() ?? false), $"{typeof(TModel)} data:{data?.GetIdentityValue()} cann't to be delete");
+            }
+            return DeleteData(datas, configure);
+        }
+
+        /// <summary>
+        /// Delete by condition
+        /// </summary>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Affected data number</returns>
+        public sealed override int Delete(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return DeleteData(queryable, configure);
+        }
+
+        /// <summary>
+        /// Delete object by condition
+        /// </summary>
+        /// <param name="conditionExpression">Condition expression</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Affected data number</returns>
+        public sealed override int Delete(Expression<Func<TModel, bool>> conditionExpression, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return Delete(conditionExpression.GetQueryable<TModel>(), configure);
+        }
+
+        /// <summary>
+        /// Delete
+        /// </summary>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Affected data number</returns>
+        public sealed override int Delete(Action<SixnetDataOperationOptions> configure = null)
+        {
+            return Delete(SixnetQuerier.Create<TModel>(), configure);
+        }
+
+        #endregion
+
+        #region Get
+
+        /// <summary>
+        /// Get data
+        /// </summary>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Data</returns>
+        public sealed override TModel Get(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return GetFirstData(queryable, configure);
+        }
+
+        /// <summary>
+        /// Get data
+        /// </summary>
+        /// <param name="conditionExpression">Condition expression</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Data</returns>
+        public sealed override TModel Get(Expression<Func<TModel, bool>> conditionExpression, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return Get(conditionExpression.GetQueryable<TModel>(), configure);
+        }
+
+        /// <summary>
+        /// Get data
+        /// </summary>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Data</returns>
+        public sealed override TModel Get(Action<SixnetDataOperationOptions> configure = null)
+        {
+            return Get(SixnetQuerier.Create<TModel>(), configure);
+        }
+
+        #endregion
+
+        #region Get list
+
+        /// <summary>
+        /// Get data list
+        /// </summary>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Data list</returns>
+        public sealed override List<TModel> GetList(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return GetDataList(queryable, configure) ?? new List<TModel>(0);
+        }
+
+        /// <summary>
+        /// Get data list
+        /// </summary>
+        /// <param name="conditionExpression">Condition expression</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Data list</returns>
+        public sealed override List<TModel> GetList(Expression<Func<TModel, bool>> conditionExpression, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return GetList(conditionExpression.GetQueryable<TModel>(), configure);
+        }
+
+        /// <summary>
+        /// Get data list
+        /// </summary>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Data list</returns>
+        public sealed override List<TModel> GetList(Action<SixnetDataOperationOptions> configure = null)
+        {
+            return GetList(SixnetQuerier.Create<TModel>(), configure);
+        }
+
+        /// <summary>
+        /// Get data list
+        /// </summary>
+        /// <typeparam name="TFirst">First data type</typeparam>
+        /// <typeparam name="TSecond">Second data type</typeparam>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="dataMappingFunc">Data mapping function</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Return the datas</returns>
+        public sealed override List<TModel> GetList<TFirst, TSecond>(ISixnetQueryable queryable, Func<TFirst, TSecond, TModel> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return GetDataList(queryable, dataMappingFunc, configure) ?? new List<TModel>(0);
+        }
+
+        /// <summary>
+        /// Get data list
+        /// </summary>
+        /// <typeparam name="TFirst">First data type</typeparam>
+        /// <typeparam name="TSecond">Second data type</typeparam>
+        /// <typeparam name="TThird">Third data type</typeparam>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="dataMappingFunc">Data mapping function</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Return the datas</returns>
+        public sealed override List<TModel> GetList<TFirst, TSecond, TThird>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TModel> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return GetDataList(queryable, dataMappingFunc, configure) ?? new List<TModel>(0);
+        }
+
+        /// <summary>
+        /// Get data list
+        /// </summary>
+        /// <typeparam name="TFirst">First data type</typeparam>
+        /// <typeparam name="TSecond">Second data type</typeparam>
+        /// <typeparam name="TThird">Third data type</typeparam>
+        /// <typeparam name="TFourth">Fourth data type</typeparam>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="dataMappingFunc">Data mapping function</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Return the datas</returns>
+        public sealed override List<TModel> GetList<TFirst, TSecond, TThird, TFourth>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TModel> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return GetDataList(queryable, dataMappingFunc, configure) ?? new List<TModel>(0);
+        }
+
+        /// <summary>
+        /// Get data list
+        /// </summary>
+        /// <typeparam name="TFirst">First data type</typeparam>
+        /// <typeparam name="TSecond">Second data type</typeparam>
+        /// <typeparam name="TThird">Third data type</typeparam>
+        /// <typeparam name="TFourth">Fourth data type</typeparam>
+        /// <typeparam name="TFifth">Fifth data type</typeparam>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="dataMappingFunc">Data mapping function</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Return the datas</returns>
+        public sealed override List<TModel> GetList<TFirst, TSecond, TThird, TFourth, TFifth>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TModel> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return GetDataList(queryable, dataMappingFunc, configure) ?? new List<TModel>(0);
+        }
+
+        /// <summary>
+        /// Get data list
+        /// </summary>
+        /// <typeparam name="TFirst">First data type</typeparam>
+        /// <typeparam name="TSecond">Second data type</typeparam>
+        /// <typeparam name="TThird">Third data type</typeparam>
+        /// <typeparam name="TFourth">Fourth data type</typeparam>
+        /// <typeparam name="TFifth">Fifth data type</typeparam>
+        /// <typeparam name="TSixth">Sixth data type</typeparam>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="dataMappingFunc">Data mapping function</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Return the datas</returns>
+        public sealed override List<TModel> GetList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TModel> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return GetDataList(queryable, dataMappingFunc, configure) ?? new List<TModel>(0);
+        }
+
+        /// <summary>
+        /// Get data list
+        /// </summary>
+        /// <typeparam name="TFirst">First data type</typeparam>
+        /// <typeparam name="TSecond">Second data type</typeparam>
+        /// <typeparam name="TThird">Third data type</typeparam>
+        /// <typeparam name="TFourth">Fourth data type</typeparam>
+        /// <typeparam name="TFifth">Fifth data type</typeparam>
+        /// <typeparam name="TSixth">Sixth data type</typeparam>
+        /// <typeparam name="TSeventh">Seventh data type</typeparam>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="dataMappingFunc">Data mapping function</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Return the datas</returns>
+        public sealed override List<TModel> GetList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TModel> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return GetDataList(queryable, dataMappingFunc, configure) ?? new List<TModel>(0);
+        }
+
+        #endregion
+
+        #region Get paging
+
+        /// <summary>
+        /// Get paging
+        /// </summary>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="pagingFilter">Paging filter</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Paging data</returns>
+        public sealed override SixnetPagingInfo<TModel> GetPaging(ISixnetQueryable queryable, SixnetPagingFilter pagingFilter, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return GetDataPaging(queryable, pagingFilter, configure);
+        }
+
+        /// <summary>
+        /// Get paging
+        /// </summary>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="page">Page</param>
+        /// <param name="pageSize">Page size</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Paging data</returns>
+        public sealed override SixnetPagingInfo<TModel> GetPaging(ISixnetQueryable queryable, int page, int pageSize, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return GetPaging(queryable, SixnetPagingFilter.Create(page, pageSize), configure);
+        }
+
+        /// <summary>
+        /// Get paging
+        /// </summary>
+        /// <param name="conditionExpression">Condition expression</param>
+        /// <param name="pagingFilter">Paging filter</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Paging data</returns>
+        public sealed override SixnetPagingInfo<TModel> GetPaging(Expression<Func<TModel, bool>> conditionExpression, SixnetPagingFilter pagingFilter, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return GetPaging(conditionExpression.GetQueryable<TModel>(), pagingFilter, configure);
+        }
+
+        /// <summary>
+        /// Get paging
+        /// </summary>
+        /// <param name="conditionExpression">Condition expression</param>
+        /// <param name="page">Page</param>
+        /// <param name="pageSize">Page size</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Paging data</returns>
+        public sealed override SixnetPagingInfo<TModel> GetPaging(Expression<Func<TModel, bool>> conditionExpression, int page, int pageSize, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return GetPaging(conditionExpression, SixnetPagingFilter.Create(page, pageSize), configure);
+        }
+
+        /// <summary>
+        /// Get paging
+        /// </summary>
+        /// <param name="pagingFilter">Paging filter</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Paging data</returns>
+        public sealed override SixnetPagingInfo<TModel> GetPaging(SixnetPagingFilter pagingFilter, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return GetPaging(SixnetQuerier.Create<TModel>(), pagingFilter, configure);
+        }
+
+        /// <summary>
+        /// Get paging
+        /// </summary>
+        /// <param name="page">Page</param>
+        /// <param name="pageSize">Page size</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Paging data</returns>
+        public sealed override SixnetPagingInfo<TModel> GetPaging(int page, int pageSize, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return GetPaging(SixnetQuerier.Create<TModel>(), page, pageSize, configure);
+        }
+
+        #endregion
+
+        #region Exists
+
+        /// <summary>
+        /// Whether has data
+        /// </summary>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Whether has data</returns>
+        public sealed override bool Exists(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return ExistsData(queryable, configure);
+        }
+
+        /// <summary>
+        /// Whether has data
+        /// </summary>
+        /// <param name="conditionExpression">Condition expression</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Whether has data</returns>
+        public sealed override bool Exists(Expression<Func<TModel, bool>> conditionExpression, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return Exists(conditionExpression.GetQueryable<TModel>(), configure);
+        }
+
+        /// <summary>
+        /// Whether has data
+        /// </summary>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Whether has data</returns>
+        public sealed override bool Exists(Action<SixnetDataOperationOptions> configure = null)
+        {
+            return Exists(SixnetQuerier.Create<TModel>(), configure);
+        }
+
+        #endregion
+
+        #region Count
+
+        /// <summary>
+        /// Count data
+        /// </summary>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Data num</returns>
+        public sealed override int Count(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return CountValue(queryable, configure);
+        }
+
+        /// <summary>
+        /// Count data
+        /// </summary>
+        /// <param name="conditionExpression">Condition expression</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Data num</returns>
+        public sealed override int Count(Expression<Func<TModel, bool>> conditionExpression, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return CountValue(conditionExpression.GetQueryable<TModel>(), configure);
+        }
+
+        /// <summary>
+        /// Count data
+        /// </summary>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Data num</returns>
+        public sealed override int Count(Action<SixnetDataOperationOptions> configure = null)
+        {
+            return Count(SixnetQuerier.Create<TModel>(), configure);
+        }
+
+        #endregion
+
+        #region Max
+
+        /// <summary>
+        /// Get max value
+        /// </summary>
+        /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Max value</returns>
+        public sealed override TValue Max<TValue>(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return MaxValue<TValue>(queryable, configure);
+        }
+
+        /// <summary>
+        /// Get max value
+        /// </summary>
+        /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="field">Field</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Max value</returns>
+        public sealed override TValue Max<TValue>(Expression<Func<TModel, TValue>> field, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return Max(field, null, configure);
+        }
+
+        /// <summary>
+        /// Get max value
+        /// </summary>
+        /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="field">Field</param>
+        /// <param name="conditionExpression">Condition expression</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Max value</returns>
+        public sealed override TValue Max<TValue>(Expression<Func<TModel, TValue>> field, Expression<Func<TModel, bool>> conditionExpression, Action<SixnetDataOperationOptions> configure = null)
+        {
+            var maxQueryable = conditionExpression.GetQueryable<TModel>()
+                .Select(field.GetDataField(SixnetFieldFormatterNames.MAX));
+            return Max<TValue>(maxQueryable, configure);
+        }
+
+        #endregion
+
+        #region Min
+
+        /// <summary>
+        /// Get min value
+        /// </summary>
+        /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Min value</returns>
+        public sealed override TValue Min<TValue>(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return MinValue<TValue>(queryable, configure);
+        }
+
+        /// <summary>
+        /// Get min value
+        /// </summary>
+        /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="field">Field</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Min value</returns>
+        public sealed override TValue Min<TValue>(Expression<Func<TModel, TValue>> field, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return Min(field, null, configure);
+        }
+
+        /// <summary>
+        /// Get min value
+        /// </summary>
+        /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="field">Field</param>
+        /// <param name="conditionExpression">Condition expression</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Min value</returns>
+        public sealed override TValue Min<TValue>(Expression<Func<TModel, TValue>> field, Expression<Func<TModel, bool>> conditionExpression, Action<SixnetDataOperationOptions> configure = null)
+        {
+            var minQueryable = conditionExpression.GetQueryable<TModel>()
+                .Select(field.GetDataField(SixnetFieldFormatterNames.MIN));
+            return Min<TValue>(minQueryable, configure);
+        }
+
+        #endregion
+
+        #region Sum
+
+        /// <summary>
+        /// Get sum value
+        /// </summary>
+        /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Sum value</returns>
+        public sealed override TValue Sum<TValue>(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return SumValue<TValue>(queryable, configure);
+        }
+
+        /// <summary>
+        /// Get sum value
+        /// </summary>
+        /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="field">Field</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Sum value</returns>
+        public sealed override TValue Sum<TValue>(Expression<Func<TModel, TValue>> field, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return Sum(field, null, configure);
+        }
+
+        /// <summary>
+        /// Get sum value
+        /// </summary>
+        /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="field">Field</param>
+        /// <param name="conditionExpression">Condition expression</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Sum value</returns>
+        public sealed override TValue Sum<TValue>(Expression<Func<TModel, TValue>> field, Expression<Func<TModel, bool>> conditionExpression = null, Action<SixnetDataOperationOptions> configure = null)
+        {
+            var sumQueryable = conditionExpression.GetQueryable<TModel>()
+                .Select(field.GetDataField(SixnetFieldFormatterNames.SUM));
+            return Sum<TValue>(sumQueryable, configure);
+        }
+
+        #endregion
+
+        #region Avg
+
+        /// <summary>
+        /// Get average value
+        /// </summary>
+        /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Average value</returns>
+        public sealed override TValue Avg<TValue>(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return AvgValue<TValue>(queryable, configure);
+        }
+
+        /// <summary>
+        /// Get average value
+        /// </summary>
+        /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="field">Field</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Average value</returns>
+        public sealed override TValue Avg<TValue>(Expression<Func<TModel, TValue>> field, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return Avg(field, null, configure);
+        }
+
+        /// <summary>
+        /// Get average value
+        /// </summary>
+        /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="field">Field</param>
+        /// <param name="conditionExpression">Condition expression</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Average value</returns>
+        public sealed override TValue Avg<TValue>(Expression<Func<TModel, TValue>> field, Expression<Func<TModel, bool>> conditionExpression, Action<SixnetDataOperationOptions> configure = null)
+        {
+            var avgQueryable = conditionExpression.GetQueryable<TModel>()
+                .Select(field.GetDataField(SixnetFieldFormatterNames.AVG));
+            return Avg<TValue>(avgQueryable, configure);
+        }
+
+        #endregion
+
+        #region Scalar
+
+        /// <summary>
+        /// Get scalar value
+        /// </summary>
+        /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Value</returns>
+        public sealed override TValue Scalar<TValue>(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return ScalarValue<TValue>(queryable, configure);
+        }
+
+        /// <summary>
+        /// Get scalar value
+        /// </summary>
+        /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="field">Field</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Value</returns>
+        public sealed override TValue Scalar<TValue>(Expression<Func<TModel, TValue>> field, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return Scalar(field, null, configure);
+        }
+
+        /// <summary>
+        /// Get scalar value
+        /// </summary>
+        /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="field">Field</param>
+        /// <param name="conditionExpression">Condition</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Value</returns>
+        public sealed override TValue Scalar<TValue>(Expression<Func<TModel, TValue>> field, Expression<Func<TModel, bool>> conditionExpression, Action<SixnetDataOperationOptions> configure = null)
+        {
+            var query = conditionExpression.GetQueryable<TModel>()
+                        .Select(field.GetDataField());
+            return Scalar<TValue>(query, configure);
+        }
+
+        /// <summary>
+        /// Get scalar value
+        /// </summary>
+        /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="field">Field</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Value</returns>
+        public sealed override TValue Scalar<TValue>(SixnetDataField field, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return Scalar<TValue>(field, null, configure);
+        }
+
+        /// <summary>
+        /// Get scalar value
+        /// </summary>
+        /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="field">Field</param>
+        /// <param name="conditionExpression">Condition</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Value</returns>
+        public sealed override TValue Scalar<TValue>(SixnetDataField field, Expression<Func<TModel, bool>> conditionExpression, Action<SixnetDataOperationOptions> configure = null)
+        {
+            var query = conditionExpression.GetQueryable<TModel>()
+                        .Select(field);
+            return Scalar<TValue>(query, configure);
+        }
+
+        #endregion
+
+        #region Queryable
+
+        /// <summary>
+        /// Get a queryable
+        /// </summary>
+        /// <returns></returns>
+        public override ISixnetQueryable<TModel> AsQueryable()
+        {
+            return SixnetQuerier.Create<TModel>();
+        }
+
+        /// <summary>
+        /// Get a queryable
+        /// </summary>
+        /// <param name="conditionExpression">Condition expression</param>
+        /// <returns></returns>
+        public override ISixnetQueryable<TModel> AsQueryable(Expression<Func<TModel, bool>> conditionExpression)
+        {
+            return AsQueryable().Where(conditionExpression);
+        }
+
+        /// <summary>
+        /// Get a queryable
+        /// </summary>
+        /// <param name="currentQueryable">Current queryable</param>
+        /// <returns></returns>
+        public override ISixnetQueryable<TModel> AsQueryable(ISixnetQueryable currentQueryable)
+        {
+            return SixnetQuerier.Create<TModel>(currentQueryable);
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Functions
+
+        /// <summary>
+        /// Add data
+        /// </summary>
+        /// <param name="datas">Datas</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Affected data number</returns>
+        protected abstract int AddData(IEnumerable<TModel> datas, Action<SixnetDataOperationOptions> configure = null);
+
+        /// <summary>
+        /// Add datas and return identiies
+        /// </summary>
+        /// <typeparam name="TIdentity">Identity type</typeparam>
+        /// <param name="datas">Datas</param>
+        /// <param name="configure">Confirure options</param>
+        /// <returns>Identities</returns>
+        protected abstract List<TIdentity> AddDataReturnIdentities<TIdentity>(IEnumerable<TModel> datas, Action<SixnetDataOperationOptions> configure = null);
+
+        /// <summary>
+        /// Update data
+        /// </summary>
+        /// <param name="newDatas">New datas</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Affected data number</returns>
+        protected abstract int UpdateData(IEnumerable<TModel> newDatas, Action<SixnetDataOperationOptions> configure = null);
+
+        /// <summary>
+        /// Update columns
+        /// </summary>
+        /// <param name="fieldsAssignment">Fields assignment</param>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Affected data number</returns>
+        protected abstract int UpdateFields(SixnetFieldsAssignment fieldsAssignment, ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null);
+
+        /// <summary>
+        /// Delete data
+        /// </summary>
+        /// <param name="datas">Datas</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Affected data number</returns>
+        protected abstract int DeleteData(IEnumerable<TModel> datas, Action<SixnetDataOperationOptions> configure = null);
+
+        /// <summary>
+        /// Delete data
+        /// </summary>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Affected data number</returns>
+        protected abstract int DeleteData(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null);
+
+        /// <summary>
+        /// Get first data
+        /// </summary>
+        /// <param name="queryable"></param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        protected abstract TModel GetFirstData(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null);
+
+        /// <summary>
+        /// Get data list
+        /// </summary>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Data list</returns>
+        protected abstract List<TModel> GetDataList(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null);
+
+        /// <summary>
+        /// Get data list
+        /// </summary>
+        /// <typeparam name="TFirst">First data type</typeparam>
+        /// <typeparam name="TSecond">Second data type</typeparam>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="dataMappingFunc">Data mapping function</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Return the datas</returns>
+        protected abstract List<TModel> GetDataList<TFirst, TSecond>(ISixnetQueryable queryable, Func<TFirst, TSecond, TModel> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null);
+
+        /// <summary>
+        /// Get data list
+        /// </summary>
+        /// <typeparam name="TFirst">First data type</typeparam>
+        /// <typeparam name="TSecond">Second data type</typeparam>
+        /// <typeparam name="TThird">Third data type</typeparam>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="dataMappingFunc">Data mapping function</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Return the datas</returns>
+        protected abstract List<TModel> GetDataList<TFirst, TSecond, TThird>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TModel> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null);
+
+        /// <summary>
+        /// Get data list
+        /// </summary>
+        /// <typeparam name="TFirst">First data type</typeparam>
+        /// <typeparam name="TSecond">Second data type</typeparam>
+        /// <typeparam name="TThird">Third data type</typeparam>
+        /// <typeparam name="TFourth">Fourth data type</typeparam>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="dataMappingFunc">Data mapping function</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Return the datas</returns>
+        protected abstract List<TModel> GetDataList<TFirst, TSecond, TThird, TFourth>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TModel> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null);
+
+        /// <summary>
+        /// Get data list
+        /// </summary>
+        /// <typeparam name="TFirst">First data type</typeparam>
+        /// <typeparam name="TSecond">Second data type</typeparam>
+        /// <typeparam name="TThird">Third data type</typeparam>
+        /// <typeparam name="TFourth">Fourth data type</typeparam>
+        /// <typeparam name="TFifth">Fifth data type</typeparam>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="dataMappingFunc">Data mapping function</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Return the datas</returns>
+        protected abstract List<TModel> GetDataList<TFirst, TSecond, TThird, TFourth, TFifth>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TModel> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null);
+
+        /// <summary>
+        /// Get data list
+        /// </summary>
+        /// <typeparam name="TFirst">First data type</typeparam>
+        /// <typeparam name="TSecond">Second data type</typeparam>
+        /// <typeparam name="TThird">Third data type</typeparam>
+        /// <typeparam name="TFourth">Fourth data type</typeparam>
+        /// <typeparam name="TFifth">Fifth data type</typeparam>
+        /// <typeparam name="TSixth">Sixth data type</typeparam>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="dataMappingFunc">Data mapping function</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Return the datas</returns>
+        protected abstract List<TModel> GetDataList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TModel> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null);
+
+        /// <summary>
+        /// Get data list
+        /// </summary>
+        /// <typeparam name="TFirst">First data type</typeparam>
+        /// <typeparam name="TSecond">Second data type</typeparam>
+        /// <typeparam name="TThird">Third data type</typeparam>
+        /// <typeparam name="TFourth">Fourth data type</typeparam>
+        /// <typeparam name="TFifth">Fifth data type</typeparam>
+        /// <typeparam name="TSixth">Sixth data type</typeparam>
+        /// <typeparam name="TSeventh">Seventh data type</typeparam>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="dataMappingFunc">Data mapping function</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Return the datas</returns>
+        protected abstract List<TModel> GetDataList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(ISixnetQueryable queryable, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TModel> dataMappingFunc, Action<SixnetDataOperationOptions> configure = null);
+
+        /// <summary>
+        /// Get data paging
+        /// </summary>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="pagingFilter">Paging filter</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Data paging</returns>
+        protected abstract SixnetPagingInfo<TModel> GetDataPaging(ISixnetQueryable queryable, SixnetPagingFilter pagingFilter, Action<SixnetDataOperationOptions> configure = null);
+
+        /// <summary>
+        /// Whether has data
+        /// </summary>
+        /// <param name="queryable">Queryable</param>
+        /// <returns>Whether has data</returns>
+        protected abstract bool ExistsData(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null);
+
+        /// <summary>
+        /// Get count value
+        /// </summary>
+        /// <param name="queryable">Queryable</param>
+        /// <returns>Count value</returns>
+        protected abstract int CountValue(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null);
+
+        /// <summary>
+        /// Get max value
+        /// </summary>
+        /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="queryable">Queryable</param>
+        /// <returns>Max value</returns>
+        protected abstract TValue MaxValue<TValue>(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null);
+
+        /// <summary>
+        /// Get min value
+        /// </summary>
+        /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="queryable">Queryable</param>
+        /// <returns>Min value</returns>
+        protected abstract TValue MinValue<TValue>(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null);
+
+        /// <summary>
+        /// Get sum value
+        /// </summary>
+        /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="queryable">Queryable</param>
+        /// <returns>Sum value</returns>
+        protected abstract TValue SumValue<TValue>(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null);
+
+        /// <summary>
+        /// Get average value
+        /// </summary>
+        /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="queryable">Queryable</param>
+        /// <returns>Average value</returns>
+        protected abstract TValue AvgValue<TValue>(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null);
+
+        /// <summary>
+        /// Get scalar value
+        /// </summary>
+        /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="queryable">Queryable</param>
+        /// <returns>Value</returns>
+        protected abstract TValue ScalarValue<TValue>(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null);
+
+        #endregion
+    }
+}

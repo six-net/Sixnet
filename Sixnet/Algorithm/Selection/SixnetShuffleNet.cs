@@ -54,7 +54,7 @@ namespace Sixnet.Algorithm.Selection
             var size = valueArray.Length;
             for (var i = size - 1; i >= 0; --i)
             {
-                var nextIndex = RandomNumberHelper.GetRandomNumber(i);
+                var nextIndex = SixnetRandomNumberHelper.GetRandomNumber(i);
                 var nextValue = valueArray[nextIndex];
                 valueArray[nextIndex] = valueArray[i];
                 valueArray[i] = nextValue;

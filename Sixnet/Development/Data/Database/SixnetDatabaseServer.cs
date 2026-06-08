@@ -1,0 +1,85 @@
+﻿// "Company © 2025. All rights reserved."
+
+namespace Sixnet.Development.Data.Database
+{
+    /// <summary>
+    /// Database server
+    /// </summary>
+    public class SixnetDatabaseServer
+    {
+        #region Properties
+
+        /// <summary>
+        /// Gets or sets the database server name
+        /// </summary>
+        public string Name { get; set; } = Guid.NewGuid().ToString();
+
+        /// <summary>
+        /// Gets or sets the database server role
+        /// </summary>
+        public SixnetDatabaseServerRole Role { get; set; } = SixnetDatabaseServerRole.Default;
+
+        /// <summary>
+        /// Gets or sets connection string
+        /// </summary>
+        public string ConnectionString { get; set; }
+
+        /// <summary>
+        /// Gets or sets database type
+        /// </summary>
+        public SixnetDatabaseType DatabaseType { get; set; }
+
+        /// <summary>
+        /// Connection string secret key
+        /// </summary>
+        public string SecretKey { get; set; } = "";
+
+        /// <summary>
+        /// Connection string secret IV
+        /// </summary>
+        public string SecretIV { get; set; }
+
+        /// <summary>
+        /// Encrypt connection string
+        /// </summary>
+        public bool Encrypt { get; set; }
+
+        #endregion
+
+        #region Methods
+
+        public string GetServerIdentityValue()
+        {
+            return $"{DatabaseType}_{ConnectionString}";
+        }
+
+        public override bool Equals(object otherServer)
+        {
+            if (otherServer == null)
+            {
+                return false;
+            }
+            if (otherServer is not SixnetDatabaseServer otherServerInfo)
+            {
+                return false;
+            }
+            return GetServerIdentityValue() == otherServerInfo.GetServerIdentityValue();
+        }
+
+        public override int GetHashCode()
+        {
+            return GetServerIdentityValue().GetHashCode();
+        }
+
+        /// <summary>
+        /// Whether use single connection
+        /// </summary>
+        /// <returns></returns>
+        public virtual bool UseSingleConnection()
+        {
+            return DatabaseType == SixnetDatabaseType.SQLite;
+        }
+
+        #endregion
+    }
+}

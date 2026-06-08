@@ -19,13 +19,13 @@ namespace Sixnet.Development.Data.Intercept
         /// <summary>
         /// Data interceptor
         /// </summary>
-        static Action<InterceptDataContext> dataInterceptor;
+        static Action<SixnetInterceptDataContext> dataInterceptor;
 
         /// <summary>
         /// default interceptor field role
         /// </summary>
-        static FieldRole defaultInterceptorFieldRole = FieldRole.CreateDate | FieldRole.CreateUserId | FieldRole.CreateUserName | FieldRole.CreateUserDisplayName
-            | FieldRole.UpdateDate | FieldRole.UpdateUserId | FieldRole.UpdateUserName | FieldRole.UpdateUserDisplayName | FieldRole.Revision | FieldRole.Isolation;
+        static SixnetFieldRole defaultInterceptorFieldRole = SixnetFieldRole.CreateDate | SixnetFieldRole.CreateUserId | SixnetFieldRole.CreateUserName | SixnetFieldRole.CreateUserDisplayName
+            | SixnetFieldRole.UpdateDate | SixnetFieldRole.UpdateUserId | SixnetFieldRole.UpdateUserName | SixnetFieldRole.UpdateUserDisplayName | SixnetFieldRole.Revision | SixnetFieldRole.Isolation;
 
         #endregion
 
@@ -38,13 +38,13 @@ namespace Sixnet.Development.Data.Intercept
         /// <returns>Finally values</returns>
         internal static SixnetDataCommand InterceptData(SixnetDataCommand dataCommand)
         {
-            var interceptContext = new InterceptDataContext()
+            var interceptContext = new SixnetInterceptDataContext()
             {
                 DataCommand = dataCommand
             };
 
             // default interceptor
-            if (defaultInterceptorFieldRole != FieldRole.None)
+            if (defaultInterceptorFieldRole != SixnetFieldRole.None)
             {
                 DefaultDataInterceptor(interceptContext);
             }
@@ -63,7 +63,7 @@ namespace Sixnet.Development.Data.Intercept
         /// Config data interceptor
         /// </summary>
         /// <param name="interceptor"></param>
-        public static void ConfigDataInterceptor(Action<InterceptDataContext> interceptor)
+        public static void ConfigDataInterceptor(Action<SixnetInterceptDataContext> interceptor)
         {
             if (interceptor != null)
             {
@@ -80,14 +80,14 @@ namespace Sixnet.Development.Data.Intercept
         /// </summary>
         public static void ClearDefaultDataInterceptor()
         {
-            defaultInterceptorFieldRole = FieldRole.None;
+            defaultInterceptorFieldRole = SixnetFieldRole.None;
         }
 
         /// <summary>
         /// Remove default interceptor
         /// </summary>
         /// <param name="fieldRoles">Field roles</param>
-        public static void RemoveDefaultDataInterceptor(params FieldRole[] fieldRoles)
+        public static void RemoveDefaultDataInterceptor(params SixnetFieldRole[] fieldRoles)
         {
             if (fieldRoles.IsNullOrEmpty())
             {
@@ -107,23 +107,23 @@ namespace Sixnet.Development.Data.Intercept
         /// </summary>
         /// <param name="context"></param>
         /// <exception cref="SixnetException"></exception>
-        static void DefaultDataInterceptor(InterceptDataContext context)
+        static void DefaultDataInterceptor(SixnetInterceptDataContext context)
         {
             var entityType = context.GetEntityType();
             var operationType = context.GetDataOperationType();
-            var createDateField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & FieldRole.CreateDate);
-            var updateDateField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & FieldRole.UpdateDate);
-            var createUserIdField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & FieldRole.CreateUserId);
-            var updateUserIdField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & FieldRole.UpdateUserId);
-            var createUserNameField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & FieldRole.CreateUserName);
-            var updateUserNameField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & FieldRole.UpdateUserName);
-            var createUserDisplayNameField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & FieldRole.CreateUserDisplayName);
-            var updateUserDisplayNameField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & FieldRole.UpdateUserDisplayName);
-            var versionField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & FieldRole.Revision);
-            var isolationField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & FieldRole.Isolation);
+            var createDateField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & SixnetFieldRole.CreateDate);
+            var updateDateField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & SixnetFieldRole.UpdateDate);
+            var createUserIdField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & SixnetFieldRole.CreateUserId);
+            var updateUserIdField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & SixnetFieldRole.UpdateUserId);
+            var createUserNameField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & SixnetFieldRole.CreateUserName);
+            var updateUserNameField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & SixnetFieldRole.UpdateUserName);
+            var createUserDisplayNameField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & SixnetFieldRole.CreateUserDisplayName);
+            var updateUserDisplayNameField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & SixnetFieldRole.UpdateUserDisplayName);
+            var versionField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & SixnetFieldRole.Revision);
+            var isolationField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & SixnetFieldRole.Isolation);
             switch (operationType)
             {
-                case DataOperationType.Insert:
+                case SixnetDataOperationType.Insert:
                     if (AllowSetInterceptorValue(context, createDateField))
                     {
                         context.SetNewValue(createDateField.PropertyName, createDateField.DataType.GetNowDateTime());
@@ -150,55 +150,55 @@ namespace Sixnet.Development.Data.Intercept
                             context.SetNewValue(versionField.PropertyName, 1.ConvertTo(versionField.DataType));
                         }
                     }
-                    if (SessionContext.Current?.User != null)
+                    if (SixnetSessionContext.Current?.User != null)
                     {
                         if (AllowSetInterceptorValue(context, createUserIdField))
                         {
-                            context.SetNewValue(createUserIdField.PropertyName, SessionContext.Current.User.Id.ConvertTo(createUserIdField.DataType));
+                            context.SetNewValue(createUserIdField.PropertyName, SixnetSessionContext.Current.User.Id.ConvertTo(createUserIdField.DataType));
                         }
                         if (AllowSetInterceptorValue(context, createUserNameField))
                         {
-                            context.SetNewValue(createUserNameField.PropertyName, SessionContext.Current.User.Name ?? string.Empty);
+                            context.SetNewValue(createUserNameField.PropertyName, SixnetSessionContext.Current.User.Name ?? string.Empty);
                         }
                         if (AllowSetInterceptorValue(context, createUserDisplayNameField))
                         {
-                            context.SetNewValue(createUserDisplayNameField.PropertyName, SessionContext.Current.User.DisplayName ?? string.Empty);
+                            context.SetNewValue(createUserDisplayNameField.PropertyName, SixnetSessionContext.Current.User.DisplayName ?? string.Empty);
                         }
                         if (AllowSetInterceptorValue(context, updateUserIdField))
                         {
-                            context.SetNewValue(updateUserIdField.PropertyName, SessionContext.Current.User.Id.ConvertTo(updateUserIdField.DataType));
+                            context.SetNewValue(updateUserIdField.PropertyName, SixnetSessionContext.Current.User.Id.ConvertTo(updateUserIdField.DataType));
                         }
                         if (AllowSetInterceptorValue(context, updateUserNameField))
                         {
-                            context.SetNewValue(updateUserNameField.PropertyName, SessionContext.Current.User.Name ?? string.Empty);
+                            context.SetNewValue(updateUserNameField.PropertyName, SixnetSessionContext.Current.User.Name ?? string.Empty);
                         }
                         if (AllowSetInterceptorValue(context, updateUserDisplayNameField))
                         {
-                            context.SetNewValue(updateUserDisplayNameField.PropertyName, SessionContext.Current.User.DisplayName ?? string.Empty);
+                            context.SetNewValue(updateUserDisplayNameField.PropertyName, SixnetSessionContext.Current.User.DisplayName ?? string.Empty);
                         }
                     }
-                    if (SessionContext.Current?.Isolation != null && AllowSetInterceptorValue(context, isolationField))
+                    if (SixnetSessionContext.Current?.Isolation != null && AllowSetInterceptorValue(context, isolationField))
                     {
-                        context.SetNewValue(isolationField.PropertyName, SessionContext.Current.Isolation.Id.ConvertTo(isolationField.DataType));
+                        context.SetNewValue(isolationField.PropertyName, SixnetSessionContext.Current.Isolation.Id.ConvertTo(isolationField.DataType));
                     }
                     break;
-                case DataOperationType.Update:
+                case SixnetDataOperationType.Update:
                     // update field
                     if (AllowSetInterceptorValue(context, updateDateField))
                     {
                         context.SetNewValue(updateDateField.PropertyName, updateDateField.DataType.GetNowDateTime());
                     }
-                    if (SessionContext.Current?.User != null && AllowSetInterceptorValue(context, updateUserIdField))
+                    if (SixnetSessionContext.Current?.User != null && AllowSetInterceptorValue(context, updateUserIdField))
                     {
-                        context.SetNewValue(updateUserIdField.PropertyName, SessionContext.Current.User.Id.ConvertTo(updateUserIdField.DataType));
+                        context.SetNewValue(updateUserIdField.PropertyName, SixnetSessionContext.Current.User.Id.ConvertTo(updateUserIdField.DataType));
                     }
-                    if (SessionContext.Current?.User != null && AllowSetInterceptorValue(context, updateUserNameField))
+                    if (SixnetSessionContext.Current?.User != null && AllowSetInterceptorValue(context, updateUserNameField))
                     {
-                        context.SetNewValue(updateUserNameField.PropertyName, SessionContext.Current.User.Name ?? string.Empty);
+                        context.SetNewValue(updateUserNameField.PropertyName, SixnetSessionContext.Current.User.Name ?? string.Empty);
                     }
-                    if (SessionContext.Current?.User != null && AllowSetInterceptorValue(context, updateUserDisplayNameField))
+                    if (SixnetSessionContext.Current?.User != null && AllowSetInterceptorValue(context, updateUserDisplayNameField))
                     {
-                        context.SetNewValue(updateUserDisplayNameField.PropertyName, SessionContext.Current.User.DisplayName ?? string.Empty);
+                        context.SetNewValue(updateUserDisplayNameField.PropertyName, SixnetSessionContext.Current.User.DisplayName ?? string.Empty);
                     }
 
                     // version field
@@ -221,8 +221,8 @@ namespace Sixnet.Development.Data.Intercept
                             }
                             else
                             {
-                                var newCalValue = DataField.Create(versionField.PropertyName, entityType);
-                                newCalValue.FormatSetting = FieldFormatSetting.Create(FieldFormatterNames.ADD, 1);
+                                var newCalValue = SixnetDataField.Create(versionField.PropertyName, entityType);
+                                newCalValue.FormatSetting = SixnetFieldFormatSetting.Create(SixnetFieldFormatterNames.ADD, 1);
                                 context.SetNewValue(versionField.PropertyName, newCalValue);
                             }
                         }
@@ -237,7 +237,7 @@ namespace Sixnet.Development.Data.Intercept
         /// <param name="context"></param>
         /// <param name="entityField"></param>
         /// <returns></returns>
-        static bool AllowSetInterceptorValue(InterceptDataContext context, DataField entityField)
+        static bool AllowSetInterceptorValue(SixnetInterceptDataContext context, SixnetDataField entityField)
         {
             return entityField != null && context.AllowUpdateNewValue(entityField.DataType, entityField.PropertyName);
         }

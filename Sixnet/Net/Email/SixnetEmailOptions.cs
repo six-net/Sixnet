@@ -15,16 +15,16 @@ namespace Sixnet.Net.Email
         /// <summary>
         /// Gets or set the email account
         /// </summary>
-        public EmailAccount Account { get; set; }
+        public SixnetEmailAccount Account { get; set; }
 
         /// <summary>
         /// Get email account
         /// </summary>
-        public Func<EmailInfo, EmailAccount> GetEmailAccount { get; set; }
+        public Func<SixnetEmailInfo, SixnetEmailAccount> GetEmailAccount { get; set; }
 
         /// <summary>
         /// Send callback
         /// </summary>
-        public Action<IEnumerable<SendEmailResult>> SendCallback { get; set; }
+        public Action<IEnumerable<SixnetSendEmailResult>> SendCallback { get; set; }
     }
 }

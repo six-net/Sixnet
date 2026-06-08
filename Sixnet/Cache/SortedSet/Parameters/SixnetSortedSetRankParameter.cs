@@ -24,7 +24,7 @@ namespace Sixnet.Cache.SortedSet.Parameters
         /// <summary>
         /// Gets or sets the order type
         /// </summary>
-        public CacheOrder Order { get; set; } = CacheOrder.Ascending;
+        public SixnetCacheOrder Order { get; set; } = SixnetCacheOrder.Ascending;
 
         /// <summary>
         /// Execute cache operation

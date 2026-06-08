@@ -1,0 +1,42 @@
+﻿// "Company © 2025. All rights reserved."
+
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+
+#pragma warning disable 659 // overrides AddToHashCodeCombiner instead
+
+namespace Sixnet.Expressions.Linq
+{
+    // MethodCallExpression fingerprint class
+    // Expression of form xxx.Foo(...), xxx[...] (get_Item()), etc.
+
+    [SuppressMessage("Microsoft.Usage", "CA2218:OverrideGetHashCodeOnOverridingEquals", Justification = "Overrides AddToHashCodeCombiner() instead.")]
+    public sealed class SixnetMethodCallExpressionFingerprint : SixnetExpressionFingerprint
+    {
+        public SixnetMethodCallExpressionFingerprint(ExpressionType nodeType, Type type, MethodInfo method)
+            : base(nodeType, type)
+        {
+            // Other properties on MethodCallExpression (like the argument count) are simply derived
+            // from Type and Indexer, so they're not necessary for inclusion in the fingerprint.
+
+            Method = method;
+        }
+
+        // http://msdn.microsoft.com/en-us/library/system.linq.expressions.methodcallexpression.method.aspx
+        public MethodInfo Method { get; private set; }
+
+        public override bool Equals(object obj)
+        {
+            SixnetMethodCallExpressionFingerprint other = obj as SixnetMethodCallExpressionFingerprint;
+            return other != null
+                   && Equals(Method, other.Method)
+                   && Equals(other);
+        }
+
+        internal override void AddToHashCodeCombiner(SixnetHashCodeCombiner combiner)
+        {
+            combiner.AddObject(Method);
+            base.AddToHashCodeCombiner(combiner);
+        }
+    }
+}

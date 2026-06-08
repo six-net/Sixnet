@@ -22,7 +22,7 @@ namespace Sixnet.Net.Http
         /// <summary>
         /// Http method handlers
         /// </summary>
-        static readonly Dictionary<HttpMethod, Action<HttpClient, HttpRequestMessage, HttpRequestOptions>> HttpMethodRequestMessageHandlers = null;
+        static readonly Dictionary<HttpMethod, Action<HttpClient, HttpRequestMessage, SixnetHttpRequestOptions>> HttpMethodRequestMessageHandlers = null;
 
         /// <summary>
         /// Default http client
@@ -36,7 +36,7 @@ namespace Sixnet.Net.Http
 
         static SixnetHttp()
         {
-            HttpMethodRequestMessageHandlers = new Dictionary<HttpMethod, Action<HttpClient, HttpRequestMessage, HttpRequestOptions>>()
+            HttpMethodRequestMessageHandlers = new Dictionary<HttpMethod, Action<HttpClient, HttpRequestMessage, SixnetHttpRequestOptions>>()
             {
                 [HttpMethod.Post] = HttpRequestMessageSetFileAndParameter,
                 [HttpMethod.Put] = HttpRequestMessageSetFileAndParameter,
@@ -99,7 +99,7 @@ namespace Sixnet.Net.Http
         /// </summary>
         /// <param name="httpRequestOptions">Http request options</param>
         /// <returns>Return the http response message</returns>
-        public static HttpResponseMessage Send(HttpRequestOptions httpRequestOptions)
+        public static HttpResponseMessage Send(SixnetHttpRequestOptions httpRequestOptions)
         {
             return SendAsync(httpRequestOptions).Result;
         }
@@ -708,7 +708,7 @@ namespace Sixnet.Net.Http
         {
             var content = new StringContent(jsonData, Encoding.UTF8);
             content.Headers.ContentType = new MediaTypeWithQualityHeaderValue("application/json");
-            return Send(new HttpRequestOptions()
+            return Send(new SixnetHttpRequestOptions()
             {
                 HttpClientConfigName = httpClientConfigName,
                 HttpCompletionOption = HttpCompletionOption.ResponseHeadersRead,
@@ -814,7 +814,7 @@ namespace Sixnet.Net.Http
             var result = SixnetJsonSerializer.Deserialize<SixnetUploadResult>(valueAsString);
             result?.Files?.ForEach(file =>
             {
-                file.Location = UploadLocation.Remote;
+                file.Location = SixnetUploadLocation.Remote;
             });
             return result;
         }
@@ -1014,7 +1014,7 @@ namespace Sixnet.Net.Http
 
         #region Handle http request options
 
-        static HttpRequestOptions HandleHttpRequestOptions(HttpClient httpClient, HttpRequestOptions httpRequestOptions)
+        static SixnetHttpRequestOptions HandleHttpRequestOptions(HttpClient httpClient, SixnetHttpRequestOptions httpRequestOptions)
         {
             httpRequestOptions.HttpRequestMessage ??= new HttpRequestMessage();
             var httpRequestMessage = httpRequestOptions.HttpRequestMessage;
@@ -1048,7 +1048,7 @@ namespace Sixnet.Net.Http
         /// <param name="httpClient">Http client</param>
         /// <param name="httpRequestMessage">Http request message</param>
         /// <param name="httpRequestOptions">Http request options</param>
-        private static void HttpRequestMessageSetFileAndParameter(HttpClient httpClient, HttpRequestMessage httpRequestMessage, HttpRequestOptions httpRequestOptions)
+        private static void HttpRequestMessageSetFileAndParameter(HttpClient httpClient, HttpRequestMessage httpRequestMessage, SixnetHttpRequestOptions httpRequestOptions)
         {
             if (httpRequestMessage == null || httpRequestOptions == null)
             {
@@ -1115,7 +1115,7 @@ namespace Sixnet.Net.Http
         /// <param name="httpClient">Http client</param>
         /// <param name="httpRequestMessage">Http request message</param>
         /// <param name="httpRequestOption">Http request option</param>
-        static void AppendUrlParameter(HttpClient httpClient, HttpRequestMessage httpRequestMessage, HttpRequestOptions httpRequestOption)
+        static void AppendUrlParameter(HttpClient httpClient, HttpRequestMessage httpRequestMessage, SixnetHttpRequestOptions httpRequestOption)
         {
             if (httpRequestMessage == null || httpRequestOption == null || httpRequestOption.Parameters.IsNullOrEmpty())
             {

@@ -14,13 +14,13 @@ namespace Sixnet.Development.Message
         /// </summary>
         /// <param name="parameter">Send message parameter</param>
         /// <returns></returns>
-        void Send(SendMessageParameter parameter);
+        void Send(SixnetSendMessageParameter parameter);
 
         /// <summary>
         /// Send message
         /// </summary>
         /// <param name="parameter">Send message parameter</param>
         /// <returns></returns>
-        Task SendAsync(SendMessageParameter parameter);
+        Task SendAsync(SixnetSendMessageParameter parameter);
     }
 }

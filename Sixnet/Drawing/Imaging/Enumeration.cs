@@ -5,7 +5,7 @@ namespace Sixnet.Drawing.Imaging
     /// <summary>
     /// Defines image handling type
     /// </summary>
-    public enum ImageHandlingType
+    public enum SixnetImageHandlingType
     {
         Scale = 1101,
         Cut = 1105
@@ -14,7 +14,7 @@ namespace Sixnet.Drawing.Imaging
     /// <summary>
     /// Defines image scale type
     /// </summary>
-    public enum ScalingType
+    public enum SixnetScalingType
     {
         Regular = 210,
         WidthFirst = 215,
@@ -25,7 +25,7 @@ namespace Sixnet.Drawing.Imaging
     /// <summary>
     /// Defines scaling quality
     /// </summary>
-    public enum ScalingQuality
+    public enum SixnetScalingQuality
     {
         High = 310,
         Default = 320,
@@ -35,7 +35,7 @@ namespace Sixnet.Drawing.Imaging
     /// <summary>
     /// Defines image split direction
     /// </summary>
-    public enum ImageSplitDirection
+    public enum SixnetImageSplitDirection
     {
         Horizontal = 410,
         Vertical = 420

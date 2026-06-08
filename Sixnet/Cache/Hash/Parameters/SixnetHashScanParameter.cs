@@ -24,7 +24,7 @@ namespace Sixnet.Cache.Hash.Parameters
         /// <summary>
         /// Gets or sets the pattern type
         /// </summary>
-        public KeyMatchPattern PatternType { get; set; }
+        public SixnetKeyMatchPattern PatternType { get; set; }
 
         /// <summary>
         /// Gets or sets the page size

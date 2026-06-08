@@ -127,13 +127,13 @@ namespace Sixnet.Localization.Database
                 }
                 var resources = new ConcurrentDictionary<string, string>();
 
-                var resourceFilter = new PagingFilter()
+                var resourceFilter = new SixnetPagingFilter()
                 {
                     Page = 1,
                     PageSize = 1000
                 };
                 var repository = SixnetContainer.GetRepository<SixnetLocalizationEntity>();
-                PagingInfo<SixnetLocalizationEntity> resourcePaging = null;
+                SixnetPagingInfo<SixnetLocalizationEntity> resourcePaging = null;
                 do
                 {
                     resourcePaging = repository.AsQueryable()
