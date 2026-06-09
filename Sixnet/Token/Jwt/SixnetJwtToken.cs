@@ -1,15 +1,14 @@
-﻿// "Company © 2025. All rights reserved."
-
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 
 using Sixnet.DependencyInjection;
 using Sixnet.Exceptions;
 using Sixnet.Security.Authentication;
+using Sixnet.Security.Cryptography;
 using Sixnet.Session;
 
 namespace Sixnet.Token.Jwt
@@ -40,15 +39,17 @@ namespace Sixnet.Token.Jwt
 
         #region Methods
 
+        #region Create token
+
         /// <summary>
-        /// Create token core
+        /// Generate token
         /// </summary>
         /// <param name="claims"></param>
         /// <param name="jwtSetting"></param>
         /// <returns></returns>
-        static SixnetJwtToken CreateTokenCore(IEnumerable<Claim> claims, SixnetJwtSetting jwtSetting)
+        static SixnetJwtToken GenerateToken(IEnumerable<Claim> claims, SixnetJwtSetting jwtSetting)
         {
-            var tokenHandler = new JwtSecurityTokenHandler();
+            var tokenHandler = new JsonWebTokenHandler();
             var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSetting.IssuerSigningKey));
             var signingCredentials = new SigningCredentials(signingKey, string.IsNullOrWhiteSpace(jwtSetting.SecurityAlgorithms) ? SecurityAlgorithms.HmacSha256Signature : jwtSetting.SecurityAlgorithms);
 
@@ -67,24 +68,15 @@ namespace Sixnet.Token.Jwt
                 SigningCredentials = signingCredentials,
                 Subject = new ClaimsIdentity(claims)
             };
-            var userInfo = SixnetUserInfo.GetUserFromClaims(claims);
-            SixnetAuthenticationManager.SetAuthenticationToken(setting =>
-            {
-                setting.AppTag = userInfo.AppTag;
-                setting.Token = userInfo.Token;
-                setting.UserId = userInfo.Id;
-                setting.Score = jwtSetting.Score;
-                setting.ExpireSeconds = jwtSetting.TokenExpirationSeconds;
-            });
-            var accessToken = tokenHandler.WriteToken(tokenHandler.CreateToken(accessTokenDescriptor));
+            var accessToken = tokenHandler.CreateToken(accessTokenDescriptor);
 
             // refresh token
             accessTokenDescriptor.Expires = accessTokenExpiresAt.AddSeconds(accessTokenExpirSeconds);
             accessTokenDescriptor.Claims = new Dictionary<string, object>()
             {
-                { SixnetJwtClaimTypes.Role, "refresh" }
+                { SixnetJwtClaimTypes.Role, SixnetMD5Helper.Encrypt(accessToken) }
             };
-            var refreshToken = tokenHandler.WriteToken(tokenHandler.CreateToken(accessTokenDescriptor));
+            var refreshToken = tokenHandler.CreateToken(accessTokenDescriptor);
 
             return new SixnetJwtToken()
             {
@@ -100,27 +92,31 @@ namespace Sixnet.Token.Jwt
         /// <param name="claims"></param>
         /// <param name="jwtSetting"></param>
         /// <returns></returns>
+        static SixnetJwtToken CreateTokenCore(IEnumerable<Claim> claims, SixnetJwtSetting jwtSetting)
+        {
+            // auth token
+            var userInfo = SixnetUserInfo.GetUserFromClaims(claims);
+            SixnetAuthenticationManager.SetAuthenticationToken(setting =>
+            {
+                setting.AppTag = userInfo.AppTag;
+                setting.Token = userInfo.Token;
+                setting.UserId = userInfo.Id;
+                setting.Score = jwtSetting.Score;
+                setting.ExpireSeconds = jwtSetting.TokenExpirationSeconds;
+            });
+
+            return GenerateToken(claims, jwtSetting);
+        }
+
+        /// <summary>
+        /// Create token core
+        /// </summary>
+        /// <param name="claims"></param>
+        /// <param name="jwtSetting"></param>
+        /// <returns></returns>
         static async Task<SixnetJwtToken> CreateTokenCoreAsync(IEnumerable<Claim> claims, SixnetJwtSetting jwtSetting)
         {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSetting.IssuerSigningKey));
-            var signingCredentials = new SigningCredentials(signingKey, string.IsNullOrWhiteSpace(jwtSetting.SecurityAlgorithms) ? SecurityAlgorithms.HmacSha256Signature : jwtSetting.SecurityAlgorithms);
-
-            //access token
-            var authTime = DateTime.UtcNow;
-            int accessTokenExpirSeconds = jwtSetting.TokenExpirationSeconds;
-            accessTokenExpirSeconds = accessTokenExpirSeconds < 1 ? SixnetJwtSetting.DEFAULT_TOKEN_EXP_SECONDS : accessTokenExpirSeconds;
-            var accessTokenExpiresAt = authTime.AddSeconds(accessTokenExpirSeconds);
-            var accessTokenDescriptor = new SecurityTokenDescriptor
-            {
-                Expires = accessTokenExpiresAt,
-                NotBefore = authTime,
-                IssuedAt = authTime,
-                Issuer = jwtSetting.ValidIssuer,
-                Audience = jwtSetting.ValidAudience,
-                SigningCredentials = signingCredentials,
-                Subject = new ClaimsIdentity(claims)
-            };
+            // auth token
             var userInfo = SixnetUserInfo.GetUserFromClaims(claims);
             await SixnetAuthenticationManager.SetAuthenticationTokenAsync(setting =>
             {
@@ -130,22 +126,8 @@ namespace Sixnet.Token.Jwt
                 setting.Score = jwtSetting.Score;
                 setting.ExpireSeconds = jwtSetting.TokenExpirationSeconds;
             });
-            var accessToken = tokenHandler.WriteToken(tokenHandler.CreateToken(accessTokenDescriptor));
 
-            // refresh token
-            accessTokenDescriptor.Expires = accessTokenExpiresAt.AddSeconds(accessTokenExpirSeconds);
-            accessTokenDescriptor.Claims = new Dictionary<string, object>()
-            {
-                { SixnetJwtClaimTypes.Role, "refresh" }
-            };
-            var refreshToken = tokenHandler.WriteToken(tokenHandler.CreateToken(accessTokenDescriptor));
-
-            return new SixnetJwtToken()
-            {
-                AccessToken = accessToken,
-                RefreshToken = refreshToken,
-                ExpSeconds = accessTokenExpirSeconds
-            };
+            return GenerateToken(claims, jwtSetting);
         }
 
         /// <summary>
@@ -206,20 +188,19 @@ namespace Sixnet.Token.Jwt
             return await CreateAsync(user.GetClaims(), configure);
         }
 
+        #endregion
+
+        #region Refresh token
+
         /// <summary>
-        /// Refresh token
+        /// Refresh core
         /// </summary>
+        /// <param name="jwtSetting"></param>
         /// <returns></returns>
-        public SixnetJwtToken Refresh(Action<SixnetJwtSetting> configure = null)
+        async Task<SixnetUserInfo> ValidateRefreshTokenAsync(SixnetJwtSetting jwtSetting)
         {
-            var jwtSetting = SixnetContainer.GetOptions<SixnetAuthenticationOptions>()?.GetJwtSetting() ?? new SixnetJwtSetting();
-            configure?.Invoke(jwtSetting);
-            SixnetDirectThrower.ThrowArgNullIf(jwtSetting == null, nameof(jwtSetting));
-
             SixnetDirectThrower.ThrowArgErrorIf(string.IsNullOrWhiteSpace(AccessToken), "Access token is null or empty");
-
-            var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
-            SixnetDirectThrower.ThrowNotSupportIf(!jwtSecurityTokenHandler.CanReadToken(AccessToken), "Access token is fault");
+            SixnetDirectThrower.ThrowArgErrorIf(string.IsNullOrWhiteSpace(RefreshToken), "Refresh token is null or empty");
 
             // Validate parameter
             var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSetting.IssuerSigningKey));
@@ -233,14 +214,39 @@ namespace Sixnet.Token.Jwt
                 ValidAudience = jwtSetting.ValidAudience,
                 IssuerSigningKey = signingKey
             };
+            var jwtTokenHandler = new JsonWebTokenHandler();
 
-            // Validate access token
-            jwtSecurityTokenHandler.ValidateToken(AccessToken, validateParameter, out var validatedToken);
+            SixnetDirectThrower.ThrowSixnetExceptionIf(!jwtTokenHandler.CanReadToken(AccessToken), "Access token is incorrect");
+            SixnetDirectThrower.ThrowSixnetExceptionIf(!jwtTokenHandler.CanReadToken(RefreshToken), "RefreshToken token is incorrect");
 
-            // Create new access token
-            var jwtToken = validatedToken as JwtSecurityToken;
-            var tokenUser = SixnetUserInfo.GetUserFromClaims(jwtToken.Claims);
-            return CreateTokenCore(tokenUser.GetClaims(), jwtSetting);
+            var accessTokenResult = await jwtTokenHandler.ValidateTokenAsync(AccessToken, validateParameter).ConfigureAwait(false);
+            SixnetDirectThrower.ThrowSixnetExceptionIf(accessTokenResult.IsValid, "RefreshToken token is incorrect");
+
+            var refreshTokenResult = await jwtTokenHandler.ValidateTokenAsync(RefreshToken, validateParameter).ConfigureAwait(false);
+            SixnetDirectThrower.ThrowSixnetExceptionIf(refreshTokenResult.IsValid, "RefreshToken token is incorrect");
+
+            var refreshTokenClaims = refreshTokenResult.Claims;
+            refreshTokenClaims.TryGetValue(SixnetJwtClaimTypes.Role, out var refreshRoleValue);
+            SixnetDirectThrower.ThrowSixnetExceptionIf(string.Compare(refreshRoleValue?.ToString(), SixnetMD5Helper.Encrypt(AccessToken), true) != 0, "The RefreshToken and AccessToken do not match");
+
+            var accessTokenClaims = accessTokenResult.Claims;
+            var userInfo = SixnetUserInfo.GetUserFromClaims(accessTokenClaims?.Select(c => new Claim(c.Key, c.Value?.ToString())));
+            userInfo.Token = Guid.NewGuid().ToString();
+            return userInfo;
+        }
+
+        /// <summary>
+        /// Refresh token
+        /// </summary>
+        /// <returns></returns>
+        public SixnetJwtToken Refresh(Action<SixnetJwtSetting> configure = null)
+        {
+            var jwtSetting = SixnetContainer.GetOptions<SixnetAuthenticationOptions>()?.GetJwtSetting() ?? new SixnetJwtSetting();
+            configure?.Invoke(jwtSetting);
+            SixnetDirectThrower.ThrowArgNullIf(jwtSetting == null, nameof(jwtSetting));
+
+            var userInfo = ValidateRefreshTokenAsync(jwtSetting).Result;
+            return CreateTokenCore(userInfo.GetClaims(), jwtSetting);
         }
 
         /// <summary>
@@ -253,32 +259,13 @@ namespace Sixnet.Token.Jwt
             configure?.Invoke(jwtSetting);
             SixnetDirectThrower.ThrowArgNullIf(jwtSetting == null, nameof(jwtSetting));
 
-            SixnetDirectThrower.ThrowArgErrorIf(string.IsNullOrWhiteSpace(AccessToken), "Access token is null or empty");
-
-            var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
-            SixnetDirectThrower.ThrowNotSupportIf(!jwtSecurityTokenHandler.CanReadToken(AccessToken), "Access token is fault");
-
-            // Validate parameter
-            var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSetting.IssuerSigningKey));
-            var validateParameter = new TokenValidationParameters()
-            {
-                ValidateAudience = true,
-                ValidateIssuer = true,
-                ValidateLifetime = false,
-                ValidateIssuerSigningKey = true,
-                ValidIssuer = jwtSetting.ValidIssuer,
-                ValidAudience = jwtSetting.ValidAudience,
-                IssuerSigningKey = signingKey
-            };
-
-            // Validate access token
-            jwtSecurityTokenHandler.ValidateToken(AccessToken, validateParameter, out var validatedToken);
-
-            // Create new access token
-            var jwtToken = validatedToken as JwtSecurityToken;
-            var tokenUser = SixnetUserInfo.GetUserFromClaims(jwtToken.Claims);
-            return await CreateTokenCoreAsync(tokenUser.GetClaims(), jwtSetting);
+            var userInfo = await ValidateRefreshTokenAsync(jwtSetting).ConfigureAwait(false);
+            return await CreateTokenCoreAsync(userInfo.GetClaims(), jwtSetting).ConfigureAwait(false);
         }
+
+        #endregion
+
+        #region Destory token
 
         /// <summary>
         /// Destory token
@@ -351,6 +338,8 @@ namespace Sixnet.Token.Jwt
                 await DestroyAsync(SixnetSessionContext.Current?.User, configure);
             }
         }
+
+        #endregion
 
         #endregion
     }

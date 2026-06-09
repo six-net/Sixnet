@@ -15,7 +15,6 @@
     <tags>.NET,Sixnet,DDD</tags>
     <dependencies>
 		<dependency id="Microsoft.Bcl.HashCode" version="6.0.0" />
-		<dependency id="Microsoft.CSharp" version="4.7.0" />
 		<dependency id="Microsoft.Extensions.Configuration.Json" version="9.0.10" />
 		<dependency id="Microsoft.Extensions.DependencyInjection" version="9.0.10" />
 		<dependency id="Microsoft.Extensions.Hosting" version="9.0.10" />
@@ -27,12 +26,8 @@
 		<dependency id="System.ComponentModel.Annotations" version="5.0.0" />
 		<dependency id="System.DirectoryServices.Protocols" version="9.0.10" />
 		<dependency id="System.Drawing.Common" version="9.0.10" />
-		<dependency id="System.IdentityModel.Tokens.Jwt" version="8.14.0" />
-		<dependency id="System.Reflection.Emit" version="4.7.0" />
-		<dependency id="System.Reflection.Emit.Lightweight" version="4.7.0" />
 		<dependency id="System.Text.Json" version="9.0.10" />
 		<dependency id="System.Threading.Channels" version="9.0.10" />
-		<dependency id="System.Threading.Tasks.Extensions" version="4.6.3" />
     </dependencies>
   </metadata>
   <files>
@@ -40,6 +35,8 @@
 	<file src="Sixnet\bin\$configuration$\net6.0\Sixnet.pdb" target="lib\net6.0" />
     <file src="Sixnet\bin\$configuration$\net8.0\Sixnet.dll" target="lib\net8.0" />
 	<file src="Sixnet\bin\$configuration$\net8.0\Sixnet.pdb" target="lib\net8.0" />
+	<file src="Sixnet\bin\$configuration$\net10.0\Sixnet.dll" target="lib\net10.0" />
+	<file src="Sixnet\bin\$configuration$\net10.0\Sixnet.pdb" target="lib\net10.0" />
 	<file src=".\nugeticon.png" target="images\" />
   </files>
 </package>
