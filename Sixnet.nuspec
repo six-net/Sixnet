@@ -14,20 +14,20 @@
     <copyright>Copyright © DingBin.Li</copyright>
     <tags>.NET,Sixnet,DDD</tags>
     <dependencies>
-		<dependency id="Microsoft.Bcl.HashCode" version="6.0.0" />
-		<dependency id="Microsoft.Extensions.Configuration.Json" version="9.0.10" />
-		<dependency id="Microsoft.Extensions.DependencyInjection" version="9.0.10" />
-		<dependency id="Microsoft.Extensions.Hosting" version="9.0.10" />
-		<dependency id="Microsoft.Extensions.Http" version="9.0.10" />
-		<dependency id="Microsoft.Extensions.Localization" version="9.0.10" />
-		<dependency id="Microsoft.Extensions.Logging" version="9.0.10" />
-		<dependency id="Microsoft.Extensions.Options.ConfigurationExtensions" version="9.0.10" />
-		<dependency id="Microsoft.IdentityModel.JsonWebTokens" version="8.14.0" />
-		<dependency id="System.ComponentModel.Annotations" version="5.0.0" />
-		<dependency id="System.DirectoryServices.Protocols" version="9.0.10" />
-		<dependency id="System.Drawing.Common" version="9.0.10" />
-		<dependency id="System.Text.Json" version="9.0.10" />
-		<dependency id="System.Threading.Channels" version="9.0.10" />
+		<dependency id="Microsoft.Bcl.HashCode" Version="6.0.0" />
+		<dependency id="Microsoft.Extensions.Configuration.Json" Version="10.0.8" />
+		<dependency id="Microsoft.Extensions.DependencyInjection" Version="10.0.8" />
+		<dependency id="Microsoft.Extensions.Hosting" Version="10.0.8" />
+		<dependency id="Microsoft.Extensions.Http" Version="10.0.8" />
+		<dependency id="Microsoft.Extensions.Localization" Version="10.0.8" />
+		<dependency id="Microsoft.Extensions.Logging" Version="10.0.8" />
+		<dependency id="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.8" />
+		<dependency id="Microsoft.IdentityModel.JsonWebTokens" Version="8.19.1" />
+		<dependency id="System.ComponentModel.Annotations" Version="5.0.0" />
+		<dependency id="System.DirectoryServices.Protocols" Version="10.0.8" />
+		<dependency id="System.Drawing.Common" Version="10.0.8" />
+		<dependency id="System.Text.Json" Version="10.0.8" />
+		<dependency id="System.Threading.Channels" Version="10.0.8" />
     </dependencies>
   </metadata>
   <files>
