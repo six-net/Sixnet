@@ -2,7 +2,7 @@
 
 using Sixnet.Development.Events;
 
-namespace Sixnet.Development.Domain.Events
+namespace Sixnet.Development.Events
 {
     /// <summary>
     /// Sixnet base event

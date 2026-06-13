@@ -164,11 +164,6 @@ namespace Sixnet.App
                         }) ?? false);
                     }
 
-                    if (type.Name == "IUserRoleCommandService")
-                    {
-                        
-                    }
-
                     if (containEventHandlerTag(type))
                     {
                         SixnetApplication.AddEventHandlerConfigurable(type);

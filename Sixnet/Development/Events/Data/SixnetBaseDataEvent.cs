@@ -2,7 +2,7 @@
 
 using Sixnet.Development.Data.Client;
 using Sixnet.Development.Data.Command;
-using Sixnet.Development.Domain.Events;
+using Sixnet.Development.Events;
 using Sixnet.Exceptions;
 
 namespace Sixnet.Development.Events.Data

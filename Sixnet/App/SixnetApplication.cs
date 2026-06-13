@@ -4,9 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
-
 using Sixnet.DependencyInjection;
-using Sixnet.Development.Domain.Events;
 using Sixnet.Development.Events;
 using Sixnet.Environments;
 using Sixnet.Logging;

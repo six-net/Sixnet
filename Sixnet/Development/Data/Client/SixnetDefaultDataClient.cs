@@ -3,6 +3,7 @@
 using System.Collections.Concurrent;
 using System.Data;
 using System.Threading;
+
 using Sixnet.Development.Command;
 using Sixnet.Development.Data.Command;
 using Sixnet.Development.Data.Database;
@@ -1470,11 +1471,12 @@ namespace Sixnet.Development.Data.Client
         /// <typeparam name="TEntity"></typeparam>
         /// <param name="field"></param>
         /// <param name="options"></param>
-        public void AlterField<TEntity>(Expression<Func<TEntity, object>> field, Action<SixnetDataField> configureField = null, SixnetDataOperationOptions options = null)
+        public void AlterField<TEntity>(Expression<Func<TEntity, object>> field, Action<SixnetDataField> configureField, SixnetDataOperationOptions options = null)
         {
             var dataField = SixnetExpressionHelper.GetDataField(field) as SixnetDataField;
+            var currentFieldName = dataField.FieldName;
             configureField?.Invoke(dataField);
-            AlterField(typeof(TEntity), new Dictionary<string, SixnetDataField>(1) { { dataField.FieldName, dataField } }, options);
+            AlterField(typeof(TEntity), new Dictionary<string, SixnetDataField>(1) { { currentFieldName, dataField } }, options);
         }
 
         /// <summary>

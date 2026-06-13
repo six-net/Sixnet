@@ -378,6 +378,20 @@ namespace Sixnet.Development.Data.Field
 
         #endregion
 
+        #region Set field name
+
+        /// <summary>
+        /// Set field name
+        /// </summary>
+        /// <param name="fieldName"></param>
+        public void SetFieldName(string fieldName)
+        {
+            FieldName = fieldName;
+            fixedFieldName = true;
+        }
+
+        #endregion
+
         #region Necessary field
 
         /// <summary>

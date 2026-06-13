@@ -838,7 +838,7 @@ namespace Sixnet.Development.Data.Client
         /// <typeparam name="TEntity"></typeparam>
         /// <param name="field"></param>
         /// <param name="options"></param>
-        void AlterField<TEntity>(Expression<Func<TEntity, object>> field, Action<SixnetDataField> configureField = null, SixnetDataOperationOptions options = null);
+        void AlterField<TEntity>(Expression<Func<TEntity, object>> field, Action<SixnetDataField> configureField, SixnetDataOperationOptions options = null);
 
         /// <summary>
         /// Alter field
