@@ -405,7 +405,7 @@ namespace Sixnet.DependencyInjection
             // File
             services.ConfigureIfNotNull<SixnetFileOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.File)));
             // Rsa key
-            services.ConfigureIfNotNull<SixnetRsations>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Rsa)));
+            services.ConfigureIfNotNull<SixnetRsaOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Rsa)));
             // Database
             services.ConfigureIfNotNull<SixnetDataOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Data)));
             // Cache

@@ -5,7 +5,7 @@ namespace Sixnet.Security.Cryptography
     /// <summary>
     /// RSA options
     /// </summary>
-    public class SixnetRsations
+    public class SixnetRsaOptions
     {
         /// <summary>
         /// Public key

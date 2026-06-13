@@ -318,12 +318,12 @@ namespace Sixnet
 
         #region Configure RSA
 
-        internal Action<SixnetRsations> ConfigureRsaAction;
+        internal Action<SixnetRsaOptions> ConfigureRsaAction;
 
         /// <summary>
         /// Register configure RSA action
         /// </summary>
-        public SixnetOptions ConfigureRSA(Action<SixnetRsations> configure, bool toFirst = false)
+        public SixnetOptions ConfigureRSA(Action<SixnetRsaOptions> configure, bool toFirst = false)
         {
             ConfigureRsaAction = toFirst
                 ? configure + ConfigureRsaAction
@@ -334,7 +334,7 @@ namespace Sixnet
         /// <summary>
         /// Invoke the registered configure RSA action
         /// </summary>
-        internal void ConfigureRSA(SixnetRsations options)
+        internal void ConfigureRSA(SixnetRsaOptions options)
         {
             ConfigureRsaAction?.Invoke(options);
         }
