@@ -472,7 +472,7 @@ namespace Sixnet.Development.Data.Database
             var renameTableStatements = GetRenameTableStatements(command);
             if (!renameTableStatements.IsNullOrEmpty())
             {
-                statements.AddRange(createTableStatements);
+                statements.AddRange(renameTableStatements);
             }
 
             // Deleteable tables

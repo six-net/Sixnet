@@ -10,6 +10,7 @@ using Sixnet.Development.Data.Database;
 using Sixnet.Development.Data.Field;
 using Sixnet.Development.Entity;
 using Sixnet.Development.Queryable;
+using Sixnet.Exceptions;
 using Sixnet.Model.Paging;
 
 namespace Sixnet.Development.Data.Client
@@ -884,6 +885,40 @@ namespace Sixnet.Development.Data.Client
         /// <param name="fields"></param>
         /// <param name="options"></param>
         void AlterField(Type entityType, Dictionary<string, SixnetDataField> fields, SixnetDataOperationOptions options);
+
+        /// <summary>
+        /// Rename table
+        /// </summary>
+        /// <param name="currentTableName">Current table name</param>
+        /// <param name="newTableName">New table name</param>
+        /// <param name="entityType">Entity type</param>
+        /// <param name="options">Options</param>
+        void RenameTable(string currentTableName, string newTableName, Type entityType, SixnetDataOperationOptions options = null);
+
+        /// <summary>
+        /// Rename table
+        /// </summary>
+        /// <param name="currentTableName">Current table name</param>
+        /// <param name="options">Options</param>
+        void RenameTable<TEntity>(string currentTableName, SixnetDataOperationOptions options = null);
+
+        /// <summary>
+        /// Rename table
+        /// </summary>
+        /// <param name="currentTableName">Current table name</param>
+        /// <param name="newTableName">New table name</param>
+        /// <param name="schema">Schema</param>
+        /// <param name="entityType">Entity type</param>
+        /// <param name="options">Options</param>
+        void RenameTable(string currentTableName, string newTableName, string schema, Type entityType, SixnetDataOperationOptions options = null);
+
+        /// <summary>
+        /// Rename table
+        /// </summary>
+        /// <param name="currentTableName">Current table name</param>
+        /// <param name="schema">Schema</param>
+        /// <param name="options">Options</param>
+        void RenameTable<TEntity>(string currentTableName, string schema, SixnetDataOperationOptions options = null);
 
         #endregion
 

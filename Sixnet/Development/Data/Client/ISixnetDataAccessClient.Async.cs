@@ -854,6 +854,40 @@ namespace Sixnet.Development.Data.Client
         /// <param name="options"></param>
         Task AlterFieldAsync(Type entityType, Dictionary<string, SixnetDataField> fields, SixnetDataOperationOptions options);
 
+        /// <summary>
+        /// Rename table
+        /// </summary>
+        /// <param name="currentTableName">Current table name</param>
+        /// <param name="newTableName">New table name</param>
+        /// <param name="entityType">Entity type</param>
+        /// <param name="options">Options</param>
+        Task RenameTableAsync(string currentTableName, string newTableName, Type entityType, SixnetDataOperationOptions options = null);
+
+        /// <summary>
+        /// Rename table
+        /// </summary>
+        /// <param name="currentTableName">Current table name</param>
+        /// <param name="options">Options</param>
+        Task RenameTableAsync<TEntity>(string currentTableName, SixnetDataOperationOptions options = null);
+
+        /// <summary>
+        /// Rename table
+        /// </summary>
+        /// <param name="currentTableName">Current table name</param>
+        /// <param name="newTableName">New table name</param>
+        /// <param name="schema">Schema</param>
+        /// <param name="entityType">Entity type</param>
+        /// <param name="options">Options</param>
+        Task RenameTableAsync(string currentTableName, string newTableName, string schema, Type entityType, SixnetDataOperationOptions options = null);
+
+        /// <summary>
+        /// Rename table
+        /// </summary>
+        /// <param name="currentTableName">Current table name</param>
+        /// <param name="schema">Schema</param>
+        /// <param name="options">Options</param>
+        Task RenameTableAsync<TEntity>(string currentTableName, string schema, SixnetDataOperationOptions options = null);
+
         #endregion
 
         #region Get tables

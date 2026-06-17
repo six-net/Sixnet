@@ -2,6 +2,7 @@
 
 using System.Data;
 using System.Runtime.InteropServices;
+
 using Sixnet.Development.Data;
 using Sixnet.Development.Data.Command;
 using Sixnet.Development.Data.Database;
@@ -104,7 +105,8 @@ namespace Sixnet.Development.Command
                     if (!pagingInfo.Items.IsNullOrEmpty())
                     {
                         finallyDatas = finallyDatas.Union(pagingInfo.Items);
-                    };
+                    }
+                    ;
                 }
             }
             if (finallyDatas.GetCount() > pageSize)
@@ -1037,6 +1039,50 @@ namespace Sixnet.Development.Command
             return migCmd;
         }
 
+        /// <summary>
+        /// Get rename table command
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <param name="entityType"></param>
+        /// <param name="allTableNames"></param>
+        /// <param name="newTableName"></param>
+        /// <param name="options"></param>
+        /// <returns></returns>
+        static SixnetMigrationDatabaseCommand GetRenameTableCommand(SixnetDatabaseConnection connection, Type entityType
+            , List<SixnetDatabaseObjectName> allTableNames, SixnetDatabaseObjectName oldTableName, SixnetDatabaseObjectName newTableName
+            , SixnetDataOperationOptions options = null)
+        {
+            var entityConfig = SixnetEntityManager.GetEntityConfig(entityType);
+            var migCmd = SixnetDatabaseCommand.Create<SixnetMigrationDatabaseCommand>(connection, options, cmd =>
+            {
+                cmd.MigrationInfo = new SixnetMigrationInfo();
+            });
+            if (string.IsNullOrWhiteSpace(newTableName.Name))
+            {
+                newTableName.Name = SixnetDataManager.GetDefaultTableName(SixnetDataCommandExecutionContext.Create(connection), entityConfig).Name;
+            }
+            if (entityConfig?.IsSplitTable ?? false)
+            {
+                var splitProvider = SixnetDataManager.GetSplitTableProvider(SixnetDataManager.GetDataOptions(), SixnetEntityManager.GetEntityConfig(entityType));
+                var splitBehavior = options?.SplitTableBehavior ?? new SixnetSplitTableBehavior();
+                allTableNames = splitProvider.FilterAllTableNames(new SixnetFilterAllSplitTableNameParameter()
+                {
+                    AllTableNames = allTableNames,
+                    Behavior = splitBehavior,
+                    RootTableName = oldTableName,
+                });
+                migCmd.MigrationInfo.RenameTables = splitProvider.ChangeRootTableNames(allTableNames, newTableName);
+            }
+            else
+            {
+                migCmd.MigrationInfo.RenameTables = new Dictionary<SixnetDatabaseObjectName, SixnetDatabaseObjectName>
+                {
+                    { oldTableName, newTableName}
+                };
+            }
+            return migCmd;
+        }
+
         #endregion
 
         #region Create table
@@ -1135,6 +1181,27 @@ namespace Sixnet.Development.Command
             foreach (var connection in connections)
             {
                 connection.DatabaseProvider.Migrate(GetAlterFieldCommand(connection, connection.DatabaseProvider.GetTables(SixnetDatabaseCommand.Create(connection, options))?.Select(c => c.GetDatabaseObjectName()).ToList(), entityType, fields, options));
+            }
+        }
+
+        #endregion
+
+        #region Rename table
+
+        /// <summary>
+        /// Rename table
+        /// </summary>
+        /// <param name="connections">Connections</param>
+        /// <param name="entityType">Entity type</param>
+        /// <param name="oldTableName">Old table name</param>
+        /// <param name="newTableName">New table name</param>
+        /// <param name="options">Options</param>
+        public static void RenameTable(IEnumerable<SixnetDatabaseConnection> connections, Type entityType, SixnetDatabaseObjectName oldTableName, SixnetDatabaseObjectName newTableName, SixnetDataOperationOptions options)
+        {
+            ValidateConnections(connections);
+            foreach (var connection in connections)
+            {
+                connection.DatabaseProvider.Migrate(GetRenameTableCommand(connection, entityType, connection.DatabaseProvider.GetTables(SixnetDatabaseCommand.Create(connection, options))?.Select(c => c.GetDatabaseObjectName()).ToList(), oldTableName, newTableName, options));
             }
         }
 

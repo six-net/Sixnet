@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Sixnet.Cache;
 using Sixnet.Cache.Keys.Parameters;
 using Sixnet.Cache.String.Parameters;
+using Sixnet.Code;
 using Sixnet.Development.Data.Database;
 using Sixnet.Exceptions;
 
@@ -148,6 +149,100 @@ namespace Sixnet.Threading.Locking
         {
             var lockName = GetCreateDatabaseConnectionLockName(server);
             return GetLockAsync(CreateDatabaseConnectionLockName, lockName, GetLockValue(), expirationSeconds);
+        }
+
+        #endregion
+
+        #region Execute
+
+        /// <summary>
+        /// Execute
+        /// </summary>
+        /// <param name="func"></param>
+        /// <param name="lockObject"></param>>
+        /// <param name="expirationSeconds"></param>
+        public static async Task ExecuteAsync(Func<Task> func, string lockObject, int? expirationSeconds = null)
+        {
+            var lockInstance = GetLock(lockObject, lockObject, SixnetGuidHelper.GetGuid().ToString(), expirationSeconds);
+            try
+            {
+                await func.Invoke();
+            }
+            finally
+            {
+                if (lockInstance.HasValue)
+                {
+                    lockInstance.Value.Release();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Execute
+        /// </summary>
+        /// <param name="func"></param>
+        /// <param name="lockObject"></param>
+        /// <param name="lockName"></param>
+        /// <param name="expirationSeconds"></param>
+        public static async Task ExecuteAsync(Func<Task> func, string lockObject, string lockName, int? expirationSeconds = null)
+        {
+            var lockInstance = GetLock(lockObject, lockName, SixnetGuidHelper.GetGuid().ToString(), expirationSeconds);
+            try
+            {
+                await func.Invoke();
+            }
+            finally
+            {
+                if (lockInstance.HasValue)
+                {
+                    lockInstance.Value.Release();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Execute
+        /// </summary>
+        /// <param name="func"></param>
+        /// <param name="lockObject"></param>>
+        /// <param name="expirationSeconds"></param>
+        public static async Task<TResult> ExecuteAsync<TResult>(Func<Task<TResult>> func, string lockObject, int? expirationSeconds = null)
+        {
+            var lockInstance = GetLock(lockObject, lockObject, SixnetGuidHelper.GetGuid().ToString(), expirationSeconds);
+            try
+            {
+                return await func.Invoke();
+            }
+            finally
+            {
+                if (lockInstance.HasValue)
+                {
+                    lockInstance.Value.Release();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Execute
+        /// </summary>
+        /// <param name="func"></param>
+        /// <param name="lockObject"></param>
+        /// <param name="lockName"></param>
+        /// <param name="expirationSeconds"></param>
+        public static async Task<TResult> ExecuteAsync<TResult>(Func<Task<TResult>> func, string lockObject, string lockName, int? expirationSeconds = null)
+        {
+            var lockInstance = GetLock(lockObject, lockName, SixnetGuidHelper.GetGuid().ToString(), expirationSeconds);
+            try
+            {
+                return await func.Invoke();
+            }
+            finally
+            {
+                if (lockInstance.HasValue)
+                {
+                    lockInstance.Value.Release();
+                }
+            }
         }
 
         #endregion

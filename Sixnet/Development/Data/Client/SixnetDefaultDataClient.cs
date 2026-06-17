@@ -1552,6 +1552,64 @@ namespace Sixnet.Development.Data.Client
             SixnetDataCommandExecutor.AlterField(connections, entityType, fields, options);
         }
 
+        /// <summary>
+        /// Rename table
+        /// </summary>
+        /// <param name="currentTableName">Current table name</param>
+        /// <param name="newTableName">New table name</param>
+        /// <param name="entityType">Entity type</param>
+        /// <param name="options">Options</param>
+        public void RenameTable(string currentTableName, string newTableName, Type entityType, SixnetDataOperationOptions options = null)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(internalDatabaseServers.IsNullOrEmpty(), "Database servers");
+            var connections = GetConnections(internalDatabaseServers);
+            SixnetDataCommandExecutor.RenameTable(connections, entityType, SixnetDatabaseObjectName.Create(currentTableName, SixnetDatabaseObjectType.Table)
+                , SixnetDatabaseObjectName.Create(newTableName, SixnetDatabaseObjectType.Table), options);
+        }
+
+        /// <summary>
+        /// Rename table
+        /// </summary>
+        /// <param name="currentTableName">Current table name</param>
+        /// <param name="options">Options</param>
+        public void RenameTable<TEntity>(string currentTableName, SixnetDataOperationOptions options = null)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(internalDatabaseServers.IsNullOrEmpty(), "Database servers");
+            var connections = GetConnections(internalDatabaseServers);
+            SixnetDataCommandExecutor.RenameTable(connections, typeof(TEntity), SixnetDatabaseObjectName.Create(currentTableName, SixnetDatabaseObjectType.Table)
+                , SixnetDatabaseObjectName.Create(string.Empty, SixnetDatabaseObjectType.Table), options);
+        }
+
+        /// <summary>
+        /// Rename table
+        /// </summary>
+        /// <param name="currentTableName">Current table name</param>
+        /// <param name="newTableName">New table name</param>
+        /// <param name="schema">Schema</param>
+        /// <param name="entityType">Entity type</param>
+        /// <param name="options">Options</param>
+        public void RenameTable(string currentTableName, string newTableName, string schema, Type entityType, SixnetDataOperationOptions options = null)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(internalDatabaseServers.IsNullOrEmpty(), "Database servers");
+            var connections = GetConnections(internalDatabaseServers);
+            SixnetDataCommandExecutor.RenameTable(connections, entityType, SixnetDatabaseObjectName.Create(currentTableName, SixnetDatabaseObjectType.Table, schema)
+                , SixnetDatabaseObjectName.Create(newTableName, SixnetDatabaseObjectType.Table, schema), options);
+        }
+
+        /// <summary>
+        /// Rename table
+        /// </summary>
+        /// <param name="currentTableName">Current table name</param>
+        /// <param name="schema">Schema</param>
+        /// <param name="options">Options</param>
+        public void RenameTable<TEntity>(string currentTableName, string schema, SixnetDataOperationOptions options = null)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(internalDatabaseServers.IsNullOrEmpty(), "Database servers");
+            var connections = GetConnections(internalDatabaseServers);
+            SixnetDataCommandExecutor.RenameTable(connections, typeof(TEntity), SixnetDatabaseObjectName.Create(currentTableName, SixnetDatabaseObjectType.Table, schema)
+                , SixnetDatabaseObjectName.Create(string.Empty, SixnetDatabaseObjectType.Table, schema), options);
+        }
+
         #endregion
 
         #region Get tables

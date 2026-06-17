@@ -1,5 +1,6 @@
 ﻿// "Company © 2025. All rights reserved."
 
+using System.Reflection.Metadata;
 using System.Text.RegularExpressions;
 
 using Sixnet.Development.Entity;
@@ -105,6 +106,30 @@ namespace Sixnet.Development.Data.Database
             }
             var tableNameRegex = new Regex(@$"^{parameter.RootTableName.FullName}_\d+$", RegexOptions.IgnoreCase);
             return parameter.AllTableNames?.Where(tn => !string.IsNullOrWhiteSpace(tn.Name) && tableNameRegex.IsMatch($"{tn.FullName}")).ToList();
+        }
+
+        /// <summary>
+        /// Change root table names
+        /// </summary>
+        /// <param name="currentTableNames">Current table names</param>
+        /// <param name="newRootTableName">New root table name</param>
+        /// <returns></returns>
+        public Dictionary<SixnetDatabaseObjectName, SixnetDatabaseObjectName> ChangeRootTableNames(IEnumerable<SixnetDatabaseObjectName> currentTableNames, SixnetDatabaseObjectName newRootTableName)
+        {
+            if (currentTableNames.IsNullOrEmpty())
+            {
+                return new Dictionary<SixnetDatabaseObjectName, SixnetDatabaseObjectName>(0);
+            }
+
+            var newNamesDict = new Dictionary<SixnetDatabaseObjectName, SixnetDatabaseObjectName>();
+            foreach (var currentTableName in currentTableNames)
+            {
+                var newTableName = currentTableName.Clone();
+                var idx = currentTableName.Name.LastIndexOf('_');
+                newTableName.Name = $"{newRootTableName.Name}{currentTableName.Name.Substring(idx)}";
+                newNamesDict[currentTableName] = newTableName;
+            }
+            return newNamesDict;
         }
 
         /// <summary>

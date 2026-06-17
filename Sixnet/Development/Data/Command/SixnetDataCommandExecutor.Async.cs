@@ -104,7 +104,8 @@ namespace Sixnet.Development.Command
                     if (!pagingInfo.Items.IsNullOrEmpty())
                     {
                         finallyDatas = finallyDatas.Union(pagingInfo.Items);
-                    };
+                    }
+                    ;
                 }
             }
             if (finallyDatas.GetCount() > pageSize)
@@ -959,6 +960,27 @@ namespace Sixnet.Development.Command
             foreach (var connection in connections)
             {
                 await connection.DatabaseProvider.MigrateAsync(GetAlterFieldCommand(connection, (await connection.DatabaseProvider.GetTablesAsync(SixnetDatabaseCommand.Create(connection, options)).ConfigureAwait(false))?.Select(c => c.GetDatabaseObjectName()).ToList(), entityType, fields, options));
+            }
+        }
+
+        #endregion
+
+        #region Rename table
+
+        /// <summary>
+        /// Rename table
+        /// </summary>
+        /// <param name="connections">Connections</param>
+        /// <param name="entityType">Entity type</param>
+        /// <param name="oldTableName">Old table name</param>
+        /// <param name="newTableName">New table name</param>
+        /// <param name="options">Options</param>
+        public static async Task RenameTableAsync(IEnumerable<SixnetDatabaseConnection> connections, Type entityType, SixnetDatabaseObjectName oldTableName, SixnetDatabaseObjectName newTableName, SixnetDataOperationOptions options)
+        {
+            ValidateConnections(connections);
+            foreach (var connection in connections)
+            {
+                await connection.DatabaseProvider.MigrateAsync(GetRenameTableCommand(connection, entityType, (await connection.DatabaseProvider.GetTablesAsync(SixnetDatabaseCommand.Create(connection, options)).ConfigureAwait(false))?.Select(c => c.GetDatabaseObjectName()).ToList(), oldTableName, newTableName, options));
             }
         }
 

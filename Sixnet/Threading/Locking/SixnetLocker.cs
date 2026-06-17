@@ -336,5 +336,99 @@ namespace Sixnet.Threading.Locking
         }
 
         #endregion
+
+        #region Execute
+
+        /// <summary>
+        /// Execute
+        /// </summary>
+        /// <param name="action"></param>
+        /// <param name="lockObject"></param>>
+        /// <param name="expirationSeconds"></param>
+        public static void Execute(Action action, string lockObject, int? expirationSeconds = null)
+        {
+            var lockInstance = GetLock(lockObject, lockObject, SixnetGuidHelper.GetGuid().ToString(), expirationSeconds);
+            try
+            {
+                action?.Invoke();
+            }
+            finally
+            {
+                if (lockInstance.HasValue)
+                {
+                    lockInstance.Value.Release();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Execute
+        /// </summary>
+        /// <param name="action"></param>
+        /// <param name="lockObject"></param>
+        /// <param name="lockName"></param>
+        /// <param name="expirationSeconds"></param>
+        public static void Execute(Action action, string lockObject, string lockName, int? expirationSeconds = null)
+        {
+            var lockInstance = GetLock(lockObject, lockName, SixnetGuidHelper.GetGuid().ToString(), expirationSeconds);
+            try
+            {
+                action?.Invoke();
+            }
+            finally
+            {
+                if (lockInstance.HasValue)
+                {
+                    lockInstance.Value.Release();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Execute
+        /// </summary>
+        /// <param name="func"></param>
+        /// <param name="lockObject"></param>>
+        /// <param name="expirationSeconds"></param>
+        public static TResult Execute<TResult>(Func<TResult> func, string lockObject, int? expirationSeconds = null)
+        {
+            var lockInstance = GetLock(lockObject, lockObject, SixnetGuidHelper.GetGuid().ToString(), expirationSeconds);
+            try
+            {
+                return func.Invoke();
+            }
+            finally
+            {
+                if (lockInstance.HasValue)
+                {
+                    lockInstance.Value.Release();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Execute
+        /// </summary>
+        /// <param name="func"></param>
+        /// <param name="lockObject"></param>
+        /// <param name="lockName"></param>
+        /// <param name="expirationSeconds"></param>
+        public static TResult Execute<TResult>(Func<TResult> func, string lockObject, string lockName, int? expirationSeconds = null)
+        {
+            var lockInstance = GetLock(lockObject, lockName, SixnetGuidHelper.GetGuid().ToString(), expirationSeconds);
+            try
+            {
+                return func.Invoke();
+            }
+            finally
+            {
+                if (lockInstance.HasValue)
+                {
+                    lockInstance.Value.Release();
+                }
+            }
+        }
+
+        #endregion
     }
 }
