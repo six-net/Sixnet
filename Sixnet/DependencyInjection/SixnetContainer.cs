@@ -1,10 +1,12 @@
 ﻿// "Company © 2025. All rights reserved."
 
 using System.Runtime;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+
 using Sixnet.App;
 using Sixnet.Cache;
 using Sixnet.Cache.Provider.Memory;
@@ -28,6 +30,7 @@ using Sixnet.Security.Authentication;
 using Sixnet.Security.Authorization;
 using Sixnet.Security.Cryptography;
 using Sixnet.Serialization.Json;
+using Sixnet.Threading.Locking;
 using Sixnet.Validation;
 
 namespace Sixnet.DependencyInjection
@@ -76,7 +79,7 @@ namespace Sixnet.DependencyInjection
         internal static IServiceCollection Configure(SixnetOptions options)
         {
             // Configure application
-            SixnetApplication.Configure(options.ConfigureApp);
+            SixnetApplication.Configure(options.InvokeConfigureApp);
 
             // Init services
             _serviceCollection = options.Services ?? new ServiceCollection();
@@ -98,7 +101,7 @@ namespace Sixnet.DependencyInjection
             BuildServiceProvider(true);
 
             // Configure service
-            options.ConfigureService(_serviceCollection);
+            options.InvokeConfigureService(_serviceCollection);
 
             // Container
             var container = SixnetApplication.Options.DIContainer ?? new SixnetDefaultServiceProviderContainer();
@@ -434,16 +437,18 @@ namespace Sixnet.DependencyInjection
             services.ConfigureIfNotNull<SixnetEntityOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Entity)));
             // Enum
             services.ConfigureIfNotNull<SixnetEnumOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Enum)));
+            // Lock
+            services.ConfigureIfNotNull<SixnetLockOptions>(GetSixnetConfigurationSection(nameof(SixnetConfiguration.Lock)));
 
             // Post config options
-            services.PostConfigureIfNotNull(sixnetOptions.ConfigureFileAction);
-            services.PostConfigureIfNotNull(sixnetOptions.ConfigureRsaAction);
-            services.PostConfigureIfNotNull(sixnetOptions.ConfigureEmailAction);
-            services.PostConfigureIfNotNull(sixnetOptions.ConfigureSmsAction);
-            services.PostConfigureIfNotNull(sixnetOptions.ConfigureMessageAction);
+            services.PostConfigureIfNotNull<SixnetFileOptions>(sixnetOptions.InvokeConfigureFile);
+            services.PostConfigureIfNotNull<SixnetRsaOptions>(sixnetOptions.InvokeConfigureRSA);
+            services.PostConfigureIfNotNull<SixnetEmailOptions>(sixnetOptions.InvokeConfigureEmail);
+            services.PostConfigureIfNotNull<SixnetSmsOptions>(sixnetOptions.InvokeConfigureSms);
+            services.PostConfigureIfNotNull<SixnetMessageOptions>(sixnetOptions.InvokeConfigureMessage);
             services.PostConfigureIfNotNull<SixnetDataOptions>((options) =>
             {
-                sixnetOptions.ConfigureData(options);
+                sixnetOptions.InvokeConfigureData(options);
                 if (!options.Servers.IsNullOrEmpty())
                 {
                     foreach (var server in options.Servers)
@@ -455,20 +460,21 @@ namespace Sixnet.DependencyInjection
                     }
                 }
             });
-            services.PostConfigureIfNotNull(sixnetOptions.ConfigureMessageQueueAction);
-            services.PostConfigureIfNotNull(sixnetOptions.ConfigureJsonAction);
-            services.PostConfigureIfNotNull(sixnetOptions.ConfigureValidationAction);
+            services.PostConfigureIfNotNull<SixnetMessageQueueOptions>(sixnetOptions.InvokeConfigureMessageQueue);
+            services.PostConfigureIfNotNull<SixnetJsonSerializationOptions>(sixnetOptions.InvokeConfigureJson);
+            services.PostConfigureIfNotNull<SixnetValidationOptions>(sixnetOptions.InvokeConfigureValidation);
             services.PostConfigureIfNotNull<SixnetCacheOptions>((options) =>
             {
                 options.AddCacheProvider(SixnetCacheServerType.InMemory, new MemoryProvider());
-                sixnetOptions.ConfigureCache(options);
+                sixnetOptions.InvokeConfigureCache(options);
             });
-            services.PostConfigureIfNotNull(sixnetOptions.ConfigureAuthorizationAction);
-            services.PostConfigureIfNotNull(sixnetOptions.ConfigureAuthenticationAction);
-            services.PostConfigureIfNotNull(sixnetOptions.ConfigureUnitOfWorkAction);
-            services.PostConfigureIfNotNull(sixnetOptions.ConfigureLoggingAction);
-            services.PostConfigureIfNotNull(sixnetOptions.ConfigureEntityAction);
-            services.PostConfigureIfNotNull(sixnetOptions.ConfigureEnumAction);
+            services.PostConfigureIfNotNull<SixnetAuthorizationOptions>(sixnetOptions.InvokeConfigureAuthorization);
+            services.PostConfigureIfNotNull<SixnetAuthenticationOptions>(sixnetOptions.InvokeConfigureAuthentication);
+            services.PostConfigureIfNotNull<SixnetUnitOfWorkOptions>(sixnetOptions.InvokeConfigureUnitOfWork);
+            services.PostConfigureIfNotNull<SixnetLoggingOptions>(sixnetOptions.InvokeConfigureLogging);
+            services.PostConfigureIfNotNull<SixnetEntityOptions>(sixnetOptions.InvokeConfigureEntity);
+            services.PostConfigureIfNotNull<SixnetEnumOptions>(sixnetOptions.InvokeConfigureEnum);
+            services.PostConfigureIfNotNull<SixnetLockOptions>(sixnetOptions.InvokeConfigureLock);
         }
 
         #endregion
@@ -499,9 +505,9 @@ namespace Sixnet.DependencyInjection
             services.AddSingleton<ISixnetMessageProvider, SixnetDefaultMessageProvider>();
             services.AddSingleton(typeof(ISixnetDataAccess<>), typeof(SixnetDefaultDataAccess<>));
             services.AddSingleton(typeof(ISixnetRepository<>), typeof(SixnetDefaultRepository<>));
-            services.AddSixnetLocalization(options => 
+            services.AddSixnetLocalization(options =>
             {
-                sixnetOptions?.ConfigureLocalization(options);
+                sixnetOptions?.InvokeConfigureLocalization(options);
             });
         }
 

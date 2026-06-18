@@ -7,8 +7,10 @@ using Sixnet.Cache;
 using Sixnet.Cache.Keys.Parameters;
 using Sixnet.Cache.String.Parameters;
 using Sixnet.Code;
+using Sixnet.DependencyInjection;
 using Sixnet.Development.Data.Database;
 using Sixnet.Exceptions;
+using Sixnet.Security.Authorization;
 
 namespace Sixnet.Threading.Locking
 {
@@ -40,36 +42,18 @@ namespace Sixnet.Threading.Locking
         public const string CreateInProcessQueueLockName = "SIXNET_LOAD_CREATE_IN_PROCESS_QUEUE_LOCK";
 
         /// <summary>
-        /// Lock object expiration seconds
-        /// </summary>
-        static readonly Dictionary<string, int> LockObjectExpirationSeconds = new()
-        {
-            { CreateTableLockObjectName, 60},
-            { CreateDatabaseConnectionLockName, 60},
-            { LoadLocalizationStringLockName, 60}
-        };
-
-        /// <summary>
         /// Sixnet lock options
         /// </summary>
         static readonly SixnetLockOptions _options = new();
 
         #endregion
 
-        #region Configure
-
-        /// <summary>
-        /// Configure lock
-        /// </summary>
-        /// <param name="configure"></param>
-        public static void Configure(Action<SixnetLockOptions> configure)
-        {
-            configure?.Invoke(_options);
-        }
-
-        #endregion
-
         #region Common lock
+
+        static SixnetLockOptions GetLockOptions()
+        {
+            return SixnetContainer.GetOptions<SixnetLockOptions>() ?? _options;
+        }
 
         #region Handle lock parameter
 
@@ -79,7 +63,8 @@ namespace Sixnet.Threading.Locking
         /// <param name="parameter"></param>
         static void HandleLockParameter(ISixnetCacheParameter parameter)
         {
-            if (_options.DistributeLockObjectNames?.Contains(parameter.CacheObject?.ObjectName ?? string.Empty) ?? false)
+            var lockOptions = GetLockOptions();
+            if ((_options?.LockObjects?.TryGetValue(parameter.CacheObject?.ObjectName ?? string.Empty, out var lockObjectSetting) ?? false) && (lockObjectSetting?.Remote ?? false))
             {
                 parameter.UseInMemoryForDefault = false;
             }
@@ -105,11 +90,12 @@ namespace Sixnet.Threading.Locking
             {
                 return expirationSeconds.Value;
             }
-            if (LockObjectExpirationSeconds.TryGetValue(lockObject, out var lockExpSeconds) && lockExpSeconds > 0)
+            var lockOptions = GetLockOptions();
+            if ((lockOptions?.LockObjects?.TryGetValue(lockObject, out var lockObjectSetting) ?? false) && (lockObjectSetting?.ExpirationSeconds > 0))
             {
-                return lockExpSeconds;
+                return lockObjectSetting.ExpirationSeconds.Value;
             }
-            return -1;
+            return lockOptions.DefaultExpirationSeconds;
         }
 
         #endregion

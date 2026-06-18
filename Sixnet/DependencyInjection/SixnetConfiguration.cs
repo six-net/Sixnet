@@ -15,6 +15,7 @@ using Sixnet.Security.Authentication;
 using Sixnet.Security.Authorization;
 using Sixnet.Security.Cryptography;
 using Sixnet.Serialization.Json;
+using Sixnet.Threading.Locking;
 using Sixnet.Validation;
 
 namespace Sixnet.DependencyInjection
@@ -103,5 +104,10 @@ namespace Sixnet.DependencyInjection
         /// Gets or sets the enum options
         /// </summary>
         public SixnetEnumOptions Enum { get; set; }
+
+        /// <summary>
+        /// Gets or sets the lock options
+        /// </summary>
+        public SixnetLockOptions Lock { get; set; }
     }
 }

@@ -22,6 +22,7 @@ using Sixnet.Security.Authentication;
 using Sixnet.Security.Authorization;
 using Sixnet.Security.Cryptography;
 using Sixnet.Serialization.Json;
+using Sixnet.Threading.Locking;
 using Sixnet.Validation;
 
 namespace Sixnet
@@ -78,16 +79,16 @@ namespace Sixnet
 
         #region Configure host builder
 
-        internal Action<IHostBuilder> ConfigureHostBuilderAction;
+        Action<IHostBuilder> _configureHostBuilderAction;
 
         /// <summary>
         /// Configure host builder
         /// </summary>
         public SixnetOptions ConfigureHostBuilder(Action<IHostBuilder> configure, bool toFirst = false)
         {
-            ConfigureHostBuilderAction = toFirst
-                ? configure + ConfigureHostBuilderAction
-                : ConfigureHostBuilderAction + configure;
+            _configureHostBuilderAction = toFirst
+                ? configure + _configureHostBuilderAction
+                : _configureHostBuilderAction + configure;
             return this;
         }
 
@@ -95,9 +96,9 @@ namespace Sixnet
         /// Configure host builder
         /// </summary>
         /// <param name="hostBuilder"></param>
-        internal void ConfigureHostBuilder(IHostBuilder hostBuilder)
+        internal void InvokeConfigureHostBuilder(IHostBuilder hostBuilder)
         {
-            ConfigureHostBuilderAction?.Invoke(hostBuilder);
+            _configureHostBuilderAction?.Invoke(hostBuilder);
         }
 
         /// <summary>
@@ -106,7 +107,7 @@ namespace Sixnet
         /// <param name="hostBuilder"></param>
         public void SetHostBuilder(IHostBuilder hostBuilder)
         {
-            ConfigureHostBuilder(hostBuilder);
+            InvokeConfigureHostBuilder(hostBuilder);
             HostBuilder = hostBuilder;
         }
 
@@ -114,16 +115,16 @@ namespace Sixnet
 
         #region Configure app
 
-        internal Action<SixnetApplicationOptions> ConfigureAppAction;
+        Action<SixnetApplicationOptions> _configureAppAction;
 
         /// <summary>
         /// Register configure app action
         /// </summary>
         public SixnetOptions ConfigureApp(Action<SixnetApplicationOptions> configure, bool toFirst = false)
         {
-            ConfigureAppAction = toFirst
-                ? configure + ConfigureAppAction
-                : ConfigureAppAction + configure;
+            _configureAppAction = toFirst
+                ? configure + _configureAppAction
+                : _configureAppAction + configure;
             return this;
         }
 
@@ -131,25 +132,25 @@ namespace Sixnet
         /// Invoke the registered configure app action
         /// </summary>
         /// <param name="options"></param>
-        internal void ConfigureApp(SixnetApplicationOptions options)
+        internal void InvokeConfigureApp(SixnetApplicationOptions options)
         {
-            ConfigureAppAction?.Invoke(options);
+            _configureAppAction?.Invoke(options);
         }
 
         #endregion
 
         #region Configure data
 
-        internal Action<SixnetDataOptions> ConfigureDataAction;
+        Action<SixnetDataOptions> _configureDataAction;
 
         /// <summary>
         /// Register configure data action
         /// </summary>
         public SixnetOptions ConfigureData(Action<SixnetDataOptions> configure, bool toFirst = false)
         {
-            ConfigureDataAction = toFirst
-                ? configure + ConfigureDataAction
-                : ConfigureDataAction + configure;
+            _configureDataAction = toFirst
+                ? configure + _configureDataAction
+                : _configureDataAction + configure;
             return this;
         }
 
@@ -157,25 +158,25 @@ namespace Sixnet
         /// Invoke the registered configure data action
         /// </summary>
         /// <param name="options"></param>
-        internal void ConfigureData(SixnetDataOptions options)
+        internal void InvokeConfigureData(SixnetDataOptions options)
         {
-            ConfigureDataAction?.Invoke(options);
+            _configureDataAction?.Invoke(options);
         }
 
         #endregion
 
         #region Configure email
 
-        internal Action<SixnetEmailOptions> ConfigureEmailAction;
+        Action<SixnetEmailOptions> _configureEmailAction;
 
         /// <summary>
         /// Register configure email action
         /// </summary>
         public SixnetOptions ConfigureEmail(Action<SixnetEmailOptions> configure, bool toFirst = false)
         {
-            ConfigureEmailAction = toFirst
-                ? configure + ConfigureEmailAction
-                : ConfigureEmailAction + configure;
+            _configureEmailAction = toFirst
+                ? configure + _configureEmailAction
+                : _configureEmailAction + configure;
             return this;
         }
 
@@ -183,25 +184,25 @@ namespace Sixnet
         /// Invoke the registered configure email action
         /// </summary>
         /// <param name="options"></param>
-        internal void ConfigureEmail(SixnetEmailOptions options)
+        internal void InvokeConfigureEmail(SixnetEmailOptions options)
         {
-            ConfigureEmailAction?.Invoke(options);
+            _configureEmailAction?.Invoke(options);
         }
 
         #endregion
 
         #region Configure sms
 
-        internal Action<SixnetSmsOptions> ConfigureSmsAction;
+        Action<SixnetSmsOptions> _configureSmsAction;
 
         /// <summary>
         /// Register configure sms action
         /// </summary>
         public SixnetOptions ConfigureSms(Action<SixnetSmsOptions> configure, bool toFirst = false)
         {
-            ConfigureSmsAction = toFirst
-                ? configure + ConfigureSmsAction
-                : ConfigureSmsAction + configure;
+            _configureSmsAction = toFirst
+                ? configure + _configureSmsAction
+                : _configureSmsAction + configure;
             return this;
         }
 
@@ -209,384 +210,409 @@ namespace Sixnet
         /// Invoke the registered configure sms action
         /// </summary>
         /// <param name="options"></param>
-        internal void ConfigureSms(SixnetSmsOptions options)
+        internal void InvokeConfigureSms(SixnetSmsOptions options)
         {
-            ConfigureSmsAction?.Invoke(options);
+            _configureSmsAction?.Invoke(options);
         }
 
         #endregion
 
         #region Configure message
 
-        internal Action<SixnetMessageOptions> ConfigureMessageAction;
+        Action<SixnetMessageOptions> _configureMessageAction;
 
         /// <summary>
         /// Register configure message action
         /// </summary>
         public SixnetOptions ConfigureMessage(Action<SixnetMessageOptions> configure, bool toFirst = false)
         {
-            ConfigureMessageAction = toFirst
-                ? configure + ConfigureMessageAction
-                : ConfigureMessageAction + configure;
+            _configureMessageAction = toFirst
+                ? configure + _configureMessageAction
+                : _configureMessageAction + configure;
             return this;
         }
 
         /// <summary>
         /// Invoke the registered configure message action
         /// </summary>
-        internal void ConfigureMessage(SixnetMessageOptions options)
+        internal void InvokeConfigureMessage(SixnetMessageOptions options)
         {
-            ConfigureMessageAction?.Invoke(options);
+            _configureMessageAction?.Invoke(options);
         }
 
         #endregion
 
         #region Configure service
 
-        internal Action<IServiceCollection> ConfigureServiceAction;
+        Action<IServiceCollection> _configureServiceAction;
 
         /// <summary>
         /// Register configure service action
         /// </summary>
         public SixnetOptions ConfigureService(Action<IServiceCollection> configure, bool toFirst = false)
         {
-            ConfigureServiceAction = toFirst
-                ? configure + ConfigureServiceAction
-                : ConfigureServiceAction + configure;
+            _configureServiceAction = toFirst
+                ? configure + _configureServiceAction
+                : _configureServiceAction + configure;
             return this;
         }
 
         /// <summary>
         /// Invoke the registered configure service action
         /// </summary>
-        internal void ConfigureService(IServiceCollection services)
+        internal void InvokeConfigureService(IServiceCollection services)
         {
-            ConfigureServiceAction?.Invoke(services);
+            _configureServiceAction?.Invoke(services);
         }
 
         #endregion
 
         #region Configure logging
 
-        internal Action<SixnetLoggingOptions> ConfigureLoggingAction;
+        Action<SixnetLoggingOptions> _configureLoggingAction;
 
         /// <summary>
         /// Register configure logging action
         /// </summary>
         public SixnetOptions ConfigureLogging(Action<SixnetLoggingOptions> configure, bool toFirst = false)
         {
-            ConfigureLoggingAction = toFirst
-                ? configure + ConfigureLoggingAction
-                : ConfigureLoggingAction + configure;
+            _configureLoggingAction = toFirst
+                ? configure + _configureLoggingAction
+                : _configureLoggingAction + configure;
             return this;
         }
 
         /// <summary>
         /// Invoke the registered configure logging action
         /// </summary>
-        internal void ConfigureLogging(SixnetLoggingOptions options)
+        internal void InvokeConfigureLogging(SixnetLoggingOptions options)
         {
-            ConfigureLoggingAction?.Invoke(options);
+            _configureLoggingAction?.Invoke(options);
         }
 
         #endregion
 
         #region Configure file
 
-        internal Action<SixnetFileOptions> ConfigureFileAction;
+        Action<SixnetFileOptions> _configureFileAction;
 
         /// <summary>
         /// Register configure file action
         /// </summary>
         public SixnetOptions ConfigureFile(Action<SixnetFileOptions> configure, bool toFirst = false)
         {
-            ConfigureFileAction = toFirst
-                ? configure + ConfigureFileAction
-                : ConfigureFileAction + configure;
+            _configureFileAction = toFirst
+                ? configure + _configureFileAction
+                : _configureFileAction + configure;
             return this;
         }
 
         /// <summary>
         /// Invoke the registered configure file action
         /// </summary>
-        internal void ConfigureFile(SixnetFileOptions options)
+        internal void InvokeConfigureFile(SixnetFileOptions options)
         {
-            ConfigureFileAction?.Invoke(options);
+            _configureFileAction?.Invoke(options);
         }
 
         #endregion
 
         #region Configure RSA
 
-        internal Action<SixnetRsaOptions> ConfigureRsaAction;
+        Action<SixnetRsaOptions> _configureRsaAction;
 
         /// <summary>
         /// Register configure RSA action
         /// </summary>
         public SixnetOptions ConfigureRSA(Action<SixnetRsaOptions> configure, bool toFirst = false)
         {
-            ConfigureRsaAction = toFirst
-                ? configure + ConfigureRsaAction
-                : ConfigureRsaAction + configure;
+            _configureRsaAction = toFirst
+                ? configure + _configureRsaAction
+                : _configureRsaAction + configure;
             return this;
         }
 
         /// <summary>
         /// Invoke the registered configure RSA action
         /// </summary>
-        internal void ConfigureRSA(SixnetRsaOptions options)
+        internal void InvokeConfigureRSA(SixnetRsaOptions options)
         {
-            ConfigureRsaAction?.Invoke(options);
+            _configureRsaAction?.Invoke(options);
         }
 
         #endregion
 
         #region Configure cache
 
-        internal Action<SixnetCacheOptions> ConfigureCacheAction;
+        Action<SixnetCacheOptions> _configureCacheAction;
 
         /// <summary>
         /// Register configure cache action
         /// </summary>
         public SixnetOptions ConfigureCache(Action<SixnetCacheOptions> configure, bool toFirst = false)
         {
-            ConfigureCacheAction = toFirst
-                ? configure + ConfigureCacheAction
-                : ConfigureCacheAction + configure;
+            _configureCacheAction = toFirst
+                ? configure + _configureCacheAction
+                : _configureCacheAction + configure;
             return this;
         }
 
         /// <summary>
         /// Invoke the registered configure cache action
         /// </summary>
-        internal void ConfigureCache(SixnetCacheOptions options)
+        internal void InvokeConfigureCache(SixnetCacheOptions options)
         {
-            ConfigureCacheAction?.Invoke(options);
+            _configureCacheAction?.Invoke(options);
         }
 
         #endregion
 
         #region Configure localization
 
-        internal Action<SixnetLocalizationOptions> ConfigureLocalizationAction;
+        internal Action<SixnetLocalizationOptions> _configureLocalizationAction;
 
         /// <summary>
         /// Register configure localization action
         /// </summary>
         public SixnetOptions ConfigureLocalization(Action<SixnetLocalizationOptions> configure, bool toFirst = false)
         {
-            ConfigureLocalizationAction = toFirst
-                ? configure + ConfigureLocalizationAction
-                : ConfigureLocalizationAction + configure;
+            _configureLocalizationAction = toFirst
+                ? configure + _configureLocalizationAction
+                : _configureLocalizationAction + configure;
             return this;
         }
 
         /// <summary>
         /// Invoke the registered configure localization action
         /// </summary>
-        internal void ConfigureLocalization(SixnetLocalizationOptions options)
+        internal void InvokeConfigureLocalization(SixnetLocalizationOptions options)
         {
-            ConfigureLocalizationAction?.Invoke(options);
+            _configureLocalizationAction?.Invoke(options);
         }
 
         #endregion
 
         #region Configure JSON
 
-        internal Action<SixnetJsonSerializationOptions> ConfigureJsonAction;
+        Action<SixnetJsonSerializationOptions> _configureJsonAction;
 
         /// <summary>
         /// Register configure JSON action
         /// </summary>
         public SixnetOptions ConfigureJson(Action<SixnetJsonSerializationOptions> configure, bool toFirst = false)
         {
-            ConfigureJsonAction = toFirst
-                ? configure + ConfigureJsonAction
-                : ConfigureJsonAction + configure;
+            _configureJsonAction = toFirst
+                ? configure + _configureJsonAction
+                : _configureJsonAction + configure;
             return this;
         }
 
         /// <summary>
         /// Invoke the registered configure JSON action
         /// </summary>
-        internal void ConfigureJson(SixnetJsonSerializationOptions options)
+        internal void InvokeConfigureJson(SixnetJsonSerializationOptions options)
         {
-            ConfigureJsonAction?.Invoke(options);
+            _configureJsonAction?.Invoke(options);
         }
 
         #endregion
 
         #region Configure message queue
 
-        internal Action<SixnetMessageQueueOptions> ConfigureMessageQueueAction;
+        Action<SixnetMessageQueueOptions> _configureMessageQueueAction;
 
         /// <summary>
         /// Register configure message queue action
         /// </summary>
         public SixnetOptions ConfigureMessageQueue(Action<SixnetMessageQueueOptions> configure, bool toFirst = false)
         {
-            ConfigureMessageQueueAction = toFirst
-                ? configure + ConfigureMessageQueueAction
-                : ConfigureMessageQueueAction + configure;
+            _configureMessageQueueAction = toFirst
+                ? configure + _configureMessageQueueAction
+                : _configureMessageQueueAction + configure;
             return this;
         }
 
         /// <summary>
         /// Invoke the registered configure message queue action
         /// </summary>
-        internal void ConfigureMessageQueue(SixnetMessageQueueOptions options)
+        internal void InvokeConfigureMessageQueue(SixnetMessageQueueOptions options)
         {
-            ConfigureMessageQueueAction?.Invoke(options);
+            _configureMessageQueueAction?.Invoke(options);
         }
 
         #endregion
 
         #region Configure validation
 
-        internal Action<SixnetValidationOptions> ConfigureValidationAction;
+        Action<SixnetValidationOptions> _configureValidationAction;
 
         /// <summary>
         /// Register configure validation action
         /// </summary>
         public SixnetOptions ConfigureValidation(Action<SixnetValidationOptions> configure, bool toFirst = false)
         {
-            ConfigureValidationAction = toFirst
-                ? configure + ConfigureValidationAction
-                : ConfigureValidationAction + configure;
+            _configureValidationAction = toFirst
+                ? configure + _configureValidationAction
+                : _configureValidationAction + configure;
             return this;
         }
 
         /// <summary>
         /// Invoke the registered configure validation action
         /// </summary>
-        internal void ConfigureValidation(SixnetValidationOptions options)
+        internal void InvokeConfigureValidation(SixnetValidationOptions options)
         {
-            ConfigureValidationAction?.Invoke(options);
+            _configureValidationAction?.Invoke(options);
         }
 
         #endregion
 
         #region Configure authorization
 
-        internal Action<SixnetAuthorizationOptions> ConfigureAuthorizationAction;
+        Action<SixnetAuthorizationOptions> _configureAuthorizationAction;
 
         /// <summary>
         /// Register configure authorization action
         /// </summary>
         public SixnetOptions ConfigureAuthorization(Action<SixnetAuthorizationOptions> configure, bool toFirst = false)
         {
-            ConfigureAuthorizationAction = toFirst
-                ? configure + ConfigureAuthorizationAction
-                : ConfigureAuthorizationAction + configure;
+            _configureAuthorizationAction = toFirst
+                ? configure + _configureAuthorizationAction
+                : _configureAuthorizationAction + configure;
             return this;
         }
 
         /// <summary>
         /// Invoke the registered configure authorization action
         /// </summary>
-        internal void ConfigureAuthorization(SixnetAuthorizationOptions options)
+        internal void InvokeConfigureAuthorization(SixnetAuthorizationOptions options)
         {
-            ConfigureAuthorizationAction?.Invoke(options);
+            _configureAuthorizationAction?.Invoke(options);
         }
 
         #endregion
 
         #region Configure authentication
 
-        internal Action<SixnetAuthenticationOptions> ConfigureAuthenticationAction;
+        Action<SixnetAuthenticationOptions> _configureAuthenticationAction;
 
         /// <summary>
         /// Register configure authentication action
         /// </summary>
         public SixnetOptions ConfigureAuthentication(Action<SixnetAuthenticationOptions> configure, bool toFirst = false)
         {
-            ConfigureAuthenticationAction = toFirst
-                ? configure + ConfigureAuthenticationAction
-                : ConfigureAuthenticationAction + configure;
+            _configureAuthenticationAction = toFirst
+                ? configure + _configureAuthenticationAction
+                : _configureAuthenticationAction + configure;
             return this;
         }
 
         /// <summary>
         /// Invoke the registered configure authentication action
         /// </summary>
-        internal void ConfigureAuthentication(SixnetAuthenticationOptions options)
+        internal void InvokeConfigureAuthentication(SixnetAuthenticationOptions options)
         {
-            ConfigureAuthenticationAction?.Invoke(options);
+            _configureAuthenticationAction?.Invoke(options);
         }
 
         #endregion
 
         #region Configure unit of work
 
-        internal Action<SixnetUnitOfWorkOptions> ConfigureUnitOfWorkAction;
+        Action<SixnetUnitOfWorkOptions> _configureUnitOfWorkAction;
 
         /// <summary>
         /// Register configure unit of work action
         /// </summary>
         public SixnetOptions ConfigureUnitOfWork(Action<SixnetUnitOfWorkOptions> configure, bool toFirst = false)
         {
-            ConfigureUnitOfWorkAction = toFirst
-                ? configure + ConfigureUnitOfWorkAction
-                : ConfigureUnitOfWorkAction + configure;
+            _configureUnitOfWorkAction = toFirst
+                ? configure + _configureUnitOfWorkAction
+                : _configureUnitOfWorkAction + configure;
             return this;
         }
 
         /// <summary>
         /// Invoke the registered configure unit of work action
         /// </summary>
-        internal void ConfigureUnitOfWork(SixnetUnitOfWorkOptions options)
+        internal void InvokeConfigureUnitOfWork(SixnetUnitOfWorkOptions options)
         {
-            ConfigureUnitOfWorkAction?.Invoke(options);
+            _configureUnitOfWorkAction?.Invoke(options);
         }
 
         #endregion
 
         #region Configure entity
 
-        internal Action<SixnetEntityOptions> ConfigureEntityAction;
+        Action<SixnetEntityOptions> _configureEntityAction;
 
         /// <summary>
         /// Register configure entity action
         /// </summary>
         public SixnetOptions ConfigureEntity(Action<SixnetEntityOptions> configure, bool toFirst = false)
         {
-            ConfigureEntityAction = toFirst
-                ? configure + ConfigureEntityAction
-                : ConfigureEntityAction + configure;
+            _configureEntityAction = toFirst
+                ? configure + _configureEntityAction
+                : _configureEntityAction + configure;
             return this;
         }
 
         /// <summary>
         /// Invoke the registered configure entity action
         /// </summary>
-        internal void ConfigureEntity(SixnetEntityOptions options)
+        internal void InvokeConfigureEntity(SixnetEntityOptions options)
         {
-            ConfigureEntityAction?.Invoke(options);
+            _configureEntityAction?.Invoke(options);
         }
 
         #endregion
 
         #region Configure enum
 
-        internal Action<SixnetEnumOptions> ConfigureEnumAction;
+        Action<SixnetEnumOptions> _configureEnumAction;
 
         /// <summary>
         /// Register configure enum action
         /// </summary>
         public SixnetOptions ConfigureEnum(Action<SixnetEnumOptions> configure, bool toFirst = false)
         {
-            ConfigureEnumAction = toFirst
-                ? configure + ConfigureEnumAction
-                : ConfigureEnumAction + configure;
+            _configureEnumAction = toFirst
+                ? configure + _configureEnumAction
+                : _configureEnumAction + configure;
             return this;
         }
 
         /// <summary>
         /// Invoke the registered configure enum action
         /// </summary>
-        internal void ConfigureEnum(SixnetEnumOptions options)
+        internal void InvokeConfigureEnum(SixnetEnumOptions options)
         {
-            ConfigureEnumAction?.Invoke(options);
+            _configureEnumAction?.Invoke(options);
+        }
+
+        #endregion
+
+        #region Configure lock
+
+        internal Action<SixnetLockOptions> _configureSixnetLockAction;
+
+        /// <summary>
+        /// Configure lock
+        /// </summary>
+        /// <param name="configure"></param>
+        /// <param name="toFirst"></param>
+        /// <returns></returns>
+        public SixnetOptions ConfigureLock(Action<SixnetLockOptions> configure, bool toFirst = false)
+        {
+            _configureSixnetLockAction = toFirst
+                ? configure + _configureSixnetLockAction
+                : _configureSixnetLockAction + configure;
+            return this;
+        }
+
+        internal void InvokeConfigureLock(SixnetLockOptions options)
+        {
+            _configureSixnetLockAction?.Invoke(options);
         }
 
         #endregion
