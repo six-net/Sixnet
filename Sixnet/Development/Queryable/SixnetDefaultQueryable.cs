@@ -1187,6 +1187,22 @@ namespace Sixnet.Development.Queryable
         #region Split table
 
         /// <summary>
+        /// Specify split table
+        /// </summary>
+        /// <param name="tableNames">Table names</param>
+        /// <returns></returns>
+        public ISixnetQueryable SpecifySplitTable(params string[] tableNames)
+        {
+            SpecifySplitTableCore(tableNames);
+            return this;
+        }
+
+        protected void SpecifySplitTableCore(params string[] tableNames)
+        {
+            queryableContext.SpecifySplitTable(tableNames?.Select(t => SixnetDatabaseObjectName.Create(t, SixnetDatabaseObjectType.Table)));
+        }
+
+        /// <summary>
         /// Use split table
         /// </summary>
         /// <param name="splitValue">Split value</param>

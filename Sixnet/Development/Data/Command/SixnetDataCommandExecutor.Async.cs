@@ -985,5 +985,163 @@ namespace Sixnet.Development.Command
         }
 
         #endregion
+
+        #region Add foreign key
+
+        /// <summary>
+        /// Add foreign key
+        /// </summary>
+        /// <param name="connections">Connections</param>
+        /// <param name="selfEntityType">Self entity type</param>
+        /// <param name="selfField">Self field</param>
+        /// <param name="referenceEntityType">Reference entity type</param>
+        /// <param name="referenceField">Reference field</param>
+        /// <param name="options">Options</param>
+        public static async Task AddForeignKeyAsync(IEnumerable<SixnetDatabaseConnection> connections, Type selfEntityType, string selfField, Type referenceEntityType, string referenceField, SixnetDataOperationOptions options = null)
+        {
+            ValidateConnections(connections);
+            foreach (var connection in connections)
+            {
+                await connection.DatabaseProvider.MigrateAsync(GetAddForeignKeyCommand(connection, (await connection.DatabaseProvider.GetTablesAsync(SixnetDatabaseCommand.Create(connection, options)).ConfigureAwait(false))?.Select(c => c.GetDatabaseObjectName()).ToList()
+                    , selfEntityType, selfField, referenceEntityType, referenceField, options)).ConfigureAwait(false);
+            }
+        }
+
+        #endregion
+
+        #region Delete foreign key
+
+        /// <summary>
+        /// Delete foreign key
+        /// </summary>
+        /// <param name="connections">Connections</param>
+        /// <param name="selfEntityType">Self entity type</param>
+        /// <param name="selfField">Self field</param>
+        /// <param name="referenceEntityType">Reference entity type</param>
+        /// <param name="referenceField">Reference field</param>
+        /// <param name="options">Options</param>
+        public static async Task DeleteForeignKeyAsync(IEnumerable<SixnetDatabaseConnection> connections, Type selfEntityType, string selfField, Type referenceEntityType, string referenceField, SixnetDataOperationOptions options = null)
+        {
+            ValidateConnections(connections);
+            foreach (var connection in connections)
+            {
+                await connection.DatabaseProvider.MigrateAsync(GetDeleteForeignKeyCommand(connection, (await connection.DatabaseProvider.GetTablesAsync(SixnetDatabaseCommand.Create(connection, options)).ConfigureAwait(false))?.Select(c => c.GetDatabaseObjectName()).ToList()
+                    , selfEntityType, selfField, referenceEntityType, referenceField, options)).ConfigureAwait(false);
+            }
+        }
+
+        /// <summary>
+        /// Delete all foreign keys
+        /// </summary>
+        /// <param name="connections"></param>
+        /// <param name="options"></param>
+        public static async Task DeleteAllForeignKeysAsync(IEnumerable<SixnetDatabaseConnection> connections, SixnetDataOperationOptions options = null)
+        {
+            ValidateConnections(connections);
+            foreach (var connection in connections)
+            {
+                var migCmd = SixnetDatabaseCommand.Create<SixnetMigrationDatabaseCommand>(connection, options, cmd =>
+                {
+                    cmd.MigrationInfo = new SixnetMigrationInfo()
+                    {
+                        DeleteAllForeignKey = true
+                    };
+                });
+                await connection.DatabaseProvider.MigrateAsync(migCmd).ConfigureAwait(false);
+            }
+        }
+
+        #endregion
+
+        #region Add index
+
+        /// <summary>
+        /// Add index
+        /// </summary>
+        /// <param name="unique">Whether is unique index</param>
+        /// <param name="fields">Fields</param>
+        public static async Task AddIndexAsync(IEnumerable<SixnetDatabaseConnection> connections, Type entityType, bool unique, IEnumerable<string> fields, SixnetDataOperationOptions options = null)
+        {
+            ValidateConnections(connections);
+            foreach (var connection in connections)
+            {
+                await connection.DatabaseProvider.MigrateAsync(GetAddIndexCommand(connection, (await connection.DatabaseProvider.GetTablesAsync(SixnetDatabaseCommand.Create(connection, options)).ConfigureAwait(false))?.Select(c => c.GetDatabaseObjectName()).ToList()
+                    , entityType, unique, fields, null, options)).ConfigureAwait(false);
+            }
+        }
+
+        /// <summary>
+        /// Add index
+        /// </summary>
+        /// <param name="unique">Whether is unique index</param>
+        /// <param name="fields">Fields</param>
+        public static async Task AddIndexAsync(IEnumerable<SixnetDatabaseConnection> connections, Type entityType, bool unique, List<SixnetEntityIndexField> fields, SixnetDataOperationOptions options = null)
+        {
+            ValidateConnections(connections);
+            foreach (var connection in connections)
+            {
+                await connection.DatabaseProvider.MigrateAsync(GetAddIndexCommand(connection, (await connection.DatabaseProvider.GetTablesAsync(SixnetDatabaseCommand.Create(connection, options)).ConfigureAwait(false))?.Select(c => c.GetDatabaseObjectName()).ToList()
+                    , entityType, unique, null, fields, options)).ConfigureAwait(false);
+            }
+        }
+
+        #endregion
+
+        #region Delete index
+
+        /// <summary>
+        /// Delete index
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        public static async Task DeleteIndexAsync(IEnumerable<SixnetDatabaseConnection> connections, Type entityType, IEnumerable<string> fields, SixnetDataOperationOptions options = null)
+        {
+            ValidateConnections(connections);
+            foreach (var connection in connections)
+            {
+                await connection.DatabaseProvider.MigrateAsync(GetDeleteIndexCommand(connection, (await connection.DatabaseProvider.GetTablesAsync(SixnetDatabaseCommand.Create(connection, options)).ConfigureAwait(false))?.Select(c => c.GetDatabaseObjectName()).ToList()
+                    , entityType, false, fields, null, options)).ConfigureAwait(false);
+            }
+        }
+
+        /// <summary>
+        /// Delete index
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        public static async Task DeleteIndexAsync(IEnumerable<SixnetDatabaseConnection> connections, Type entityType, List<SixnetEntityIndexField> fields, SixnetDataOperationOptions options = null)
+        {
+            ValidateConnections(connections);
+            foreach (var connection in connections)
+            {
+                await connection.DatabaseProvider.MigrateAsync(GetDeleteIndexCommand(connection, (await connection.DatabaseProvider.GetTablesAsync(SixnetDatabaseCommand.Create(connection, options)).ConfigureAwait(false))?.Select(c => c.GetDatabaseObjectName()).ToList()
+                    , entityType, false, null, fields, options)).ConfigureAwait(false);
+            }
+        }
+
+        #endregion
+
+        #region Clear database
+
+        /// <summary>
+        /// Clear database
+        /// </summary>
+        /// <param name="connections"></param>
+        /// <param name="options"></param>
+        public static async Task ClearDatabaseAsync(IEnumerable<SixnetDatabaseConnection> connections, SixnetDataOperationOptions options = null)
+        {
+            ValidateConnections(connections);
+            foreach (var connection in connections)
+            {
+                var migCmd = SixnetDatabaseCommand.Create<SixnetMigrationDatabaseCommand>(connection, options, cmd =>
+                {
+                    cmd.MigrationInfo = new SixnetMigrationInfo()
+                    {
+                        ClearDatabase = true
+                    };
+                });
+                await connection.DatabaseProvider.MigrateAsync(migCmd).ConfigureAwait(false);
+            }
+        }
+
+        #endregion
     }
 }

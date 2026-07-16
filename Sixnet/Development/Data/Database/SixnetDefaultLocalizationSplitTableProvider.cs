@@ -14,11 +14,11 @@ namespace Sixnet.Development.Data.Database
     /// <summary>
     /// Localization split table provider
     /// </summary>
-    internal class SixnetDefaultLocalizationSplitTableProvider : ISixnetSplitTableProvider
+    internal class SixnetDefaultLocalizationSplitTableProvider : SixnetBaseSplitTableProvider
     {
         public const string Name = "SIXNET_DEFAULT_LOCALIZATION_SPLIT_TABLE_PROVIDER";
 
-        public List<SixnetDatabaseObjectName> FilterAllTableNames(SixnetFilterAllSplitTableNameParameter parameter)
+        public override List<SixnetDatabaseObjectName> FilterAllTableNames(SixnetFilterAllSplitTableNameParameter parameter)
         {
             if (parameter?.AllTableNames.IsNullOrEmpty() ?? true)
             {
@@ -28,7 +28,7 @@ namespace Sixnet.Development.Data.Database
             && tn.Name.Contains("sixnet_localization", StringComparison.OrdinalIgnoreCase)).ToList();
         }
 
-        public List<SixnetDatabaseObjectName> GetTableNames(SixnetGetSplitTableNameParameter parameter)
+        public override List<SixnetDatabaseObjectName> GetTableNames(SixnetGetSplitTableNameParameter parameter)
         {
             SixnetDirectThrower.ThrowArgNullIf(parameter == null, nameof(parameter));
 
@@ -42,19 +42,9 @@ namespace Sixnet.Development.Data.Database
             return resolvedTableNames;
         }
 
-        public List<SixnetDatabaseObjectName> ResolveTableNames(SixnetResolveSplitTableNameParameter parameter)
+        protected override List<SixnetDatabaseObjectName> FigureOutTableNames(SixnetResolveSplitTableNameParameter parameter)
         {
-            SixnetDirectThrower.ThrowArgNullIf(parameter == null, nameof(parameter));
-            SixnetDirectThrower.ThrowArgNullIf(parameter.EntityConfiguration == null, nameof(SixnetResolveSplitTableNameParameter.EntityConfiguration));
-            SixnetDirectThrower.ThrowArgNullIf(parameter.SplitBehavior == null, nameof(SixnetResolveSplitTableNameParameter.SplitBehavior));
-            SixnetDirectThrower.ThrowArgNullIf(string.IsNullOrWhiteSpace(parameter.RootTableName.Name), nameof(SixnetResolveSplitTableNameParameter.RootTableName.Name));
-
             var splitBehavior = parameter.SplitBehavior;
-            if (splitBehavior.SplitValues.IsNullOrEmpty())
-            {
-                return new List<SixnetDatabaseObjectName>(0);
-            }
-
             var tableNames = new HashSet<string>();
             foreach (var splitValue in splitBehavior.SplitValues)
             {
@@ -64,31 +54,7 @@ namespace Sixnet.Development.Data.Database
                     tableNames.Add($"{parameter.RootTableName.Name}_{splitStringValue.ToUpper().ReplaceByRegex("[.-]", "_")}");
                 }
             }
-            return tableNames.Select(t => SixnetDatabaseObjectName.Create(t, SixnetDatabaseObjectType.Table, parameter.RootTableName.SchemaName)).ToList();
-        }
-
-        /// <summary>
-        /// Change root table names
-        /// </summary>
-        /// <param name="currentTableNames">Current table names</param>
-        /// <param name="newRootTableName">New root table name</param>
-        /// <returns></returns>
-        public Dictionary<SixnetDatabaseObjectName, SixnetDatabaseObjectName> ChangeRootTableNames(IEnumerable<SixnetDatabaseObjectName> currentTableNames, SixnetDatabaseObjectName newRootTableName)
-        {
-            if (currentTableNames.IsNullOrEmpty())
-            {
-                return new Dictionary<SixnetDatabaseObjectName, SixnetDatabaseObjectName>(0);
-            }
-
-            var newNamesDict = new Dictionary<SixnetDatabaseObjectName, SixnetDatabaseObjectName>();
-            foreach (var currentTableName in currentTableNames)
-            {
-                var newTableName = currentTableName.Clone();
-                var idx = currentTableName.Name.LastIndexOf('_');
-                newTableName.Name = $"{newRootTableName.Name}{currentTableName.Name.Substring(idx)}";
-                newNamesDict[currentTableName] = newTableName;
-            }
-            return newNamesDict;
+            return [.. tableNames.Select(t => SixnetDatabaseObjectName.Create(t, SixnetDatabaseObjectType.Table, parameter.RootTableName.SchemaName))];
         }
     }
 }

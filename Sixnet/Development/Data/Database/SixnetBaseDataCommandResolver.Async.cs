@@ -377,6 +377,408 @@ namespace Sixnet.Development.Data.Database
 
         #endregion
 
+        #region Migration
+
+        #region Generate database migration statements
+
+        /// <summary>
+        /// Generate database migration statements
+        /// </summary>
+        /// <param name="command">Database migration command</param>
+        /// <returns></returns>
+        public virtual async Task<List<SixnetExecutionDatabaseStatement>> GenerateDatabaseMigrationStatementsAsync(SixnetMigrationDatabaseCommand command)
+        {
+            var statements = new List<SixnetExecutionDatabaseStatement>();
+
+            #region Clear database
+
+            if (command?.MigrationInfo?.ClearDatabase ?? false)
+            {
+                var clearForeignKeyStatements = await GetDeleteAllForeignKeyStatementsAsync(command).ConfigureAwait(false);
+                if (!clearForeignKeyStatements.IsNullOrEmpty())
+                {
+                    statements.AddRange(clearForeignKeyStatements);
+                }
+
+                var clearViewStatements = await GetDeleteAllViewStatementsAsync(command).ConfigureAwait(false);
+                if (!clearViewStatements.IsNullOrEmpty())
+                {
+                    statements.AddRange(clearViewStatements);
+                }
+
+                var clearTableStatements = await GetDeleteAllTableStatementsAsync(command).ConfigureAwait(false);
+                if (!clearTableStatements.IsNullOrEmpty())
+                {
+                    statements.AddRange(clearTableStatements);
+                }
+
+                var clearProcedureStatements = await GetDeleteAllProcedureStatementsAsync(command).ConfigureAwait(false);
+                if (!clearProcedureStatements.IsNullOrEmpty())
+                {
+                    statements.AddRange(clearProcedureStatements);
+                }
+
+                var clearFunctionStatements = await GetDeleteAllFunctionStatementsAsync(command).ConfigureAwait(false);
+                if (!clearFunctionStatements.IsNullOrEmpty())
+                {
+                    statements.AddRange(clearFunctionStatements);
+                }
+
+                var clearCustomTypeStatements = await GetDeleteAllCustomTypeStatementsAsync(command).ConfigureAwait(false);
+                if (!clearCustomTypeStatements.IsNullOrEmpty())
+                {
+                    statements.AddRange(clearCustomTypeStatements);
+                }
+
+                return statements;
+            }
+            #endregion
+
+            #region Delete foreign key
+
+            // Delete foreign key
+            var deleteForeignKeyStatements = await GetDeleteForeignKeyStatementsAsync(command).ConfigureAwait(false);
+            if (!deleteForeignKeyStatements.IsNullOrEmpty())
+            {
+                statements.AddRange(deleteForeignKeyStatements);
+            }
+
+            // Delete all foreign key
+            if (command?.MigrationInfo?.DeleteAllForeignKey ?? false)
+            {
+                var deleteAllForeignKeyStatements = await GetDeleteAllForeignKeyStatementsAsync(command).ConfigureAwait(false);
+                if (!deleteAllForeignKeyStatements.IsNullOrEmpty())
+                {
+                    statements.AddRange(deleteAllForeignKeyStatements);
+                }
+            }
+
+            #endregion
+
+            #region Views
+
+            // Delete all view
+            if (command?.MigrationInfo?.DeleteAllView ?? false)
+            {
+                var deleteAllViewStatements = await GetDeleteAllViewStatementsAsync(command).ConfigureAwait(false);
+                if (!deleteAllViewStatements.IsNullOrEmpty())
+                {
+                    statements.AddRange(deleteAllViewStatements);
+                }
+            }
+
+            #endregion
+
+            #region Tables
+
+            // New tables
+            var createTableStatements = await GetCreateTableStatementsAsync(command).ConfigureAwait(false);
+            if (!createTableStatements.IsNullOrEmpty())
+            {
+                statements.AddRange(createTableStatements);
+            }
+
+            // Rename tables
+            var renameTableStatements = await GetRenameTableStatementsAsync(command).ConfigureAwait(false);
+            if (!renameTableStatements.IsNullOrEmpty())
+            {
+                statements.AddRange(renameTableStatements);
+            }
+
+            // Delete tables
+            var deleteTableStatements = await GetDeleteTableStatementsAsync(command).ConfigureAwait(false);
+            if (!deleteTableStatements.IsNullOrEmpty())
+            {
+                statements.AddRange(deleteTableStatements);
+            }
+
+            // Delete all tables
+            if (command?.MigrationInfo?.DeleteAllTable ?? false)
+            {
+                var deleteAllTableStatements = await GetDeleteAllTableStatementsAsync(command).ConfigureAwait(false);
+                if (!deleteAllTableStatements.IsNullOrEmpty())
+                {
+                    statements.AddRange(deleteAllTableStatements);
+                }
+            }
+
+            #endregion
+
+            #region Fields
+
+            // New fields
+            var newFieldStatements = await GetAddFieldStatementsAsync(command).ConfigureAwait(false);
+            if (!newFieldStatements.IsNullOrEmpty())
+            {
+                statements.AddRange(newFieldStatements);
+            }
+
+            // Update fields
+            var updateFieldStatements = await GetUpdateFieldStatementsAsync(command).ConfigureAwait(false);
+            if (!updateFieldStatements.IsNullOrEmpty())
+            {
+                statements.AddRange(updateFieldStatements);
+            }
+
+            // Delete fields
+            var deleteFieldStatements = await GetDeleteFieldStatementsAsync(command).ConfigureAwait(false);
+            if (!deleteFieldStatements.IsNullOrEmpty())
+            {
+                statements.AddRange(deleteFieldStatements);
+            }
+
+            #endregion
+
+            #region Index
+
+            // Delete index
+            var deleteIndexStatements = await GetDeleteIndexStatementsAsync(command).ConfigureAwait(false);
+            if (!deleteIndexStatements.IsNullOrEmpty())
+            {
+                statements.AddRange(deleteIndexStatements);
+            }
+
+            // New index
+            var addIndexStatements = await GetAddIndexStatementsAsync(command).ConfigureAwait(false);
+            if (!addIndexStatements.IsNullOrEmpty())
+            {
+                statements.AddRange(addIndexStatements);
+            }
+
+            #endregion
+
+            #region Procedure
+
+            // Delete all procedure
+            if (command?.MigrationInfo?.DeleteAllProcedure ?? false)
+            {
+                var deleteAllProcedureStatements = await GetDeleteAllProcedureStatementsAsync(command).ConfigureAwait(false);
+                if (!deleteAllProcedureStatements.IsNullOrEmpty())
+                {
+                    statements.AddRange(deleteAllProcedureStatements);
+                }
+            }
+
+            #endregion
+
+            #region Function
+
+            // Delete all function
+            if (command?.MigrationInfo?.DeleteAllFunction ?? false)
+            {
+                var deleteAllFunctionStatements = await GetDeleteAllFunctionStatementsAsync(command).ConfigureAwait(false);
+                if (!deleteAllFunctionStatements.IsNullOrEmpty())
+                {
+                    statements.AddRange(deleteAllFunctionStatements);
+                }
+            }
+
+            #endregion
+
+            #region Custom type
+
+            // Delete all custom type
+            if (command?.MigrationInfo?.DeleteAllCustomType ?? false)
+            {
+                var deleteAllCustomTypeStatements = await GetDeleteAllCustomTypeStatementsAsync(command).ConfigureAwait(false);
+                if (!deleteAllCustomTypeStatements.IsNullOrEmpty())
+                {
+                    statements.AddRange(deleteAllCustomTypeStatements);
+                }
+            }
+
+            #endregion
+
+            #region New foreign key
+
+            // New foreign key
+            var addForeignKeyStatements = await GetAddForeignKeyStatementsAsync(command).ConfigureAwait(false);
+            if (!addForeignKeyStatements.IsNullOrEmpty())
+            {
+                statements.AddRange(addForeignKeyStatements);
+            }
+
+            #endregion
+
+            return statements;
+        }
+
+        #endregion
+
+        #region Tables
+
+        #region Get create table statements
+
+        /// <summary>
+        /// Get create table statements
+        /// </summary>
+        /// <param name="migrationCommand">Migration command</param>
+        /// <returns></returns>
+        protected abstract Task<List<SixnetExecutionDatabaseStatement>> GetCreateTableStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand);
+
+        #endregion
+
+        #region Get rename table statements
+
+        protected abstract Task<List<SixnetExecutionDatabaseStatement>> GetRenameTableStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand);
+
+        #endregion
+
+        #region Get delete table statements
+
+        /// <summary>
+        /// Get delete table statements
+        /// </summary>
+        /// <param name="migrationCommand"></param>
+        /// <returns></returns>
+        protected virtual Task<List<SixnetExecutionDatabaseStatement>> GetDeleteTableStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand)
+        {
+            return Task.FromResult(GetDeleteTableStatements(migrationCommand));
+        }
+
+        #endregion
+
+        #region Get delete all table statements
+
+        /// <summary>
+        /// Get delete all table statements
+        /// </summary>
+        /// <param name="migrationCommand"></param>
+        /// <returns></returns>
+        protected abstract Task<List<SixnetExecutionDatabaseStatement>> GetDeleteAllTableStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand);
+
+        #endregion
+
+        #endregion
+
+        #region Procedure
+
+        /// <summary>
+        /// Get delete all procedure statements
+        /// </summary>
+        /// <param name="migrationCommand"></param>
+        /// <returns></returns>
+        protected abstract Task<List<SixnetExecutionDatabaseStatement>> GetDeleteAllProcedureStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand);
+
+        #endregion
+
+        #region Functions
+
+        /// <summary>
+        /// Get delete all function statements
+        /// </summary>
+        /// <param name="migrationCommand"></param>
+        /// <returns></returns>
+        protected abstract Task<List<SixnetExecutionDatabaseStatement>> GetDeleteAllFunctionStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand);
+
+        #endregion
+
+        #region Custom type
+
+        /// <summary>
+        /// Get delete all custom type statements
+        /// </summary>
+        /// <param name="migrationCommand"></param>
+        /// <returns></returns>
+        protected abstract Task<List<SixnetExecutionDatabaseStatement>> GetDeleteAllCustomTypeStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand);
+
+        #endregion
+
+        #region Fields
+
+        #region Get add filed statements
+
+        protected abstract Task<List<SixnetExecutionDatabaseStatement>> GetAddFieldStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand);
+
+        #endregion
+
+        #region Get update field statements 
+
+        protected abstract Task<List<SixnetExecutionDatabaseStatement>> GetUpdateFieldStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand);
+
+        #endregion
+
+        #region Get delete filed statements
+
+        protected abstract Task<List<SixnetExecutionDatabaseStatement>> GetDeleteFieldStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand);
+
+        #endregion
+
+        #endregion
+
+        #region Foreign key
+
+        #region Add foreign key
+
+        /// <summary>
+        /// Get add foreign key statements
+        /// </summary>
+        /// <param name="migrationCommand"></param>
+        /// <returns></returns>
+        protected abstract Task<List<SixnetExecutionDatabaseStatement>> GetAddForeignKeyStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand);
+
+
+        #endregion
+
+        #region Delete foreign key
+
+        /// <summary>
+        /// Get delete foreign key statements
+        /// </summary>
+        /// <param name="migrationCommand"></param>
+        /// <returns></returns>
+        protected abstract Task<List<SixnetExecutionDatabaseStatement>> GetDeleteForeignKeyStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand);
+
+        /// <summary>
+        /// Get delete foreign key statements
+        /// </summary>
+        /// <param name="migrationCommand"></param>
+        /// <returns></returns>
+        protected abstract Task<List<SixnetExecutionDatabaseStatement>> GetDeleteAllForeignKeyStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand);
+
+        #endregion
+
+        #endregion
+
+        #region Index
+
+        #region Add index
+
+        /// <summary>
+        /// Get add index status
+        /// </summary>
+        /// <param name="migrationCommand"></param>
+        /// <returns></returns>
+        protected abstract Task<List<SixnetExecutionDatabaseStatement>> GetAddIndexStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand);
+
+        #endregion
+
+        #region Delete index
+
+        /// <summary>
+        /// Get delete index statements
+        /// </summary>
+        /// <param name="migrationCommand"></param>
+        /// <returns></returns>
+        protected abstract Task<List<SixnetExecutionDatabaseStatement>> GetDeleteIndexStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand);
+
+        #endregion 
+
+        #endregion
+
+        #region View
+
+        /// <summary>
+        /// Get delete all view statements
+        /// </summary>
+        /// <param name="migrationCommand"></param>
+        /// <returns></returns>
+        protected abstract Task<List<SixnetExecutionDatabaseStatement>> GetDeleteAllViewStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand);
+
+        #endregion
+
+        #endregion
+
         #region From target
 
         /// <summary>

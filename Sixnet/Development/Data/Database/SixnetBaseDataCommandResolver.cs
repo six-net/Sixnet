@@ -2,6 +2,7 @@
 
 using System.Data;
 using System.Text;
+using System.Threading.Tasks;
 
 using Sixnet.Development.Data.Command;
 using Sixnet.Development.Data.Field;
@@ -461,6 +462,87 @@ namespace Sixnet.Development.Data.Database
         {
             var statements = new List<SixnetExecutionDatabaseStatement>();
 
+            #region Clear database
+
+            if (command?.MigrationInfo?.ClearDatabase ?? false)
+            {
+                var clearForeignKeyStatements = GetDeleteAllForeignKeyStatements(command);
+                if (!clearForeignKeyStatements.IsNullOrEmpty())
+                {
+                    statements.AddRange(clearForeignKeyStatements);
+                }
+
+                var clearViewStatements = GetDeleteAllViewStatements(command);
+                if (!clearViewStatements.IsNullOrEmpty())
+                {
+                    statements.AddRange(clearViewStatements);
+                }
+
+                var clearTableStatements = GetDeleteAllTableStatements(command);
+                if (!clearTableStatements.IsNullOrEmpty())
+                {
+                    statements.AddRange(clearTableStatements);
+                }
+
+                var clearProcedureStatements = GetDeleteAllProcedureStatements(command);
+                if (!clearProcedureStatements.IsNullOrEmpty())
+                {
+                    statements.AddRange(clearProcedureStatements);
+                }
+
+                var clearFunctionStatements = GetDeleteAllFunctionStatements(command);
+                if (!clearFunctionStatements.IsNullOrEmpty())
+                {
+                    statements.AddRange(clearFunctionStatements);
+                }
+
+                var clearCustomTypeStatements = GetDeleteAllCustomTypeStatements(command);
+                if (!clearCustomTypeStatements.IsNullOrEmpty())
+                {
+                    statements.AddRange(clearCustomTypeStatements);
+                }
+
+                return statements;
+            } 
+            #endregion
+
+            #region Delete foreign key
+
+            // Delete foreign key
+            var deleteForeignKeyStatements = GetDeleteForeignKeyStatements(command);
+            if (!deleteForeignKeyStatements.IsNullOrEmpty())
+            {
+                statements.AddRange(deleteForeignKeyStatements);
+            }
+
+            // Delete all foreign key
+            if (command?.MigrationInfo?.DeleteAllForeignKey ?? false)
+            {
+                var deleteAllForeignKeyStatements = GetDeleteAllForeignKeyStatements(command);
+                if (!deleteAllForeignKeyStatements.IsNullOrEmpty())
+                {
+                    statements.AddRange(deleteAllForeignKeyStatements);
+                }
+            }
+
+            #endregion
+
+            #region Views
+
+            // Delete all view
+            if (command?.MigrationInfo?.DeleteAllView ?? false)
+            {
+                var deleteAllViewStatements = GetDeleteAllViewStatements(command);
+                if (!deleteAllViewStatements.IsNullOrEmpty())
+                {
+                    statements.AddRange(deleteAllViewStatements);
+                }
+            }
+
+            #endregion
+
+            #region Tables
+
             // New tables
             var createTableStatements = GetCreateTableStatements(command);
             if (!createTableStatements.IsNullOrEmpty())
@@ -475,12 +557,26 @@ namespace Sixnet.Development.Data.Database
                 statements.AddRange(renameTableStatements);
             }
 
-            // Deleteable tables
+            // Delete tables
             var deleteTableStatements = GetDeleteTableStatements(command);
             if (!deleteTableStatements.IsNullOrEmpty())
             {
                 statements.AddRange(deleteTableStatements);
             }
+
+            // Delete all tables
+            if (command?.MigrationInfo?.DeleteAllTable ?? false)
+            {
+                var deleteAllTableStatements = GetDeleteAllTableStatements(command);
+                if (!deleteAllTableStatements.IsNullOrEmpty())
+                {
+                    statements.AddRange(deleteAllTableStatements);
+                }
+            }
+
+            #endregion
+
+            #region Fields
 
             // New fields
             var newFieldStatements = GetAddFieldStatements(command);
@@ -503,12 +599,85 @@ namespace Sixnet.Development.Data.Database
                 statements.AddRange(deleteFieldStatements);
             }
 
+            #endregion
+
+            #region Index
+
+            // Delete index
+            var deleteIndexStatements = GetDeleteIndexStatements(command);
+            if (!deleteIndexStatements.IsNullOrEmpty())
+            {
+                statements.AddRange(deleteIndexStatements);
+            }
+
+            // New index
+            var addIndexStatements = GetAddIndexStatements(command);
+            if (!addIndexStatements.IsNullOrEmpty())
+            {
+                statements.AddRange(addIndexStatements);
+            }
+
+            #endregion
+
+            #region Procedure
+
+            // Delete all procedure
+            if (command?.MigrationInfo?.DeleteAllProcedure ?? false)
+            {
+                var deleteAllProcedureStatements = GetDeleteAllProcedureStatements(command);
+                if (!deleteAllProcedureStatements.IsNullOrEmpty())
+                {
+                    statements.AddRange(deleteAllProcedureStatements);
+                }
+            }
+
+            #endregion
+
+            #region Function
+
+            // Delete all function
+            if (command?.MigrationInfo?.DeleteAllFunction ?? false)
+            {
+                var deleteAllFunctionStatements = GetDeleteAllFunctionStatements(command);
+                if (!deleteAllFunctionStatements.IsNullOrEmpty())
+                {
+                    statements.AddRange(deleteAllFunctionStatements);
+                }
+            }
+
+            #endregion
+
+            #region Custom type
+
+            // Delete all custom type
+            if (command?.MigrationInfo?.DeleteAllCustomType ?? false)
+            {
+                var deleteAllCustomTypeStatements = GetDeleteAllCustomTypeStatements(command);
+                if (!deleteAllCustomTypeStatements.IsNullOrEmpty())
+                {
+                    statements.AddRange(deleteAllCustomTypeStatements);
+                }
+            }
+
+            #endregion
+
+            #region New foreign key
+
+            // New foreign key
+            var addForeignKeyStatements = GetAddForeignKeyStatements(command);
+            if (!addForeignKeyStatements.IsNullOrEmpty())
+            {
+                statements.AddRange(addForeignKeyStatements);
+            }
+
+            #endregion
+
             return statements;
         }
 
         #endregion
 
-        #region Get create table statements
+        #region Tables
 
         /// <summary>
         /// Get create table statements
@@ -517,15 +686,19 @@ namespace Sixnet.Development.Data.Database
         /// <returns></returns>
         protected abstract List<SixnetExecutionDatabaseStatement> GetCreateTableStatements(SixnetMigrationDatabaseCommand migrationCommand);
 
-        #endregion
+        /// <summary>
+        /// Get delete all table statements
+        /// </summary>
+        /// <param name="migrationCommand"></param>
+        /// <returns></returns>
+        protected abstract List<SixnetExecutionDatabaseStatement> GetDeleteAllTableStatements(SixnetMigrationDatabaseCommand migrationCommand);
 
-        #region Get rename table statements
-
+        /// <summary>
+        /// Get rename table statements
+        /// </summary>
+        /// <param name="migrationCommand"></param>
+        /// <returns></returns>
         protected abstract List<SixnetExecutionDatabaseStatement> GetRenameTableStatements(SixnetMigrationDatabaseCommand migrationCommand);
-
-        #endregion
-
-        #region Get delete table statements
 
         /// <summary>
         /// Get delete table statements
@@ -534,12 +707,12 @@ namespace Sixnet.Development.Data.Database
         /// <returns></returns>
         protected virtual List<SixnetExecutionDatabaseStatement> GetDeleteTableStatements(SixnetMigrationDatabaseCommand migrationCommand)
         {
-            if (migrationCommand?.MigrationInfo?.DeletableTableNames.IsNullOrEmpty() ?? true)
+            if (migrationCommand?.MigrationInfo?.DeletedTables.IsNullOrEmpty() ?? true)
             {
                 return new List<SixnetExecutionDatabaseStatement>(0);
             }
             var statements = new List<SixnetExecutionDatabaseStatement>();
-            foreach (var tableName in migrationCommand.MigrationInfo.DeletableTableNames)
+            foreach (var tableName in migrationCommand.MigrationInfo.DeletedTables)
             {
                 var deleteStatement = new SixnetExecutionDatabaseStatement()
                 {
@@ -554,6 +727,41 @@ namespace Sixnet.Development.Data.Database
         }
 
         #endregion
+
+        #region Procedure
+
+        /// <summary>
+        /// Get delete all procedure statements
+        /// </summary>
+        /// <param name="migrationCommand"></param>
+        /// <returns></returns>
+        protected abstract List<SixnetExecutionDatabaseStatement> GetDeleteAllProcedureStatements(SixnetMigrationDatabaseCommand migrationCommand);
+
+        #endregion
+
+        #region Functions
+
+        /// <summary>
+        /// Get delete all function statements
+        /// </summary>
+        /// <param name="migrationCommand"></param>
+        /// <returns></returns>
+        protected abstract List<SixnetExecutionDatabaseStatement> GetDeleteAllFunctionStatements(SixnetMigrationDatabaseCommand migrationCommand);
+
+        #endregion
+
+        #region Custom type
+
+        /// <summary>
+        /// Get delete all custom type statements
+        /// </summary>
+        /// <param name="migrationCommand"></param>
+        /// <returns></returns>
+        protected abstract List<SixnetExecutionDatabaseStatement> GetDeleteAllCustomTypeStatements(SixnetMigrationDatabaseCommand migrationCommand);
+
+        #endregion
+
+        #region Fields
 
         #region Get add filed statements
 
@@ -655,6 +863,79 @@ namespace Sixnet.Development.Data.Database
         }
 
         #endregion
+
+        #endregion
+
+        #endregion
+
+        #region Foreign key
+
+        #region Add foreign key
+
+        /// <summary>
+        /// Get add foreign key statements
+        /// </summary>
+        /// <param name="migrationCommand"></param>
+        /// <returns></returns>
+        protected abstract List<SixnetExecutionDatabaseStatement> GetAddForeignKeyStatements(SixnetMigrationDatabaseCommand migrationCommand);
+
+
+        #endregion
+
+        #region Delete foreign key
+
+        /// <summary>
+        /// Get delete foreign key statements
+        /// </summary>
+        /// <param name="migrationCommand"></param>
+        /// <returns></returns>
+        protected abstract List<SixnetExecutionDatabaseStatement> GetDeleteForeignKeyStatements(SixnetMigrationDatabaseCommand migrationCommand);
+
+        /// <summary>
+        /// Get delete foreign key statements
+        /// </summary>
+        /// <param name="migrationCommand"></param>
+        /// <returns></returns>
+        protected abstract List<SixnetExecutionDatabaseStatement> GetDeleteAllForeignKeyStatements(SixnetMigrationDatabaseCommand migrationCommand);
+
+        #endregion
+
+        #endregion
+
+        #region Index
+
+        #region Add index
+
+        /// <summary>
+        /// Get add index status
+        /// </summary>
+        /// <param name="migrationCommand"></param>
+        /// <returns></returns>
+        protected abstract List<SixnetExecutionDatabaseStatement> GetAddIndexStatements(SixnetMigrationDatabaseCommand migrationCommand);
+
+        #endregion
+
+        #region Delete index
+
+        /// <summary>
+        /// Get delete index statements
+        /// </summary>
+        /// <param name="migrationCommand"></param>
+        /// <returns></returns>
+        protected abstract List<SixnetExecutionDatabaseStatement> GetDeleteIndexStatements(SixnetMigrationDatabaseCommand migrationCommand);
+
+        #endregion 
+
+        #endregion
+
+        #region View
+
+        /// <summary>
+        /// Get delete all view statements
+        /// </summary>
+        /// <param name="migrationCommand"></param>
+        /// <returns></returns>
+        protected abstract List<SixnetExecutionDatabaseStatement> GetDeleteAllViewStatements(SixnetMigrationDatabaseCommand migrationCommand);
 
         #endregion
 

@@ -179,7 +179,7 @@ namespace Sixnet.Development.Data
         /// <returns></returns>
         internal static List<SixnetDatabaseObjectName> GetTableNames(SixnetDataCommandExecutionContext context)
         {
-            var entityType = context.ActivityQueryable.GetModelType();
+            var entityType = context?.ActivityQueryable?.GetModelType();
             entityType ??= (context?.Command?.GetEntityType());
 
             SixnetDirectThrower.ThrowArgNullIf(entityType == null, $"Entity type is null");

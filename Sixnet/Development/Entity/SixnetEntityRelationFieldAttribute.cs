@@ -1,5 +1,7 @@
 ﻿// "Company © 2025. All rights reserved."
 
+using Sixnet.Development.Data.Database;
+
 namespace Sixnet.Development.Entity
 {
     /// <summary>
@@ -34,5 +36,31 @@ namespace Sixnet.Development.Entity
             RelationField = relationField;
             Behavior = behavior;
         }
+    }
+
+    /// <summary>
+    /// Sixnet entity foreign key info
+    /// </summary>
+    public class SixnetEntityForeignKeyInfo
+    {
+        /// <summary>
+        /// Gets or sets the source table 
+        /// </summary>
+        public SixnetDatabaseObjectName SourceTable { get; set; }
+
+        /// <summary>
+        /// Gets or sets the source field
+        /// </summary>
+        public SixnetDatabaseObjectName SourceField { get; set; }
+
+        /// <summary>
+        /// Gets or sets the reference table
+        /// </summary>
+        public SixnetDatabaseObjectName ReferenceTable { get; set; }
+
+        /// <summary>
+        /// Gets or sets the referebce field
+        /// </summary>
+        public SixnetDatabaseObjectName ReferenceField { get; set; }
     }
 }

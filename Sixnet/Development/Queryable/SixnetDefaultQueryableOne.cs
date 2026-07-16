@@ -867,6 +867,17 @@ namespace Sixnet.Development.Queryable
         #region Split table
 
         /// <summary>
+        /// Specify split table
+        /// </summary>
+        /// <param name="tableNames">Table names</param>
+        /// <returns></returns>
+        public new ISixnetQueryable<TFirst> SpecifySplitTable(params string[] tableNames)
+        {
+            SpecifySplitTableCore(tableNames);
+            return this;
+        }
+
+        /// <summary>
         /// Use split table
         /// </summary>
         /// <param name="splitValue">Split value</param>

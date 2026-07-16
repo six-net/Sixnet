@@ -1185,6 +1185,15 @@ namespace Sixnet.Development.Queryable
 
         #region Split table
 
+        internal SixnetQueryableContext SpecifySplitTable(IEnumerable<SixnetDatabaseObjectName> tableNames)
+        {
+            tableNames ??= Array.Empty<SixnetDatabaseObjectName>();
+            var splitBehavior = SplitTableBehavior;
+            splitBehavior ??= new SixnetSplitTableBehavior();
+            splitBehavior.SpecificTableNames = tableNames;;
+            return SplitTable(splitBehavior);
+        }
+
         /// <summary>
         /// Use split table
         /// </summary>
@@ -1210,11 +1219,11 @@ namespace Sixnet.Development.Queryable
         internal SixnetQueryableContext SplitTable(IEnumerable<dynamic> splitValues, SixnetSplitTableNameSelectionPattern selectionPattern = SixnetSplitTableNameSelectionPattern.Precision)
         {
             splitValues ??= Array.Empty<dynamic>();
-            return SplitTable(new SixnetSplitTableBehavior()
-            {
-                SelectionPattern = selectionPattern,
-                SplitValues = splitValues
-            });
+            var splitBehavior = SplitTableBehavior;
+            splitBehavior ??= new SixnetSplitTableBehavior();
+            splitBehavior.SelectionPattern = selectionPattern;
+            splitBehavior.SplitValues = splitValues;
+            return SplitTable(splitBehavior);
         }
 
         /// <summary>
@@ -1224,10 +1233,10 @@ namespace Sixnet.Development.Queryable
         /// <returns></returns>
         internal SixnetQueryableContext SplitTable(Func<IEnumerable<SixnetDatabaseObjectName>, IEnumerable<SixnetDatabaseObjectName>, IEnumerable<SixnetDatabaseObjectName>> tableNameFilter)
         {
-            return SplitTable(new SixnetSplitTableBehavior()
-            {
-                SplitTableNameFilter = tableNameFilter
-            });
+            var splitBehavior = SplitTableBehavior;
+            splitBehavior ??= new SixnetSplitTableBehavior();
+            splitBehavior.SplitTableNameFilter = tableNameFilter;
+            return SplitTable(splitBehavior);
         }
 
         #endregion

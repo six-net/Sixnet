@@ -784,6 +784,12 @@ namespace Sixnet.Development.Data.Client
         void Migrate(SixnetMigrationInfo migrationInfo, SixnetDataOperationOptions options = null);
 
         /// <summary>
+        /// Clear database
+        /// </summary>
+        /// <param name="options">Data operation options</param>
+        void ClearDatabase(SixnetDataOperationOptions options = null);
+
+        /// <summary>
         /// Create all entity tables
         /// </summary>
         /// <param name="options"></param>
@@ -919,6 +925,57 @@ namespace Sixnet.Development.Data.Client
         /// <param name="schema">Schema</param>
         /// <param name="options">Options</param>
         void RenameTable<TEntity>(string currentTableName, string schema, SixnetDataOperationOptions options = null);
+
+        /// <summary>
+        /// Add foreign key
+        /// </summary>
+        /// <typeparam name="TSelfEntity"></typeparam>
+        /// <typeparam name="TReferenceEntity"></typeparam>
+        /// <param name="selfField">Self field</param>
+        /// <param name="referenceField">Reference field</param>
+        /// <param name="options">Options</param>
+        void AddForeignKey<TSelfEntity, TReferenceEntity>(Expression<Func<TSelfEntity, object>> selfField, Expression<Func<TSelfEntity, object>> referenceField, SixnetDataOperationOptions options = null);
+
+        /// <summary>
+        /// Delete foreign key
+        /// </summary>
+        /// <typeparam name="TSelfEntity"></typeparam>
+        /// <typeparam name="TReferenceEntity"></typeparam>
+        /// <param name="selfField">Self field</param>
+        /// <param name="referenceField">Reference field</param>
+        /// <param name="options">Options</param>
+        void DeleteForeignKey<TSelfEntity, TReferenceEntity>(Expression<Func<TSelfEntity, object>> selfField, Expression<Func<TSelfEntity, object>> referenceField, SixnetDataOperationOptions options = null);
+
+        /// <summary>
+        /// Add index
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="unique">Whether is unique index</param>
+        /// <param name="fields">Fields</param>
+        void AddIndex<TEntity>(bool unique, params Expression<Func<TEntity, object>>[] fields);
+
+        /// <summary>
+        /// Add index
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="unique">Whether is unique index</param>
+        /// <param name="fields">Fields</param>
+        void AddIndex<TEntity>(bool unique, Func<List<SixnetEntityIndexField>> getIndexFieldsFunc, SixnetDataOperationOptions options = null);
+
+        /// <summary>
+        /// Delete index
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="fields">Fields</param>
+        void DeleteIndex<TEntity>(params Expression<Func<TEntity, object>>[] fields);
+
+        /// <summary>
+        /// Delete index
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="getIndexFieldsFunc">Get index fields func</param>
+        /// <param name="options">Options</param>
+        void DeleteIndex<TEntity>(Func<List<SixnetEntityIndexField>> getIndexFieldsFunc, SixnetDataOperationOptions options = null);
 
         #endregion
 

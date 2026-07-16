@@ -37,6 +37,11 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         public string IdentityName => string.IsNullOrWhiteSpace(SchemaName) ? Name : $"{SchemaName}_{Name}";
 
+        public override string ToString()
+        {
+            return FullName;
+        }
+
         public static SixnetDatabaseObjectName Create(string name, SixnetDatabaseObjectType nameType, string schemaName = "")
         {
             return new SixnetDatabaseObjectName()

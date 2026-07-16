@@ -712,6 +712,13 @@ namespace Sixnet.Development.Queryable
         #region Split table
 
         /// <summary>
+        /// Specify split table
+        /// </summary>
+        /// <param name="tableNames">Table names</param>
+        /// <returns></returns>
+        ISixnetQueryable SpecifySplitTable(params string[] tableNames);
+
+        /// <summary>
         /// Use split table
         /// </summary>
         /// <param name="splitValue">Split value</param>
@@ -1797,6 +1804,13 @@ namespace Sixnet.Development.Queryable
         #region Split table
 
         /// <summary>
+        /// Specify split table
+        /// </summary>
+        /// <param name="tableNames">Table names</param>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst> SpecifySplitTable(params string[] tableNames);
+
+        /// <summary>
         /// Use split table
         /// </summary>
         /// <param name="splitValue">Split value</param>
@@ -2523,6 +2537,13 @@ namespace Sixnet.Development.Queryable
         #endregion
 
         #region Split table
+
+        /// <summary>
+        /// Specify split table
+        /// </summary>
+        /// <param name="tableNames">Table names</param>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond> SpecifySplitTable(params string[] tableNames);
 
         /// <summary>
         /// Use split table
@@ -3346,6 +3367,13 @@ namespace Sixnet.Development.Queryable
         #endregion
 
         #region Split table
+
+        /// <summary>
+        /// Specify split table
+        /// </summary>
+        /// <param name="tableNames">Table names</param>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird> SpecifySplitTable(params string[] tableNames);
 
         /// <summary>
         /// Use split table
@@ -4255,6 +4283,13 @@ namespace Sixnet.Development.Queryable
         #endregion
 
         #region Split table
+
+        /// <summary>
+        /// Specify split table
+        /// </summary>
+        /// <param name="tableNames">Table names</param>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth> SpecifySplitTable(params string[] tableNames);
 
         /// <summary>
         /// Use split table
@@ -5246,6 +5281,13 @@ namespace Sixnet.Development.Queryable
         #endregion
 
         #region Split table
+
+        /// <summary>
+        /// Specify split table
+        /// </summary>
+        /// <param name="tableNames">Table names</param>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> SpecifySplitTable(params string[] tableNames);
 
         /// <summary>
         /// Use split table
@@ -6321,6 +6363,13 @@ namespace Sixnet.Development.Queryable
         #region Split table
 
         /// <summary>
+        /// Specify split table
+        /// </summary>
+        /// <param name="tableNames">Table names</param>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> SpecifySplitTable(params string[] tableNames);
+
+        /// <summary>
         /// Use split table
         /// </summary>
         /// <param name="splitValue">Split value</param>
@@ -7258,6 +7307,13 @@ namespace Sixnet.Development.Queryable
         #endregion
 
         #region Split table
+
+        /// <summary>
+        /// Specify split table
+        /// </summary>
+        /// <param name="tableNames">Table names</param>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> SpecifySplitTable(params string[] tableNames);
 
         /// <summary>
         /// Use split table

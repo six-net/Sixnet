@@ -3,6 +3,7 @@
 using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
+
 using Sixnet.Development.Command;
 using Sixnet.Development.Data.Command;
 using Sixnet.Development.Data.Database;
@@ -1278,6 +1279,17 @@ namespace Sixnet.Development.Data.Client
         }
 
         /// <summary>
+        /// Clear database
+        /// </summary>
+        /// <param name="options">Data operation options</param>
+        public async Task ClearDatabaseAsync(SixnetDataOperationOptions options = null)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(internalDatabaseServers.IsNullOrEmpty(), "Database servers");
+            var connections = GetConnections(internalDatabaseServers);
+            await SixnetDataCommandExecutor.ClearDatabaseAsync(connections, options).ConfigureAwait(false);
+        }
+
+        /// <summary>
         /// Create all entity tables
         /// </summary>
         /// <param name="options"></param>
@@ -1301,6 +1313,9 @@ namespace Sixnet.Development.Data.Client
         /// <returns></returns>
         public async Task DeleteAllEntityTablesAsync(SixnetDataOperationOptions options = null)
         {
+            var connections = GetConnections(internalDatabaseServers);
+            await SixnetDataCommandExecutor.DeleteAllForeignKeysAsync(connections, options);
+
             var entities = SixnetEntityManager.GetAllEntityConfigs();
             await DeleteTableAsync(entities.Where(c => !c.IsSystem).Select(c => c.EntityType).ToList(), options);
         }
@@ -1500,6 +1515,91 @@ namespace Sixnet.Development.Data.Client
             var connections = GetConnections(internalDatabaseServers);
             return SixnetDataCommandExecutor.RenameTableAsync(connections, typeof(TEntity), SixnetDatabaseObjectName.Create(currentTableName, SixnetDatabaseObjectType.Table, schema)
                 , SixnetDatabaseObjectName.Create(string.Empty, SixnetDatabaseObjectType.Table, schema), options);
+        }
+
+        /// <summary>
+        /// Add foreign key
+        /// </summary>
+        /// <typeparam name="TSelfEntity"></typeparam>
+        /// <typeparam name="TReferenceEntity"></typeparam>
+        /// <param name="selfField">Self field</param>
+        /// <param name="referenceField">Reference field</param>
+        /// <param name="options">Options</param>
+        public Task AddForeignKeyAsync<TSelfEntity, TReferenceEntity>(Expression<Func<TSelfEntity, object>> selfField, Expression<Func<TSelfEntity, object>> referenceField, SixnetDataOperationOptions options = null)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(internalDatabaseServers.IsNullOrEmpty(), "Database servers");
+            var connections = GetConnections(internalDatabaseServers);
+            return SixnetDataCommandExecutor.AddForeignKeyAsync(connections, typeof(TSelfEntity), SixnetExpressionHelper.GetDataField(selfField).PropertyName
+                , typeof(TReferenceEntity), SixnetExpressionHelper.GetDataField(referenceField).PropertyName, options);
+        }
+
+        /// <summary>
+        /// Delete foreign key
+        /// </summary>
+        /// <typeparam name="TSelfEntity"></typeparam>
+        /// <typeparam name="TReferenceEntity"></typeparam>
+        /// <param name="selfField">Self field</param>
+        /// <param name="referenceField">Reference field</param>
+        /// <param name="options">Options</param>
+        public Task DeleteForeignKeyAsync<TSelfEntity, TReferenceEntity>(Expression<Func<TSelfEntity, object>> selfField, Expression<Func<TSelfEntity, object>> referenceField, SixnetDataOperationOptions options = null)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(internalDatabaseServers.IsNullOrEmpty(), "Database servers");
+            var connections = GetConnections(internalDatabaseServers);
+            return SixnetDataCommandExecutor.DeleteForeignKeyAsync(connections, typeof(TSelfEntity), SixnetExpressionHelper.GetDataField(selfField).PropertyName
+                , typeof(TReferenceEntity), SixnetExpressionHelper.GetDataField(referenceField).PropertyName, options);
+        }
+
+        /// <summary>
+        /// Add index
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="unique">Whether is unique index</param>
+        /// <param name="fields">Fields</param>
+        public Task AddIndexAsync<TEntity>(bool unique, params Expression<Func<TEntity, object>>[] fields)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(internalDatabaseServers.IsNullOrEmpty(), "Database servers");
+            var connections = GetConnections(internalDatabaseServers);
+            var fieldNames = fields?.Select(f => SixnetExpressionHelper.GetDataField(f).PropertyName);
+            return SixnetDataCommandExecutor.AddIndexAsync(connections, typeof(TEntity), unique, fieldNames, null);
+        }
+
+        /// <summary>
+        /// Add index
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="unique">Whether is unique index</param>
+        /// <param name="fields">Fields</param>
+        public Task AddIndexAsync<TEntity>(bool unique, Func<List<SixnetEntityIndexField>> getIndexFieldsFunc, SixnetDataOperationOptions options = null)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(internalDatabaseServers.IsNullOrEmpty(), "Database servers");
+            var connections = GetConnections(internalDatabaseServers);
+            return SixnetDataCommandExecutor.AddIndexAsync(connections, typeof(TEntity), unique, getIndexFieldsFunc?.Invoke(), null);
+        }
+
+        /// <summary>
+        /// Delete index
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="fields">Fields</param>
+        public Task DeleteIndexAsync<TEntity>(params Expression<Func<TEntity, object>>[] fields)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(internalDatabaseServers.IsNullOrEmpty(), "Database servers");
+            var connections = GetConnections(internalDatabaseServers);
+            var fieldNames = fields?.Select(f => SixnetExpressionHelper.GetDataField(f).PropertyName);
+            return SixnetDataCommandExecutor.DeleteIndexAsync(connections, typeof(TEntity), fieldNames, null);
+        }
+
+        /// <summary>
+        /// Delete index
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="getIndexFieldsFunc">Get index fields func</param>
+        /// <param name="options">Options</param>
+        public Task DeleteIndexAsync<TEntity>(Func<List<SixnetEntityIndexField>> getIndexFieldsFunc, SixnetDataOperationOptions options = null)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(internalDatabaseServers.IsNullOrEmpty(), "Database servers");
+            var connections = GetConnections(internalDatabaseServers);
+            return SixnetDataCommandExecutor.DeleteIndexAsync(connections, typeof(TEntity), getIndexFieldsFunc?.Invoke(), null);
         }
 
         #endregion

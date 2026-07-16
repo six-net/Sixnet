@@ -1,7 +1,10 @@
 ﻿// "Company © 2025. All rights reserved."
 
 using System.Data;
+using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
+
+using Microsoft.Extensions.Options;
 
 using Sixnet.Development.Data;
 using Sixnet.Development.Data.Command;
@@ -12,6 +15,8 @@ using Sixnet.Development.Entity;
 using Sixnet.Development.Queryable;
 using Sixnet.Exceptions;
 using Sixnet.Model.Paging;
+
+using static Sixnet.Reflection.SixnetReflecter;
 
 namespace Sixnet.Development.Command
 {
@@ -912,7 +917,7 @@ namespace Sixnet.Development.Command
             {
                 tableNames = [rootTableName];
             }
-            migCmd.MigrationInfo.DeletableTableNames = tableNames;
+            migCmd.MigrationInfo.DeletedTables = tableNames;
             return migCmd;
         }
 
@@ -994,7 +999,7 @@ namespace Sixnet.Development.Command
             {
                 tableFieldDict[tableName] = fields;
             }
-            migCmd.MigrationInfo.DeletableFields = tableFieldDict;
+            migCmd.MigrationInfo.DeletedFields = tableFieldDict;
             return migCmd;
         }
 
@@ -1035,7 +1040,7 @@ namespace Sixnet.Development.Command
             {
                 tableFieldDict[tableName] = fields;
             }
-            migCmd.MigrationInfo.UpdatableFields = tableFieldDict;
+            migCmd.MigrationInfo.UpdatedFields = tableFieldDict;
             return migCmd;
         }
 
@@ -1071,15 +1076,203 @@ namespace Sixnet.Development.Command
                     Behavior = splitBehavior,
                     RootTableName = oldTableName,
                 });
-                migCmd.MigrationInfo.RenameTables = splitProvider.ChangeRootTableNames(allTableNames, newTableName);
+                migCmd.MigrationInfo.RenamedTables = splitProvider.ChangeRootTableNames(allTableNames, newTableName);
             }
             else
             {
-                migCmd.MigrationInfo.RenameTables = new Dictionary<SixnetDatabaseObjectName, SixnetDatabaseObjectName>
+                migCmd.MigrationInfo.RenamedTables = new Dictionary<SixnetDatabaseObjectName, SixnetDatabaseObjectName>
                 {
                     { oldTableName, newTableName}
                 };
             }
+            return migCmd;
+        }
+
+        static SixnetMigrationDatabaseCommand GetAddForeignKeyCommand(SixnetDatabaseConnection connection, List<SixnetDatabaseObjectName> allTableNames, Type selfEntityType, string selfField, Type referenceEntityType, string referenceField, SixnetDataOperationOptions options = null)
+        {
+            var selfEntityConfig = SixnetEntityManager.GetEntityConfig(selfEntityType);
+            var selfDataField = SixnetEntityManager.GetField(selfEntityType, selfField);
+            var selfFieldDatabaseObject = SixnetDatabaseObjectName.Create(selfDataField.GetFieldName(connection.DatabaseServer.DatabaseType), SixnetDatabaseObjectType.Column);
+            var referenceEntityConfig = SixnetEntityManager.GetEntityConfig(referenceEntityType);
+            var referenceDataField = SixnetEntityManager.GetField(referenceEntityType, referenceField);
+            var referenceFieldDatabaseObject = SixnetDatabaseObjectName.Create(referenceDataField.GetFieldName(connection.DatabaseServer.DatabaseType), SixnetDatabaseObjectType.Column);
+            var migCmd = SixnetDatabaseCommand.Create<SixnetMigrationDatabaseCommand>(connection, options, cmd =>
+            {
+                cmd.MigrationInfo = new SixnetMigrationInfo()
+                {
+                    NewForeignKeys = []
+                };
+            });
+            var selfTableNames = new List<SixnetDatabaseObjectName>() { SixnetDataManager.GetDefaultTableName(SixnetDataCommandExecutionContext.Create(connection), selfEntityConfig) };
+            if (selfEntityConfig?.IsSplitTable ?? false)
+            {
+                var splitProvider = SixnetDataManager.GetSplitTableProvider(SixnetDataManager.GetDataOptions(), selfEntityConfig);
+                var splitBehavior = options?.SplitTableBehavior ?? new SixnetSplitTableBehavior();
+                selfTableNames = splitProvider.FilterAllTableNames(new SixnetFilterAllSplitTableNameParameter()
+                {
+                    AllTableNames = allTableNames,
+                    Behavior = splitBehavior,
+                    RootTableName = selfTableNames.FirstOrDefault(),
+                });
+            }
+            var referenceTableName = SixnetDataManager.GetDefaultTableName(SixnetDataCommandExecutionContext.Create(connection), referenceEntityConfig);
+            foreach (var selfTable in selfTableNames)
+            {
+                migCmd.MigrationInfo.NewForeignKeys.Add(new SixnetEntityForeignKeyInfo()
+                {
+                    SourceTable = selfTable,
+                    SourceField = selfFieldDatabaseObject,
+                    ReferenceTable = referenceTableName,
+                    ReferenceField = referenceFieldDatabaseObject
+                });
+            }
+            return migCmd;
+        }
+
+        static SixnetMigrationDatabaseCommand GetDeleteForeignKeyCommand(SixnetDatabaseConnection connection, List<SixnetDatabaseObjectName> allTableNames, Type selfEntityType, string selfField, Type referenceEntityType, string referenceField, SixnetDataOperationOptions options = null)
+        {
+            var selfEntityConfig = SixnetEntityManager.GetEntityConfig(selfEntityType);
+            var selfDataField = SixnetEntityManager.GetField(selfEntityType, selfField);
+            var selfFieldDatabaseObject = SixnetDatabaseObjectName.Create(selfDataField.GetFieldName(connection.DatabaseServer.DatabaseType), SixnetDatabaseObjectType.Column);
+            var referenceEntityConfig = SixnetEntityManager.GetEntityConfig(referenceEntityType);
+            var referenceDataField = SixnetEntityManager.GetField(referenceEntityType, referenceField);
+            var referenceFieldDatabaseObject = SixnetDatabaseObjectName.Create(referenceDataField.GetFieldName(connection.DatabaseServer.DatabaseType), SixnetDatabaseObjectType.Column);
+            var migCmd = SixnetDatabaseCommand.Create<SixnetMigrationDatabaseCommand>(connection, options, cmd =>
+            {
+                cmd.MigrationInfo = new SixnetMigrationInfo()
+                {
+                    DeletedForeignKeys = []
+                };
+            });
+            var selfTableNames = new List<SixnetDatabaseObjectName>() { SixnetDataManager.GetDefaultTableName(SixnetDataCommandExecutionContext.Create(connection), selfEntityConfig) };
+            if (selfEntityConfig?.IsSplitTable ?? false)
+            {
+                var splitProvider = SixnetDataManager.GetSplitTableProvider(SixnetDataManager.GetDataOptions(), selfEntityConfig);
+                var splitBehavior = options?.SplitTableBehavior ?? new SixnetSplitTableBehavior();
+                selfTableNames = splitProvider.FilterAllTableNames(new SixnetFilterAllSplitTableNameParameter()
+                {
+                    AllTableNames = allTableNames,
+                    Behavior = splitBehavior,
+                    RootTableName = selfTableNames.FirstOrDefault(),
+                });
+            }
+            var referenceTableName = SixnetDataManager.GetDefaultTableName(SixnetDataCommandExecutionContext.Create(connection), referenceEntityConfig);
+            foreach (var selfTable in selfTableNames)
+            {
+                migCmd.MigrationInfo.DeletedForeignKeys.Add(new SixnetEntityForeignKeyInfo()
+                {
+                    SourceTable = selfTable,
+                    SourceField = selfFieldDatabaseObject,
+                    ReferenceTable = referenceTableName,
+                    ReferenceField = referenceFieldDatabaseObject
+                });
+            }
+            return migCmd;
+        }
+
+        static SixnetMigrationDatabaseCommand GetAddIndexCommand(SixnetDatabaseConnection connection, List<SixnetDatabaseObjectName> allTableNames, Type entityType, bool unique, IEnumerable<string> fields, List<SixnetEntityIndexField> indexFields = null, SixnetDataOperationOptions options = null)
+        {
+            var entityConfig = SixnetEntityManager.GetEntityConfig(entityType);
+            var migCmd = SixnetDatabaseCommand.Create<SixnetMigrationDatabaseCommand>(connection, options, cmd =>
+            {
+                cmd.MigrationInfo = new SixnetMigrationInfo()
+                {
+                    NewIndexes = []
+                };
+            });
+
+            var tableNames = new List<SixnetDatabaseObjectName>() { SixnetDataManager.GetDefaultTableName(SixnetDataCommandExecutionContext.Create(connection), entityConfig) };
+            if (entityConfig?.IsSplitTable ?? false)
+            {
+                var splitProvider = SixnetDataManager.GetSplitTableProvider(SixnetDataManager.GetDataOptions(), entityConfig);
+                var splitBehavior = options?.SplitTableBehavior ?? new SixnetSplitTableBehavior();
+                tableNames = splitProvider.FilterAllTableNames(new SixnetFilterAllSplitTableNameParameter()
+                {
+                    AllTableNames = allTableNames,
+                    Behavior = splitBehavior,
+                    RootTableName = tableNames.FirstOrDefault(),
+                });
+            }
+
+            if (indexFields.IsNullOrEmpty() && !fields.IsNullOrEmpty())
+            {
+                indexFields = new List<SixnetEntityIndexField>();
+                foreach (var field in fields)
+                {
+                    var dataField = SixnetEntityManager.GetField(entityType, field);
+                    var dataFieldObject = SixnetDatabaseObjectName.Create(dataField.GetFieldName(connection.DatabaseServer.DatabaseType), SixnetDatabaseObjectType.Column);
+                    indexFields.Add(new SixnetEntityIndexField()
+                    {
+                        Name = dataFieldObject,
+                        Desc = dataField.HasDbFeature(SixnetFieldDbFeature.IndexDesc),
+                        Sequence = dataField.IndexSequence
+                    });
+                }
+            }
+
+            foreach (var table in tableNames)
+            {
+                migCmd.MigrationInfo.NewIndexes.Add(new SixnetEntityIndexInfo()
+                {
+                    Table = table,
+                    Unique = unique,
+                    Fields = indexFields
+                });
+            }
+
+            return migCmd;
+        }
+
+        static SixnetMigrationDatabaseCommand GetDeleteIndexCommand(SixnetDatabaseConnection connection, List<SixnetDatabaseObjectName> allTableNames, Type entityType, bool unique, IEnumerable<string> fields, List<SixnetEntityIndexField> indexFields = null, SixnetDataOperationOptions options = null)
+        {
+            var entityConfig = SixnetEntityManager.GetEntityConfig(entityType);
+            var migCmd = SixnetDatabaseCommand.Create<SixnetMigrationDatabaseCommand>(connection, options, cmd =>
+            {
+                cmd.MigrationInfo = new SixnetMigrationInfo()
+                {
+                    DeletedIndexes = []
+                };
+            });
+
+            var tableNames = new List<SixnetDatabaseObjectName>() { SixnetDataManager.GetDefaultTableName(SixnetDataCommandExecutionContext.Create(connection), entityConfig) };
+            if (entityConfig?.IsSplitTable ?? false)
+            {
+                var splitProvider = SixnetDataManager.GetSplitTableProvider(SixnetDataManager.GetDataOptions(), entityConfig);
+                var splitBehavior = options?.SplitTableBehavior ?? new SixnetSplitTableBehavior();
+                tableNames = splitProvider.FilterAllTableNames(new SixnetFilterAllSplitTableNameParameter()
+                {
+                    AllTableNames = allTableNames,
+                    Behavior = splitBehavior,
+                    RootTableName = tableNames.FirstOrDefault(),
+                });
+            }
+
+            if (indexFields.IsNullOrEmpty() && !fields.IsNullOrEmpty())
+            {
+                indexFields = new List<SixnetEntityIndexField>();
+                foreach (var field in fields)
+                {
+                    var dataField = SixnetEntityManager.GetField(entityType, field);
+                    var dataFieldObject = SixnetDatabaseObjectName.Create(dataField.GetFieldName(connection.DatabaseServer.DatabaseType), SixnetDatabaseObjectType.Column);
+                    indexFields.Add(new SixnetEntityIndexField()
+                    {
+                        Name = dataFieldObject,
+                        Desc = dataField.HasDbFeature(SixnetFieldDbFeature.IndexDesc),
+                        Sequence = dataField.IndexSequence
+                    });
+                }
+            }
+
+            foreach (var table in tableNames)
+            {
+                migCmd.MigrationInfo.DeletedIndexes.Add(new SixnetEntityIndexInfo()
+                {
+                    Table = table,
+                    Unique = unique,
+                    Fields = indexFields
+                });
+            }
+
             return migCmd;
         }
 
@@ -1202,6 +1395,164 @@ namespace Sixnet.Development.Command
             foreach (var connection in connections)
             {
                 connection.DatabaseProvider.Migrate(GetRenameTableCommand(connection, entityType, connection.DatabaseProvider.GetTables(SixnetDatabaseCommand.Create(connection, options))?.Select(c => c.GetDatabaseObjectName()).ToList(), oldTableName, newTableName, options));
+            }
+        }
+
+        #endregion
+
+        #region Add foreign key
+
+        /// <summary>
+        /// Add foreign key
+        /// </summary>
+        /// <param name="connections">Connections</param>
+        /// <param name="selfEntityType">Self entity type</param>
+        /// <param name="selfField">Self field</param>
+        /// <param name="referenceEntityType">Reference entity type</param>
+        /// <param name="referenceField">Reference field</param>
+        /// <param name="options">Options</param>
+        public static void AddForeignKey(IEnumerable<SixnetDatabaseConnection> connections, Type selfEntityType, string selfField, Type referenceEntityType, string referenceField, SixnetDataOperationOptions options = null)
+        {
+            ValidateConnections(connections);
+            foreach (var connection in connections)
+            {
+                connection.DatabaseProvider.Migrate(GetAddForeignKeyCommand(connection, connection.DatabaseProvider.GetTables(SixnetDatabaseCommand.Create(connection, options))?.Select(c => c.GetDatabaseObjectName()).ToList()
+                    , selfEntityType, selfField, referenceEntityType, referenceField, options));
+            }
+        }
+
+        #endregion
+
+        #region Delete foreign key
+
+        /// <summary>
+        /// Delete foreign key
+        /// </summary>
+        /// <param name="connections">Connections</param>
+        /// <param name="selfEntityType">Self entity type</param>
+        /// <param name="selfField">Self field</param>
+        /// <param name="referenceEntityType">Reference entity type</param>
+        /// <param name="referenceField">Reference field</param>
+        /// <param name="options">Options</param>
+        public static void DeleteForeignKey(IEnumerable<SixnetDatabaseConnection> connections, Type selfEntityType, string selfField, Type referenceEntityType, string referenceField, SixnetDataOperationOptions options = null)
+        {
+            ValidateConnections(connections);
+            foreach (var connection in connections)
+            {
+                connection.DatabaseProvider.Migrate(GetDeleteForeignKeyCommand(connection, connection.DatabaseProvider.GetTables(SixnetDatabaseCommand.Create(connection, options))?.Select(c => c.GetDatabaseObjectName()).ToList()
+                    , selfEntityType, selfField, referenceEntityType, referenceField, options));
+            }
+        }
+
+        /// <summary>
+        /// Delete all foreign keys
+        /// </summary>
+        /// <param name="connections"></param>
+        /// <param name="options"></param>
+        public static void DeleteAllForeignKeys(IEnumerable<SixnetDatabaseConnection> connections, SixnetDataOperationOptions options = null)
+        {
+            ValidateConnections(connections);
+            foreach (var connection in connections)
+            {
+                var migCmd = SixnetDatabaseCommand.Create<SixnetMigrationDatabaseCommand>(connection, options, cmd =>
+                {
+                    cmd.MigrationInfo = new SixnetMigrationInfo()
+                    {
+                        DeleteAllForeignKey = true
+                    };
+                });
+                connection.DatabaseProvider.Migrate(migCmd);
+            }
+        }
+
+        #endregion
+
+        #region Add index
+
+        /// <summary>
+        /// Add index
+        /// </summary>
+        /// <param name="unique">Whether is unique index</param>
+        /// <param name="fields">Fields</param>
+        public static void AddIndex(IEnumerable<SixnetDatabaseConnection> connections, Type entityType, bool unique, IEnumerable<string> fields, SixnetDataOperationOptions options = null)
+        {
+            ValidateConnections(connections);
+            foreach (var connection in connections)
+            {
+                connection.DatabaseProvider.Migrate(GetAddIndexCommand(connection, connection.DatabaseProvider.GetTables(SixnetDatabaseCommand.Create(connection, options))?.Select(c => c.GetDatabaseObjectName()).ToList()
+                    , entityType, unique, fields, null, options));
+            }
+        }
+
+        /// <summary>
+        /// Add index
+        /// </summary>
+        /// <param name="unique">Whether is unique index</param>
+        /// <param name="fields">Fields</param>
+        public static void AddIndex(IEnumerable<SixnetDatabaseConnection> connections, Type entityType, bool unique, List<SixnetEntityIndexField> fields, SixnetDataOperationOptions options = null)
+        {
+            ValidateConnections(connections);
+            foreach (var connection in connections)
+            {
+                connection.DatabaseProvider.Migrate(GetAddIndexCommand(connection, connection.DatabaseProvider.GetTables(SixnetDatabaseCommand.Create(connection, options))?.Select(c => c.GetDatabaseObjectName()).ToList()
+                    , entityType, unique, null, fields, options));
+            }
+        }
+
+        #endregion
+
+        #region Delete index
+
+        /// <summary>
+        /// Delete index
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        public static void DeleteIndex(IEnumerable<SixnetDatabaseConnection> connections, Type entityType, IEnumerable<string> fields, SixnetDataOperationOptions options = null)
+        {
+            ValidateConnections(connections);
+            foreach (var connection in connections)
+            {
+                connection.DatabaseProvider.Migrate(GetDeleteIndexCommand(connection, connection.DatabaseProvider.GetTables(SixnetDatabaseCommand.Create(connection, options))?.Select(c => c.GetDatabaseObjectName()).ToList()
+                    , entityType, false, fields, null, options));
+            }
+        }
+
+        /// <summary>
+        /// Delete index
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        public static void DeleteIndex(IEnumerable<SixnetDatabaseConnection> connections, Type entityType, List<SixnetEntityIndexField> fields, SixnetDataOperationOptions options = null)
+        {
+            ValidateConnections(connections);
+            foreach (var connection in connections)
+            {
+                connection.DatabaseProvider.Migrate(GetDeleteIndexCommand(connection, connection.DatabaseProvider.GetTables(SixnetDatabaseCommand.Create(connection, options))?.Select(c => c.GetDatabaseObjectName()).ToList()
+                    , entityType, false, null, fields, options));
+            }
+        }
+
+        #endregion
+
+        #region Clear database
+
+        /// <summary>
+        /// Clear database
+        /// </summary>
+        /// <param name="connections"></param>
+        /// <param name="options"></param>
+        public static void ClearDatabase(IEnumerable<SixnetDatabaseConnection> connections, SixnetDataOperationOptions options = null)
+        {
+            ValidateConnections(connections);
+            foreach (var connection in connections)
+            {
+                var migCmd = SixnetDatabaseCommand.Create<SixnetMigrationDatabaseCommand>(connection, options, cmd =>
+                {
+                    cmd.MigrationInfo = new SixnetMigrationInfo()
+                    {
+                        ClearDatabase = true
+                    };
+                });
+                connection.DatabaseProvider.Migrate(migCmd);
             }
         }
 

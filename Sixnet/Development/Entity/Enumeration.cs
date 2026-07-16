@@ -52,7 +52,8 @@ namespace Sixnet.Development.Entity
         None = 0,
         NotFixedLength = 2,
         NotNull = 4,
-        Default = 8
+        Default = 8,
+        IndexDesc = 16
     }
 
     /// <summary>
@@ -87,7 +88,8 @@ namespace Sixnet.Development.Entity
     public enum SixnetRelationBehavior
     {
         None = 0,
-        CascadingDelete = 2
+        CascadingDelete = 2,
+        ForeignKey = 4
     }
 
     /// <summary>

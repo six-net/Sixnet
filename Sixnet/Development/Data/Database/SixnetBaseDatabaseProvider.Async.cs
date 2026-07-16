@@ -473,7 +473,7 @@ namespace Sixnet.Development.Data.Database
             try
             {
                 var dataCommandResolver = GetDataCommandResolver();
-                var statements = dataCommandResolver.GenerateDatabaseMigrationStatements(command);
+                var statements = await dataCommandResolver.GenerateDatabaseMigrationStatementsAsync(command).ConfigureAwait(false);
                 foreach (var statement in statements)
                 {
                     await ExecuteDatabaseStatementAsync(command, statement).ConfigureAwait(false);

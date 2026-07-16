@@ -71,6 +71,7 @@ namespace Sixnet.Development.Data.Database
             {
                 DataClient = SixnetUnitOfWork.Current.DataClient;
                 await ExecuteUpdateAsync().ConfigureAwait(false);
+                await DataClient.CreateTableAsync(typeof(SixnetAppUpdateRecordEntity)).ConfigureAwait(false);
                 if (Version > context.CurrentVersion)
                 {
                     context.CurrentVersion = Version;
@@ -111,6 +112,7 @@ namespace Sixnet.Development.Data.Database
             {
                 DataClient = SixnetUnitOfWork.Current.DataClient;
                 await ExecuteRollbackAsync().ConfigureAwait(false);
+                await DataClient.CreateTableAsync(typeof(SixnetAppUpdateRecordEntity)).ConfigureAwait(false);
                 var recordRepository = SixnetContainer.GetService<ISixnetRepository<SixnetAppUpdateRecordEntity>>();
                 await recordRepository.DeleteAsync(r => r.Id == Id).ConfigureAwait(false);
                 await workContext.CommitAsync().ConfigureAwait(false);

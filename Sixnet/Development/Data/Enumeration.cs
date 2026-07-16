@@ -292,7 +292,9 @@ namespace Sixnet.Development.Data
     public enum SixnetDatabaseObjectType
     {
         Table = 1,
-        Column = 2
+        Column = 2,
+        Index = 3,
+        Constraint = 4
     }
 
     #endregion

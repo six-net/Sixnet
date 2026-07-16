@@ -79,5 +79,10 @@ namespace Sixnet.Development.Entity
         /// Gets or sets the increment value
         /// </summary>
         public int IncrementValue { get; set; }
+
+        /// <summary>
+        /// Gets or sets the index sequence
+        /// </summary>
+        public int IndexSequence { get; set; }
     }
 }

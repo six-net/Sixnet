@@ -152,6 +152,7 @@ namespace Sixnet.Development.Entity
                     Precision = entityFieldAttribute?.Precision ?? 0,
                     DefaultValue = entityFieldAttribute?.DefaultValue ?? string.Empty,
                     IncrementValue = entityFieldAttribute?.IncrementValue ?? 0,
+                    IndexSequence = entityFieldAttribute.IndexSequence
                 };
                 var fieldStartValue = entityFieldAttribute?.StartValue ?? 0;
                 if (propertyField.InRole(SixnetFieldRole.PrimaryKey) && fieldStartValue == 0)
@@ -219,6 +220,7 @@ namespace Sixnet.Development.Entity
                     }
                 }
             }
+
             allFields = allFields.OrderByDescending(f => f.InRole(SixnetFieldRole.PrimaryKey))
                         .ThenByDescending(c => cacheFieldNames.Contains(c.PropertyName))
                         .ToList();
