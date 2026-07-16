@@ -14,20 +14,10 @@
     <copyright>Copyright © DingBin.Li</copyright>
     <tags>.NET,Sixnet,DDD</tags>
     <dependencies>
-		<dependency id="Microsoft.Bcl.HashCode" version="6.0.0" />
-		<dependency id="Microsoft.Extensions.Configuration.Json" version="10.0.8" />
-		<dependency id="Microsoft.Extensions.DependencyInjection" version="10.0.8" />
 		<dependency id="Microsoft.Extensions.Hosting" version="10.0.8" />
 		<dependency id="Microsoft.Extensions.Http" version="10.0.8" />
 		<dependency id="Microsoft.Extensions.Localization" version="10.0.8" />
-		<dependency id="Microsoft.Extensions.Logging" version="10.0.8" />
-		<dependency id="Microsoft.Extensions.Options.ConfigurationExtensions" version="10.0.8" />
 		<dependency id="Microsoft.IdentityModel.JsonWebTokens" version="8.19.1" />
-		<dependency id="System.ComponentModel.Annotations" version="5.0.0" />
-		<dependency id="System.DirectoryServices.Protocols" version="10.0.8" />
-		<dependency id="System.Drawing.Common" version="10.0.8" />
-		<dependency id="System.Text.Json" version="10.0.8" />
-		<dependency id="System.Threading.Channels" version="10.0.8" />
     </dependencies>
   </metadata>
   <files>
