@@ -9,7 +9,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class IdEntity<TId, TEntity> : SixnetBaseEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetIdEntity<TId, TEntity> : SixnetBaseEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Id
@@ -23,7 +23,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class IdCreateDateEntity<TId, TEntity> : CreateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetIdCreateDateEntity<TId, TEntity> : SixnetCreateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Id
@@ -37,7 +37,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class IdUpdateDateEntity<TId, TEntity> : UpdateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetIdUpdateDateEntity<TId, TEntity> : SixnetUpdateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Id
@@ -51,7 +51,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class IdCreateUpdateDateEntity<TId, TEntity> : CreateUpdateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetIdCreateUpdateDateEntity<TId, TEntity> : SixnetCreateUpdateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Id
@@ -65,7 +65,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class TenantIdEntity<TId, TEntity> : TenantEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetTenantIdEntity<TId, TEntity> : SixnetTenantEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Id
@@ -79,7 +79,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class TenantIdCreateDateEntity<TId, TEntity> : TenantCreateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetTenantIdCreateDateEntity<TId, TEntity> : SixnetTenantCreateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Id
@@ -93,7 +93,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class TenantIdUpdateDateEntity<TId, TEntity> : TenantUpdateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetTenantIdUpdateDateEntity<TId, TEntity> : SixnetTenantUpdateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Id
@@ -107,7 +107,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class TenantIdCreateUpdateDateEntity<TId, TEntity> : TenantCreateUpdateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetTenantIdCreateUpdateDateEntity<TId, TEntity> : SixnetTenantCreateUpdateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Id
@@ -121,7 +121,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class ArchiveableIdEntity<TId, TEntity> : IdEntity<TId, TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetArchiveableIdEntity<TId, TEntity> : SixnetIdEntity<TId, TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Archived
@@ -135,7 +135,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class ArchiveableIdCreateDateEntity<TId, TEntity> : IdCreateDateEntity<TId, TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetArchiveableIdCreateDateEntity<TId, TEntity> : SixnetIdCreateDateEntity<TId, TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Archived
@@ -149,7 +149,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class ArchiveableIdUpdateDateEntity<TId, TEntity> : IdUpdateDateEntity<TId, TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetArchiveableIdUpdateDateEntity<TId, TEntity> : SixnetIdUpdateDateEntity<TId, TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Archived
@@ -163,7 +163,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class ArchiveableIdCreateUpdateDateEntity<TId, TEntity> : IdCreateUpdateDateEntity<TId, TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetArchiveableIdCreateUpdateDateEntity<TId, TEntity> : SixnetIdCreateUpdateDateEntity<TId, TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Archived
@@ -177,7 +177,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class ArchiveableTenantIdEntity<TId, TEntity> : TenantIdEntity<TId, TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetArchiveableTenantIdEntity<TId, TEntity> : SixnetTenantIdEntity<TId, TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Archived
@@ -191,7 +191,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class ArchiveableTenantIdCreateDateEntity<TId, TEntity> : TenantIdCreateDateEntity<TId, TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetArchiveableTenantIdCreateDateEntity<TId, TEntity> : SixnetTenantIdCreateDateEntity<TId, TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Archived
@@ -205,7 +205,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class ArchiveableTenantIdUpdateDateEntity<TId, TEntity> : TenantIdUpdateDateEntity<TId, TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetArchiveableTenantIdUpdateDateEntity<TId, TEntity> : SixnetTenantIdUpdateDateEntity<TId, TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Archived
@@ -219,7 +219,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class ArchiveableTenantIdCreateUpdateDateEntity<TId, TEntity> : TenantIdCreateUpdateDateEntity<TId, TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetArchiveableTenantIdCreateUpdateDateEntity<TId, TEntity> : SixnetTenantIdCreateUpdateDateEntity<TId, TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Archived
@@ -237,7 +237,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class AutoIdEntity<TId, TEntity> : SixnetBaseEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetAutoIdEntity<TId, TEntity> : SixnetBaseEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Id
@@ -251,7 +251,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class AutoIdCreateDateEntity<TId, TEntity> : CreateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetAutoIdCreateDateEntity<TId, TEntity> : SixnetCreateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Id
@@ -265,7 +265,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class AutoIdUpdateDateEntity<TId, TEntity> : UpdateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetAutoIdUpdateDateEntity<TId, TEntity> : SixnetUpdateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Id
@@ -279,7 +279,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class AutoIdCreateUpdateDateEntity<TId, TEntity> : CreateUpdateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetAutoIdCreateUpdateDateEntity<TId, TEntity> : SixnetCreateUpdateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Id
@@ -293,7 +293,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class TenantAutoIdEntity<TId, TEntity> : TenantEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetTenantAutoIdEntity<TId, TEntity> : SixnetTenantEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Id
@@ -307,7 +307,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class TenantAutoIdCreateDateEntity<TId, TEntity> : TenantCreateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetTenantAutoIdCreateDateEntity<TId, TEntity> : SixnetTenantCreateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Id
@@ -321,7 +321,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class TenantAutoIdUpdateDateEntity<TId, TEntity> : TenantUpdateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetTenantAutoIdUpdateDateEntity<TId, TEntity> : SixnetTenantUpdateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Id
@@ -335,7 +335,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class TenantAutoIdCreateUpdateDateEntity<TId, TEntity> : TenantCreateUpdateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetTenantAutoIdCreateUpdateDateEntity<TId, TEntity> : SixnetTenantCreateUpdateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Id
@@ -349,7 +349,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class ArchiveableAutoIdEntity<TId, TEntity> : AutoIdEntity<TId, TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetArchiveableAutoIdEntity<TId, TEntity> : SixnetAutoIdEntity<TId, TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Archived
@@ -363,7 +363,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class ArchiveableAutoIdCreateDateEntity<TId, TEntity> : AutoIdCreateDateEntity<TId, TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetArchiveableAutoIdCreateDateEntity<TId, TEntity> : SixnetAutoIdCreateDateEntity<TId, TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Archived
@@ -377,7 +377,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class ArchiveableAutoIdUpdateDateEntity<TId, TEntity> : AutoIdUpdateDateEntity<TId, TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetArchiveableAutoIdUpdateDateEntity<TId, TEntity> : SixnetAutoIdUpdateDateEntity<TId, TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Archived
@@ -391,7 +391,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class ArchiveableAutoIdCreateUpdateDateEntity<TId, TEntity> : AutoIdCreateUpdateDateEntity<TId, TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetArchiveableAutoIdCreateUpdateDateEntity<TId, TEntity> : SixnetAutoIdCreateUpdateDateEntity<TId, TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Archived
@@ -405,7 +405,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class ArchiveableTenantAutoIdEntity<TId, TEntity> : TenantAutoIdEntity<TId, TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetArchiveableTenantAutoIdEntity<TId, TEntity> : SixnetTenantAutoIdEntity<TId, TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Archived
@@ -419,7 +419,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class ArchiveableTenantAutoIdCreateDateEntity<TId, TEntity> : TenantAutoIdCreateDateEntity<TId, TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetArchiveableTenantAutoIdCreateDateEntity<TId, TEntity> : SixnetTenantAutoIdCreateDateEntity<TId, TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Archived
@@ -433,7 +433,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class ArchiveableTenantAutoIdUpdateDateEntity<TId, TEntity> : TenantAutoIdUpdateDateEntity<TId, TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetArchiveableTenantAutoIdUpdateDateEntity<TId, TEntity> : SixnetTenantAutoIdUpdateDateEntity<TId, TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Archived
@@ -447,7 +447,7 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class ArchiveableTenantAutoIdCreateUpdateDateEntity<TId, TEntity> : TenantAutoIdCreateUpdateDateEntity<TId, TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetArchiveableTenantAutoIdCreateUpdateDateEntity<TId, TEntity> : SixnetTenantAutoIdCreateUpdateDateEntity<TId, TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Archived

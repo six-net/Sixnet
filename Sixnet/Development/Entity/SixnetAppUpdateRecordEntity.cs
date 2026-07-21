@@ -14,7 +14,7 @@ namespace Sixnet.Development.Entity
     /// Sixnet app update record entity
     /// </summary>
     [SixnetEntity(TableName = "SIXNET_APPLICATION_UPDATE_RECORD", Module = "", Description = "App update record", IsSystem = true)]
-    public class SixnetAppUpdateRecordEntity : CreateUpdateDateEntity<SixnetAppUpdateRecordEntity>
+    public class SixnetAppUpdateRecordEntity : SixnetCreateUpdateDateEntity<SixnetAppUpdateRecordEntity>
     {
         /// <summary>
         /// Id

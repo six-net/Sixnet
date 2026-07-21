@@ -150,14 +150,14 @@ namespace Sixnet.Development.Data.Database
         {
             if (instance != null)
             {
-                if (instance is CreateDateEntity<TEntity> createDateEntity)
+                if (instance is SixnetCreateDateEntity<TEntity> createDateEntity)
                 {
                     createDateEntity.CreateUserId = SystemUserId;
                     createDateEntity.CreateUserName = SystemUserName;
                     createDateEntity.CreateUserDisplayName = SystemUserDisplayName;
                     createDateEntity.CreateDate = DateTimeOffset.Now;
                 }
-                if (instance is CreateUpdateDateEntity<TEntity> updateDateEntity)
+                if (instance is SixnetCreateUpdateDateEntity<TEntity> updateDateEntity)
                 {
                     updateDateEntity.UpdateUserId = SystemUserId;
                     updateDateEntity.UpdateUserName = SystemUserName;
