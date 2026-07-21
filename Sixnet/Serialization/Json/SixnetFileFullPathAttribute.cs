@@ -17,9 +17,9 @@ namespace Sixnet.Serialization.Json
 
         public string FileObjectName { get; set; }
 
-        public SixnetFileFullPathAttribute(string fileObjectName = "")
+        public SixnetFileFullPathAttribute(object fileObjectName = null)
         {
-            FileObjectName = fileObjectName;
+            FileObjectName = fileObjectName?.ToString() ?? string.Empty;
         }
 
         public override JsonConverter CreateConverter(Type typeToConvert)
