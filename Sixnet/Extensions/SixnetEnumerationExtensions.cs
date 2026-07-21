@@ -14,7 +14,7 @@ namespace System
         /// <param name="enumValue">Enum value</param>
         /// <param name="configure">Configure options</param>
         /// <returns>Return a dictionary</returns>
-        public static Dictionary<int, string> GetEnumDictionary<TEnum>(this TEnum enumValue, Action<SixnetEnumOptions> configure = null) where TEnum : struct, Enum
+        public static Dictionary<int, string> GetEnumDictionary<TEnum>(this TEnum enumValue, Action<SixnetEnumOptions> configure = null) where TEnum : Enum
         {
             return enumValue.GetType().GetEnumValueAndNames(configure);
         }
@@ -26,7 +26,7 @@ namespace System
         /// <param name="enumValue">Enum value</param>
         /// <param name="configure">Configure options</param>
         /// <returns>Return a name code & value collection</returns>
-        public static List<SixnetNameValue<int>> GetEnumNameValues<TEnum>(this TEnum enumValue, Action<SixnetEnumOptions> configure = null) where TEnum : struct, Enum
+        public static List<SixnetNameValue<int>> GetEnumNameValues<TEnum>(this TEnum enumValue, Action<SixnetEnumOptions> configure = null) where TEnum : Enum
         {
             var enumDict = enumValue.GetEnumDictionary(configure);
             return enumDict.Select(c => new SixnetNameValue<int>()
@@ -43,7 +43,7 @@ namespace System
         /// <param name="enumValue">Enum value</param>
         /// <param name="configure">Configure options</param>
         /// <returns></returns>
-        public static string GetEnumName<TEnum>(this TEnum enumValue, Action<SixnetEnumOptions> configure = null) where TEnum : struct, Enum
+        public static string GetEnumName<TEnum>(this TEnum enumValue, Action<SixnetEnumOptions> configure = null) where TEnum : Enum
         {
             var intValue = Convert.ToInt32(enumValue);
             var enumDict = enumValue.GetEnumDictionary(configure);
