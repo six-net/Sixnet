@@ -22,6 +22,11 @@ namespace Sixnet.Session
         /// </summary>
         public SixnetUserInfo User { get; set; }
 
+        /// <summary>
+        /// Gets or sets the other info
+        /// </summary>
+        public object Info { get; set; }
+
         internal SixnetSession()
         {
             SixnetSessionContext.Current = this;

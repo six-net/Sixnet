@@ -107,6 +107,34 @@ namespace Sixnet.Session
 
         #endregion
 
+        #region Isolation
+
+        /// <summary>
+        /// Gets the isolation info
+        /// </summary>
+        /// <returns></returns>
+        public static SixnetIsolationInfo GetIsolation()
+        {
+            return current?.Value?.Isolation;
+        }
+
+        /// <summary>
+        /// Gets the isolation id
+        /// </summary>
+        /// <typeparam name="TId"></typeparam>
+        /// <returns></returns>
+        public static TId GetIsolationId<TId>()
+        {
+            var isolation = GetIsolation();
+            if (isolation == null)
+            {
+                return default;
+            }
+            return isolation.GetId<TId>();
+        }
+
+        #endregion
+
         #endregion
     }
 }

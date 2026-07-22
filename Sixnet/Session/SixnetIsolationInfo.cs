@@ -21,5 +21,33 @@ namespace Sixnet.Session
         /// Gets or sets the tenant name
         /// </summary>
         public string Name { get; set; }
+
+        /// <summary>
+        /// Get user id
+        /// </summary>
+        /// <typeparam name="TId">Id data type</typeparam>
+        /// <returns></returns>
+        public TId GetId<TId>()
+        {
+            return GetIdValue<TId>(Id);
+        }
+
+        static TId GetIdValue<TId>(string originalId)
+        {
+            if (string.IsNullOrWhiteSpace(originalId))
+            {
+                return default;
+            }
+            object idValue;
+            if (typeof(TId) == typeof(Guid))
+            {
+                idValue = Guid.Parse(originalId);
+            }
+            else
+            {
+                idValue = originalId.ConvertTo<TId>();
+            }
+            return (TId)idValue;
+        }
     }
 }
