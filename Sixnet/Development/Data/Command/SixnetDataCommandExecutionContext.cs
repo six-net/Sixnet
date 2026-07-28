@@ -137,7 +137,7 @@ namespace Sixnet.Development.Data.Command
             switch (Command.OperationType)
             {
                 case SixnetDataOperationType.Insert:
-                    return splitValues.IsNullOrEmpty() ? (Command.Options?.SplitTableBehavior ?? ActivityQueryable?.SplitTableBehavior) 
+                    return splitValues.IsNullOrEmpty() ? (Command.Options?.SplitTableBehavior ?? ActivityQueryable?.Info.SplitTableBehavior) 
                                                         : new SixnetSplitTableBehavior()
                                                         {
                                                             SelectionPattern = SixnetSplitTableNameSelectionPattern.Precision,
@@ -146,14 +146,14 @@ namespace Sixnet.Development.Data.Command
                 case SixnetDataOperationType.BulkInsert:
                     throw new NotSupportedException($"Not support get split values for {SixnetDataOperationType.BulkInsert}");
                 default:
-                    return Command.Options?.SplitTableBehavior ?? ActivityQueryable?.SplitTableBehavior;
+                    return Command.Options?.SplitTableBehavior ?? ActivityQueryable?.Info.SplitTableBehavior;
             }
         }
 
         /// <summary>
         /// Create data command execution context
         /// </summary>
-        /// <param name="server">Database server</param>
+        /// <param name="connection">Database connection</param>
         /// <param name="command">Command</param>
         /// <returns></returns>
         public static SixnetDataCommandExecutionContext Create(SixnetDatabaseConnection connection, SixnetDataCommand command = null)

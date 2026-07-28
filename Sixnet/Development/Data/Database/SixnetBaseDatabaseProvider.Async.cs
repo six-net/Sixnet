@@ -41,6 +41,30 @@ namespace Sixnet.Development.Data.Database
         }
 
         /// <summary>
+        /// Create temp table
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        public virtual async Task<SixnetTempTable> CreateTempTableAsync(SixnetSingleDatabaseCommand command)
+        {
+            try
+            {
+                var dataCommandResolver = GetDataCommandResolver();
+                var queryStatement = dataCommandResolver.GenerateDatabaseQueryStatement(command);
+                await command.Connection.DbConnection.ExecuteAsync(GetCommandDefinition(command, queryStatement)).ConfigureAwait(false);
+
+                return new SixnetTempTable()
+                {
+                    Name = $"{command.DataCommand?.Queryable?.Info.TempTableName}"
+                };
+            }
+            catch (Exception ex)
+            {
+                throw GetSqlException(ex);
+            }
+        }
+
+        /// <summary>
         /// Execute database statement
         /// </summary>
         /// <param name="command">Database command</param>
@@ -218,7 +242,7 @@ namespace Sixnet.Development.Data.Database
         /// <returns>Whether has data</returns>
         public virtual async Task<bool> ExistsAsync(SixnetSingleDatabaseCommand command)
         {
-            command?.DataCommand?.Queryable?.Output(SixnetQueryableOutputType.Predicate);
+            command?.DataCommand?.Queryable?.Info.Output(SixnetQueryableOutputType.Predicate);
             return (await ScalarAsync<int>(command).ConfigureAwait(false)) > 0;
         }
 
@@ -229,7 +253,7 @@ namespace Sixnet.Development.Data.Database
         /// <returns></returns>
         public virtual async Task<int> CountAsync(SixnetSingleDatabaseCommand command)
         {
-            command?.DataCommand?.Queryable?.Output(SixnetQueryableOutputType.Count);
+            command?.DataCommand?.Queryable?.Info.Output(SixnetQueryableOutputType.Count);
             return await ScalarAsync<int>(command).ConfigureAwait(false);
         }
 

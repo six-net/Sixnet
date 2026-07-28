@@ -2,6 +2,7 @@
 
 using System.Threading.Tasks;
 
+using Sixnet.Development.Data.Database;
 using Sixnet.Development.Data.Field;
 using Sixnet.Development.Entity;
 using Sixnet.Development.Queryable;
@@ -520,6 +521,30 @@ namespace Sixnet.Development.Data.Client
             using (var dataClient = GetDataClient(true))
             {
                 return await dataClient.ScalarAsync<TValue>(queryable, options).ConfigureAwait(false);
+            }
+        }
+
+        #endregion
+
+        #region Temp table
+
+        /// <summary>
+        /// Query scalar value
+        /// </summary>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Value</returns>
+        public static Task<SixnetTempTable> CreateTempTableAsync(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
+        {
+            var options = GetDataOperationOptions(configure);
+
+            if (SixnetUnitOfWork.Current != null)
+            {
+                return SixnetUnitOfWork.Current.DataClient.CreateTempTableAsync(queryable, options);
+            }
+            using (var dataClient = GetDataClient(true))
+            {
+                return dataClient.CreateTempTableAsync(queryable, options);
             }
         }
 

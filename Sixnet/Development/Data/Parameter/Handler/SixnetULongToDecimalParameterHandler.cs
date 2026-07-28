@@ -9,7 +9,7 @@ namespace Sixnet.Development.Data.ParameterHandler.Handler
 {
     public class SixnetULongToDecimalParameterHandler : ISixnetDataCommandParameterHandler
     {
-        public DataCommandParameterItem Parse(DataCommandParameterItem originalParameter)
+        public SixnetDataCommandParameterItem Parse(SixnetDataCommandParameterItem originalParameter)
         {
             if (originalParameter != null)
             {

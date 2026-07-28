@@ -28,10 +28,6 @@ namespace Sixnet.Development.Data.Database
             var splitBehavior = parameter.SplitBehavior;
 
             List<SixnetDatabaseObjectName> splitTableNames = null;
-            if (!splitBehavior.SpecificTableNames.IsNullOrEmpty())
-            {
-                splitTableNames = [.. splitBehavior.SpecificTableNames];
-            }
             if (splitBehavior.SplitValues.IsNullOrEmpty())
             {
                 return splitTableNames ?? [];

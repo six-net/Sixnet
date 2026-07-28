@@ -593,7 +593,7 @@ namespace Sixnet.Development.Repository
         public sealed override Task<TValue> MaxAsync<TValue>(Expression<Func<TModel, TValue>> field, Expression<Func<TModel, bool>> conditionExpression, Action<SixnetDataOperationOptions> configure = null)
         {
             var maxQueryable = conditionExpression.GetQueryable<TModel>()
-                .Select(field.GetDataField(SixnetFieldFormatterNames.MAX));
+                .SelectFields(field.GetDataField(SixnetFieldFormatterNames.MAX));
             return MaxAsync<TValue>(maxQueryable, configure);
         }
 
@@ -636,7 +636,7 @@ namespace Sixnet.Development.Repository
         public sealed override Task<TValue> MinAsync<TValue>(Expression<Func<TModel, TValue>> field, Expression<Func<TModel, bool>> conditionExpression, Action<SixnetDataOperationOptions> configure = null)
         {
             var minQueryable = conditionExpression.GetQueryable<TModel>()
-                .Select(field.GetDataField(SixnetFieldFormatterNames.MIN));
+                .SelectFields(field.GetDataField(SixnetFieldFormatterNames.MIN));
             return MinAsync<TValue>(minQueryable, configure);
         }
 
@@ -679,7 +679,7 @@ namespace Sixnet.Development.Repository
         public sealed override Task<TValue> SumAsync<TValue>(Expression<Func<TModel, TValue>> field, Expression<Func<TModel, bool>> conditionExpression = null, Action<SixnetDataOperationOptions> configure = null)
         {
             var sumQueryable = conditionExpression.GetQueryable<TModel>()
-                .Select(field.GetDataField(SixnetFieldFormatterNames.SUM));
+                .SelectFields(field.GetDataField(SixnetFieldFormatterNames.SUM));
             return SumAsync<TValue>(sumQueryable, configure);
         }
 
@@ -722,7 +722,7 @@ namespace Sixnet.Development.Repository
         public sealed override Task<TValue> AvgAsync<TValue>(Expression<Func<TModel, TValue>> field, Expression<Func<TModel, bool>> conditionExpression, Action<SixnetDataOperationOptions> configure = null)
         {
             var avgQueryable = conditionExpression.GetQueryable<TModel>()
-                .Select(field.GetDataField(SixnetFieldFormatterNames.AVG));
+                .SelectFields(field.GetDataField(SixnetFieldFormatterNames.AVG));
             return AvgAsync<TValue>(avgQueryable, configure);
         }
 
@@ -765,7 +765,7 @@ namespace Sixnet.Development.Repository
         public sealed override Task<TValue> ScalarAsync<TValue>(Expression<Func<TModel, TValue>> field, Expression<Func<TModel, bool>> conditionExpression, Action<SixnetDataOperationOptions> configure = null)
         {
             var query = conditionExpression.GetQueryable<TModel>()
-                        .Select(field.GetDataField());
+                        .SelectFields(field.GetDataField());
             return ScalarAsync<TValue>(query, configure);
         }
 
@@ -792,7 +792,7 @@ namespace Sixnet.Development.Repository
         public sealed override Task<TValue> ScalarAsync<TValue>(SixnetDataField field, Expression<Func<TModel, bool>> conditionExpression, Action<SixnetDataOperationOptions> configure = null)
         {
             var query = conditionExpression.GetQueryable<TModel>()
-                        .Select(field);
+                        .SelectFields(field);
             return ScalarAsync<TValue>(query, configure);
         }
 

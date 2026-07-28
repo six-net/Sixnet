@@ -523,7 +523,7 @@ namespace Sixnet.Development.Data
         public static IEnumerable<ISixnetField> GetQueryableFields(SixnetDatabaseType databaseType, Type entityType
             , ISixnetQueryable queryable, bool includeNecessaryFields)
         {
-            var queryFields = queryable.GetFields(entityType, includeNecessaryFields);
+            var queryFields = queryable.GetSelectedFields(entityType, includeNecessaryFields);
             return GetFields(databaseType, entityType, queryFields);
         }
 
@@ -605,7 +605,7 @@ namespace Sixnet.Development.Data
         /// <param name="databaseType">Database type</param>
         /// <param name="parameter">Parameter</param>
         /// <returns>Return a parameter handler</returns>
-        static ISixnetDataCommandParameterHandler GetParameterHandler(SixnetDatabaseType databaseType, DataCommandParameterItem parameter)
+        static ISixnetDataCommandParameterHandler GetParameterHandler(SixnetDatabaseType databaseType, SixnetDataCommandParameterItem parameter)
         {
             if (parameter != null)
             {
@@ -637,7 +637,7 @@ namespace Sixnet.Development.Data
         /// <param name="databaseType">Database type</param>
         /// <param name="parameter">Parameter</param>
         /// <returns></returns>
-        internal static DataCommandParameterItem HandleParameter(SixnetDatabaseType databaseType, DataCommandParameterItem parameter)
+        internal static SixnetDataCommandParameterItem HandleParameter(SixnetDatabaseType databaseType, SixnetDataCommandParameterItem parameter)
         {
             var handler = GetParameterHandler(databaseType, parameter);
             return handler?.Parse(parameter) ?? parameter;

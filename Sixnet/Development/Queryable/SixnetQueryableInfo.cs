@@ -1,7 +1,10 @@
 ﻿// "Company © 2025. All rights reserved."
 
+using System.Collections;
 using System.Dynamic;
+using System.Runtime.Serialization.Formatters;
 
+using Sixnet.Code;
 using Sixnet.Development.Data;
 using Sixnet.Development.Data.Database;
 using Sixnet.Development.Data.Field;
@@ -16,9 +19,9 @@ using Sixnet.Reflection;
 namespace Sixnet.Development.Queryable
 {
     /// <summary>
-    /// Queryable context
+    /// Queryable Info
     /// </summary>
-    internal class SixnetQueryableContext : ISixnetCloneable<SixnetQueryableContext>
+    public class SixnetQueryableInfo : ISixnetCloneable<SixnetQueryableInfo>
     {
         #region Fields
 
@@ -52,9 +55,9 @@ namespace Sixnet.Development.Queryable
 
         #region Constructor
 
-        internal SixnetQueryableContext()
+        internal SixnetQueryableInfo()
         {
-            Id = Guid.NewGuid();
+            Id = SixnetGuidHelper.GetGuid().ToString().Replace("-", "").ToUpper();
         }
 
         #endregion
@@ -64,7 +67,12 @@ namespace Sixnet.Development.Queryable
         /// <summary>
         /// Get the queryable context id
         /// </summary>
-        public Guid Id { get; private set; }
+        public string Id { get; private set; }
+
+        /// <summary>
+        /// Temp table name
+        /// </summary>
+        public string TempTableName => $"SIXNET_TEMP_TABLE_{Id}";
 
         /// <summary>
         /// Whether exclude necessary fields
@@ -215,7 +223,17 @@ namespace Sixnet.Development.Queryable
         /// <summary>
         /// Gets the target queryable
         /// </summary>
-        public ISixnetQueryable Target { get; private set; }
+        public ISixnetQueryable TargetQueryable { get; private set; }
+
+        /// <summary>
+        /// Gets the specify tables
+        /// </summary>
+        public List<SixnetDatabaseObjectName> SpecifyTables { get; private set; }
+
+        /// <summary>
+        /// Gets the target constant values
+        /// </summary>
+        public object TargetConstantValue { get; private set; }
 
         /// <summary>
         /// Gets the output type
@@ -266,7 +284,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="criterionOperator">Criterion operator</param>
         /// <param name="value">Value</param>
         /// <param name="criterionOptions">Criterion options</param>
-        internal SixnetQueryableContext AddCriterion(SixnetCriterionConnector connector, ISixnetField field, SixnetCriterionOperator criterionOperator, dynamic value, SixnetCriterionOptions criterionOptions = null)
+        internal SixnetQueryableInfo AddCriterion(SixnetCriterionConnector connector, ISixnetField field, SixnetCriterionOperator criterionOperator, dynamic value, SixnetCriterionOptions criterionOptions = null)
         {
             SixnetDirectThrower.ThrowArgErrorIf(field == null, nameof(field));
 
@@ -278,7 +296,7 @@ namespace Sixnet.Development.Queryable
         /// Add condition
         /// </summary>
         /// <param name="condition">Condition</param>
-        internal SixnetQueryableContext AddCondition(ISixnetCondition condition)
+        internal SixnetQueryableInfo AddCondition(ISixnetCondition condition)
         {
             #region Handle condition
 
@@ -336,7 +354,7 @@ namespace Sixnet.Development.Queryable
         /// Clear sort condition
         /// </summary>
         /// <returns></returns>
-        internal SixnetQueryableContext ClearSort()
+        internal SixnetQueryableInfo ClearSort()
         {
             Sorts?.Clear();
             return this;
@@ -347,7 +365,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="sortEntries">Sort entries</param>
         /// <returns></returns>
-        internal SixnetQueryableContext AddSort(params SixnetSortEntry[] sortEntries)
+        internal SixnetQueryableInfo AddSort(params SixnetSortEntry[] sortEntries)
         {
             if (!sortEntries.IsNullOrEmpty())
             {
@@ -366,7 +384,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        internal SixnetQueryableContext SelectFields(params ISixnetField[] fields)
+        internal SixnetQueryableInfo SelectFields(params ISixnetField[] fields)
         {
             if (!fields.IsNullOrEmpty())
             {
@@ -383,7 +401,7 @@ namespace Sixnet.Development.Queryable
         /// <typeparam name="T"></typeparam>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        internal SixnetQueryableContext SelectFields<T>(params Expression<Func<T, dynamic>>[] fields)
+        internal SixnetQueryableInfo SelectFields<T>(params Expression<Func<T, dynamic>>[] fields)
         {
             return SelectFields(fields?.Select(f => SixnetExpressionHelper.GetDataField(f.Body)).ToArray());
         }
@@ -392,7 +410,7 @@ namespace Sixnet.Development.Queryable
         /// Clear selected fields
         /// </summary>
         /// <returns></returns>
-        internal SixnetQueryableContext ClearSelectedFields()
+        internal SixnetQueryableInfo ClearSelectedFields()
         {
             SelectedFields?.Clear();
             ClearCacheFields();
@@ -404,7 +422,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        internal SixnetQueryableContext UnselectFields(params ISixnetField[] fields)
+        internal SixnetQueryableInfo UnselectFields(params ISixnetField[] fields)
         {
             if (!fields.IsNullOrEmpty())
             {
@@ -421,7 +439,7 @@ namespace Sixnet.Development.Queryable
         /// <typeparam name="T"></typeparam>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        internal SixnetQueryableContext UnselectFields<T>(params Expression<Func<T, object>>[] fields)
+        internal SixnetQueryableInfo UnselectFields<T>(params Expression<Func<T, object>>[] fields)
         {
             return UnselectFields(fields?.Select(f => SixnetExpressionHelper.GetDataField(f.Body)).ToArray());
         }
@@ -430,7 +448,7 @@ namespace Sixnet.Development.Queryable
         /// Clear unselected fields
         /// </summary>
         /// <returns></returns>
-        internal SixnetQueryableContext ClearUnselectedFields()
+        internal SixnetQueryableInfo ClearUnselectedFields()
         {
             UnselectedFields?.Clear();
             ClearCacheFields();
@@ -477,7 +495,7 @@ namespace Sixnet.Development.Queryable
         /// Exclude necessary fields
         /// </summary>
         /// <returns></returns>
-        internal SixnetQueryableContext ExcludeNecessaryFields()
+        internal SixnetQueryableInfo ExcludeNecessaryFields()
         {
             IsExcludedNecessaryFields = true;
             ClearCacheFields();
@@ -488,7 +506,7 @@ namespace Sixnet.Development.Queryable
         /// Include necessary fields
         /// </summary>
         /// <returns></returns>
-        internal SixnetQueryableContext IncludeNecessaryFields()
+        internal SixnetQueryableInfo IncludeNecessaryFields()
         {
             IsExcludedNecessaryFields = false;
             ClearCacheFields();
@@ -514,7 +532,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="scriptType">Script type</param>
         /// <param name="parameters">Parameters</param>
         /// <returns></returns>
-        internal SixnetQueryableContext SetScript(string script, SixnetDataScriptType scriptType = SixnetDataScriptType.Text, object parameters = null)
+        internal SixnetQueryableInfo SetScript(string script, SixnetDataScriptType scriptType = SixnetDataScriptType.Text, object parameters = null)
         {
             Script = script;
             ScriptType = scriptType;
@@ -599,18 +617,18 @@ namespace Sixnet.Development.Queryable
                 return GenerateSingleExpression(parameter, condition as SixnetCriterion);
             }
             var query = condition as ISixnetQueryable;
-            if (query?.Conditions.IsNullOrEmpty() ?? true)
+            if (query?.Info.Conditions.IsNullOrEmpty() ?? true)
             {
                 return null;
             }
-            var conditionCount = query.Conditions.Count();
-            var firstCondition = query.Conditions.First();
+            var conditionCount = query.Info.Conditions.Count();
+            var firstCondition = query.Info.Conditions.First();
             if (conditionCount == 1 && firstCondition is SixnetCriterion firstCriterion)
             {
                 return GenerateSingleExpression(parameter, firstCriterion);
             }
             Expression conditionExpression = null;
-            foreach (var conditionEntry in query.Conditions)
+            foreach (var conditionEntry in query.Info.Conditions)
             {
                 var childExpression = GenerateExpression(parameter, conditionEntry);
                 if (conditionExpression == null)
@@ -820,7 +838,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="parentFieldName">Parent field name</param>
         /// <param name="direction">Recurve direction</param>
         /// <returns></returns>
-        internal SixnetQueryableContext TreeMatching(string dataFieldName, string parentFieldName, SixnetTreeMatchingDirection direction = SixnetTreeMatchingDirection.Down)
+        internal SixnetQueryableInfo TreeMatching(string dataFieldName, string parentFieldName, SixnetTreeMatchingDirection direction = SixnetTreeMatchingDirection.Down)
         {
             SixnetDirectThrower.ThrowArgErrorIf(string.IsNullOrWhiteSpace(dataFieldName) || string.IsNullOrWhiteSpace(parentFieldName), $"{nameof(dataFieldName)} or {nameof(parentFieldName)} is null or empty");
             return TreeMatching(SixnetDataField.Create(dataFieldName), SixnetDataField.Create(parentFieldName), direction);
@@ -833,7 +851,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="parentField">Parent field</param>
         /// <param name="direction">Matching direction</param>
         /// <returns></returns>
-        internal SixnetQueryableContext TreeMatching(ISixnetField dataField, ISixnetField parentField, SixnetTreeMatchingDirection direction = SixnetTreeMatchingDirection.Down)
+        internal SixnetQueryableInfo TreeMatching(ISixnetField dataField, ISixnetField parentField, SixnetTreeMatchingDirection direction = SixnetTreeMatchingDirection.Down)
         {
             SixnetDirectThrower.ThrowArgErrorIf(dataField == null || parentField == null, $"{nameof(dataField)} or {nameof(parentField)} is null");
             SixnetDirectThrower.ThrowArgErrorIf(dataField == parentField, $"{nameof(dataField)} and {nameof(parentField)} can not be the same value");
@@ -856,65 +874,66 @@ namespace Sixnet.Development.Queryable
         /// Light clone an IQuery object
         /// </summary>
         /// <returns>Return the replicated Queryable</returns>
-        public SixnetQueryableContext LightClone()
+        public SixnetQueryableInfo LightClone()
         {
-            var newQueryableContext = CloneValueMember();
-            newQueryableContext.IgnoredFilterTypes = IgnoredFilterTypes == null ? null : new HashSet<Type>(IgnoredFilterTypes);
-            newQueryableContext.Conditions = Conditions == null ? null : new List<ISixnetCondition>(Conditions);
-            newQueryableContext.Criteria = Criteria == null ? null : new List<SixnetCriterion>(Criteria);
-            newQueryableContext.Sorts = Sorts == null ? null : new List<SixnetSortEntry>(Sorts);
-            newQueryableContext.SelectedFields = SelectedFields == null ? null : new List<ISixnetField>(SelectedFields);
-            newQueryableContext.UnselectedFields = UnselectedFields == null ? null : new List<ISixnetField>(UnselectedFields);
-            newQueryableContext.GroupFields = GroupFields == null ? null : new List<ISixnetField>(GroupFields);
-            newQueryableContext.ScriptParameters = ScriptParameters?.ToDictionary(c => c.Key, c => c.Value);
-            newQueryableContext.TreeInfo = TreeInfo;
-            newQueryableContext.Joins = Joins == null ? null : new List<SixnetJoinEntry>(Joins);
-            newQueryableContext.Combines = Combines == null ? null : new List<SixnetCombineEntry>(Combines);
-            newQueryableContext.Target = Target?.LightClone();
-            newQueryableContext.Repository = Repository;
-            newQueryableContext.HavingQueryable = HavingQueryable?.LightClone();
-            newQueryableContext.SplitTableBehavior = SplitTableBehavior;
-            newQueryableContext._finallyFieldsCache = new Dictionary<string, List<ISixnetField>>(_finallyFieldsCache);
-            newQueryableContext._validationFuncDict = new Dictionary<Guid, dynamic>(_validationFuncDict);
-            return newQueryableContext;
+            var newQueryableInfo = CloneValueMember();
+            newQueryableInfo.IgnoredFilterTypes = IgnoredFilterTypes == null ? null : new HashSet<Type>(IgnoredFilterTypes);
+            newQueryableInfo.Conditions = Conditions == null ? null : new List<ISixnetCondition>(Conditions);
+            newQueryableInfo.Criteria = Criteria == null ? null : new List<SixnetCriterion>(Criteria);
+            newQueryableInfo.Sorts = Sorts == null ? null : new List<SixnetSortEntry>(Sorts);
+            newQueryableInfo.SelectedFields = SelectedFields == null ? null : new List<ISixnetField>(SelectedFields);
+            newQueryableInfo.UnselectedFields = UnselectedFields == null ? null : new List<ISixnetField>(UnselectedFields);
+            newQueryableInfo.GroupFields = GroupFields == null ? null : new List<ISixnetField>(GroupFields);
+            newQueryableInfo.ScriptParameters = ScriptParameters?.ToDictionary(c => c.Key, c => c.Value);
+            newQueryableInfo.TreeInfo = TreeInfo;
+            newQueryableInfo.Joins = Joins == null ? null : new List<SixnetJoinEntry>(Joins);
+            newQueryableInfo.Combines = Combines == null ? null : new List<SixnetCombineEntry>(Combines);
+            newQueryableInfo.TargetQueryable = TargetQueryable?.LightClone();
+            newQueryableInfo.Repository = Repository;
+            newQueryableInfo.HavingQueryable = HavingQueryable?.LightClone();
+            newQueryableInfo.SplitTableBehavior = SplitTableBehavior;
+            newQueryableInfo._finallyFieldsCache = new Dictionary<string, List<ISixnetField>>(_finallyFieldsCache);
+            newQueryableInfo._validationFuncDict = new Dictionary<Guid, dynamic>(_validationFuncDict);
+            newQueryableInfo.SpecifyTables = SpecifyTables == null ? null : new List<SixnetDatabaseObjectName>(SpecifyTables);
+            return newQueryableInfo;
         }
 
         /// <summary>
         /// Clone a IQuery object
         /// </summary>
         /// <returns>Return the replicated Queryable</returns>
-        public SixnetQueryableContext Clone()
+        public SixnetQueryableInfo Clone()
         {
-            var newQueryableContext = CloneValueMember();
-            newQueryableContext.IgnoredFilterTypes = IgnoredFilterTypes == null ? null : new HashSet<Type>(IgnoredFilterTypes);
-            newQueryableContext.Conditions = Conditions?.Select(c => c?.Clone()).ToList();
-            newQueryableContext.Criteria = Criteria?.Select(c => c.Clone()).ToList();
-            newQueryableContext.Sorts = Sorts?.Select(c => c?.Clone()).ToList();
-            newQueryableContext.SelectedFields = SelectedFields?.Select(c => c.Clone()).ToList();
-            newQueryableContext.UnselectedFields = UnselectedFields?.Select(c => c.Clone()).ToList();
-            newQueryableContext.GroupFields = GroupFields?.Select(c => c.Clone()).ToList();
-            newQueryableContext.ScriptParameters = ScriptParameters?.ToDictionary(c => c.Key, c => c.Value);
-            newQueryableContext.TreeInfo = TreeInfo?.Clone();
-            newQueryableContext.Joins = Joins?.Select(c => c.Clone()).ToList();
-            newQueryableContext.Combines = Combines?.Select(c => c.Clone()).ToList();
-            newQueryableContext.Target = Target?.Clone();
-            newQueryableContext.Repository = Repository;
-            newQueryableContext.HavingQueryable = HavingQueryable?.Clone();
-            newQueryableContext.SplitTableBehavior = SplitTableBehavior?.Clone();
-            newQueryableContext._finallyFieldsCache = _finallyFieldsCache?.ToDictionary(f => f.Key, f => f.Value?.Select(fv => fv.Clone()).ToList());
-            newQueryableContext._validationFuncDict = new Dictionary<Guid, dynamic>(_validationFuncDict);
-            return newQueryableContext;
+            var newQueryableInfo = CloneValueMember();
+            newQueryableInfo.IgnoredFilterTypes = IgnoredFilterTypes == null ? null : new HashSet<Type>(IgnoredFilterTypes);
+            newQueryableInfo.Conditions = Conditions?.Select(c => c?.Clone()).ToList();
+            newQueryableInfo.Criteria = Criteria?.Select(c => c.Clone()).ToList();
+            newQueryableInfo.Sorts = Sorts?.Select(c => c?.Clone()).ToList();
+            newQueryableInfo.SelectedFields = SelectedFields?.Select(c => c.Clone()).ToList();
+            newQueryableInfo.UnselectedFields = UnselectedFields?.Select(c => c.Clone()).ToList();
+            newQueryableInfo.GroupFields = GroupFields?.Select(c => c.Clone()).ToList();
+            newQueryableInfo.ScriptParameters = ScriptParameters?.ToDictionary(c => c.Key, c => c.Value);
+            newQueryableInfo.TreeInfo = TreeInfo?.Clone();
+            newQueryableInfo.Joins = Joins?.Select(c => c.Clone()).ToList();
+            newQueryableInfo.Combines = Combines?.Select(c => c.Clone()).ToList();
+            newQueryableInfo.TargetQueryable = TargetQueryable?.Clone();
+            newQueryableInfo.Repository = Repository;
+            newQueryableInfo.HavingQueryable = HavingQueryable?.Clone();
+            newQueryableInfo.SplitTableBehavior = SplitTableBehavior?.Clone();
+            newQueryableInfo._finallyFieldsCache = _finallyFieldsCache?.ToDictionary(f => f.Key, f => f.Value?.Select(fv => fv.Clone()).ToList());
+            newQueryableInfo._validationFuncDict = new Dictionary<Guid, dynamic>(_validationFuncDict);
+            newQueryableInfo.SpecifyTables = SpecifyTables?.Select(c => c.Clone()).ToList();
+            return newQueryableInfo;
         }
 
         /// <summary>
         /// Clone value member
         /// </summary>
         /// <returns></returns>
-        SixnetQueryableContext CloneValueMember()
+        SixnetQueryableInfo CloneValueMember()
         {
-            var newQueryableContext = new SixnetQueryableContext
+            var newQueryableContext = new SixnetQueryableInfo
             {
-                Id = Guid.NewGuid(),
                 IsExcludedNecessaryFields = IsExcludedNecessaryFields,
                 ModelType = ModelType,
                 IgnoredFilterFieldRole = IgnoredFilterFieldRole,
@@ -949,7 +968,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="joinEntry">Join entry</param>
         /// <returns></returns>
-        internal SixnetQueryableContext Join(SixnetJoinEntry joinEntry, Action<SixnetJoinEntry> configure = null)
+        internal SixnetQueryableInfo Join(SixnetJoinEntry joinEntry, Action<SixnetJoinEntry> configure = null)
         {
             if (joinEntry?.Target != null)
             {
@@ -998,7 +1017,7 @@ namespace Sixnet.Development.Queryable
         /// Increment join index
         /// </summary>
         /// <returns></returns>
-        internal SixnetQueryableContext IncrementJoinIndex()
+        internal SixnetQueryableInfo IncrementJoinIndex()
         {
             _joinIndex++;
             return this;
@@ -1013,7 +1032,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="combineEntry">Combine entry</param>
         /// <returns></returns>
-        internal SixnetQueryableContext Combine(SixnetCombineEntry combineEntry)
+        internal SixnetQueryableInfo Combine(SixnetCombineEntry combineEntry)
         {
             if (combineEntry == null)
             {
@@ -1034,7 +1053,7 @@ namespace Sixnet.Development.Queryable
         /// Distinct
         /// </summary>
         /// <returns></returns>
-        internal SixnetQueryableContext Distinct()
+        internal SixnetQueryableInfo Distinct()
         {
             IsDistincted = true;
             return this;
@@ -1058,7 +1077,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="modelType">Model type</param>
         /// <returns></returns>
-        internal SixnetQueryableContext SetModelType(Type modelType)
+        internal SixnetQueryableInfo SetModelType(Type modelType)
         {
             ModelType = modelType ?? DefaultModelType;
             return this;
@@ -1074,7 +1093,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="count">Take data count</param>
         /// <param name="skip">Skip data count</param>
         /// <returns></returns>
-        internal SixnetQueryableContext Take(int count, int skip = 0)
+        internal SixnetQueryableInfo Take(int count, int skip = 0)
         {
             TakeCount = count;
             SkipCount = skip;
@@ -1087,7 +1106,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="pageIndex">Page index</param>
         /// <param name="pageSize">Page size</param>
         /// <returns></returns>
-        internal SixnetQueryableContext TakeByPaging(int pageIndex, int pageSize)
+        internal SixnetQueryableInfo TakeByPaging(int pageIndex, int pageSize)
         {
             if (pageIndex < 1)
             {
@@ -1106,7 +1125,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="pagingFilter">Paging filter</param>
         /// <returns></returns>
-        internal SixnetQueryableContext TakeByPaging(SixnetPagingFilter pagingFilter)
+        internal SixnetQueryableInfo TakeByPaging(SixnetPagingFilter pagingFilter)
         {
             if (pagingFilter == null)
             {
@@ -1145,7 +1164,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fieldNames">Group field names</param>
         /// <returns></returns>
-        internal SixnetQueryableContext GroupBy(params string[] fieldNames)
+        internal SixnetQueryableInfo GroupBy(params string[] fieldNames)
         {
             return GroupBy(fieldNames?.Select(fn => SixnetDataField.Create(fn)).ToArray());
         }
@@ -1155,7 +1174,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        internal SixnetQueryableContext GroupBy(params ISixnetField[] fields)
+        internal SixnetQueryableInfo GroupBy(params ISixnetField[] fields)
         {
             if (!fields.IsNullOrEmpty())
             {
@@ -1174,36 +1193,79 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="targetQueryable">Target queryable</param>
         /// <returns></returns>
-        internal SixnetQueryableContext FromQueryable(ISixnetQueryable targetQueryable)
+        internal SixnetQueryableInfo FromQueryable(ISixnetQueryable targetQueryable)
         {
             FromType = SixnetQueryableFromType.Queryable;
-            Target = HandleParameterQueryable(targetQueryable);
+            TargetQueryable = HandleParameterQueryable(targetQueryable);
+            CleanFromInfo();
             return this;
+        }
+
+        /// <summary>
+        /// From specify table
+        /// </summary>
+        /// <param name="tableNames"></param>
+        /// <returns></returns>
+        internal SixnetQueryableInfo From(IEnumerable<SixnetDatabaseObjectName> tableNames)
+        {
+            FromType = SixnetQueryableFromType.SpecifyTable;
+            SpecifyTables = tableNames?.ToList();
+            CleanFromInfo();
+            return this;
+        }
+
+        /// <summary>
+        /// From datas
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="datas"></param>
+        /// <returns></returns>
+        internal SixnetQueryableInfo From<T>(IEnumerable<T> datas)
+        {
+            FromType = SixnetQueryableFromType.ConstantValue;
+            TargetConstantValue = datas;
+            CleanFromInfo();
+            return this;
+        }
+
+        void CleanFromInfo()
+        {
+            switch (FromType)
+            {
+                case SixnetQueryableFromType.Queryable:
+                    SpecifyTables = null;
+                    TargetConstantValue = null;
+                    break;
+                case SixnetQueryableFromType.SpecifyTable:
+                    TargetQueryable = null;
+                    TargetConstantValue = null;
+                    break;
+                case SixnetQueryableFromType.ConstantValue:
+                    TargetQueryable = null;
+                    SpecifyTables = null;
+                    break;
+                case SixnetQueryableFromType.Table:
+                    SpecifyTables = null;
+                    TargetQueryable = null;
+                    TargetConstantValue = null;
+                    break;
+            }
         }
 
         #endregion
 
         #region Split table
 
-        internal SixnetQueryableContext SpecifySplitTable(IEnumerable<SixnetDatabaseObjectName> tableNames)
-        {
-            tableNames ??= Array.Empty<SixnetDatabaseObjectName>();
-            var splitBehavior = SplitTableBehavior;
-            splitBehavior ??= new SixnetSplitTableBehavior();
-            splitBehavior.SpecificTableNames = tableNames;;
-            return SplitTable(splitBehavior);
-        }
-
         /// <summary>
         /// Use split table
         /// </summary>
         /// <param name="splitTableBehavior">Split table behavior</param>
         /// <returns></returns>
-        internal SixnetQueryableContext SplitTable(SixnetSplitTableBehavior splitTableBehavior)
+        internal SixnetQueryableInfo SplitTable(SixnetSplitTableBehavior splitTableBehavior)
         {
             if (splitTableBehavior != null)
             {
-                Target = null;
+                TargetQueryable = null;
                 FromType = SixnetQueryableFromType.Table;
                 SplitTableBehavior = splitTableBehavior;
             }
@@ -1216,7 +1278,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="splitValues">Split values</param>
         /// <param name="selectionPattern">Selection pattern</param>
         /// <returns></returns>
-        internal SixnetQueryableContext SplitTable(IEnumerable<dynamic> splitValues, SixnetSplitTableNameSelectionPattern selectionPattern = SixnetSplitTableNameSelectionPattern.Precision)
+        internal SixnetQueryableInfo SplitTable(IEnumerable<dynamic> splitValues, SixnetSplitTableNameSelectionPattern selectionPattern = SixnetSplitTableNameSelectionPattern.Precision)
         {
             splitValues ??= Array.Empty<dynamic>();
             var splitBehavior = SplitTableBehavior;
@@ -1231,7 +1293,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="tableNameFilter">Table name filter</param>
         /// <returns></returns>
-        internal SixnetQueryableContext SplitTable(Func<IEnumerable<SixnetDatabaseObjectName>, IEnumerable<SixnetDatabaseObjectName>, IEnumerable<SixnetDatabaseObjectName>> tableNameFilter)
+        internal SixnetQueryableInfo SplitTable(Func<IEnumerable<SixnetDatabaseObjectName>, IEnumerable<SixnetDatabaseObjectName>, IEnumerable<SixnetDatabaseObjectName>> tableNameFilter)
         {
             var splitBehavior = SplitTableBehavior;
             splitBehavior ??= new SixnetSplitTableBehavior();
@@ -1248,7 +1310,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="outputType">Output type</param>
         /// <returns></returns>
-        internal SixnetQueryableContext Output(SixnetQueryableOutputType outputType)
+        internal SixnetQueryableInfo Output(SixnetQueryableOutputType outputType)
         {
             OutputType = outputType;
             return this;
@@ -1263,7 +1325,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fieldRoles"></param>
         /// <returns></returns>
-        internal SixnetQueryableContext IgnoreFilter(params SixnetFieldRole[] fieldRoles)
+        internal SixnetQueryableInfo IgnoreFilter(params SixnetFieldRole[] fieldRoles)
         {
             if (!fieldRoles.IsNullOrEmpty())
             {
@@ -1280,7 +1342,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="types">Filter types</param>
         /// <returns></returns>
-        internal SixnetQueryableContext IgnoreFilter(params Type[] types)
+        internal SixnetQueryableInfo IgnoreFilter(params Type[] types)
         {
             if (!types.IsNullOrEmpty())
             {
@@ -1329,7 +1391,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="queryable">Queryable</param>
         /// <returns></returns>
-        internal SixnetQueryableContext Having(ISixnetQueryable queryable)
+        internal SixnetQueryableInfo Having(ISixnetQueryable queryable)
         {
             if (queryable != null)
             {
@@ -1432,7 +1494,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="subQueryable">Sub queryable</param>
         /// <returns></returns>
-        internal SixnetQueryableContext AddSubQueryable(ISixnetQueryable subQueryable)
+        internal SixnetQueryableInfo AddSubQueryable(ISixnetQueryable subQueryable)
         {
             if (subQueryable != null)
             {
@@ -1446,12 +1508,12 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="groupQueryable">Group queryable</param>
         /// <returns></returns>
-        internal SixnetQueryableContext AddGroupQueryable(ISixnetQueryable groupQueryable)
+        internal SixnetQueryableInfo AddGroupQueryable(ISixnetQueryable groupQueryable)
         {
-            if (groupQueryable != null && !groupQueryable.Criteria.IsNullOrEmpty())
+            if (groupQueryable != null && !groupQueryable.Info.Criteria.IsNullOrEmpty())
             {
                 Criteria ??= new List<SixnetCriterion>();
-                Criteria.AddRange(groupQueryable.Criteria);
+                Criteria.AddRange(groupQueryable.Info.Criteria);
             }
             return this;
         }
@@ -1464,10 +1526,10 @@ namespace Sixnet.Development.Queryable
         {
             if (targetQueryable != null)
             {
-                SetHasSubQueryable(HasSubQueryable || targetQueryable.HasSubquery);
-                SetHasJoin(HasJoin || targetQueryable.HasJoin);
-                SetHasTreeMatching(HasTreeMatching || targetQueryable.HasRecurve);
-                SetHasFieldFormatter(HasFieldFormatter || targetQueryable.HasFieldFormatter);
+                SetHasSubQueryable(HasSubQueryable || targetQueryable.Info.HasSubQueryable);
+                SetHasJoin(HasJoin || targetQueryable.Info.HasJoin);
+                SetHasTreeMatching(HasTreeMatching || targetQueryable.Info.HasSubQueryable);
+                SetHasFieldFormatter(HasFieldFormatter || targetQueryable.Info.HasFieldFormatter);
             }
         }
 

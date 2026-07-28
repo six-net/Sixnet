@@ -110,6 +110,30 @@ namespace Sixnet.Development.Data.Database
         }
 
         /// <summary>
+        /// Create temp table
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        public virtual SixnetTempTable CreateTempTable(SixnetSingleDatabaseCommand command)
+        {
+            try
+            {
+                var dataCommandResolver = GetDataCommandResolver();
+                var queryStatement = dataCommandResolver.GenerateDatabaseQueryStatement(command);
+                command.Connection.DbConnection.Execute(GetCommandDefinition(command, queryStatement));
+
+                return new SixnetTempTable()
+                {
+                    Name = $"{command.DataCommand?.Queryable?.Info.TempTableName}"
+                };
+            }
+            catch (Exception ex)
+            {
+                throw GetSqlException(ex);
+            }
+        }
+
+        /// <summary>
         /// Execute database statement
         /// </summary>
         /// <param name="command">Database command</param>
@@ -317,7 +341,7 @@ namespace Sixnet.Development.Data.Database
         /// <returns>Return whether the data exists or not</returns>
         public virtual bool Exists(SixnetSingleDatabaseCommand command)
         {
-            command?.DataCommand?.Queryable?.Output(SixnetQueryableOutputType.Predicate);
+            command?.DataCommand?.Queryable?.Info.Output(SixnetQueryableOutputType.Predicate);
             return Scalar<int>(command) > 0;
         }
 
@@ -328,7 +352,7 @@ namespace Sixnet.Development.Data.Database
         /// <returns></returns>
         public int Count(SixnetSingleDatabaseCommand command)
         {
-            command?.DataCommand?.Queryable?.Output(SixnetQueryableOutputType.Count);
+            command?.DataCommand?.Queryable?.Info.Output(SixnetQueryableOutputType.Count);
             return Scalar<int>(command);
         }
 
@@ -621,7 +645,7 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="command"></param>
         /// <returns></returns>
-        public List<SixnetView> GetViews(SixnetDatabaseCommand command)
+        public virtual List<SixnetView> GetViews(SixnetDatabaseCommand command)
         {
             return command.Connection.DbConnection.Query<SixnetView>(queryViewsScript, transaction: command.Connection?.Transaction?.DbTransaction).ToList();
         }
@@ -635,7 +659,7 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="command"></param>
         /// <returns></returns>
-        public List<SixnetStoredProcedure> GetStoredProcedures(SixnetDatabaseCommand command)
+        public virtual List<SixnetStoredProcedure> GetStoredProcedures(SixnetDatabaseCommand command)
         {
             return command.Connection.DbConnection.Query<SixnetStoredProcedure>(queryStoredProcedureScript, transaction: command.Connection?.Transaction?.DbTransaction).ToList();
         }
@@ -649,7 +673,7 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="command"></param>
         /// <returns></returns>
-        public List<SixnetColumn> GetColumns(SixnetDatabaseCommand command)
+        public virtual List<SixnetColumn> GetColumns(SixnetDatabaseCommand command)
         {
             return command.Connection.DbConnection.Query<SixnetColumn>(queryColumnScript, transaction: command.Connection?.Transaction?.DbTransaction).ToList();
         }

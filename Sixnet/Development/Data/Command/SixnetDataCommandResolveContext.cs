@@ -43,7 +43,7 @@ namespace Sixnet.Development.Data.Command
         /// <summary>
         /// Table pet name dict
         /// </summary>
-        Dictionary<Guid, Dictionary<string, string>> tablePetNameDict;
+        Dictionary<string, Dictionary<string, string>> tablePetNameDict;
 
         const string DefaultTablePetName = "TB";
 
@@ -143,8 +143,8 @@ namespace Sixnet.Development.Data.Command
             {
                 throw new ArgumentNullException(nameof(entityType));
             }
-            tablePetNameDict ??= new Dictionary<Guid, Dictionary<string, string>>();
-            var queryableId = queryable.Id;
+            tablePetNameDict ??= new Dictionary<string, Dictionary<string, string>>();
+            var queryableId = queryable.Info.Id;
             var entityTypeId = $"{entityType.GUID}_{index}";
             if (!tablePetNameDict.TryGetValue(queryableId, out var queryablePetNameDict))
             {
@@ -177,13 +177,13 @@ namespace Sixnet.Development.Data.Command
                 var topEntityType = queryable.GetModelType();
                 SixnetDirectThrower.ThrowSixnetExceptionIf(topEntityType == null, "Queryable model type is null");
 
-                tablePetNameDict ??= new Dictionary<Guid, Dictionary<string, string>>();
+                tablePetNameDict ??= new Dictionary<string, Dictionary<string, string>>();
                 var entityTablePetNameDict = new Dictionary<string, string>();
                 entityTablePetNameDict[$"{topEntityType.GUID}_0"] = GetNewTablePetName();
 
-                if (!queryable.Joins.IsNullOrEmpty())
+                if (!queryable.Info.Joins.IsNullOrEmpty())
                 {
-                    foreach (var joinEntry in queryable.Joins)
+                    foreach (var joinEntry in queryable.Info.Joins)
                     {
                         var joinTargetQueryable = joinEntry.Target;
                         var joinModelType = joinTargetQueryable.GetModelType();
@@ -191,7 +191,7 @@ namespace Sixnet.Development.Data.Command
                         entityTablePetNameDict[$"{topEntityType.GUID}_{joinEntry.Index}"] = GetNewTablePetName();
                     }
                 }
-                tablePetNameDict[queryable.Id] = entityTablePetNameDict;
+                tablePetNameDict[queryable.Info.Id] = entityTablePetNameDict;
             }
         }
 

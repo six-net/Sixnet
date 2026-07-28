@@ -35,7 +35,7 @@ namespace Sixnet.Development.Data.Database
             //generate statement
             var statement = await GenerateQueryStatementCoreAsync(context, queryableTranResult, SixnetQueryableLocation.Top).ConfigureAwait(false);
             var queryable = queryableTranResult.GetOriginalQueryable();
-            statement.ScriptType = GetCommandType(queryable.ScriptType);
+            statement.ScriptType = GetCommandType(queryable.Info.ScriptType);
             return statement;
         }
 
@@ -68,7 +68,7 @@ namespace Sixnet.Development.Data.Database
                     ? cmdQueryableStatement.Parameters
                     : groupParameters.Union(cmdQueryableStatement.Parameters);
                 var queryable = queryableTranResult.GetOriginalQueryable();
-                commandType = GetCommandType(queryable.ScriptType);
+                commandType = GetCommandType(queryable.Info.ScriptType);
             }
             var statement = SixnetQueryDatabaseStatement.Create(commandScriptBuilder.ToString(), groupParameters);
             statement.ScriptType = commandType;
@@ -89,7 +89,7 @@ namespace Sixnet.Development.Data.Database
             var translationResult = await TranslateAsync(context).ConfigureAwait(false);
             string sqlStatement;
             IEnumerable<ISixnetField> outputFields = null;
-            switch (queryable.ExecutionMode)
+            switch (queryable.Info.ExecutionMode)
             {
                 case SixnetQueryableExecutionMode.Script:
                     sqlStatement = translationResult.GetCondition();
@@ -126,7 +126,7 @@ namespace Sixnet.Development.Data.Database
                     }
 
                     // output fields
-                    if (outputFields.IsNullOrEmpty() || !queryable.SelectedFields.IsNullOrEmpty())
+                    if (outputFields.IsNullOrEmpty() || !queryable.Info.SelectedFields.IsNullOrEmpty())
                     {
                         outputFields = SixnetDataManager.GetQueryableFields(DatabaseType, queryable.GetModelType(), queryable, context.IsRootQueryable(queryable));
                     }
@@ -141,7 +141,7 @@ namespace Sixnet.Development.Data.Database
                     var hasSort = !string.IsNullOrWhiteSpace(sort);
 
                     //statement
-                    switch (queryable.OutputType)
+                    switch (queryable.Info.OutputType)
                     {
                         case SixnetQueryableOutputType.Count:
                         case SixnetQueryableOutputType.Predicate:
@@ -792,10 +792,10 @@ namespace Sixnet.Development.Data.Database
         protected virtual async Task<SixnetQueryDatabaseStatement> GetFromTargetStatementAsync(SixnetDataCommandResolveContext context, ISixnetQueryable originalQueryable
             , SixnetQueryableLocation location, string tablePetName, bool applyTablePetName = true)
         {
-            switch (originalQueryable.FromType)
+            switch (originalQueryable.Info.FromType)
             {
                 case SixnetQueryableFromType.Queryable:
-                    var targetTranslationResult = await ExecuteTranslationAsync(context, originalQueryable.TargetQueryable, SixnetQueryableLocation.From, true).ConfigureAwait(false);
+                    var targetTranslationResult = await ExecuteTranslationAsync(context, originalQueryable.Info.TargetQueryable, SixnetQueryableLocation.From, true).ConfigureAwait(false);
                     var databaseStatement = await GenerateQueryStatementCoreAsync(context, targetTranslationResult, SixnetQueryableLocation.From).ConfigureAwait(false);
                     databaseStatement.Script = $"({databaseStatement.Script}){(applyTablePetName ? $"{TablePetNameKeyword}{tablePetName}" : "")}";
                     databaseStatement.ComplexTarget = true;
@@ -880,7 +880,7 @@ namespace Sixnet.Development.Data.Database
                 return SixnetQueryableTranslationResult.Empty;
             }
             var translationResult = SixnetQueryableTranslationResult.Create(queryable);
-            switch (queryable.ExecutionMode)
+            switch (queryable.Info.ExecutionMode)
             {
                 case SixnetQueryableExecutionMode.Regular:
 
@@ -910,8 +910,8 @@ namespace Sixnet.Development.Data.Database
 
                     break;
                 default:
-                    translationResult.AddCondition(queryable.Script, AndConnector);
-                    context.SetParameters(ConvertParameter(queryable.ScriptParameters));
+                    translationResult.AddCondition(queryable.Info.Script, AndConnector);
+                    context.SetParameters(ConvertParameter(queryable.Info.ScriptParameters));
                     break;
             }
             return translationResult;
@@ -926,9 +926,9 @@ namespace Sixnet.Development.Data.Database
         /// <returns></returns>
         protected virtual async Task<SixnetQueryableTranslationResult> AppendConditionAsync(SixnetDataCommandResolveContext context, SixnetQueryableTranslationResult parentTranslationResult, ISixnetQueryable queryable)
         {
-            if (!queryable.Conditions.IsNullOrEmpty())
+            if (!queryable.Info.Conditions.IsNullOrEmpty())
             {
-                foreach (var condition in queryable.Conditions)
+                foreach (var condition in queryable.Info.Conditions)
                 {
                     var conditionResult = await TranslateConditionAsync(context, queryable, condition).ConfigureAwait(false);
                     if (conditionResult != null)
@@ -958,12 +958,12 @@ namespace Sixnet.Development.Data.Database
             {
                 translationResult = await TranslateCriterionAsync(context, topQueryable, criterion).ConfigureAwait(false);
             }
-            if (condition is ISixnetQueryable groupQueryable && !groupQueryable.Conditions.IsNullOrEmpty())
+            if (condition is ISixnetQueryable groupQueryable && !groupQueryable.Info.Conditions.IsNullOrEmpty())
             {
-                var conditionCount = groupQueryable.Conditions.Count();
+                var conditionCount = groupQueryable.Info.Conditions.Count();
                 if (conditionCount == 1)
                 {
-                    var firstCondition = groupQueryable.Conditions.First();
+                    var firstCondition = groupQueryable.Info.Conditions.First();
                     if (firstCondition is SixnetCriterion firstCriterion)
                     {
                         translationResult = await TranslateCriterionAsync(context, topQueryable, firstCriterion).ConfigureAwait(false);
@@ -978,7 +978,7 @@ namespace Sixnet.Development.Data.Database
                     translationResult = SixnetQueryableTranslationResult.Create(topQueryable);
                     var groupCondition = new StringBuilder($"(");
                     var index = 0;
-                    foreach (var groupItem in groupQueryable.Conditions)
+                    foreach (var groupItem in groupQueryable.Info.Conditions)
                     {
                         var itemResult = await TranslateConditionAsync(context, topQueryable, groupItem).ConfigureAwait(false);
                         var itemCondition = itemResult.GetCondition();
@@ -1038,7 +1038,7 @@ namespace Sixnet.Development.Data.Database
         /// <exception cref="SixnetException"></exception>
         protected virtual async Task<string> TranslateSubqueryAsync(SixnetDataCommandResolveContext context, ISixnetQueryable subqueryable)
         {
-            SixnetException.ThrowIf(subqueryable.SelectedFields.IsNullOrEmpty(), "Subqueryable must set query fields");
+            SixnetException.ThrowIf(subqueryable.Info.SelectedFields.IsNullOrEmpty(), "Subqueryable must set query fields");
 
             var subqueryTranslationResult = await ExecuteTranslationAsync(context, subqueryable, SixnetQueryableLocation.Subquery, true).ConfigureAwait(false);
             var subqueryStatement = await GenerateQueryStatementCoreAsync(context, subqueryTranslationResult, SixnetQueryableLocation.Subquery).ConfigureAwait(false);
@@ -1058,12 +1058,12 @@ namespace Sixnet.Development.Data.Database
         /// <returns></returns>
         protected virtual async Task<SixnetQueryableTranslationResult> AppandCombineAsync(SixnetDataCommandResolveContext context, ISixnetQueryable topQueryable, SixnetQueryableTranslationResult parentTranslationResult)
         {
-            if (topQueryable?.Combines.IsNullOrEmpty() ?? true)
+            if (topQueryable?.Info.Combines.IsNullOrEmpty() ?? true)
             {
                 return parentTranslationResult;
             }
             var combineBuilder = new StringBuilder();
-            foreach (var combineEntry in topQueryable.Combines)
+            foreach (var combineEntry in topQueryable.Info.Combines)
             {
                 if (combineEntry?.Target == null)
                 {
@@ -1091,13 +1091,13 @@ namespace Sixnet.Development.Data.Database
         /// <returns></returns>
         protected virtual async Task<SixnetQueryableTranslationResult> AppendSortAsync(SixnetDataCommandResolveContext context, ISixnetQueryable originalQueryable, SixnetQueryableTranslationResult parentTranslationResult, bool useSort)
         {
-            if (!useSort || (originalQueryable?.Sorts.IsNullOrEmpty() ?? true))
+            if (!useSort || (originalQueryable?.Info.Sorts.IsNullOrEmpty() ?? true))
             {
                 return parentTranslationResult;
             }
             var sortBuilder = new StringBuilder();
-            var hasGroup = !originalQueryable.GroupFields.IsNullOrEmpty();
-            foreach (var sortEntry in originalQueryable.Sorts)
+            var hasGroup = !originalQueryable.Info.GroupFields.IsNullOrEmpty();
+            foreach (var sortEntry in originalQueryable.Info.Sorts)
             {
                 sortBuilder.Append($"{await FormatSortFieldAsync(context, originalQueryable, sortEntry).ConfigureAwait(false)}{(sortEntry.Desc ? DescKeyword : AscKeyword)},");
             }
@@ -1119,12 +1119,12 @@ namespace Sixnet.Development.Data.Database
         /// <returns></returns>
         protected virtual async Task<SixnetQueryableTranslationResult> AppendJoinAsync(SixnetDataCommandResolveContext context, ISixnetQueryable topQueryable, SixnetQueryableTranslationResult parentTranslationResult)
         {
-            if (topQueryable.Joins.IsNullOrEmpty())
+            if (topQueryable.Info.Joins.IsNullOrEmpty())
             {
                 return parentTranslationResult;
             }
             var joinBuilder = new StringBuilder();
-            foreach (var joinEntry in topQueryable.Joins)
+            foreach (var joinEntry in topQueryable.Info.Joins)
             {
                 var joinTargetSegment = await GetJoinTargetStatementAsync(context, topQueryable, joinEntry).ConfigureAwait(false);
 
@@ -1160,7 +1160,7 @@ namespace Sixnet.Development.Data.Database
             SixnetException.ThrowIf(joinConnection?.None ?? true, $"Not set join connection between {sourceEntityType?.FullName} and {targetEntityType?.FullName}");
 
             var joinConnectionResult = SixnetQueryableTranslationResult.Create(topQueryable);
-            foreach (var condition in joinConnection.Conditions)
+            foreach (var condition in joinConnection.Info.Conditions)
             {
                 var conditionResult = await TranslateConditionAsync(context, topQueryable, condition).ConfigureAwait(false);
                 joinConnectionResult.AddCondition(conditionResult.GetCondition(), condition.Connector.ToString().ToUpper());
@@ -1190,10 +1190,10 @@ namespace Sixnet.Development.Data.Database
         protected virtual async Task<SixnetQueryableTranslationResult> AppendGroupAsync(SixnetDataCommandResolveContext context, ISixnetQueryable originalQueryable
             , SixnetQueryableTranslationResult translationResult, SixnetQueryableLocation location)
         {
-            if (!originalQueryable.GroupFields.IsNullOrEmpty())
+            if (!originalQueryable.Info.GroupFields.IsNullOrEmpty())
             {
                 var groupFormatedFields = new List<string>();
-                foreach (var groupField in originalQueryable.GroupFields)
+                foreach (var groupField in originalQueryable.Info.GroupFields)
                 {
                     groupFormatedFields.Add(await FormatFieldAsync(context, originalQueryable, SixnetDataManager.GetField(DatabaseType, originalQueryable?.GetModelType(), groupField), location, SixnetFieldLocation.Criterion).ConfigureAwait(false));
                 }
@@ -1216,10 +1216,10 @@ namespace Sixnet.Development.Data.Database
         /// <returns></returns>
         protected virtual async Task<SixnetQueryableTranslationResult> AppendHavingAsync(SixnetDataCommandResolveContext context, ISixnetQueryable originalQuery, SixnetQueryableTranslationResult translationResult, SixnetQueryableLocation location)
         {
-            if (originalQuery.HavingQueryable != null)
+            if (originalQuery.Info.HavingQueryable != null)
             {
                 var havingResult = SixnetQueryableTranslationResult.Create(originalQuery);
-                foreach (var condition in originalQuery.HavingQueryable.Conditions)
+                foreach (var condition in originalQuery.Info.HavingQueryable.Info.Conditions)
                 {
                     var conditionResult = await TranslateConditionAsync(context, originalQuery, condition).ConfigureAwait(false);
                     havingResult.AddCondition(conditionResult.GetCondition(), condition.Connector.ToString().ToUpper());
@@ -1248,7 +1248,7 @@ namespace Sixnet.Development.Data.Database
         /// <returns></returns>
         protected virtual async Task<SixnetQueryableTranslationResult> AppendTreeAsync(SixnetDataCommandResolveContext context, ISixnetQueryable originalQueryable, SixnetQueryableTranslationResult translationResult, SixnetQueryableLocation location)
         {
-            var treeInfo = originalQueryable.TreeInfo;
+            var treeInfo = originalQueryable.Info.TreeInfo;
             if (treeInfo == null)
             {
                 return translationResult;
@@ -1463,7 +1463,7 @@ namespace Sixnet.Development.Data.Database
             {
                 var fieldModelType = regularField.GetModelType();
                 if (fieldModelType == null
-                    || fieldModelType == SixnetQueryableContext.DefaultModelType
+                    || fieldModelType == SixnetQueryableInfo.DefaultModelType
                     || (context.DataOptions?.IsFilterType(fieldModelType) ?? false))
                 {
                     fieldModelType = queryable.GetModelType();
@@ -1496,7 +1496,7 @@ namespace Sixnet.Development.Data.Database
             // constant field
             else if (field is SixnetConstantField constantField)
             {
-                if (ParameterizationField(fieldLocation, formatterName))
+                if (ParameterizationField(context, queryable, fieldLocation, formatterName))
                 {
                     var constantValue = constantField.Value;
                     if (criterionOperator.HasValue && NeedWrapParameter(criterionOperator.Value) && SplitWrapParameter)

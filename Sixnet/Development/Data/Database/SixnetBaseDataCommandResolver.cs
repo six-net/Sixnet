@@ -1,6 +1,8 @@
 ﻿// "Company © 2025. All rights reserved."
 
+using System.Collections;
 using System.Data;
+using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -11,6 +13,7 @@ using Sixnet.Development.Entity;
 using Sixnet.Development.Queryable;
 using Sixnet.Exceptions;
 using Sixnet.Logging;
+using Sixnet.Reflection;
 
 namespace Sixnet.Development.Data.Database
 {
@@ -107,7 +110,7 @@ namespace Sixnet.Development.Data.Database
             //generate statement
             var statement = GenerateQueryStatementCore(context, queryableTranResult, SixnetQueryableLocation.Top);
             var queryable = queryableTranResult.GetOriginalQueryable();
-            statement.ScriptType = GetCommandType(queryable.ScriptType);
+            statement.ScriptType = GetCommandType(queryable.Info.ScriptType);
             return statement;
         }
 
@@ -140,7 +143,7 @@ namespace Sixnet.Development.Data.Database
                     ? cmdQueryableStatement.Parameters
                     : groupParameters.Union(cmdQueryableStatement.Parameters);
                 var queryable = queryableTranResult.GetOriginalQueryable();
-                commandType = GetCommandType(queryable.ScriptType);
+                commandType = GetCommandType(queryable.Info.ScriptType);
             }
             var statement = SixnetQueryDatabaseStatement.Create(commandScriptBuilder.ToString(), groupParameters);
             statement.ScriptType = commandType;
@@ -161,7 +164,7 @@ namespace Sixnet.Development.Data.Database
             var translationResult = Translate(context);
             string sqlStatement;
             IEnumerable<ISixnetField> outputFields = null;
-            switch (queryable.ExecutionMode)
+            switch (queryable.Info.ExecutionMode)
             {
                 case SixnetQueryableExecutionMode.Script:
                     sqlStatement = translationResult.GetCondition();
@@ -198,7 +201,7 @@ namespace Sixnet.Development.Data.Database
                     }
 
                     // output fields
-                    if (outputFields.IsNullOrEmpty() || !queryable.SelectedFields.IsNullOrEmpty())
+                    if (outputFields.IsNullOrEmpty() || !queryable.Info.SelectedFields.IsNullOrEmpty())
                     {
                         outputFields = SixnetDataManager.GetQueryableFields(DatabaseType, queryable.GetModelType(), queryable, context.IsRootQueryable(queryable));
                     }
@@ -213,7 +216,7 @@ namespace Sixnet.Development.Data.Database
                     var hasSort = !string.IsNullOrWhiteSpace(sort);
 
                     //statement
-                    switch (queryable.OutputType)
+                    switch (queryable.Info.OutputType)
                     {
                         case SixnetQueryableOutputType.Count:
                         case SixnetQueryableOutputType.Predicate:
@@ -503,7 +506,7 @@ namespace Sixnet.Development.Data.Database
                 }
 
                 return statements;
-            } 
+            }
             #endregion
 
             #region Delete foreign key
@@ -954,10 +957,10 @@ namespace Sixnet.Development.Data.Database
         protected virtual SixnetQueryDatabaseStatement GetFromTargetStatement(SixnetDataCommandResolveContext context, ISixnetQueryable originalQueryable
             , SixnetQueryableLocation location, string tablePetName, bool applyTablePetName = true)
         {
-            switch (originalQueryable.FromType)
+            switch (originalQueryable.Info.FromType)
             {
                 case SixnetQueryableFromType.Queryable:
-                    var targetTranslationResult = ExecuteTranslation(context, originalQueryable.TargetQueryable, SixnetQueryableLocation.From, true);
+                    var targetTranslationResult = ExecuteTranslation(context, originalQueryable.Info.TargetQueryable, SixnetQueryableLocation.From, true);
                     var databaseStatement = GenerateQueryStatementCore(context, targetTranslationResult, SixnetQueryableLocation.From);
                     databaseStatement.Script = $"({databaseStatement.Script}){(applyTablePetName ? $"{TablePetNameKeyword}{tablePetName}" : "")}";
                     databaseStatement.ComplexTarget = true;
@@ -966,6 +969,41 @@ namespace Sixnet.Development.Data.Database
                         databaseStatement.OutputFields = new List<ISixnetField>(1) { SixnetDataField.Create("*", originalQueryable.GetModelType(), 0, null, "*") };
                     }
                     return databaseStatement;
+                case SixnetQueryableFromType.SpecifyTable:
+                    var specifyTableNames = originalQueryable.Info.SpecifyTables;
+                    var specifyComplexTarget = false;
+                    string specifyTargetScript;
+                    if (specifyTableNames.Count == 1)
+                    {
+                        specifyTargetScript = $"{FormatAndWrapObjectName(specifyTableNames.FirstOrDefault())}{(applyTablePetName ? $"{TablePetNameKeyword}{tablePetName}" : "")}";
+                    }
+                    else
+                    {
+                        var specifyTargetScripts = new List<string>(specifyTableNames.Count);
+                        foreach (var tableName in specifyTableNames)
+                        {
+                            specifyTargetScripts.Add($"SELECT * FROM {FormatAndWrapObjectName(tableName)}");
+                        }
+                        specifyTargetScript = $"({string.Join(" UNION ", specifyTargetScripts)}){(applyTablePetName ? $"{TablePetNameKeyword}{tablePetName}" : "")}";
+                        specifyComplexTarget = true;
+                    }
+                    return SixnetQueryDatabaseStatement.Create(specifyTargetScript, null, complexTarget: specifyComplexTarget);
+                case SixnetQueryableFromType.ConstantValue:
+
+                    var constantValues = SixnetReflecter.Collections.ResolveCollection(originalQueryable.Info.TargetConstantValue as IEnumerable);
+                    SixnetDirectThrower.ThrowNotSupportIf(constantValues == null, "Target value is not supported");
+
+                    var parameterNames = new List<string>();
+                    foreach (var val in constantValues)
+                    {
+
+                        var valParameterName = FormatField(context, originalQueryable, SixnetConstantField.Create(val), location
+                            , SixnetFieldLocation.Output);
+                        parameterNames.Add($"({valParameterName})");
+                    }
+                    var constantTargetScript = $"(VALUES {string.Join(",", parameterNames)}) t(VALUE)";
+
+                    return SixnetQueryDatabaseStatement.Create(constantTargetScript, null);
                 default:
                     var tableNames = context.GetTableNames(originalQueryable, location);
                     var complexTarget = false;
@@ -1042,7 +1080,7 @@ namespace Sixnet.Development.Data.Database
                 return SixnetQueryableTranslationResult.Empty;
             }
             var translationResult = SixnetQueryableTranslationResult.Create(queryable);
-            switch (queryable.ExecutionMode)
+            switch (queryable.Info.ExecutionMode)
             {
                 case SixnetQueryableExecutionMode.Regular:
 
@@ -1072,8 +1110,8 @@ namespace Sixnet.Development.Data.Database
 
                     break;
                 default:
-                    translationResult.AddCondition(queryable.Script, AndConnector);
-                    context.SetParameters(ConvertParameter(queryable.ScriptParameters));
+                    translationResult.AddCondition(queryable.Info.Script, AndConnector);
+                    context.SetParameters(ConvertParameter(queryable.Info.ScriptParameters));
                     break;
             }
             return translationResult;
@@ -1088,9 +1126,9 @@ namespace Sixnet.Development.Data.Database
         /// <returns></returns>
         protected virtual SixnetQueryableTranslationResult AppendCondition(SixnetDataCommandResolveContext context, SixnetQueryableTranslationResult parentTranslationResult, ISixnetQueryable queryable)
         {
-            if (!queryable.Conditions.IsNullOrEmpty())
+            if (!queryable.Info.Conditions.IsNullOrEmpty())
             {
-                foreach (var condition in queryable.Conditions)
+                foreach (var condition in queryable.Info.Conditions)
                 {
                     var conditionResult = TranslateCondition(context, queryable, condition);
                     if (conditionResult != null)
@@ -1121,12 +1159,12 @@ namespace Sixnet.Development.Data.Database
             {
                 translationResult = TranslateCriterion(context, topQueryable, criterion);
             }
-            if (condition is ISixnetQueryable groupQueryable && !groupQueryable.Conditions.IsNullOrEmpty())
+            if (condition is ISixnetQueryable groupQueryable && !groupQueryable.Info.Conditions.IsNullOrEmpty())
             {
-                var conditionCount = groupQueryable.Conditions.Count();
+                var conditionCount = groupQueryable.Info.Conditions.Count();
                 if (conditionCount == 1)
                 {
-                    var firstCondition = groupQueryable.Conditions.First();
+                    var firstCondition = groupQueryable.Info.Conditions.First();
                     if (firstCondition is SixnetCriterion firstCriterion)
                     {
                         translationResult = TranslateCriterion(context, topQueryable, firstCriterion);
@@ -1141,7 +1179,7 @@ namespace Sixnet.Development.Data.Database
                     translationResult = SixnetQueryableTranslationResult.Create(topQueryable);
                     var groupCondition = new StringBuilder($"(");
                     var index = 0;
-                    foreach (var groupItem in groupQueryable.Conditions)
+                    foreach (var groupItem in groupQueryable.Info.Conditions)
                     {
                         var itemResult = TranslateCondition(context, topQueryable, groupItem);
                         var itemCondition = itemResult.GetCondition();
@@ -1201,7 +1239,7 @@ namespace Sixnet.Development.Data.Database
         /// <exception cref="SixnetException"></exception>
         protected virtual string TranslateSubquery(SixnetDataCommandResolveContext context, ISixnetQueryable subqueryable)
         {
-            SixnetException.ThrowIf(subqueryable.SelectedFields.IsNullOrEmpty(), "Subqueryable must set query fields");
+            SixnetException.ThrowIf(subqueryable.Info.SelectedFields.IsNullOrEmpty(), "Subqueryable must set query fields");
 
             var subqueryTranslationResult = ExecuteTranslation(context, subqueryable, SixnetQueryableLocation.Subquery, true);
             var subqueryStatement = GenerateQueryStatementCore(context, subqueryTranslationResult, SixnetQueryableLocation.Subquery);
@@ -1221,12 +1259,12 @@ namespace Sixnet.Development.Data.Database
         /// <returns></returns>
         protected virtual SixnetQueryableTranslationResult AppandCombine(SixnetDataCommandResolveContext context, ISixnetQueryable topQueryable, SixnetQueryableTranslationResult parentTranslationResult)
         {
-            if (topQueryable?.Combines.IsNullOrEmpty() ?? true)
+            if (topQueryable?.Info.Combines.IsNullOrEmpty() ?? true)
             {
                 return parentTranslationResult;
             }
             var combineBuilder = new StringBuilder();
-            foreach (var combineEntry in topQueryable.Combines)
+            foreach (var combineEntry in topQueryable.Info.Combines)
             {
                 if (combineEntry?.Target == null)
                 {
@@ -1254,13 +1292,13 @@ namespace Sixnet.Development.Data.Database
         /// <returns></returns>
         protected virtual SixnetQueryableTranslationResult AppendSort(SixnetDataCommandResolveContext context, ISixnetQueryable originalQueryable, SixnetQueryableTranslationResult parentTranslationResult, bool useSort)
         {
-            if (!useSort || (originalQueryable?.Sorts.IsNullOrEmpty() ?? true))
+            if (!useSort || (originalQueryable?.Info.Sorts.IsNullOrEmpty() ?? true))
             {
                 return parentTranslationResult;
             }
             var sortBuilder = new StringBuilder();
-            var hasGroup = !originalQueryable.GroupFields.IsNullOrEmpty();
-            foreach (var sortEntry in originalQueryable.Sorts)
+            var hasGroup = !originalQueryable.Info.GroupFields.IsNullOrEmpty();
+            foreach (var sortEntry in originalQueryable.Info.Sorts)
             {
                 sortBuilder.Append($"{FormatSortField(context, originalQueryable, sortEntry)}{(sortEntry.Desc ? DescKeyword : AscKeyword)},");
             }
@@ -1282,12 +1320,12 @@ namespace Sixnet.Development.Data.Database
         /// <returns></returns>
         protected virtual SixnetQueryableTranslationResult AppendJoin(SixnetDataCommandResolveContext context, ISixnetQueryable topQueryable, SixnetQueryableTranslationResult parentTranslationResult)
         {
-            if (topQueryable.Joins.IsNullOrEmpty())
+            if (topQueryable.Info.Joins.IsNullOrEmpty())
             {
                 return parentTranslationResult;
             }
             var joinBuilder = new StringBuilder();
-            foreach (var joinEntry in topQueryable.Joins)
+            foreach (var joinEntry in topQueryable.Info.Joins)
             {
                 var joinTargetSegment = GetJoinTargetStatement(context, topQueryable, joinEntry);
 
@@ -1323,7 +1361,7 @@ namespace Sixnet.Development.Data.Database
             SixnetException.ThrowIf(joinConnection?.None ?? true, $"Not set join connection between {sourceEntityType?.FullName} and {targetEntityType?.FullName}");
 
             var joinConnectionResult = SixnetQueryableTranslationResult.Create(topQueryable);
-            foreach (var condition in joinConnection.Conditions)
+            foreach (var condition in joinConnection.Info.Conditions)
             {
                 var conditionResult = TranslateCondition(context, topQueryable, condition);
                 joinConnectionResult.AddCondition(conditionResult.GetCondition(), condition.Connector.ToString().ToUpper());
@@ -1352,7 +1390,7 @@ namespace Sixnet.Development.Data.Database
         /// <returns></returns>
         protected virtual SixnetQueryableTranslationResult AppendTree(SixnetDataCommandResolveContext context, ISixnetQueryable originalQueryable, SixnetQueryableTranslationResult translationResult, SixnetQueryableLocation location)
         {
-            var treeInfo = originalQueryable.TreeInfo;
+            var treeInfo = originalQueryable.Info.TreeInfo;
             if (treeInfo == null)
             {
                 return translationResult;
@@ -1433,9 +1471,9 @@ namespace Sixnet.Development.Data.Database
         protected virtual SixnetQueryableTranslationResult AppendGroup(SixnetDataCommandResolveContext context, ISixnetQueryable originalQueryable
             , SixnetQueryableTranslationResult translationResult, SixnetQueryableLocation location)
         {
-            if (!originalQueryable.GroupFields.IsNullOrEmpty())
+            if (!originalQueryable.Info.GroupFields.IsNullOrEmpty())
             {
-                translationResult.SetGroup($"{GroupByKeyword}{string.Join(",", originalQueryable.GroupFields.Select(gf => FormatField(context, originalQueryable, SixnetDataManager.GetField(DatabaseType, originalQueryable?.GetModelType(), gf), location, SixnetFieldLocation.Criterion)))}");
+                translationResult.SetGroup($"{GroupByKeyword}{string.Join(",", originalQueryable.Info.GroupFields.Select(gf => FormatField(context, originalQueryable, SixnetDataManager.GetField(DatabaseType, originalQueryable?.GetModelType(), gf), location, SixnetFieldLocation.Criterion)))}");
             }
             return translationResult;
         }
@@ -1454,10 +1492,10 @@ namespace Sixnet.Development.Data.Database
         /// <returns></returns>
         protected virtual SixnetQueryableTranslationResult AppendHaving(SixnetDataCommandResolveContext context, ISixnetQueryable originalQuery, SixnetQueryableTranslationResult translationResult, SixnetQueryableLocation location)
         {
-            if (originalQuery.HavingQueryable != null)
+            if (originalQuery.Info.HavingQueryable != null)
             {
                 var havingResult = SixnetQueryableTranslationResult.Create(originalQuery);
-                foreach (var condition in originalQuery.HavingQueryable.Conditions)
+                foreach (var condition in originalQuery.Info.HavingQueryable.Info.Conditions)
                 {
                     var conditionResult = TranslateCondition(context, originalQuery, condition);
                     havingResult.AddCondition(conditionResult.GetCondition(), condition.Connector.ToString().ToUpper());
@@ -1618,7 +1656,7 @@ namespace Sixnet.Development.Data.Database
         /// <returns></returns>
         protected virtual string GetDistinctString(ISixnetQueryable queryable)
         {
-            if (queryable?.IsDistincted ?? false)
+            if (queryable?.Info.IsDistincted ?? false)
             {
                 return DistinctKeyword;
             }
@@ -1766,7 +1804,7 @@ namespace Sixnet.Development.Data.Database
             {
                 var fieldModelType = regularField.GetModelType();
                 if (fieldModelType == null
-                    || fieldModelType == SixnetQueryableContext.DefaultModelType
+                    || fieldModelType == SixnetQueryableInfo.DefaultModelType
                     || (context.DataOptions?.IsFilterType(fieldModelType) ?? false))
                 {
                     fieldModelType = queryable.GetModelType();
@@ -1799,7 +1837,7 @@ namespace Sixnet.Development.Data.Database
             // constant field
             else if (field is SixnetConstantField constantField)
             {
-                if (ParameterizationField(fieldLocation, formatterName))
+                if (ParameterizationField(context, queryable, fieldLocation, formatterName))
                 {
                     var constantValue = constantField.Value;
                     if (criterionOperator.HasValue && NeedWrapParameter(criterionOperator.Value) && SplitWrapParameter)
@@ -1820,7 +1858,7 @@ namespace Sixnet.Development.Data.Database
                 }
                 else
                 {
-                    formatedFieldName = constantField.Value == null ? $"{NullKeyword}" : $"{constantField.Value}";
+                    formatedFieldName = constantField.Value == null ? $"{NullKeyword}" : $"{ToSqlLiteral(constantField.Value)}";
                 }
             }
             else if (field is SixnetConditionalDataField conditionalDataField)
@@ -1879,7 +1917,7 @@ namespace Sixnet.Development.Data.Database
             return formatedFieldName;
         }
 
-        protected virtual bool ParameterizationField(SixnetFieldLocation fieldLocation, string formatterName = "")
+        protected virtual bool ParameterizationField(SixnetDataCommandResolveContext context, ISixnetQueryable currentQueryable, SixnetFieldLocation fieldLocation, string formatterName = "")
         {
             return fieldLocation == SixnetFieldLocation.Criterion
                 || fieldLocation == SixnetFieldLocation.UpdateValue
@@ -2250,6 +2288,84 @@ namespace Sixnet.Development.Data.Database
         public string FormatAndWrapObjectName(SixnetDatabaseObjectName objectName)
         {
             return GetObjectFullName(WrapObjectName(FormatObjectName(objectName)));
+        }
+
+        #endregion
+
+        #region To sql literal
+
+        protected virtual string ToSqlLiteral(object value)
+        {
+            if (value == null || value == DBNull.Value)
+                return "NULL";
+
+            switch (value)
+            {
+                case bool b:
+                    return b ? "1" : "0";
+
+                case string s:
+                    return QuoteString(s);
+
+                case char c:
+                    return QuoteString(c.ToString());
+
+                case Guid guid:
+                    return $"'{guid}'";
+
+                case DateTime dt:
+                    return $"'{dt:yyyy-MM-dd HH:mm:ss.fff}'";
+
+                case DateTimeOffset dto:
+                    return $"'{dto:yyyy-MM-dd HH:mm:ss.fff zzz}'";
+
+                case TimeSpan ts:
+                    return $"'{ts}'";
+
+                case byte[] bytes:
+                    return "0x" + System.Convert.ToHexString(bytes);
+
+                case Enum e:
+                    return System.Convert.ToInt64(e)
+                        .ToString(CultureInfo.InvariantCulture);
+
+                case sbyte or
+                     byte or
+                     short or
+                     ushort or
+                     int or
+                     uint or
+                     long or
+                     ulong or
+                     float or
+                     double or
+                     decimal:
+                    return System.Convert.ToString(value, CultureInfo.InvariantCulture)!;
+
+                case IEnumerable enumerable:
+                    return ToCollectionLiteral(enumerable);
+
+                default:
+                    throw new NotSupportedException(
+                        $"Unsupported type: {value.GetType()}");
+            }
+        }
+
+        protected virtual string ToCollectionLiteral(IEnumerable values)
+        {
+            var list = new List<string>();
+
+            foreach (var item in values)
+            {
+                list.Add(ToSqlLiteral(item));
+            }
+
+            return $"({string.Join(",", list)})";
+        }
+
+        protected virtual string QuoteString(string value)
+        {
+            return $"N'{value.Replace("'", "''")}'";
         }
 
         #endregion

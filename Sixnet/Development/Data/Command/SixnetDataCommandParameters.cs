@@ -15,7 +15,7 @@ namespace Sixnet.Development.Data.Command
         /// <summary>
         /// Items
         /// </summary>
-        public Dictionary<string, DataCommandParameterItem> Items { get; private set; } = new Dictionary<string, DataCommandParameterItem>();
+        public Dictionary<string, SixnetDataCommandParameterItem> Items { get; private set; } = new Dictionary<string, SixnetDataCommandParameterItem>();
 
         /// <summary>
         /// Add parameter
@@ -29,7 +29,7 @@ namespace Sixnet.Development.Data.Command
         /// <param name="scale">Scale</param>
         public void Add(string name, object value = null, DbType? dbType = null, ParameterDirection? direction = null, int? size = null, byte? precision = null, byte? scale = null)
         {
-            var item = new DataCommandParameterItem()
+            var item = new SixnetDataCommandParameterItem()
             {
                 Name = name,
                 Value = value,
@@ -46,7 +46,7 @@ namespace Sixnet.Development.Data.Command
         /// Add parameter
         /// </summary>
         /// <param name="parameter">Parameter item</param>
-        public void Add(DataCommandParameterItem parameter)
+        public void Add(SixnetDataCommandParameterItem parameter)
         {
             if (parameter == null)
             {
@@ -247,7 +247,7 @@ namespace Sixnet.Development.Data.Command
 /// Data command parameter item
 /// </summary>
 [Serializable]
-public class DataCommandParameterItem
+public class SixnetDataCommandParameterItem
 {
     /// <summary>
     /// Gets or sets the parameter name
@@ -303,9 +303,9 @@ public class DataCommandParameterItem
     /// Clone a parameter item
     /// </summary>
     /// <returns></returns>
-    public DataCommandParameterItem Clone()
+    public SixnetDataCommandParameterItem Clone()
     {
-        return new DataCommandParameterItem()
+        return new SixnetDataCommandParameterItem()
         {
             Name = Name,
             Value = Value,

@@ -21,6 +21,13 @@ namespace Sixnet.Development.Data.Database
         /// <returns>Affected data numbers</returns>
         Task<int> ExecuteAsync(SixnetMultipleDatabaseCommand command);
 
+        /// <summary>
+        /// Create temp table
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        Task<SixnetTempTable> CreateTempTableAsync(SixnetSingleDatabaseCommand command);
+
         #endregion
 
         #region Query

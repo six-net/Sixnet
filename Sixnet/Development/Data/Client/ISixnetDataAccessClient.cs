@@ -774,6 +774,18 @@ namespace Sixnet.Development.Data.Client
 
         #endregion
 
+        #region Temp table
+
+        /// <summary>
+        /// Create temp table
+        /// </summary>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="options">Options</param>
+        /// <returns>Return temp table info</returns>
+        SixnetTempTable CreateTempTable(ISixnetQueryable queryable, SixnetDataOperationOptions options = null);
+
+        #endregion
+
         #region Migration
 
         /// <summary>

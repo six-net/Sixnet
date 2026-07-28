@@ -11,6 +11,20 @@ namespace Sixnet.Development.Queryable
     /// </summary>
     internal partial class SixnetDefaultQueryableSeven<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>
     {
+        #region Select
+
+        /// <summary>
+        /// Select fields as a temp table
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        /// <returns></returns>
+        public Task<ISixnetQueryable<TResult>> SelectAsTempTableAsync<TResult>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult>> fields)
+        {
+            return IncludeExpressionFieldsAsTempTableCoreAsync<TResult>(fields);
+        }
+
+        #endregion
+
         #region Data access
 
         #region List

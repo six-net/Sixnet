@@ -5,7 +5,7 @@ namespace Sixnet.Development.Data.Parameter.Handler
     public class SixnetNullCharacterParameterHandler : ISixnetDataCommandParameterHandler
     {
         const char nullChar = '\u0000';
-        public DataCommandParameterItem Parse(DataCommandParameterItem originalParameter)
+        public SixnetDataCommandParameterItem Parse(SixnetDataCommandParameterItem originalParameter)
         {
             if (originalParameter != null)
             {

@@ -137,7 +137,9 @@ namespace Sixnet.Development.Queryable
     public enum SixnetQueryableFromType
     {
         Table = 310,
-        Queryable = 320
+        Queryable = 320,
+        SpecifyTable = 330,
+        ConstantValue = 340
     }
 
     /// <summary>
@@ -147,6 +149,7 @@ namespace Sixnet.Development.Queryable
     {
         Data = 2,
         Count = 4,
-        Predicate = 8
+        Predicate = 8,
+        TempTable = 16,
     }
 }

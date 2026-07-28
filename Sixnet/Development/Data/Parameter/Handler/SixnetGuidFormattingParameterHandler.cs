@@ -12,7 +12,7 @@ namespace Sixnet.Development.Data.ParameterHandler.Handler
     /// </summary>
     public class SixnetGuidFormattingParameterHandler : ISixnetDataCommandParameterHandler
     {
-        public DataCommandParameterItem Parse(DataCommandParameterItem originalParameter)
+        public SixnetDataCommandParameterItem Parse(SixnetDataCommandParameterItem originalParameter)
         {
             if (originalParameter != null)
             {

@@ -12,6 +12,6 @@ namespace Sixnet.Development.Data.Parameter.Handler
         /// </summary>
         /// <param name="originalParameter">Original parameter</param>
         /// <returns></returns>
-        DataCommandParameterItem Parse(DataCommandParameterItem originalParameter);
+        SixnetDataCommandParameterItem Parse(SixnetDataCommandParameterItem originalParameter);
     }
 }

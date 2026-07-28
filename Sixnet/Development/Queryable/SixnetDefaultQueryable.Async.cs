@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 using Sixnet.Development.Data;
 using Sixnet.Development.Data.Client;
+using Sixnet.Development.Data.Database;
 using Sixnet.Development.Data.Field;
 using Sixnet.Development.Repository;
 using Sixnet.Model.Paging;
@@ -15,6 +16,39 @@ namespace Sixnet.Development.Queryable
     /// </summary>
     internal partial class SixnetDefaultQueryable
     {
+        #region From
+
+        /// <summary>
+        /// As a temp table
+        /// </summary>
+        /// <returns></returns>
+        public async Task<ISixnetQueryable> AsTempTableAsync()
+        {
+            var tempTableName = await CreateTempTableCoreAsync().ConfigureAwait(false);
+            var newQueryable = SixnetQuerier.Create();
+            newQueryable.From(tempTableName);
+            return newQueryable;
+        }
+
+        /// <summary>
+        /// As a temp table
+        /// </summary>
+        /// <returns></returns>
+        public async Task<ISixnetQueryable<TTable>> AsTempTableAsync<TTable>()
+        {
+            var tempTableName = await CreateTempTableCoreAsync().ConfigureAwait(false);
+            var newQueryable = SixnetQuerier.Create<TTable>();
+            newQueryable.From(tempTableName);
+            return newQueryable;
+        }
+
+        async Task<string> CreateTempTableCoreAsync()
+        {
+            return (await CreateTempTableAsync().ConfigureAwait(false))?.Name;
+        }
+
+        #endregion
+
         #region Data access
 
         #region Update
@@ -28,7 +62,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Affected rows</returns>
         public async Task<int> UpdateAsync(SixnetFieldsAssignment fieldsAssignment, Action<SixnetDataOperationOptions> configure = null)
         {
-            var repository = queryableContext.Repository;
+            var repository = queryableInfo.Repository;
             if (repository != null)
             {
                 return await repository.UpdateAsync(fieldsAssignment, this, configure).ConfigureAwait(false);
@@ -47,7 +81,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Affected data number</returns>
         public async Task<int> DeleteAsync(Action<SixnetDataOperationOptions> configure = null)
         {
-            var repository = queryableContext.Repository;
+            var repository = queryableInfo.Repository;
             if (repository != null)
             {
                 return await repository.DeleteAsync(this, configure).ConfigureAwait(false);
@@ -67,7 +101,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Data</returns>
         public async Task<T> FirstAsync<T>(Action<SixnetDataOperationOptions> configure = null)
         {
-            if (queryableContext.Repository is ISixnetRepository<T> repository)
+            if (queryableInfo.Repository is ISixnetRepository<T> repository)
             {
                 return await repository.GetAsync(this, configure).ConfigureAwait(false);
             }
@@ -85,7 +119,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Data list</returns>
         public async Task<List<T>> ToListAsync<T>(Action<SixnetDataOperationOptions> configure = null)
         {
-            if (queryableContext.Repository is ISixnetRepository<T> repository)
+            if (queryableInfo.Repository is ISixnetRepository<T> repository)
             {
                 return await repository.GetListAsync(this, configure).ConfigureAwait(false);
             }
@@ -203,7 +237,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Paging data</returns>
         public async Task<SixnetPagingInfo<T>> ToPagingAsync<T>(SixnetPagingFilter pagingFilter, Action<SixnetDataOperationOptions> configure = null)
         {
-            if (queryableContext.Repository is ISixnetRepository<T> repository)
+            if (queryableInfo.Repository is ISixnetRepository<T> repository)
             {
                 return await repository.GetPagingAsync(this, pagingFilter, configure).ConfigureAwait(false);
             }
@@ -233,7 +267,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Whether has data</returns>
         public async Task<bool> AnyAsync(Action<SixnetDataOperationOptions> configure = null)
         {
-            var repository = queryableContext.Repository;
+            var repository = queryableInfo.Repository;
             if (repository != null)
             {
                 return await repository.ExistsAsync(this, configure).ConfigureAwait(false);
@@ -252,7 +286,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Data num</returns>
         public async Task<int> CountAsync(Action<SixnetDataOperationOptions> configure = null)
         {
-            var repository = queryableContext.Repository;
+            var repository = queryableInfo.Repository;
             if (repository != null)
             {
                 return await repository.CountAsync(this, configure).ConfigureAwait(false);
@@ -272,7 +306,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Max value</returns>
         public async Task<TValue> MaxAsync<TValue>(Action<SixnetDataOperationOptions> configure = null)
         {
-            var repository = queryableContext.Repository;
+            var repository = queryableInfo.Repository;
             if (repository != null)
             {
                 return await repository.MaxAsync<TValue>(this, configure).ConfigureAwait(false);
@@ -292,7 +326,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Min value</returns>
         public async Task<TValue> MinAsync<TValue>(Action<SixnetDataOperationOptions> configure = null)
         {
-            var repository = queryableContext.Repository;
+            var repository = queryableInfo.Repository;
             if (repository != null)
             {
                 return await repository.MinAsync<TValue>(this, configure).ConfigureAwait(false);
@@ -312,7 +346,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Sum value</returns>
         public async Task<TValue> SumAsync<TValue>(Action<SixnetDataOperationOptions> configure = null)
         {
-            var repository = queryableContext.Repository;
+            var repository = queryableInfo.Repository;
             if (repository != null)
             {
                 return await repository.SumAsync<TValue>(this, configure).ConfigureAwait(false);
@@ -332,7 +366,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Average value</returns>
         public async Task<TValue> AvgAsync<TValue>(Action<SixnetDataOperationOptions> configure = null)
         {
-            var repository = queryableContext.Repository;
+            var repository = queryableInfo.Repository;
             if (repository != null)
             {
                 return await repository.AvgAsync<TValue>(this, configure).ConfigureAwait(false);
@@ -352,12 +386,21 @@ namespace Sixnet.Development.Queryable
         /// <returns>Value</returns>
         public async Task<TValue> ScalarAsync<TValue>(Action<SixnetDataOperationOptions> configure = null)
         {
-            var repository = queryableContext.Repository;
+            var repository = queryableInfo.Repository;
             if (repository != null)
             {
                 return await repository.ScalarAsync<TValue>(this, configure).ConfigureAwait(false);
             }
             return await repository.ScalarAsync<TValue>(this, configure).ConfigureAwait(false);
+        }
+
+        #endregion
+
+        #region Temp table
+
+        protected Task<SixnetTempTable> CreateTempTableAsync(Action<SixnetDataOperationOptions> configure = null)
+        {
+            return SixnetDataClientContext.CreateTempTableAsync(this, configure);
         }
 
         #endregion

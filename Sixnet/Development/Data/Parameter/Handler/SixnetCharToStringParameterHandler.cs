@@ -9,7 +9,7 @@ namespace Sixnet.Development.Data.ParameterHandler.Handler
 {
     public class SixnetCharToStringParameterHandler : ISixnetDataCommandParameterHandler
     {
-        public DataCommandParameterItem Parse(DataCommandParameterItem originalParameter)
+        public SixnetDataCommandParameterItem Parse(SixnetDataCommandParameterItem originalParameter)
         {
             if (originalParameter != null)
             {

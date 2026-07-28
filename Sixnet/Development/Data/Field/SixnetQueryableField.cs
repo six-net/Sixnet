@@ -14,7 +14,7 @@ namespace Sixnet.Development.Data.Field
         /// <summary>
         /// Whether has field formatter
         /// </summary>
-        public bool HasFormatter => Queryable?.HasFieldFormatter ?? false;
+        public bool HasFormatter => Queryable?.Info.HasFieldFormatter ?? false;
 
         /// <summary>
         /// Get or set the queryable
@@ -24,7 +24,7 @@ namespace Sixnet.Development.Data.Field
         /// <summary>
         /// Gets the field identity
         /// </summary>
-        public string FieldIdentity => Queryable?.Id.ToString();
+        public string FieldIdentity => Queryable?.Info.Id.ToString();
 
         /// <summary>
         /// Get or set the field output name
@@ -57,7 +57,7 @@ namespace Sixnet.Development.Data.Field
 
         public override int GetHashCode()
         {
-            return $"{PropertyName}{Queryable?.Id}".GetHashCode();
+            return $"{PropertyName}{Queryable?.Info.Id}".GetHashCode();
         }
 
         public override bool Equals(object obj)
@@ -66,7 +66,7 @@ namespace Sixnet.Development.Data.Field
             {
                 return obj is SixnetQueryableField queryableField
                     && queryableField.PropertyName == PropertyName
-                    && queryableField.Queryable?.Id == Queryable?.Id;
+                    && queryableField.Queryable?.Info.Id == Queryable?.Info.Id;
             }
             return true;
         }
@@ -106,7 +106,7 @@ namespace Sixnet.Development.Data.Field
         /// <returns></returns>
         public Type GetDataType()
         {
-            return Queryable?.SelectedFields?.FirstOrDefault()?.GetDataType();
+            return Queryable?.Info.SelectedFields?.FirstOrDefault()?.GetDataType();
         }
 
         /// <summary>
@@ -115,7 +115,7 @@ namespace Sixnet.Development.Data.Field
         /// <returns></returns>
         public string GetFieldName(SixnetDatabaseType databaseType)
         {
-            return Queryable?.SelectedFields?.FirstOrDefault()?.GetFieldName(databaseType) ?? string.Empty;
+            return Queryable?.Info.SelectedFields?.FirstOrDefault()?.GetFieldName(databaseType) ?? string.Empty;
         }
     }
 }

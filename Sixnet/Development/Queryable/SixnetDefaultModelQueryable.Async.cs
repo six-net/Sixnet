@@ -15,6 +15,19 @@ namespace Sixnet.Development.Queryable
     /// </summary>
     internal abstract partial class SixnetDefaultModelQueryable<TModel>
     {
+        #region From
+
+        /// <summary>
+        /// As a temp table
+        /// </summary>
+        /// <returns></returns>
+        public new async Task<ISixnetQueryable<TModel>> AsTempTableAsync()
+        {
+            return await AsTempTableAsync<TModel>();
+        }
+
+        #endregion
+
         #region Data access
 
         #region First
@@ -26,7 +39,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Data</returns>
         public async Task<TModel> FirstAsync(Action<SixnetDataOperationOptions> configure = null)
         {
-            if (queryableContext.Repository is ISixnetRepository<TModel> firstRepository)
+            if (queryableInfo.Repository is ISixnetRepository<TModel> firstRepository)
             {
                 return await firstRepository.GetAsync(this, configure).ConfigureAwait(false);
             }
@@ -44,7 +57,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Data list</returns>
         public async Task<List<TModel>> ToListAsync(Action<SixnetDataOperationOptions> configure = null)
         {
-            if (queryableContext.Repository is ISixnetRepository<TModel> firstRepository)
+            if (queryableInfo.Repository is ISixnetRepository<TModel> firstRepository)
             {
                 return await firstRepository.GetListAsync(this, configure).ConfigureAwait(false);
             }
@@ -63,7 +76,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Paging data</returns>
         public async Task<SixnetPagingInfo<TModel>> ToPagingAsync(SixnetPagingFilter pagingFilter, Action<SixnetDataOperationOptions> configure = null)
         {
-            if (queryableContext.Repository is ISixnetRepository<TModel> firstRepository)
+            if (queryableInfo.Repository is ISixnetRepository<TModel> firstRepository)
             {
                 return await firstRepository.GetPagingAsync(this, pagingFilter, configure).ConfigureAwait(false);
             }
@@ -79,7 +92,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Paging data</returns>
         public async Task<SixnetPagingInfo<TModel>> ToPagingAsync(int page, int pageSize, Action<SixnetDataOperationOptions> configure = null)
         {
-            if (queryableContext.Repository is ISixnetRepository<TModel> firstRepository)
+            if (queryableInfo.Repository is ISixnetRepository<TModel> firstRepository)
             {
                 return await firstRepository.GetPagingAsync(this, page, pageSize, configure).ConfigureAwait(false);
             }
@@ -114,7 +127,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Max value</returns>
         public Task<TValue> MaxAsync<TValue>(Expression<Func<TModel, TValue>> field, Action<SixnetDataOperationOptions> configure = null)
         {
-            Select(SixnetExpressionHelper.GetDataField(field, SixnetFieldFormatSetting.Create(SixnetFieldFormatterNames.MAX)));
+            SelectFields(SixnetExpressionHelper.GetDataField(field, SixnetFieldFormatSetting.Create(SixnetFieldFormatterNames.MAX)));
             return MaxAsync<TValue>(configure);
         }
 
@@ -131,7 +144,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Min value</returns>
         public Task<TValue> MinAsync<TValue>(Expression<Func<TModel, TValue>> field, Action<SixnetDataOperationOptions> configure = null)
         {
-            Select(SixnetExpressionHelper.GetDataField(field, SixnetFieldFormatSetting.Create(SixnetFieldFormatterNames.MIN)));
+            SelectFields(SixnetExpressionHelper.GetDataField(field, SixnetFieldFormatSetting.Create(SixnetFieldFormatterNames.MIN)));
             return MinAsync<TValue>(configure);
         }
 
@@ -148,7 +161,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Sum value</returns>
         public Task<TValue> SumAsync<TValue>(Expression<Func<TModel, TValue>> field, Action<SixnetDataOperationOptions> configure = null)
         {
-            Select(SixnetExpressionHelper.GetDataField(field, SixnetFieldFormatSetting.Create(SixnetFieldFormatterNames.SUM)));
+            SelectFields(SixnetExpressionHelper.GetDataField(field, SixnetFieldFormatSetting.Create(SixnetFieldFormatterNames.SUM)));
             return SumAsync<TValue>(configure);
         }
 
@@ -165,7 +178,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Average value</returns>
         public Task<TValue> AvgAsync<TValue>(Expression<Func<TModel, TValue>> field, Action<SixnetDataOperationOptions> configure = null)
         {
-            Select(SixnetExpressionHelper.GetDataField(field, SixnetFieldFormatSetting.Create(SixnetFieldFormatterNames.AVG)));
+            SelectFields(SixnetExpressionHelper.GetDataField(field, SixnetFieldFormatSetting.Create(SixnetFieldFormatterNames.AVG)));
             return AvgAsync<TValue>(configure);
         }
 

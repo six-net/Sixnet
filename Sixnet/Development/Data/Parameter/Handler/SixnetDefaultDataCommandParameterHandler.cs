@@ -7,14 +7,14 @@ namespace Sixnet.Development.Data.Parameter.Handler
     /// </summary>
     public class SixnetDefaultDataCommandParameterHandler : ISixnetDataCommandParameterHandler
     {
-        readonly Func<DataCommandParameterItem, DataCommandParameterItem> _handler = null;
+        readonly Func<SixnetDataCommandParameterItem, SixnetDataCommandParameterItem> _handler = null;
 
-        public SixnetDefaultDataCommandParameterHandler(Func<DataCommandParameterItem, DataCommandParameterItem> handleParameterDelegate)
+        public SixnetDefaultDataCommandParameterHandler(Func<SixnetDataCommandParameterItem, SixnetDataCommandParameterItem> handleParameterDelegate)
         {
             _handler = handleParameterDelegate;
         }
 
-        public DataCommandParameterItem Parse(DataCommandParameterItem originalParameter)
+        public SixnetDataCommandParameterItem Parse(SixnetDataCommandParameterItem originalParameter)
         {
             if (originalParameter == null || _handler == null)
             {

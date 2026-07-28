@@ -1,5 +1,6 @@
 ﻿// "Company © 2025. All rights reserved."
 
+using Sixnet.Development.Data.Database;
 using Sixnet.Development.Data.Field;
 using Sixnet.Development.Entity;
 using Sixnet.Development.Queryable;
@@ -518,6 +519,30 @@ namespace Sixnet.Development.Data.Client
             using (var dataClient = GetDataClient(true))
             {
                 return dataClient.Scalar<TValue>(queryable, options);
+            }
+        }
+
+        #endregion
+
+        #region Temp table
+
+        /// <summary>
+        /// Query scalar value
+        /// </summary>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="configure">Confirure options </param>
+        /// <returns>Value</returns>
+        public static SixnetTempTable CreateTempTable(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
+        {
+            var options = GetDataOperationOptions(configure);
+
+            if (SixnetUnitOfWork.Current != null)
+            {
+                return SixnetUnitOfWork.Current.DataClient.CreateTempTable(queryable, options);
+            }
+            using (var dataClient = GetDataClient(true))
+            {
+                return dataClient.CreateTempTable(queryable, options);
             }
         }
 

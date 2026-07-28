@@ -10,13 +10,13 @@ namespace Sixnet.Development.Queryable
     /// <summary>
     /// Default queryable one
     /// </summary>
-    internal class SixnetDefaultQueryableOne<TFirst> : SixnetDefaultModelQueryable<TFirst>, ISixnetQueryable<TFirst>
+    internal partial class SixnetDefaultQueryableOne<TFirst> : SixnetDefaultModelQueryable<TFirst>, ISixnetQueryable<TFirst>
     {
         #region Constructor
 
         public SixnetDefaultQueryableOne(ISixnetQueryable sourceQueryable = null) : base(sourceQueryable) { }
 
-        public SixnetDefaultQueryableOne(SixnetQueryableContext sourceQueryableContext = null) : base(sourceQueryableContext) { }
+        public SixnetDefaultQueryableOne(SixnetQueryableInfo sourceQueryableContext = null) : base(sourceQueryableContext) { }
 
         #endregion
 
@@ -477,7 +477,7 @@ namespace Sixnet.Development.Queryable
             }
             else
             {
-                queryableContext.IncrementJoinIndex();
+                queryableInfo.IncrementJoinIndex();
             }
             return SixnetQuerier.Create<TFirst, TSecond>(this);
         }
@@ -493,9 +493,9 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst> Select(params ISixnetField[] fields)
+        public new ISixnetQueryable<TFirst> SelectFields(params ISixnetField[] fields)
         {
-            base.Select(fields);
+            base.SelectFields(fields);
             return this;
         }
 
@@ -504,20 +504,30 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        public ISixnetQueryable<TFirst> Select<TResult>(Expression<Func<TFirst, TResult>> fields)
+        public ISixnetQueryable<TFirst> SelectFields<TResult>(Expression<Func<TFirst, TResult>> fields)
         {
             IncludeExpressionFieldsCore(fields);
             return this;
         }
 
         /// <summary>
-        /// Select fields
+        /// Select fields as a data source
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
         public ISixnetQueryable<TResult> SelectAsSource<TResult>(Expression<Func<TFirst, TResult>> fields)
         {
             return IncludeExpressionFieldsAsSourceCore<TResult>(fields);
+        }
+
+        /// <summary>
+        /// Select fields as a temp table
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        /// <returns></returns>
+        public ISixnetQueryable<TResult> SelectAsTempTable<TResult>(Expression<Func<TFirst, TResult>> fields)
+        {
+            return IncludeExpressionFieldsAsTempTableCore<TResult>(fields);
         }
 
         /// <summary>
@@ -544,7 +554,7 @@ namespace Sixnet.Development.Queryable
 
         protected void IncludeExpressionFieldsCore(Expression fields)
         {
-            Select(SixnetExpressionHelper.GetDataFields(fields).ToArray());
+            SelectFields(SixnetExpressionHelper.GetDataFields(fields).ToArray());
         }
 
         protected ISixnetQueryable<TResult> IncludeExpressionFieldsAsSourceCore<TResult>(Expression fields)
@@ -556,6 +566,12 @@ namespace Sixnet.Development.Queryable
         protected void ExcludeExpressionFieldsCore(Expression fields)
         {
             Unselect(SixnetExpressionHelper.GetDataFields(fields).ToArray());
+        }
+
+        protected ISixnetQueryable<TResult> IncludeExpressionFieldsAsTempTableCore<TResult>(Expression fields)
+        {
+            IncludeExpressionFieldsCore(fields);
+            return AsTempTable<TResult>();
         }
 
         #endregion
@@ -612,12 +628,12 @@ namespace Sixnet.Development.Queryable
 
         protected override ISixnetQueryable LightCloneCore()
         {
-            return new SixnetDefaultQueryableOne<TFirst>(queryableContext?.LightClone());
+            return new SixnetDefaultQueryableOne<TFirst>(queryableInfo?.LightClone());
         }
 
         protected override ISixnetQueryable CloneCore()
         {
-            return new SixnetDefaultQueryableOne<TFirst>(queryableContext?.Clone());
+            return new SixnetDefaultQueryableOne<TFirst>(queryableInfo?.Clone());
         }
 
         #endregion
@@ -773,7 +789,7 @@ namespace Sixnet.Development.Queryable
         /// <returns></returns>
         public new ISixnetQueryable<TFirst> Distinct()
         {
-            queryableContext.Distinct();
+            queryableInfo.Distinct();
             return this;
         }
 
@@ -862,20 +878,38 @@ namespace Sixnet.Development.Queryable
             return this;
         }
 
-        #endregion
-
-        #region Split table
-
         /// <summary>
-        /// Specify split table
+        /// From specify table
         /// </summary>
         /// <param name="tableNames">Table names</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst> SpecifySplitTable(params string[] tableNames)
+        public new ISixnetQueryable<TFirst> From(params string[] tableNames)
         {
-            SpecifySplitTableCore(tableNames);
+            FromSpecifyTableCore(tableNames);
             return this;
         }
+
+        /// <summary>
+        /// As a data source
+        /// </summary>
+        /// <returns></returns>
+        public new ISixnetQueryable<TFirst> AsSource()
+        {
+            return SixnetQuerier.Create<TFirst>().From(this);
+        }
+
+        /// <summary>
+        /// As a temp table
+        /// </summary>
+        /// <returns></returns>
+        public new ISixnetQueryable<TFirst> AsTempTable()
+        {
+            return AsTempTable<TFirst>();
+        }
+
+        #endregion
+
+        #region Split table
 
         /// <summary>
         /// Use split table

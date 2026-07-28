@@ -8,11 +8,29 @@ using Sixnet.Model.Paging;
 
 namespace Sixnet.Development.Queryable
 {
+    #region Base queryable
+
     /// <summary>
     /// Defines queryable contract
     /// </summary>
     public partial interface ISixnetQueryable
     {
+        #region From
+
+        /// <summary>
+        /// As a temp table
+        /// </summary>
+        /// <returns></returns>
+        Task<ISixnetQueryable> AsTempTableAsync();
+
+        /// <summary>
+        /// As a temp table
+        /// </summary>
+        /// <returns></returns>
+        Task<ISixnetQueryable<TTable>> AsTempTableAsync<TTable>();
+
+        #endregion
+
         #region Data access
 
         #region Update
@@ -249,11 +267,25 @@ namespace Sixnet.Development.Queryable
         #endregion
     }
 
+    #endregion
+
+    #region Model queryable
+
     /// <summary>
     /// Defines model queryable
     /// </summary>
     public partial interface ISixnetModelQueryable<TModel> : ISixnetQueryable
     {
+        #region From
+
+        /// <summary>
+        /// As a temp table
+        /// </summary>
+        /// <returns></returns>
+        new Task<ISixnetQueryable<TModel>> AsTempTableAsync();
+
+        #endregion
+
         #region Data access
 
         #region First
@@ -367,6 +399,32 @@ namespace Sixnet.Development.Queryable
         #endregion
     }
 
+    #endregion
+
+    #region One
+
+    /// <summary>
+    /// Defines queryable contract
+    /// </summary>
+    /// <typeparam name="TFirst">TFirst</typeparam>
+    public partial interface ISixnetQueryable<TFirst> : ISixnetModelQueryable<TFirst>
+    {
+        #region Select
+
+        /// <summary>
+        /// Select fields as a temp table
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        /// <returns></returns>
+        Task<ISixnetQueryable<TResult>> SelectAsTempTableAsync<TResult>(Expression<Func<TFirst, TResult>> fields);
+
+        #endregion
+    }
+
+    #endregion
+
+    #region Two
+
     /// <summary>
     /// Defines queryable contract
     /// </summary>
@@ -374,6 +432,24 @@ namespace Sixnet.Development.Queryable
     /// <typeparam name="TSecond">TSecond</typeparam>
     public partial interface ISixnetQueryable<TFirst, TSecond> : ISixnetModelQueryable<TFirst>
     {
+        #region Select
+
+        /// <summary>
+        /// Select fields as a temp table
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        /// <returns></returns>
+        Task<ISixnetQueryable<TResult>> SelectAsTempTableAsync<TResult>(Expression<Func<TFirst, TResult>> fields);
+
+        /// <summary>
+        /// Select fields as a temp table
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        /// <returns></returns>
+        Task<ISixnetQueryable<TResult>> SelectAsTempTableAsync<TResult>(Expression<Func<TFirst, TSecond, TResult>> fields);
+
+        #endregion
+
         #region Data access
 
         #region List
@@ -392,6 +468,10 @@ namespace Sixnet.Development.Queryable
         #endregion
     }
 
+    #endregion
+
+    #region Three
+
     /// <summary>
     /// Defines queryable contract
     /// </summary>
@@ -400,6 +480,31 @@ namespace Sixnet.Development.Queryable
     /// <typeparam name="TThird">TThird</typeparam>
     public partial interface ISixnetQueryable<TFirst, TSecond, TThird> : ISixnetModelQueryable<TFirst>
     {
+        #region Select
+
+        /// <summary>
+        /// Select fields as a temp table
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        /// <returns></returns>
+        Task<ISixnetQueryable<TResult>> SelectAsTempTableAsync<TResult>(Expression<Func<TFirst, TResult>> fields);
+
+        /// <summary>
+        /// Select fields as a temp table
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        /// <returns></returns>
+        Task<ISixnetQueryable<TResult>> SelectAsTempTableAsync<TResult>(Expression<Func<TFirst, TSecond, TResult>> fields);
+
+        /// <summary>
+        /// Select fields as a temp table
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        /// <returns></returns>
+        Task<ISixnetQueryable<TResult>> SelectAsTempTableAsync<TResult>(Expression<Func<TFirst, TSecond, TThird, TResult>> fields);
+
+        #endregion
+
         #region Data access
 
         #region List
@@ -418,6 +523,10 @@ namespace Sixnet.Development.Queryable
         #endregion
     }
 
+    #endregion
+
+    #region Four
+
     /// <summary>
     /// Defines queryable contract
     /// </summary>
@@ -427,6 +536,38 @@ namespace Sixnet.Development.Queryable
     /// <typeparam name="TFourth">TFourth</typeparam>
     public partial interface ISixnetQueryable<TFirst, TSecond, TThird, TFourth> : ISixnetModelQueryable<TFirst>
     {
+        #region Select
+
+        /// <summary>
+        /// Select fields as a temp table
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        /// <returns></returns>
+        Task<ISixnetQueryable<TResult>> SelectAsTempTableAsync<TResult>(Expression<Func<TFirst, TResult>> fields);
+
+        /// <summary>
+        /// Select fields as a temp table
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        /// <returns></returns>
+        Task<ISixnetQueryable<TResult>> SelectAsTempTableAsync<TResult>(Expression<Func<TFirst, TSecond, TResult>> fields);
+
+        /// <summary>
+        /// Select fields as a temp table
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        /// <returns></returns>
+        Task<ISixnetQueryable<TResult>> SelectAsTempTableAsync<TResult>(Expression<Func<TFirst, TSecond, TThird, TResult>> fields);
+
+        /// <summary>
+        /// Select fields as a temp table
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        /// <returns></returns>
+        Task<ISixnetQueryable<TResult>> SelectAsTempTableAsync<TResult>(Expression<Func<TFirst, TSecond, TThird, TFourth, TResult>> fields);
+
+        #endregion
+
         #region Data access
 
         #region List
@@ -445,6 +586,10 @@ namespace Sixnet.Development.Queryable
         #endregion
     }
 
+    #endregion
+
+    #region Five
+
     /// <summary>
     /// Defines queryable contract
     /// </summary>
@@ -455,6 +600,45 @@ namespace Sixnet.Development.Queryable
     /// <typeparam name="TFifth">TFifth</typeparam>
     public partial interface ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> : ISixnetModelQueryable<TFirst>
     {
+        #region Select
+
+        /// <summary>
+        /// Select fields as a temp table
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        /// <returns></returns>
+        Task<ISixnetQueryable<TResult>> SelectAsTempTableAsync<TResult>(Expression<Func<TFirst, TResult>> fields);
+
+        /// <summary>
+        /// Select fields as a temp table
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        /// <returns></returns>
+        Task<ISixnetQueryable<TResult>> SelectAsTempTableAsync<TResult>(Expression<Func<TFirst, TSecond, TResult>> fields);
+
+        /// <summary>
+        /// Select fields as a temp table
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        /// <returns></returns>
+        Task<ISixnetQueryable<TResult>> SelectAsTempTableAsync<TResult>(Expression<Func<TFirst, TSecond, TThird, TResult>> fields);
+
+        /// <summary>
+        /// Select fields as a temp table
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        /// <returns></returns>
+        Task<ISixnetQueryable<TResult>> SelectAsTempTableAsync<TResult>(Expression<Func<TFirst, TSecond, TThird, TFourth, TResult>> fields);
+
+        /// <summary>
+        /// Select fields as a temp table
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        /// <returns></returns>
+        Task<ISixnetQueryable<TResult>> SelectAsTempTableAsync<TResult>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult>> fields);
+
+        #endregion
+
         #region Data access
 
         #region List
@@ -473,6 +657,10 @@ namespace Sixnet.Development.Queryable
         #endregion
     }
 
+    #endregion
+
+    #region Six
+
     /// <summary>
     /// Defines queryable contract
     /// </summary>
@@ -484,6 +672,52 @@ namespace Sixnet.Development.Queryable
     /// <typeparam name="TSixth">TSixth</typeparam>
     public partial interface ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> : ISixnetModelQueryable<TFirst>
     {
+        #region Select
+
+        /// <summary>
+        /// Select fields as a temp table
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        /// <returns></returns>
+        Task<ISixnetQueryable<TResult>> SelectAsTempTableAsync<TResult>(Expression<Func<TFirst, TResult>> fields);
+
+        /// <summary>
+        /// Select fields as a temp table
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        /// <returns></returns>
+        Task<ISixnetQueryable<TResult>> SelectAsTempTableAsync<TResult>(Expression<Func<TFirst, TSecond, TResult>> fields);
+
+        /// <summary>
+        /// Select fields as a temp table
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        /// <returns></returns>
+        Task<ISixnetQueryable<TResult>> SelectAsTempTableAsync<TResult>(Expression<Func<TFirst, TSecond, TThird, TResult>> fields);
+
+        /// <summary>
+        /// Select fields as a temp table
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        /// <returns></returns>
+        Task<ISixnetQueryable<TResult>> SelectAsTempTableAsync<TResult>(Expression<Func<TFirst, TSecond, TThird, TFourth, TResult>> fields);
+
+        /// <summary>
+        /// Select fields as a temp table
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        /// <returns></returns>
+        Task<ISixnetQueryable<TResult>> SelectAsTempTableAsync<TResult>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult>> fields);
+
+        /// <summary>
+        /// Select fields as a temp table
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        /// <returns></returns>
+        Task<ISixnetQueryable<TResult>> SelectAsTempTableAsync<TResult>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>> fields);
+
+        #endregion
+
         #region Data access
 
         #region List
@@ -502,6 +736,10 @@ namespace Sixnet.Development.Queryable
         #endregion
     }
 
+    #endregion
+
+    #region Seven
+
     /// <summary>
     /// Defines queryable contract
     /// </summary>
@@ -514,6 +752,59 @@ namespace Sixnet.Development.Queryable
     /// <typeparam name="TSeventh">TSeventh</typeparam>
     public partial interface ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> : ISixnetModelQueryable<TFirst>
     {
+        #region Select
+
+        /// <summary>
+        /// Select fields as a temp table
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        /// <returns></returns>
+        Task<ISixnetQueryable<TResult>> SelectAsTempTableAsync<TResult>(Expression<Func<TFirst, TResult>> fields);
+
+        /// <summary>
+        /// Select fields as a temp table
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        /// <returns></returns>
+        Task<ISixnetQueryable<TResult>> SelectAsTempTableAsync<TResult>(Expression<Func<TFirst, TSecond, TResult>> fields);
+
+        /// <summary>
+        /// Select fields as a temp table
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        /// <returns></returns>
+        Task<ISixnetQueryable<TResult>> SelectAsTempTableAsync<TResult>(Expression<Func<TFirst, TSecond, TThird, TResult>> fields);
+
+        /// <summary>
+        /// Select fields as a temp table
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        /// <returns></returns>
+        Task<ISixnetQueryable<TResult>> SelectAsTempTableAsync<TResult>(Expression<Func<TFirst, TSecond, TThird, TFourth, TResult>> fields);
+
+        /// <summary>
+        /// Select fields as a temp table
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        /// <returns></returns>
+        Task<ISixnetQueryable<TResult>> SelectAsTempTableAsync<TResult>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult>> fields);
+
+        /// <summary>
+        /// Select fields as a temp table
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        /// <returns></returns>
+        Task<ISixnetQueryable<TResult>> SelectAsTempTableAsync<TResult>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>> fields);
+
+        /// <summary>
+        /// Select fields as a temp table
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        /// <returns></returns>
+        Task<ISixnetQueryable<TResult>> SelectAsTempTableAsync<TResult>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult>> fields);
+
+        #endregion
+
         #region Data access
 
         #region List
@@ -531,4 +822,6 @@ namespace Sixnet.Development.Queryable
 
         #endregion
     }
+
+    #endregion
 }

@@ -488,7 +488,7 @@ namespace Sixnet.Development.Data.Client
         public async Task<TValue> MaxAsync<T, TValue>(Expression<Func<T, TValue>> field, Expression<Func<T, bool>> conditionExpression, SixnetDataOperationOptions options = null)
         {
             var maxQueryable = conditionExpression.GetQueryable<T>()
-            .Select(field.GetDataField(SixnetFieldFormatterNames.MAX));
+            .SelectFields(field.GetDataField(SixnetFieldFormatterNames.MAX));
             return await MaxAsync<TValue>(maxQueryable, options).ConfigureAwait(false);
         }
 
@@ -514,7 +514,7 @@ namespace Sixnet.Development.Data.Client
         public async Task<TValue> MinAsync<T, TValue>(Expression<Func<T, TValue>> field, Expression<Func<T, bool>> conditionExpression, SixnetDataOperationOptions options = null)
         {
             var minQueryable = conditionExpression.GetQueryable<T>()
-            .Select(field.GetDataField(SixnetFieldFormatterNames.MIN));
+            .SelectFields(field.GetDataField(SixnetFieldFormatterNames.MIN));
             return await MinAsync<TValue>(minQueryable, options).ConfigureAwait(false);
         }
 
@@ -540,7 +540,7 @@ namespace Sixnet.Development.Data.Client
         public async Task<TValue> SumAsync<T, TValue>(Expression<Func<T, TValue>> field, Expression<Func<T, bool>> conditionExpression, SixnetDataOperationOptions options = null)
         {
             var sumQueryable = conditionExpression.GetQueryable<T>()
-            .Select(field.GetDataField(SixnetFieldFormatterNames.SUM));
+            .SelectFields(field.GetDataField(SixnetFieldFormatterNames.SUM));
             return await SumAsync<TValue>(sumQueryable, options).ConfigureAwait(false);
         }
 
@@ -566,7 +566,7 @@ namespace Sixnet.Development.Data.Client
         public async Task<TValue> AvgAsync<T, TValue>(Expression<Func<T, TValue>> field, Expression<Func<T, bool>> conditionExpression, SixnetDataOperationOptions options = null)
         {
             var avgQueryable = conditionExpression.GetQueryable<T>()
-            .Select(field.GetDataField(SixnetFieldFormatterNames.AVG));
+            .SelectFields(field.GetDataField(SixnetFieldFormatterNames.AVG));
             return await AvgAsync<TValue>(avgQueryable, options).ConfigureAwait(false);
         }
 
@@ -1264,6 +1264,23 @@ namespace Sixnet.Development.Data.Client
 
         #endregion
 
+        #region Temp table
+
+        /// <summary>
+        /// Create temp table
+        /// </summary>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="options">Options</param>
+        /// <returns>Return temp table info</returns>
+        public async Task<SixnetTempTable> CreateTempTableAsync(ISixnetQueryable queryable, SixnetDataOperationOptions options = null)
+        {
+            var command = SixnetDataCommand.CreateQueryCommand(queryable);
+            var connections = GetConnections(GetDataCommandDatabaseServers(command, true, options));
+            return await SixnetDataCommandExecutor.CreateTempTableAsync(connections, command, options).ConfigureAwait(false);
+        }
+
+        #endregion
+
         #region Migration
 
         /// <summary>
@@ -1717,7 +1734,7 @@ namespace Sixnet.Development.Data.Client
                 var queryable = dataCommand.Queryable;
                 var options = dataCommand.Options;
                 var entityType = dataCommand.GetEntityType();
-                if (dataCommand.OperationType == SixnetDataOperationType.Delete && entityType != null && (queryable == null || queryable.ExecutionMode == SixnetQueryableExecutionMode.Regular))
+                if (dataCommand.OperationType == SixnetDataOperationType.Delete && entityType != null && (queryable == null || queryable.Info.ExecutionMode == SixnetQueryableExecutionMode.Regular))
                 {
                     #region Logic delete
 

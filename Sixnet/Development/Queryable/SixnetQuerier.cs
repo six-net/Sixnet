@@ -1,6 +1,9 @@
 ﻿// "Company © 2025. All rights reserved."
 
 using System.Dynamic;
+using System.Threading.Tasks;
+
+using Sixnet.Model;
 
 namespace Sixnet.Development.Queryable
 {
@@ -120,7 +123,7 @@ namespace Sixnet.Development.Queryable
         }
 
         /// <summary>
-        /// Create a new query instance
+        /// Create a new queryable instance
         /// </summary>
         /// <typeparam name="T">Query model</typeparam>
         /// <param name="conditionExpression">Condition expression</param>
@@ -133,6 +136,32 @@ namespace Sixnet.Development.Queryable
                 query.Where(conditionExpression);
             }
             return query;
+        }
+
+        /// <summary>
+        /// Create a new queryable instance
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="datas"></param>
+        /// <returns></returns>
+        public static ISixnetQueryable<SixnetValue<T>> FromDatas<T>(IEnumerable<T> datas)
+        {
+            var queryable = Create<SixnetValue<T>>();
+            queryable.Info.From(datas);
+            return queryable.AsTempTable();
+        }
+
+        /// <summary>
+        /// Create a new queryable instance
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="datas"></param>
+        /// <returns></returns>
+        public static Task<ISixnetQueryable<SixnetValue<T>>> FromDatasAsync<T>(IEnumerable<T> datas)
+        {
+            var queryable = Create<SixnetValue<T>>();
+            queryable.Info.From(datas);
+            return queryable.AsTempTableAsync();
         }
 
         #endregion

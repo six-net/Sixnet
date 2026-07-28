@@ -2,6 +2,7 @@
 
 using System.Data;
 
+using Sixnet.Development.Data.Dapper;
 using Sixnet.Model.Paging;
 
 namespace Sixnet.Development.Data.Database
@@ -37,6 +38,13 @@ namespace Sixnet.Development.Data.Database
         /// <param name="command">Database multiple command</param>
         /// <returns>Affected data numbers</returns>
         int Execute(SixnetMultipleDatabaseCommand command);
+
+        /// <summary>
+        /// Create temp table
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        SixnetTempTable CreateTempTable(SixnetSingleDatabaseCommand command);
 
         #endregion
 

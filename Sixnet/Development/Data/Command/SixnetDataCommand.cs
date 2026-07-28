@@ -338,7 +338,7 @@ namespace Sixnet.Development.Data.Command
                 EntityIdentityValues ??= new Dictionary<string, dynamic>();
                 foreach (var field in primaryFields)
                 {
-                    if (ScriptParameters.Items.TryGetValue(field, out DataCommandParameterItem parameterItem))
+                    if (ScriptParameters.Items.TryGetValue(field, out SixnetDataCommandParameterItem parameterItem))
                     {
                         EntityIdentityValues.Add(field, parameterItem?.Value);
                     }

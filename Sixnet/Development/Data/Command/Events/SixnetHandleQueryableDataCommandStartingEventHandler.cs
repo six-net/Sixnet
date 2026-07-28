@@ -88,9 +88,9 @@ namespace Sixnet.Development.Data.Command.Events
             var modelType = originalQueryable.GetModelType();
 
             // group, not set model type
-            if (originalQueryable.IsGroupQueryable
+            if (originalQueryable.Info.CheckUseForGroup()
                 || modelType == null
-                || modelType == SixnetQueryableContext.DefaultModelType)
+                || modelType == SixnetQueryableInfo.DefaultModelType)
             {
                 return originalQueryable;
             }
@@ -103,12 +103,12 @@ namespace Sixnet.Development.Data.Command.Events
 
             #region condition
 
-            if (!originalQueryable.Conditions.IsNullOrEmpty())
+            if (!originalQueryable.Info.Conditions.IsNullOrEmpty())
             {
-                foreach (var condition in originalQueryable.Conditions)
+                foreach (var condition in originalQueryable.Info.Conditions)
                 {
                     if (condition is ISixnetQueryable conditionQueryable
-                        && !conditionQueryable.IsGroupQueryable)
+                        && !conditionQueryable.Info.CheckUseForGroup())
                     {
                         context.OriginalQueryable = conditionQueryable;
                         context.Location = SixnetQueryableLocation.Condition;
@@ -141,9 +141,9 @@ namespace Sixnet.Development.Data.Command.Events
 
             #region join
 
-            if (!originalQueryable.Joins.IsNullOrEmpty())
+            if (!originalQueryable.Info.Joins.IsNullOrEmpty())
             {
-                foreach (var join in originalQueryable.Joins)
+                foreach (var join in originalQueryable.Info.Joins)
                 {
                     if (join == null)
                     {
@@ -156,8 +156,8 @@ namespace Sixnet.Development.Data.Command.Events
                         context.Location = SixnetQueryableLocation.JoinTarget;
                         context.ModelType = joinTargetQueryable.GetModelType();
                         FilterData(dataOptions, context);
-                        if (joinTargetQueryable.FromType == SixnetQueryableFromType.Table
-                            && !joinTargetQueryable.Criteria.IsNullOrEmpty())
+                        if (joinTargetQueryable.Info.FromType == SixnetQueryableFromType.Table
+                            && !joinTargetQueryable.Info.Criteria.IsNullOrEmpty())
                         {
                             var newJoinTargetQueryable = SixnetQuerier.Create()
                                 .SetModelType(joinTargetQueryable.GetModelType())
@@ -199,7 +199,7 @@ namespace Sixnet.Development.Data.Command.Events
 
             #region tree
 
-            var treeInfo = originalQueryable.TreeInfo;
+            var treeInfo = originalQueryable.Info.TreeInfo;
             if (treeInfo != null)
             {
                 if (treeInfo.DataField is ISixnetQueryable dataFieldQueryable)
@@ -222,9 +222,9 @@ namespace Sixnet.Development.Data.Command.Events
 
             #region combine
 
-            if (!originalQueryable.Combines.IsNullOrEmpty())
+            if (!originalQueryable.Info.Combines.IsNullOrEmpty())
             {
-                foreach (var combine in originalQueryable.Combines)
+                foreach (var combine in originalQueryable.Info.Combines)
                 {
                     if (combine?.Target != null)
                     {
@@ -240,12 +240,12 @@ namespace Sixnet.Development.Data.Command.Events
 
             #region from
 
-            if (originalQueryable.FromType == SixnetQueryableFromType.Queryable
-                && originalQueryable.TargetQueryable != null)
+            if (originalQueryable.Info.FromType == SixnetQueryableFromType.Queryable
+                && originalQueryable.Info.TargetQueryable != null)
             {
-                context.OriginalQueryable = originalQueryable.TargetQueryable;
+                context.OriginalQueryable = originalQueryable.Info.TargetQueryable;
                 context.Location = SixnetQueryableLocation.From;
-                context.ModelType = originalQueryable.TargetQueryable.GetModelType();
+                context.ModelType = originalQueryable.Info.TargetQueryable.GetModelType();
                 FilterData(dataOptions, context);
             }
 
@@ -278,7 +278,7 @@ namespace Sixnet.Development.Data.Command.Events
                 context.OriginalQueryable.SetModelType(context.ModelType);
             }
             var originalQueryable = context.OriginalQueryable;
-            if (originalQueryable.IsGroupQueryable)
+            if (originalQueryable.Info.CheckUseForGroup())
             {
                 return null;
             }

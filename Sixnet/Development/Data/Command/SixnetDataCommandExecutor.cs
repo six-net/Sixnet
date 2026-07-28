@@ -59,7 +59,7 @@ namespace Sixnet.Development.Command
         public static T QueryFirst<T>(IEnumerable<SixnetDatabaseConnection> connections, SixnetDataCommand queryCommand, SixnetDataOperationOptions options = null)
         {
             ValidateConnections(connections);
-            queryCommand?.Queryable?.Take(1, queryCommand?.Queryable?.SkipCount ?? 0);
+            queryCommand?.Queryable?.Take(1, queryCommand?.Queryable?.Info.SkipCount ?? 0);
             T data = default;
             foreach (var conn in connections)
             {
@@ -373,7 +373,7 @@ namespace Sixnet.Development.Command
             {
                 values.Add(conn.DatabaseProvider.Scalar<TValue>(GetDatabaseSingleCommand<SixnetSingleDatabaseCommand>(conn, queryCommand, options)));
             }
-            var conversionName = queryCommand?.Queryable?.SelectedFields?.FirstOrDefault()?.FormatSetting?.Name;
+            var conversionName = queryCommand?.Queryable?.Info.SelectedFields?.FirstOrDefault()?.FormatSetting?.Name;
             dynamic result = conversionName switch
             {
                 SixnetFieldFormatterNames.MAX => values.Max(),
@@ -752,6 +752,25 @@ namespace Sixnet.Development.Command
                 value += conn.DatabaseProvider.Execute(GetDatabaseMultipleCommand(conn, commands, options));
             }
             return value;
+        }
+
+        /// <summary>
+        /// Create temp table
+        /// </summary>
+        /// <param name="connections">Connections</param>
+        /// <param name="queryCommand">Query data command</param>
+        /// <param name="options">Data operation options</param>
+        /// <returns>Data list</returns>
+        public static SixnetTempTable CreateTempTable(IEnumerable<SixnetDatabaseConnection> connections, SixnetDataCommand queryCommand, SixnetDataOperationOptions options = null)
+        {
+            ValidateConnections(connections);
+            SixnetTempTable tempTable = null;
+            queryCommand?.Queryable?.Info?.Output(SixnetQueryableOutputType.TempTable);
+            foreach (var conn in connections)
+            {
+                tempTable = conn.DatabaseProvider.CreateTempTable(GetDatabaseSingleCommand<SixnetSingleDatabaseCommand>(conn, queryCommand, options));
+            }
+            return tempTable;
         }
 
         /// <summary>
@@ -1641,7 +1660,7 @@ namespace Sixnet.Development.Command
             {
                 return originalDatas;
             }
-            var takeCount = queryable?.TakeCount ?? 0;
+            var takeCount = queryable?.Info.TakeCount ?? 0;
             if (takeCount > 0)
             {
                 originalDatas = originalDatas?.Take(takeCount);

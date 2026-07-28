@@ -578,7 +578,7 @@ namespace Sixnet.Development.Data.Client
         public TValue Max<T, TValue>(Expression<Func<T, TValue>> field, Expression<Func<T, bool>> conditionExpression, SixnetDataOperationOptions options = null)
         {
             var maxQueryable = conditionExpression.GetQueryable<T>();
-            maxQueryable.Select(field.GetDataField(SixnetFieldFormatterNames.MAX));
+            maxQueryable.SelectFields(field.GetDataField(SixnetFieldFormatterNames.MAX));
             return Max<TValue>(maxQueryable, options);
         }
 
@@ -606,7 +606,7 @@ namespace Sixnet.Development.Data.Client
         public TValue Min<T, TValue>(Expression<Func<T, TValue>> field, Expression<Func<T, bool>> conditionExpression, SixnetDataOperationOptions options = null)
         {
             var minQueryable = SixnetExpressionHelper.GetQueryable<T>(conditionExpression);
-            minQueryable.Select(field.GetDataField(SixnetFieldFormatterNames.MIN));
+            minQueryable.SelectFields(field.GetDataField(SixnetFieldFormatterNames.MIN));
             return Min<TValue>(minQueryable, options);
         }
 
@@ -634,7 +634,7 @@ namespace Sixnet.Development.Data.Client
         public TValue Sum<T, TValue>(Expression<Func<T, TValue>> field, Expression<Func<T, bool>> conditionExpression, SixnetDataOperationOptions options = null)
         {
             var sumQueryable = SixnetExpressionHelper.GetQueryable<T>(conditionExpression);
-            sumQueryable.Select(field.GetDataField(SixnetFieldFormatterNames.SUM));
+            sumQueryable.SelectFields(field.GetDataField(SixnetFieldFormatterNames.SUM));
             return Sum<TValue>(sumQueryable, options);
         }
 
@@ -662,7 +662,7 @@ namespace Sixnet.Development.Data.Client
         public TValue Avg<T, TValue>(Expression<Func<T, TValue>> field, Expression<Func<T, bool>> conditionExpression, SixnetDataOperationOptions options = null)
         {
             var avgQueryable = SixnetExpressionHelper.GetQueryable<T>(conditionExpression);
-            avgQueryable.Select(field.GetDataField(SixnetFieldFormatterNames.AVG));
+            avgQueryable.SelectFields(field.GetDataField(SixnetFieldFormatterNames.AVG));
             return Avg<TValue>(avgQueryable, options);
         }
 
@@ -1376,6 +1376,23 @@ namespace Sixnet.Development.Data.Client
 
         #endregion
 
+        #region Temp table
+
+        /// <summary>
+        /// Create temp table
+        /// </summary>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="options">Options</param>
+        /// <returns>Return temp table info</returns>
+        public SixnetTempTable CreateTempTable(ISixnetQueryable queryable, SixnetDataOperationOptions options = null)
+        {
+            var command = SixnetDataCommand.CreateQueryCommand(queryable);
+            var connections = GetConnections(GetDataCommandDatabaseServers(command, true, options));
+            return SixnetDataCommandExecutor.CreateTempTable(connections, command, options);
+        }
+
+        #endregion
+
         #region Migration
 
         /// <summary>
@@ -1909,7 +1926,7 @@ namespace Sixnet.Development.Data.Client
                 var queryable = dataCommand.Queryable;
                 var options = dataCommand.Options;
                 var entityType = dataCommand.GetEntityType();
-                if (dataCommand.OperationType == SixnetDataOperationType.Delete && entityType != null && (queryable == null || queryable.ExecutionMode == SixnetQueryableExecutionMode.Regular))
+                if (dataCommand.OperationType == SixnetDataOperationType.Delete && entityType != null && (queryable == null || queryable.Info.ExecutionMode == SixnetQueryableExecutionMode.Regular))
                 {
                     #region Logic delete
 
@@ -2389,7 +2406,7 @@ namespace Sixnet.Development.Data.Client
         /// <param name="options">Options</param>
         void ValidateCalculateField(ISixnetQueryable queryable, string fieldFormatterName, SixnetDataOperationOptions options)
         {
-            var firstField = queryable.SelectedFields?.FirstOrDefault();
+            var firstField = queryable.Info.SelectedFields?.FirstOrDefault();
             SixnetException.ThrowIf(!string.Equals(fieldFormatterName, firstField?.FormatSetting?.Name), $"The field for which the {fieldFormatterName} value is to be calculated is not specified");
         }
 

@@ -17,7 +17,29 @@ namespace Sixnet.Development.Queryable
 
         public SixnetDefaultModelQueryable(ISixnetQueryable sourceQueryable = null) : base(sourceQueryable) { }
 
-        public SixnetDefaultModelQueryable(SixnetQueryableContext sourceQueryableContext = null) : base(sourceQueryableContext) { }
+        public SixnetDefaultModelQueryable(SixnetQueryableInfo sourceQueryableContext = null) : base(sourceQueryableContext) { }
+
+        #endregion
+
+        #region From
+
+        /// <summary>
+        /// As a data source
+        /// </summary>
+        /// <returns></returns>
+        public new ISixnetQueryable<TModel> AsSource()
+        {
+            return AsSource<TModel>();
+        }
+
+        /// <summary>
+        /// As a temp table
+        /// </summary>
+        /// <returns></returns>
+        public new ISixnetQueryable<TModel> AsTempTable()
+        {
+            return AsTempTable<TModel>();
+        }
 
         #endregion
 
@@ -32,7 +54,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Data</returns>
         public TModel First(Action<SixnetDataOperationOptions> configure = null)
         {
-            if (queryableContext.Repository is ISixnetRepository<TModel> firstRepository)
+            if (queryableInfo.Repository is ISixnetRepository<TModel> firstRepository)
             {
                 return firstRepository.Get(this, configure);
             }
@@ -50,7 +72,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Data list</returns>
         public List<TModel> ToList(Action<SixnetDataOperationOptions> configure = null)
         {
-            if (queryableContext.Repository is ISixnetRepository<TModel> firstRepository)
+            if (queryableInfo.Repository is ISixnetRepository<TModel> firstRepository)
             {
                 return firstRepository.GetList(this, configure);
             }
@@ -69,7 +91,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Paging data</returns>
         public SixnetPagingInfo<TModel> ToPaging(SixnetPagingFilter pagingFilter, Action<SixnetDataOperationOptions> configure = null)
         {
-            if (queryableContext.Repository is ISixnetRepository<TModel> firstRepository)
+            if (queryableInfo.Repository is ISixnetRepository<TModel> firstRepository)
             {
                 return firstRepository.GetPaging(this, pagingFilter, configure);
             }
@@ -116,7 +138,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Max value</returns>
         public TValue Max<TValue>(Expression<Func<TModel, TValue>> field, Action<SixnetDataOperationOptions> configure = null)
         {
-            Select(SixnetExpressionHelper.GetDataField(field, SixnetFieldFormatSetting.Create(SixnetFieldFormatterNames.MAX)));
+            SelectFields(SixnetExpressionHelper.GetDataField(field, SixnetFieldFormatSetting.Create(SixnetFieldFormatterNames.MAX)));
             return Max<TValue>(configure);
         }
 
@@ -133,7 +155,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Min value</returns>
         public TValue Min<TValue>(Expression<Func<TModel, TValue>> field, Action<SixnetDataOperationOptions> configure = null)
         {
-            Select(SixnetExpressionHelper.GetDataField(field, SixnetFieldFormatSetting.Create(SixnetFieldFormatterNames.MIN)));
+            SelectFields(SixnetExpressionHelper.GetDataField(field, SixnetFieldFormatSetting.Create(SixnetFieldFormatterNames.MIN)));
             return Min<TValue>(configure);
         }
 
@@ -150,7 +172,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Sum value</returns>
         public TValue Sum<TValue>(Expression<Func<TModel, TValue>> field, Action<SixnetDataOperationOptions> configure = null)
         {
-            Select(SixnetExpressionHelper.GetDataField(field, SixnetFieldFormatSetting.Create(SixnetFieldFormatterNames.SUM)));
+            SelectFields(SixnetExpressionHelper.GetDataField(field, SixnetFieldFormatSetting.Create(SixnetFieldFormatterNames.SUM)));
             return Sum<TValue>(configure);
         }
 
@@ -167,24 +189,11 @@ namespace Sixnet.Development.Queryable
         /// <returns>Average value</returns>
         public TValue Avg<TValue>(Expression<Func<TModel, TValue>> field, Action<SixnetDataOperationOptions> configure = null)
         {
-            Select(SixnetExpressionHelper.GetDataField(field, SixnetFieldFormatSetting.Create(SixnetFieldFormatterNames.AVG)));
+            SelectFields(SixnetExpressionHelper.GetDataField(field, SixnetFieldFormatSetting.Create(SixnetFieldFormatterNames.AVG)));
             return Avg<TValue>(configure);
         }
 
         #endregion
-
-        #endregion
-
-        #region From
-
-        /// <summary>
-        /// As a source to other Queryable
-        /// </summary>
-        /// <returns>A new Queryable</returns>
-        public ISixnetQueryable<TSource> AsSource<TSource>()
-        {
-            return SixnetQuerier.Create<TSource>().From(this);
-        }
 
         #endregion
     }

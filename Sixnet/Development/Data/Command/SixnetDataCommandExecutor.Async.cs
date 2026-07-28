@@ -8,6 +8,7 @@ using Sixnet.Development.Data.Command;
 using Sixnet.Development.Data.Database;
 using Sixnet.Development.Data.Field;
 using Sixnet.Development.Data.Field.Formatting;
+using Sixnet.Development.Queryable;
 using Sixnet.Model.Paging;
 
 namespace Sixnet.Development.Command
@@ -50,7 +51,7 @@ namespace Sixnet.Development.Command
         public static async Task<T> QueryFirstAsync<T>(IEnumerable<SixnetDatabaseConnection> connections, SixnetDataCommand queryCommand, SixnetDataOperationOptions options = null)
         {
             ValidateConnections(connections);
-            queryCommand?.Queryable?.Take(1, queryCommand?.Queryable?.SkipCount ?? 0);
+            queryCommand?.Queryable?.Take(1, queryCommand?.Queryable?.Info.SkipCount ?? 0);
             T data = default;
             foreach (var conn in connections)
             {
@@ -365,7 +366,7 @@ namespace Sixnet.Development.Command
                 taskIndex++;
             }
             var values = await Task.WhenAll(scalarTasks).ConfigureAwait(false);
-            var conversionName = queryCommand?.Queryable?.SelectedFields?.FirstOrDefault()?.FormatSetting?.Name;
+            var conversionName = queryCommand?.Queryable?.Info.SelectedFields?.FirstOrDefault()?.FormatSetting?.Name;
             dynamic result = conversionName switch
             {
                 SixnetFieldFormatterNames.MAX => values.Max(),
@@ -834,6 +835,25 @@ namespace Sixnet.Development.Command
                 taskIndex++;
             }
             await Task.WhenAll(insertTasks).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Create temp table
+        /// </summary>
+        /// <param name="connections">Connections</param>
+        /// <param name="queryCommand">Query data command</param>
+        /// <param name="options">Data operation options</param>
+        /// <returns>Data list</returns>
+        public static async Task<SixnetTempTable> CreateTempTableAsync(IEnumerable<SixnetDatabaseConnection> connections, SixnetDataCommand queryCommand, SixnetDataOperationOptions options = null)
+        {
+            ValidateConnections(connections);
+            SixnetTempTable tempTable = null;
+            queryCommand?.Queryable?.Info?.Output(SixnetQueryableOutputType.TempTable);
+            foreach (var conn in connections)
+            {
+                tempTable = await conn.DatabaseProvider.CreateTempTableAsync(GetDatabaseSingleCommand<SixnetSingleDatabaseCommand>(conn, queryCommand, options)).ConfigureAwait(false);
+            }
+            return tempTable;
         }
 
         #endregion
