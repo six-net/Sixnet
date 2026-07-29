@@ -179,6 +179,12 @@ namespace Sixnet.Development.Data
         /// <returns></returns>
         internal static List<SixnetDatabaseObjectName> GetTableNames(SixnetDataCommandExecutionContext context)
         {
+            // specify tables
+            if (context.ActivityQueryable?.Info?.FromType == SixnetQueryableFromType.SpecifyTable)
+            {
+                return context.ActivityQueryable.Info.SpecifyTables.Select(c => c.Clone()).ToList();
+            }
+
             var entityType = context?.ActivityQueryable?.GetModelType();
             entityType ??= (context?.Command?.GetEntityType());
 

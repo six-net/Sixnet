@@ -969,25 +969,6 @@ namespace Sixnet.Development.Data.Database
                         databaseStatement.OutputFields = new List<ISixnetField>(1) { SixnetDataField.Create("*", originalQueryable.GetModelType(), 0, null, "*") };
                     }
                     return databaseStatement;
-                case SixnetQueryableFromType.SpecifyTable:
-                    var specifyTableNames = originalQueryable.Info.SpecifyTables;
-                    var specifyComplexTarget = false;
-                    string specifyTargetScript;
-                    if (specifyTableNames.Count == 1)
-                    {
-                        specifyTargetScript = $"{FormatAndWrapObjectName(specifyTableNames.FirstOrDefault())}{(applyTablePetName ? $"{TablePetNameKeyword}{tablePetName}" : "")}";
-                    }
-                    else
-                    {
-                        var specifyTargetScripts = new List<string>(specifyTableNames.Count);
-                        foreach (var tableName in specifyTableNames)
-                        {
-                            specifyTargetScripts.Add($"SELECT * FROM {FormatAndWrapObjectName(tableName)}");
-                        }
-                        specifyTargetScript = $"({string.Join(" UNION ", specifyTargetScripts)}){(applyTablePetName ? $"{TablePetNameKeyword}{tablePetName}" : "")}";
-                        specifyComplexTarget = true;
-                    }
-                    return SixnetQueryDatabaseStatement.Create(specifyTargetScript, null, complexTarget: specifyComplexTarget);
                 case SixnetQueryableFromType.ConstantValue:
 
                     var constantValues = SixnetReflecter.Collections.ResolveCollection(originalQueryable.Info.TargetConstantValue as IEnumerable);

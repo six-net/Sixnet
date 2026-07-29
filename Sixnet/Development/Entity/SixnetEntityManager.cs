@@ -152,7 +152,7 @@ namespace Sixnet.Development.Entity
                     Precision = entityFieldAttribute?.Precision ?? 0,
                     DefaultValue = entityFieldAttribute?.DefaultValue ?? string.Empty,
                     IncrementValue = entityFieldAttribute?.IncrementValue ?? 0,
-                    IndexSequence = entityFieldAttribute.IndexSequence
+                    IndexSequence = entityFieldAttribute?.IndexSequence ?? 0
                 };
                 var fieldStartValue = entityFieldAttribute?.StartValue ?? 0;
                 if (propertyField.InRole(SixnetFieldRole.PrimaryKey) && fieldStartValue == 0)
