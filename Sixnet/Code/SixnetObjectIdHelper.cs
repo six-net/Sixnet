@@ -374,7 +374,7 @@ namespace Sixnet.Code
                     dataField.FormatSetting = SixnetFieldFormatSetting.Create(SixnetFieldFormatterNames.MAX);
                     var maxValue = SixnetQuerier.Create()
                         .SetModelType(entityConfig.EntityType)
-                        .SelectFields(dataField)
+                        .Select(dataField)
                         .IgnoreIsolation()
                         .IncludeArchived()
                         .Scalar<long>();

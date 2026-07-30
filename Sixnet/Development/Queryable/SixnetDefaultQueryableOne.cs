@@ -493,9 +493,9 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst> SelectFields(params ISixnetField[] fields)
+        public new ISixnetQueryable<TFirst> Select(params ISixnetField[] fields)
         {
-            base.SelectFields(fields);
+            base.Select(fields);
             return this;
         }
 
@@ -504,7 +504,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        public ISixnetQueryable<TFirst> SelectFields<TResult>(Expression<Func<TFirst, TResult>> fields)
+        public ISixnetQueryable<TFirst> Select<TResult>(Expression<Func<TFirst, TResult>> fields)
         {
             IncludeExpressionFieldsCore(fields);
             return this;
@@ -554,7 +554,7 @@ namespace Sixnet.Development.Queryable
 
         protected void IncludeExpressionFieldsCore(Expression fields)
         {
-            SelectFields(SixnetExpressionHelper.GetDataFields(fields).ToArray());
+            Select(SixnetExpressionHelper.GetDataFields(fields).ToArray());
         }
 
         protected ISixnetQueryable<TResult> IncludeExpressionFieldsAsSourceCore<TResult>(Expression fields)

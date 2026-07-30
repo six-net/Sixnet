@@ -578,7 +578,7 @@ namespace Sixnet.Development.Data.Client
         public TValue Max<T, TValue>(Expression<Func<T, TValue>> field, Expression<Func<T, bool>> conditionExpression, SixnetDataOperationOptions options = null)
         {
             var maxQueryable = conditionExpression.GetQueryable<T>();
-            maxQueryable.SelectFields(field.GetDataField(SixnetFieldFormatterNames.MAX));
+            maxQueryable.Select(field.GetDataField(SixnetFieldFormatterNames.MAX));
             return Max<TValue>(maxQueryable, options);
         }
 
@@ -606,7 +606,7 @@ namespace Sixnet.Development.Data.Client
         public TValue Min<T, TValue>(Expression<Func<T, TValue>> field, Expression<Func<T, bool>> conditionExpression, SixnetDataOperationOptions options = null)
         {
             var minQueryable = SixnetExpressionHelper.GetQueryable<T>(conditionExpression);
-            minQueryable.SelectFields(field.GetDataField(SixnetFieldFormatterNames.MIN));
+            minQueryable.Select(field.GetDataField(SixnetFieldFormatterNames.MIN));
             return Min<TValue>(minQueryable, options);
         }
 
@@ -634,7 +634,7 @@ namespace Sixnet.Development.Data.Client
         public TValue Sum<T, TValue>(Expression<Func<T, TValue>> field, Expression<Func<T, bool>> conditionExpression, SixnetDataOperationOptions options = null)
         {
             var sumQueryable = SixnetExpressionHelper.GetQueryable<T>(conditionExpression);
-            sumQueryable.SelectFields(field.GetDataField(SixnetFieldFormatterNames.SUM));
+            sumQueryable.Select(field.GetDataField(SixnetFieldFormatterNames.SUM));
             return Sum<TValue>(sumQueryable, options);
         }
 
@@ -662,7 +662,7 @@ namespace Sixnet.Development.Data.Client
         public TValue Avg<T, TValue>(Expression<Func<T, TValue>> field, Expression<Func<T, bool>> conditionExpression, SixnetDataOperationOptions options = null)
         {
             var avgQueryable = SixnetExpressionHelper.GetQueryable<T>(conditionExpression);
-            avgQueryable.SelectFields(field.GetDataField(SixnetFieldFormatterNames.AVG));
+            avgQueryable.Select(field.GetDataField(SixnetFieldFormatterNames.AVG));
             return Avg<TValue>(avgQueryable, options);
         }
 

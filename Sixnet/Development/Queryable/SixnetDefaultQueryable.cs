@@ -287,11 +287,11 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        public ISixnetQueryable SelectFields(params ISixnetField[] fields)
+        public ISixnetQueryable Select(params ISixnetField[] fields)
         {
             if (!fields.IsNullOrEmpty())
             {
-                queryableInfo.SelectFields(fields);
+                queryableInfo.Select(fields);
             }
             return this;
         }
@@ -301,9 +301,9 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fieldNames">Field names</param>
         /// <returns></returns>
-        public ISixnetQueryable SelectFields(params string[] fieldNames)
+        public ISixnetQueryable Select(params string[] fieldNames)
         {
-            return SelectFields(fieldNames?.Select(f => SixnetDataField.Create(f)).ToArray());
+            return Select(fieldNames?.Select(f => SixnetDataField.Create(f)).ToArray());
         }
 
         /// <summary>

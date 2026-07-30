@@ -488,7 +488,7 @@ namespace Sixnet.Development.Data.Client
         public async Task<TValue> MaxAsync<T, TValue>(Expression<Func<T, TValue>> field, Expression<Func<T, bool>> conditionExpression, SixnetDataOperationOptions options = null)
         {
             var maxQueryable = conditionExpression.GetQueryable<T>()
-            .SelectFields(field.GetDataField(SixnetFieldFormatterNames.MAX));
+            .Select(field.GetDataField(SixnetFieldFormatterNames.MAX));
             return await MaxAsync<TValue>(maxQueryable, options).ConfigureAwait(false);
         }
 
@@ -514,7 +514,7 @@ namespace Sixnet.Development.Data.Client
         public async Task<TValue> MinAsync<T, TValue>(Expression<Func<T, TValue>> field, Expression<Func<T, bool>> conditionExpression, SixnetDataOperationOptions options = null)
         {
             var minQueryable = conditionExpression.GetQueryable<T>()
-            .SelectFields(field.GetDataField(SixnetFieldFormatterNames.MIN));
+            .Select(field.GetDataField(SixnetFieldFormatterNames.MIN));
             return await MinAsync<TValue>(minQueryable, options).ConfigureAwait(false);
         }
 
@@ -540,7 +540,7 @@ namespace Sixnet.Development.Data.Client
         public async Task<TValue> SumAsync<T, TValue>(Expression<Func<T, TValue>> field, Expression<Func<T, bool>> conditionExpression, SixnetDataOperationOptions options = null)
         {
             var sumQueryable = conditionExpression.GetQueryable<T>()
-            .SelectFields(field.GetDataField(SixnetFieldFormatterNames.SUM));
+            .Select(field.GetDataField(SixnetFieldFormatterNames.SUM));
             return await SumAsync<TValue>(sumQueryable, options).ConfigureAwait(false);
         }
 
@@ -566,7 +566,7 @@ namespace Sixnet.Development.Data.Client
         public async Task<TValue> AvgAsync<T, TValue>(Expression<Func<T, TValue>> field, Expression<Func<T, bool>> conditionExpression, SixnetDataOperationOptions options = null)
         {
             var avgQueryable = conditionExpression.GetQueryable<T>()
-            .SelectFields(field.GetDataField(SixnetFieldFormatterNames.AVG));
+            .Select(field.GetDataField(SixnetFieldFormatterNames.AVG));
             return await AvgAsync<TValue>(avgQueryable, options).ConfigureAwait(false);
         }
 

@@ -384,7 +384,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        internal SixnetQueryableInfo SelectFields(params ISixnetField[] fields)
+        internal SixnetQueryableInfo Select(params ISixnetField[] fields)
         {
             if (!fields.IsNullOrEmpty())
             {
@@ -401,9 +401,9 @@ namespace Sixnet.Development.Queryable
         /// <typeparam name="T"></typeparam>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        internal SixnetQueryableInfo SelectFields<T>(params Expression<Func<T, dynamic>>[] fields)
+        internal SixnetQueryableInfo Select<T>(params Expression<Func<T, dynamic>>[] fields)
         {
-            return SelectFields(fields?.Select(f => SixnetExpressionHelper.GetDataField(f.Body)).ToArray());
+            return Select(fields?.Select(f => SixnetExpressionHelper.GetDataField(f.Body)).ToArray());
         }
 
         /// <summary>

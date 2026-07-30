@@ -41,5 +41,10 @@ namespace Sixnet.App
         /// Gets or sets the virtual path
         /// </summary>
         public string VirtualPath { get; set; }
+
+        /// <summary>
+        /// Whether enable license
+        /// </summary>
+        public bool EnableLicense {  get; set; }
     }
 }

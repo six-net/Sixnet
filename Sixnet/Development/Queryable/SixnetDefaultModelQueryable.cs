@@ -138,7 +138,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Max value</returns>
         public TValue Max<TValue>(Expression<Func<TModel, TValue>> field, Action<SixnetDataOperationOptions> configure = null)
         {
-            SelectFields(SixnetExpressionHelper.GetDataField(field, SixnetFieldFormatSetting.Create(SixnetFieldFormatterNames.MAX)));
+            Select(SixnetExpressionHelper.GetDataField(field, SixnetFieldFormatSetting.Create(SixnetFieldFormatterNames.MAX)));
             return Max<TValue>(configure);
         }
 
@@ -155,7 +155,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Min value</returns>
         public TValue Min<TValue>(Expression<Func<TModel, TValue>> field, Action<SixnetDataOperationOptions> configure = null)
         {
-            SelectFields(SixnetExpressionHelper.GetDataField(field, SixnetFieldFormatSetting.Create(SixnetFieldFormatterNames.MIN)));
+            Select(SixnetExpressionHelper.GetDataField(field, SixnetFieldFormatSetting.Create(SixnetFieldFormatterNames.MIN)));
             return Min<TValue>(configure);
         }
 
@@ -172,7 +172,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Sum value</returns>
         public TValue Sum<TValue>(Expression<Func<TModel, TValue>> field, Action<SixnetDataOperationOptions> configure = null)
         {
-            SelectFields(SixnetExpressionHelper.GetDataField(field, SixnetFieldFormatSetting.Create(SixnetFieldFormatterNames.SUM)));
+            Select(SixnetExpressionHelper.GetDataField(field, SixnetFieldFormatSetting.Create(SixnetFieldFormatterNames.SUM)));
             return Sum<TValue>(configure);
         }
 
@@ -189,7 +189,7 @@ namespace Sixnet.Development.Queryable
         /// <returns>Average value</returns>
         public TValue Avg<TValue>(Expression<Func<TModel, TValue>> field, Action<SixnetDataOperationOptions> configure = null)
         {
-            SelectFields(SixnetExpressionHelper.GetDataField(field, SixnetFieldFormatSetting.Create(SixnetFieldFormatterNames.AVG)));
+            Select(SixnetExpressionHelper.GetDataField(field, SixnetFieldFormatSetting.Create(SixnetFieldFormatterNames.AVG)));
             return Avg<TValue>(configure);
         }
 

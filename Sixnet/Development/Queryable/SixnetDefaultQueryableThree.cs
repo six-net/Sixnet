@@ -594,9 +594,9 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird> SelectFields(params ISixnetField[] fields)
+        public new ISixnetQueryable<TFirst, TSecond, TThird> Select(params ISixnetField[] fields)
         {
-            base.SelectFields(fields);
+            base.Select(fields);
             return this;
         }
 
@@ -605,18 +605,7 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird> SelectFields<TResult>(Expression<Func<TFirst, TResult>> fields)
-        {
-            IncludeExpressionFieldsCore(fields);
-            return this;
-        }
-
-        /// <summary>
-        /// Select fields
-        /// </summary>
-        /// <param name="fields">Fields</param>
-        /// <returns></returns>
-        public new ISixnetQueryable<TFirst, TSecond, TThird> SelectFields<TResult>(Expression<Func<TFirst, TSecond, TResult>> fields)
+        public new ISixnetQueryable<TFirst, TSecond, TThird> Select<TResult>(Expression<Func<TFirst, TResult>> fields)
         {
             IncludeExpressionFieldsCore(fields);
             return this;
@@ -627,7 +616,18 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <param name="fields">Fields</param>
         /// <returns></returns>
-        public ISixnetQueryable<TFirst, TSecond, TThird> SelectFields<TResult>(Expression<Func<TFirst, TSecond, TThird, TResult>> fields)
+        public new ISixnetQueryable<TFirst, TSecond, TThird> Select<TResult>(Expression<Func<TFirst, TSecond, TResult>> fields)
+        {
+            IncludeExpressionFieldsCore(fields);
+            return this;
+        }
+
+        /// <summary>
+        /// Select fields
+        /// </summary>
+        /// <param name="fields">Fields</param>
+        /// <returns></returns>
+        public ISixnetQueryable<TFirst, TSecond, TThird> Select<TResult>(Expression<Func<TFirst, TSecond, TThird, TResult>> fields)
         {
             IncludeExpressionFieldsCore(fields);
             return this;
