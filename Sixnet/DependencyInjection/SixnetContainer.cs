@@ -540,14 +540,6 @@ namespace Sixnet.DependencyInjection
                     {
                         SixnetObjectIdHelper.InitAppObjectIds();
                     }
-                    if (SixnetApplication.Options.EnableLicense)
-                    {
-                        var license = SixnetApplication.Options.GetLicenseFunc?.Invoke();
-                        SixnetDirectThrower.ThrowAppException(license == null, "Not set license");
-                        var validateResult = license.Validate();
-                        SixnetDirectThrower.ThrowAppException(!validateResult.IsAvailable, "License is not available");
-                        SixnetApplication.Current.License = license;
-                    }
                     options.ApplicationStarted(options);
                 });
 

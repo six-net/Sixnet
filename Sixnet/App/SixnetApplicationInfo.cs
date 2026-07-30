@@ -1,8 +1,5 @@
 ﻿// "Company © 2025. All rights reserved."
 
-using Sixnet.Environments;
-using Sixnet.Security.License;
-
 namespace Sixnet.App
 {
     /// <summary>
@@ -64,10 +61,5 @@ namespace Sixnet.App
         {
             return $"{Name}{Env}";
         }
-
-        /// <summary>
-        /// Gets or sets the license
-        /// </summary>
-        public SixnetLicenseInfo License {  get; set; }
     }
 }

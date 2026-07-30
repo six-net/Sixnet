@@ -4,7 +4,6 @@ using AutoMapper;
 
 using Sixnet.DependencyInjection;
 using Sixnet.Mapper;
-using Sixnet.Security.License;
 
 namespace Sixnet.App
 {
@@ -42,15 +41,5 @@ namespace Sixnet.App
         /// Gets or sets the virtual path
         /// </summary>
         public string VirtualPath { get; set; }
-
-        /// <summary>
-        /// Whether enable license
-        /// </summary>
-        public bool EnableLicense {  get; set; }
-
-        /// <summary>
-        /// Get license func
-        /// </summary>
-        public Func<SixnetLicenseInfo> GetLicenseFunc { get; set; }
     }
 }
