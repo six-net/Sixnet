@@ -13,6 +13,7 @@ using Sixnet.Development.Entity;
 using Sixnet.Development.Queryable;
 using Sixnet.Exceptions;
 using Sixnet.Logging;
+using Sixnet.Model;
 using Sixnet.Reflection;
 
 namespace Sixnet.Development.Data.Database
@@ -982,9 +983,11 @@ namespace Sixnet.Development.Data.Database
                             , SixnetFieldLocation.Output);
                         parameterNames.Add($"({valParameterName})");
                     }
-                    var constantTargetScript = $"(VALUES {string.Join(",", parameterNames)}) t(VALUE)";
+                    var outValueField = SixnetDataField.Create("*", originalQueryable.GetModelType(), 0, null, "*");
+                    var outTablePetName = context.GetTablePetName(originalQueryable, outValueField.ModelType, outValueField.ModelTypeIndex);
+                    var constantTargetScript = $"(VALUES {string.Join(",", parameterNames)}) {outTablePetName}(VALUE)";
 
-                    return SixnetQueryDatabaseStatement.Create(constantTargetScript, null);
+                    return SixnetQueryDatabaseStatement.Create(constantTargetScript, null, new List<ISixnetField>(1) { outValueField });
                 default:
                     var tableNames = context.GetTableNames(originalQueryable, location);
                     var complexTarget = false;

@@ -895,6 +895,7 @@ namespace Sixnet.Development.Queryable
             newQueryableInfo._finallyFieldsCache = new Dictionary<string, List<ISixnetField>>(_finallyFieldsCache);
             newQueryableInfo._validationFuncDict = new Dictionary<Guid, dynamic>(_validationFuncDict);
             newQueryableInfo.SpecifyTables = SpecifyTables == null ? null : new List<SixnetDatabaseObjectName>(SpecifyTables);
+
             return newQueryableInfo;
         }
 
@@ -954,7 +955,8 @@ namespace Sixnet.Development.Queryable
                 OutputType = OutputType,
                 IsDistincted = IsDistincted,
                 Negation = Negation,
-                IsReadOnly = IsReadOnly
+                IsReadOnly = IsReadOnly,
+                TargetConstantValue = TargetConstantValue,
             };
             return newQueryableContext;
         }

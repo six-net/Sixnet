@@ -109,7 +109,7 @@ namespace Sixnet.Development.Data.Database
                 return new List<SixnetDatabaseObjectName>(0);
             }
             var tableNameRegex = new Regex(@$"^{parameter.RootTableName.FullName}_\d+$", RegexOptions.IgnoreCase);
-            return parameter.AllTableNames?.Where(tn => !string.IsNullOrWhiteSpace(tn.Name) && tableNameRegex.IsMatch($"{tn.Name}")).ToList();
+            return parameter.AllTableNames?.Where(tn => !string.IsNullOrWhiteSpace(tn.Name) && tableNameRegex.IsMatch($"{tn.FullName}")).ToList();
         }
 
         /// <summary>
