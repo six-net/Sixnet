@@ -37,7 +37,7 @@ namespace Sixnet.Development.Queryable
         /// <summary>
         /// Gets or sets the criterion operator
         /// </summary>
-        public SixnetCriterionOperator Operator { get; internal set; }
+        public SixnetCriterionOperator Operator { get; internal set; } = SixnetCriterionOperator.None;
 
         /// <summary>
         /// Gets or sets the right field

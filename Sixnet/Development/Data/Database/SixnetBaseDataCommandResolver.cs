@@ -1223,8 +1223,6 @@ namespace Sixnet.Development.Data.Database
         /// <exception cref="SixnetException"></exception>
         protected virtual string TranslateSubquery(SixnetDataCommandResolveContext context, ISixnetQueryable subqueryable)
         {
-            SixnetException.ThrowIf(subqueryable.Info.SelectedFields.IsNullOrEmpty(), "Subqueryable must set query fields");
-
             var subqueryTranslationResult = ExecuteTranslation(context, subqueryable, SixnetQueryableLocation.Subquery, true);
             var subqueryStatement = GenerateQueryStatementCore(context, subqueryTranslationResult, SixnetQueryableLocation.Subquery);
             return subqueryStatement.Script;

@@ -1038,8 +1038,6 @@ namespace Sixnet.Development.Data.Database
         /// <exception cref="SixnetException"></exception>
         protected virtual async Task<string> TranslateSubqueryAsync(SixnetDataCommandResolveContext context, ISixnetQueryable subqueryable)
         {
-            SixnetException.ThrowIf(subqueryable.Info.SelectedFields.IsNullOrEmpty(), "Subqueryable must set query fields");
-
             var subqueryTranslationResult = await ExecuteTranslationAsync(context, subqueryable, SixnetQueryableLocation.Subquery, true).ConfigureAwait(false);
             var subqueryStatement = await GenerateQueryStatementCoreAsync(context, subqueryTranslationResult, SixnetQueryableLocation.Subquery).ConfigureAwait(false);
             return subqueryStatement.Script;

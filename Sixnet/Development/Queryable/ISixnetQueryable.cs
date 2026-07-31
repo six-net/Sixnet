@@ -444,6 +444,18 @@ namespace Sixnet.Development.Queryable
         /// <returns></returns>
         bool GreaterThanOrEqual(object value);
 
+        /// <summary>
+        /// Has data
+        /// </summary>
+        /// <returns></returns>
+        bool Exists();
+
+        /// <summary>
+        /// Not has data
+        /// </summary>
+        /// <returns></returns>
+        bool NotExists();
+
         #endregion
 
         #region Filter

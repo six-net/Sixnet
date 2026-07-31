@@ -431,5 +431,13 @@ namespace Sixnet.Development.Data.Field.Formatting
         /// String last index of nay
         /// </summary>
         public const string STRING_LAST_INDEX_OF_ANY = FormatterNamePrefix + "STRING_LAST_INDEX_OF_ANY";
+        /// <summary>
+        /// Exists
+        /// </summary>
+        public const string EXISTS = FormatterNamePrefix + "EXISTS";
+        /// <summary>
+        /// Not exists
+        /// </summary>
+        public const string NOT_EXISTS = FormatterNamePrefix + "NOT_EXISTS";
     }
 }

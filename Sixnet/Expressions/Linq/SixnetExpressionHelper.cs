@@ -749,7 +749,7 @@ namespace Sixnet.Expressions.Linq
         }
 
         /// <summary>
-        /// 
+        /// Get member access criterion
         /// </summary>
         /// <param name="parameterIndexes"></param>
         /// <param name="connector"></param>
@@ -798,7 +798,7 @@ namespace Sixnet.Expressions.Linq
                     valueExpression = methodCallExpression.Arguments[0];
                     criterion = GetIEnumerableMethodCriterion(parameterIndexes, methodCallExpression.Method.Name, connector, fieldExpression, valueExpression);
                 }
-                else if (methodType == typeof(SixnetFunc) || methodType == typeof(SixnetSixnetFieldExtensions))
+                else if (methodType == typeof(SixnetDbFunc) || methodType == typeof(SixnetSixnetFieldExtensions))
                 {
                     fieldExpression = methodCallExpression.Arguments[0];
                     criterion = GetSixnetQueryableExtendMethodCriterion(parameterIndexes, methodCallExpression.Method.Name, connector, fieldExpression);
@@ -822,9 +822,7 @@ namespace Sixnet.Expressions.Linq
                 }
                 else if (typeof(ISixnetQueryable).IsAssignableFrom(instanceType)) // subquery
                 {
-                    valueExpression = methodCallExpression.Object;
-                    fieldExpression = methodCallExpression.Arguments[0];
-                    criterion = GetSubqueryMethodCriterion(parameterIndexes, methodCallExpression.Method.Name, connector, fieldExpression, valueExpression);
+                    criterion = GetSubqueryMethodCriterion(parameterIndexes, connector, methodCallExpression);
                 }
             }
 
@@ -916,19 +914,26 @@ namespace Sixnet.Expressions.Linq
         /// <param name="methodName">Method name</param>
         /// <param name="field">Expression</param>
         /// <returns>criterion</returns>
-        internal static ISixnetCondition GetSubqueryMethodCriterion(Dictionary<string, int> parameterIndexes, string methodName, SixnetCriterionConnector connector, Expression field, Expression subquery)
+        internal static ISixnetCondition GetSubqueryMethodCriterion(Dictionary<string, int> parameterIndexes, SixnetCriterionConnector connector, MethodCallExpression methodCallExpression)
         {
-            var leftField = GetDataField(field, parameterIndexes);
-            if (leftField == null)
+            var valueExpression = methodCallExpression.Object;
+            var fieldExpression = !methodCallExpression.Arguments.IsNullOrEmpty() ? methodCallExpression.Arguments[0] : null;
+            ISixnetField leftField = null;
+            if (fieldExpression != null)
             {
-                return null;
+                leftField = GetDataField(fieldExpression, parameterIndexes);
+                if (leftField == null)
+                {
+                    return null;
+                }
             }
             ISixnetField rightField = null;
-            if (subquery != null)
+            if (valueExpression != null)
             {
-                var value = CompileExpressionValue(subquery) as ISixnetQueryable;
+                var value = CompileExpressionValue(valueExpression) as ISixnetQueryable;
                 rightField = SixnetQueryableField.Create(value);
             }
+            var methodName = methodCallExpression.Method.Name;
             var criterionOperator = SixnetCriterionOperator.Equal;
             switch (methodName)
             {
@@ -956,6 +961,14 @@ namespace Sixnet.Expressions.Linq
                 case "GreaterThanOrEqual":
                     criterionOperator = SixnetCriterionOperator.GreaterThanOrEqual;
                     break;
+                case "Exists":
+                    criterionOperator = SixnetCriterionOperator.None;
+                    rightField.FormatSetting = SixnetFieldFormatSetting.Create(SixnetFieldFormatterNames.EXISTS);
+                    break;
+                case "NotExists":
+                    criterionOperator = SixnetCriterionOperator.None;
+                    rightField.FormatSetting = SixnetFieldFormatSetting.Create(SixnetFieldFormatterNames.NOT_EXISTS);
+                    break;
                 default:
                     throw new NotSupportedException(methodName);
             }
@@ -982,7 +995,7 @@ namespace Sixnet.Expressions.Linq
                 "DbIsNull" => SixnetCriterionOperator.IsNull,
                 "NotNull" => SixnetCriterionOperator.NotNull,
                 "DbNotNull" => SixnetCriterionOperator.NotNull,
-                _ => throw new NotSupportedException(methodName),
+                _ => SixnetCriterionOperator.None,
             };
             return CreateCriterion(connector, criterionOperator, leftField, null);
         }
@@ -1355,7 +1368,14 @@ namespace Sixnet.Expressions.Linq
                     var value = CompileExpressionValue(fieldExpression);
                     if (value != null)
                     {
-                        dataField = SixnetConstantField.Create(value);
+                        if (value is ISixnetQueryable)
+                        {
+                            dataField = SixnetQueryableField.Create(value);
+                        }
+                        else
+                        {
+                            dataField = SixnetConstantField.Create(value);
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -1741,7 +1761,7 @@ namespace Sixnet.Expressions.Linq
                         {
                             #region SixnetFunc
 
-                            if (methodDeclaringType == typeof(SixnetFunc))
+                            if (methodDeclaringType == typeof(SixnetDbFunc))
                             {
                                 switch (methodName)
                                 {
@@ -1798,7 +1818,7 @@ namespace Sixnet.Expressions.Linq
 
                             #endregion
 
-                            #region SixnetFieldExtensions
+                            #region SixnetSixnetFieldExtensions
 
                             else if (methodDeclaringType == typeof(SixnetSixnetFieldExtensions))
                             {

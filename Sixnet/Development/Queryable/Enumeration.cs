@@ -8,6 +8,7 @@ namespace Sixnet.Development.Queryable
     [Serializable]
     public enum SixnetCriterionOperator
     {
+        None,
         Equal,              //=  
         NotEqual,      //<>  
         LessThanOrEqual,    //<=  

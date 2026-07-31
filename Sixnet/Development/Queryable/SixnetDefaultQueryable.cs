@@ -1334,6 +1334,24 @@ namespace Sixnet.Development.Queryable
             return true;
         }
 
+        /// <summary>
+        /// Has data
+        /// </summary>
+        /// <returns></returns>
+        public bool Exists()
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// Not has data
+        /// </summary>
+        /// <returns></returns>
+        public bool NotExists()
+        {
+            return true;
+        }
+
         #endregion
 
         #region Data access

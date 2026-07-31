@@ -17,11 +17,31 @@ namespace Sixnet.Development.Queryable
         /// <summary>
         /// Create a new queryable instance
         /// </summary>
+        /// <returns></returns>
+        public static ISixnetQueryable Create()
+        {
+            return Create(null);
+        }
+
+        /// <summary>
+        /// Create a new queryable instance
+        /// </summary>
         /// <param name="sourceQueryable">Source queryable</param>
         /// <returns></returns>
         public static ISixnetQueryable Create(ISixnetQueryable sourceQueryable = null)
         {
             return new SixnetDefaultQueryable(sourceQueryable).SetModelType(typeof(ExpandoObject));
+        }
+
+        /// <summary>
+        /// Create a new queryable instance
+        /// </summary>
+        /// <typeparam name="TFirst"></typeparam>
+        /// <returns></returns>
+        public static ISixnetQueryable<TFirst> Create<TFirst>()
+        {
+            ISixnetQueryable sourceQueryable = null;
+            return Create<TFirst>(sourceQueryable);
         }
 
         /// <summary>

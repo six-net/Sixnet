@@ -2,7 +2,7 @@
 
 namespace Sixnet.Development.Queryable
 {
-    public static class SixnetFunc
+    public static class SixnetDbFunc
     {
         /// <summary>
         /// Max func
