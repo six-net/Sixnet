@@ -2,6 +2,8 @@
 
 using System.Data;
 
+using Sixnet.Logging;
+
 namespace Sixnet.Development.Data.Database
 {
     /// <summary>
@@ -9,6 +11,11 @@ namespace Sixnet.Development.Data.Database
     /// </summary>
     public class SixnetExecutionDatabaseStatement : SixnetDatabaseStatement
     {
+        private SixnetExecutionDatabaseStatement()
+        {
+
+        }
+
         /// <summary>
         /// Indicates whether must arrect data
         /// </summary>
@@ -33,6 +40,16 @@ namespace Sixnet.Development.Data.Database
             {
                 return HasPreScript || ScriptType != CommandType.Text || MustAffectData || !string.IsNullOrWhiteSpace(IncrScript);
             }
+        }
+
+        public static SixnetExecutionDatabaseStatement Create(SixnetDatabaseType databaseType, Action<SixnetExecutionDatabaseStatement> configure)
+        {
+            var data = new SixnetExecutionDatabaseStatement();
+            configure?.Invoke(data);
+
+            SixnetFrameworkLogManager.LogDatabaseExecutionStatement(data.GetType(), databaseType, data);
+
+            return data;
         }
     }
 }

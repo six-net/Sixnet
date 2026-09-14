@@ -23,34 +23,22 @@ namespace Sixnet.Development.Entity
         public long Id { get; set; }
 
         /// <summary>
-        /// Record app version
+        /// App version
         /// </summary>
         [SixnetEntityField(Length = 30)]
-        public string RecordAppVersion { get; set; }
+        public string AppVersion { get; set; }
 
         /// <summary>
-        /// Record app version id
+        /// App version id
         /// </summary>
         [SixnetEntityField()]
-        public long RecordAppVersionId { get; set; }
-
-        /// <summary>
-        /// Current app version
-        /// </summary>
-        [SixnetEntityField(Length = 30)]
-        public string CurrentAppVersion { get; set; }
-
-        /// <summary>
-        /// Current app version id
-        /// </summary>
-        [SixnetEntityField()]
-        public long CurrentAppVersionId { get; set; }
+        public long AppVersionId { get; set; }
 
         /// <summary>
         /// Execute count
         /// </summary>
         [SixnetEntityField()]
-        public int ExecuteCount {  get; set; }
+        public int ExecutionCount {  get; set; }
 
         /// <summary>
         /// Note

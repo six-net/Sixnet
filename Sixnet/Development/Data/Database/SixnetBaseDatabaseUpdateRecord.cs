@@ -60,6 +60,11 @@ namespace Sixnet.Development.Data.Database
         public static string SystemUserDisplayName { get; set; }
 
         /// <summary>
+        /// Unit of work
+        /// </summary>
+        protected SixnetUnitOfWorkExecutionContext UnitOfWork {  get; private set; }
+
+        /// <summary>
         /// Update
         /// </summary>
         /// <param name="context"></param>
@@ -69,18 +74,18 @@ namespace Sixnet.Development.Data.Database
             Context = context;
             await SixnetUnitOfWork.ExecuteAsync(new List<SixnetDatabaseServer>() { context.UpdateParameter.DatabaseServer }, async workContext =>
             {
+                UnitOfWork = workContext;
                 DataClient = SixnetUnitOfWork.Current.DataClient;
                 await ExecuteUpdateAsync().ConfigureAwait(false);
                 await DataClient.CreateTableAsync(typeof(SixnetAppUpdateRecordEntity)).ConfigureAwait(false);
-                if (Version > context.CurrentVersion)
-                {
-                    context.CurrentVersion = Version;
-                }
+
+                context.AddNewRecord(this);
+
                 var recordRepository = SixnetContainer.GetService<ISixnetRepository<SixnetAppUpdateRecordEntity>>();
                 var currentRecord = await recordRepository.GetAsync(c => c.Id == Id).ConfigureAwait(false);
                 if (currentRecord != null)
                 {
-                    currentRecord.ExecuteCount++;
+                    currentRecord.ExecutionCount++;
                     await recordRepository.UpdateAsync(currentRecord).ConfigureAwait(false);
                 }
                 else
@@ -88,11 +93,9 @@ namespace Sixnet.Development.Data.Database
                     await recordRepository.AddAsync(new SixnetAppUpdateRecordEntity()
                     {
                         Id = Id,
-                        CurrentAppVersion = context.CurrentVersion.ToString(),
-                        CurrentAppVersionId = context.CurrentVersion.VersionToLong(),
-                        RecordAppVersion = Version.ToString(),
-                        RecordAppVersionId = Version.VersionToLong(),
-                        ExecuteCount = 1,
+                        AppVersion = Version.ToString(),
+                        AppVersionId = Version.VersionToLong(),
+                        ExecutionCount = 1,
                         Note = Note
                     }).ConfigureAwait(false);
                 }
@@ -110,6 +113,7 @@ namespace Sixnet.Development.Data.Database
             Context = context;
             await SixnetUnitOfWork.ExecuteAsync(new List<SixnetDatabaseServer>() { context.UpdateParameter.DatabaseServer }, async workContext =>
             {
+                UnitOfWork = workContext;
                 DataClient = SixnetUnitOfWork.Current.DataClient;
                 await ExecuteRollbackAsync().ConfigureAwait(false);
                 await DataClient.CreateTableAsync(typeof(SixnetAppUpdateRecordEntity)).ConfigureAwait(false);
@@ -136,8 +140,7 @@ namespace Sixnet.Development.Data.Database
         /// <param name="message"></param>
         protected void ReportMessage(string message)
         {
-            Context?.UpdateParameter?.ReportProcess?.Invoke(SixnetUpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Message, Context.UpdateParameter
-                , this, Context.CurrentVersion, Context.CurrentRecordId, null, message));
+            Context?.UpdateParameter?.ReportProcess?.Invoke(SixnetUpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Message, Context?.UpdateParameter, Context, this, null, message));
         }
 
         /// <summary>

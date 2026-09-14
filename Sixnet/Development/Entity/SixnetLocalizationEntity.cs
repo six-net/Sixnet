@@ -19,7 +19,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Code
         /// </summary>
-        [SixnetEntityField(Role = SixnetFieldRole.PrimaryKey, Length = 1000)]
+        [SixnetEntityField(Role = SixnetFieldRole.PrimaryKey, Length = 700)]
         public string Code { get; set; }
 
         /// <summary>

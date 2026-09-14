@@ -39,4 +39,37 @@ namespace Sixnet.Development.Data.ParameterHandler.Handler
             return originalParameter;
         }
     }
+
+    public class SixnetDateTimeOffsetUTCParameterHandler : ISixnetDataCommandParameterHandler
+    {
+        public SixnetDataCommandParameterItem Parse(SixnetDataCommandParameterItem originalParameter)
+        {
+            if (originalParameter != null)
+            {
+                if (originalParameter.Value is IEnumerable values)
+                {
+                    List<DateTimeOffset> dateTimeValues = new();
+                    foreach (var val in values)
+                    {
+                        if (val is DateTimeOffset offsetVal)
+                        {
+                            dateTimeValues.Add(offsetVal.ToUniversalTime());
+                        }
+                        else
+                        {
+                            return originalParameter;
+                        }
+                    }
+                    originalParameter.DbType = null;
+                    originalParameter.Value = dateTimeValues;
+                }
+                else if (originalParameter.Value is DateTimeOffset || originalParameter.DbType == DbType.DateTimeOffset)
+                {
+                    originalParameter.DbType = DbType.DateTimeOffset;
+                    originalParameter.Value = ((DateTimeOffset)originalParameter.Value).ToUniversalTime();
+                }
+            }
+            return originalParameter;
+        }
+    }
 }

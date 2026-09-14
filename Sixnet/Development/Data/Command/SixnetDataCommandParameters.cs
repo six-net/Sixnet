@@ -52,7 +52,40 @@ namespace Sixnet.Development.Data.Command
             {
                 return;
             }
+
+            //if (parameter.DbType == null)
+            //{
+            //    parameter.DbType = parameter.Value == null ? null : parameter.Value.GetType().GetDbType();
+            //}
+            //SetParameterSize(parameter);
             Items[parameter.Name] = parameter;
+        }
+
+        void SetParameterSize(SixnetDataCommandParameterItem parameter)
+        {
+            if (parameter.DbType == null)
+            {
+                return;
+            }
+
+            switch (parameter.Value)
+            {
+                case string str:
+                    parameter.Size = str.Length;
+                    break;
+                case byte[] bytes:
+                    parameter.Size = bytes.Length;
+                    break;
+                case char[] chars:
+                    parameter.Size = chars.Length;
+                    break;
+                case Array array when array.GetType().GetElementType() == typeof(byte):
+                    parameter.Size = array.Length;
+                    break;
+                default:
+                    parameter.Size = 8;
+                    break;
+            }
         }
 
         /// <summary>
@@ -215,7 +248,7 @@ namespace Sixnet.Development.Data.Command
         /// </summary>
         /// <param name="databaseType">Database type</param>
         /// <returns></returns>
-        public DynamicParameters ConvertToDynamicParameters(SixnetDatabaseType databaseType)
+        public DynamicParameters ConvertToDynamicParameters(params SixnetDatabaseType[] databaseTypes)
         {
             if (Items.IsNullOrEmpty())
             {
@@ -224,7 +257,15 @@ namespace Sixnet.Development.Data.Command
             DynamicParameters dynamicParameters = new DynamicParameters();
             foreach (var item in Items)
             {
-                var parameter = SixnetDataManager.HandleParameter(databaseType, item.Value);
+
+                var parameter = item.Value;
+                if (!databaseTypes.IsNullOrEmpty())
+                {
+                    foreach (var databaseType in databaseTypes)
+                    {
+                        parameter = SixnetDataManager.HandleParameter(databaseType, parameter);
+                    }
+                }
                 dynamicParameters.Add(parameter.Name, parameter.Value
                                     , parameter.DbType, parameter.ParameterDirection
                                     , parameter.Size, parameter.Precision

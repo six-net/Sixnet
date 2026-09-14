@@ -46,17 +46,19 @@ namespace Sixnet.Development.Data.Database
         /// <summary>
         /// Message
         /// </summary>
-        public string Message {  get; set; }
+        public string Message { get; set; }
 
-        public static SixnetUpdateDatabaseProcess Create(UpdateDatabaseProcessState state, SixnetUpdateDatabaseParameter parameter, ISixnetDatabaseUpdateRecord record = null
-            , Version currentVersion = null, long? currentRecordId = null, Exception ex = null, string message = null)
+        public static SixnetUpdateDatabaseProcess Create(UpdateDatabaseProcessState state, SixnetUpdateDatabaseParameter parameter
+            , SixnetUpdateDatabaseContext updateContext = null, ISixnetDatabaseUpdateRecord record = null
+            , Exception ex = null, string message = null)
         {
+            var maxVersion = updateContext?.GetMaxVersion();
             return new SixnetUpdateDatabaseProcess()
             {
                 Record = record,
                 State = state,
-                CurrentVersion = currentVersion,
-                CurrentRecordId = currentRecordId,
+                CurrentVersion = maxVersion,
+                CurrentRecordId = updateContext?.GetVersionMaxRecordId(maxVersion),
                 Parameter = parameter,
                 Exception = ex,
                 Message = message

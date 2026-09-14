@@ -500,6 +500,7 @@ namespace Sixnet.Development.Data
         void AddDefaultParameterHandler()
         {
             var datetimeOffsetHandler = new SixnetDateTimeOffsetParameterHandler();
+            var datetimeOffsetUtcHandler = new SixnetDateTimeOffsetUTCParameterHandler();
             var boolToIntegerHandler = new SixnetBooleanToIntegerParameterHandler();
             var guidHandler = new SixnetGuidFormattingParameterHandler();
             var sbyteHandler = new SixnetSByteToShortParameterHandler();
@@ -563,6 +564,8 @@ namespace Sixnet.Development.Data
 
             #region PostgreSQL
 
+            //SByte
+            AddParameterHandler(SixnetDatabaseType.PostgreSQL, DbType.SByte, sbyteHandler);
             //UInt
             AddParameterHandler(SixnetDatabaseType.PostgreSQL, DbType.UInt32, uintHandler);
             //ULong
@@ -574,6 +577,26 @@ namespace Sixnet.Development.Data
             AddParameterHandler(SixnetDatabaseType.PostgreSQL, DbType.AnsiStringFixedLength, nullCharHandler);
             AddParameterHandler(SixnetDatabaseType.PostgreSQL, DbType.String, nullCharHandler);
             AddParameterHandler(SixnetDatabaseType.PostgreSQL, DbType.StringFixedLength, nullCharHandler);
+            AddParameterHandler(SixnetDatabaseType.PostgreSQL, DbType.DateTimeOffset, datetimeOffsetUtcHandler);
+
+            #endregion
+
+            #region Kingbase
+
+            //SByte
+            AddParameterHandler(SixnetDatabaseType.Kingbase, DbType.SByte, sbyteHandler);
+            //UInt
+            AddParameterHandler(SixnetDatabaseType.Kingbase, DbType.UInt32, uintHandler);
+            //ULong
+            AddParameterHandler(SixnetDatabaseType.Kingbase, DbType.UInt64, ulongHandler);
+            //UShort
+            AddParameterHandler(SixnetDatabaseType.Kingbase, DbType.UInt16, ushortHandler);
+            //null char
+            AddParameterHandler(SixnetDatabaseType.Kingbase, DbType.AnsiString, nullCharHandler);
+            AddParameterHandler(SixnetDatabaseType.Kingbase, DbType.AnsiStringFixedLength, nullCharHandler);
+            AddParameterHandler(SixnetDatabaseType.Kingbase, DbType.String, nullCharHandler);
+            AddParameterHandler(SixnetDatabaseType.Kingbase, DbType.StringFixedLength, nullCharHandler);
+            AddParameterHandler(SixnetDatabaseType.Kingbase, DbType.DateTimeOffset, datetimeOffsetUtcHandler);
 
             #endregion
         }
@@ -819,33 +842,6 @@ namespace Sixnet.Development.Data
         }
 
         /// <summary>
-        /// Get default schema
-        /// </summary>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        string GetDatabaseDefaultSchema(SixnetDataCommandExecutionContext context)
-        {
-            if (context?.DatabaseConnection == null)
-            {
-                return string.Empty;
-            }
-            _databaseDefaultSchemas.TryGetValue(context.DatabaseConnection.DatabaseServer.DatabaseType, out var schema);
-            if (string.IsNullOrWhiteSpace(schema))
-            {
-                schema = context.DatabaseConnection.DatabaseServer.DatabaseType switch
-                {
-                    SixnetDatabaseType.SQLServer => "dbo",
-                    SixnetDatabaseType.PostgreSQL => "public",
-                    SixnetDatabaseType.Oracle => context.DatabaseConnection.Meta.UserName,
-                    SixnetDatabaseType.DaMeng => context.DatabaseConnection.Meta.UserName,
-                    SixnetDatabaseType.Kingbase => "public",
-                    _ => string.Empty,
-                };
-            }
-            return schema;
-        }
-
-        /// <summary>
         /// Configure database schema
         /// </summary>
         /// <param name="configure"></param>
@@ -853,6 +849,35 @@ namespace Sixnet.Development.Data
         public void ConfigureDatabaseSchema(Func<SixnetDataCommandExecutionContext, SixnetEntityConfiguration, string> configure)
         {
             _getDatabaseSchemaFunc = configure;
+        }
+
+        /// <summary>
+        /// Get database default schema
+        /// </summary>
+        /// <param name="conn"></param>
+        /// <returns></returns>
+        internal string GetDatabaseDefaultSchema(SixnetDatabaseConnection conn, SixnetDatabaseType? realDatabaseType = null)
+        {
+            if (conn?.DatabaseServer == null)
+            {
+                return string.Empty;
+            }
+            var databaseType = realDatabaseType ?? conn.DatabaseServer.DatabaseType;
+            _databaseDefaultSchemas.TryGetValue(databaseType, out var schema);
+            if (string.IsNullOrWhiteSpace(schema))
+            {
+                schema = databaseType switch
+                {
+                    SixnetDatabaseType.SQLServer => "dbo",
+                    SixnetDatabaseType.PostgreSQL => "public",
+                    SixnetDatabaseType.Oracle => conn.Meta.UserName,
+                    SixnetDatabaseType.DaMeng => conn.Meta.UserName,
+                    SixnetDatabaseType.Kingbase => "public",
+                    SixnetDatabaseType.MySQL => conn.DbConnection.Database,
+                    _ => string.Empty,
+                };
+            }
+            return schema;
         }
 
         /// <summary>
@@ -865,7 +890,7 @@ namespace Sixnet.Development.Data
             var schema = _getDatabaseSchemaFunc?.Invoke(context, entityConfiguration);
             if (string.IsNullOrWhiteSpace(schema))
             {
-                schema = GetDatabaseDefaultSchema(context);
+                schema = GetDatabaseDefaultSchema(context.DatabaseConnection);
             }
             return schema;
         }

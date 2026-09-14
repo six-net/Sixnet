@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Sixnet.Development.Data.Database
 {
-    public struct SixnetDatabaseObjectName: IComparable<SixnetDatabaseObjectName>
+    public class SixnetDatabaseObjectName: IComparable<SixnetDatabaseObjectName>
     {
         /// <summary>
         /// Gets or sets the table name

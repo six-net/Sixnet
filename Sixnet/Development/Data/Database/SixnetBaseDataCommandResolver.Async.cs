@@ -1,5 +1,6 @@
 ﻿// "Company © 2025. All rights reserved."
 
+using System.Collections;
 using System.Data;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ using Sixnet.Development.Data.Field.Formatting;
 using Sixnet.Development.Entity;
 using Sixnet.Development.Queryable;
 using Sixnet.Exceptions;
+using Sixnet.Reflection;
 
 namespace Sixnet.Development.Data.Database
 {
@@ -70,7 +72,7 @@ namespace Sixnet.Development.Data.Database
                 var queryable = queryableTranResult.GetOriginalQueryable();
                 commandType = GetCommandType(queryable.Info.ScriptType);
             }
-            var statement = SixnetQueryDatabaseStatement.Create(commandScriptBuilder.ToString(), groupParameters);
+            var statement = SixnetQueryDatabaseStatement.Create(DatabaseType, SixnetQueryableLocation.Top, commandScriptBuilder.ToString(), groupParameters);
             statement.ScriptType = commandType;
             return statement;
         }
@@ -166,9 +168,7 @@ namespace Sixnet.Development.Data.Database
             //parameter
             var parameters = context.GetParameters();
 
-            //log script
-            LogScript(sqlStatement, parameters);
-            return SixnetQueryDatabaseStatement.Create(sqlStatement, context.GetParameters());
+            return SixnetQueryDatabaseStatement.Create(DatabaseType, SixnetQueryableLocation.Top, sqlStatement, context.GetParameters());
         }
 
         /// <summary>
@@ -226,13 +226,15 @@ namespace Sixnet.Development.Data.Database
                 {
                     commandScriptBuilder.Append($"SELECT {incrScriptBuilder.ToString().Trim(',')};");
                 }
-                var statement = new SixnetExecutionDatabaseStatement()
+
+                var statement = SixnetExecutionDatabaseStatement.Create(DatabaseType, data =>
                 {
-                    Script = commandScriptBuilder.ToString(),
-                    ScriptType = scriptType,
-                    MustAffectData = mustAffectData,
-                    Parameters = groupParameters
-                };
+                    data.Script = commandScriptBuilder.ToString();
+                    data.ScriptType = scriptType;
+                    data.MustAffectData = mustAffectData;
+                    data.Parameters = groupParameters;
+                });
+
                 appendedStatementCount = 0;
                 commandScriptBuilder.Clear();
                 incrScriptBuilder.Clear();
@@ -240,9 +242,6 @@ namespace Sixnet.Development.Data.Database
                 mustAffectData = false;
                 scriptType = CommandType.Text;
                 commandResolveContext.Reset();
-
-                //Trace log
-                LogExecutionStatement(statement);
 
                 return statement;
             }
@@ -313,14 +312,14 @@ namespace Sixnet.Development.Data.Database
             //Get script statement
             SixnetExecutionDatabaseStatement GetScriptStatement()
             {
-                return new SixnetExecutionDatabaseStatement()
+                return SixnetExecutionDatabaseStatement.Create(DatabaseType, data =>
                 {
-                    Script = command.Script,
-                    Parameters = ConvertParameter(command.ScriptParameters),
-                    ScriptType = GetCommandType(command),
-                    MustAffectData = command.Options?.MustAffectData ?? false,
-                    HasPreScript = true
-                };
+                    data.Script = command.Script;
+                    data.Parameters = ConvertParameter(command.ScriptParameters);
+                    data.ScriptType = GetCommandType(command);
+                    data.MustAffectData = command.Options?.MustAffectData ?? false;
+                    data.HasPreScript = true;
+                });
             }
 
             if (command.ExecutionMode == SixnetCommandExecutionMode.Script)
@@ -614,13 +613,19 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="migrationCommand">Migration command</param>
         /// <returns></returns>
-        protected abstract Task<List<SixnetExecutionDatabaseStatement>> GetCreateTableStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand);
+        protected virtual Task<List<SixnetExecutionDatabaseStatement>> GetCreateTableStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand)
+        {
+            return Task.FromResult(GetCreateTableStatements(migrationCommand));
+        }
 
         #endregion
 
         #region Get rename table statements
 
-        protected abstract Task<List<SixnetExecutionDatabaseStatement>> GetRenameTableStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand);
+        protected virtual Task<List<SixnetExecutionDatabaseStatement>> GetRenameTableStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand)
+        {
+            return Task.FromResult(GetRenameTableStatements(migrationCommand));
+        }
 
         #endregion
 
@@ -645,7 +650,10 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="migrationCommand"></param>
         /// <returns></returns>
-        protected abstract Task<List<SixnetExecutionDatabaseStatement>> GetDeleteAllTableStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand);
+        protected virtual Task<List<SixnetExecutionDatabaseStatement>> GetDeleteAllTableStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand)
+        {
+            return Task.FromResult(GetDeleteAllTableStatements(migrationCommand));
+        }
 
         #endregion
 
@@ -658,7 +666,10 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="migrationCommand"></param>
         /// <returns></returns>
-        protected abstract Task<List<SixnetExecutionDatabaseStatement>> GetDeleteAllProcedureStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand);
+        protected virtual Task<List<SixnetExecutionDatabaseStatement>> GetDeleteAllProcedureStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand)
+        {
+            return Task.FromResult(GetDeleteAllProcedureStatements(migrationCommand));
+        }
 
         #endregion
 
@@ -669,7 +680,10 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="migrationCommand"></param>
         /// <returns></returns>
-        protected abstract Task<List<SixnetExecutionDatabaseStatement>> GetDeleteAllFunctionStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand);
+        protected virtual Task<List<SixnetExecutionDatabaseStatement>> GetDeleteAllFunctionStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand)
+        {
+            return Task.FromResult(GetDeleteAllFunctionStatements(migrationCommand));
+        }
 
         #endregion
 
@@ -680,7 +694,10 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="migrationCommand"></param>
         /// <returns></returns>
-        protected abstract Task<List<SixnetExecutionDatabaseStatement>> GetDeleteAllCustomTypeStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand);
+        protected virtual Task<List<SixnetExecutionDatabaseStatement>> GetDeleteAllCustomTypeStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand)
+        {
+            return Task.FromResult(GetDeleteAllCustomTypeStatements(migrationCommand));
+        }
 
         #endregion
 
@@ -688,19 +705,28 @@ namespace Sixnet.Development.Data.Database
 
         #region Get add filed statements
 
-        protected abstract Task<List<SixnetExecutionDatabaseStatement>> GetAddFieldStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand);
+        protected virtual Task<List<SixnetExecutionDatabaseStatement>> GetAddFieldStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand)
+        {
+            return Task.FromResult(GetAddFieldStatements(migrationCommand));
+        }
 
         #endregion
 
         #region Get update field statements 
 
-        protected abstract Task<List<SixnetExecutionDatabaseStatement>> GetUpdateFieldStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand);
+        protected virtual Task<List<SixnetExecutionDatabaseStatement>> GetUpdateFieldStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand)
+        {
+            return Task.FromResult(GetUpdateFieldStatements(migrationCommand));
+        }
 
         #endregion
 
         #region Get delete filed statements
 
-        protected abstract Task<List<SixnetExecutionDatabaseStatement>> GetDeleteFieldStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand);
+        protected virtual Task<List<SixnetExecutionDatabaseStatement>> GetDeleteFieldStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand)
+        {
+            return Task.FromResult(GetDeleteFieldStatements(migrationCommand));
+        }
 
         #endregion
 
@@ -715,8 +741,10 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="migrationCommand"></param>
         /// <returns></returns>
-        protected abstract Task<List<SixnetExecutionDatabaseStatement>> GetAddForeignKeyStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand);
-
+        protected virtual Task<List<SixnetExecutionDatabaseStatement>> GetAddForeignKeyStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand)
+        {
+            return Task.FromResult(GetAddForeignKeyStatements(migrationCommand));
+        }
 
         #endregion
 
@@ -727,14 +755,20 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="migrationCommand"></param>
         /// <returns></returns>
-        protected abstract Task<List<SixnetExecutionDatabaseStatement>> GetDeleteForeignKeyStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand);
+        protected virtual Task<List<SixnetExecutionDatabaseStatement>> GetDeleteForeignKeyStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand)
+        {
+            return Task.FromResult(GetDeleteForeignKeyStatements(migrationCommand));
+        }
 
         /// <summary>
         /// Get delete foreign key statements
         /// </summary>
         /// <param name="migrationCommand"></param>
         /// <returns></returns>
-        protected abstract Task<List<SixnetExecutionDatabaseStatement>> GetDeleteAllForeignKeyStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand);
+        protected virtual Task<List<SixnetExecutionDatabaseStatement>> GetDeleteAllForeignKeyStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand)
+        {
+            return Task.FromResult(GetDeleteAllForeignKeyStatements(migrationCommand));
+        }
 
         #endregion
 
@@ -749,7 +783,10 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="migrationCommand"></param>
         /// <returns></returns>
-        protected abstract Task<List<SixnetExecutionDatabaseStatement>> GetAddIndexStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand);
+        protected virtual Task<List<SixnetExecutionDatabaseStatement>> GetAddIndexStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand)
+        {
+            return Task.FromResult(GetAddIndexStatements(migrationCommand));
+        }
 
         #endregion
 
@@ -760,7 +797,10 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="migrationCommand"></param>
         /// <returns></returns>
-        protected abstract Task<List<SixnetExecutionDatabaseStatement>> GetDeleteIndexStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand);
+        protected virtual Task<List<SixnetExecutionDatabaseStatement>> GetDeleteIndexStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand)
+        {
+            return Task.FromResult(GetDeleteIndexStatements(migrationCommand));
+        }
 
         #endregion 
 
@@ -773,7 +813,10 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="migrationCommand"></param>
         /// <returns></returns>
-        protected abstract Task<List<SixnetExecutionDatabaseStatement>> GetDeleteAllViewStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand);
+        protected virtual Task<List<SixnetExecutionDatabaseStatement>> GetDeleteAllViewStatementsAsync(SixnetMigrationDatabaseCommand migrationCommand)
+        {
+            return Task.FromResult(GetDeleteAllViewStatements(migrationCommand));
+        }
 
         #endregion
 
@@ -804,6 +847,24 @@ namespace Sixnet.Development.Data.Database
                         databaseStatement.OutputFields = new List<ISixnetField>(1) { SixnetDataField.Create("*", originalQueryable.GetModelType(), 0, null, "*") };
                     }
                     return databaseStatement;
+                case SixnetQueryableFromType.ConstantValue:
+
+                    var constantValues = SixnetReflecter.Collections.ResolveCollection(originalQueryable.Info.TargetConstantValue as IEnumerable);
+                    SixnetDirectThrower.ThrowNotSupportIf(constantValues == null, "Target value is not supported");
+
+                    var parameterNames = new List<string>();
+                    foreach (var val in constantValues)
+                    {
+
+                        var valParameterName = FormatField(context, originalQueryable, SixnetConstantField.Create(val), location
+                            , SixnetFieldLocation.Output);
+                        parameterNames.Add($"({valParameterName})");
+                    }
+                    var outValueField = SixnetDataField.Create("*", originalQueryable.GetModelType(), 0, null, "*");
+                    var outTablePetName = context.GetTablePetName(originalQueryable, outValueField.ModelType, outValueField.ModelTypeIndex);
+                    var constantTargetScript = $"(VALUES {string.Join(",", parameterNames)}) {outTablePetName}(VALUE)";
+
+                    return SixnetQueryDatabaseStatement.Create(DatabaseType, SixnetQueryableLocation.From, constantTargetScript, null, new List<ISixnetField>(1) { outValueField });
                 default:
                     var tableNames = await context.GetTableNamesAsync(originalQueryable, location).ConfigureAwait(false);
                     var complexTarget = false;
@@ -822,7 +883,7 @@ namespace Sixnet.Development.Data.Database
                         targetScript = $"({string.Join(" UNION ", targetScripts)}){(applyTablePetName ? $"{TablePetNameKeyword}{tablePetName}" : "")}";
                         complexTarget = true;
                     }
-                    return SixnetQueryDatabaseStatement.Create(targetScript, null, complexTarget: complexTarget);
+                    return SixnetQueryDatabaseStatement.Create(DatabaseType, SixnetQueryableLocation.From, targetScript, null, complexTarget: complexTarget);
             }
         }
 

@@ -331,5 +331,11 @@ namespace Sixnet.Development.Data.Database
         List<SixnetColumn> GetColumns(SixnetDatabaseCommand command);
 
         #endregion
+
+        #region Get database type
+
+        SixnetDatabaseType GetDatabaseType(SixnetDatabaseConnection connection);
+
+        #endregion
     }
 }

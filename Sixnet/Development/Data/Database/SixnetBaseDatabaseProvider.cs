@@ -21,6 +21,7 @@ namespace Sixnet.Development.Data.Database
         protected string queryViewsScript = "";
         protected string queryStoredProcedureScript = "";
         protected string queryColumnScript = "";
+        protected bool recordTempTable = false;
 
         #endregion
 
@@ -48,7 +49,7 @@ namespace Sixnet.Development.Data.Database
         /// Get data command resolver
         /// </summary>
         /// <returns></returns>
-        protected abstract ISixnetDataCommandResolver GetDataCommandResolver();
+        protected abstract ISixnetDataCommandResolver GetDataCommandResolver(SixnetDatabaseCommand command);
 
         #endregion
 
@@ -59,7 +60,7 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="parameters">Data command parameters</param>
         /// <returns></returns>
-        protected abstract DynamicParameters ConvertDataCommandParameters(SixnetDataCommandParameters parameters);
+        protected abstract DynamicParameters ConvertDataCommandParameters(SixnetDatabaseCommand command, SixnetDataCommandParameters parameters);
 
         #endregion
 
@@ -74,7 +75,7 @@ namespace Sixnet.Development.Data.Database
         protected virtual CommandDefinition GetCommandDefinition(SixnetDatabaseCommand command, SixnetDatabaseStatement statement)
         {
             return new CommandDefinition(statement.Script
-                                , ConvertDataCommandParameters(statement.Parameters)
+                                , ConvertDataCommandParameters(command, statement.Parameters)
                                 , transaction: command.Connection?.Transaction?.DbTransaction
                                 , commandType: statement.ScriptType
                                 , cancellationToken: command?.CancellationToken ?? default
@@ -94,7 +95,7 @@ namespace Sixnet.Development.Data.Database
         {
             try
             {
-                var dataCommandResolver = GetDataCommandResolver();
+                var dataCommandResolver = GetDataCommandResolver(command);
                 var statements = dataCommandResolver.GenerateDatabaseExecutionStatements(command);
                 var totalAffectedNumber = 0;
                 foreach (var statement in statements)
@@ -118,19 +119,31 @@ namespace Sixnet.Development.Data.Database
         {
             try
             {
-                var dataCommandResolver = GetDataCommandResolver();
+                var dataCommandResolver = GetDataCommandResolver(command);
                 var queryStatement = dataCommandResolver.GenerateDatabaseQueryStatement(command);
                 command.Connection.DbConnection.Execute(GetCommandDefinition(command, queryStatement));
 
-                return new SixnetTempTable()
+                var tempTable = new SixnetTempTable()
                 {
                     Name = $"{command.DataCommand?.Queryable?.Info.TempTableName}"
                 };
+                tempTable = HandleTemTableName(tempTable);
+                if (recordTempTable)
+                {
+                    command.Connection.AddTempTable(tempTable);
+                }
+
+                return tempTable;
             }
             catch (Exception ex)
             {
                 throw GetSqlException(ex);
             }
+        }
+
+        public virtual SixnetTempTable HandleTemTableName(SixnetTempTable tempTable)
+        {
+            return tempTable;
         }
 
         /// <summary>
@@ -156,7 +169,7 @@ namespace Sixnet.Development.Data.Database
         /// <returns>Return the datas</returns>
         public virtual List<T> Query<T>(SixnetSingleDatabaseCommand command)
         {
-            var dataCommandResolver = GetDataCommandResolver();
+            var dataCommandResolver = GetDataCommandResolver(command);
             var queryStatement = dataCommandResolver.GenerateDatabaseQueryStatement(command);
             return command.Connection.DbConnection.Query<T>(GetCommandDefinition(command, queryStatement))?.ToList() ?? new List<T>(0);
         }
@@ -169,7 +182,7 @@ namespace Sixnet.Development.Data.Database
         /// <returns>Return the datas</returns>
         public virtual T QueryFirst<T>(SixnetSingleDatabaseCommand command)
         {
-            var dataCommandResolver = GetDataCommandResolver();
+            var dataCommandResolver = GetDataCommandResolver(command);
             var queryStatement = dataCommandResolver.GenerateDatabaseQueryStatement(command);
             return command.Connection.DbConnection.QueryFirstOrDefault<T>(GetCommandDefinition(command, queryStatement));
         }
@@ -184,10 +197,10 @@ namespace Sixnet.Development.Data.Database
         /// <returns>Return the datas</returns>
         public virtual List<TReturn> QueryMapping<TFirst, TSecond, TReturn>(SixnetQueryMappingDatabaseCommand<TFirst, TSecond, TReturn> command)
         {
-            var dataCommandResolver = GetDataCommandResolver();
+            var dataCommandResolver = GetDataCommandResolver(command);
             var queryStatement = dataCommandResolver.GenerateDatabaseQueryStatement(command);
             return command.Connection.DbConnection.Query(queryStatement.Script, command.DataMappingFunc
-                , param: ConvertDataCommandParameters(queryStatement.Parameters)
+                , param: ConvertDataCommandParameters(command, queryStatement.Parameters)
                 , transaction: command.Connection?.Transaction?.DbTransaction
                 , splitOn: command.SpiltOnFieldName
                 , commandType: queryStatement.ScriptType
@@ -205,10 +218,10 @@ namespace Sixnet.Development.Data.Database
         /// <returns>Return the datas</returns>
         public virtual List<TReturn> QueryMapping<TFirst, TSecond, TThird, TReturn>(DatabaseQueryMappingCommand<TFirst, TSecond, TThird, TReturn> command)
         {
-            var dataCommandResolver = GetDataCommandResolver();
+            var dataCommandResolver = GetDataCommandResolver(command);
             var queryStatement = dataCommandResolver.GenerateDatabaseQueryStatement(command);
             return command.Connection.DbConnection.Query(queryStatement.Script, command.DataMappingFunc
-                , param: ConvertDataCommandParameters(queryStatement.Parameters)
+                , param: ConvertDataCommandParameters(command, queryStatement.Parameters)
                 , transaction: command.Connection?.Transaction?.DbTransaction
                 , splitOn: command.SpiltOnFieldName
                 , commandType: queryStatement.ScriptType
@@ -227,10 +240,10 @@ namespace Sixnet.Development.Data.Database
         /// <returns>Return the datas</returns>
         public virtual List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TReturn>(DatabaseQueryMappingCommand<TFirst, TSecond, TThird, TFourth, TReturn> command)
         {
-            var dataCommandResolver = GetDataCommandResolver();
+            var dataCommandResolver = GetDataCommandResolver(command);
             var queryStatement = dataCommandResolver.GenerateDatabaseQueryStatement(command);
             return command.Connection.DbConnection.Query(queryStatement.Script, command.DataMappingFunc
-                , param: ConvertDataCommandParameters(queryStatement.Parameters)
+                , param: ConvertDataCommandParameters(command, queryStatement.Parameters)
                 , transaction: command.Connection?.Transaction?.DbTransaction
                 , splitOn: command.SpiltOnFieldName
                 , commandType: queryStatement.ScriptType
@@ -250,10 +263,10 @@ namespace Sixnet.Development.Data.Database
         /// <returns>Return the datas</returns>
         public virtual List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(DatabaseQueryMappingCommand<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> command)
         {
-            var dataCommandResolver = GetDataCommandResolver();
+            var dataCommandResolver = GetDataCommandResolver(command);
             var queryStatement = dataCommandResolver.GenerateDatabaseQueryStatement(command);
             return command.Connection.DbConnection.Query(queryStatement.Script, command.DataMappingFunc
-                , param: ConvertDataCommandParameters(queryStatement.Parameters)
+                , param: ConvertDataCommandParameters(command, queryStatement.Parameters)
                 , transaction: command.Connection?.Transaction?.DbTransaction
                 , splitOn: command.SpiltOnFieldName
                 , commandType: queryStatement.ScriptType
@@ -274,10 +287,10 @@ namespace Sixnet.Development.Data.Database
         /// <returns>Return the datas</returns>
         public virtual List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(DatabaseQueryMappingCommand<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> command)
         {
-            var dataCommandResolver = GetDataCommandResolver();
+            var dataCommandResolver = GetDataCommandResolver(command);
             var queryStatement = dataCommandResolver.GenerateDatabaseQueryStatement(command);
             return command.Connection.DbConnection.Query(queryStatement.Script, command.DataMappingFunc
-                , param: ConvertDataCommandParameters(queryStatement.Parameters)
+                , param: ConvertDataCommandParameters(command, queryStatement.Parameters)
                 , transaction: command.Connection?.Transaction?.DbTransaction
                 , splitOn: command.SpiltOnFieldName
                 , commandType: queryStatement.ScriptType
@@ -299,10 +312,10 @@ namespace Sixnet.Development.Data.Database
         /// <returns>Return the datas</returns>
         public virtual List<TReturn> QueryMapping<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(DatabaseQueryMappingCommand<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> command)
         {
-            var dataCommandResolver = GetDataCommandResolver();
+            var dataCommandResolver = GetDataCommandResolver(command);
             var queryStatement = dataCommandResolver.GenerateDatabaseQueryStatement(command);
             return command.Connection.DbConnection.Query(queryStatement.Script, command.DataMappingFunc
-                , param: ConvertDataCommandParameters(queryStatement.Parameters)
+                , param: ConvertDataCommandParameters(command, queryStatement.Parameters)
                 , transaction: command.Connection?.Transaction?.DbTransaction
                 , splitOn: command.SpiltOnFieldName
                 , commandType: queryStatement.ScriptType
@@ -317,7 +330,7 @@ namespace Sixnet.Development.Data.Database
         /// <returns>Return the datas</returns>
         public virtual SixnetPagingInfo<T> QueryPaging<T>(SixnetSingleDatabaseCommand command)
         {
-            var dataCommandResolver = GetDataCommandResolver();
+            var dataCommandResolver = GetDataCommandResolver(command);
             var queryStatement = dataCommandResolver.GenerateDatabaseQueryPagingStatement(command);
             List<T> datas = null;
             var totalCount = 0;
@@ -364,7 +377,7 @@ namespace Sixnet.Development.Data.Database
         /// <returns>Return the data</returns>
         public virtual T Scalar<T>(SixnetSingleDatabaseCommand command)
         {
-            var dataCommandResolver = GetDataCommandResolver();
+            var dataCommandResolver = GetDataCommandResolver(command);
             var queryStatement = dataCommandResolver.GenerateDatabaseQueryStatement(command);
             return command.Connection.DbConnection.ExecuteScalar<T>(GetCommandDefinition(command, queryStatement));
         }
@@ -376,7 +389,7 @@ namespace Sixnet.Development.Data.Database
         /// <returns>Return the dataset</returns>
         public virtual DataSet QueryMultiple(SixnetMultipleDatabaseCommand command)
         {
-            var dataCommandResolver = GetDataCommandResolver();
+            var dataCommandResolver = GetDataCommandResolver(command);
             var queryStatement = dataCommandResolver.GenerateDatabaseQueryStatement(command);
             using (var reader = command.Connection.DbConnection.ExecuteReader(GetCommandDefinition(command, queryStatement)))
             {
@@ -400,7 +413,7 @@ namespace Sixnet.Development.Data.Database
         /// <returns></returns>
         public virtual Tuple<List<TFirst>, List<TSecond>> QueryMultiple<TFirst, TSecond>(SixnetMultipleDatabaseCommand command)
         {
-            var dataCommandResolver = GetDataCommandResolver();
+            var dataCommandResolver = GetDataCommandResolver(command);
             var queryStatement = dataCommandResolver.GenerateDatabaseQueryStatement(command);
             using (var gridReader = command.Connection.DbConnection.QueryMultiple(GetCommandDefinition(command, queryStatement)))
             {
@@ -420,7 +433,7 @@ namespace Sixnet.Development.Data.Database
         /// <returns></returns>
         public virtual Tuple<List<TFirst>, List<TSecond>, List<TThird>> QueryMultiple<TFirst, TSecond, TThird>(SixnetMultipleDatabaseCommand command)
         {
-            var dataCommandResolver = GetDataCommandResolver();
+            var dataCommandResolver = GetDataCommandResolver(command);
             var queryStatement = dataCommandResolver.GenerateDatabaseQueryStatement(command);
             using (var gridReader = command.Connection.DbConnection.QueryMultiple(GetCommandDefinition(command, queryStatement)))
             {
@@ -442,7 +455,7 @@ namespace Sixnet.Development.Data.Database
         /// <returns></returns>
         public virtual Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>> QueryMultiple<TFirst, TSecond, TThird, TFourth>(SixnetMultipleDatabaseCommand command)
         {
-            var dataCommandResolver = GetDataCommandResolver();
+            var dataCommandResolver = GetDataCommandResolver(command);
             var queryStatement = dataCommandResolver.GenerateDatabaseQueryStatement(command);
             using (var gridReader = command.Connection.DbConnection.QueryMultiple(GetCommandDefinition(command, queryStatement)))
             {
@@ -466,7 +479,7 @@ namespace Sixnet.Development.Data.Database
         /// <returns></returns>
         public virtual Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>> QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth>(SixnetMultipleDatabaseCommand command)
         {
-            var dataCommandResolver = GetDataCommandResolver();
+            var dataCommandResolver = GetDataCommandResolver(command);
             var queryStatement = dataCommandResolver.GenerateDatabaseQueryStatement(command);
             using (var gridReader = command.Connection.DbConnection.QueryMultiple(GetCommandDefinition(command, queryStatement)))
             {
@@ -492,7 +505,7 @@ namespace Sixnet.Development.Data.Database
         /// <returns></returns>
         public virtual Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>> QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(SixnetMultipleDatabaseCommand command)
         {
-            var dataCommandResolver = GetDataCommandResolver();
+            var dataCommandResolver = GetDataCommandResolver(command);
             var queryStatement = dataCommandResolver.GenerateDatabaseQueryStatement(command);
             using (var gridReader = command.Connection.DbConnection.QueryMultiple(GetCommandDefinition(command, queryStatement)))
             {
@@ -520,7 +533,7 @@ namespace Sixnet.Development.Data.Database
         /// <returns></returns>
         public virtual Tuple<List<TFirst>, List<TSecond>, List<TThird>, List<TFourth>, List<TFifth>, List<TSixth>, List<TSeventh>> QueryMultiple<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(SixnetMultipleDatabaseCommand command)
         {
-            var dataCommandResolver = GetDataCommandResolver();
+            var dataCommandResolver = GetDataCommandResolver(command);
             var queryStatement = dataCommandResolver.GenerateDatabaseQueryStatement(command);
             using (var gridReader = command.Connection.DbConnection.QueryMultiple(GetCommandDefinition(command, queryStatement)))
             {
@@ -548,7 +561,7 @@ namespace Sixnet.Development.Data.Database
         {
             try
             {
-                var dataCommandResolver = GetDataCommandResolver();
+                var dataCommandResolver = GetDataCommandResolver(command);
                 var statements = dataCommandResolver.GenerateDatabaseExecutionStatements(command);
                 var identityDict = new Dictionary<string, TIdentity>();
                 var dbConnection = command.Connection.DbConnection;
@@ -595,7 +608,7 @@ namespace Sixnet.Development.Data.Database
         {
             try
             {
-                var dataCommandResolver = GetDataCommandResolver();
+                var dataCommandResolver = GetDataCommandResolver(command);
                 var statements = dataCommandResolver.GenerateDatabaseMigrationStatements(command);
                 foreach (var statement in statements)
                 {
@@ -685,6 +698,23 @@ namespace Sixnet.Development.Data.Database
         protected virtual Exception GetSqlException(Exception ex)
         {
             return ex;
+        }
+
+        #endregion
+
+        #region Get database type
+
+        /// <summary>
+        /// Get database type
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
+        public virtual SixnetDatabaseType GetDatabaseType(SixnetDatabaseConnection connection)
+        {
+            return GetDataCommandResolver(new SixnetDatabaseCommand()
+            {
+                Connection = connection
+            }).DatabaseType;
         }
 
         #endregion

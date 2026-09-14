@@ -105,5 +105,10 @@ namespace Sixnet.Development.Data.Database
         /// Whether clear database
         /// </summary>
         public bool ClearDatabase { get; set; }
+
+        /// <summary>
+        /// Gets or sets the schemas
+        /// </summary>
+        public List<string> Schemas { get; set; }
     }
 }

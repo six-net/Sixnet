@@ -2,11 +2,15 @@
 
 using System.Collections;
 using System.Data;
+using System.Diagnostics;
 using System.Globalization;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
+using Sixnet.DependencyInjection;
 using Sixnet.Development.Data.Command;
+using Sixnet.Development.Data.Dapper;
 using Sixnet.Development.Data.Field;
 using Sixnet.Development.Data.Field.Formatting;
 using Sixnet.Development.Entity;
@@ -68,7 +72,7 @@ namespace Sixnet.Development.Data.Database
             { SixnetJoinType.RightJoin," RIGHT JOIN " },
             { SixnetJoinType.FullJoin," FULL JOIN " }
         };
-        public Dictionary<SixnetCalculationOperator, string> CalculationOperators = new Dictionary<SixnetCalculationOperator, string>(4)
+        public Dictionary<SixnetCalculationOperator, string> CalculationOperators { get; set; } = new Dictionary<SixnetCalculationOperator, string>(4)
         {
             [SixnetCalculationOperator.Add] = "+",
             [SixnetCalculationOperator.Subtract] = "-",
@@ -86,6 +90,9 @@ namespace Sixnet.Development.Data.Database
         public string RecursiveKeyword { get; set; }
         public bool UseFieldForRecursive { get; set; } = false;
         public bool SplitWrapParameter { get; set; } = false;
+        public bool OnlyIncrementPrimaryKey { get; set; } = false;
+        public bool DisableDefaultPrimaryKeyAsc { get; set; } = false;
+        public int MaxIdentifierLength { get; set; } = 0;
 
         #endregion
 
@@ -146,7 +153,7 @@ namespace Sixnet.Development.Data.Database
                 var queryable = queryableTranResult.GetOriginalQueryable();
                 commandType = GetCommandType(queryable.Info.ScriptType);
             }
-            var statement = SixnetQueryDatabaseStatement.Create(commandScriptBuilder.ToString(), groupParameters);
+            var statement = SixnetQueryDatabaseStatement.Create(DatabaseType, SixnetQueryableLocation.Top, commandScriptBuilder.ToString(), groupParameters);
             statement.ScriptType = commandType;
             return statement;
         }
@@ -242,9 +249,7 @@ namespace Sixnet.Development.Data.Database
             //parameter
             var parameters = context.GetParameters();
 
-            //log script
-            LogScript(sqlStatement, parameters);
-            return SixnetQueryDatabaseStatement.Create(sqlStatement, context.GetParameters());
+            return SixnetQueryDatabaseStatement.Create(DatabaseType, SixnetQueryableLocation.Top, sqlStatement, context.GetParameters());
         }
 
         /// <summary>
@@ -302,13 +307,14 @@ namespace Sixnet.Development.Data.Database
                 {
                     commandScriptBuilder.Append($"SELECT {incrScriptBuilder.ToString().Trim(',')};");
                 }
-                var statement = new SixnetExecutionDatabaseStatement()
+                var statement = SixnetExecutionDatabaseStatement.Create(DatabaseType, data =>
                 {
-                    Script = commandScriptBuilder.ToString(),
-                    ScriptType = scriptType,
-                    MustAffectData = mustAffectData,
-                    Parameters = groupParameters
-                };
+                    data.Script = commandScriptBuilder.ToString();
+                    data.ScriptType = scriptType;
+                    data.MustAffectData = mustAffectData;
+                    data.Parameters = groupParameters;
+                });
+
                 appendedStatementCount = 0;
                 commandScriptBuilder.Clear();
                 incrScriptBuilder.Clear();
@@ -316,9 +322,6 @@ namespace Sixnet.Development.Data.Database
                 mustAffectData = false;
                 scriptType = CommandType.Text;
                 commandResolveContext.Reset();
-
-                //Trace log
-                LogExecutionStatement(statement);
 
                 return statement;
             }
@@ -389,14 +392,14 @@ namespace Sixnet.Development.Data.Database
             //Get script statement
             SixnetExecutionDatabaseStatement GetScriptStatement()
             {
-                return new SixnetExecutionDatabaseStatement()
+                return SixnetExecutionDatabaseStatement.Create(DatabaseType, data =>
                 {
-                    Script = command.Script,
-                    Parameters = ConvertParameter(command.ScriptParameters),
-                    ScriptType = GetCommandType(command),
-                    MustAffectData = command.Options?.MustAffectData ?? false,
-                    HasPreScript = true
-                };
+                    data.Script = command.Script;
+                    data.Parameters = ConvertParameter(command.ScriptParameters);
+                    data.ScriptType = GetCommandType(command);
+                    data.MustAffectData = command.Options?.MustAffectData ?? false;
+                    data.HasPreScript = true;
+                });
             }
 
             if (command.ExecutionMode == SixnetCommandExecutionMode.Script)
@@ -455,7 +458,7 @@ namespace Sixnet.Development.Data.Database
 
         #region Migration
 
-        #region Generate database migration statements
+        #region Generate migration statements
 
         /// <summary>
         /// Generate database migration statements
@@ -465,6 +468,13 @@ namespace Sixnet.Development.Data.Database
         public virtual List<SixnetExecutionDatabaseStatement> GenerateDatabaseMigrationStatements(SixnetMigrationDatabaseCommand command)
         {
             var statements = new List<SixnetExecutionDatabaseStatement>();
+
+            var migrationInfo = command.MigrationInfo;
+            if (migrationInfo.Schemas.IsNullOrEmpty())
+            {
+                var dataOptions = SixnetContainer.GetOptions<SixnetDataOptions>();
+                migrationInfo.Schemas = [dataOptions.GetDatabaseDefaultSchema(command.Connection)];
+            }
 
             #region Clear database
 
@@ -688,21 +698,271 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="migrationCommand">Migration command</param>
         /// <returns></returns>
-        protected abstract List<SixnetExecutionDatabaseStatement> GetCreateTableStatements(SixnetMigrationDatabaseCommand migrationCommand);
+        protected virtual List<SixnetExecutionDatabaseStatement> GetCreateTableStatements(SixnetMigrationDatabaseCommand migrationCommand)
+        {
+            var migrationInfo = migrationCommand.MigrationInfo;
+            if (migrationInfo?.NewTables.IsNullOrEmpty() ?? true)
+            {
+                return new List<SixnetExecutionDatabaseStatement>(0);
+            }
+            var newTables = migrationInfo.NewTables;
+            var statements = new List<SixnetExecutionDatabaseStatement>();
+            foreach (var newTableInfo in newTables)
+            {
+                if (newTableInfo?.EntityType == null || (newTableInfo?.TableNames.IsNullOrEmpty() ?? true))
+                {
+                    continue;
+                }
+                var entityType = newTableInfo.EntityType;
+                var entityConfig = SixnetEntityManager.GetEntityConfig(entityType);
+                SixnetDirectThrower.ThrowSixnetExceptionIf(entityConfig == null, $"Get entity config failed for {entityType.Name}");
+
+                // Columns
+                var columnDefine = GetCreateColumnDefine(new SixnetGetCreateColumnDefineParameter()
+                {
+                    EntityConfiguration = entityConfig,
+                    MigrationInfo = migrationInfo
+                });
+
+                foreach (var table in newTableInfo.TableNames)
+                {
+                    var schemas = GetSchemasCombination(migrationCommand, table);
+
+                    foreach (var schema in schemas)
+                    {
+                        table.SchemaName = schema;
+                        var getTableScriptParameter = new SixnetGetCreateTableDefineScriptParameter()
+                        {
+                            Table = table,
+                            ColumnDefineInfo = columnDefine,
+                            MigrationInfo = migrationInfo
+                        };
+                        var tableScriptInfo = GetCreateTableScripts(getTableScriptParameter);
+                        if (!tableScriptInfo.Scripts.IsNullOrEmpty())
+                        {
+                            foreach (var script in tableScriptInfo.Scripts)
+                            {
+                                var createTableStatement = SixnetExecutionDatabaseStatement.Create(DatabaseType, data =>
+                                {
+                                    data.Script = script;
+                                });
+                                statements.Add(createTableStatement);
+                            }
+                        }
+
+                        // Foreign key
+                        if (!entityConfig.RelationFields.IsNullOrEmpty())
+                        {
+                            var foreignKeyInfos = new List<SixnetEntityForeignKeyInfo>();
+                            foreach (var relationTypeItem in entityConfig.RelationFields)
+                            {
+                                var referenceEntityConfig = SixnetEntityManager.GetEntityConfig(relationTypeItem.Key);
+                                foreach (var relationFieldItem in relationTypeItem.Value)
+                                {
+                                    if ((relationFieldItem.Value.Behavior & SixnetRelationBehavior.ForeignKey) != SixnetRelationBehavior.ForeignKey)
+                                    {
+                                        continue;
+                                    }
+                                    var sourceTable = table;
+                                    var sourceField = SixnetDatabaseObjectName.Create(SixnetDataField.Create(relationFieldItem.Key, entityType).GetFieldName(DatabaseType), SixnetDatabaseObjectType.Column);
+                                    var referenceField = SixnetDatabaseObjectName.Create(SixnetDataField.Create(relationFieldItem.Value.RelationField, relationFieldItem.Value.RelationType).GetFieldName(DatabaseType), SixnetDatabaseObjectType.Column);
+                                    var referenceCommand = SixnetDataCommand.Create(null);
+                                    referenceCommand.SetEntityType(referenceEntityConfig.EntityType);
+                                    var referenceTable = SixnetDataCommandExecutionContext.Create(migrationCommand.Connection, referenceCommand).GetTableNames(null, SixnetQueryableLocation.From).FirstOrDefault();
+                                    referenceTable.SchemaName = schema;
+                                    foreignKeyInfos.Add(new SixnetEntityForeignKeyInfo()
+                                    {
+                                        SourceTable = sourceTable,
+                                        SourceField = sourceField,
+                                        ReferenceTable = referenceTable,
+                                        ReferenceField = referenceField
+                                    });
+                                }
+                            }
+                            var foreignKeyStatements = GetAddForeignKeyScripts(migrationCommand, foreignKeyInfos);
+                            if (!foreignKeyStatements.IsNullOrEmpty())
+                            {
+                                statements.AddRange(foreignKeyStatements);
+                            }
+                        }
+
+                        // Index
+                        var indexAttributes = entityType.GetCustomAttributes(typeof(SixnetEntityIndexAttribute), false);
+                        if (!indexAttributes.IsNullOrEmpty())
+                        {
+                            var indexInfos = new List<SixnetEntityIndexInfo>();
+                            foreach (var indexItem in indexAttributes)
+                            {
+                                if (indexItem is SixnetEntityIndexAttribute indexAttr && !indexAttr.Fields.IsNullOrEmpty())
+                                {
+                                    var newIndexInfo = new SixnetEntityIndexInfo()
+                                    {
+                                        Table = table,
+                                        Fields = new List<SixnetEntityIndexField>(),
+                                        Unique = indexAttr.Unique
+                                    };
+                                    foreach (var indexItemField in indexAttr.Fields)
+                                    {
+                                        var entityField = entityConfig.AllFields[indexItemField];
+                                        var fieldDesc = entityField.HasDbFeature(SixnetFieldDbFeature.IndexDesc);
+                                        var entityFieldName = FormatObjectName(SixnetDatabaseObjectName.Create(entityField.GetFieldName(DatabaseType), SixnetDatabaseObjectType.Column));
+                                        newIndexInfo.Fields.Add(new SixnetEntityIndexField()
+                                        {
+                                            Desc = fieldDesc,
+                                            Name = entityFieldName,
+                                            Sequence = entityField.IndexSequence
+                                        });
+                                    }
+                                    indexInfos.Add(newIndexInfo);
+                                }
+                            }
+                            var indexStatements = GetAddIndexScripts(migrationCommand, indexInfos);
+                            if (!indexStatements.IsNullOrEmpty())
+                            {
+                                statements.AddRange(indexStatements);
+                            }
+                        }
+                    }
+                }
+            }
+            return statements;
+        }
+
+        /// <summary>
+        /// Get create column define
+        /// </summary>
+        /// <param name="migrationInfo"></param>
+        /// <param name="entityConfig"></param>
+        /// <returns></returns>
+        protected virtual SixnetColumnDefineInfo GetCreateColumnDefine(SixnetGetCreateColumnDefineParameter parameter)
+        {
+            var entityConfig = parameter.EntityConfiguration;
+            var migrationInfo = parameter.MigrationInfo;
+            var newFieldScripts = new List<string>();
+            var primaryKeyNames = new List<string>();
+            var hasIncrementField = false;
+            foreach (var field in entityConfig.AllFields)
+            {
+                var dataField = SixnetDataManager.GetField(DatabaseType, entityConfig.EntityType, field.Value);
+                if (dataField is SixnetDataField dataEntityField)
+                {
+                    var dataFieldName = FormatAndWrapObjectName(SixnetDatabaseObjectName.Create(dataEntityField.GetFieldName(DatabaseType), SixnetDatabaseObjectType.Column));
+                    newFieldScripts.Add($"{dataFieldName}{GetFieldDefinition(dataEntityField, migrationInfo)}");
+                    hasIncrementField |= dataEntityField.InRole(SixnetFieldRole.Increment);
+                    if (dataEntityField.InRole(SixnetFieldRole.PrimaryKey))
+                    {
+                        primaryKeyNames.Add($"{dataFieldName}{(DisableDefaultPrimaryKeyAsc ? "" : " ASC")}");
+                    }
+                }
+            }
+            if (hasIncrementField && OnlyIncrementPrimaryKey)
+            {
+                primaryKeyNames.Clear();
+            }
+            return new SixnetColumnDefineInfo()
+            {
+                ColumnScripts = newFieldScripts,
+                PrimaryKeys = primaryKeyNames
+            };
+        }
+
+        /// <summary>
+        /// Get create table define script 
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <returns></returns>
+        protected abstract SixnetDatabaseScriptInfo GetCreateTableScripts(SixnetGetCreateTableDefineScriptParameter parameter);
 
         /// <summary>
         /// Get delete all table statements
         /// </summary>
         /// <param name="migrationCommand"></param>
         /// <returns></returns>
-        protected abstract List<SixnetExecutionDatabaseStatement> GetDeleteAllTableStatements(SixnetMigrationDatabaseCommand migrationCommand);
+        protected virtual List<SixnetExecutionDatabaseStatement> GetDeleteAllTableStatements(SixnetMigrationDatabaseCommand migrationCommand)
+        {
+            var statements = new List<SixnetExecutionDatabaseStatement>();
+            var schemas = GetSchemasCombination(migrationCommand);
+
+            foreach (var schema in schemas)
+            {
+                var deleteInfo = GetDeleteAllTableScripts(new SixnetDeleteAllTableParameter()
+                {
+                    Command = migrationCommand,
+                    Schema = schema
+                });
+                if (!deleteInfo.Scripts.IsNullOrEmpty())
+                {
+                    foreach (var script in deleteInfo.Scripts)
+                    {
+                        statements.Add(SixnetExecutionDatabaseStatement.Create(DatabaseType, data =>
+                        {
+                            data.Script = script;
+                        }));
+                    }
+                }
+            }
+
+            return statements;
+        }
+
+        /// <summary>
+        /// Get delete all table scripts
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <returns></returns>
+        protected abstract SixnetDatabaseScriptInfo GetDeleteAllTableScripts(SixnetDeleteAllTableParameter parameter);
 
         /// <summary>
         /// Get rename table statements
         /// </summary>
         /// <param name="migrationCommand"></param>
         /// <returns></returns>
-        protected abstract List<SixnetExecutionDatabaseStatement> GetRenameTableStatements(SixnetMigrationDatabaseCommand migrationCommand);
+        protected virtual List<SixnetExecutionDatabaseStatement> GetRenameTableStatements(SixnetMigrationDatabaseCommand migrationCommand)
+        {
+            var migrationInfo = migrationCommand?.MigrationInfo;
+            if (migrationInfo?.RenamedTables.IsNullOrEmpty() ?? true)
+            {
+                return new List<SixnetExecutionDatabaseStatement>(0);
+            }
+            var renameTables = migrationInfo.RenamedTables;
+            var statements = new List<SixnetExecutionDatabaseStatement>();
+            foreach (var tableItem in renameTables)
+            {
+                var schemas = GetSchemasCombination(migrationCommand, tableItem.Key);
+
+                foreach (var schema in schemas)
+                {
+                    tableItem.Key.SchemaName = schema;
+
+                    var renameInfo = GetRenameTableScripts(new SixnetRenameTableParameter()
+                    {
+                        Command = migrationCommand,
+                        CurrentTableName = tableItem.Key,
+                        NewTableName = tableItem.Value
+                    });
+
+                    if (!renameInfo.Scripts.IsNullOrEmpty())
+                    {
+                        foreach (var script in renameInfo.Scripts)
+                        {
+                            var renameTableStatement = SixnetExecutionDatabaseStatement.Create(DatabaseType, data =>
+                            {
+                                data.Script = script;
+                            });
+                            statements.Add(renameTableStatement);
+                        }
+                    }
+                }
+            }
+            return statements;
+        }
+
+        /// <summary>
+        /// Get rename table statements
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <returns></returns>
+        protected abstract SixnetDatabaseScriptInfo GetRenameTableScripts(SixnetRenameTableParameter parameter);
 
         /// <summary>
         /// Get delete table statements
@@ -718,14 +978,21 @@ namespace Sixnet.Development.Data.Database
             var statements = new List<SixnetExecutionDatabaseStatement>();
             foreach (var tableName in migrationCommand.MigrationInfo.DeletedTables)
             {
-                var deleteStatement = new SixnetExecutionDatabaseStatement()
+                var schemas = migrationCommand.MigrationInfo.Schemas.Select(c => c).ToList();
+                if (!string.IsNullOrWhiteSpace(tableName.SchemaName) && !schemas.Contains(tableName.SchemaName))
                 {
-                    Script = $"DROP TABLE IF EXISTS {FormatAndWrapObjectName(tableName)};"
-                };
-                statements.Add(deleteStatement);
+                    schemas.Add(tableName.SchemaName);
+                }
+                foreach (var schema in schemas)
+                {
+                    tableName.SchemaName = schema;
 
-                // Log script
-                LogExecutionStatement(deleteStatement);
+                    var deleteStatement = SixnetExecutionDatabaseStatement.Create(DatabaseType, data =>
+                    {
+                        data.Script = $"DROP TABLE IF EXISTS {FormatAndWrapObjectName(tableName)};";
+                    });
+                    statements.Add(deleteStatement);
+                }
             }
             return statements;
         }
@@ -739,7 +1006,33 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="migrationCommand"></param>
         /// <returns></returns>
-        protected abstract List<SixnetExecutionDatabaseStatement> GetDeleteAllProcedureStatements(SixnetMigrationDatabaseCommand migrationCommand);
+        protected virtual List<SixnetExecutionDatabaseStatement> GetDeleteAllProcedureStatements(SixnetMigrationDatabaseCommand migrationCommand)
+        {
+            var statements = new List<SixnetExecutionDatabaseStatement>();
+            var schemas = GetSchemasCombination(migrationCommand);
+            foreach (var schema in schemas)
+            {
+                var deleteProcedureInfo = GetDeleteAllProcedureScripts(new SixnetDeleteAllProcedureParameter()
+                {
+                    Schema = schema,
+                    Command = migrationCommand
+                });
+                if (!deleteProcedureInfo.Scripts.IsNullOrEmpty())
+                {
+                    foreach (var script in deleteProcedureInfo.Scripts)
+                    {
+                        var statement = SixnetExecutionDatabaseStatement.Create(DatabaseType, data =>
+                        {
+                            data.Script = script;
+                        });
+                        statements.Add(statement);
+                    }
+                }
+            }
+            return statements;
+        }
+
+        protected abstract SixnetDatabaseScriptInfo GetDeleteAllProcedureScripts(SixnetDeleteAllProcedureParameter parameter);
 
         #endregion
 
@@ -750,7 +1043,38 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="migrationCommand"></param>
         /// <returns></returns>
-        protected abstract List<SixnetExecutionDatabaseStatement> GetDeleteAllFunctionStatements(SixnetMigrationDatabaseCommand migrationCommand);
+        protected virtual List<SixnetExecutionDatabaseStatement> GetDeleteAllFunctionStatements(SixnetMigrationDatabaseCommand migrationCommand)
+        {
+            var statements = new List<SixnetExecutionDatabaseStatement>();
+            var schemas = GetSchemasCombination(migrationCommand);
+            foreach (var schema in schemas)
+            {
+                var deleteFunctionInfo = GetDeleteAllFunctionScripts(new SixnetDeleteAllFunctionParameter()
+                {
+                    Schema = schema,
+                    Command = migrationCommand
+                });
+                if (!deleteFunctionInfo.Scripts.IsNullOrEmpty())
+                {
+                    foreach (var script in deleteFunctionInfo.Scripts)
+                    {
+                        var statement = SixnetExecutionDatabaseStatement.Create(DatabaseType, data =>
+                        {
+                            data.Script = script;
+                        });
+                        statements.Add(statement);
+                    }
+                }
+            }
+            return statements;
+        }
+
+        /// <summary>
+        /// Get delete all function statements
+        /// </summary>
+        /// <param name="migrationCommand"></param>
+        /// <returns></returns>
+        protected abstract SixnetDatabaseScriptInfo GetDeleteAllFunctionScripts(SixnetDeleteAllFunctionParameter parameter);
 
         #endregion
 
@@ -761,7 +1085,33 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="migrationCommand"></param>
         /// <returns></returns>
-        protected abstract List<SixnetExecutionDatabaseStatement> GetDeleteAllCustomTypeStatements(SixnetMigrationDatabaseCommand migrationCommand);
+        protected virtual List<SixnetExecutionDatabaseStatement> GetDeleteAllCustomTypeStatements(SixnetMigrationDatabaseCommand migrationCommand)
+        {
+            var statements = new List<SixnetExecutionDatabaseStatement>();
+            var schemas = GetSchemasCombination(migrationCommand);
+            foreach (var schema in schemas)
+            {
+                var deleteCustomerTypeInfo = GetDeleteAllCustomTypeScripts(new SixnetDeleteAllCustomerTypeParameter()
+                {
+                    Schema = schema,
+                    Command = migrationCommand
+                });
+                if (!deleteCustomerTypeInfo.Scripts.IsNullOrEmpty())
+                {
+                    foreach (var script in deleteCustomerTypeInfo.Scripts)
+                    {
+                        var statement = SixnetExecutionDatabaseStatement.Create(DatabaseType, data =>
+                        {
+                            data.Script = script;
+                        });
+                        statements.Add(statement);
+                    }
+                }
+            }
+            return statements;
+        }
+
+        protected abstract SixnetDatabaseScriptInfo GetDeleteAllCustomTypeScripts(SixnetDeleteAllCustomerTypeParameter parameter);
 
         #endregion
 
@@ -769,104 +1119,155 @@ namespace Sixnet.Development.Data.Database
 
         #region Get add filed statements
 
-        protected abstract List<SixnetExecutionDatabaseStatement> GetAddFieldStatements(SixnetMigrationDatabaseCommand migrationCommand);
+        protected virtual List<SixnetExecutionDatabaseStatement> GetAddFieldStatements(SixnetMigrationDatabaseCommand migrationCommand)
+        {
+            if (migrationCommand?.MigrationInfo?.NewFields.IsNullOrEmpty() ?? true)
+            {
+                return new List<SixnetExecutionDatabaseStatement>(0);
+            }
+
+            var statements = new List<SixnetExecutionDatabaseStatement>();
+            foreach (var tableItem in migrationCommand.MigrationInfo.NewFields)
+            {
+                if (!tableItem.Value.IsNullOrEmpty())
+                {
+                    var schemas = GetSchemasCombination(migrationCommand, tableItem.Key);
+
+                    foreach (var schema in schemas)
+                    {
+                        tableItem.Key.SchemaName = schema;
+
+                        var formattedTableName = FormatAndWrapObjectName(tableItem.Key);
+                        var addFieldInfo = GetAddFieldScripts(new SixnetAddFieldParameter()
+                        {
+                            Table = tableItem.Key,
+                            Command = migrationCommand,
+                            Fields = tableItem.Value
+                        });
+                        if (!addFieldInfo.Scripts.IsNullOrEmpty())
+                        {
+                            foreach (var script in addFieldInfo.Scripts)
+                            {
+                                var newFieldStatement = SixnetExecutionDatabaseStatement.Create(DatabaseType, data =>
+                                {
+                                    data.Script = script;
+                                });
+                                statements.Add(newFieldStatement);
+                            }
+                        }
+                    }
+                }
+            }
+            return statements;
+        }
+
+        /// <summary>
+        /// Get add field scripts
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <returns></returns>
+        protected abstract SixnetDatabaseScriptInfo GetAddFieldScripts(SixnetAddFieldParameter parameter);
 
         #endregion
 
         #region Get update field statements 
-        protected abstract List<SixnetExecutionDatabaseStatement> GetUpdateFieldStatements(SixnetMigrationDatabaseCommand migrationCommand);
+
+        protected virtual List<SixnetExecutionDatabaseStatement> GetUpdateFieldStatements(SixnetMigrationDatabaseCommand migrationCommand)
+        {
+            if (migrationCommand?.MigrationInfo?.UpdatedFields.IsNullOrEmpty() ?? true)
+            {
+                return new List<SixnetExecutionDatabaseStatement>(0);
+            }
+
+            var statements = new List<SixnetExecutionDatabaseStatement>();
+            foreach (var tableItem in migrationCommand.MigrationInfo.UpdatedFields)
+            {
+                if (tableItem.Value.IsNullOrEmpty())
+                {
+                    continue;
+                }
+
+                var schemas = GetSchemasCombination(migrationCommand, tableItem.Key);
+
+                foreach (var schema in schemas)
+                {
+                    tableItem.Key.SchemaName = schema;
+                    var updateInfo = GetUpdateFieldScripts(new SixnetUpdateFieldParameter()
+                    {
+                        Command = migrationCommand,
+                        Fields = tableItem.Value,
+                        Table = tableItem.Key
+                    });
+                    if (!updateInfo.Scripts.IsNullOrEmpty())
+                    {
+                        foreach (var script in updateInfo.Scripts)
+                        {
+                            var updateFieldStatement = SixnetExecutionDatabaseStatement.Create(DatabaseType, data =>
+                            {
+                                data.Script = script;
+                            });
+                            statements.Add(updateFieldStatement);
+                        }
+                    }
+                }
+            }
+            return statements;
+        }
+
+        /// <summary>
+        /// Get update field scripts
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <returns></returns>
+        protected abstract SixnetDatabaseScriptInfo GetUpdateFieldScripts(SixnetUpdateFieldParameter parameter);
 
         #endregion
 
         #region Get delete filed statements
 
-        protected abstract List<SixnetExecutionDatabaseStatement> GetDeleteFieldStatements(SixnetMigrationDatabaseCommand migrationCommand);
-
-        #endregion
-
-        #region Get field definition
-
-        /// <summary>
-        /// Get field definition
-        /// </summary>
-        /// <param name="field"></param>
-        /// <param name="options"></param>
-        /// <returns></returns>
-        protected virtual string GetFieldDefinition(SixnetDataField field, SixnetMigrationInfo options)
+        protected virtual List<SixnetExecutionDatabaseStatement> GetDeleteFieldStatements(SixnetMigrationDatabaseCommand migrationCommand)
         {
-            return $" {GetSqlDataType(field, options)}{GetFieldIdentity(field, options)}{GetFieldNullable(field, options)}{GetSqlDefaultValue(field, options)}";
-        }
-
-        #endregion
-
-        #region Get field nullable
-
-        /// <summary>
-        /// Get field nullable
-        /// </summary>
-        /// <param name="field">Field</param>
-        /// <param name="options">Options</param>
-        /// <returns></returns>
-        protected virtual string GetFieldNullable(SixnetDataField field, SixnetMigrationInfo options)
-        {
-            SixnetDirectThrower.ThrowArgNullIf(field == null, nameof(field));
-            var dataType = field.DataType;
-            var required = field.HasDbFeature(SixnetFieldDbFeature.NotNull);
-            return required || !dataType.AllowNull() || field.InRole(SixnetFieldRole.PrimaryKey) ? " NOT NULL" : " NULL";
-        }
-
-        #endregion
-
-        #region Get field sql data type
-
-        /// <summary>
-        /// Get sql data type
-        /// </summary>
-        /// <param name="field">Field</param>
-        /// <returns></returns>
-        protected abstract string GetSqlDataType(SixnetDataField field, SixnetMigrationInfo options);
-
-        #endregion
-
-        #region Get field default value
-
-        /// <summary>
-        /// Get sql default value
-        /// </summary>
-        /// <param name="field"></param>
-        /// <param name="options"></param>
-        /// <returns></returns>
-        protected virtual string GetSqlDefaultValue(SixnetDataField field, SixnetMigrationInfo options)
-        {
-            SixnetDirectThrower.ThrowArgNullIf(field == null, nameof(field));
-            var defaultValue = field.DefaultValue;
-            var useDefaultValue = field.HasDbFeature(SixnetFieldDbFeature.Default);
-            if (string.IsNullOrWhiteSpace(defaultValue) && useDefaultValue)
+            if (migrationCommand?.MigrationInfo?.DeletedFields.IsNullOrEmpty() ?? true)
             {
-                var dbType = field.DataType.GetDbType();
-                DbTypeDefaultValues.TryGetValue(dbType, out defaultValue);
+                return new List<SixnetExecutionDatabaseStatement>(0);
             }
-            if (!string.IsNullOrWhiteSpace(defaultValue))
+
+            var statements = new List<SixnetExecutionDatabaseStatement>();
+            foreach (var tableItem in migrationCommand.MigrationInfo.DeletedFields)
             {
-                defaultValue = $" DEFAULT ({defaultValue})";
+                if (!tableItem.Value.IsNullOrEmpty())
+                {
+                    var schemas = GetSchemasCombination(migrationCommand, tableItem.Key);
+
+                    foreach (var schema in schemas)
+                    {
+                        tableItem.Key.SchemaName = schema;
+
+                        var deleteInfo = GetDeleteFieldScripts(new SixnetDeleteFieldParameter()
+                        {
+                            Command = migrationCommand,
+                            Fields = tableItem.Value,
+                            Table = tableItem.Key
+                        });
+
+                        if (!deleteInfo.Scripts.IsNullOrEmpty())
+                        {
+                            foreach (var script in deleteInfo.Scripts)
+                            {
+                                var deleteStatement = SixnetExecutionDatabaseStatement.Create(DatabaseType, data =>
+                                {
+                                    data.Script = script;
+                                });
+                                statements.Add(deleteStatement);
+                            }
+                        }
+                    }
+                }
             }
-            return defaultValue;
+            return statements;
         }
 
-        #region Get field identity
-
-        /// <summary>
-        /// Get field identity
-        /// </summary>
-        /// <param name="field">Field</param>
-        /// <param name="options">Options</param>
-        /// <returns></returns>
-        protected virtual string GetFieldIdentity(SixnetDataField field, SixnetMigrationInfo options)
-        {
-            return string.Empty;
-        }
-
-        #endregion
+        protected abstract SixnetDatabaseScriptInfo GetDeleteFieldScripts(SixnetDeleteFieldParameter parameter);
 
         #endregion
 
@@ -881,8 +1282,83 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="migrationCommand"></param>
         /// <returns></returns>
-        protected abstract List<SixnetExecutionDatabaseStatement> GetAddForeignKeyStatements(SixnetMigrationDatabaseCommand migrationCommand);
+        protected virtual List<SixnetExecutionDatabaseStatement> GetAddForeignKeyStatements(SixnetMigrationDatabaseCommand migrationCommand)
+        {
+            if (migrationCommand?.MigrationInfo?.NewForeignKeys.IsNullOrEmpty() ?? true)
+            {
+                return new List<SixnetExecutionDatabaseStatement>(0);
+            }
 
+            var statements = new List<SixnetExecutionDatabaseStatement>();
+            foreach (var foreignKey in migrationCommand.MigrationInfo.NewForeignKeys)
+            {
+                var schemas = GetSchemasCombination(migrationCommand, foreignKey.SourceTable);
+                foreach (var schema in schemas)
+                {
+                    foreignKey.SourceTable.SchemaName = schema;
+                    foreignKey.ReferenceTable.SchemaName = schema;
+
+                    var addForeighKeyInfo = GetAddForeignKeyScripts(new SixnetAddForeignKeyParameter()
+                    {
+                        Command = migrationCommand,
+                        ForeignKeyInfo = foreignKey
+                    });
+                    if (!addForeighKeyInfo.Scripts.IsNullOrEmpty())
+                    {
+                        foreach (var script in addForeighKeyInfo.Scripts)
+                        {
+                            var addForeignKeyStatement = SixnetExecutionDatabaseStatement.Create(DatabaseType, data =>
+                            {
+                                data.Script = script;
+                            });
+                            statements.Add(addForeignKeyStatement);
+                        }
+                    }
+                }
+            }
+            return statements;
+        }
+
+        /// <summary>
+        /// Get add foreign key scripts
+        /// </summary>
+        /// <param name="foreignKeyInfos"></param>
+        /// <returns></returns>
+        protected virtual List<SixnetExecutionDatabaseStatement> GetAddForeignKeyScripts(SixnetMigrationDatabaseCommand migrationCommand, List<SixnetEntityForeignKeyInfo> foreignKeyInfos)
+        {
+            if (foreignKeyInfos.IsNullOrEmpty())
+            {
+                return new List<SixnetExecutionDatabaseStatement>(0);
+            }
+            var statements = new List<SixnetExecutionDatabaseStatement>();
+            foreach (var foreignKey in foreignKeyInfos)
+            {
+                var addForeighKeyInfo = GetAddForeignKeyScripts(new SixnetAddForeignKeyParameter()
+                {
+                    Command = migrationCommand,
+                    ForeignKeyInfo = foreignKey
+                });
+                if (!addForeighKeyInfo.Scripts.IsNullOrEmpty())
+                {
+                    foreach (var script in addForeighKeyInfo.Scripts)
+                    {
+                        var addForeignKeyStatement = SixnetExecutionDatabaseStatement.Create(DatabaseType, data =>
+                        {
+                            data.Script = script;
+                        });
+                        statements.Add(addForeignKeyStatement);
+                    }
+                }
+            }
+            return statements;
+        }
+
+        /// <summary>
+        /// Get add foreign key scripts
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <returns></returns>
+        protected abstract SixnetDatabaseScriptInfo GetAddForeignKeyScripts(SixnetAddForeignKeyParameter parameter);
 
         #endregion
 
@@ -893,20 +1369,127 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="migrationCommand"></param>
         /// <returns></returns>
-        protected abstract List<SixnetExecutionDatabaseStatement> GetDeleteForeignKeyStatements(SixnetMigrationDatabaseCommand migrationCommand);
+        protected virtual List<SixnetExecutionDatabaseStatement> GetDeleteForeignKeyStatements(SixnetMigrationDatabaseCommand migrationCommand)
+        {
+            if (migrationCommand?.MigrationInfo?.DeletedForeignKeys.IsNullOrEmpty() ?? true)
+            {
+                return new List<SixnetExecutionDatabaseStatement>(0);
+            }
+            var statements = new List<SixnetExecutionDatabaseStatement>();
+            foreach (var foreignKeyInfo in migrationCommand.MigrationInfo.DeletedForeignKeys)
+            {
+                var schemas = GetSchemasCombination(migrationCommand, foreignKeyInfo.SourceTable);
+                foreach (var schema in schemas)
+                {
+                    foreignKeyInfo.SourceTable.SchemaName = schema;
+
+                    var deleteForeignKeyInfo = GetDeleteForeignKeyScripts(new SixnetDeleteForeignKeyParameter()
+                    {
+                        Command = migrationCommand,
+                        ForeignKeyInfo = foreignKeyInfo
+                    });
+                    if (!deleteForeignKeyInfo.Scripts.IsNullOrEmpty())
+                    {
+                        foreach (var script in deleteForeignKeyInfo.Scripts)
+                        {
+                            var foreignKeyStatement = SixnetExecutionDatabaseStatement.Create(DatabaseType, data =>
+                            {
+                                data.Script = script;
+                            });
+                            statements.Add(foreignKeyStatement);
+                        }
+                    }
+                }
+            }
+            return statements;
+        }
+
+        /// <summary>
+        /// Get delete foreign key scripts
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <returns></returns>
+        public abstract SixnetDatabaseScriptInfo GetDeleteForeignKeyScripts(SixnetDeleteForeignKeyParameter parameter);
 
         /// <summary>
         /// Get delete foreign key statements
         /// </summary>
         /// <param name="migrationCommand"></param>
         /// <returns></returns>
-        protected abstract List<SixnetExecutionDatabaseStatement> GetDeleteAllForeignKeyStatements(SixnetMigrationDatabaseCommand migrationCommand);
+        protected virtual List<SixnetExecutionDatabaseStatement> GetDeleteAllForeignKeyStatements(SixnetMigrationDatabaseCommand migrationCommand)
+        {
+            var statements = new List<SixnetExecutionDatabaseStatement>();
+            var schemas = GetSchemasCombination(migrationCommand);
+            foreach (var schema in schemas)
+            {
+                var deleteInfo = GetDeleteAllForeignKeyScripts(new SixnetDeleteAllForeignKeyParameter()
+                {
+                    Command = migrationCommand,
+                    Schema = schema
+                });
+                if (!deleteInfo.Scripts.IsNullOrEmpty())
+                {
+                    foreach (var script in deleteInfo.Scripts)
+                    {
+                        var deleteStatement = SixnetExecutionDatabaseStatement.Create(DatabaseType, data =>
+                        {
+                            data.Script = script;
+                        });
+                        statements.Add(deleteStatement);
+                    }
+                }
+            }
+
+            return statements;
+        }
+
+        /// <summary>
+        /// Get delete all foreign key scripts
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <returns></returns>
+        protected abstract SixnetDatabaseScriptInfo GetDeleteAllForeignKeyScripts(SixnetDeleteAllForeignKeyParameter parameter);
+
+        #endregion
+
+        #region Get foreign key name
+
+        protected virtual SixnetDatabaseObjectName GetForeignKeyName(SixnetDatabaseObjectName sourceTableName, SixnetDatabaseObjectName sourceFieldName)
+        {
+            var foreignKeyName = NormalizeIdentifierName($"FK_{sourceTableName.IdentityName}_{sourceFieldName}", MaxIdentifierLength);
+            return SixnetDatabaseObjectName.Create(foreignKeyName, SixnetDatabaseObjectType.Constraint);
+        }
 
         #endregion
 
         #endregion
 
         #region Index
+
+        #region Get index name
+
+        /// <summary>
+        /// Get index name
+        /// </summary>
+        /// <param name="info"></param>
+        /// <returns></returns>
+        protected virtual Tuple<SixnetDatabaseObjectName, List<string>> GetIndexDefine(SixnetEntityIndexInfo indexInfo)
+        {
+            var formattedTableName = FormatObjectName(indexInfo.Table);
+            var indexName = $"INX_{formattedTableName.IdentityName}";
+            var indexFields = indexInfo.Fields.OrderBy(c => c.Sequence).ThenBy(c => c.Name);
+            var indexFieldStrings = new List<string>();
+            foreach (var indexItemField in indexFields)
+            {
+                var entityFieldName = FormatObjectName(indexItemField.Name);
+                indexName = $"{indexName}_{entityFieldName.Name}";
+                indexFieldStrings.Add($"{WrapObjectName(entityFieldName).Name} {(indexItemField.Desc ? "DESC" : "ASC")}");
+            }
+            indexName = NormalizeIdentifierName(indexName, MaxIdentifierLength);
+            return new Tuple<SixnetDatabaseObjectName, List<string>>(SixnetDatabaseObjectName.Create(indexName, SixnetDatabaseObjectType.Index), indexFieldStrings);
+        }
+
+        #endregion
 
         #region Add index
 
@@ -915,7 +1498,82 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="migrationCommand"></param>
         /// <returns></returns>
-        protected abstract List<SixnetExecutionDatabaseStatement> GetAddIndexStatements(SixnetMigrationDatabaseCommand migrationCommand);
+        protected virtual List<SixnetExecutionDatabaseStatement> GetAddIndexStatements(SixnetMigrationDatabaseCommand migrationCommand)
+        {
+            if (migrationCommand?.MigrationInfo?.NewIndexes.IsNullOrEmpty() ?? true)
+            {
+                return new List<SixnetExecutionDatabaseStatement>(0);
+            }
+
+            var statements = new List<SixnetExecutionDatabaseStatement>();
+            foreach (var indexInfo in migrationCommand.MigrationInfo.NewIndexes)
+            {
+                var schemas = GetSchemasCombination(migrationCommand, indexInfo.Table);
+                foreach (var schema in schemas)
+                {
+                    indexInfo.Table.SchemaName = schema;
+
+                    var addIndexInfo = GetAddIndexScripts(new SixnetAddIndexParameter()
+                    {
+                        Command = migrationCommand,
+                        IndexInfo = indexInfo
+                    });
+                    if (!addIndexInfo.Scripts.IsNullOrEmpty())
+                    {
+                        foreach (var script in addIndexInfo.Scripts)
+                        {
+                            var addIndexStatement = SixnetExecutionDatabaseStatement.Create(DatabaseType, data =>
+                            {
+                                data.Script = script;
+                            });
+                            statements.Add(addIndexStatement);
+                        }
+                    }
+                }
+            }
+            return statements;
+        }
+
+        /// <summary>
+        /// Get add index scripts
+        /// </summary>
+        /// <param name="indexInfos"></param>
+        /// <returns></returns>
+        protected virtual List<SixnetExecutionDatabaseStatement> GetAddIndexScripts(SixnetMigrationDatabaseCommand migrationCommand, List<SixnetEntityIndexInfo> indexInfos)
+        {
+            if (indexInfos.IsNullOrEmpty())
+            {
+                return new List<SixnetExecutionDatabaseStatement>(0);
+            }
+            var statements = new List<SixnetExecutionDatabaseStatement>();
+            foreach (var indexInfo in indexInfos)
+            {
+                var addIndexInfo = GetAddIndexScripts(new SixnetAddIndexParameter()
+                {
+                    Command = migrationCommand,
+                    IndexInfo = indexInfo
+                });
+                if (!addIndexInfo.Scripts.IsNullOrEmpty())
+                {
+                    foreach (var script in addIndexInfo.Scripts)
+                    {
+                        var addIndexStatement = SixnetExecutionDatabaseStatement.Create(DatabaseType, data =>
+                        {
+                            data.Script = script;
+                        });
+                        statements.Add(addIndexStatement);
+                    }
+                }
+            }
+            return statements;
+        }
+
+        /// <summary>
+        /// Get add index scripts
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <returns></returns>
+        protected abstract SixnetDatabaseScriptInfo GetAddIndexScripts(SixnetAddIndexParameter parameter);
 
         #endregion
 
@@ -926,7 +1584,48 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="migrationCommand"></param>
         /// <returns></returns>
-        protected abstract List<SixnetExecutionDatabaseStatement> GetDeleteIndexStatements(SixnetMigrationDatabaseCommand migrationCommand);
+        protected virtual List<SixnetExecutionDatabaseStatement> GetDeleteIndexStatements(SixnetMigrationDatabaseCommand migrationCommand)
+        {
+            if (migrationCommand?.MigrationInfo?.DeletedIndexes.IsNullOrEmpty() ?? true)
+            {
+                return new List<SixnetExecutionDatabaseStatement>();
+            }
+            var statements = new List<SixnetExecutionDatabaseStatement>();
+            foreach (var indexInfo in migrationCommand.MigrationInfo.DeletedIndexes)
+            {
+                var schemas = GetSchemasCombination(migrationCommand, indexInfo.Table);
+
+                foreach (var schema in schemas)
+                {
+                    indexInfo.Table.SchemaName = schema;
+
+                    var deleteIndexInfo = GetDeleteIndexScripts(new SixnetDeleteIndexParameter()
+                    {
+                        Command = migrationCommand,
+                        IndexInfo = indexInfo
+                    });
+                    if (!deleteIndexInfo.Scripts.IsNullOrEmpty())
+                    {
+                        foreach (var script in deleteIndexInfo.Scripts)
+                        {
+                            var indexStatement = SixnetExecutionDatabaseStatement.Create(DatabaseType, data =>
+                            {
+                                data.Script = script;
+                            });
+                            statements.Add(indexStatement);
+                        }
+                    }
+                }
+            }
+            return statements;
+        }
+
+        /// <summary>
+        /// Get delete index scripts
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <returns></returns>
+        protected abstract SixnetDatabaseScriptInfo GetDeleteIndexScripts(SixnetDeleteIndexParameter parameter);
 
         #endregion 
 
@@ -939,7 +1638,61 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         /// <param name="migrationCommand"></param>
         /// <returns></returns>
-        protected abstract List<SixnetExecutionDatabaseStatement> GetDeleteAllViewStatements(SixnetMigrationDatabaseCommand migrationCommand);
+        protected virtual List<SixnetExecutionDatabaseStatement> GetDeleteAllViewStatements(SixnetMigrationDatabaseCommand migrationCommand)
+        {
+            var statements = new List<SixnetExecutionDatabaseStatement>();
+            var schemas = GetSchemasCombination(migrationCommand);
+            foreach (var schema in schemas)
+            {
+                var deleteViewInfo = GetDeleteAllViewScripts(new SixnetDeleteAllViewParameter()
+                {
+                    Schema = schema,
+                    Command = migrationCommand
+                });
+                if (!deleteViewInfo.Scripts.IsNullOrEmpty())
+                {
+                    foreach (var script in deleteViewInfo.Scripts)
+                    {
+                        var statement = SixnetExecutionDatabaseStatement.Create(DatabaseType, data =>
+                        {
+                            data.Script = script;
+                        });
+                        statements.Add(statement);
+                    }
+                }
+            }
+
+            return statements;
+        }
+
+        protected abstract SixnetDatabaseScriptInfo GetDeleteAllViewScripts(SixnetDeleteAllViewParameter parameter);
+
+        #endregion
+
+        #region Schema
+
+        /// <summary>
+        /// Get schemas combination
+        /// </summary>
+        /// <param name="migrationInfo"></param>
+        /// <param name="table"></param>
+        /// <returns></returns>
+        protected virtual List<string> GetSchemasCombination(SixnetMigrationDatabaseCommand command, SixnetDatabaseObjectName table = null)
+        {
+            var migrationInfo = command.MigrationInfo;
+            var schemas = migrationInfo?.Schemas?.Select(c => c).ToList() ?? new List<string>();
+            var defaultSchema = table?.SchemaName ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(defaultSchema))
+            {
+                var dataOptions = SixnetContainer.GetOptions<SixnetDataOptions>();
+                defaultSchema = dataOptions.GetDatabaseDefaultSchema(command.Connection) ?? string.Empty;
+            }
+            if (!schemas.Contains(defaultSchema))
+            {
+                schemas.Add(defaultSchema);
+            }
+            return schemas.Distinct().ToList();
+        }
 
         #endregion
 
@@ -987,7 +1740,7 @@ namespace Sixnet.Development.Data.Database
                     var outTablePetName = context.GetTablePetName(originalQueryable, outValueField.ModelType, outValueField.ModelTypeIndex);
                     var constantTargetScript = $"(VALUES {string.Join(",", parameterNames)}) {outTablePetName}(VALUE)";
 
-                    return SixnetQueryDatabaseStatement.Create(constantTargetScript, null, new List<ISixnetField>(1) { outValueField });
+                    return SixnetQueryDatabaseStatement.Create(DatabaseType, SixnetQueryableLocation.From, constantTargetScript, null, new List<ISixnetField>(1) { outValueField });
                 default:
                     var tableNames = context.GetTableNames(originalQueryable, location);
                     var complexTarget = false;
@@ -1006,7 +1759,7 @@ namespace Sixnet.Development.Data.Database
                         targetScript = $"({string.Join(" UNION ", targetScripts)}){(applyTablePetName ? $"{TablePetNameKeyword}{tablePetName}" : "")}";
                         complexTarget = true;
                     }
-                    return SixnetQueryDatabaseStatement.Create(targetScript, null, complexTarget: complexTarget);
+                    return SixnetQueryDatabaseStatement.Create(DatabaseType, SixnetQueryableLocation.From, targetScript, null, complexTarget: complexTarget);
             }
         }
 
@@ -2075,20 +2828,20 @@ namespace Sixnet.Development.Data.Database
         /// Log execution command
         /// </summary>
         /// <param name="statement">Exection command</param>
-        protected virtual void LogExecutionStatement(SixnetExecutionDatabaseStatement statement)
-        {
-            SixnetFrameworkLogManager.LogDatabaseExecutionStatement(GetType(), DatabaseType, statement);
-        }
+        //protected virtual void LogExecutionStatement(SixnetExecutionDatabaseStatement statement)
+        //{
+        //    SixnetFrameworkLogManager.LogDatabaseExecutionStatement(GetType(), DatabaseType, statement);
+        //}
 
         /// <summary>
         /// Log script
         /// </summary>
         /// <param name="script">Script</param>
         /// <param name="parameter">Parameter</param>
-        protected virtual void LogScript(string script, object parameter)
-        {
-            SixnetFrameworkLogManager.LogDatabaseScript(GetType(), DatabaseType, script, parameter);
-        }
+        //protected virtual void LogScript(string script, object parameter)
+        //{
+        //    SixnetFrameworkLogManager.LogDatabaseScript(GetType(), DatabaseType, script, parameter);
+        //}
 
         #endregion
 
@@ -2193,11 +2946,6 @@ namespace Sixnet.Development.Data.Database
             }
         }
 
-        internal protected SixnetDatabaseObjectName DefaultFormatObjectName(SixnetDatabaseObjectName objectName)
-        {
-            return SixnetDataManager.FormatDatabaseObjectName(DatabaseType, objectName);
-        }
-
         /// <summary>
         /// Wrap object name
         /// </summary>
@@ -2215,17 +2963,6 @@ namespace Sixnet.Development.Data.Database
             }
         }
 
-        internal protected SixnetDatabaseObjectName DefaultWrapObjectName(SixnetDatabaseObjectName objectName)
-        {
-            if (!string.IsNullOrWhiteSpace(objectName.Name))
-            {
-                var newObjectName = objectName.Clone();
-                newObjectName.Name = $"{KeywordPrefix}{objectName.Name}{KeywordSuffix}";
-                return newObjectName;
-            }
-            return objectName;
-        }
-
         /// <summary>
         /// Get object full name
         /// </summary>
@@ -2241,15 +2978,6 @@ namespace Sixnet.Development.Data.Database
             {
                 return GetObjectFullNameFunc(objectName);
             }
-        }
-
-        internal protected string DefaultGetObjectFullName(SixnetDatabaseObjectName objectName)
-        {
-            if (!string.IsNullOrWhiteSpace(objectName.SchemaName))
-            {
-                return $"{objectName.SchemaName}.{objectName.Name}";
-            }
-            return objectName.Name;
         }
 
         /// <summary>
@@ -2270,6 +2998,27 @@ namespace Sixnet.Development.Data.Database
         public string FormatAndWrapObjectName(SixnetDatabaseObjectName objectName)
         {
             return GetObjectFullName(WrapObjectName(FormatObjectName(objectName)));
+        }
+
+        internal protected SixnetDatabaseObjectName DefaultWrapObjectName(SixnetDatabaseObjectName objectName)
+        {
+            if (!string.IsNullOrWhiteSpace(objectName.Name))
+            {
+                var newObjectName = objectName.Clone();
+                newObjectName.Name = $"{KeywordPrefix}{objectName.Name}{KeywordSuffix}";
+                return newObjectName;
+            }
+            return objectName;
+        }
+
+        internal protected SixnetDatabaseObjectName DefaultFormatObjectName(SixnetDatabaseObjectName objectName)
+        {
+            return SixnetDataManager.FormatDatabaseObjectName(DatabaseType, objectName);
+        }
+
+        internal protected string DefaultGetObjectFullName(SixnetDatabaseObjectName objectName)
+        {
+            return objectName.FullName;
         }
 
         #endregion
@@ -2348,6 +3097,123 @@ namespace Sixnet.Development.Data.Database
         protected virtual string QuoteString(string value)
         {
             return $"N'{value.Replace("'", "''")}'";
+        }
+
+        #endregion
+
+        #region Get field definition
+
+        /// <summary>
+        /// Get field definition
+        /// </summary>
+        /// <param name="field"></param>
+        /// <param name="options"></param>
+        /// <returns></returns>
+        protected virtual string GetFieldDefinition(SixnetDataField field, SixnetMigrationInfo options)
+        {
+            return $" {GetSqlDataType(field, options)}{GetFieldIdentity(field, options)}{GetFieldNullable(field, options)}{GetSqlDefaultValue(field, options)}";
+        }
+
+        #endregion
+
+        #region Get field nullable
+
+        /// <summary>
+        /// Get field nullable
+        /// </summary>
+        /// <param name="field">Field</param>
+        /// <param name="options">Options</param>
+        /// <returns></returns>
+        protected virtual string GetFieldNullable(SixnetDataField field, SixnetMigrationInfo options)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(field == null, nameof(field));
+            var dataType = field.DataType;
+            var required = field.HasDbFeature(SixnetFieldDbFeature.NotNull);
+            return required || !dataType.AllowNull() || field.InRole(SixnetFieldRole.PrimaryKey) ? " NOT NULL" : " NULL";
+        }
+
+        #endregion
+
+        #region Get field sql data type
+
+        /// <summary>
+        /// Get sql data type
+        /// </summary>
+        /// <param name="field">Field</param>
+        /// <returns></returns>
+        protected abstract string GetSqlDataType(SixnetDataField field, SixnetMigrationInfo options);
+
+        #endregion
+
+        #region Get field default value
+
+        /// <summary>
+        /// Get sql default value
+        /// </summary>
+        /// <param name="field"></param>
+        /// <param name="options"></param>
+        /// <returns></returns>
+        protected virtual string GetSqlDefaultValue(SixnetDataField field, SixnetMigrationInfo options)
+        {
+            SixnetDirectThrower.ThrowArgNullIf(field == null, nameof(field));
+            var defaultValue = field.DefaultValue;
+            var useDefaultValue = field.HasDbFeature(SixnetFieldDbFeature.Default);
+            if (string.IsNullOrWhiteSpace(defaultValue) && useDefaultValue)
+            {
+                var dbType = field.DataType.GetDbType();
+                DbTypeDefaultValues.TryGetValue(dbType, out defaultValue);
+            }
+            if (!string.IsNullOrWhiteSpace(defaultValue))
+            {
+                defaultValue = $" DEFAULT ({defaultValue})";
+            }
+            return defaultValue;
+        }
+
+        #region Get field identity
+
+        /// <summary>
+        /// Get field identity
+        /// </summary>
+        /// <param name="field">Field</param>
+        /// <param name="options">Options</param>
+        /// <returns></returns>
+        protected virtual string GetFieldIdentity(SixnetDataField field, SixnetMigrationInfo options)
+        {
+            return string.Empty;
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Normalize Identifier Name
+
+        protected virtual string NormalizeIdentifierName(string name, int maxLength, int hashLength = 8)
+        {
+            if (string.IsNullOrEmpty(name) || maxLength <= 0 || name.Length <= maxLength)
+            {
+                return name;
+            }
+
+            if (hashLength < 4)
+            {
+                throw new ArgumentOutOfRangeException(nameof(hashLength));
+            }
+
+            using (var sha256 = SHA256.Create())
+            {
+                var hashBytes = sha256.ComputeHash(
+                    Encoding.UTF8.GetBytes(name));
+                var hash = System.Convert.ToHexString(hashBytes).Substring(0, hashLength);
+                var suffix = "_" + hash;
+                var prefixLength = maxLength - suffix.Length;
+                if (prefixLength <= 0)
+                {
+                    throw new ArgumentException($"maxLength must be greater {suffix.Length}。", nameof(maxLength));
+                }
+                return name.Substring(0, prefixLength) + suffix;
+            }
         }
 
         #endregion

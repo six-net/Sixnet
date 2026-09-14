@@ -54,6 +54,16 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         public SixnetDatabaseConnectionMeta Meta { get; private set; }
 
+        /// <summary>
+        /// Tem tables
+        /// </summary>
+        public List<SixnetTempTable> TempTables { get; private set; }
+
+        /// <summary>
+        /// Gets or sets connection extra info
+        /// </summary>
+        public ISixnetConnectionExtraInfo ExtraInfo { get; private set; }
+
         #endregion
 
         #region Constructor
@@ -132,21 +142,34 @@ namespace Sixnet.Development.Data.Database
                     newTransaction = OpenTransaction();
                     break;
                 case DatabaseConnectionOperationType.Close:
+                    if (!TempTables.IsNullOrEmpty())
+                    {
+                        DatabaseProvider.Migrate(new SixnetMigrationDatabaseCommand()
+                        {
+                            MigrationInfo = new SixnetMigrationInfo()
+                            {
+                                DeletedTables = TempTables.Select(c => SixnetDatabaseObjectName.Create(c.Name, SixnetDatabaseObjectType.TempTable)).ToList()
+                            }
+                        });
+                    }
                     if (DbConnection.State != ConnectionState.Closed)
                     {
                         Transaction?.Dispose();
                         DbConnection.Close();
                     }
+                    ExtraInfo?.Dispose();
                     Transaction = null;
                     ReleaseConnectionLock();
                     break;
                 case DatabaseConnectionOperationType.Commit:
                     Transaction?.Commit();
+                    ExtraInfo?.Dispose();
                     Transaction = null;
                     newTransaction = OpenTransaction();
                     break;
                 case DatabaseConnectionOperationType.Rollback:
                     Transaction?.Rollback();
+                    ExtraInfo?.Dispose();
                     Transaction = null;
                     newTransaction = OpenTransaction();
                     break;
@@ -211,6 +234,28 @@ namespace Sixnet.Development.Data.Database
                 return new SixnetDatabaseConnection(server, useTransaction, isolationLevel, connLock);
             }
             throw new InvalidOperationException($"{server.Name} is locked");
+        }
+
+        /// <summary>
+        /// Add temp table
+        /// </summary>
+        /// <param name="tempTable"></param>
+        public void AddTempTable(SixnetTempTable tempTable)
+        {
+            TempTables ??= new List<SixnetTempTable>();
+            if (tempTable != null)
+            {
+                TempTables.Add(tempTable);
+            }
+        }
+
+        /// <summary>
+        /// Set extra info
+        /// </summary>
+        /// <param name="extraInfo"></param>
+        public void SetExtraInfo(ISixnetConnectionExtraInfo extraInfo)
+        {
+            ExtraInfo = extraInfo;
         }
 
         #endregion

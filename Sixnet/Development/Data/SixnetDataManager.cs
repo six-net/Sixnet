@@ -2,6 +2,7 @@
 
 using System.Collections;
 using System.Data;
+using System.Reflection.Metadata;
 using System.Threading.Tasks;
 
 using Sixnet.Cache;
@@ -1004,34 +1005,24 @@ namespace Sixnet.Development.Data
                     if (!parameter.Records.IsNullOrEmpty())
                     {
                         var sortedRecords = parameter.Records.OrderBy(c => c.Id);
-                        var currentVersion = new Version(0, 0, 0);
-                        var currentRecordId = 0L;
-                        var lastRecordQueryable = SixnetQuerier.Create<SixnetAppUpdateRecordEntity>().OrderBy(c => c.Id, true);
-                        var lastRecord = GetClient(parameter.DatabaseServer).QueryFirst<SixnetAppUpdateRecordEntity>(lastRecordQueryable);
-                        if (lastRecord != null)
+                        SixnetUpdateDatabaseContext context = null;
+                        using (var dataClient = GetClient(parameter.DatabaseServer))
                         {
-                            currentVersion = Version.Parse(lastRecord.CurrentAppVersion);
-                            currentRecordId = lastRecord.Id;
+                            context = GetUpdateDatabaseContext(dataClient, parameter);
                         }
-                        var context = new SixnetUpdateDatabaseContext()
-                        {
-                            UpdateParameter = parameter,
-                            CurrentRecordId = currentRecordId,
-                            CurrentVersion = currentVersion,
-                        };
                         foreach (var record in sortedRecords)
                         {
                             if (!parameter.ExecuteRecordForRollback)
                             {
-                                reportProcess?.Invoke(SixnetUpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Update, parameter, record));
+                                reportProcess?.Invoke(SixnetUpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Update, parameter, context, record));
                                 record.UpdateAsync(context).Wait();
-                                reportProcess?.Invoke(SixnetUpdateDatabaseProcess.Create(UpdateDatabaseProcessState.UpdateFinished, parameter, record));
+                                reportProcess?.Invoke(SixnetUpdateDatabaseProcess.Create(UpdateDatabaseProcessState.UpdateFinished, parameter, context, record));
                             }
                             else
                             {
-                                reportProcess?.Invoke(SixnetUpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Rollback, parameter, record));
+                                reportProcess?.Invoke(SixnetUpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Rollback, parameter, context, record));
                                 record.RollbackAsync(context).Wait();
-                                reportProcess?.Invoke(SixnetUpdateDatabaseProcess.Create(UpdateDatabaseProcessState.RollbackFinished, parameter, record));
+                                reportProcess?.Invoke(SixnetUpdateDatabaseProcess.Create(UpdateDatabaseProcessState.RollbackFinished, parameter, context, record));
                             }
                         }
                     }
@@ -1041,7 +1032,7 @@ namespace Sixnet.Development.Data
                     reportProcess?.Invoke(SixnetUpdateDatabaseProcess.Create(UpdateDatabaseProcessState.BeginGettingCurrentInfo, parameter));
                     var recordRes = GetDatabaseUpdateRecordsCore(parameter);
                     var context = recordRes.Item1;
-                    reportProcess?.Invoke(SixnetUpdateDatabaseProcess.Create(UpdateDatabaseProcessState.EndGettingCurrentInfo, parameter, null, context.CurrentVersion, context.CurrentRecordId));
+                    reportProcess?.Invoke(SixnetUpdateDatabaseProcess.Create(UpdateDatabaseProcessState.EndGettingCurrentInfo, parameter, context, null));
 
                     if (recordRes.Item2.IsNullOrEmpty())
                     {
@@ -1053,15 +1044,15 @@ namespace Sixnet.Development.Data
                         {
                             if (recordRes.Item3)
                             {
-                                reportProcess?.Invoke(SixnetUpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Update, parameter, record));
+                                reportProcess?.Invoke(SixnetUpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Update, parameter, context, record));
                                 record.UpdateAsync(context).Wait();
-                                reportProcess?.Invoke(SixnetUpdateDatabaseProcess.Create(UpdateDatabaseProcessState.UpdateFinished, parameter, record));
+                                reportProcess?.Invoke(SixnetUpdateDatabaseProcess.Create(UpdateDatabaseProcessState.UpdateFinished, parameter, context, record));
                             }
                             else
                             {
-                                reportProcess?.Invoke(SixnetUpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Rollback, parameter, record));
+                                reportProcess?.Invoke(SixnetUpdateDatabaseProcess.Create(UpdateDatabaseProcessState.Rollback, parameter, context, record));
                                 record.RollbackAsync(context).Wait();
-                                reportProcess?.Invoke(SixnetUpdateDatabaseProcess.Create(UpdateDatabaseProcessState.RollbackFinished, parameter, record));
+                                reportProcess?.Invoke(SixnetUpdateDatabaseProcess.Create(UpdateDatabaseProcessState.RollbackFinished, parameter, context, record));
                             }
                         }
                     }
@@ -1097,35 +1088,24 @@ namespace Sixnet.Development.Data
         {
             SixnetDirectThrower.ThrowArgErrorIf(parameter?.DatabaseServer == null, "Database server is null");
             SixnetDirectThrower.ThrowArgErrorIf(parameter?.TargetVersion == null, "Target version is null");
-            var currentVersion = new Version(0, 0, 0);
-            var currentRecordId = 0L;
+
+            SixnetUpdateDatabaseContext updateContext = null;
             using (var client = GetClient(parameter.DatabaseServer, false, true))
             {
                 // create table
                 client.CreateTable(typeof(SixnetAppUpdateRecordEntity));
                 client.Commit();
-                var lastRecordQueryable = SixnetQuerier.Create<SixnetAppUpdateRecordEntity>()
-                    .OrderBy(c => c.Id, true);
-                var lastRecord = client.QueryFirst<SixnetAppUpdateRecordEntity>(lastRecordQueryable);
-                if (lastRecord != null)
-                {
-                    currentVersion = Version.Parse(lastRecord.CurrentAppVersion);
-                    currentRecordId = lastRecord.Id;
-                }
+
+                // get context
+                updateContext = GetUpdateDatabaseContext(client, parameter);
             }
-            var context = new SixnetUpdateDatabaseContext()
+            if (updateContext.GetMaxVersion() <= parameter.TargetVersion)
             {
-                UpdateParameter = parameter,
-                CurrentVersion = currentVersion,
-                CurrentRecordId = currentRecordId
-            };
-            if (currentVersion <= parameter.TargetVersion)
-            {
-                return new Tuple<SixnetUpdateDatabaseContext, List<ISixnetDatabaseUpdateRecord>, bool>(context, GetForwardRecords(context), true);
+                return new Tuple<SixnetUpdateDatabaseContext, List<ISixnetDatabaseUpdateRecord>, bool>(updateContext, GetForwardRecords(updateContext), true);
             }
             else
             {
-                return new Tuple<SixnetUpdateDatabaseContext, List<ISixnetDatabaseUpdateRecord>, bool>(context, GetRollbackRecords(context), false);
+                return new Tuple<SixnetUpdateDatabaseContext, List<ISixnetDatabaseUpdateRecord>, bool>(updateContext, GetRollbackRecords(updateContext), false);
             }
         }
 
@@ -1141,66 +1121,42 @@ namespace Sixnet.Development.Data
                 return new List<ISixnetDatabaseUpdateRecord>(0);
             }
             var targetVersion = context.UpdateParameter.TargetVersion;
-            var currentVersion = context.CurrentVersion;
-            var currentRecordId = context.CurrentRecordId;
+            var currentVersion = context.GetMaxVersion();
             var reportProcess = context.UpdateParameter?.ReportProcess;
             var recordVersions = new SortedSet<Version>(_updateRecords.Keys);
             var minVersion = recordVersions.Min;
             var allRecords = new List<ISixnetDatabaseUpdateRecord>();
-
-            // lower version
-            if (currentVersion >= recordVersions.Min)
+            var updateableVersions = recordVersions.GetViewBetween(minVersion, targetVersion);
+            if (updateableVersions.IsNullOrEmpty())
             {
-                var nextRecord = SixnetEmptyDatabaseUpdateRecord.Create(currentRecordId + 1);
-                var lowerVersions = recordVersions.GetViewBetween(recordVersions.Min, currentVersion);
-                foreach (var lowerVersion in lowerVersions)
+                return allRecords;
+            }
+            foreach (var nowVersion in updateableVersions)
+            {
+                _updateRecords.TryGetValue(nowVersion, out var nowVersionRecords);
+                if (nowVersionRecords.IsNullOrEmpty())
                 {
-                    _updateRecords.TryGetValue(lowerVersion, out var lowerVersionRecords);
-                    if (lowerVersionRecords == null || lowerVersionRecords.Count < 1)
+                    continue;
+                }
+                if (nowVersion <= currentVersion)
+                {
+                    var nowVersionMaxRecord = nowVersionRecords.Max;
+                    var currentMaxRecordId = context.GetVersionMaxRecordId(nowVersion);
+                    if (nowVersionMaxRecord.Id > currentMaxRecordId)
                     {
-                        continue;
-                    }
-                    var maxRecord = lowerVersionRecords.Max;
-                    if (maxRecord.Id < nextRecord.Id)
-                    {
-                        continue;
-                    }
-                    var updatableRecords = lowerVersionRecords.GetViewBetween(nextRecord, maxRecord);
-                    foreach (var record in updatableRecords)
-                    {
-                        if (record.Version != lowerVersion || currentVersion < record.Version || currentRecordId >= record.Id)
+                        var nextRecord = SixnetEmptyDatabaseUpdateRecord.Create(currentMaxRecordId + 1);
+                        var nowVersionNewRecords = nowVersionRecords.GetViewBetween(nextRecord, nowVersionMaxRecord);
+                        foreach (var newRecord in nowVersionNewRecords)
                         {
-                            reportProcess?.Invoke(SixnetUpdateDatabaseProcess.Create(UpdateDatabaseProcessState.ErrorRecord, context.UpdateParameter, record));
-                            continue;
+                            allRecords.Add(newRecord);
                         }
-                        allRecords.Add(record);
                     }
                 }
-            }
-
-            // abover version
-            var nextVersion = new Version(currentVersion.Major, currentVersion.Minor, currentVersion.Build, currentVersion.Revision + 1);
-            if (nextVersion <= targetVersion)
-            {
-                var aboverVersions = recordVersions.GetViewBetween(nextVersion, targetVersion);
-                if (!aboverVersions.IsNullOrEmpty())
+                else
                 {
-                    foreach (var aboverVersion in aboverVersions)
+                    foreach (var newRecord in nowVersionRecords)
                     {
-                        _updateRecords.TryGetValue(aboverVersion, out var aboverVersionRecords);
-                        if (aboverVersionRecords == null || aboverVersionRecords.Count < 1)
-                        {
-                            continue;
-                        }
-                        foreach (var record in aboverVersionRecords)
-                        {
-                            if (record.Version != aboverVersion || record.Version > targetVersion || record.Version <= currentVersion)
-                            {
-                                reportProcess?.Invoke(SixnetUpdateDatabaseProcess.Create(UpdateDatabaseProcessState.ErrorRecord, context.UpdateParameter, record));
-                                continue;
-                            }
-                            allRecords.Add(record);
-                        }
+                        allRecords.Add(newRecord);
                     }
                 }
             }
@@ -1219,7 +1175,7 @@ namespace Sixnet.Development.Data
                 return new List<ISixnetDatabaseUpdateRecord>(0);
             }
             var targetVersion = context.UpdateParameter.TargetVersion;
-            var currentVersion = context.CurrentVersion;
+            var currentVersion = context.GetMaxVersion();
             var recordVersions = new SortedSet<Version>(_updateRecords.Keys);
             if (targetVersion >= currentVersion)
             {
@@ -1246,6 +1202,23 @@ namespace Sixnet.Development.Data
                 }
             }
             return allRecords;
+        }
+
+        static SixnetUpdateDatabaseContext GetUpdateDatabaseContext(ISixnetDataClient dataClient, SixnetUpdateDatabaseParameter parameter)
+        {
+            var versionGroupMaxRecords = dataClient.Query<SixnetAppUpdateRecordEntity>(SixnetQuerier.Create<SixnetAppUpdateRecordEntity>()
+                .GroupBy(c => c.AppVersion)
+                .Select(c => new
+                {
+                    c.AppVersion,
+                    Id = c.Id.DbMax()
+                }));
+
+            return new SixnetUpdateDatabaseContext()
+            {
+                UpdateParameter = parameter,
+                VersionMaxRecordIds = versionGroupMaxRecords?.ToDictionary(c => Version.Parse(c.AppVersion), c => c.Id) ?? new Dictionary<Version, long>(0)
+            };
         }
 
         #endregion

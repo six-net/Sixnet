@@ -294,7 +294,8 @@ namespace Sixnet.Development.Data
         Table = 1,
         Column = 2,
         Index = 3,
-        Constraint = 4
+        Constraint = 4,
+        TempTable = 5
     }
 
     #endregion

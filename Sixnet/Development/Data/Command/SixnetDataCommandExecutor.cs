@@ -1081,9 +1081,18 @@ namespace Sixnet.Development.Command
             {
                 cmd.MigrationInfo = new SixnetMigrationInfo();
             });
+            var defaultTableName = SixnetDataManager.GetDefaultTableName(SixnetDataCommandExecutionContext.Create(connection), entityConfig);
+            if (string.IsNullOrWhiteSpace(oldTableName.SchemaName)) 
+            {
+                oldTableName.SchemaName = defaultTableName.SchemaName;
+            }
+            if (string.IsNullOrWhiteSpace(newTableName.SchemaName))
+            {
+                newTableName.SchemaName = defaultTableName.SchemaName;
+            }
             if (string.IsNullOrWhiteSpace(newTableName.Name))
             {
-                newTableName.Name = SixnetDataManager.GetDefaultTableName(SixnetDataCommandExecutionContext.Create(connection), entityConfig).Name;
+                newTableName.Name = defaultTableName.Name;
             }
             if (entityConfig?.IsSplitTable ?? false)
             {
