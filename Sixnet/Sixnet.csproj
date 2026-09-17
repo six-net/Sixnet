@@ -6,7 +6,25 @@
 		<LangVersion>12.0</LangVersion>
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>sixnet.snk</AssemblyOriginatorKeyFile>
+		<Title>$(AssemblyName)</Title>
+		<Authors>DingBin.Li</Authors>
+		<Owners>DingBin.Li</Owners>
+		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/sixnet-net</PackageProjectUrl>
+		<Copyright>Copyright © DingBin.Li</Copyright>
+		<PackageTags>.NET;Sixnet;DDD</PackageTags>
+		<Description>A simple, easy-to-use, flexible, and efficient .NET development framework</Description>
+		<PackageIcon>nugeticon.png</PackageIcon>
+		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <None Include="..\nugeticon.png">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.9" />
