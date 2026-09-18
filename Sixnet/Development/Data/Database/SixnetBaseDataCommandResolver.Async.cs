@@ -4,7 +4,7 @@ using System.Collections;
 using System.Data;
 using System.Text;
 using System.Threading.Tasks;
-
+using Sixnet.DependencyInjection;
 using Sixnet.Development.Data.Command;
 using Sixnet.Development.Data.Field;
 using Sixnet.Development.Data.Field.Formatting;
@@ -388,6 +388,13 @@ namespace Sixnet.Development.Data.Database
         public virtual async Task<List<SixnetExecutionDatabaseStatement>> GenerateDatabaseMigrationStatementsAsync(SixnetMigrationDatabaseCommand command)
         {
             var statements = new List<SixnetExecutionDatabaseStatement>();
+
+            var migrationInfo = command.MigrationInfo;
+            if (migrationInfo.Schemas.IsNullOrEmpty())
+            {
+                var dataOptions = SixnetContainer.GetOptions<SixnetDataOptions>();
+                migrationInfo.Schemas = [dataOptions.GetDatabaseDefaultSchema(command.Connection)];
+            }
 
             #region Clear database
 
