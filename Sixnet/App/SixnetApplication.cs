@@ -33,8 +33,8 @@ namespace Sixnet.App
         /// </summary>
         static readonly List<string> _conventionFileNamePatterns = new()
         {
-            @"\.Modules\.",
-            @"\.Module\."
+            @"\.Modules",
+            @"\.Module"
         };
 
         /// <summary>
