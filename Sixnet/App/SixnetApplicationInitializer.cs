@@ -3,7 +3,7 @@
 using System.Reflection;
 using System.Runtime;
 using System.Text.RegularExpressions;
-
+using AutoMapper.Internal;
 using Sixnet.DependencyInjection;
 using Sixnet.Development.Data;
 using Sixnet.Development.Data.Database;
@@ -185,12 +185,15 @@ namespace Sixnet.App
 
         static bool IsDirectFromInterface(Type interfaceType, Type classType)
         {
+            var baseTypes = classType.BaseClassesAndInterfaces();
+            if (baseTypes.IsNullOrEmpty())
+            {
+                return false;
+            }
+
             return classType != null
                 && interfaceType != null
-                && interfaceType.IsAssignableFrom(classType)
-                && (classType.BaseType == null
-                    || classType.BaseType == typeof(object)
-                    || !interfaceType.IsAssignableFrom(classType.BaseType));
+                && baseTypes.Any(bt => bt == interfaceType);
         }
 
         #endregion
