@@ -1233,7 +1233,7 @@ namespace Sixnet.Development.Command
                     {
                         Name = dataFieldObject,
                         Desc = dataField.HasDbFeature(SixnetFieldDbFeature.IndexDesc),
-                        Sequence = dataField.IndexSequence
+                        Sequence = dataField.DbIndexSequence
                     });
                 }
             }
@@ -1286,7 +1286,7 @@ namespace Sixnet.Development.Command
                     {
                         Name = dataFieldObject,
                         Desc = dataField.HasDbFeature(SixnetFieldDbFeature.IndexDesc),
-                        Sequence = dataField.IndexSequence
+                        Sequence = dataField.DbIndexSequence
                     });
                 }
             }

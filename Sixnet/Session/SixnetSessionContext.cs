@@ -16,26 +16,6 @@ namespace Sixnet.Session
         /// </summary>
         static readonly AsyncLocal<SixnetSession> current = new();
 
-        /// <summary>
-        /// User id key
-        /// </summary>
-        public static string UserIdKey = "sixnet_usr_id";
-
-        /// <summary>
-        /// User name key
-        /// </summary>
-        public static string UserNameKey = "sixnet_usr_name";
-
-        /// <summary>
-        /// Personal name key
-        /// </summary>
-        public static string PersonalNameKey = "sixnet_personal_name";
-
-        /// <summary>
-        /// User display name key
-        /// </summary>
-        public static string UserDisplayNameKey = "sixnet_usr_disname";
-
         #endregion
 
         #region Properties

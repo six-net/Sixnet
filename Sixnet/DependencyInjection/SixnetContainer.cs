@@ -540,6 +540,10 @@ namespace Sixnet.DependencyInjection
                     {
                         SixnetObjectIdHelper.InitAppObjectIds();
                     }
+                    if (!options.NotAutoInitEntityValidation)
+                    {
+                        SixnetEntityManager.InitAllEntityValidation();
+                    }
                     options.ApplicationStarted(options);
                 });
 

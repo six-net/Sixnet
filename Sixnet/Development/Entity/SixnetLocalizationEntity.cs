@@ -19,19 +19,19 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Code
         /// </summary>
-        [SixnetEntityField(Role = SixnetFieldRole.PrimaryKey, Length = 700)]
+        [SixnetEntityField(DbRole = SixnetFieldRole.PrimaryKey, DbLength = 700)]
         public string Code { get; set; }
 
         /// <summary>
         /// Text
         /// </summary>
-        [SixnetEntityField(Length = 2000)]
+        [SixnetEntityField(DbLength = 2000)]
         public string Text { get; set; }
 
         /// <summary>
         /// Description
         /// </summary>
-        [SixnetEntityField(Length = 2000)]
+        [SixnetEntityField(DbLength = 2000)]
         public string Description { get; set; }
     }
 }

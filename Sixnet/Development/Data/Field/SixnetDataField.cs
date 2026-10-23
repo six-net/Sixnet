@@ -4,6 +4,7 @@ using Sixnet.Development.Data.Field.Formatting;
 using Sixnet.Development.Entity;
 using Sixnet.Exceptions;
 using Sixnet.Expressions.Linq;
+using Sixnet.Validation;
 
 namespace Sixnet.Development.Data.Field
 {
@@ -33,11 +34,6 @@ namespace Sixnet.Development.Data.Field
         internal Type DataType { get; set; }
 
         /// <summary>
-        /// Field name
-        /// </summary>
-        internal string FieldName { get; set; }
-
-        /// <summary>
         /// Gets the field identity
         /// </summary>
         public string FieldIdentity => identityValue;
@@ -63,19 +59,59 @@ namespace Sixnet.Development.Data.Field
         public string Description { get; set; }
 
         /// <summary>
-        /// Gets or sets the field role
+        /// Field name
         /// </summary>
-        public SixnetFieldRole Role { get; set; } = SixnetFieldRole.None;
+        internal string DbFieldName { get; set; }
 
         /// <summary>
-        /// Gets or sets cache option
+        /// Gets or sets the field role
         /// </summary>
-        public SixnetFieldCacheRole CacheRole { get; set; } = SixnetFieldCacheRole.None;
+        public SixnetFieldRole DbRole { get; set; } = SixnetFieldRole.None;
 
         /// <summary>
         /// Gets or sets db feature
         /// </summary>
         public SixnetFieldDbFeature DbFeature { get; set; } = SixnetFieldDbFeature.None;
+
+        /// <summary>
+        /// Gets or sets the database type
+        /// </summary>
+        public string DbType { get; set; }
+
+        /// <summary>
+        /// Gets or sets the length
+        /// </summary>
+        public int DbLength { get; set; }
+
+        /// <summary>
+        /// Precision
+        /// </summary>
+        public int DbPrecision { get; set; }
+
+        /// <summary>
+        /// Gets or sets default value
+        /// </summary>
+        public string DbDefaultValue { get; set; }
+
+        /// <summary>
+        /// Gets or sets the start value
+        /// </summary>
+        public long DbStartValue { get; set; }
+
+        /// <summary>
+        /// Gets or sets the increment value
+        /// </summary>
+        public int DbIncrementValue { get; set; }
+
+        /// <summary>
+        /// Gets or sets the index sequence
+        /// </summary>
+        public int DbIndexSequence { get; set; }
+
+        /// <summary>
+        /// Gets or sets cache option
+        /// </summary>
+        public SixnetFieldCacheRole CacheRole { get; set; } = SixnetFieldCacheRole.None;
 
         /// <summary>
         /// Gets or sets field behavior
@@ -86,26 +122,6 @@ namespace Sixnet.Development.Data.Field
         /// Gets or sets the file object name
         /// </summary>
         public string FileObjectName { get; set; }
-
-        /// <summary>
-        /// Gets or sets the database type
-        /// </summary>
-        public string DbType { get; set; }
-
-        /// <summary>
-        /// Gets or sets the length
-        /// </summary>
-        public int Length { get; set; }
-
-        /// <summary>
-        /// Precision
-        /// </summary>
-        public int Precision { get; set; }
-
-        /// <summary>
-        /// Gets or sets default value
-        /// </summary>
-        public string DefaultValue { get; set; }
 
         /// <summary>
         /// Gets or sets the value provider
@@ -123,19 +139,64 @@ namespace Sixnet.Development.Data.Field
         public bool IsSimpleConstant => false;
 
         /// <summary>
-        /// Gets or sets the start value
+        /// Gets or sets the validators
         /// </summary>
-        public long StartValue { get; set; }
+        public SixnetValidatorType[] Validators { get; set; }
 
         /// <summary>
-        /// Gets or sets the increment value
+        /// Gets or sets the validation operator
         /// </summary>
-        public int IncrementValue { get; set; }
+        public SixnetCompareOperator ValidationOperator { get; set; }
 
         /// <summary>
-        /// Gets or sets the index sequence
+        /// Gets or sets the validation value
         /// </summary>
-        public int IndexSequence {  get; set; }
+        public dynamic ValidationValue { get; set; }
+
+        /// <summary>
+        /// Gets or sets the enum type
+        /// </summary>
+        public Type ValidationEnumType { get; set; }
+
+        /// <summary>
+        /// Gets or sets the max value
+        /// </summary>
+        public dynamic ValidationMaxValue { get; set; }
+
+        /// <summary>
+        /// Gets or sets the min value
+        /// </summary>
+        public dynamic ValidationMinValue { get; set; }
+
+        /// <summary>
+        /// Gets or sets the lower boundary
+        /// </summary>
+        public SixnetRangeBoundary ValidationLowerBoundary { get; set; } = SixnetRangeBoundary.Include;
+
+        /// <summary>
+        /// Gets or sets the upper boundary
+        /// </summary>
+        public SixnetRangeBoundary ValidationUpperBoundary { get; set; } = SixnetRangeBoundary.Include;
+
+        /// <summary>
+        /// Gets or sets the error message
+        /// </summary>
+        public string ValidationErrorMessage { get; set; }
+
+        /// <summary>
+        /// Gets or sets the tip
+        /// </summary>
+        public bool ValidationTip { get; set; }
+
+        /// <summary>
+        /// Gets or sets the compare type
+        /// </summary>
+        public SixnetValidationCompareObject ValidationCompareType { get; set; } = SixnetValidationCompareObject.Value;
+
+        /// <summary>
+        /// Gets or sets ignore scenarios
+        /// </summary>
+        public string[] ValidationIgnoreScenarios { get; set; }
 
         #endregion
 
@@ -167,14 +228,14 @@ namespace Sixnet.Development.Data.Field
             };
             field.ModelTypeIndex = modelTypeIndex;
             field.FormatSetting = fieldFormatSetting;
-            field.FieldName = string.IsNullOrWhiteSpace(fieldName) ? propertyName : fieldName;
+            field.DbFieldName = string.IsNullOrWhiteSpace(fieldName) ? propertyName : fieldName;
             field.identityValue = field.GetIdentity();
             return field;
         }
 
         string GetIdentity()
         {
-            return $"{ModelType?.GUID}_{FieldName}_{PropertyName}";
+            return $"{ModelType?.GUID}_{DbFieldName}_{PropertyName}";
         }
 
         #endregion
@@ -190,26 +251,26 @@ namespace Sixnet.Development.Data.Field
             return new SixnetDataField()
             {
                 Description = Description,
-                Role = Role,
+                DbRole = DbRole,
                 CacheRole = CacheRole,
                 DbFeature = DbFeature,
                 Behavior = Behavior,
                 FormatSetting = FormatSetting?.Clone(),
                 DbType = DbType,
-                Length = Length,
-                Precision = Precision,
-                DefaultValue = DefaultValue,
+                DbLength = DbLength,
+                DbPrecision = DbPrecision,
+                DbDefaultValue = DbDefaultValue,
                 ValueProvider = ValueProvider,
                 identityValue = identityValue,
                 ModelType = ModelType,
                 DataType = DataType,
-                FieldName = FieldName,
+                DbFieldName = DbFieldName,
                 PropertyName = PropertyName,
                 ModelTypeIndex = ModelTypeIndex,
                 fixedFieldName = fixedFieldName,
                 FileObjectName = FileObjectName,
-                IncrementValue = IncrementValue,
-                StartValue = StartValue,
+                DbIncrementValue = DbIncrementValue,
+                DbStartValue = DbStartValue,
             };
         }
 
@@ -239,7 +300,7 @@ namespace Sixnet.Development.Data.Field
         /// <returns></returns>
         public override int GetHashCode()
         {
-            return $"{ModelType?.GUID}{FieldName}{PropertyName}".GetHashCode();
+            return $"{ModelType?.GUID}{DbFieldName}{PropertyName}".GetHashCode();
         }
 
         public override string ToString()
@@ -267,7 +328,7 @@ namespace Sixnet.Development.Data.Field
         /// <returns></returns>
         public virtual bool InRole(SixnetFieldRole role)
         {
-            return (Role & role) == role;
+            return (DbRole & role) == role;
         }
 
         /// <summary>
@@ -367,7 +428,7 @@ namespace Sixnet.Development.Data.Field
         /// <returns></returns>
         public string GetFieldName(SixnetDatabaseType databaseType)
         {
-            var fieldName = FieldName;
+            var fieldName = DbFieldName;
             var entityType = GetModelType();
             if (entityType != null && !fixedFieldName)
             {
@@ -391,7 +452,7 @@ namespace Sixnet.Development.Data.Field
         /// <param name="fieldName"></param>
         public void SetFieldName(string fieldName)
         {
-            FieldName = fieldName;
+            DbFieldName = fieldName;
             fixedFieldName = true;
         }
 

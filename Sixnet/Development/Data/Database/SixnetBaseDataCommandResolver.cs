@@ -810,7 +810,7 @@ namespace Sixnet.Development.Data.Database
                                         {
                                             Desc = fieldDesc,
                                             Name = entityFieldName,
-                                            Sequence = entityField.IndexSequence
+                                            Sequence = entityField.DbIndexSequence
                                         });
                                     }
                                     indexInfos.Add(newIndexInfo);
@@ -2549,13 +2549,13 @@ namespace Sixnet.Development.Data.Database
                 {
                     tablePetName = context.GetTablePetName(queryable, fieldModelType, regularField.ModelTypeIndex);
                 }
-                if (regularField.FieldName == "*")
+                if (regularField.DbFieldName == "*")
                 {
-                    formatedFieldName = fieldName = regularField.FieldName;
+                    formatedFieldName = fieldName = regularField.DbFieldName;
                 }
                 else
                 {
-                    var formatObjectName = FormatObjectName(SixnetDatabaseObjectName.Create(regularField.FieldName, SixnetDatabaseObjectType.Column));
+                    var formatObjectName = FormatObjectName(SixnetDatabaseObjectName.Create(regularField.DbFieldName, SixnetDatabaseObjectType.Column));
                     fieldName = formatObjectName.Name;
                     formatedFieldName = GetObjectFullName(WrapObjectName(formatObjectName));
                 }
@@ -3156,7 +3156,7 @@ namespace Sixnet.Development.Data.Database
         protected virtual string GetSqlDefaultValue(SixnetDataField field, SixnetMigrationInfo options)
         {
             SixnetDirectThrower.ThrowArgNullIf(field == null, nameof(field));
-            var defaultValue = field.DefaultValue;
+            var defaultValue = field.DbDefaultValue;
             var useDefaultValue = field.HasDbFeature(SixnetFieldDbFeature.Default);
             if (string.IsNullOrWhiteSpace(defaultValue) && useDefaultValue)
             {

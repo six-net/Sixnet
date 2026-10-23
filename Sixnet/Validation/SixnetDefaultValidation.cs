@@ -130,6 +130,10 @@ namespace Sixnet.Validation
                     MessageArgs = [SixnetLocalizer.GetString(display)]
                 });
             }
+            if(result!=null)
+            {
+                result.FieldName = fieldName;
+            }
             return result;
         }
 

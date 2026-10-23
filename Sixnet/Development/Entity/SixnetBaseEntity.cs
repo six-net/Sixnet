@@ -454,7 +454,7 @@ namespace Sixnet.Development.Entity
                     foreach (var field in generatedIdFields)
                     {
                         var fieldValue = GetValue(field.PropertyName);
-                        if (fieldValue == null || fieldValue <= field.StartValue)
+                        if (fieldValue == null || fieldValue <= field.DbStartValue)
                         {
                             var typeCode = Type.GetTypeCode(field.DataType);
                             switch (typeCode)
@@ -517,7 +517,7 @@ namespace Sixnet.Development.Entity
                     foreach (var field in generatedIdFields)
                     {
                         var fieldValue = GetValue(field.PropertyName);
-                        if (fieldValue == null || fieldValue <= field.StartValue)
+                        if (fieldValue == null || fieldValue <= field.DbStartValue)
                         {
                             var typeCode = Type.GetTypeCode(field.DataType);
                             switch (typeCode)

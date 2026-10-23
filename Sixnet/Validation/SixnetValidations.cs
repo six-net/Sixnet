@@ -917,17 +917,16 @@ namespace Sixnet.Validation
         /// <summary>
         /// Validate data
         /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
         /// <param name="data">Data</param>
         /// <param name="useScenario">Use scenario</param>
         /// <returns>Return verify result</returns>
-        public static List<SixnetValidationResult> Validate<T>(T data, string useScenario = "")
+        public static List<SixnetValidationResult> Validate(object data, string useScenario = "")
         {
             if (data == null)
             {
                 return new List<SixnetValidationResult>(0);
             }
-            var validationList = GetTypeValidations<T>();
+            var validationList = GetTypeValidations(data.GetType());
             var resultList = new List<SixnetValidationResult>();
             foreach (var validation in validationList)
             {

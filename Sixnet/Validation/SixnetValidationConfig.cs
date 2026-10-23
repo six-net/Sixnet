@@ -333,7 +333,7 @@ namespace Sixnet.Validation
         /// <param name="parameterArray">Parameter array</param>
         /// <param name="compareOperator">Compare operator</param>
         /// <param name="fieldInstance">field instance</param>
-        void BuildCompareValidation(Type modelType, object compareValue, CompareObject compareType, ParameterExpression parameterExpression, Type funcType, Array parameterArray, SixnetCompareOperator compareOperator, object fieldInstance)
+        void BuildCompareValidation(Type modelType, object compareValue, SixnetValidationCompareObject compareType, ParameterExpression parameterExpression, Type funcType, Array parameterArray, SixnetCompareOperator compareOperator, object fieldInstance)
         {
             MethodInfo compareMethod = _validationMethods.FirstOrDefault(c => c.Name == "SetCompareValidation");
             if (compareValue == null || compareMethod == null)
@@ -342,7 +342,7 @@ namespace Sixnet.Validation
             }
             switch (compareType)
             {
-                case CompareObject.Field:
+                case SixnetValidationCompareObject.Field:
                     string[] comparePropertyNameArray = compareValue?.ToString().LSplit(".");
                     Expression comparePropertyExpress = null;
                     foreach (string pname in comparePropertyNameArray)

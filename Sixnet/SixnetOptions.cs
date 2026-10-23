@@ -73,6 +73,11 @@ namespace Sixnet
         /// </summary>
         public bool TraceFrameworkLog { get; set; }
 
+        /// <summary>
+        /// Whether not auto init entity validation
+        /// </summary>
+        public bool NotAutoInitEntityValidation { get; set; }
+
         #endregion
 
         #region Methods

@@ -1,11 +1,14 @@
 ﻿// "Company © 2025. All rights reserved."
 
+using System.Net.Http.Headers;
 using System.Reflection;
 
 using Sixnet.Development.Data.Database;
 using Sixnet.Development.Data.Field;
 using Sixnet.Expressions.Linq;
+using Sixnet.Localization;
 using Sixnet.Reflection;
+using Sixnet.Validation;
 
 namespace Sixnet.Development.Entity
 {
@@ -117,8 +120,8 @@ namespace Sixnet.Development.Entity
                 var propertyName = fieldName;
                 var fieldRole = SixnetFieldRole.None;
                 var entityFieldAttribute = (member.GetCustomAttributes(typeof(SixnetEntityFieldAttribute), false)?.FirstOrDefault()) as SixnetEntityFieldAttribute;
-                fieldRole = entityFieldAttribute?.Role ?? SixnetFieldRole.None;
-                fieldName = string.IsNullOrWhiteSpace(entityFieldAttribute?.FieldName) ? fieldName : entityFieldAttribute.FieldName;
+                fieldRole = entityFieldAttribute?.DbRole ?? SixnetFieldRole.None;
+                fieldName = string.IsNullOrWhiteSpace(entityFieldAttribute?.DbFieldName) ? fieldName : entityFieldAttribute.DbFieldName;
                 Type memberType = null;
                 if (member is PropertyInfo propertyInfo)
                 {
@@ -136,30 +139,42 @@ namespace Sixnet.Development.Entity
                 }
                 var propertyField = new SixnetDataField()
                 {
-                    FieldName = fieldName,
+                    DbFieldName = fieldName,
                     PropertyName = propertyName,
                     CacheRole = entityFieldAttribute?.CacheRole ?? SixnetFieldCacheRole.None,
-                    Role = fieldRole,
+                    DbRole = fieldRole,
                     Behavior = entityFieldAttribute?.Behavior ?? SixnetFieldBehavior.None,
                     DataType = memberType,
                     DbType = entityFieldAttribute?.DbType,
-                    Length = entityFieldAttribute?.Length ?? 0,
+                    DbLength = entityFieldAttribute?.DbLength ?? 0,
                     Description = entityFieldAttribute?.Description ?? string.Empty,
                     FileObjectName = fileObjectName,
                     ModelType = entityType,
                     DbFeature = entityFieldAttribute?.DbFeature ?? SixnetFieldDbFeature.None,
                     FormatSetting = entityFieldAttribute?.FormatSetting,
-                    Precision = entityFieldAttribute?.Precision ?? 0,
-                    DefaultValue = entityFieldAttribute?.DefaultValue ?? string.Empty,
-                    IncrementValue = entityFieldAttribute?.IncrementValue ?? 0,
-                    IndexSequence = entityFieldAttribute?.IndexSequence ?? 0
+                    DbPrecision = entityFieldAttribute?.DbPrecision ?? 0,
+                    DbDefaultValue = entityFieldAttribute?.DbDefaultValue ?? string.Empty,
+                    DbIncrementValue = entityFieldAttribute?.DbIncrementValue ?? 0,
+                    DbIndexSequence = entityFieldAttribute?.DbIndexSequence ?? 0,
+                    Validators = entityFieldAttribute?.Validators,
+                    ValidationOperator = entityFieldAttribute?.ValidationOperator ?? SixnetCompareOperator.Equal,
+                    ValidationValue = entityFieldAttribute?.ValidationValue,
+                    ValidationEnumType = entityFieldAttribute?.ValidationEnumType,
+                    ValidationMaxValue = entityFieldAttribute?.ValidationMaxValue,
+                    ValidationMinValue = entityFieldAttribute?.ValidationMinValue,
+                    ValidationLowerBoundary = entityFieldAttribute?.ValidationLowerBoundary ?? SixnetRangeBoundary.Include,
+                    ValidationUpperBoundary = entityFieldAttribute?.ValidationUpperBoundary ?? SixnetRangeBoundary.Include,
+                    ValidationErrorMessage = entityFieldAttribute?.ValidationErrorMessage,
+                    ValidationTip = entityFieldAttribute?.ValidationTip ?? false,
+                    ValidationCompareType = entityFieldAttribute?.ValidationCompareType ?? SixnetValidationCompareObject.Field,
+                    ValidationIgnoreScenarios = entityFieldAttribute?.ValidationIgnoreScenarios
                 };
-                var fieldStartValue = entityFieldAttribute?.StartValue ?? 0;
+                var fieldStartValue = entityFieldAttribute?.DbStartValue ?? 0;
                 if (propertyField.InRole(SixnetFieldRole.PrimaryKey) && fieldStartValue == 0)
                 {
                     fieldStartValue = entityAttribute.PrimaryKeyStartValue;
                 }
-                propertyField.StartValue = fieldStartValue;
+                propertyField.DbStartValue = fieldStartValue;
 
                 //value provider
                 var valueProvider = GetValueProvider(entityType, member);
@@ -682,6 +697,188 @@ namespace Sixnet.Development.Entity
             }
             var entityConfig = GetEntityConfig(entityType);
             return entityConfig?.PredicateType ?? _funcType.MakeGenericType(entityType, _booleanType);
+        }
+
+        #endregion
+
+        #region Init entity validation
+
+        /// <summary>
+        /// Init all entity validation
+        /// </summary>
+        internal static void InitAllEntityValidation()
+        {
+            if (_entityConfigurations.IsNullOrEmpty())
+            {
+                return;
+            }
+            var validationConfig = new SixnetValidationConfig() { Types = new List<SixnetTypeValidationSetting>() };
+
+            foreach (var entityConfig in _entityConfigurations.Values)
+            {
+                if (entityConfig.AllFields.IsNullOrEmpty())
+                {
+                    return;
+                }
+                var typeValidationSetting = new SixnetTypeValidationSetting()
+                {
+                    TypeAssemblyQualifiedName = entityConfig.EntityType.AssemblyQualifiedName,
+                    Properties = new List<SixnetPropertyValidationSetting>()
+                };
+                foreach (var field in entityConfig.AllFields.Values)
+                {
+                    var propertyValidationSetting = new SixnetPropertyValidationSetting()
+                    {
+                        Name = field.PropertyName,
+                        Rules = new List<SixnetValidatorSetting>()
+                    };
+                    if (!field.Validators.IsNullOrEmpty())
+                    {
+                        foreach (var validator in field.Validators)
+                        {
+                            var validationSetting = new SixnetValidatorSetting()
+                            {
+                                Type = validator,
+                                Operator = field.ValidationOperator,
+                                Value = field.ValidationValue,
+                                EnumType = field.ValidationEnumType?.FullName,
+                                MaxValue = field.ValidationMaxValue,
+                                MinValue = field.ValidationMinValue,
+                                LowerBoundary = field.ValidationLowerBoundary,
+                                UpperBoundary = field.ValidationUpperBoundary,
+                                ErrorMessage = FormatValidationErrorMessage(validator, field.ValidationOperator, field.ValidationErrorMessage),
+                                TipMessage = field.ValidationTip,
+                                CompareType = field.ValidationCompareType,
+                                IgnoreUseScenarios = field.ValidationIgnoreScenarios?.ToList()
+                            };
+                            propertyValidationSetting.Rules.Add(validationSetting);
+                        }
+                    }
+                    typeValidationSetting.Properties.Add(propertyValidationSetting);
+                }
+                validationConfig.Types.Add(typeValidationSetting);
+            }
+
+            validationConfig.BuildValidation();
+        }
+
+        static string FormatValidationErrorMessage(SixnetValidatorType validatorType, SixnetCompareOperator compareOperator, string errorMessage)
+        {
+            if (string.IsNullOrWhiteSpace(errorMessage))
+            {
+                switch (validatorType)
+                {
+                    case SixnetValidatorType.Compare:
+                        errorMessage = SixnetResourceKeys.compare_value;
+                        break;
+                    case SixnetValidatorType.CreditCard:
+                        errorMessage = SixnetResourceKeys.wrong_value;
+                        break;
+                    case SixnetValidatorType.Email:
+                        errorMessage = SixnetResourceKeys.wrong_value;
+                        break;
+                    case SixnetValidatorType.EnumType:
+                        errorMessage = SixnetResourceKeys.wrong_value;
+                        break;
+                    case SixnetValidatorType.MaxLength:
+                        errorMessage = SixnetResourceKeys.string_max_length_value;
+                        break;
+                    case SixnetValidatorType.MinLength:
+                        errorMessage = SixnetResourceKeys.string_min_length_value;
+                        break;
+                    case SixnetValidatorType.Phone:
+                        errorMessage = SixnetResourceKeys.wrong_value;
+                        break;
+                    case SixnetValidatorType.Range:
+                        errorMessage = SixnetResourceKeys.range_value;
+                        break;
+                    case SixnetValidatorType.RegularExpression:
+                        errorMessage = SixnetResourceKeys.wrong_value;
+                        break;
+                    case SixnetValidatorType.Required:
+                        errorMessage = SixnetResourceKeys.required_value;
+                        break;
+                    case SixnetValidatorType.StringLength:
+                        errorMessage = SixnetResourceKeys.string_length_value;
+                        break;
+                    case SixnetValidatorType.Url:
+                        errorMessage = SixnetResourceKeys.wrong_value;
+                        break;
+                    case SixnetValidatorType.Integer:
+                        errorMessage = SixnetResourceKeys.integer_value;
+                        break;
+                    case SixnetValidatorType.PositiveInteger:
+                        errorMessage = SixnetResourceKeys.positive_integer_value;
+                        break;
+                    case SixnetValidatorType.PositiveIntegerOrZero:
+                        errorMessage = SixnetResourceKeys.positive_integer_or_zero_value;
+                        break;
+                    case SixnetValidatorType.NegativeInteger:
+                        errorMessage = SixnetResourceKeys.negative_integer_value;
+                        break;
+                    case SixnetValidatorType.NegativeIntegerOrZero:
+                        errorMessage = SixnetResourceKeys.negative_integer_or_zero_value;
+                        break;
+                    case SixnetValidatorType.Fraction:
+                        errorMessage = SixnetResourceKeys.fraction_value;
+                        break;
+                    case SixnetValidatorType.PositiveFraction:
+                        errorMessage = SixnetResourceKeys.positive_fraction_value;
+                        break;
+                    case SixnetValidatorType.NegativeFraction:
+                        errorMessage = SixnetResourceKeys.negative_fraction_value;
+                        break;
+                    case SixnetValidatorType.PositiveFractionOrZero:
+                        errorMessage = SixnetResourceKeys.positive_fraction_or_zero_value;
+                        break;
+                    case SixnetValidatorType.NegativeFractionOrZero:
+                        errorMessage = SixnetResourceKeys.negative_fraction_or_zero_value;
+                        break;
+                    case SixnetValidatorType.Number:
+                        errorMessage = SixnetResourceKeys.number_value;
+                        break;
+                    case SixnetValidatorType.Color:
+                        errorMessage = SixnetResourceKeys.wrong_value;
+                        break;
+                    case SixnetValidatorType.Chinese:
+                        errorMessage = SixnetResourceKeys.chinese_value;
+                        break;
+                    case SixnetValidatorType.PostCode:
+                        errorMessage = SixnetResourceKeys.wrong_value;
+                        break;
+                    case SixnetValidatorType.Mobile:
+                        errorMessage = SixnetResourceKeys.wrong_value;
+                        break;
+                    case SixnetValidatorType.IPV4:
+                        errorMessage = SixnetResourceKeys.wrong_value;
+                        break;
+                    case SixnetValidatorType.Date:
+                        errorMessage = SixnetResourceKeys.wrong_value;
+                        break;
+                    case SixnetValidatorType.DateTime:
+                        errorMessage = SixnetResourceKeys.wrong_value;
+                        break;
+                    case SixnetValidatorType.Letter:
+                        errorMessage = SixnetResourceKeys.letter_value;
+                        break;
+                    case SixnetValidatorType.UpperLetter:
+                        errorMessage = SixnetResourceKeys.upper_letter_value;
+                        break;
+                    case SixnetValidatorType.LowerLetter:
+                        errorMessage = SixnetResourceKeys.lower_letter_value;
+                        break;
+                    case SixnetValidatorType.IdentityCard:
+                        errorMessage = SixnetResourceKeys.wrong_value;
+                        break;
+                    case SixnetValidatorType.ImageFile:
+                        errorMessage = SixnetResourceKeys.wrong_value;
+                        break;
+                    case SixnetValidatorType.CompressFile:
+                        errorMessage = SixnetResourceKeys.wrong_value;
+                        break;
+                }
+            }
+            return errorMessage;
         }
 
         #endregion

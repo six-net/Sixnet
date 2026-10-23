@@ -1498,7 +1498,7 @@ namespace Sixnet.Development.Data.Client
         public void AlterField<TEntity>(Expression<Func<TEntity, object>> field, SixnetDataOperationOptions options = null)
         {
             var dataField = SixnetExpressionHelper.GetDataField(field) as SixnetDataField;
-            AlterField(typeof(TEntity), new Dictionary<string, SixnetDataField>(1) { { dataField.FieldName, dataField } }, options);
+            AlterField(typeof(TEntity), new Dictionary<string, SixnetDataField>(1) { { dataField.DbFieldName, dataField } }, options);
         }
 
         /// <summary>
@@ -1510,7 +1510,7 @@ namespace Sixnet.Development.Data.Client
         public void AlterField<TEntity>(Expression<Func<TEntity, object>> field, Action<SixnetDataField> configureField, SixnetDataOperationOptions options = null)
         {
             var dataField = SixnetExpressionHelper.GetDataField(field) as SixnetDataField;
-            var currentFieldName = dataField.FieldName;
+            var currentFieldName = dataField.DbFieldName;
             configureField?.Invoke(dataField);
             AlterField(typeof(TEntity), new Dictionary<string, SixnetDataField>(1) { { currentFieldName, dataField } }, options);
         }

@@ -11,25 +11,25 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Create date
         /// </summary>
-        [SixnetEntityField(Description = "Create date", Role = SixnetFieldRole.CreateDate)]
+        [SixnetEntityField(Description = "Create date", DbRole = SixnetFieldRole.CreateDate)]
         public DateTimeOffset CreateDate { get; set; }
 
         /// <summary>
         /// Create user id
         /// </summary>
-        [SixnetEntityField(Description = "Create user id", Role = SixnetFieldRole.CreateUserId)]
+        [SixnetEntityField(Description = "Create user id", DbRole = SixnetFieldRole.CreateUserId)]
         public long CreateUserId { get; set; }
 
         /// <summary>
         /// Create user name
         /// </summary>
-        [SixnetEntityField(Description = "Create user name", Role = SixnetFieldRole.CreateUserName, Length = 50)]
+        [SixnetEntityField(Description = "Create user name", DbRole = SixnetFieldRole.CreateUserName, DbLength = 50)]
         public string CreateUserName { get; set; }
 
         /// <summary>
         /// Create user display name
         /// </summary>
-        [SixnetEntityField(Description = "Create user display name", Role = SixnetFieldRole.CreateUserDisplayName, Length = 200)]
+        [SixnetEntityField(Description = "Create user display name", DbRole = SixnetFieldRole.CreateUserDisplayName, DbLength = 200)]
         public string CreateUserDisplayName { get; set; }
     }
 
@@ -42,7 +42,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Tenant id
         /// </summary>
-        [SixnetEntityField(Description = "Tenant id", Role = SixnetFieldRole.Isolation)]
+        [SixnetEntityField(Description = "Tenant id", DbRole = SixnetFieldRole.Isolation)]
         public long TenantId { get; set; }
     }
 
@@ -55,25 +55,25 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Update date
         /// </summary>
-        [SixnetEntityField(Description = "Update date", Role = SixnetFieldRole.UpdateDate)]
+        [SixnetEntityField(Description = "Update date", DbRole = SixnetFieldRole.UpdateDate)]
         public DateTimeOffset UpdateDate { get; set; }
 
         /// <summary>
         /// Update user id
         /// </summary>
-        [SixnetEntityField(Description = "Update user id", Role = SixnetFieldRole.UpdateUserId)]
+        [SixnetEntityField(Description = "Update user id", DbRole = SixnetFieldRole.UpdateUserId)]
         public long UpdateUserId { get; set; }
 
         /// <summary>
         /// Update user name
         /// </summary>
-        [SixnetEntityField(Description = "Update user name", Role = SixnetFieldRole.UpdateUserName, Length = 50)]
+        [SixnetEntityField(Description = "Update user name", DbRole = SixnetFieldRole.UpdateUserName, DbLength = 50)]
         public string UpdateUserName { get; set; }
 
         /// <summary>
         /// Update user display name
         /// </summary>
-        [SixnetEntityField(Description = "Update user display name", Role = SixnetFieldRole.UpdateUserDisplayName, Length = 200)]
+        [SixnetEntityField(Description = "Update user display name", DbRole = SixnetFieldRole.UpdateUserDisplayName, DbLength = 200)]
         public string UpdateUserDisplayName { get; set; }
     }
 
@@ -86,7 +86,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Tenant id
         /// </summary>
-        [SixnetEntityField(Description = "Tenant id", Role = SixnetFieldRole.Isolation)]
+        [SixnetEntityField(Description = "Tenant id", DbRole = SixnetFieldRole.Isolation)]
         public long TenantId { get; set; }
     }
 
@@ -99,25 +99,25 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Update date
         /// </summary>
-        [SixnetEntityField(Description = "Update date", Role = SixnetFieldRole.UpdateDate)]
+        [SixnetEntityField(Description = "Update date", DbRole = SixnetFieldRole.UpdateDate)]
         public DateTimeOffset UpdateDate { get; set; }
 
         /// <summary>
         /// Update user id
         /// </summary>
-        [SixnetEntityField(Description = "Update user id", Role = SixnetFieldRole.UpdateUserId)]
+        [SixnetEntityField(Description = "Update user id", DbRole = SixnetFieldRole.UpdateUserId)]
         public long UpdateUserId { get; set; }
 
         /// <summary>
         /// Update user name
         /// </summary>
-        [SixnetEntityField(Description = "Update user name", Role = SixnetFieldRole.UpdateUserName, Length = 50)]
+        [SixnetEntityField(Description = "Update user name", DbRole = SixnetFieldRole.UpdateUserName, DbLength = 50)]
         public string UpdateUserName { get; set; }
 
         /// <summary>
         /// Update display name
         /// </summary>
-        [SixnetEntityField(Description = "Update display name", Role = SixnetFieldRole.UpdateUserDisplayName, Length = 200)]
+        [SixnetEntityField(Description = "Update display name", DbRole = SixnetFieldRole.UpdateUserDisplayName, DbLength = 200)]
         public string UpdateUserDisplayName { get; set; }
     }
 
@@ -130,7 +130,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Tenant id
         /// </summary>
-        [SixnetEntityField(Description = "Tenant id", Role = SixnetFieldRole.Isolation)]
+        [SixnetEntityField(Description = "Tenant id", DbRole = SixnetFieldRole.Isolation)]
         public long TenantId { get; set; }
     }
 }

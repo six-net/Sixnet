@@ -584,7 +584,10 @@ namespace Sixnet.Expressions.Linq
                 {
                     for (int i = 0; i < parameterExps.Count; i++)
                     {
-                        parameterIndexes[parameterExps[i].Name] = i;
+                        if (!string.IsNullOrWhiteSpace(parameterExps[i].Name))
+                        {
+                            parameterIndexes[parameterExps[i].Name] = i;
+                        }
                     }
                 }
             }
@@ -1270,7 +1273,7 @@ namespace Sixnet.Expressions.Linq
                             var propertyName = string.IsNullOrWhiteSpace(cusPropertyName) ? memberName : cusPropertyName;
                             var modelType = parameterExp.Type;
                             var modelTypeIndex = 0;
-                            parameterIndexes?.TryGetValue(parameterExp.Name, out modelTypeIndex);
+                            parameterIndexes?.TryGetValue(parameterExp.Name ?? string.Empty, out modelTypeIndex);
                             var entityField = SixnetEntityManager.GetField(modelType, memberName);
                             if (entityField?.FormatSetting != null)
                             {
@@ -1279,7 +1282,7 @@ namespace Sixnet.Expressions.Linq
                                 fieldFormatSetting = fildOriginalFormattingSetting;
                                 innermostFieldFormatSetting ??= fildOriginalFormattingSetting;
                             }
-                            var propertyField = SixnetDataField.Create(propertyName, modelType, modelTypeIndex, null, entityField?.FieldName);
+                            var propertyField = SixnetDataField.Create(propertyName, modelType, modelTypeIndex, null, entityField?.DbFieldName);
                             propertyField.DataType = memberExpression.Type;
                             dataField = propertyField;
                             isEnd = true;

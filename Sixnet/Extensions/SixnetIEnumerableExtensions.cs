@@ -275,7 +275,7 @@ namespace System.Collections.Generic
                 {
                     columnName = databaseType.HasValue
                         ? entityField.GetFieldName(databaseType.Value)
-                        : entityField.FieldName;
+                        : entityField.DbFieldName;
                 }
                 columnNameDict[property.Name] = columnName;
                 table.Columns.Add(columnName, property.PropertyType.GetRealValueType());
@@ -288,7 +288,7 @@ namespace System.Collections.Generic
                 {
                     columnName = databaseType.HasValue
                         ? entityField.GetFieldName(databaseType.Value)
-                        : entityField.FieldName;
+                        : entityField.DbFieldName;
                 }
                 columnNameDict[field.Name] = columnName;
                 table.Columns.Add(columnName, field.FieldType.GetRealValueType());

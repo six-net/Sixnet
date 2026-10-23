@@ -1386,7 +1386,7 @@ namespace Sixnet.Development.Data.Client
         public Task AlterFieldAsync<TEntity>(Expression<Func<TEntity, object>> field, SixnetDataOperationOptions options = null)
         {
             var dataField = SixnetExpressionHelper.GetDataField(field) as SixnetDataField;
-            return AlterFieldAsync(typeof(TEntity), new Dictionary<string, SixnetDataField>(1) { { dataField.FieldName, dataField } }, options);
+            return AlterFieldAsync(typeof(TEntity), new Dictionary<string, SixnetDataField>(1) { { dataField.DbFieldName, dataField } }, options);
         }
 
         /// <summary>
@@ -1398,7 +1398,7 @@ namespace Sixnet.Development.Data.Client
         public Task AlterFieldAsync<TEntity>(Expression<Func<TEntity, object>> field, Action<SixnetDataField> configureField, SixnetDataOperationOptions options = null)
         {
             var dataField = SixnetExpressionHelper.GetDataField(field) as SixnetDataField;
-            var currentFieldName = dataField.FieldName;
+            var currentFieldName = dataField.DbFieldName;
             configureField?.Invoke(dataField);
             return AlterFieldAsync(typeof(TEntity), new Dictionary<string, SixnetDataField>(1) { { currentFieldName, dataField } }, options);
         }

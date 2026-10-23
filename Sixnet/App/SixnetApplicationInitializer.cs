@@ -3,7 +3,9 @@
 using System.Reflection;
 using System.Runtime;
 using System.Text.RegularExpressions;
+
 using AutoMapper.Internal;
+
 using Sixnet.DependencyInjection;
 using Sixnet.Development.Data;
 using Sixnet.Development.Data.Database;
@@ -147,15 +149,15 @@ namespace Sixnet.App
 
                     static bool containEventHandlerTag(Type t)
                     {
-                        return (t.GetCustomAttributes(false)?.Any(ta => 
+                        return (t.GetCustomAttributes(false)?.Any(ta =>
                         {
                             var classAttributeType = ta.GetType();
                             return classAttributeType.IsGenericType &&
                                    classAttributeType.GetGenericTypeDefinition() == typeof(SixnetEventHandlerAttribute<>);
 
-                        }) ?? false) || (t.GetMethods(BindingFlags.Public | BindingFlags.Instance)?.Any(m => 
+                        }) ?? false) || (t.GetMethods(BindingFlags.Public | BindingFlags.Instance)?.Any(m =>
                         {
-                            return m.GetCustomAttributes(false)?.Any(ma => 
+                            return m.GetCustomAttributes(false)?.Any(ma =>
                             {
                                 var methodAttributeType = ma.GetType();
                                 return methodAttributeType.IsGenericType &&

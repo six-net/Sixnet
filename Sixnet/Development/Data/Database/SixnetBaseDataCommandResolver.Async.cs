@@ -4,6 +4,7 @@ using System.Collections;
 using System.Data;
 using System.Text;
 using System.Threading.Tasks;
+
 using Sixnet.DependencyInjection;
 using Sixnet.Development.Data.Command;
 using Sixnet.Development.Data.Field;
@@ -1539,13 +1540,13 @@ namespace Sixnet.Development.Data.Database
                 {
                     tablePetName = context.GetTablePetName(queryable, fieldModelType, regularField.ModelTypeIndex);
                 }
-                if (regularField.FieldName == "*")
+                if (regularField.DbFieldName == "*")
                 {
-                    formatedFieldName = fieldName = regularField.FieldName;
+                    formatedFieldName = fieldName = regularField.DbFieldName;
                 }
                 else
                 {
-                    var formatObjectName = FormatObjectName(SixnetDatabaseObjectName.Create(regularField.FieldName, SixnetDatabaseObjectType.Column));
+                    var formatObjectName = FormatObjectName(SixnetDatabaseObjectName.Create(regularField.DbFieldName, SixnetDatabaseObjectType.Column));
                     fieldName = formatObjectName.Name;
                     formatedFieldName = GetObjectFullName(WrapObjectName(formatObjectName));
                 }

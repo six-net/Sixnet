@@ -60,7 +60,7 @@ namespace Sixnet.Validation
         /// <summary>
         /// Gets or sets the compare type
         /// </summary>
-        public CompareObject CompareType { get; set; }
+        public SixnetValidationCompareObject CompareType { get; set; }
 
         /// <summary>
         /// Ignore use scenarios
@@ -72,7 +72,7 @@ namespace Sixnet.Validation
     /// Defines compare object
     /// </summary>
     [Serializable]
-    public enum CompareObject
+    public enum SixnetValidationCompareObject
     {
         Field,
         Value

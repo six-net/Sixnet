@@ -1,6 +1,7 @@
 ﻿// "Company © 2025. All rights reserved."
 
 using Sixnet.Development.Data.Field.Formatting;
+using Sixnet.Validation;
 
 namespace Sixnet.Development.Entity
 {
@@ -11,9 +12,9 @@ namespace Sixnet.Development.Entity
     public class SixnetEntityFieldAttribute : Attribute
     {
         /// <summary>
-        /// Gets or sets the field name
+        /// Gets or sets the db field name
         /// </summary>
-        public string FieldName { get; set; }
+        public string DbFieldName { get; set; }
 
         /// <summary>
         /// Gets or sets the field description
@@ -23,12 +24,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Gets or sets the field role
         /// </summary>
-        public SixnetFieldRole Role { get; set; } = SixnetFieldRole.None;
-
-        /// <summary>
-        /// Gets or sets the cache role
-        /// </summary>
-        public SixnetFieldCacheRole CacheRole { get; set; } = SixnetFieldCacheRole.None;
+        public SixnetFieldRole DbRole { get; set; } = SixnetFieldRole.None;
 
         /// <summary>
         /// Gets or sets db feature
@@ -36,9 +32,49 @@ namespace Sixnet.Development.Entity
         public SixnetFieldDbFeature DbFeature { get; set; } = SixnetFieldDbFeature.None;
 
         /// <summary>
+        /// Gets or sets the database type
+        /// </summary>
+        public string DbType { get; set; }
+
+        /// <summary>
+        /// Gets or sets the length
+        /// </summary>
+        public int DbLength { get; set; }
+
+        /// <summary>
+        /// Precision
+        /// </summary>
+        public int DbPrecision { get; set; }
+
+        /// <summary>
+        /// Gets or sets default value
+        /// </summary>
+        public string DbDefaultValue { get; set; }
+
+        /// <summary>
+        /// Gets or sets the start value
+        /// </summary>
+        public long DbStartValue { get; set; }
+
+        /// <summary>
+        /// Gets or sets the increment value
+        /// </summary>
+        public int DbIncrementValue { get; set; }
+
+        /// <summary>
+        /// Gets or sets the index sequence
+        /// </summary>
+        public int DbIndexSequence { get; set; }
+
+        /// <summary>
         /// Gets or sets field behavior
         /// </summary>
         public SixnetFieldBehavior Behavior { get; set; } = SixnetFieldBehavior.None;
+
+        /// <summary>
+        /// Gets or sets the cache role
+        /// </summary>
+        public SixnetFieldCacheRole CacheRole { get; set; } = SixnetFieldCacheRole.None;
 
         /// <summary>
         /// Gets or sets the file object name
@@ -51,38 +87,63 @@ namespace Sixnet.Development.Entity
         public SixnetFieldFormatSetting FormatSetting { get; set; }
 
         /// <summary>
-        /// Gets or sets the database type
+        /// Gets or sets the validators
         /// </summary>
-        public string DbType { get; set; }
+        public SixnetValidatorType[] Validators { get; set; }
 
         /// <summary>
-        /// Gets or sets the length
+        /// Gets or sets the validation operator
         /// </summary>
-        public int Length { get; set; }
+        public SixnetCompareOperator ValidationOperator { get; set; } = SixnetCompareOperator.Equal;
 
         /// <summary>
-        /// Precision
+        /// Gets or sets the validation value
         /// </summary>
-        public int Precision { get; set; }
+        public dynamic ValidationValue { get; set; }
 
         /// <summary>
-        /// Gets or sets default value
+        /// Gets or sets the enum type
         /// </summary>
-        public string DefaultValue { get; set; }
+        public Type ValidationEnumType { get; set; }
 
         /// <summary>
-        /// Gets or sets the start value
+        /// Gets or sets the max value
         /// </summary>
-        public long StartValue { get; set; }
+        public dynamic ValidationMaxValue { get; set; }
 
         /// <summary>
-        /// Gets or sets the increment value
+        /// Gets or sets the min value
         /// </summary>
-        public int IncrementValue { get; set; }
+        public dynamic ValidationMinValue { get; set; }
 
         /// <summary>
-        /// Gets or sets the index sequence
+        /// Gets or sets the lower boundary
         /// </summary>
-        public int IndexSequence { get; set; }
+        public SixnetRangeBoundary ValidationLowerBoundary { get; set; } = SixnetRangeBoundary.Include;
+
+        /// <summary>
+        /// Gets or sets the upper boundary
+        /// </summary>
+        public SixnetRangeBoundary ValidationUpperBoundary { get; set; } = SixnetRangeBoundary.Include;
+
+        /// <summary>
+        /// Gets or sets the error message
+        /// </summary>
+        public string ValidationErrorMessage { get; set; }
+
+        /// <summary>
+        /// Gets or sets the tip
+        /// </summary>
+        public bool ValidationTip { get; set; }
+
+        /// <summary>
+        /// Gets or sets the compare type
+        /// </summary>
+        public SixnetValidationCompareObject ValidationCompareType { get; set; } = SixnetValidationCompareObject.Value;
+
+        /// <summary>
+        /// Gets or sets ignore scenarios
+        /// </summary>
+        public string[] ValidationIgnoreScenarios { get; set; }
     }
 }

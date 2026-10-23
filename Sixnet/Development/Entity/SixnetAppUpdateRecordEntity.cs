@@ -19,13 +19,13 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Id
         /// </summary>
-        [SixnetEntityField(Role = SixnetFieldRole.PrimaryKey)]
+        [SixnetEntityField(DbRole = SixnetFieldRole.PrimaryKey)]
         public long Id { get; set; }
 
         /// <summary>
         /// App version
         /// </summary>
-        [SixnetEntityField(Length = 30)]
+        [SixnetEntityField(DbLength = 30)]
         public string AppVersion { get; set; }
 
         /// <summary>
@@ -43,7 +43,7 @@ namespace Sixnet.Development.Entity
         /// <summary>
         /// Note
         /// </summary>
-        [SixnetEntityField(Length = 2000)]
+        [SixnetEntityField(DbLength = 2000)]
         public string Note { get; set; }
     }
 }

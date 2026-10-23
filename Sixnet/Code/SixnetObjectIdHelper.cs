@@ -370,7 +370,7 @@ namespace Sixnet.Code
                 foreach (var fieldItem in generadeIdFields)
                 {
                     var field = fieldItem.Value;
-                    var dataField = SixnetDataField.Create(field.PropertyName, entityConfig.EntityType, 0, null, field.FieldName);
+                    var dataField = SixnetDataField.Create(field.PropertyName, entityConfig.EntityType, 0, null, field.DbFieldName);
                     dataField.FormatSetting = SixnetFieldFormatSetting.Create(SixnetFieldFormatterNames.MAX);
                     var maxValue = SixnetQuerier.Create()
                         .SetModelType(entityConfig.EntityType)
@@ -378,7 +378,7 @@ namespace Sixnet.Code
                         .IgnoreIsolation()
                         .IncludeArchived()
                         .Scalar<long>();
-                    maxValue = maxValue < field.StartValue ? field.StartValue : maxValue;
+                    maxValue = maxValue < field.DbStartValue ? field.DbStartValue : maxValue;
                     objectIdEntries.Add(new ObjectIdEntry()
                     {
                         ObjectName = GetObjectNameByType(entityConfig.EntityType),
