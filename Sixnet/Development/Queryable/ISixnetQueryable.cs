@@ -351,6 +351,18 @@ namespace Sixnet.Development.Queryable
         /// <returns></returns>
         ISixnetQueryable<TTable> AsTempTable<TTable>();
 
+        /// <summary>
+        /// From all versions
+        /// </summary>
+        /// <returns></returns>
+        ISixnetQueryable FromAllVersions();
+
+        /// <summary>
+        /// From all versions
+        /// </summary>
+        /// <returns></returns>
+        ISixnetQueryable FromAllVersionsIf(bool predicate);
+
         #endregion
 
         #region Split table
@@ -485,6 +497,32 @@ namespace Sixnet.Development.Queryable
         /// <param name="filterType">Filter type</param>
         /// <returns></returns>
         ISixnetQueryable IgnoreFilter(Type filterType);
+
+        /// <summary>
+        /// Include archived
+        /// </summary>
+        /// <returns></returns>
+        ISixnetQueryable IncludeArchivedIf(bool predicate);
+
+        /// <summary>
+        /// Ignore data isolation
+        /// </summary>
+        /// <returns></returns>
+        ISixnetQueryable IgnoreIsolationIf(bool predicate);
+
+        /// <summary>
+        /// Ignore filter
+        /// </summary>
+        /// <typeparam name="TFilter">Filter type</typeparam>
+        /// <returns></returns>
+        ISixnetQueryable IgnoreFilterIf<TFilter>(bool predicate);
+
+        /// <summary>
+        /// Ignore filter
+        /// </summary>
+        /// <param name="filterType">Filter type</param>
+        /// <returns></returns>
+        ISixnetQueryable IgnoreFilterIf(bool predicate, Type filterType);
 
         /// <summary>
         /// Has ignored filter
@@ -1478,6 +1516,18 @@ namespace Sixnet.Development.Queryable
         /// <returns></returns>
         new ISixnetQueryable<TFirst> From(params string[] tableNames);
 
+        /// <summary>
+        /// From all versions
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst> FromAllVersions();
+
+        /// <summary>
+        /// From all versions
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst> FromAllVersionsIf(bool predicate);
+
         #endregion
 
         #region Split table
@@ -1540,6 +1590,32 @@ namespace Sixnet.Development.Queryable
         /// <param name="filterType">Filter type</param>
         /// <returns></returns>
         new ISixnetQueryable<TFirst> IgnoreFilter(Type filterType);
+
+        /// <summary>
+        /// Include archived
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst> IncludeArchivedIf(bool predicate);
+
+        /// <summary>
+        /// Ignore data isolation
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst> IgnoreIsolationIf(bool predicate);
+
+        /// <summary>
+        /// Ignore filter
+        /// </summary>
+        /// <typeparam name="TFilter">Filter type</typeparam>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst> IgnoreFilterIf<TFilter>(bool predicate);
+
+        /// <summary>
+        /// Ignore filter
+        /// </summary>
+        /// <param name="filterType">Filter type</param>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst> IgnoreFilterIf(bool predicate, Type filterType);
 
         #endregion
 
@@ -2231,6 +2307,18 @@ namespace Sixnet.Development.Queryable
         /// <returns></returns>
         new ISixnetQueryable<TFirst, TSecond> From(params string[] tableNames);
 
+        /// <summary>
+        /// From all versions
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond> FromAllVersions();
+
+        /// <summary>
+        /// From all versions
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond> FromAllVersionsIf(bool predicate);
+
         #endregion
 
         #region Split table
@@ -2293,6 +2381,32 @@ namespace Sixnet.Development.Queryable
         /// <param name="filterType">Filter type</param>
         /// <returns></returns>
         new ISixnetQueryable<TFirst, TSecond> IgnoreFilter(Type filterType);
+
+        /// <summary>
+        /// Include archived
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond> IncludeArchivedIf(bool predicate);
+
+        /// <summary>
+        /// Ignore data isolation
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond> IgnoreIsolationIf(bool predicate);
+
+        /// <summary>
+        /// Ignore filter
+        /// </summary>
+        /// <typeparam name="TFilter">Filter type</typeparam>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond> IgnoreFilterIf<TFilter>(bool predicate);
+
+        /// <summary>
+        /// Ignore filter
+        /// </summary>
+        /// <param name="filterType">Filter type</param>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond> IgnoreFilterIf(bool predicate, Type filterType);
 
         #endregion
 
@@ -3086,6 +3200,18 @@ namespace Sixnet.Development.Queryable
         /// <returns></returns>
         new ISixnetQueryable<TFirst, TSecond, TThird> From(params string[] tableNames);
 
+        /// <summary>
+        /// From all versions
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird> FromAllVersions();
+
+        /// <summary>
+        /// From all versions
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird> FromAllVersionsIf(bool predicate);
+
         #endregion
 
         #region Split table
@@ -3148,6 +3274,32 @@ namespace Sixnet.Development.Queryable
         /// <param name="filterType">Filter type</param>
         /// <returns></returns>
         new ISixnetQueryable<TFirst, TSecond, TThird> IgnoreFilter(Type filterType);
+
+        /// <summary>
+        /// Include archived
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird> IncludeArchivedIf(bool predicate);
+
+        /// <summary>
+        /// Ignore data isolation
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird> IgnoreIsolationIf(bool predicate);
+
+        /// <summary>
+        /// Ignore filter
+        /// </summary>
+        /// <typeparam name="TFilter">Filter type</typeparam>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird> IgnoreFilterIf<TFilter>(bool predicate);
+
+        /// <summary>
+        /// Ignore filter
+        /// </summary>
+        /// <param name="filterType">Filter type</param>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird> IgnoreFilterIf(bool predicate, Type filterType);
 
         #endregion
 
@@ -4034,6 +4186,18 @@ namespace Sixnet.Development.Queryable
         /// <returns></returns>
         new ISixnetQueryable<TFirst, TSecond, TThird, TFourth> From(params string[] tableNames);
 
+        /// <summary>
+        /// From all versions
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth> FromAllVersions();
+
+        /// <summary>
+        /// From all versions
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth> FromAllVersionsIf(bool predicate);
+
         #endregion
 
         #region Split table
@@ -4096,6 +4260,32 @@ namespace Sixnet.Development.Queryable
         /// <param name="filterType">Filter type</param>
         /// <returns></returns>
         new ISixnetQueryable<TFirst, TSecond, TThird, TFourth> IgnoreFilter(Type filterType);
+
+        /// <summary>
+        /// Include archived
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth> IncludeArchivedIf(bool predicate);
+
+        /// <summary>
+        /// Ignore data isolation
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth> IgnoreIsolationIf(bool predicate);
+
+        /// <summary>
+        /// Ignore filter
+        /// </summary>
+        /// <typeparam name="TFilter">Filter type</typeparam>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth> IgnoreFilterIf<TFilter>(bool predicate);
+
+        /// <summary>
+        /// Ignore filter
+        /// </summary>
+        /// <param name="filterType">Filter type</param>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth> IgnoreFilterIf(bool predicate, Type filterType);
 
         #endregion
 
@@ -5071,6 +5261,18 @@ namespace Sixnet.Development.Queryable
         /// <returns></returns>
         new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> From(params string[] tableNames);
 
+        /// <summary>
+        /// From all versions
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> FromAllVersions();
+
+        /// <summary>
+        /// From all versions
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> FromAllVersionsIf(bool predicate);
+
         #endregion
 
         #region Split table
@@ -5133,6 +5335,32 @@ namespace Sixnet.Development.Queryable
         /// <param name="filterType">Filter type</param>
         /// <returns></returns>
         new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> IgnoreFilter(Type filterType);
+
+        /// <summary>
+        /// Include archived
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> IncludeArchivedIf(bool predicate);
+
+        /// <summary>
+        /// Ignore data isolation
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> IgnoreIsolationIf(bool predicate);
+
+        /// <summary>
+        /// Ignore filter
+        /// </summary>
+        /// <typeparam name="TFilter">Filter type</typeparam>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> IgnoreFilterIf<TFilter>(bool predicate);
+
+        /// <summary>
+        /// Ignore filter
+        /// </summary>
+        /// <param name="filterType">Filter type</param>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> IgnoreFilterIf(bool predicate, Type filterType);
 
         #endregion
 
@@ -6197,6 +6425,18 @@ namespace Sixnet.Development.Queryable
         /// <returns></returns>
         new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> From(params string[] tableNames);
 
+        /// <summary>
+        /// From all versions
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> FromAllVersions();
+
+        /// <summary>
+        /// From all versions
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> FromAllVersionsIf(bool predicate);
+
         #endregion
 
         #region Split table
@@ -6259,6 +6499,32 @@ namespace Sixnet.Development.Queryable
         /// <param name="filterType">Filter type</param>
         /// <returns></returns>
         new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> IgnoreFilter(Type filterType);
+
+        /// <summary>
+        /// Include archived
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> IncludeArchivedIf(bool predicate);
+
+        /// <summary>
+        /// Ignore data isolation
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> IgnoreIsolationIf(bool predicate);
+
+        /// <summary>
+        /// Ignore filter
+        /// </summary>
+        /// <typeparam name="TFilter">Filter type</typeparam>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> IgnoreFilterIf<TFilter>(bool predicate);
+
+        /// <summary>
+        /// Ignore filter
+        /// </summary>
+        /// <param name="filterType">Filter type</param>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> IgnoreFilterIf(bool predicate, Type filterType);
 
         #endregion
 
@@ -7196,6 +7462,18 @@ namespace Sixnet.Development.Queryable
         /// <returns></returns>
         new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> From(params string[] tableNames);
 
+        /// <summary>
+        /// From all versions
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> FromAllVersions();
+
+        /// <summary>
+        /// From all versions
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> FromAllVersionsIf(bool predicate);
+
         #endregion
 
         #region Split table
@@ -7258,6 +7536,32 @@ namespace Sixnet.Development.Queryable
         /// <param name="filterType">Filter type</param>
         /// <returns></returns>
         new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> IgnoreFilter(Type filterType);
+
+        /// <summary>
+        /// Include archived
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> IncludeArchivedIf(bool predicate);
+
+        /// <summary>
+        /// Ignore data isolation
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> IgnoreIsolationIf(bool predicate);
+
+        /// <summary>
+        /// Ignore filter
+        /// </summary>
+        /// <typeparam name="TFilter">Filter type</typeparam>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> IgnoreFilterIf<TFilter>(bool predicate);
+
+        /// <summary>
+        /// Ignore filter
+        /// </summary>
+        /// <param name="filterType">Filter type</param>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> IgnoreFilterIf(bool predicate, Type filterType);
 
         #endregion
 

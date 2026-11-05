@@ -118,6 +118,8 @@ namespace Sixnet.Development.Data.Database
         public SixnetMigrationInfo MigrationInfo { get; set; }
 
         public SixnetEntityConfiguration EntityConfiguration { get; set; }
+
+        public SixnetDatabaseObjectName TableName { get; set; }
     }
 
     public class SixnetColumnDefineInfo

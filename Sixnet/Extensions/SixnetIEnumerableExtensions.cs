@@ -265,7 +265,8 @@ namespace System.Collections.Generic
             var entityConfig = SixnetEntityManager.GetEntityConfig(dataType);
             table.TableName = entityConfig == null
                 ? dataType.Name
-                : SixnetDataManager.GetDefaultTableName(SixnetDataCommandExecutionContext.Create(null, null), entityConfig).FullName;
+                : SixnetDataManager.GetDefaultTableNames(SixnetDataCommandExecutionContext.Create(null, null), entityConfig)
+                  ?.FirstOrDefault(c => !c.IsHistoricalTable).FullName;
             var columnNameDict = new Dictionary<string, string>();
             foreach (var property in properties)
             {

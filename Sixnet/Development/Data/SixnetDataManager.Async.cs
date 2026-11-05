@@ -40,8 +40,8 @@ namespace Sixnet.Development.Data
             }
             else // default table name
             {
-                var tableName = GetDefaultTableName(context, entityConfig);
-                return new List<SixnetDatabaseObjectName>(1) { tableName };
+                var tableNames = GetDefaultTableNames(context, entityConfig);
+                return tableNames;
             }
         }
 
@@ -62,87 +62,95 @@ namespace Sixnet.Development.Data
             SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"Not set split table provider for {entityConfig.SplitTableProviderName}");
 
             var splitBehavior = context.GetSplitTableBehavior() ?? _defaultSplitTableBehavior;
-            var rootTableName = GetDefaultTableName(context, entityConfig, context.Command?.TableName);
-            var splitedTableNames = provider.ResolveTableNames(new SixnetResolveSplitTableNameParameter()
-            {
-                EntityConfiguration = entityConfig,
-                RootTableName = rootTableName,
-                SplitBehavior = splitBehavior
-            });
-            var resolvedTableNames = splitedTableNames;
+            var defaultTableNames = GetDefaultTableNames(context, entityConfig, context.Command?.TableName);
 
-            // all table names
-            var serverTableKey = GetDatabaseServerSplitTableCacheKey(entityConfig, context.Server, rootTableName);
-            var allTableNames = await GetCachedTableNamesAsync(serverTableKey, rootTableName).ConfigureAwait(false);
-            if (allTableNames.IsNullOrEmpty())
-            {
-                allTableNames = await RefreshTablesAsync(context, rootTableName, serverTableKey, splitBehavior, provider).ConfigureAwait(false);
-            }
+            var allSplitedTableNames = new List<SixnetDatabaseObjectName>();
 
-            // split table names
-            if (context.Command?.OperationType == SixnetDataOperationType.Insert)
+            foreach (var rootTableName in defaultTableNames)
             {
-                SixnetDirectThrower.ThrowInvalidOperationIf(splitedTableNames.IsNullOrEmpty(), $"Not assign split table for {entityConfig.EntityType.Name}");
-                var diffTables = splitedTableNames.Except(allTableNames);
-                if (!diffTables.IsNullOrEmpty())
+                var splitedTableNames = provider.ResolveTableNames(new SixnetResolveSplitTableNameParameter()
+                {
+                    EntityConfiguration = entityConfig,
+                    RootTableName = rootTableName,
+                    SplitBehavior = splitBehavior
+                });
+
+                var resolvedTableNames = splitedTableNames;
+
+                // all table names
+                var serverTableKey = GetDatabaseServerSplitTableCacheKey(entityConfig, context.Server, rootTableName);
+                var allTableNames = await GetCachedTableNamesAsync(serverTableKey, rootTableName).ConfigureAwait(false);
+                if (allTableNames.IsNullOrEmpty())
                 {
                     allTableNames = await RefreshTablesAsync(context, rootTableName, serverTableKey, splitBehavior, provider).ConfigureAwait(false);
-                    diffTables = splitedTableNames.Except(allTableNames);
                 }
-                if (!diffTables.IsNullOrEmpty() && dataOptions.AutoCreateSplitTable)
+
+                // split table names
+                if (context.Command?.OperationType == SixnetDataOperationType.Insert)
                 {
-                    var createTableLock = await SixnetLocker.GetCreateTableLockAsync(entityConfig.EntityType).ConfigureAwait(false);
-                    if (createTableLock != null)
-                    {
-                        try
-                        {
-                            allTableNames = await GetCachedTableNamesAsync(serverTableKey, rootTableName).ConfigureAwait(false);
-                            diffTables = splitedTableNames.Except(allTableNames);
-                            if (!diffTables.IsNullOrEmpty())
-                            {
-                                await AutoCreateTablesAsync(context, rootTableName, serverTableKey, entityConfig, diffTables, splitBehavior, provider).ConfigureAwait(false);
-                            }
-                        }
-                        catch
-                        {
-                            throw;
-                        }
-                        finally
-                        {
-                            await createTableLock.Value.ReleaseAsync().ConfigureAwait(false);
-                        }
-                    }
-                }
-            }
-            else
-            {
-                if (splitBehavior.IsTakeAllSplitTables(splitedTableNames))
-                {
-                    if (allTableNames.IsNullOrEmpty())
+                    SixnetDirectThrower.ThrowInvalidOperationIf(splitedTableNames.IsNullOrEmpty(), $"Not assign split table for {entityConfig.EntityType.Name}");
+                    var diffTables = splitedTableNames.Except(allTableNames);
+                    if (!diffTables.IsNullOrEmpty())
                     {
                         allTableNames = await RefreshTablesAsync(context, rootTableName, serverTableKey, splitBehavior, provider).ConfigureAwait(false);
+                        diffTables = splitedTableNames.Except(allTableNames);
                     }
-                    splitedTableNames = allTableNames;
+                    if (!diffTables.IsNullOrEmpty() && dataOptions.AutoCreateSplitTable)
+                    {
+                        var createTableLock = await SixnetLocker.GetCreateTableLockAsync(entityConfig.EntityType).ConfigureAwait(false);
+                        if (createTableLock != null)
+                        {
+                            try
+                            {
+                                allTableNames = await GetCachedTableNamesAsync(serverTableKey, rootTableName).ConfigureAwait(false);
+                                diffTables = splitedTableNames.Except(allTableNames);
+                                if (!diffTables.IsNullOrEmpty())
+                                {
+                                    await AutoCreateTablesAsync(context, rootTableName, serverTableKey, entityConfig, diffTables, splitBehavior, provider).ConfigureAwait(false);
+                                }
+                            }
+                            catch
+                            {
+                                throw;
+                            }
+                            finally
+                            {
+                                await createTableLock.Value.ReleaseAsync().ConfigureAwait(false);
+                            }
+                        }
+                    }
                 }
-                var diffTables = splitedTableNames.Except(allTableNames);
-                if (!diffTables.IsNullOrEmpty())
+                else
                 {
-                    allTableNames = await RefreshTablesAsync(context, rootTableName, serverTableKey, splitBehavior, provider).ConfigureAwait(false);
-                    diffTables = splitedTableNames.Except(allTableNames);
+                    if (splitBehavior.IsTakeAllSplitTables(splitedTableNames))
+                    {
+                        if (allTableNames.IsNullOrEmpty())
+                        {
+                            allTableNames = await RefreshTablesAsync(context, rootTableName, serverTableKey, splitBehavior, provider).ConfigureAwait(false);
+                        }
+                        splitedTableNames = allTableNames;
+                    }
+                    var diffTables = splitedTableNames.Except(allTableNames);
+                    if (!diffTables.IsNullOrEmpty())
+                    {
+                        allTableNames = await RefreshTablesAsync(context, rootTableName, serverTableKey, splitBehavior, provider).ConfigureAwait(false);
+                        diffTables = splitedTableNames.Except(allTableNames);
+                    }
+                    if (!diffTables.IsNullOrEmpty())
+                    {
+                        splitedTableNames = splitedTableNames.Except(diffTables).ToList();
+                    }
+                    splitedTableNames = provider.GetTableNames(new SixnetGetSplitTableNameParameter()
+                    {
+                        ResolvedTableNames = splitedTableNames,
+                        AllTableNames = allTableNames,
+                        RootTableName = rootTableName,
+                        Behavior = splitBehavior
+                    });
                 }
-                if (!diffTables.IsNullOrEmpty())
-                {
-                    splitedTableNames = splitedTableNames.Except(diffTables).ToList();
-                }
-                splitedTableNames = provider.GetTableNames(new SixnetGetSplitTableNameParameter()
-                {
-                    ResolvedTableNames = splitedTableNames,
-                    AllTableNames = allTableNames,
-                    RootTableName = rootTableName,
-                    Behavior = splitBehavior
-                });
+                allSplitedTableNames.AddRange(splitedTableNames.IsNullOrEmpty() ? resolvedTableNames : splitedTableNames); 
             }
-            return splitedTableNames.IsNullOrEmpty() ? resolvedTableNames : splitedTableNames;
+            return allSplitedTableNames;
         }
 
         /// <summary>

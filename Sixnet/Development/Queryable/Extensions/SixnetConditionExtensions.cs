@@ -1,5 +1,7 @@
 ﻿// "Company © 2025. All rights reserved."
 
+using System.Diagnostics.Metrics;
+
 using Sixnet.Development.Data.Field;
 using Sixnet.Development.Entity;
 using Sixnet.Exceptions;
@@ -39,9 +41,9 @@ namespace Sixnet.Development.Queryable
         /// <param name="originalQueryable"></param>
         /// <param name="entities"></param>
         /// <returns></returns>
-        public static ISixnetQueryable IncludeEntities<TEntity>(this ISixnetQueryable originalQueryable, IEnumerable<TEntity> entities) where TEntity : class, ISixnetEntity<TEntity>
+        public static ISixnetQueryable IncludeEntities<TEntity>(this ISixnetQueryable originalQueryable, IEnumerable<TEntity> entities, IEnumerable<string> ignorePks = null) where TEntity : class, ISixnetEntity<TEntity>
         {
-            return AppendEntityIdentityCore(entities, originalQueryable, false);
+            return AppendEntityIdentityCore(entities, originalQueryable, false, ignorePks);
         }
 
         /// <summary>
@@ -51,9 +53,9 @@ namespace Sixnet.Development.Queryable
         /// <param name="originalQueryable"></param>
         /// <param name="entity"></param>
         /// <returns></returns>
-        public static ISixnetQueryable IncludeEntity<TEntity>(this ISixnetQueryable originalQueryable, TEntity entity) where TEntity : class, ISixnetEntity<TEntity>
+        public static ISixnetQueryable IncludeEntity<TEntity>(this ISixnetQueryable originalQueryable, TEntity entity, IEnumerable<string> ignorePks = null) where TEntity : class, ISixnetEntity<TEntity>
         {
-            return AppendEntityIdentityCore(new TEntity[1] { entity }, originalQueryable, false);
+            return AppendEntityIdentityCore(new TEntity[1] { entity }, originalQueryable, false, ignorePks);
         }
 
         /// <summary>
@@ -63,9 +65,9 @@ namespace Sixnet.Development.Queryable
         /// <param name="originalQueryable"></param>
         /// <param name="entities"></param>
         /// <returns></returns>
-        public static ISixnetQueryable ExcludeEntities<TEntity>(this ISixnetQueryable originalQueryable, IEnumerable<TEntity> entities) where TEntity : class, ISixnetEntity<TEntity>
+        public static ISixnetQueryable ExcludeEntities<TEntity>(this ISixnetQueryable originalQueryable, IEnumerable<TEntity> entities, IEnumerable<string> ignorePks = null) where TEntity : class, ISixnetEntity<TEntity>
         {
-            return AppendEntityIdentityCore(entities, originalQueryable, true);
+            return AppendEntityIdentityCore(entities, originalQueryable, true, ignorePks);
         }
 
         /// <summary>
@@ -75,9 +77,9 @@ namespace Sixnet.Development.Queryable
         /// <param name="originalQueryable"></param>
         /// <param name="entity"></param>
         /// <returns></returns>
-        public static ISixnetQueryable ExcludeEntity<TEntity>(this ISixnetQueryable originalQueryable, TEntity entity) where TEntity : class, ISixnetEntity<TEntity>
+        public static ISixnetQueryable ExcludeEntity<TEntity>(this ISixnetQueryable originalQueryable, TEntity entity, IEnumerable<string> ignorePks = null) where TEntity : class, ISixnetEntity<TEntity>
         {
-            return AppendEntityIdentityCore(new TEntity[1] { entity }, originalQueryable, true);
+            return AppendEntityIdentityCore(new TEntity[1] { entity }, originalQueryable, true, ignorePks);
         }
 
         /// <summary>
@@ -89,7 +91,7 @@ namespace Sixnet.Development.Queryable
         /// <param name="originalQueryable">Original queryable</param>
         /// <param name="exclude">Exclude</param>
         /// <returns></returns>
-        static ISixnetQueryable AppendEntityIdentityCore<TEntity>(IEnumerable<TEntity> entities, ISixnetQueryable originalQueryable = null, bool exclude = false) where TEntity : class, ISixnetEntity<TEntity>
+        static ISixnetQueryable AppendEntityIdentityCore<TEntity>(IEnumerable<TEntity> entities, ISixnetQueryable originalQueryable = null, bool exclude = false, IEnumerable<string> ignorePks = null) where TEntity : class, ISixnetEntity<TEntity>
         {
             if (entities.IsNullOrEmpty())
             {
@@ -100,6 +102,14 @@ namespace Sixnet.Development.Queryable
 
             var primaryKeys = SixnetEntityManager.GetPrimaryKeyNames(entityType);
             SixnetDirectThrower.ThrowSixnetExceptionIf(primaryKeys.IsNullOrEmpty(), string.Format("Type:{0} isn't set primary keys", entityType.FullName));
+            if (!ignorePks.IsNullOrEmpty())
+            {
+                primaryKeys = primaryKeys.Except(ignorePks).ToList();
+            }
+            if (primaryKeys.IsNullOrEmpty())
+            {
+                return originalQueryable;
+            }
 
             var primaryKeyValues = new List<dynamic>();
             var primaryKeyCount = primaryKeys.GetCount();

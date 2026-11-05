@@ -109,6 +109,7 @@ namespace Sixnet.Development.Entity
             var necessaryQueryableFields = new List<SixnetDataField>();
             var editableFields = new List<SixnetDataField>();
             var queryableFields = new List<SixnetDataField>();
+
             foreach (var member in memberInfos)
             {
                 var nonDataAttribute = member.GetCustomAttribute<SixnetNotEntityFieldAttribute>();
@@ -170,14 +171,23 @@ namespace Sixnet.Development.Entity
                     ValidationIgnoreScenarios = entityFieldAttribute?.ValidationIgnoreScenarios
                 };
                 var fieldStartValue = entityFieldAttribute?.DbStartValue ?? 0;
-                if (propertyField.InRole(SixnetFieldRole.PrimaryKey) && fieldStartValue == 0)
+                if (propertyField.InRole(SixnetFieldRole.PrimaryKey))
                 {
-                    fieldStartValue = entityAttribute.PrimaryKeyStartValue;
+                    if (fieldStartValue == 0)
+                    {
+                        fieldStartValue = entityAttribute.PrimaryKeyStartValue;
+                    }
                 }
                 propertyField.DbStartValue = fieldStartValue;
 
+                // version
+                if ((entityAttribute.Style & SixnetEntityStyle.Versioning) == SixnetEntityStyle.Versioning && propertyField.InRole(SixnetFieldRole.Version) && !propertyField.InRole(SixnetFieldRole.PrimaryKey))
+                {
+                    propertyField.DbRole |= SixnetFieldRole.PrimaryKey;
+                }
+
                 //value provider
-                var valueProvider = GetValueProvider(entityType, member);
+                var valueProvider = GetValueProvider(entityType, member, memberType);
                 if (valueProvider != null)
                 {
                     propertyField.ValueProvider = valueProvider;
@@ -238,6 +248,7 @@ namespace Sixnet.Development.Entity
 
             allFields = allFields.OrderByDescending(f => f.InRole(SixnetFieldRole.PrimaryKey))
                         .ThenByDescending(c => cacheFieldNames.Contains(c.PropertyName))
+                        .ThenBy(c=>c.PropertyName)
                         .ToList();
             var allFieldDict = new Dictionary<string, SixnetDataField>(allFields.Count);
             foreach (var field in allFields)
@@ -621,7 +632,7 @@ namespace Sixnet.Development.Entity
         /// <param name="member">Member</param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        internal static ISixnetEntityPropertyValueProvider GetValueProvider(Type entityType, MemberInfo member)
+        internal static ISixnetEntityPropertyValueProvider GetValueProvider(Type entityType, MemberInfo member, Type dataType)
         {
             ParameterExpression instanceExpression = Expression.Parameter(entityType);
 
@@ -639,6 +650,8 @@ namespace Sixnet.Development.Entity
             var propertyProvider = Activator.CreateInstance(propertyProviderType);
             var setGetterMethod = propertyProviderType.GetMethod("SetGetter");
             setGetterMethod.Invoke(propertyProvider, new object[] { lambdaExpression });
+            var dataTypeProperty = propertyProviderType.GetProperty("DataType", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+            dataTypeProperty.SetValue(propertyProvider, dataType);
 
             //setter
             lambdaExpression = null;

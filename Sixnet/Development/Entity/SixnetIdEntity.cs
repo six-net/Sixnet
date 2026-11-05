@@ -9,12 +9,12 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class SixnetIdEntity<TId, TEntity> : SixnetBaseEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetIdEntity<TId, TEntity> : SixnetBaseEntity<TEntity>, ISixnetIdEntity<TId> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Id
         /// </summary>
-        [SixnetEntityField(DbRole = SixnetFieldRole.PrimaryKey | SixnetFieldRole.GeneratedId)]
+        [SixnetEntityField(DbRole = SixnetFieldRole.PrimaryKey | SixnetFieldRole.GeneratedId | SixnetFieldRole.DefaultId)]
         public TId Id { get; set; }
     }
 
@@ -23,12 +23,12 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class SixnetIdCreateDateEntity<TId, TEntity> : SixnetCreateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetIdCreateDateEntity<TId, TEntity> : SixnetCreateDateEntity<TEntity>, ISixnetIdEntity<TId> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Id
         /// </summary>
-        [SixnetEntityField(DbRole = SixnetFieldRole.PrimaryKey | SixnetFieldRole.GeneratedId)]
+        [SixnetEntityField(DbRole = SixnetFieldRole.PrimaryKey | SixnetFieldRole.GeneratedId | SixnetFieldRole.DefaultId)]
         public TId Id { get; set; }
     }
 
@@ -37,12 +37,12 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class SixnetIdUpdateDateEntity<TId, TEntity> : SixnetUpdateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetIdUpdateDateEntity<TId, TEntity> : SixnetUpdateDateEntity<TEntity>, ISixnetIdEntity<TId> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Id
         /// </summary>
-        [SixnetEntityField(DbRole = SixnetFieldRole.PrimaryKey | SixnetFieldRole.GeneratedId)]
+        [SixnetEntityField(DbRole = SixnetFieldRole.PrimaryKey | SixnetFieldRole.GeneratedId | SixnetFieldRole.DefaultId)]
         public TId Id { get; set; }
     }
 
@@ -51,12 +51,12 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class SixnetIdCreateUpdateDateEntity<TId, TEntity> : SixnetCreateUpdateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetIdCreateUpdateDateEntity<TId, TEntity> : SixnetCreateUpdateDateEntity<TEntity>, ISixnetIdEntity<TId> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Id
         /// </summary>
-        [SixnetEntityField(DbRole = SixnetFieldRole.PrimaryKey | SixnetFieldRole.GeneratedId)]
+        [SixnetEntityField(DbRole = SixnetFieldRole.PrimaryKey | SixnetFieldRole.GeneratedId | SixnetFieldRole.DefaultId)]
         public TId Id { get; set; }
     }
 
@@ -65,12 +65,12 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class SixnetTenantIdEntity<TId, TEntity> : SixnetTenantEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetTenantIdEntity<TId, TEntity> : SixnetTenantEntity<TEntity>, ISixnetIdEntity<TId> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Id
         /// </summary>
-        [SixnetEntityField(DbRole = SixnetFieldRole.PrimaryKey | SixnetFieldRole.GeneratedId)]
+        [SixnetEntityField(DbRole = SixnetFieldRole.PrimaryKey | SixnetFieldRole.GeneratedId | SixnetFieldRole.DefaultId)]
         public TId Id { get; set; }
     }
 
@@ -79,12 +79,12 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class SixnetTenantIdCreateDateEntity<TId, TEntity> : SixnetTenantCreateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetTenantIdCreateDateEntity<TId, TEntity> : SixnetTenantCreateDateEntity<TEntity>, ISixnetIdEntity<TId> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Id
         /// </summary>
-        [SixnetEntityField(DbRole = SixnetFieldRole.PrimaryKey | SixnetFieldRole.GeneratedId)]
+        [SixnetEntityField(DbRole = SixnetFieldRole.PrimaryKey | SixnetFieldRole.GeneratedId | SixnetFieldRole.DefaultId)]
         public TId Id { get; set; }
     }
 
@@ -93,12 +93,12 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class SixnetTenantIdUpdateDateEntity<TId, TEntity> : SixnetTenantUpdateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetTenantIdUpdateDateEntity<TId, TEntity> : SixnetTenantUpdateDateEntity<TEntity>, ISixnetIdEntity<TId> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Id
         /// </summary>
-        [SixnetEntityField(DbRole = SixnetFieldRole.PrimaryKey | SixnetFieldRole.GeneratedId)]
+        [SixnetEntityField(DbRole = SixnetFieldRole.PrimaryKey | SixnetFieldRole.GeneratedId | SixnetFieldRole.DefaultId)]
         public TId Id { get; set; }
     }
 
@@ -107,12 +107,12 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class SixnetTenantIdCreateUpdateDateEntity<TId, TEntity> : SixnetTenantCreateUpdateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetTenantIdCreateUpdateDateEntity<TId, TEntity> : SixnetTenantCreateUpdateDateEntity<TEntity>, ISixnetIdEntity<TId> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Id
         /// </summary>
-        [SixnetEntityField(DbRole = SixnetFieldRole.PrimaryKey | SixnetFieldRole.GeneratedId)]
+        [SixnetEntityField(DbRole = SixnetFieldRole.PrimaryKey | SixnetFieldRole.GeneratedId | SixnetFieldRole.DefaultId)]
         public TId Id { get; set; }
     }
 
@@ -237,12 +237,12 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class SixnetAutoIdEntity<TId, TEntity> : SixnetBaseEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetAutoIdEntity<TId, TEntity> : SixnetBaseEntity<TEntity>, ISixnetIdEntity<TId> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Id
         /// </summary>
-        [SixnetEntityField(DbRole = SixnetFieldRole.PrimaryKey | SixnetFieldRole.Increment)]
+        [SixnetEntityField(DbRole = SixnetFieldRole.PrimaryKey | SixnetFieldRole.Increment | SixnetFieldRole.DefaultId)]
         public TId Id { get; set; }
     }
 
@@ -251,12 +251,12 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class SixnetAutoIdCreateDateEntity<TId, TEntity> : SixnetCreateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetAutoIdCreateDateEntity<TId, TEntity> : SixnetCreateDateEntity<TEntity>, ISixnetIdEntity<TId> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Id
         /// </summary>
-        [SixnetEntityField(DbRole = SixnetFieldRole.PrimaryKey | SixnetFieldRole.Increment)]
+        [SixnetEntityField(DbRole = SixnetFieldRole.PrimaryKey | SixnetFieldRole.Increment | SixnetFieldRole.DefaultId)]
         public TId Id { get; set; }
     }
 
@@ -265,12 +265,12 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class SixnetAutoIdUpdateDateEntity<TId, TEntity> : SixnetUpdateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetAutoIdUpdateDateEntity<TId, TEntity> : SixnetUpdateDateEntity<TEntity>, ISixnetIdEntity<TId> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Id
         /// </summary>
-        [SixnetEntityField(DbRole = SixnetFieldRole.PrimaryKey | SixnetFieldRole.Increment)]
+        [SixnetEntityField(DbRole = SixnetFieldRole.PrimaryKey | SixnetFieldRole.Increment | SixnetFieldRole.DefaultId)]
         public TId Id { get; set; }
     }
 
@@ -279,12 +279,12 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class SixnetAutoIdCreateUpdateDateEntity<TId, TEntity> : SixnetCreateUpdateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetAutoIdCreateUpdateDateEntity<TId, TEntity> : SixnetCreateUpdateDateEntity<TEntity>, ISixnetIdEntity<TId> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Id
         /// </summary>
-        [SixnetEntityField(DbRole = SixnetFieldRole.PrimaryKey | SixnetFieldRole.Increment)]
+        [SixnetEntityField(DbRole = SixnetFieldRole.PrimaryKey | SixnetFieldRole.Increment | SixnetFieldRole.DefaultId)]
         public TId Id { get; set; }
     }
 
@@ -293,12 +293,12 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class SixnetTenantAutoIdEntity<TId, TEntity> : SixnetTenantEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetTenantAutoIdEntity<TId, TEntity> : SixnetTenantEntity<TEntity>, ISixnetIdEntity<TId> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Id
         /// </summary>
-        [SixnetEntityField(DbRole = SixnetFieldRole.PrimaryKey | SixnetFieldRole.Increment)]
+        [SixnetEntityField(DbRole = SixnetFieldRole.PrimaryKey | SixnetFieldRole.Increment | SixnetFieldRole.DefaultId)]
         public TId Id { get; set; }
     }
 
@@ -307,12 +307,12 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class SixnetTenantAutoIdCreateDateEntity<TId, TEntity> : SixnetTenantCreateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetTenantAutoIdCreateDateEntity<TId, TEntity> : SixnetTenantCreateDateEntity<TEntity>, ISixnetIdEntity<TId> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Id
         /// </summary>
-        [SixnetEntityField(DbRole = SixnetFieldRole.PrimaryKey | SixnetFieldRole.Increment)]
+        [SixnetEntityField(DbRole = SixnetFieldRole.PrimaryKey | SixnetFieldRole.Increment | SixnetFieldRole.DefaultId)]
         public TId Id { get; set; }
     }
 
@@ -321,12 +321,12 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class SixnetTenantAutoIdUpdateDateEntity<TId, TEntity> : SixnetTenantUpdateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetTenantAutoIdUpdateDateEntity<TId, TEntity> : SixnetTenantUpdateDateEntity<TEntity>, ISixnetIdEntity<TId> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Id
         /// </summary>
-        [SixnetEntityField(DbRole = SixnetFieldRole.PrimaryKey | SixnetFieldRole.Increment)]
+        [SixnetEntityField(DbRole = SixnetFieldRole.PrimaryKey | SixnetFieldRole.Increment | SixnetFieldRole.DefaultId)]
         public TId Id { get; set; }
     }
 
@@ -335,12 +335,12 @@ namespace Sixnet.Development.Entity
     /// </summary>
     /// <typeparam name="TId"></typeparam>
     /// <typeparam name="TEntity"></typeparam>
-    public abstract class SixnetTenantAutoIdCreateUpdateDateEntity<TId, TEntity> : SixnetTenantCreateUpdateDateEntity<TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    public abstract class SixnetTenantAutoIdCreateUpdateDateEntity<TId, TEntity> : SixnetTenantCreateUpdateDateEntity<TEntity>, ISixnetIdEntity<TId> where TEntity : class, ISixnetEntity<TEntity>, new()
     {
         /// <summary>
         /// Id
         /// </summary>
-        [SixnetEntityField(DbRole = SixnetFieldRole.PrimaryKey | SixnetFieldRole.Increment)]
+        [SixnetEntityField(DbRole = SixnetFieldRole.PrimaryKey | SixnetFieldRole.Increment | SixnetFieldRole.DefaultId)]
         public TId Id { get; set; }
     }
 

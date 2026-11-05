@@ -16,7 +16,7 @@ namespace Sixnet.DependencyInjection
         /// <returns>Return whether is register service</returns>
         public bool HasService<TService>()
         {
-            return SixnetContainer.HasDefaultService<TService>();
+            return SixnetContainer.HasDefaultRegistered<TService>();
         }
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace Sixnet.DependencyInjection
         /// <param name="serviceDescriptors">Service descriptor</param>
         public void AddService(params ServiceDescriptor[] serviceDescriptors)
         {
-            SixnetContainer.AddService(serviceDescriptors);
+            SixnetContainer.Register(serviceDescriptors);
         }
 
         /// <summary>
@@ -62,7 +62,7 @@ namespace Sixnet.DependencyInjection
         /// <returns>Return a service instance</returns>
         public TService GetService<TService>()
         {
-            return SixnetContainer.GetDefaultService<TService>();
+            return SixnetContainer.GetDefaultInstance<TService>();
         }
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace Sixnet.DependencyInjection
         /// <returns>Return a service instance</returns>
         public object GetService(Type serviceType)
         {
-            return SixnetContainer.GetDefaultService(serviceType);
+            return SixnetContainer.GetDefaultInstance(serviceType);
         }
 
         /// <summary>

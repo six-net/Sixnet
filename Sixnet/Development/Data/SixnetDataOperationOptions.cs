@@ -23,10 +23,21 @@ namespace Sixnet.Development.Data
         public bool MustAffectData { get; set; }
 
         /// <summary>
-        /// Gets or sets the data operation behavior.
-        /// Default is 'default'
+        /// Gets or sets the split on field name
         /// </summary>
-        public SixnetDataOperationBehavior LogicalDeleteBehavior { get; set; } = SixnetDataOperationBehavior.Default;
+        public string SpiltOnFieldName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the split table behavior
+        /// </summary>
+        public SixnetSplitTableBehavior SplitTableBehavior { get; set; }
+
+        /// <summary>
+        /// timeout (in seconds)
+        /// </summary>
+        public int? Timeout { get; set; }
+
+        #region Not overwrite
 
         /// <summary>
         /// Not overwrite fields
@@ -38,31 +49,6 @@ namespace Sixnet.Development.Data
         /// Priority greater than NotOverwriteFieldNames
         /// </summary>
         public bool NotOverwrite { get; set; }
-
-        /// <summary>
-        /// Gets or sets the split on field name
-        /// </summary>
-        public string SpiltOnFieldName { get; set; }
-
-        /// <summary>
-        /// Gets or sets the increment field behavior.
-        /// Default is 'default'
-        /// </summary>
-        public SixnetDataOperationBehavior InsertIncrementFieldBehavior { get; set; } = SixnetDataOperationBehavior.Default;
-
-        /// <summary>
-        /// Create data operation options
-        /// </summary>
-        /// <param name="cancellationToken">Cancellation token</param>
-        /// <returns></returns>
-        internal static SixnetDataOperationOptions Create(CancellationToken? cancellationToken = null, bool mustAffectData = false)
-        {
-            return new SixnetDataOperationOptions()
-            {
-                CancellationToken = cancellationToken,
-                MustAffectData = mustAffectData
-            };
-        }
 
         /// <summary>
         /// Not overwrite fields
@@ -90,15 +76,48 @@ namespace Sixnet.Development.Data
             return !string.IsNullOrWhiteSpace(fieldName) && (_notOverwriteFieldNames?.Contains(fieldName) ?? false);
         }
 
+        #endregion
+
+        #region Create
+
         /// <summary>
-        /// Allow logical delete
+        /// Create data operation options
         /// </summary>
-        /// <param name="globalAllowLogicalDelete"></param>
+        /// <param name="cancellationToken">Cancellation token</param>
         /// <returns></returns>
-        public bool AllowLogicalDelete(bool globalAllowLogicalDelete)
+        internal static SixnetDataOperationOptions Create(CancellationToken? cancellationToken = null, bool mustAffectData = false)
         {
-            return LogicalDeleteBehavior != SixnetDataOperationBehavior.Disable
-               && (globalAllowLogicalDelete || LogicalDeleteBehavior == SixnetDataOperationBehavior.Enable);
+            return new SixnetDataOperationOptions()
+            {
+                CancellationToken = cancellationToken,
+                MustAffectData = mustAffectData
+            };
+        }
+
+        #endregion
+
+        #region Increment field
+
+        /// <summary>
+        /// Gets or sets the increment field behavior.
+        /// Default is 'default'
+        /// </summary>
+        internal SixnetDataOperationBehavior InsertIncrementFieldBehavior { get; set; } = SixnetDataOperationBehavior.Default;
+
+        /// <summary>
+        /// Enable insert increment field
+        /// </summary>
+        public void EnableInsertIncrementField()
+        {
+            InsertIncrementFieldBehavior = SixnetDataOperationBehavior.Enabled;
+        }
+
+        /// <summary>
+        /// Disable insert increment field
+        /// </summary>
+        public void DisableInsertIncrementField()
+        {
+            InsertIncrementFieldBehavior = SixnetDataOperationBehavior.Disabled;
         }
 
         /// <summary>
@@ -106,20 +125,101 @@ namespace Sixnet.Development.Data
         /// </summary>
         /// <param name="globalAllowInsertIncrementField"></param>
         /// <returns></returns>
-        public bool AllowInsertIncrementField(bool globalAllowInsertIncrementField)
+        internal bool AllowInsertIncrementField(bool globalAllowInsertIncrementField)
         {
-            return InsertIncrementFieldBehavior != SixnetDataOperationBehavior.Disable
-                && (globalAllowInsertIncrementField || InsertIncrementFieldBehavior == SixnetDataOperationBehavior.Enable);
+            return InsertIncrementFieldBehavior != SixnetDataOperationBehavior.Disabled
+                && (globalAllowInsertIncrementField || InsertIncrementFieldBehavior == SixnetDataOperationBehavior.Enabled);
+        }
+
+        #endregion
+
+        #region Logical delete
+
+        /// <summary>
+        /// Gets or sets the data operation behavior.
+        /// Default is 'default'
+        /// </summary>
+        internal SixnetDataOperationBehavior LogicalDeleteBehavior { get; set; } = SixnetDataOperationBehavior.Default;
+
+        /// <summary>
+        /// Enable logical delete
+        /// </summary>
+        public void EnableLogicalDelete()
+        {
+            LogicalDeleteBehavior = SixnetDataOperationBehavior.Enabled;
         }
 
         /// <summary>
-        /// Gets or sets the split table behavior
+        /// Disable logical delete
         /// </summary>
-        public SixnetSplitTableBehavior SplitTableBehavior { get; set; }
+        public void DisableLogicalDelete()
+        {
+            LogicalDeleteBehavior = SixnetDataOperationBehavior.Disabled;
+        }
 
         /// <summary>
-        /// timeout (in seconds)
+        /// Allow logical delete
         /// </summary>
-        public int? Timeout { get; set; }
+        /// <param name="globalAllowLogicalDelete"></param>
+        /// <returns></returns>
+        internal bool AllowLogicalDelete(bool globalAllowLogicalDelete)
+        {
+            return LogicalDeleteBehavior != SixnetDataOperationBehavior.Disabled
+               && (globalAllowLogicalDelete || LogicalDeleteBehavior == SixnetDataOperationBehavior.Enabled);
+        }
+
+        #endregion
+
+        #region Versioning table
+
+        /// <summary>
+        /// Gets or sets the versioning table type
+        /// Default is 'All'
+        /// </summary>
+        internal SixnetVersioningTableType VersioningTableType { get; set; } = SixnetVersioningTableType.PrimaryTable;
+
+        /// <summary>
+        /// For all table
+        /// </summary>
+        public void ForAllTable()
+        {
+            VersioningTableType = SixnetVersioningTableType.All;
+        }
+
+        /// <summary>
+        /// For primary table
+        /// </summary>
+        public void ForPrimaryTable()
+        {
+            VersioningTableType = SixnetVersioningTableType.PrimaryTable;
+        }
+
+        /// <summary>
+        /// For version table
+        /// </summary>
+        public void ForVersionTable()
+        {
+            VersioningTableType = SixnetVersioningTableType.VersionTable;
+        }
+
+        /// <summary>
+        /// Include primary table
+        /// </summary>
+        /// <returns></returns>
+        internal bool IncludePrimaryTable()
+        {
+            return VersioningTableType == SixnetVersioningTableType.PrimaryTable || VersioningTableType == SixnetVersioningTableType.All;
+        }
+
+        /// <summary>
+        /// Include version table
+        /// </summary>
+        /// <returns></returns>
+        internal bool IncludeVersionTable()
+        {
+            return VersioningTableType == SixnetVersioningTableType.VersionTable || VersioningTableType == SixnetVersioningTableType.All;
+        }
+
+        #endregion
     }
 }

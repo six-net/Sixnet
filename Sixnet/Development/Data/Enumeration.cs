@@ -253,11 +253,31 @@ namespace Sixnet.Development.Data
         /// <summary>
         /// Enable
         /// </summary>
-        Enable = 1,
+        Enabled = 1,
         /// <summary>
         /// Disable
         /// </summary>
-        Disable = 2,
+        Disabled = 2,
+    }
+
+    #endregion
+
+    #region Versioning table type 
+
+    /// <summary>
+    /// Versioning table type
+    /// </summary>
+    public enum SixnetVersioningTableType
+    {
+        All = 0,
+        /// <summary>
+        /// Primary table
+        /// </summary>
+        PrimaryTable = 2,
+        /// <summary>
+        /// Version table
+        /// </summary>
+        VersionTable = 4
     }
 
     #endregion

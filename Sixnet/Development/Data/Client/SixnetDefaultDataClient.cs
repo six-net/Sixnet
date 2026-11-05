@@ -2135,7 +2135,11 @@ namespace Sixnet.Development.Data.Client
                 if (!string.IsNullOrWhiteSpace(autoIdentityFieldName) && identities.TryGetValue(dataCommand.Id, out var autoIdentityValue))
                 {
                     var autoIdentityField = SixnetEntityManager.GetField(dataType, autoIdentityFieldName);
-                    entity.SetValue(autoIdentityFieldName, SixnetObjectExtensions.ConvertTo(autoIdentityValue, autoIdentityField.DataType));
+                    var fieldValue = SixnetObjectExtensions.ConvertTo(autoIdentityValue, autoIdentityField.DataType);
+                    if (fieldValue != null)
+                    {
+                        entity.SetValue(autoIdentityFieldName, fieldValue);
+                    }
                 }
             }
         }

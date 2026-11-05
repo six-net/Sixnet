@@ -41,6 +41,16 @@ namespace Sixnet.Development.Data.Command.Events
                 }
             }
 
+            if (operationType == SixnetDataOperationType.Query)
+            {
+                var versionningTableType = queryable?.Info?.GetVersioningTableType();
+                if (versionningTableType.HasValue)
+                {
+                    var options = dataCommand.Options ?? SixnetDataOperationOptions.Create();
+                    options.VersioningTableType = versionningTableType.Value;
+                }
+            }
+
             // Filter data
             newQueryable = FilterData(entityType, dataCommand.Options, newQueryable, dataCommand.OperationType);
             dataCommand.Queryable = newQueryable;

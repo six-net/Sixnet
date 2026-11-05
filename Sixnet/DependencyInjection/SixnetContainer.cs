@@ -12,6 +12,7 @@ using Sixnet.Cache;
 using Sixnet.Cache.Provider.Memory;
 using Sixnet.Code;
 using Sixnet.Development.Data;
+using Sixnet.Development.Domain.Service;
 using Sixnet.Development.Entity;
 using Sixnet.Development.Events;
 using Sixnet.Development.Message;
@@ -139,41 +140,41 @@ namespace Sixnet.DependencyInjection
 
         #endregion
 
-        #region Add service
+        #region Register service
 
         /// <summary>
-        /// Add service.
+        /// Register service.
         /// Use singleton lifetime by default
         /// </summary>
         /// <typeparam name="TService">Service type</typeparam>
         /// <typeparam name="TImplementation">Service implementation</typeparam>
         /// <param name="behaviors">Behaviors</param>
-        public static void AddService<TService, TImplementation>(ServiceLifetime lifetime = ServiceLifetime.Singleton, IEnumerable<Type> behaviors = null)
+        public static void Register<TService, TImplementation>(ServiceLifetime lifetime = ServiceLifetime.Singleton, IEnumerable<Type> behaviors = null)
         {
-            AddService(typeof(TService), typeof(TImplementation), lifetime, behaviors);
+            Register(typeof(TService), typeof(TImplementation), lifetime, behaviors);
         }
 
         /// <summary>
-        /// Add service.
+        /// Register service.
         /// Use singleton lifetime by default
         /// </summary>
         /// <param name="serviceType">Service type</param>
         /// <param name="implementationType">Service implementation type</param>
         /// <param name="lifetime">Life time(default:singleton)</param>
         /// <param name="behaviors">Behaviors</param>
-        public static void AddService(Type serviceType, Type implementationType, ServiceLifetime lifetime = ServiceLifetime.Singleton, IEnumerable<Type> behaviors = null)
+        public static void Register(Type serviceType, Type implementationType, ServiceLifetime lifetime = ServiceLifetime.Singleton, IEnumerable<Type> behaviors = null)
         {
-            AddService(new SixnetServiceDescriptor(serviceType, implementationType, lifetime)
+            Register(new SixnetServiceDescriptor(serviceType, implementationType, lifetime)
             {
                 Behaviors = behaviors
             });
         }
 
         /// <summary>
-        /// Add service
+        /// Register service
         /// </summary>
         /// <param name="serviceDescriptors">Service descriptors</param>
-        public static void AddService(params ServiceDescriptor[] serviceDescriptors)
+        public static void Register(params ServiceDescriptor[] serviceDescriptors)
         {
             if (!serviceDescriptors.IsNullOrEmpty())
             {
@@ -189,48 +190,48 @@ namespace Sixnet.DependencyInjection
         #region Get service
 
         /// <summary>
-        /// Get service
+        /// Get instance
         /// </summary>
         /// <typeparam name="TService">Service type</typeparam>
         /// <returns></returns>
-        public static TService GetService<TService>()
+        public static TService GetInstance<TService>()
         {
-            return (TService)GetService(typeof(TService));
+            return (TService)GetInstance(typeof(TService));
         }
 
         /// <summary>
-        /// Get service
+        /// Get instance
         /// </summary>
         /// <param name="serviceType">Service type</param>
         /// <returns></returns>
-        public static object GetService(Type serviceType)
+        public static object GetInstance(Type serviceType)
         {
             return Container != null
                 ? Container.GetService(serviceType)
-                : GetDefaultService(serviceType);
+                : GetDefaultInstance(serviceType);
         }
 
         /// <summary>
-        /// Get added or default service
+        /// Get added or default instance
         /// </summary>
         /// <typeparam name="TService">Service type</typeparam>
         /// <typeparam name="TDefault">Default service implementation</typeparam>
         /// <returns></returns>
-        public static TService GetService<TService, TDefault>() where TDefault : TService, new()
+        public static TService GetInstance<TService, TDefault>() where TDefault : TService, new()
         {
-            var service = GetService<TService>();
+            var service = GetInstance<TService>();
             service ??= new TDefault();
             return service;
         }
 
         /// <summary>
-        /// Get default service
+        /// Get default instance
         /// </summary>
         /// <typeparam name="TService">Service type</typeparam>
         /// <returns></returns>
-        internal static TService GetDefaultService<TService>()
+        internal static TService GetDefaultInstance<TService>()
         {
-            var service = GetDefaultService(typeof(TService));
+            var service = GetDefaultInstance(typeof(TService));
             return service == null ? default : (TService)service;
         }
 
@@ -239,7 +240,7 @@ namespace Sixnet.DependencyInjection
         /// </summary>
         /// <param name="serviceType">Service type</param>
         /// <returns></returns>
-        internal static object GetDefaultService(Type serviceType)
+        internal static object GetDefaultInstance(Type serviceType)
         {
             if (ServiceProvider != null && serviceType != null)
             {
@@ -257,9 +258,9 @@ namespace Sixnet.DependencyInjection
         /// </summary>
         /// <typeparam name="TService">Service type</typeparam>
         /// <returns>Return whether service has registered</returns>
-        public static bool HasService<TService>()
+        public static bool HasRegistered<TService>()
         {
-            return Container?.HasService<TService>() ?? HasDefaultService<TService>();
+            return Container?.HasService<TService>() ?? HasDefaultRegistered<TService>();
         }
 
         /// <summary>
@@ -267,7 +268,7 @@ namespace Sixnet.DependencyInjection
         /// </summary>
         /// <typeparam name="TService">Service type</typeparam>
         /// <returns>Return whether the service is registered</returns>
-        internal static bool HasDefaultService<TService>()
+        internal static bool HasDefaultRegistered<TService>()
         {
             return _serviceCollection?.Any(c => c.ServiceType == typeof(TService)) ?? false;
         }
@@ -283,7 +284,30 @@ namespace Sixnet.DependencyInjection
         /// <returns></returns>
         public static ISixnetRepository<T> GetRepository<T>()
         {
-            return GetService<ISixnetRepository<T>>();
+            return GetInstance<ISixnetRepository<T>>();
+        }
+
+        #endregion
+
+        #region Domain service
+
+        /// <summary>
+        /// Get command service
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static ISixnetCommandService<T> GetCommandService<T>()
+        {
+            return GetInstance<ISixnetCommandService<T>>();
+        }
+
+        /// <summary>
+        /// Get query service
+        /// </summary>
+        /// <returns></returns>
+        public static ISixnetQueryService<T> GetQueryService<T>()
+        {
+            return GetInstance<ISixnetQueryService<T>>();
         }
 
         #endregion
@@ -320,7 +344,7 @@ namespace Sixnet.DependencyInjection
         /// <param name="configurationSectionKey">Configuration section key</param>
         public static void ConfigureOptions<TOptions>(string configurationSectionKey = "", Action<BinderOptions> configureBinder = null) where TOptions : class
         {
-            var configuration = GetService<IConfiguration>() ?? throw new SixnetException("Not initialize configuration");
+            var configuration = GetInstance<IConfiguration>() ?? throw new SixnetException("Not initialize configuration");
             configurationSectionKey ??= typeof(TOptions).Name;
             if (configureBinder == null)
             {
@@ -339,7 +363,7 @@ namespace Sixnet.DependencyInjection
         /// <returns></returns>
         public static IConfigurationSection GetSixnetConfigurationSection(string configurationSectionKey)
         {
-            return GetSixnetConfigurationSection(GetService<IConfiguration>(), configurationSectionKey);
+            return GetSixnetConfigurationSection(GetInstance<IConfiguration>(), configurationSectionKey);
         }
 
         /// <summary>
@@ -372,15 +396,15 @@ namespace Sixnet.DependencyInjection
             switch (optionsStyle)
             {
                 case SixnetOptionsStyle.Snapshot:
-                    var optionsSnapshot = GetService<IOptionsSnapshot<TOptions>>();
+                    var optionsSnapshot = GetInstance<IOptionsSnapshot<TOptions>>();
                     currentOptions = string.IsNullOrWhiteSpace(name) ? optionsSnapshot?.Value : optionsSnapshot?.Get(name);
                     break;
                 case SixnetOptionsStyle.Monitor:
-                    var optionsModitor = GetService<IOptionsMonitor<TOptions>>();
+                    var optionsModitor = GetInstance<IOptionsMonitor<TOptions>>();
                     currentOptions = string.IsNullOrWhiteSpace(name) ? optionsModitor?.CurrentValue : optionsModitor?.Get(name);
                     break;
                 default:
-                    var optionsConstant = GetService<IOptions<TOptions>>();
+                    var optionsConstant = GetInstance<IOptions<TOptions>>();
                     currentOptions = optionsConstant?.Value;
                     break;
             }
@@ -505,6 +529,8 @@ namespace Sixnet.DependencyInjection
             services.AddSingleton<ISixnetMessageProvider, SixnetDefaultMessageProvider>();
             services.AddSingleton(typeof(ISixnetDataAccess<>), typeof(SixnetDefaultDataAccess<>));
             services.AddSingleton(typeof(ISixnetRepository<>), typeof(SixnetDefaultRepository<>));
+            services.AddSingleton(typeof(ISixnetCommandService<>), typeof(SixnetCommandService<>));
+            services.AddSingleton(typeof(ISixnetQueryService<>), typeof(SixnetQueryService<>));
             services.AddSixnetLocalization(options =>
             {
                 sixnetOptions?.InvokeConfigureLocalization(options);
@@ -521,7 +547,7 @@ namespace Sixnet.DependencyInjection
         /// <param name="options"></param>
         internal static void RegisterApplicationLifetime(SixnetOptions options)
         {
-            var lifeTime = GetService<IHostApplicationLifetime>();
+            var lifeTime = GetInstance<IHostApplicationLifetime>();
             if (lifeTime != null)
             {
                 lifeTime.ApplicationStarted.Register(() =>

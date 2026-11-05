@@ -18,7 +18,7 @@ namespace Sixnet.Language.Chinese
         /// <returns>Return chinese provider</returns>
         public static ISixnetChineseProvider GetChineseProvider()
         {
-            return SixnetContainer.GetService<ISixnetChineseProvider>();
+            return SixnetContainer.GetInstance<ISixnetChineseProvider>();
         }
 
         /// <summary>

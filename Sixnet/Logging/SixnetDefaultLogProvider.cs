@@ -21,7 +21,7 @@ namespace Sixnet.Logging
         /// <returns>Return the logger</returns>
         static ILogger GetLogger(string loggerCategoryName)
         {
-            var loggerFactory = SixnetContainer.GetService<ILoggerFactory>();
+            var loggerFactory = SixnetContainer.GetInstance<ILoggerFactory>();
             if (loggerFactory == null)
             {
                 return null;

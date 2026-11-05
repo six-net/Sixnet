@@ -161,7 +161,7 @@ namespace Sixnet.Localization
         /// <returns></returns>
         static ISixnetStringLocalizer GetSixnetStringLocalizer()
         {
-            var localizer = SixnetContainer.GetService<ISixnetStringLocalizer>();
+            var localizer = SixnetContainer.GetInstance<ISixnetStringLocalizer>();
             SixnetDirectThrower.ThrowSixnetExceptionIf(localizer == null, "Get sixnet string localizer failed.");
             return localizer;
         }
@@ -173,7 +173,7 @@ namespace Sixnet.Localization
         /// <returns></returns>
         static ISixnetStringLocalizer<TResourceSource> GetSixnetStringLocalizer<TResourceSource>()
         {
-            var localizer = SixnetContainer.GetService<ISixnetStringLocalizer<TResourceSource>>();
+            var localizer = SixnetContainer.GetInstance<ISixnetStringLocalizer<TResourceSource>>();
             SixnetDirectThrower.ThrowSixnetExceptionIf(localizer == null, "Get sixnet string localizer failed.");
             return localizer;
         }

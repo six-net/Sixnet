@@ -122,5 +122,15 @@ namespace Sixnet.Development.Entity
         /// Whether is system entity
         /// </summary>
         public bool IsSystem { get; set; }
+
+        /// <summary>
+        /// Whether in style
+        /// </summary>
+        /// <param name="style"></param>
+        /// <returns></returns>
+        public bool InStyle(SixnetEntityStyle style)
+        {
+            return (Style & style) == style;
+        }
     }
 }

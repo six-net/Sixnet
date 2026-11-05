@@ -1,10 +1,6 @@
 ﻿// "Company © 2025. All rights reserved."
 
 using System.Data;
-using System.Net.Http.Headers;
-using System.Runtime.InteropServices;
-
-using Microsoft.Extensions.Options;
 
 using Sixnet.Development.Data;
 using Sixnet.Development.Data.Command;
@@ -15,8 +11,6 @@ using Sixnet.Development.Entity;
 using Sixnet.Development.Queryable;
 using Sixnet.Exceptions;
 using Sixnet.Model.Paging;
-
-using static Sixnet.Reflection.SixnetReflecter;
 
 namespace Sixnet.Development.Command
 {
@@ -819,6 +813,11 @@ namespace Sixnet.Development.Command
 
         #region Migrate
 
+        static SixnetDataCommand GetDefaultMigrationCommand() 
+        {
+            return SixnetDataCommand.CreateMigrationCommand();
+        }
+
         /// <summary>
         /// Migrate
         /// </summary>
@@ -860,26 +859,34 @@ namespace Sixnet.Development.Command
                     ]
                 };
             });
-            var rootTableName = SixnetDataManager.GetDefaultTableName(SixnetDataCommandExecutionContext.Create(connection), entityConfig);
-            List<SixnetDatabaseObjectName> tableNames = null;
-            if (entityConfig.IsSplitTable)
+            var defaultTableNames = SixnetDataManager.GetDefaultTableNames(SixnetDataCommandExecutionContext.Create(connection, GetDefaultMigrationCommand()), entityConfig);
+
+            var tableNames = new List<SixnetDatabaseObjectName>();
+            foreach (var rootTableName in defaultTableNames)
             {
-                var splitProvider = SixnetDataManager.GetSplitTableProvider(SixnetDataManager.GetDataOptions(), SixnetEntityManager.GetEntityConfig(entityType));
-                tableNames = splitProvider.ResolveTableNames(new SixnetResolveSplitTableNameParameter()
+                if (entityConfig.IsSplitTable)
                 {
-                    SplitBehavior = options?.SplitTableBehavior ?? new SixnetSplitTableBehavior()
+                    var splitProvider = SixnetDataManager.GetSplitTableProvider(SixnetDataManager.GetDataOptions(), SixnetEntityManager.GetEntityConfig(entityType));
+                    var splitedTableNames = splitProvider.ResolveTableNames(new SixnetResolveSplitTableNameParameter()
                     {
-                        SelectionPattern = SixnetSplitTableNameSelectionPattern.Range,
-                        SplitValues = entityConfig.SplitTableType != SixnetSplitTableType.Custom ? new List<dynamic>(1) { DateTimeOffset.Now } : null
-                    },
-                    RootTableName = rootTableName,
-                    EntityConfiguration = entityConfig,
-                    ExpansionNum = entityConfig.AutoExpansionSplitNum
-                });
-            }
-            else
-            {
-                tableNames = [rootTableName];
+                        SplitBehavior = options?.SplitTableBehavior ?? new SixnetSplitTableBehavior()
+                        {
+                            SelectionPattern = SixnetSplitTableNameSelectionPattern.Range,
+                            SplitValues = entityConfig.SplitTableType != SixnetSplitTableType.Custom ? new List<dynamic>(1) { DateTimeOffset.Now } : null
+                        },
+                        RootTableName = rootTableName,
+                        EntityConfiguration = entityConfig,
+                        ExpansionNum = entityConfig.AutoExpansionSplitNum
+                    });
+                    if (!splitedTableNames.IsNullOrEmpty())
+                    {
+                        tableNames.AddRange(splitedTableNames);
+                    }
+                }
+                else
+                {
+                    tableNames.Add(rootTableName);
+                }
             }
             migCmd.MigrationInfo.NewTables[0].TableNames = tableNames;
             return migCmd;
@@ -899,42 +906,53 @@ namespace Sixnet.Development.Command
             {
                 cmd.MigrationInfo = new SixnetMigrationInfo();
             });
-            var rootTableName = SixnetDataManager.GetDefaultTableName(SixnetDataCommandExecutionContext.Create(connection), entityConfig);
-            List<SixnetDatabaseObjectName> tableNames = null;
-            if (entityConfig.IsSplitTable)
+            var defaultTableNames = SixnetDataManager.GetDefaultTableNames(SixnetDataCommandExecutionContext.Create(connection, GetDefaultMigrationCommand()), entityConfig);
+            var tableNames = new List<SixnetDatabaseObjectName>();
+
+            foreach (var rootTableName in defaultTableNames)
             {
-                var splitProvider = SixnetDataManager.GetSplitTableProvider(SixnetDataManager.GetDataOptions(), SixnetEntityManager.GetEntityConfig(entityType));
-                var splitBehavior = options?.SplitTableBehavior ?? new SixnetSplitTableBehavior();
-                allTableNames = splitProvider.FilterAllTableNames(new SixnetFilterAllSplitTableNameParameter()
+                if (entityConfig.IsSplitTable)
                 {
-                    AllTableNames = allTableNames,
-                    Behavior = splitBehavior,
-                    RootTableName = rootTableName,
-                });
-                var splitTableNames = splitProvider.ResolveTableNames(new SixnetResolveSplitTableNameParameter()
-                {
-                    EntityConfiguration = entityConfig,
-                    RootTableName = rootTableName,
-                    SplitBehavior = splitBehavior
-                });
-                if (options?.SplitTableBehavior.IsTakeAllSplitTables(splitTableNames) ?? true)
-                {
-                    tableNames = allTableNames;
+                    var splitProvider = SixnetDataManager.GetSplitTableProvider(SixnetDataManager.GetDataOptions(), SixnetEntityManager.GetEntityConfig(entityType));
+                    var splitBehavior = options?.SplitTableBehavior ?? new SixnetSplitTableBehavior();
+                    var allSplitedTableNames = splitProvider.FilterAllTableNames(new SixnetFilterAllSplitTableNameParameter()
+                    {
+                        AllTableNames = allTableNames,
+                        Behavior = splitBehavior,
+                        RootTableName = rootTableName,
+                    });
+                    if (!allSplitedTableNames.IsNullOrEmpty())
+                    {
+                        var splitedTableNames = splitProvider.ResolveTableNames(new SixnetResolveSplitTableNameParameter()
+                        {
+                            EntityConfiguration = entityConfig,
+                            RootTableName = rootTableName,
+                            SplitBehavior = splitBehavior
+                        });
+                        if (options?.SplitTableBehavior.IsTakeAllSplitTables(splitedTableNames) ?? true)
+                        {
+                            tableNames.AddRange(allSplitedTableNames);
+                        }
+                        else
+                        {
+                            splitedTableNames = splitProvider.GetTableNames(new SixnetGetSplitTableNameParameter()
+                            {
+                                AllTableNames = allTableNames,
+                                RootTableName = rootTableName,
+                                ResolvedTableNames = splitedTableNames,
+                                Behavior = splitBehavior
+                            });
+                            if (!splitedTableNames.IsNullOrEmpty())
+                            {
+                                tableNames.AddRange(splitedTableNames);
+                            }
+                        }
+                    }
                 }
                 else
                 {
-                    tableNames = splitProvider.GetTableNames(new SixnetGetSplitTableNameParameter()
-                    {
-                        AllTableNames = allTableNames,
-                        RootTableName = rootTableName,
-                        ResolvedTableNames = splitTableNames,
-                        Behavior = splitBehavior
-                    });
+                    tableNames = [rootTableName];
                 }
-            }
-            else
-            {
-                tableNames = [rootTableName];
             }
             migCmd.MigrationInfo.DeletedTables = tableNames;
             return migCmd;
@@ -956,21 +974,29 @@ namespace Sixnet.Development.Command
             {
                 cmd.MigrationInfo = new SixnetMigrationInfo();
             });
-            var rootTableName = SixnetDataManager.GetDefaultTableName(SixnetDataCommandExecutionContext.Create(connection), entityConfig);
-            List<SixnetDatabaseObjectName> tableNames = null;
-            if (entityConfig.IsSplitTable)
+            var defaultTableNames = SixnetDataManager.GetDefaultTableNames(SixnetDataCommandExecutionContext.Create(connection, GetDefaultMigrationCommand()), entityConfig);
+
+            var tableNames = new List<SixnetDatabaseObjectName>();
+            foreach (var rootTableName in tableNames)
             {
-                var splitProvider = SixnetDataManager.GetSplitTableProvider(SixnetDataManager.GetDataOptions(), SixnetEntityManager.GetEntityConfig(entityType));
-                tableNames = splitProvider.FilterAllTableNames(new SixnetFilterAllSplitTableNameParameter()
+                if (entityConfig.IsSplitTable)
                 {
-                    AllTableNames = allTableNames,
-                    RootTableName = rootTableName,
-                    Behavior = options?.SplitTableBehavior ?? new SixnetSplitTableBehavior()
-                });
-            }
-            else
-            {
-                tableNames = [rootTableName];
+                    var splitProvider = SixnetDataManager.GetSplitTableProvider(SixnetDataManager.GetDataOptions(), SixnetEntityManager.GetEntityConfig(entityType));
+                    var splitedTableNames = splitProvider.FilterAllTableNames(new SixnetFilterAllSplitTableNameParameter()
+                    {
+                        AllTableNames = allTableNames,
+                        RootTableName = rootTableName,
+                        Behavior = options?.SplitTableBehavior ?? new SixnetSplitTableBehavior()
+                    });
+                    if (!splitedTableNames.IsNullOrEmpty())
+                    {
+                        tableNames.AddRange(splitedTableNames);
+                    }
+                }
+                else
+                {
+                    tableNames.Add(rootTableName);
+                }
             }
             var newFieldDict = new Dictionary<SixnetDatabaseObjectName, List<SixnetDataField>>();
             foreach (var tableName in tableNames)
@@ -997,21 +1023,28 @@ namespace Sixnet.Development.Command
             {
                 cmd.MigrationInfo = new SixnetMigrationInfo();
             });
-            var rootTableName = SixnetDataManager.GetDefaultTableName(SixnetDataCommandExecutionContext.Create(connection), entityConfig);
-            List<SixnetDatabaseObjectName> tableNames = null;
-            if (entityConfig.IsSplitTable)
+            var defaultTableNames = SixnetDataManager.GetDefaultTableNames(SixnetDataCommandExecutionContext.Create(connection, GetDefaultMigrationCommand()), entityConfig);
+            var tableNames = new List<SixnetDatabaseObjectName>();
+            foreach (var rootTableName in defaultTableNames)
             {
-                var splitProvider = SixnetDataManager.GetSplitTableProvider(SixnetDataManager.GetDataOptions(), SixnetEntityManager.GetEntityConfig(entityType));
-                tableNames = splitProvider.FilterAllTableNames(new SixnetFilterAllSplitTableNameParameter()
+                if (entityConfig.IsSplitTable)
                 {
-                    AllTableNames = allTableNames,
-                    RootTableName = rootTableName,
-                    Behavior = options?.SplitTableBehavior ?? new SixnetSplitTableBehavior()
-                });
-            }
-            else
-            {
-                tableNames = [rootTableName];
+                    var splitProvider = SixnetDataManager.GetSplitTableProvider(SixnetDataManager.GetDataOptions(), SixnetEntityManager.GetEntityConfig(entityType));
+                    var splitedTableNames = splitProvider.FilterAllTableNames(new SixnetFilterAllSplitTableNameParameter()
+                    {
+                        AllTableNames = allTableNames,
+                        RootTableName = rootTableName,
+                        Behavior = options?.SplitTableBehavior ?? new SixnetSplitTableBehavior()
+                    });
+                    if (!splitedTableNames.IsNullOrEmpty())
+                    {
+                        tableNames.AddRange(splitedTableNames);
+                    }
+                }
+                else
+                {
+                    tableNames.Add(rootTableName);
+                }
             }
             var tableFieldDict = new Dictionary<SixnetDatabaseObjectName, List<SixnetDataField>>();
             foreach (var tableName in tableNames)
@@ -1038,21 +1071,28 @@ namespace Sixnet.Development.Command
             {
                 cmd.MigrationInfo = new SixnetMigrationInfo();
             });
-            var rootTableName = SixnetDataManager.GetDefaultTableName(SixnetDataCommandExecutionContext.Create(connection), entityConfig);
-            List<SixnetDatabaseObjectName> tableNames = null;
-            if (entityConfig.IsSplitTable)
+            var defaultTableNames = SixnetDataManager.GetDefaultTableNames(SixnetDataCommandExecutionContext.Create(connection, GetDefaultMigrationCommand()), entityConfig);
+            var tableNames = new List<SixnetDatabaseObjectName>();
+            foreach (var rootTableName in defaultTableNames)
             {
-                var splitProvider = SixnetDataManager.GetSplitTableProvider(SixnetDataManager.GetDataOptions(), SixnetEntityManager.GetEntityConfig(entityType));
-                tableNames = splitProvider.FilterAllTableNames(new SixnetFilterAllSplitTableNameParameter()
+                if (entityConfig.IsSplitTable)
                 {
-                    AllTableNames = allTableNames,
-                    RootTableName = rootTableName,
-                    Behavior = options?.SplitTableBehavior ?? new SixnetSplitTableBehavior()
-                });
-            }
-            else
-            {
-                tableNames = [rootTableName];
+                    var splitProvider = SixnetDataManager.GetSplitTableProvider(SixnetDataManager.GetDataOptions(), SixnetEntityManager.GetEntityConfig(entityType));
+                    var splitedTableNames = splitProvider.FilterAllTableNames(new SixnetFilterAllSplitTableNameParameter()
+                    {
+                        AllTableNames = allTableNames,
+                        RootTableName = rootTableName,
+                        Behavior = options?.SplitTableBehavior ?? new SixnetSplitTableBehavior()
+                    });
+                    if (!splitedTableNames.IsNullOrEmpty())
+                    {
+                        tableNames.AddRange(splitedTableNames);
+                    }
+                }
+                else
+                {
+                    tableNames.Add(rootTableName);
+                }
             }
             var tableFieldDict = new Dictionary<SixnetDatabaseObjectName, Dictionary<string, SixnetDataField>>();
             foreach (var tableName in tableNames)
@@ -1081,8 +1121,9 @@ namespace Sixnet.Development.Command
             {
                 cmd.MigrationInfo = new SixnetMigrationInfo();
             });
-            var defaultTableName = SixnetDataManager.GetDefaultTableName(SixnetDataCommandExecutionContext.Create(connection), entityConfig);
-            if (string.IsNullOrWhiteSpace(oldTableName.SchemaName)) 
+            var defaultTableName = SixnetDataManager.GetDefaultTableNames(SixnetDataCommandExecutionContext.Create(connection, GetDefaultMigrationCommand()), entityConfig)?.FirstOrDefault(c => !c.IsHistoricalTable);
+
+            if (string.IsNullOrWhiteSpace(oldTableName.SchemaName))
             {
                 oldTableName.SchemaName = defaultTableName.SchemaName;
             }
@@ -1094,6 +1135,7 @@ namespace Sixnet.Development.Command
             {
                 newTableName.Name = defaultTableName.Name;
             }
+
             if (entityConfig?.IsSplitTable ?? false)
             {
                 var splitProvider = SixnetDataManager.GetSplitTableProvider(SixnetDataManager.GetDataOptions(), SixnetEntityManager.GetEntityConfig(entityType));
@@ -1105,6 +1147,20 @@ namespace Sixnet.Development.Command
                     RootTableName = oldTableName,
                 });
                 migCmd.MigrationInfo.RenamedTables = splitProvider.ChangeRootTableNames(allTableNames, newTableName);
+                if (entityConfig.InStyle(SixnetEntityStyle.SeparateVersioning))
+                {
+                    allTableNames = splitProvider.FilterAllTableNames(new SixnetFilterAllSplitTableNameParameter()
+                    {
+                        AllTableNames = allTableNames,
+                        Behavior = splitBehavior,
+                        RootTableName = SixnetDataManager.GetHistoryTableName(oldTableName),
+                    });
+                    var historyTableNames = splitProvider.ChangeRootTableNames(allTableNames, SixnetDataManager.GetHistoryTableName(newTableName));
+                    foreach (var historyTableName in historyTableNames)
+                    {
+                        migCmd.MigrationInfo.RenamedTables.Add(historyTableName.Key, historyTableName.Value);
+                    }
+                }
             }
             else
             {
@@ -1112,6 +1168,11 @@ namespace Sixnet.Development.Command
                 {
                     { oldTableName, newTableName}
                 };
+
+                if (entityConfig.InStyle(SixnetEntityStyle.SeparateVersioning))
+                {
+                    migCmd.MigrationInfo.RenamedTables.Add(SixnetDataManager.GetHistoryTableName(oldTableName), SixnetDataManager.GetHistoryTableName(newTableName));
+                }
             }
             return migCmd;
         }
@@ -1131,7 +1192,7 @@ namespace Sixnet.Development.Command
                     NewForeignKeys = []
                 };
             });
-            var selfTableNames = new List<SixnetDatabaseObjectName>() { SixnetDataManager.GetDefaultTableName(SixnetDataCommandExecutionContext.Create(connection), selfEntityConfig) };
+            var selfTableNames = SixnetDataManager.GetDefaultTableNames(SixnetDataCommandExecutionContext.Create(connection, GetDefaultMigrationCommand()), selfEntityConfig);
             if (selfEntityConfig?.IsSplitTable ?? false)
             {
                 var splitProvider = SixnetDataManager.GetSplitTableProvider(SixnetDataManager.GetDataOptions(), selfEntityConfig);
@@ -1143,7 +1204,8 @@ namespace Sixnet.Development.Command
                     RootTableName = selfTableNames.FirstOrDefault(),
                 });
             }
-            var referenceTableName = SixnetDataManager.GetDefaultTableName(SixnetDataCommandExecutionContext.Create(connection), referenceEntityConfig);
+            var referenceTableName = SixnetDataManager.GetDefaultTableNames(SixnetDataCommandExecutionContext.Create(connection), referenceEntityConfig)
+                ?.FirstOrDefault(c => !c.IsHistoricalTable);
             foreach (var selfTable in selfTableNames)
             {
                 migCmd.MigrationInfo.NewForeignKeys.Add(new SixnetEntityForeignKeyInfo()
@@ -1172,7 +1234,7 @@ namespace Sixnet.Development.Command
                     DeletedForeignKeys = []
                 };
             });
-            var selfTableNames = new List<SixnetDatabaseObjectName>() { SixnetDataManager.GetDefaultTableName(SixnetDataCommandExecutionContext.Create(connection), selfEntityConfig) };
+            var selfTableNames = SixnetDataManager.GetDefaultTableNames(SixnetDataCommandExecutionContext.Create(connection, GetDefaultMigrationCommand()), selfEntityConfig);
             if (selfEntityConfig?.IsSplitTable ?? false)
             {
                 var splitProvider = SixnetDataManager.GetSplitTableProvider(SixnetDataManager.GetDataOptions(), selfEntityConfig);
@@ -1184,7 +1246,8 @@ namespace Sixnet.Development.Command
                     RootTableName = selfTableNames.FirstOrDefault(),
                 });
             }
-            var referenceTableName = SixnetDataManager.GetDefaultTableName(SixnetDataCommandExecutionContext.Create(connection), referenceEntityConfig);
+            var referenceTableName = SixnetDataManager.GetDefaultTableNames(SixnetDataCommandExecutionContext.Create(connection, GetDefaultMigrationCommand()), referenceEntityConfig)
+                ?.FirstOrDefault(c => !c.IsHistoricalTable);
             foreach (var selfTable in selfTableNames)
             {
                 migCmd.MigrationInfo.DeletedForeignKeys.Add(new SixnetEntityForeignKeyInfo()
@@ -1209,7 +1272,7 @@ namespace Sixnet.Development.Command
                 };
             });
 
-            var tableNames = new List<SixnetDatabaseObjectName>() { SixnetDataManager.GetDefaultTableName(SixnetDataCommandExecutionContext.Create(connection), entityConfig) };
+            var tableNames = SixnetDataManager.GetDefaultTableNames(SixnetDataCommandExecutionContext.Create(connection, GetDefaultMigrationCommand()), entityConfig);
             if (entityConfig?.IsSplitTable ?? false)
             {
                 var splitProvider = SixnetDataManager.GetSplitTableProvider(SixnetDataManager.GetDataOptions(), entityConfig);
@@ -1262,7 +1325,7 @@ namespace Sixnet.Development.Command
                 };
             });
 
-            var tableNames = new List<SixnetDatabaseObjectName>() { SixnetDataManager.GetDefaultTableName(SixnetDataCommandExecutionContext.Create(connection), entityConfig) };
+            var tableNames = SixnetDataManager.GetDefaultTableNames(SixnetDataCommandExecutionContext.Create(connection, GetDefaultMigrationCommand()), entityConfig);
             if (entityConfig?.IsSplitTable ?? false)
             {
                 var splitProvider = SixnetDataManager.GetSplitTableProvider(SixnetDataManager.GetDataOptions(), entityConfig);

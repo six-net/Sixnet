@@ -249,7 +249,7 @@ namespace Sixnet.Net.Email
         /// <returns></returns>
         static ISixnetEmailProvider GetEmailProvider()
         {
-            var emailProvider = SixnetContainer.GetService<ISixnetEmailProvider>();
+            var emailProvider = SixnetContainer.GetInstance<ISixnetEmailProvider>();
             emailProvider ??= _defaultEmailProvider;
 
             SixnetDirectThrower.ThrowSixnetExceptionIf(emailProvider == null, "Not configure email provider");

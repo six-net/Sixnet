@@ -14,7 +14,7 @@ namespace Sixnet.Development.Entity
     /// Sixnet app update record entity
     /// </summary>
     [SixnetEntity(TableName = "SIXNET_APPLICATION_UPDATE_RECORD", Module = "", Description = "App update record", IsSystem = true)]
-    public class SixnetAppUpdateRecordEntity : SixnetCreateUpdateDateEntity<SixnetAppUpdateRecordEntity>
+    public class SixnetAppUpdateRecordEntity : SixnetCreateUpdateDateEntity<SixnetAppUpdateRecordEntity>, ISixnetIdEntity<long>
     {
         /// <summary>
         /// Id
@@ -38,7 +38,7 @@ namespace Sixnet.Development.Entity
         /// Execute count
         /// </summary>
         [SixnetEntityField()]
-        public int ExecutionCount {  get; set; }
+        public int ExecutionCount { get; set; }
 
         /// <summary>
         /// Note

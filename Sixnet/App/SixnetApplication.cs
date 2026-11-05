@@ -289,7 +289,7 @@ namespace Sixnet.App
             foreach (var eventHandlerType in _eventHandlerTypes)
             {
                 var handler = eventHandlerType.IsInterface
-                                ? SixnetContainer.GetService(eventHandlerType)
+                                ? SixnetContainer.GetInstance(eventHandlerType)
                                 : Activator.CreateInstance(eventHandlerType);
 
                 var classAttributes = eventHandlerType.GetCustomAttributes(false);

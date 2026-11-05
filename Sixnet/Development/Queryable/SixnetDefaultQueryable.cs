@@ -59,9 +59,9 @@ namespace Sixnet.Development.Queryable
 
         #region Constructor
 
-        public SixnetDefaultQueryable(SixnetQueryableInfo sourceQueryableContext)
+        public SixnetDefaultQueryable(SixnetQueryableInfo sourceQueryableInfo)
         {
-            queryableInfo = sourceQueryableContext ?? new SixnetQueryableInfo();
+            queryableInfo = sourceQueryableInfo ?? new SixnetQueryableInfo();
             InitQueryable(queryableInfo);
         }
 
@@ -69,14 +69,14 @@ namespace Sixnet.Development.Queryable
         {
         }
 
-        void InitQueryable(SixnetQueryableInfo queryableContext)
+        void InitQueryable(SixnetQueryableInfo queryableInfo)
         {
             // Init model type
-            var currentModelType = queryableContext.ModelType;
+            var currentModelType = queryableInfo.ModelType;
             var thisType = GetType();
             if (currentModelType == null && thisType.IsGenericType)
             {
-                queryableContext.SetModelType(thisType.GenericTypeArguments[0]);
+                queryableInfo.SetModelType(thisType.GenericTypeArguments[0]);
             }
         }
 
@@ -1086,6 +1086,29 @@ namespace Sixnet.Development.Queryable
             return CreateTempTable()?.Name;
         }
 
+        /// <summary>
+        /// From all versions
+        /// </summary>
+        /// <returns></returns>
+        public ISixnetQueryable FromAllVersions()
+        {
+            queryableInfo.FromAllVersions();
+            return this;
+        }
+
+        /// <summary>
+        /// From all versions
+        /// </summary>
+        /// <returns></returns>
+        public ISixnetQueryable FromAllVersionsIf(bool predicate)
+        {
+            if (predicate)
+            {
+                FromAllVersions();
+            }
+            return this;
+        }
+
         #endregion
 
         #region Split table
@@ -1203,6 +1226,60 @@ namespace Sixnet.Development.Queryable
         public ISixnetQueryable IgnoreFilter(Type filterType)
         {
             queryableInfo.IgnoreFilter(filterType);
+            return this;
+        }
+
+        /// <summary>
+        /// Include archived
+        /// </summary>
+        /// <returns></returns>
+        public ISixnetQueryable IncludeArchivedIf(bool predicate)
+        {
+            if (predicate)
+            {
+                IncludeArchived();
+            }
+            return this;
+        }
+
+        /// <summary>
+        /// Ignore data isolation
+        /// </summary>
+        /// <returns></returns>
+        public ISixnetQueryable IgnoreIsolationIf(bool predicate)
+        {
+            if (predicate)
+            {
+                IgnoreIsolation();
+            }
+            return this;
+        }
+
+        /// <summary>
+        /// Ignore filter
+        /// </summary>
+        /// <typeparam name="TFilter">Filter type</typeparam>
+        /// <returns></returns>
+        public ISixnetQueryable IgnoreFilterIf<TFilter>(bool predicate)
+        {
+            if (predicate)
+            {
+                IgnoreFilter<TFilter>();
+            }
+            return this;
+        }
+
+        /// <summary>
+        /// Ignore filter
+        /// </summary>
+        /// <param name="filterType">Filter type</param>
+        /// <returns></returns>
+        public ISixnetQueryable IgnoreFilterIf(bool predicate, Type filterType)
+        {
+            if (predicate)
+            {
+                IgnoreFilter(filterType);
+            }
             return this;
         }
 

@@ -43,7 +43,7 @@ namespace Sixnet.Serialization.Json
         /// <returns></returns>
         static ISixnetJsonSerializationProvider GetJsonSerializationProvider()
         {
-            return SixnetContainer.GetService<ISixnetJsonSerializationProvider>() ?? _defaultJsonSerializationProvider;
+            return SixnetContainer.GetInstance<ISixnetJsonSerializationProvider>() ?? _defaultJsonSerializationProvider;
         }
 
         /// <summary>

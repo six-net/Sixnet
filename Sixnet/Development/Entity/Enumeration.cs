@@ -39,7 +39,10 @@ namespace Sixnet.Development.Entity
         UpdateUserDisplayName = 16384,
         SplitValue = 32768,
         GeneratedId = 65536,
-        UploadPath = 131072
+        UploadPath = 131072,
+        Version = 262144,
+        HistoryTag = 524288,
+        DefaultId = 1048576
     }
 
     /// <summary>
@@ -100,7 +103,9 @@ namespace Sixnet.Development.Entity
     public enum SixnetEntityStyle
     {
         Physical = 0,
-        Virtual = 2
+        Virtual = 2,
+        Versioning = 4,
+        SeparateVersioning = 8
     }
 
     /// <summary>

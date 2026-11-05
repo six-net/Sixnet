@@ -1393,6 +1393,26 @@ namespace Sixnet.Development.Queryable
             return this;
         }
 
+        /// <summary>
+        /// From all versions
+        /// </summary>
+        /// <returns></returns>
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> FromAllVersions()
+        {
+            base.FromAllVersions();
+            return this;
+        }
+
+        /// <summary>
+        /// From all versions
+        /// </summary>
+        /// <returns></returns>
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> FromAllVersionsIf(bool predicate)
+        {
+            base.FromAllVersionsIf(predicate);
+            return this;
+        }
+
         #endregion
 
         #region Split table
@@ -1500,6 +1520,48 @@ namespace Sixnet.Development.Queryable
         public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> IgnoreFilter(Type filterType)
         {
             base.IgnoreFilter(filterType);
+            return this;
+        }
+
+        /// <summary>
+        /// Include archived
+        /// </summary>
+        /// <returns></returns>
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> IncludeArchivedIf(bool predicate)
+        {
+            base.IncludeArchivedIf(predicate);
+            return this;
+        }
+
+        /// <summary>
+        /// Ignore data isolation
+        /// </summary>
+        /// <returns></returns>
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> IgnoreIsolationIf(bool predicate)
+        {
+            base.IgnoreIsolationIf(predicate);
+            return this;
+        }
+
+        /// <summary>
+        /// Ignore filter
+        /// </summary>
+        /// <typeparam name="TFilter">Filter type</typeparam>
+        /// <returns></returns>
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> IgnoreFilterIf<TFilter>(bool predicate)
+        {
+            base.IgnoreFilterIf<TFilter>(predicate);
+            return this;
+        }
+
+        /// <summary>
+        /// Ignore filter
+        /// </summary>
+        /// <param name="filterType">Filter type</param>
+        /// <returns></returns>
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> IgnoreFilterIf(bool predicate, Type filterType)
+        {
+            base.IgnoreFilterIf(predicate, filterType);
             return this;
         }
 

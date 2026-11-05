@@ -51,6 +51,10 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         public static readonly Type DefaultModelType = typeof(ExpandoObject);
 
+        SixnetVersioningTableType? _versioningTableType = null;
+
+        bool _useForGroup = false;
+
         #endregion
 
         #region Constructor
@@ -329,7 +333,7 @@ namespace Sixnet.Development.Queryable
             }
             else if (condition is ISixnetQueryable groupQueryable)
             {
-                condition = HandleParameterQueryable(groupQueryable);
+                condition = groupQueryable = HandleParameterQueryable(groupQueryable);
                 AddGroupQueryable(groupQueryable);
             }
 
@@ -939,6 +943,7 @@ namespace Sixnet.Development.Queryable
                 ModelType = ModelType,
                 IgnoredFilterFieldRole = IgnoredFilterFieldRole,
                 _joinIndex = _joinIndex,
+                _useForGroup = _useForGroup,
                 Script = Script,
                 ScriptType = ScriptType,
                 ExecutionMode = ExecutionMode,
@@ -1064,15 +1069,6 @@ namespace Sixnet.Development.Queryable
         #endregion
 
         #region Model Type
-
-        ///// <summary>
-        ///// Get the model type
-        ///// </summary>
-        ///// <returns></returns>
-        //internal Type GetModelType()
-        //{
-        //    return ModelType;
-        //}
 
         /// <summary>
         /// Set model type
@@ -1228,6 +1224,21 @@ namespace Sixnet.Development.Queryable
             TargetConstantValue = datas;
             CleanFromInfo();
             return this;
+        }
+
+        /// <summary>
+        /// From all versions
+        /// </summary>
+        /// <returns></returns>
+        internal SixnetQueryableInfo FromAllVersions()
+        {
+            _versioningTableType = SixnetVersioningTableType.VersionTable;
+            return this;
+        }
+
+        internal SixnetVersioningTableType? GetVersioningTableType()
+        {
+            return _versioningTableType;
         }
 
         void CleanFromInfo()
@@ -1438,12 +1449,21 @@ namespace Sixnet.Development.Queryable
         #region Util
 
         /// <summary>
+        /// Use for group
+        /// </summary>
+        /// <param name="useForGroup"></param>
+        internal void UseForGroup(bool useForGroup)
+        {
+            _useForGroup = useForGroup;
+        }
+
+        /// <summary>
         /// Check whether is use for group queryable
         /// </summary>
         /// <returns></returns>
         internal bool CheckUseForGroup()
         {
-            return ExecutionMode != SixnetQueryableExecutionMode.Script && ModelType == null;
+            return _useForGroup;
         }
 
         /// <summary>
@@ -1514,6 +1534,7 @@ namespace Sixnet.Development.Queryable
         {
             if (groupQueryable != null && !groupQueryable.Info.Criteria.IsNullOrEmpty())
             {
+                groupQueryable.Info.UseForGroup(true);
                 Criteria ??= new List<SixnetCriterion>();
                 Criteria.AddRange(groupQueryable.Info.Criteria);
             }

@@ -37,6 +37,11 @@ namespace Sixnet.Development.Data.Database
         /// </summary>
         public string IdentityName => string.IsNullOrWhiteSpace(SchemaName) ? Name : $"{SchemaName}_{Name}";
 
+        /// <summary>
+        /// Whether is historical table
+        /// </summary>
+        public bool IsHistoricalTable { get; set; }
+
         public override string ToString()
         {
             return FullName;

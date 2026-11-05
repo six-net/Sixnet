@@ -12,6 +12,8 @@ namespace Sixnet.Development.Entity
 
         internal Action<T, object> Setter { get; set; }
 
+        internal Type DataType { get; set; }
+
         public void SetGetter(Expression<Func<T, object>> expression)
         {
             if (expression != null)
@@ -41,6 +43,10 @@ namespace Sixnet.Development.Entity
         {
             if (data is T instance && Setter != null)
             {
+                if (value != null && value.GetType() != DataType)
+                {
+                    value = System.Convert.ChangeType(value, DataType);
+                }
                 Setter(instance, value);
             }
         }

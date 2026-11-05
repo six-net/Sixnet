@@ -4,6 +4,8 @@ using System.Collections;
 using System.Globalization;
 using System.Reflection;
 
+using AutoMapper.Execution;
+
 using Sixnet.Development.Data.Field;
 using Sixnet.Development.Data.Field.Formatting;
 using Sixnet.Development.Entity;
@@ -634,6 +636,20 @@ namespace Sixnet.Expressions.Linq
 
         #endregion
 
+        #region And
+
+        public static Expression<Func<T, bool>> And<T>(Expression<Func<T, bool>> left, Expression<Func<T, bool>> right)
+        {
+            var parameter = left.Parameters[0];
+            var body = Expression.AndAlso(
+                left.Body,
+                new SixnetParameterReplaceVisitor(right.Parameters[0], parameter).Visit(right.Body)!
+             );
+            return Expression.Lambda<Func<T, bool>>(body, parameter);
+        }
+
+        #endregion
+
         #endregion
 
         #region Queryable
@@ -827,6 +843,12 @@ namespace Sixnet.Expressions.Linq
                 {
                     criterion = GetSubqueryMethodCriterion(parameterIndexes, connector, methodCallExpression);
                 }
+                else 
+                {
+                    fieldExpression = methodCallExpression.Object;
+                    valueExpression = methodCallExpression.Arguments[0];
+                    criterion = GetObjectMethodCriterion(parameterIndexes, methodCallExpression.Method.Name, connector, fieldExpression, valueExpression);
+                }
             }
 
             SixnetDirectThrower.ThrowSixnetExceptionIf(criterion == null, $"Not support {methodCallExpression.Method.Name}");
@@ -882,6 +904,9 @@ namespace Sixnet.Expressions.Linq
             var criterionOperator = SixnetCriterionOperator.Like;
             switch (methodName)
             {
+                case "Equals":
+                    criterionOperator = SixnetCriterionOperator.Equal;
+                    break;
                 case "Contains":
                     criterionOperator = SixnetCriterionOperator.Like;
                     break;
@@ -905,6 +930,32 @@ namespace Sixnet.Expressions.Linq
                     copyField.FormatSetting = SixnetFieldFormatSetting.Create(SixnetFieldFormatterNames.TRIM);
                     nullOrWhiteSpaceQueryable.Where(CreateCriterion(SixnetCriterionConnector.Or, SixnetCriterionOperator.Equal, copyField, SixnetConstantField.Create("")));
                     return nullOrWhiteSpaceQueryable;
+                default:
+                    throw new NotSupportedException(methodName);
+            }
+            return CreateCriterion(connector, criterionOperator, leftField, rightField);
+        }
+
+
+        internal static ISixnetCondition GetObjectMethodCriterion(Dictionary<string, int> parameterIndexes, string methodName, SixnetCriterionConnector connector, Expression field, Expression value)
+        {
+            var leftField = GetDataField(field, parameterIndexes);
+            if (leftField == null)
+            {
+                return null;
+            }
+            ISixnetField rightField = null;
+            if (value != null)
+            {
+                var valueObj = CompileExpressionValue(value);
+                rightField = SixnetConstantField.Create(valueObj);
+            }
+            var criterionOperator = SixnetCriterionOperator.Equal;
+            switch (methodName)
+            {
+                case "Equals":
+                    criterionOperator = SixnetCriterionOperator.Equal;
+                    break;
                 default:
                     throw new NotSupportedException(methodName);
             }
@@ -2141,5 +2192,24 @@ namespace Sixnet.Expressions.Linq
         }
 
         #endregion
+    }
+
+    internal class SixnetParameterReplaceVisitor : ExpressionVisitor
+    {
+        private readonly ParameterExpression _oldParameter;
+        private readonly ParameterExpression _newParameter;
+
+        internal SixnetParameterReplaceVisitor(
+            ParameterExpression oldParameter,
+            ParameterExpression newParameter)
+        {
+            _oldParameter = oldParameter;
+            _newParameter = newParameter;
+        }
+
+        protected override Expression VisitParameter(ParameterExpression node)
+        {
+            return node == _oldParameter ? _newParameter : base.VisitParameter(node);
+        }
     }
 }

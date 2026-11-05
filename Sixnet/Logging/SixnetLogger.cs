@@ -27,7 +27,7 @@ namespace Sixnet.Logging
         /// <summary>
         /// Log provider
         /// </summary>
-        internal static ISixnetLogProvider LogProvider => SixnetContainer.GetService<ISixnetLogProvider>() ?? _defaultLogProvider;
+        internal static ISixnetLogProvider LogProvider => SixnetContainer.GetInstance<ISixnetLogProvider>() ?? _defaultLogProvider;
 
         #endregion
 

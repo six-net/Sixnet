@@ -199,7 +199,7 @@ namespace System
         /// <returns>Return the targete data</returns>
         public static dynamic ConvertTo(this object data, Type targetType)
         {
-            if (data != null)
+            if (data != null && data.GetType() != typeof(DBNull))
             {
                 return Convert.ChangeType(data, targetType);
             }

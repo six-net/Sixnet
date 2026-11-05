@@ -297,7 +297,7 @@ namespace Sixnet.Development.Message
         /// <returns></returns>
         internal static ISixnetMessageProvider GetMessageProvider()
         {
-            return SixnetContainer.GetService<ISixnetMessageProvider>() ?? _defaultMessageProvider;
+            return SixnetContainer.GetInstance<ISixnetMessageProvider>() ?? _defaultMessageProvider;
         }
 
         #endregion

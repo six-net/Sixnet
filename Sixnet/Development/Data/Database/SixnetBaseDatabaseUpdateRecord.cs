@@ -81,7 +81,7 @@ namespace Sixnet.Development.Data.Database
 
                 context.AddNewRecord(this);
 
-                var recordRepository = SixnetContainer.GetService<ISixnetRepository<SixnetAppUpdateRecordEntity>>();
+                var recordRepository = SixnetContainer.GetInstance<ISixnetRepository<SixnetAppUpdateRecordEntity>>();
                 var currentRecord = await recordRepository.GetAsync(c => c.Id == Id).ConfigureAwait(false);
                 if (currentRecord != null)
                 {
@@ -117,7 +117,7 @@ namespace Sixnet.Development.Data.Database
                 DataClient = SixnetUnitOfWork.Current.DataClient;
                 await ExecuteRollbackAsync().ConfigureAwait(false);
                 await DataClient.CreateTableAsync(typeof(SixnetAppUpdateRecordEntity)).ConfigureAwait(false);
-                var recordRepository = SixnetContainer.GetService<ISixnetRepository<SixnetAppUpdateRecordEntity>>();
+                var recordRepository = SixnetContainer.GetInstance<ISixnetRepository<SixnetAppUpdateRecordEntity>>();
                 await recordRepository.DeleteAsync(r => r.Id == Id).ConfigureAwait(false);
                 await workContext.CommitAsync().ConfigureAwait(false);
             }).ConfigureAwait(false);
@@ -296,7 +296,7 @@ namespace Sixnet.Development.Data.Database
             {
                 if (!logicalDelete)
                 {
-                    options.LogicalDeleteBehavior = SixnetDataOperationBehavior.Disable;
+                    options.LogicalDeleteBehavior = SixnetDataOperationBehavior.Disabled;
                 }
                 optionsConfigure?.Invoke(options);
             }).ConfigureAwait(false);

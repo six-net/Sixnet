@@ -839,7 +839,7 @@ namespace Sixnet.Development.Events
             SixnetDirectThrower.ThrowSixnetExceptionIf(handlerType == null, $"{nameof(handlerType)} is null");
             SixnetDirectThrower.ThrowSixnetExceptionIf(string.IsNullOrWhiteSpace(handlerExecutorName), $"{nameof(handlerExecutorName)} is null or empty");
 
-            var handler = SixnetContainer.GetService(handlerType);
+            var handler = SixnetContainer.GetInstance(handlerType);
             SixnetDirectThrower.ThrowSixnetExceptionIf(handler == null, $"Can't resolve {handlerType.FullName}");
 
             var executorMember = handler.GetType().GetMethods().FirstOrDefault(c =>

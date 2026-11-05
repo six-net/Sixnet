@@ -198,8 +198,8 @@ namespace Sixnet.Development.Data
             }
             else
             {
-                var tableName = GetDefaultTableName(context, entityConfig, context.Command?.TableName);
-                return new List<SixnetDatabaseObjectName>(1) { tableName };
+                var tableNames = GetDefaultTableNames(context, entityConfig, context.Command?.TableName);
+                return tableNames;
             }
         }
 
@@ -220,86 +220,94 @@ namespace Sixnet.Development.Data
             SixnetDirectThrower.ThrowSixnetExceptionIf(provider == null, $"Not set split table provider for {entityConfig.SplitTableProviderName}");
 
             var splitBehavior = context.GetSplitTableBehavior() ?? _defaultSplitTableBehavior;
-            var rootTableName = GetDefaultTableName(context, entityConfig, context.Command?.TableName);
-            var splitTableNames = provider.ResolveTableNames(new SixnetResolveSplitTableNameParameter()
-            {
-                EntityConfiguration = entityConfig,
-                RootTableName = rootTableName,
-                SplitBehavior = splitBehavior
-            });
+            var defaultTableNames = GetDefaultTableNames(context, entityConfig, context.Command?.TableName);
+            var allSplitedTableNames = new List<SixnetDatabaseObjectName>();
 
-            // all table names
-            var serverTableKey = GetDatabaseServerSplitTableCacheKey(entityConfig, context.Server, rootTableName);
-            var allTableNames = GetCachedTableNames(serverTableKey, rootTableName);
-            if (allTableNames.IsNullOrEmpty())
+            foreach (var rootTableName in defaultTableNames)
             {
-                allTableNames = RefreshTables(context, rootTableName, serverTableKey, splitBehavior, provider);
-            }
+                var splitedTableNames = provider.ResolveTableNames(new SixnetResolveSplitTableNameParameter()
+                {
+                    EntityConfiguration = entityConfig,
+                    RootTableName = rootTableName,
+                    SplitBehavior = splitBehavior
+                });
 
-            // split table names
-            if (context.Command?.OperationType == SixnetDataOperationType.Insert)
-            {
-                SixnetDirectThrower.ThrowInvalidOperationIf(splitTableNames.IsNullOrEmpty(), $"Not assign split table for {entityConfig.EntityType.Name}");
-                var diffTables = splitTableNames.Except(allTableNames);
-                if (!diffTables.IsNullOrEmpty())
+                var resolvedTableNames = splitedTableNames;
+
+                // all table names
+                var serverTableKey = GetDatabaseServerSplitTableCacheKey(entityConfig, context.Server, rootTableName);
+                var allTableNames = GetCachedTableNames(serverTableKey, rootTableName);
+                if (allTableNames.IsNullOrEmpty())
                 {
                     allTableNames = RefreshTables(context, rootTableName, serverTableKey, splitBehavior, provider);
-                    diffTables = splitTableNames.Except(allTableNames);
                 }
-                if (!diffTables.IsNullOrEmpty() && dataOptions.AutoCreateSplitTable)
+
+                // split table names
+                if (context.Command?.OperationType == SixnetDataOperationType.Insert)
                 {
-                    var createTableLock = SixnetLocker.GetCreateTableLock(entityConfig.EntityType);
-                    if (createTableLock != null)
-                    {
-                        try
-                        {
-                            allTableNames = GetCachedTableNames(serverTableKey, rootTableName);
-                            diffTables = splitTableNames.Except(allTableNames);
-                            if (!diffTables.IsNullOrEmpty())
-                            {
-                                AutoCreateTables(context, rootTableName, serverTableKey, entityConfig, diffTables, splitBehavior, provider);
-                            }
-                        }
-                        catch
-                        {
-                            throw;
-                        }
-                        finally
-                        {
-                            createTableLock.Value.Release();
-                        }
-                    }
-                }
-            }
-            else
-            {
-                if (splitBehavior.IsTakeAllSplitTables(splitTableNames))
-                {
-                    if (allTableNames.IsNullOrEmpty())
+                    SixnetDirectThrower.ThrowInvalidOperationIf(splitedTableNames.IsNullOrEmpty(), $"Not assign split table for {entityConfig.EntityType.Name}");
+                    var diffTables = splitedTableNames.Except(allTableNames);
+                    if (!diffTables.IsNullOrEmpty())
                     {
                         allTableNames = RefreshTables(context, rootTableName, serverTableKey, splitBehavior, provider);
+                        diffTables = splitedTableNames.Except(allTableNames);
                     }
-                    return allTableNames;
+                    if (!diffTables.IsNullOrEmpty() && dataOptions.AutoCreateSplitTable)
+                    {
+                        var createTableLock = SixnetLocker.GetCreateTableLock(entityConfig.EntityType);
+                        if (createTableLock != null)
+                        {
+                            try
+                            {
+                                allTableNames = GetCachedTableNames(serverTableKey, rootTableName);
+                                diffTables = splitedTableNames.Except(allTableNames);
+                                if (!diffTables.IsNullOrEmpty())
+                                {
+                                    AutoCreateTables(context, rootTableName, serverTableKey, entityConfig, diffTables, splitBehavior, provider);
+                                }
+                            }
+                            catch
+                            {
+                                throw;
+                            }
+                            finally
+                            {
+                                createTableLock.Value.Release();
+                            }
+                        }
+                    }
                 }
-                var diffTables = splitTableNames.Except(allTableNames);
-                if (!diffTables.IsNullOrEmpty())
+                else
                 {
-                    allTableNames = RefreshTables(context, rootTableName, serverTableKey, splitBehavior, provider);
-                    diffTables = splitTableNames.Except(allTableNames);
+                    if (splitBehavior.IsTakeAllSplitTables(splitedTableNames))
+                    {
+                        if (allTableNames.IsNullOrEmpty())
+                        {
+                            allTableNames = RefreshTables(context, rootTableName, serverTableKey, splitBehavior, provider);
+                        }
+                        return allTableNames;
+                    }
+                    var diffTables = splitedTableNames.Except(allTableNames);
+                    if (!diffTables.IsNullOrEmpty())
+                    {
+                        allTableNames = RefreshTables(context, rootTableName, serverTableKey, splitBehavior, provider);
+                        diffTables = splitedTableNames.Except(allTableNames);
+                    }
+                    if (!diffTables.IsNullOrEmpty())
+                    {
+                        splitedTableNames = splitedTableNames.Except(diffTables).ToList();
+                    }
+                    splitedTableNames = provider.GetTableNames(new SixnetGetSplitTableNameParameter()
+                    {
+                        ResolvedTableNames = splitedTableNames,
+                        AllTableNames = allTableNames,
+                        RootTableName = rootTableName,
+                        Behavior = splitBehavior
+                    });
                 }
-                if (!diffTables.IsNullOrEmpty())
-                {
-                    splitTableNames = splitTableNames.Except(diffTables).ToList();
-                }
-                splitTableNames = provider.GetTableNames(new SixnetGetSplitTableNameParameter()
-                {
-                    ResolvedTableNames = splitTableNames,
-                    AllTableNames = allTableNames,
-                    RootTableName = rootTableName,
-                    Behavior = splitBehavior
-                });
+                allSplitedTableNames.AddRange(splitedTableNames.IsNullOrEmpty() ? resolvedTableNames : splitedTableNames);
             }
-            return splitTableNames;
+            return allSplitedTableNames;
         }
 
         /// <summary>
@@ -374,7 +382,7 @@ namespace Sixnet.Development.Data
         /// <param name="databaseType">Server type</param>
         /// <param name="entityType">Entity type</param>
         /// <returns></returns>
-        internal static SixnetDatabaseObjectName GetDefaultTableName(SixnetDataCommandExecutionContext context
+        internal static List<SixnetDatabaseObjectName> GetDefaultTableNames(SixnetDataCommandExecutionContext context
             , SixnetEntityConfiguration entityConfig, string defaultTableName = "")
         {
             SixnetDirectThrower.ThrowArgNullIf(context == null, nameof(context));
@@ -399,7 +407,36 @@ namespace Sixnet.Development.Data
             {
                 schema = dataOptions.GetDatabaseSchema(context, entityConfig);
             }
-            return SixnetDatabaseObjectName.Create(tableName, SixnetDatabaseObjectType.Table, schema);
+
+            var regularTableName = SixnetDatabaseObjectName.Create(tableName, SixnetDatabaseObjectType.Table, schema);
+            var tableNames = new List<SixnetDatabaseObjectName>();
+            var operationOptions = context?.Command?.Options;
+
+            var isSeparateVersioningTable = entityConfig.InStyle(SixnetEntityStyle.SeparateVersioning);
+
+            if (!isSeparateVersioningTable || (operationOptions?.IncludePrimaryTable() ?? true))
+            {
+                tableNames.Add(regularTableName);
+            }
+
+            if (isSeparateVersioningTable && (operationOptions?.IncludeVersionTable() ?? false))
+            {
+                tableNames.Add(GetHistoryTableName(regularTableName));
+            }
+
+            return tableNames;
+        }
+
+        static internal SixnetDatabaseObjectName GetHistoryTableName(SixnetDatabaseObjectName regularTableName)
+        {
+            if (regularTableName == null)
+            {
+                return null;
+            }
+            var historyTableName = regularTableName.Clone();
+            historyTableName.Name = $"{historyTableName.Name}_History";
+            historyTableName.IsHistoricalTable = true;
+            return historyTableName;
         }
 
         /// <summary>

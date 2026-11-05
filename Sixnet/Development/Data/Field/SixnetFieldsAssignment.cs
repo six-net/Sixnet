@@ -144,6 +144,18 @@ namespace Sixnet.Development.Data.Field
             return fieldsAssignment;
         }
 
+        /// <summary>
+        /// Remove new value
+        /// </summary>
+        /// <param name="propertyName"></param>
+        public void RemoveNewValue(string propertyName)
+        {
+            if (newValues.ContainsKey(propertyName))
+            {
+                newValues.Remove(propertyName);
+            }
+        }
+
         #endregion
     }
 }

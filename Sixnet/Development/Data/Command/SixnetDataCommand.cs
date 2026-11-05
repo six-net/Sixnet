@@ -220,6 +220,16 @@ namespace Sixnet.Development.Data.Command
             };
         }
 
+        internal static SixnetDataCommand CreateMigrationCommand()
+        {
+            var command = new SixnetDataCommand()
+            {
+                Options = new SixnetDataOperationOptions()
+            };
+            command.Options.ForAllTable();
+            return command;
+        }
+
         #endregion
 
         #region Command starting event

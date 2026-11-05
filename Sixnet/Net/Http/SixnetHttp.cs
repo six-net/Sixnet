@@ -70,7 +70,7 @@ namespace Sixnet.Net.Http
         /// <returns>Return a http client</returns>
         static HttpClient GetHttpClient(string clientConfigName = "")
         {
-            var httpClientFactory = SixnetContainer.GetService<IHttpClientFactory>();
+            var httpClientFactory = SixnetContainer.GetInstance<IHttpClientFactory>();
             if (string.IsNullOrWhiteSpace(clientConfigName) || httpClientFactory == null)
             {
                 if (DefaultHttpClient != null)

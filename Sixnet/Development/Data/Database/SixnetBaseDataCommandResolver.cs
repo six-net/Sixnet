@@ -717,17 +717,17 @@ namespace Sixnet.Development.Data.Database
                 var entityConfig = SixnetEntityManager.GetEntityConfig(entityType);
                 SixnetDirectThrower.ThrowSixnetExceptionIf(entityConfig == null, $"Get entity config failed for {entityType.Name}");
 
-                // Columns
-                var columnDefine = GetCreateColumnDefine(new SixnetGetCreateColumnDefineParameter()
-                {
-                    EntityConfiguration = entityConfig,
-                    MigrationInfo = migrationInfo
-                });
-
                 foreach (var table in newTableInfo.TableNames)
                 {
-                    var schemas = GetSchemasCombination(migrationCommand, table);
+                    // Columns
+                    var columnDefine = GetCreateColumnDefine(new SixnetGetCreateColumnDefineParameter()
+                    {
+                        EntityConfiguration = entityConfig,
+                        MigrationInfo = migrationInfo,
+                        TableName = table
+                    });
 
+                    var schemas = GetSchemasCombination(migrationCommand, table);
                     foreach (var schema in schemas)
                     {
                         table.SchemaName = schema;
@@ -838,6 +838,7 @@ namespace Sixnet.Development.Data.Database
         {
             var entityConfig = parameter.EntityConfiguration;
             var migrationInfo = parameter.MigrationInfo;
+            var tableName = parameter.TableName;
             var newFieldScripts = new List<string>();
             var primaryKeyNames = new List<string>();
             var hasIncrementField = false;
@@ -847,9 +848,9 @@ namespace Sixnet.Development.Data.Database
                 if (dataField is SixnetDataField dataEntityField)
                 {
                     var dataFieldName = FormatAndWrapObjectName(SixnetDatabaseObjectName.Create(dataEntityField.GetFieldName(DatabaseType), SixnetDatabaseObjectType.Column));
-                    newFieldScripts.Add($"{dataFieldName}{GetFieldDefinition(dataEntityField, migrationInfo)}");
+                    newFieldScripts.Add($"{dataFieldName}{GetFieldDefinition(tableName, dataEntityField, migrationInfo)}");
                     hasIncrementField |= dataEntityField.InRole(SixnetFieldRole.Increment);
-                    if (dataEntityField.InRole(SixnetFieldRole.PrimaryKey))
+                    if (dataEntityField.InRole(SixnetFieldRole.PrimaryKey) || (tableName.IsHistoricalTable && dataEntityField.InRole(SixnetFieldRole.Version)))
                     {
                         primaryKeyNames.Add($"{dataFieldName}{(DisableDefaultPrimaryKeyAsc ? "" : " ASC")}");
                     }
@@ -3106,12 +3107,13 @@ namespace Sixnet.Development.Data.Database
         /// <summary>
         /// Get field definition
         /// </summary>
-        /// <param name="field"></param>
-        /// <param name="options"></param>
+        /// <param name="tableName">Table name</param>
+        /// <param name="field">Field</param>
+        /// <param name="options">Options</param>
         /// <returns></returns>
-        protected virtual string GetFieldDefinition(SixnetDataField field, SixnetMigrationInfo options)
+        protected virtual string GetFieldDefinition(SixnetDatabaseObjectName tableName, SixnetDataField field, SixnetMigrationInfo options)
         {
-            return $" {GetSqlDataType(field, options)}{GetFieldIdentity(field, options)}{GetFieldNullable(field, options)}{GetSqlDefaultValue(field, options)}";
+            return $" {GetSqlDataType(field, options)}{(tableName.IsHistoricalTable ? "" : GetFieldIdentity(field, options))}{GetFieldNullable(field, options)}{GetSqlDefaultValue(field, options)}";
         }
 
         #endregion

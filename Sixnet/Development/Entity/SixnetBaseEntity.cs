@@ -90,7 +90,7 @@ namespace Sixnet.Development.Entity
             foreach (var pk in primaryKeys)
             {
                 var field = SixnetEntityManager.GetField(typeof(T), pk);
-                if (field != null && !field.InRole(SixnetFieldRole.Increment))
+                if (field != null && !field.InRole(SixnetFieldRole.Increment) && IdentityFieldValueIsNull(field))
                 {
                     var valueType = field.DataType?.GetRealValueType();
                     var typeCode = Type.GetTypeCode(valueType);
@@ -159,70 +159,76 @@ namespace Sixnet.Development.Entity
             foreach (var pk in primaryKeys)
             {
                 var field = SixnetEntityManager.GetField(typeof(T), pk);
-                identityValueIsNull = field == null;
-                if (!identityValueIsNull)
-                {
-                    var valueType = field.DataType?.GetRealValueType();
-                    var typeCode = Type.GetTypeCode(valueType);
-                    var fieldValue = field.ValueProvider.Get(this);
-                    switch (typeCode)
-                    {
-                        case TypeCode.Byte:
-                            identityValueIsNull = !byte.TryParse(fieldValue?.ToString(), out var byteValue) || byteValue < 1;
-                            break;
-                        case TypeCode.SByte:
-                            identityValueIsNull = !sbyte.TryParse(fieldValue?.ToString(), out var sbyteValue) || sbyteValue < 1;
-                            break;
-                        case TypeCode.Int16:
-                            identityValueIsNull = !short.TryParse(fieldValue?.ToString(), out var shortValue) || shortValue < 1;
-                            break;
-                        case TypeCode.UInt16:
-                            identityValueIsNull = !ushort.TryParse(fieldValue?.ToString(), out var ushortValue) || ushortValue < 1;
-                            break;
-                        case TypeCode.Int32:
-                            identityValueIsNull = !int.TryParse(fieldValue?.ToString(), out var intValue) || intValue < 1;
-                            break;
-                        case TypeCode.UInt32:
-                            identityValueIsNull = !uint.TryParse(fieldValue?.ToString(), out var uintValue) || uintValue < 1;
-                            break;
-                        case TypeCode.Int64:
-                            identityValueIsNull = !long.TryParse(fieldValue?.ToString(), out var longValue) || longValue < 1;
-                            break;
-                        case TypeCode.UInt64:
-                            identityValueIsNull = !ulong.TryParse(fieldValue?.ToString(), out var ulongValue) || ulongValue < 1;
-                            break;
-                        case TypeCode.Double:
-                        case TypeCode.Single:
-                            identityValueIsNull = !double.TryParse(fieldValue?.ToString(), out var doubleValue) || doubleValue < 1;
-                            break;
-                        case TypeCode.Decimal:
-                            identityValueIsNull = !decimal.TryParse(fieldValue?.ToString(), out var decimalValue) || decimalValue < 1;
-                            break;
-                        case TypeCode.String:
-                            identityValueIsNull = string.IsNullOrWhiteSpace(fieldValue?.ToString());
-                            break;
-                        case TypeCode.DateTime:
-                            identityValueIsNull = !DateTime.TryParse(fieldValue?.ToString(), out var dateTimeValue) || dateTimeValue <= DateTime.MinValue;
-                            break;
-                        default:
-                            if (valueType == typeof(Guid))
-                            {
-                                identityValueIsNull = !Guid.TryParse(fieldValue?.ToString(), out var guidValue) || guidValue.Equals(Guid.Empty);
-                            }
-                            else if (valueType == typeof(DateTimeOffset))
-                            {
-                                identityValueIsNull = !DateTimeOffset.TryParse(fieldValue?.ToString(), out var dateTimeOffsetValue) && dateTimeOffsetValue <= DateTimeOffset.MinValue;
-                            }
-                            else
-                            {
-                                throw new InvalidOperationException($"Not supported check value for {field.DataType}.");
-                            }
-                            break;
-                    }
-                }
+                identityValueIsNull = IdentityFieldValueIsNull(field);
                 if (identityValueIsNull)
                 {
                     break;
+                }
+            }
+            return identityValueIsNull;
+        }
+
+        protected virtual bool IdentityFieldValueIsNull(SixnetDataField field)
+        {
+            var identityValueIsNull = field == null;
+            if (!identityValueIsNull)
+            {
+                var valueType = field.DataType?.GetRealValueType();
+                var typeCode = Type.GetTypeCode(valueType);
+                var fieldValue = field.ValueProvider.Get(this);
+                switch (typeCode)
+                {
+                    case TypeCode.Byte:
+                        identityValueIsNull = !byte.TryParse(fieldValue?.ToString(), out var byteValue) || byteValue < 1;
+                        break;
+                    case TypeCode.SByte:
+                        identityValueIsNull = !sbyte.TryParse(fieldValue?.ToString(), out var sbyteValue) || sbyteValue < 1;
+                        break;
+                    case TypeCode.Int16:
+                        identityValueIsNull = !short.TryParse(fieldValue?.ToString(), out var shortValue) || shortValue < 1;
+                        break;
+                    case TypeCode.UInt16:
+                        identityValueIsNull = !ushort.TryParse(fieldValue?.ToString(), out var ushortValue) || ushortValue < 1;
+                        break;
+                    case TypeCode.Int32:
+                        identityValueIsNull = !int.TryParse(fieldValue?.ToString(), out var intValue) || intValue < 1;
+                        break;
+                    case TypeCode.UInt32:
+                        identityValueIsNull = !uint.TryParse(fieldValue?.ToString(), out var uintValue) || uintValue < 1;
+                        break;
+                    case TypeCode.Int64:
+                        identityValueIsNull = !long.TryParse(fieldValue?.ToString(), out var longValue) || longValue < 1;
+                        break;
+                    case TypeCode.UInt64:
+                        identityValueIsNull = !ulong.TryParse(fieldValue?.ToString(), out var ulongValue) || ulongValue < 1;
+                        break;
+                    case TypeCode.Double:
+                    case TypeCode.Single:
+                        identityValueIsNull = !double.TryParse(fieldValue?.ToString(), out var doubleValue) || doubleValue < 1;
+                        break;
+                    case TypeCode.Decimal:
+                        identityValueIsNull = !decimal.TryParse(fieldValue?.ToString(), out var decimalValue) || decimalValue < 1;
+                        break;
+                    case TypeCode.String:
+                        identityValueIsNull = string.IsNullOrWhiteSpace(fieldValue?.ToString());
+                        break;
+                    case TypeCode.DateTime:
+                        identityValueIsNull = !DateTime.TryParse(fieldValue?.ToString(), out var dateTimeValue) || dateTimeValue <= DateTime.MinValue;
+                        break;
+                    default:
+                        if (valueType == typeof(Guid))
+                        {
+                            identityValueIsNull = !Guid.TryParse(fieldValue?.ToString(), out var guidValue) || guidValue.Equals(Guid.Empty);
+                        }
+                        else if (valueType == typeof(DateTimeOffset))
+                        {
+                            identityValueIsNull = !DateTimeOffset.TryParse(fieldValue?.ToString(), out var dateTimeOffsetValue) && dateTimeOffsetValue <= DateTimeOffset.MinValue;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException($"Not supported check value for {field.DataType}.");
+                        }
+                        break;
                 }
             }
             return identityValueIsNull;
@@ -488,7 +494,7 @@ namespace Sixnet.Development.Entity
             if (IdentityValueIsNull())
             {
                 InitIdentityValue();
-            };
+            }
 
             #endregion
 
@@ -533,7 +539,7 @@ namespace Sixnet.Development.Entity
                                 case TypeCode.Double:
                                 case TypeCode.Single:
                                 case TypeCode.Decimal:
-                                    SetValue(field.PropertyName, SixnetObjectIdHelper.GetIntId<T>(field.PropertyName));
+                                    SetValue(field.PropertyName, SixnetObjectIdHelper.GetLongId<T>(field.PropertyName));
                                     break;
                                 default:
                                     SixnetDirectThrower.ThrowIf<NotSupportedException>(true, typeCode.ToString());
@@ -551,7 +557,7 @@ namespace Sixnet.Development.Entity
             if (IdentityValueIsNull())
             {
                 InitIdentityValue();
-            };
+            }
 
             #endregion
 

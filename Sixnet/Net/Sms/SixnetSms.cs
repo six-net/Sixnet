@@ -377,7 +377,7 @@ namespace Sixnet.Net.Sms
         /// <returns></returns>
         static ISixnetSmsProvider GetSmsProvider()
         {
-            var smsProvider = SixnetContainer.GetService<ISixnetSmsProvider>();
+            var smsProvider = SixnetContainer.GetInstance<ISixnetSmsProvider>();
             SixnetDirectThrower.ThrowSixnetExceptionIf(smsProvider == null, "Not set sms provider");
             return smsProvider;
         }
