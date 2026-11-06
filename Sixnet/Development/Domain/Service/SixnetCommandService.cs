@@ -32,11 +32,37 @@ namespace Sixnet.Development.Domain.Service
         /// <summary>
         /// Save
         /// </summary>
+        /// <param name="newData">New data</param>
+        /// <returns></returns>
+        public virtual T Save(T newData, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return SaveData(new SaveDataParameter<T>()
+            {
+                NewData = newData
+            }, configure);
+        }
+
+        /// <summary>
+        /// Save
+        /// </summary>
         /// <param name="newData"></param>
         /// <returns></returns>
         public virtual Task<T> SaveAsync(SaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null)
         {
             return SaveDataAsync(parameter, configure);
+        }
+
+        /// <summary>
+        /// Save
+        /// </summary>
+        /// <param name="newData">New data</param>
+        /// <returns></returns>
+        public virtual Task<T> SaveAsync(T newData, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return SaveDataAsync(new SaveDataParameter<T>()
+            {
+                NewData = newData
+            }, configure);
         }
 
         #endregion
