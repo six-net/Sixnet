@@ -27,9 +27,23 @@ namespace Sixnet.Development.Domain.Service
         /// <summary>
         /// Save
         /// </summary>
+        /// <param name="newData">New data</param>
+        /// <returns></returns>
+        T Save(T newData, Action<SixnetDataOperationOptions> configure = null);
+
+        /// <summary>
+        /// Save
+        /// </summary>
         /// <param name="newData"></param>
         /// <returns></returns>
         Task<T> SaveAsync(SaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null);
+
+        /// <summary>
+        /// Save
+        /// </summary>
+        /// <param name="newData">New data</param>
+        /// <returns></returns>
+        Task<T> SaveAsync(T newData, Action<SixnetDataOperationOptions> configure = null);
 
         #endregion
 
