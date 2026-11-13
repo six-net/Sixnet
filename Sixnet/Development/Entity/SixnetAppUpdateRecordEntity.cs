@@ -8,12 +8,14 @@ using System.Threading.Tasks;
 
 using AutoMapper.Configuration.Conventions;
 
+using static Sixnet.Reflection.SixnetReflecter;
+
 namespace Sixnet.Development.Entity
 {
     /// <summary>
     /// Sixnet app update record entity
     /// </summary>
-    [SixnetEntity(TableName = "SIXNET_APPLICATION_UPDATE_RECORD", Module = "", Description = "App update record", IsSystem = true)]
+    [SixnetEntity(TableName = "SIXNET_APPLICATION_UPDATE_RECORD", Module = "", Description = "App update record" , IsSystem = true)]
     public class SixnetAppUpdateRecordEntity : SixnetCreateUpdateDateEntity<SixnetAppUpdateRecordEntity>, ISixnetIdEntity<long>
     {
         /// <summary>

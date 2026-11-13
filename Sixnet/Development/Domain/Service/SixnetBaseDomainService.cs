@@ -76,6 +76,11 @@ namespace Sixnet.Development.Domain.Service
                 .Where(idCriterion);
         }
 
+        protected SixnetCriterion GetVersionCriterion(long version)
+        {
+            return SixnetCriterion.Create(SixnetCriterionOperator.Equal, SixnetDataField.Create(versionFieldName, typeof(T)), SixnetConstantField.Create(version));
+        }
+
         protected SixnetCriterion GetHistoryTagCriterion(bool isHistorical)
         {
             return SixnetCriterion.Create(SixnetCriterionOperator.Equal, SixnetDataField.Create(historyTagFieldName, typeof(T)), SixnetConstantField.Create(isHistorical));

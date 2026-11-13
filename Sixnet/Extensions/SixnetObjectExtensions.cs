@@ -1,7 +1,10 @@
 ﻿// "Company © 2025. All rights reserved."
 
+using System.Collections;
 using System.ComponentModel;
+using System.Threading.Tasks;
 
+using Sixnet.Development.Association;
 using Sixnet.Exceptions;
 using Sixnet.Mapper;
 using Sixnet.Serialization.Json;
@@ -119,9 +122,113 @@ namespace System
         /// <typeparam name="TTarget">Target data type</typeparam>
         /// <param name="source">Source object</param>
         /// <returns>Return the target object</returns>
-        public static TTarget MapTo<TTarget>(this object source)
+        public static TTarget MapTo<TTarget>(this object source, ISixnetAssociationLoadable associationLoadable = null)
         {
-            return SixnetMapper.MapTo<TTarget>(source);
+            var targetData = SixnetMapper.MapTo<TTarget>(source);
+            LoadMapAssociatedDatas(targetData, associationLoadable);
+            return targetData;
+        }
+
+        /// <summary>
+        /// Map an object to an other object
+        /// </summary>
+        /// <typeparam name="TTarget">Target data type</typeparam>
+        /// <param name="source">Source object</param>
+        /// <returns>Return the target object</returns>
+        public static TTarget MapTo<TTarget>(this object source, params string[] needLoadedPropertyNames)
+        {
+            var targetData = SixnetMapper.MapTo<TTarget>(source);
+            if (!needLoadedPropertyNames.IsNullOrEmpty())
+            {
+                var loadable = new SixnetAssociationLoadable();
+                loadable.Need(needLoadedPropertyNames);
+                LoadMapAssociatedDatas(targetData, loadable);
+            }
+            return targetData;
+        }
+
+        /// <summary>
+        /// Map an object to an other object
+        /// </summary>
+        /// <typeparam name="TTarget">Target data type</typeparam>
+        /// <param name="source">Source object</param>
+        /// <returns>Return the target object</returns>
+        public static async Task<TTarget> MapToAsync<TTarget>(this object source, ISixnetAssociationLoadable associationLoadable = null)
+        {
+            var targetData = SixnetMapper.MapTo<TTarget>(source);
+            LoadMapAssociatedDatas(targetData, associationLoadable);
+            await LoadMapAssociatedDatasAsync(targetData, associationLoadable).ConfigureAwait(false);
+            return targetData;
+        }
+
+        /// <summary>
+        /// Map an object to an other object
+        /// </summary>
+        /// <typeparam name="TTarget">Target data type</typeparam>
+        /// <param name="source">Source object</param>
+        /// <returns>Return the target object</returns>
+        public static async Task<TTarget> MapToAsync<TTarget>(this object source, params string[] needLoadedPropertyNames)
+        {
+            var targetData = SixnetMapper.MapTo<TTarget>(source);
+            if (!needLoadedPropertyNames.IsNullOrEmpty())
+            {
+                var loadable = new SixnetAssociationLoadable();
+                loadable.Need(needLoadedPropertyNames);
+                await LoadMapAssociatedDatasAsync(targetData, loadable).ConfigureAwait(false);
+            }
+            return targetData;
+        }
+
+        static SixnetLoadAssociatedDataInfo GetLoadMapAssociatedDatasInfo<TTarget>(TTarget data, ISixnetAssociationLoadable associationLoadable)
+        {
+            if (data == null || associationLoadable == null)
+            {
+                return null;
+            }
+            var sourceDataType = typeof(TTarget);
+            IEnumerable sourceDatas = null;
+            if (sourceDataType != typeof(string) && data is IEnumerable datas)
+            {
+                sourceDatas = datas;
+                foreach (var value in datas)
+                {
+                    if (value != null)
+                    {
+                        sourceDataType = value.GetType();
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                sourceDatas = new List<TTarget>() { data };
+            }
+            return new SixnetLoadAssociatedDataInfo()
+            {
+                Loadable = associationLoadable,
+                SourceDatas = sourceDatas,
+                SourceDataType = sourceDataType
+            };
+        }
+
+        static void LoadMapAssociatedDatas<TTarget>(TTarget data, ISixnetAssociationLoadable associationLoadable)
+        {
+            var loadInfo = GetLoadMapAssociatedDatasInfo(data, associationLoadable);
+            if (loadInfo == null)
+            {
+                return;
+            }
+            SixnetAssociationManager.LoadDatas(loadInfo);
+        }
+
+        static async Task LoadMapAssociatedDatasAsync<TTarget>(TTarget data, ISixnetAssociationLoadable associationLoadable)
+        {
+            var loadInfo = GetLoadMapAssociatedDatasInfo(data, associationLoadable);
+            if (loadInfo == null)
+            {
+                return;
+            }
+            await SixnetAssociationManager.LoadDatasAsync(loadInfo).ConfigureAwait(false);
         }
 
         #endregion
@@ -192,18 +299,29 @@ namespace System
         }
 
         /// <summary>
-        /// Convert data type
+        /// Convert value type
         /// </summary>
         /// <param name="targetType">Target data type</param>
-        /// <param name="data">Data</param>
+        /// <param name="value">Value</param>
         /// <returns>Return the targete data</returns>
-        public static dynamic ConvertTo(this object data, Type targetType)
+        public static dynamic ConvertTo(this object value, Type targetType)
         {
-            if (data != null && data.GetType() != typeof(DBNull))
+            if (value == null || value.GetType() == typeof(DBNull))
             {
-                return Convert.ChangeType(data, targetType);
+                return null;
             }
-            return null;
+            if (targetType == null)
+            {
+                return value;
+            }
+
+            var underlyingType = targetType.GetRealValueType();
+            if (underlyingType.IsInstanceOfType(value))
+            {
+                return value;
+            }
+
+            return Convert.ChangeType(value, underlyingType);
         }
 
         #endregion

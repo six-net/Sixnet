@@ -269,7 +269,6 @@ namespace Sixnet.Development.Data
     /// </summary>
     public enum SixnetVersioningTableType
     {
-        All = 0,
         /// <summary>
         /// Primary table
         /// </summary>

@@ -661,8 +661,11 @@ namespace Sixnet.Development.Data
                     {
                         foreach (var val in values)
                         {
-                            valueType = val.GetType();
-                            break;
+                            if (val != null)
+                            {
+                                valueType = val.GetType();
+                                break;
+                            }
                         }
                     }
 

@@ -98,7 +98,7 @@ namespace Sixnet.Validation
                         }
                     }
                     Type funcType = typeof(Func<,>).MakeGenericType(modelType, typeof(object));//function type
-                    var genericLambdaMethod = SixnetReflecter.Expression.LambdaMethod.MakeGenericMethod(funcType);
+                    var genericLambdaMethod = SixnetReflecter.Expressions.LambdaMethod.MakeGenericMethod(funcType);
                     var lambdaExpression = genericLambdaMethod.Invoke(null, new object[]
                     {
                         Expression.Convert(propertyExpress,typeof(object)),parameterArray

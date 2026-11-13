@@ -33,10 +33,26 @@ namespace Sixnet.Development.Domain.Service
         /// <summary>
         /// Get data
         /// </summary>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="configure">Configure</param>
+        /// <returns></returns>
+        T Get(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null);
+
+        /// <summary>
+        /// Get data
+        /// </summary>
         /// <param name="filter">Filter</param>
         /// <param name="configure">Configure</param>
         /// <returns></returns>
         T Get(SixnetQueryableFilter filter, Action<SixnetDataOperationOptions> configure = null);
+
+        /// <summary>
+        /// Get data
+        /// </summary>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="configure">Configure</param>
+        /// <returns></returns>
+        Task<T> GetAsync(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data
@@ -49,10 +65,26 @@ namespace Sixnet.Development.Domain.Service
         /// <summary>
         /// Get data list
         /// </summary>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="configure">Configure</param>
+        /// <returns></returns>
+        List<T> GetList(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null);
+
+        /// <summary>
+        /// Get data list
+        /// </summary>
         /// <param name="filter">Filter</param>
         /// <param name="configure">Configure</param>
         /// <returns></returns>
         List<T> GetList(SixnetQueryableFilter filter, Action<SixnetDataOperationOptions> configure = null);
+
+        /// <summary>
+        /// Get data
+        /// </summary>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="configure">Configure</param>
+        /// <returns></returns>
+        Task<List<T>> GetListAsync(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data

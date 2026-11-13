@@ -26,12 +26,25 @@ namespace System.Collections.Generic
         /// <summary>
         /// Whether the collection is null or empty
         /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
-        /// <param name="datas">Datas</param>
-        /// <returns>Return whether value is null or empty</returns>
-        public static bool IsNullOrEmpty<T>(this IEnumerable<T> datas)
+        /// <param name="datas">datas</param>
+        /// <returns></returns>
+        public static bool IsNullOrEmpty(this IEnumerable datas)
         {
-            return datas == null || !datas.Any();
+            if (datas == null)
+            {
+                return true;
+            }
+            if (datas is ICollection collection)
+            {
+                return collection.Count == 0;
+            }
+
+            foreach (var d in datas)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         #endregion

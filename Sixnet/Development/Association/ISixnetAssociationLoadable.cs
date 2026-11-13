@@ -1,21 +1,21 @@
 ﻿// "Company © 2025. All rights reserved."
 
-namespace Sixnet.Model
+namespace Sixnet.Development.Association
 {
     /// <summary>
-    /// Loadable model
+    /// Association loadable info
     /// </summary>
-    public interface ISixnetLoadable
+    public interface ISixnetAssociationLoadable
     {
         /// <summary>
-        /// Whether allow load data
+        /// Whether allow load specific data
         /// </summary>
         /// <param name="dataName">Data name</param>
         /// <returns></returns>
         bool Allow(string dataName);
 
         /// <summary>
-        /// Set need to load datas
+        /// Set need to load data names
         /// </summary>
         /// <param name="dataNames">Data names</param>
         /// <returns></returns>

@@ -248,7 +248,7 @@ namespace Sixnet.Development.Entity
 
             allFields = allFields.OrderByDescending(f => f.InRole(SixnetFieldRole.PrimaryKey))
                         .ThenByDescending(c => cacheFieldNames.Contains(c.PropertyName))
-                        .ThenBy(c=>c.PropertyName)
+                        .ThenBy(c => c.PropertyName)
                         .ToList();
             var allFieldDict = new Dictionary<string, SixnetDataField>(allFields.Count);
             foreach (var field in allFields)
@@ -637,57 +637,63 @@ namespace Sixnet.Development.Entity
             ParameterExpression instanceExpression = Expression.Parameter(entityType);
 
             //getter
-            var parameterArray = Array.CreateInstance(typeof(ParameterExpression), 1);
-            parameterArray.SetValue(instanceExpression, 0);
-            var propertyExpression = Expression.PropertyOrField(instanceExpression, member.Name);
-            var funcType = typeof(Func<,>).MakeGenericType(entityType, typeof(object));//function type
-            var genericLambdaMethod = SixnetReflecter.Expression.LambdaMethod.MakeGenericMethod(funcType);
-            var lambdaExpression = genericLambdaMethod.Invoke(null, new object[]
-            {
-                Expression.Convert(propertyExpression,typeof(object)),parameterArray
-            });
+            //var parameterArray = Array.CreateInstance(typeof(ParameterExpression), 1);
+            //parameterArray.SetValue(instanceExpression, 0);
+            //var propertyExpression = Expression.PropertyOrField(instanceExpression, member.Name);
+            //var funcType = typeof(Func<,>).MakeGenericType(entityType, typeof(object));//function type
+            //var genericLambdaMethod = SixnetReflecter.Expressions.LambdaMethod.MakeGenericMethod(funcType);
+            //var lambdaExpression = genericLambdaMethod.Invoke(null, new object[]
+            //{
+            //    Expression.Convert(propertyExpression,typeof(object)),parameterArray
+            //});
+            var getterExpression = SixnetReflecter.Expressions.GenerateGettingValueLambdaExpression(entityType, member);
             var propertyProviderType = typeof(SixnetDefaultEntityPropertyValueProvider<>).MakeGenericType(entityType);
             var propertyProvider = Activator.CreateInstance(propertyProviderType);
-            var setGetterMethod = propertyProviderType.GetMethod("SetGetter");
-            setGetterMethod.Invoke(propertyProvider, new object[] { lambdaExpression });
-            var dataTypeProperty = propertyProviderType.GetProperty("DataType", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-            dataTypeProperty.SetValue(propertyProvider, dataType);
+            SixnetReflecter.InvokeMethod(propertyProvider, "SetGetter", getterExpression);
+
+
+            //var setGetterMethod = propertyProviderType.GetMethod("");
+            //setGetterMethod.Invoke(propertyProvider, new object[] {  });
+
+            //var dataTypeProperty = propertyProviderType.GetProperty("DataType", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+            //dataTypeProperty.SetValue(propertyProvider, dataType);
+            SixnetReflecter.SetValue(propertyProvider, "DataType", dataType);
 
             //setter
-            lambdaExpression = null;
-            var valueType = typeof(object);
-            genericLambdaMethod = SixnetReflecter.Expression.LambdaMethod.MakeGenericMethod(typeof(Action<,>).MakeGenericType(entityType, valueType));
-            var valueParameter = Expression.Parameter(valueType, "value");
-            var parameterExpressionArray = new ParameterExpression[2] { instanceExpression, valueParameter };
-            if (member is PropertyInfo propertyInfo)
-            {
-                var readValueParameter = SixnetExpressionHelper.EnsureCastExpression(valueParameter, propertyInfo.PropertyType);
-                var setMethod = propertyInfo.GetSetMethod(true) ?? throw new ArgumentException("Property does not have a setter.");
-                var readInstanceParameter = SixnetExpressionHelper.EnsureCastExpression(instanceExpression, member.DeclaringType);
-                var setExpression = Expression.Call(readInstanceParameter, setMethod, readValueParameter);
+            //lambdaExpression = null;
+            //var valueType = typeof(object);
+            //genericLambdaMethod = SixnetReflecter.Expressions.LambdaMethod.MakeGenericMethod(typeof(Action<,>).MakeGenericType(entityType, valueType));
+            //var valueParameter = Expression.Parameter(valueType, "value");
+            //var parameterExpressionArray = new ParameterExpression[2] { instanceExpression, valueParameter };
+            //if (member is PropertyInfo propertyInfo)
+            //{
+            //    var readValueParameter = SixnetExpressionHelper.EnsureCastExpression(valueParameter, propertyInfo.PropertyType);
+            //    var setMethod = propertyInfo.GetSetMethod(true) ?? throw new ArgumentException("Property does not have a setter.");
+            //    var readInstanceParameter = SixnetExpressionHelper.EnsureCastExpression(instanceExpression, member.DeclaringType);
+            //    var setExpression = Expression.Call(readInstanceParameter, setMethod, readValueParameter);
 
-                lambdaExpression = genericLambdaMethod.Invoke(null, new object[]
-                {
-                        setExpression,parameterExpressionArray
-                });
-            }
-            else if (member is FieldInfo fieldInfo)
-            {
-                var sourceExpression = SixnetExpressionHelper.EnsureCastExpression(instanceExpression, fieldInfo.DeclaringType);
-                var fieldExpression = Expression.Field(sourceExpression, fieldInfo);
+            //    lambdaExpression = genericLambdaMethod.Invoke(null, new object[]
+            //    {
+            //            setExpression,parameterExpressionArray
+            //    });
+            //}
+            //else if (member is FieldInfo fieldInfo)
+            //{
+            //    var sourceExpression = SixnetExpressionHelper.EnsureCastExpression(instanceExpression, fieldInfo.DeclaringType);
+            //    var fieldExpression = Expression.Field(sourceExpression, fieldInfo);
 
-                var valueExpression = SixnetExpressionHelper.EnsureCastExpression(valueParameter, fieldExpression.Type);
-                var assignExpression = Expression.Assign(fieldExpression, valueExpression);
+            //    var valueExpression = SixnetExpressionHelper.EnsureCastExpression(valueParameter, fieldExpression.Type);
+            //    var assignExpression = Expression.Assign(fieldExpression, valueExpression);
 
-                lambdaExpression = genericLambdaMethod.Invoke(null, new object[]
-                {
-                    assignExpression,parameterExpressionArray
-                });
-            }
-            if (lambdaExpression != null)
+            //    lambdaExpression = genericLambdaMethod.Invoke(null, new object[]
+            //    {
+            //        assignExpression,parameterExpressionArray
+            //    });
+            //}
+            var setterExpression = SixnetReflecter.Expressions.GenerateSettingValueLambdaExpression(entityType, member);
+            if (setterExpression != null)
             {
-                var setSetterMethod = propertyProviderType.GetMethod("SetSetter");
-                setSetterMethod.Invoke(propertyProvider, new object[] { lambdaExpression });
+                SixnetReflecter.InvokeMethod(propertyProvider, "SetSetter", setterExpression);
             }
 
             return propertyProvider as ISixnetEntityPropertyValueProvider;

@@ -1,13 +1,22 @@
 ﻿// "Company © 2025. All rights reserved."
 
-namespace Sixnet.Model
+namespace Sixnet.Development.Association
 {
-    public class SixnetLoadable : ISixnetLoadable
+    public class SixnetAssociationLoadable : ISixnetAssociationLoadable
     {
         /// <summary>
         /// Allowed load data names
         /// </summary>
         protected HashSet<string> AllowedLoadDataNames { get; set; }
+
+        /// <summary>
+        /// Get all data names
+        /// </summary>
+        /// <returns></returns>
+        public HashSet<string> GetAllDataNames()
+        {
+            return AllowedLoadDataNames;
+        }
 
         /// <summary>
         /// Whether allow load data
@@ -51,7 +60,7 @@ namespace Sixnet.Model
         /// Set need to load datas
         /// </summary>
         /// <param name="originalLoadable">Original loadable</param>
-        public void Need(ISixnetLoadable originalLoadable)
+        public void Need(ISixnetAssociationLoadable originalLoadable)
         {
             var originalDataNames = originalLoadable?.GetDataNames();
             if (originalDataNames?.IsNullOrEmpty() ?? true)

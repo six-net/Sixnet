@@ -11,6 +11,7 @@ using Sixnet.App;
 using Sixnet.Cache;
 using Sixnet.Cache.Provider.Memory;
 using Sixnet.Code;
+using Sixnet.Development.Association;
 using Sixnet.Development.Data;
 using Sixnet.Development.Domain.Service;
 using Sixnet.Development.Entity;
@@ -126,6 +127,9 @@ namespace Sixnet.DependencyInjection
 
             // Event handler
             SixnetApplication.ExecuteEventHandlerConfigurable();
+
+            // Assocation
+            SixnetAssociationManager.ExecuteAssociationConfigurable();
 
             // Application life time
             RegisterApplicationLifetime(options);
@@ -531,6 +535,7 @@ namespace Sixnet.DependencyInjection
             services.AddSingleton(typeof(ISixnetRepository<>), typeof(SixnetDefaultRepository<>));
             services.AddSingleton(typeof(ISixnetCommandService<>), typeof(SixnetCommandService<>));
             services.AddSingleton(typeof(ISixnetQueryService<>), typeof(SixnetQueryService<>));
+            services.AddSingleton(typeof(ISixnetDefaultAssociatedDataProvider<,>), typeof(SixnetDefaultAssociatedDataProvider<,>));
             services.AddSixnetLocalization(options =>
             {
                 sixnetOptions?.InvokeConfigureLocalization(options);

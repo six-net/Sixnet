@@ -226,7 +226,7 @@ namespace Sixnet.Development.Data.Command
             {
                 Options = new SixnetDataOperationOptions()
             };
-            command.Options.ForAllTable();
+            command.Options.FromAllTables();
             return command;
         }
 

@@ -1,5 +1,7 @@
 ﻿// "Company © 2025. All rights reserved."
 
+using AutoMapper.Internal;
+
 namespace AutoMapper
 {
     internal class ConventionMapper : Sixnet.Mapper.ISixnetMapper

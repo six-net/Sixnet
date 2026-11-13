@@ -174,30 +174,29 @@ namespace Sixnet.Development.Data
 
         /// <summary>
         /// Gets or sets the versioning table type
-        /// Default is 'All'
         /// </summary>
-        internal SixnetVersioningTableType VersioningTableType { get; set; } = SixnetVersioningTableType.PrimaryTable;
+        internal SixnetVersioningTableType? VersioningTableType { get; set; }
 
         /// <summary>
-        /// For all table
+        /// From primary table
         /// </summary>
-        public void ForAllTable()
+        public void FromAllTables()
         {
-            VersioningTableType = SixnetVersioningTableType.All;
+            VersioningTableType = SixnetVersioningTableType.PrimaryTable | SixnetVersioningTableType.VersionTable;
         }
 
         /// <summary>
-        /// For primary table
+        /// From primary table
         /// </summary>
-        public void ForPrimaryTable()
+        public void FromPrimaryTable()
         {
             VersioningTableType = SixnetVersioningTableType.PrimaryTable;
         }
 
         /// <summary>
-        /// For version table
+        /// From version table
         /// </summary>
-        public void ForVersionTable()
+        public void FromVersionTable()
         {
             VersioningTableType = SixnetVersioningTableType.VersionTable;
         }
@@ -208,7 +207,7 @@ namespace Sixnet.Development.Data
         /// <returns></returns>
         internal bool IncludePrimaryTable()
         {
-            return VersioningTableType == SixnetVersioningTableType.PrimaryTable || VersioningTableType == SixnetVersioningTableType.All;
+            return !VersioningTableType.HasValue || (VersioningTableType.Value & SixnetVersioningTableType.PrimaryTable) == SixnetVersioningTableType.PrimaryTable;
         }
 
         /// <summary>
@@ -217,7 +216,7 @@ namespace Sixnet.Development.Data
         /// <returns></returns>
         internal bool IncludeVersionTable()
         {
-            return VersioningTableType == SixnetVersioningTableType.VersionTable || VersioningTableType == SixnetVersioningTableType.All;
+            return VersioningTableType.HasValue && (VersioningTableType.Value & SixnetVersioningTableType.VersionTable) == SixnetVersioningTableType.VersionTable;
         }
 
         #endregion

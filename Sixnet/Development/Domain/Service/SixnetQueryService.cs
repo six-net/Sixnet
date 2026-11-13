@@ -27,21 +27,32 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="version"></param>
         /// <param name="includeArchived"></param>
         /// <returns></returns>
-        ISixnetQueryable HandleQueryable(ISixnetQueryable queryable, long? version = null, bool includeArchived = false)
+        ISixnetQueryable HandleQueryable(ISixnetQueryable queryable, bool fromVersionTable = false, long? version = null, bool includeArchived = false)
         {
             queryable ??= SixnetQuerier.Create<T>();
 
+            if (queryable.GetModelType() != typeof(T))
+            {
+                queryable = SixnetQuerier.Create<T>(queryable);
+            }
+
             if (isVersioning)
             {
-                if (version.HasValue && version.Value > 0)
+                var hasVersion = version.HasValue && version.Value > 0;
+                if (hasVersion)
+                {
+                    var versionCriterion = GetVersionCriterion(version.Value);
+                    queryable.Where(versionCriterion);
+                }
+                fromVersionTable |= hasVersion;
+                fromVersionTable |= queryable.Info.IsFromAllVersions();
+                if (fromVersionTable)
                 {
                     queryable.FromAllVersions();
-                    var versionCriterion = SixnetCriterion.Create(SixnetCriterionOperator.Equal, SixnetDataField.Create(versionFieldName, typeof(T)), SixnetConstantField.Create(version.Value));
-                    queryable.Where(versionCriterion);
                 }
                 else
                 {
-                    var historicalCriterion = SixnetCriterion.Create(SixnetCriterionOperator.Equal, SixnetDataField.Create(historyTagFieldName, typeof(T)), SixnetConstantField.Create(false));
+                    var historicalCriterion = GetHistoryTagCriterion(false);
                     queryable.Where(historicalCriterion);
                 }
             }
@@ -76,12 +87,34 @@ namespace Sixnet.Development.Domain.Service
         /// <summary>
         /// Get data
         /// </summary>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="configure">Configure</param>
+        /// <returns></returns>
+        public T Get(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return repository.Get(HandleQueryable(queryable), configure);
+        }
+
+        /// <summary>
+        /// Get data
+        /// </summary>
         /// <param name="filter">Filter</param>
         /// <param name="configure">Configure</param>
         /// <returns></returns>
         public T Get(SixnetQueryableFilter filter, Action<SixnetDataOperationOptions> configure = null)
         {
             return repository.Get(HandleQueryable(filter.CreateQueryable()), configure);
+        }
+
+        /// <summary>
+        /// Get data
+        /// </summary>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="configure">Configure</param>
+        /// <returns></returns>
+        public Task<T> GetAsync(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return repository.GetAsync(HandleQueryable(queryable), configure);
         }
 
         /// <summary>
@@ -98,12 +131,34 @@ namespace Sixnet.Development.Domain.Service
         /// <summary>
         /// Get data list
         /// </summary>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="configure">Configure</param>
+        /// <returns></returns>
+        public List<T> GetList(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return repository.GetList(HandleQueryable(queryable), configure);
+        }
+
+        /// <summary>
+        /// Get data list
+        /// </summary>
         /// <param name="filter">Filter</param>
         /// <param name="configure">Configure</param>
         /// <returns></returns>
         public List<T> GetList(SixnetQueryableFilter filter, Action<SixnetDataOperationOptions> configure = null)
         {
             return repository.GetList(HandleQueryable(filter.CreateQueryable()), configure);
+        }
+
+        /// <summary>
+        /// Get data
+        /// </summary>
+        /// <param name="queryable">Queryable</param>
+        /// <param name="configure">Configure</param>
+        /// <returns></returns>
+        public Task<List<T>> GetListAsync(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return repository.GetListAsync(HandleQueryable(queryable), configure);
         }
 
         /// <summary>
@@ -127,7 +182,7 @@ namespace Sixnet.Development.Domain.Service
         /// <returns></returns>
         public T Get(dynamic id, long? version = null, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null)
         {
-            return HandleQueryable(GetIdQueryable(id), version, includeArchived).First<T>(configure);
+            return HandleQueryable(GetIdQueryable(id), version > 0, version, includeArchived).First<T>(configure);
         }
 
         /// <summary>
@@ -140,7 +195,7 @@ namespace Sixnet.Development.Domain.Service
         /// <returns></returns>
         public Task<T> GetAsync(dynamic id, long? version = null, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null)
         {
-            return HandleQueryable(GetIdQueryable(id), version, includeArchived).FirstAsync<T>(configure);
+            return HandleQueryable(GetIdQueryable(id), version > 0, version, includeArchived).FirstAsync<T>(configure);
         }
 
         /// <summary>
@@ -152,7 +207,7 @@ namespace Sixnet.Development.Domain.Service
         /// <returns></returns>
         public List<T> GetList(IEnumerable<dynamic> ids, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null)
         {
-            return HandleQueryable(GetIdsQueryable(ids), null, includeArchived).ToList<T>(configure);
+            return HandleQueryable(GetIdsQueryable(ids), false, null, includeArchived).ToList<T>(configure);
         }
 
         /// <summary>
@@ -164,7 +219,7 @@ namespace Sixnet.Development.Domain.Service
         /// <returns></returns>
         public Task<List<T>> GetListAsync(IEnumerable<dynamic> ids, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null)
         {
-            return HandleQueryable(GetIdsQueryable(ids), null, includeArchived).ToListAsync<T>(configure);
+            return HandleQueryable(GetIdsQueryable(ids), false, null, includeArchived).ToListAsync<T>(configure);
         }
 
         /// <summary>
@@ -176,7 +231,7 @@ namespace Sixnet.Development.Domain.Service
         /// <returns></returns>
         public T Get(Expression<Func<T, bool>> condition, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null)
         {
-            return repository.Get(HandleQueryable(SixnetQuerier.Create(condition), null, includeArchived), configure);
+            return repository.Get(HandleQueryable(SixnetQuerier.Create(condition), false, null, includeArchived), configure);
         }
 
         /// <summary>
@@ -188,7 +243,7 @@ namespace Sixnet.Development.Domain.Service
         /// <returns></returns>
         public Task<T> GetAsync(Expression<Func<T, bool>> condition, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null)
         {
-            return repository.GetAsync(HandleQueryable(SixnetQuerier.Create(condition), null, includeArchived), configure);
+            return repository.GetAsync(HandleQueryable(SixnetQuerier.Create(condition), false, null, includeArchived), configure);
         }
 
         /// <summary>
@@ -200,7 +255,7 @@ namespace Sixnet.Development.Domain.Service
         /// <returns></returns>
         public List<T> GetList(Expression<Func<T, bool>> condition, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null)
         {
-            return repository.GetList(HandleQueryable(SixnetQuerier.Create(condition), null, includeArchived), configure);
+            return repository.GetList(HandleQueryable(SixnetQuerier.Create(condition), false, null, includeArchived), configure);
         }
 
         /// <summary>
@@ -212,7 +267,7 @@ namespace Sixnet.Development.Domain.Service
         /// <returns></returns>
         public Task<List<T>> GetListAsync(Expression<Func<T, bool>> condition, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null)
         {
-            return repository.GetListAsync(HandleQueryable(SixnetQuerier.Create(condition), null, includeArchived), configure);
+            return repository.GetListAsync(HandleQueryable(SixnetQuerier.Create(condition), false, null, includeArchived), configure);
         }
     }
 }

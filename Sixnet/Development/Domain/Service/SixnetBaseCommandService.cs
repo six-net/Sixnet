@@ -65,13 +65,13 @@ namespace Sixnet.Development.Domain.Service
             {
                 repository.Update(fieldsAssignment, condition, options =>
                 {
-                    options.ForVersionTable();
+                    options.FromVersionTable();
                     configure?.Invoke(options);
                 });
 
                 repository.Add(datas, options =>
                 {
-                    options.ForVersionTable();
+                    options.FromVersionTable();
                     options.EnableInsertIncrementField();
                     configure?.Invoke(options);
                 });
@@ -101,13 +101,13 @@ namespace Sixnet.Development.Domain.Service
             {
                 await repository.UpdateAsync(fieldsAssignment, condition, options =>
                 {
-                    options.ForVersionTable();
+                    options.FromVersionTable();
                     configure?.Invoke(options);
                 }).ConfigureAwait(false);
 
                 await repository.AddAsync(datas, options =>
                 {
-                    options.ForVersionTable();
+                    options.FromVersionTable();
                     options.EnableInsertIncrementField();
                     configure?.Invoke(options);
                 }).ConfigureAwait(false);
@@ -145,7 +145,7 @@ namespace Sixnet.Development.Domain.Service
 
                 repository.Add(newData, options =>
                 {
-                    options.ForPrimaryTable();
+                    options.FromPrimaryTable();
                     configure?.Invoke(options);
                 });
 
@@ -153,7 +153,7 @@ namespace Sixnet.Development.Domain.Service
                 {
                     repository.Add(newData, options =>
                     {
-                        options.ForVersionTable();
+                        options.FromVersionTable();
                         options.EnableInsertIncrementField();
                         configure?.Invoke(options);
                     });
@@ -177,7 +177,7 @@ namespace Sixnet.Development.Domain.Service
                     {
                         repository.Update(currentData, options =>
                         {
-                            options.ForPrimaryTable();
+                            options.FromPrimaryTable();
                             configure?.Invoke(options);
                         });
                     }
@@ -215,7 +215,7 @@ namespace Sixnet.Development.Domain.Service
 
                 await repository.AddAsync(newData, options =>
                 {
-                    options.ForPrimaryTable();
+                    options.FromPrimaryTable();
                     configure?.Invoke(options);
                 }).ConfigureAwait(false);
 
@@ -223,7 +223,7 @@ namespace Sixnet.Development.Domain.Service
                 {
                     await repository.AddAsync(newData, options =>
                     {
-                        options.ForVersionTable();
+                        options.FromVersionTable();
                         options.EnableInsertIncrementField();
                         configure?.Invoke(options);
                     }).ConfigureAwait(false);
@@ -247,7 +247,7 @@ namespace Sixnet.Development.Domain.Service
                     {
                         await repository.UpdateAsync(currentData, options =>
                         {
-                            options.ForPrimaryTable();
+                            options.FromPrimaryTable();
                             configure?.Invoke(options);
                         }).ConfigureAwait(false);
                     }
@@ -290,7 +290,7 @@ namespace Sixnet.Development.Domain.Service
 
                     repository.Update(fieldsAssignment, queryable, options =>
                     {
-                        options.ForPrimaryTable();
+                        options.FromPrimaryTable();
                         configure?.Invoke(options);
                     });
                 }
@@ -391,7 +391,7 @@ namespace Sixnet.Development.Domain.Service
 
                     await repository.UpdateAsync(fieldsAssignment, queryable, options =>
                     {
-                        options.ForPrimaryTable();
+                        options.FromPrimaryTable();
                         configure?.Invoke(options);
                     }).ConfigureAwait(false);
                 }
@@ -492,7 +492,7 @@ namespace Sixnet.Development.Domain.Service
             {
                 repository.Delete(queryable, options =>
                 {
-                    options.ForPrimaryTable();
+                    options.FromPrimaryTable();
                     configure?.Invoke(options);
                 });
             }
@@ -547,7 +547,7 @@ namespace Sixnet.Development.Domain.Service
             {
                 await repository.DeleteAsync(queryable, options =>
                 {
-                    options.ForPrimaryTable();
+                    options.FromPrimaryTable();
                     configure?.Invoke(options);
                 }).ConfigureAwait(false);
             }

@@ -228,6 +228,40 @@ namespace Sixnet.Development.Entity
         public bool IsArchived { get; set; }
     }
 
+    /// <summary>
+    /// Versioning entity
+    /// </summary>
+    /// <typeparam name="TId"></typeparam>
+    /// <typeparam name="TEntity"></typeparam>
+    public abstract class SixnetVersioningArchiveableIdCreateUpdateDateEntity<TId, TEntity> : SixnetArchiveableIdCreateUpdateDateEntity<TId, TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    {
+        /// <summary>
+        /// Version
+        /// </summary>
+        [SixnetEntityField(Description = "Version", DbRole = SixnetFieldRole.Version)]
+        public long Version { get; set; }
+
+        /// <summary>
+        /// Is historical
+        /// </summary>
+        [SixnetEntityField(Description = "Is historical", DbRole = SixnetFieldRole.HistoryTag)]
+        public bool IsHistorical { get; set; }
+    }
+
+    /// <summary>
+    /// Tenant versioning entity
+    /// </summary>
+    /// <typeparam name="TId"></typeparam>
+    /// <typeparam name="TEntity"></typeparam>
+    public abstract class SixnetVersioningArchiveableTenantIdCreateUpdateDateEntity<TId, TEntity> : SixnetVersioningArchiveableIdCreateUpdateDateEntity<TId, TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    {
+        /// <summary>
+        /// Tenant id
+        /// </summary>
+        [SixnetEntityField(Description = "Tenant id", DbRole = SixnetFieldRole.Isolation)]
+        public long TenantId { get; set; }
+    }
+
     #endregion
 
     #region Increment
@@ -454,6 +488,40 @@ namespace Sixnet.Development.Entity
         /// </summary>
         [SixnetEntityField(Description = "Archived", DbRole = SixnetFieldRole.Archive)]
         public bool IsArchived { get; set; }
+    }
+
+    /// <summary>
+    /// Versioning entity
+    /// </summary>
+    /// <typeparam name="TId"></typeparam>
+    /// <typeparam name="TEntity"></typeparam>
+    public abstract class SixnetVersioningArchiveableAutoIdCreateUpdateDateEntity<TId, TEntity> : SixnetArchiveableAutoIdCreateUpdateDateEntity<TId, TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    {
+        /// <summary>
+        /// Version
+        /// </summary>
+        [SixnetEntityField(Description = "Version", DbRole = SixnetFieldRole.Version)]
+        public long Version { get; set; }
+
+        /// <summary>
+        /// Is historical
+        /// </summary>
+        [SixnetEntityField(Description = "Is historical", DbRole = SixnetFieldRole.HistoryTag)]
+        public bool IsHistorical { get; set; }
+    }
+
+    /// <summary>
+    /// Tenant versioning entity
+    /// </summary>
+    /// <typeparam name="TId"></typeparam>
+    /// <typeparam name="TEntity"></typeparam>
+    public abstract class SixnetVersioningArchiveableTenantAutoIdCreateUpdateDateEntity<TId, TEntity> : SixnetVersioningArchiveableAutoIdCreateUpdateDateEntity<TId, TEntity> where TEntity : class, ISixnetEntity<TEntity>, new()
+    {
+        /// <summary>
+        /// Tenant id
+        /// </summary>
+        [SixnetEntityField(Description = "Tenant id", DbRole = SixnetFieldRole.Isolation)]
+        public long TenantId { get; set; }
     }
 
     #endregion

@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using AutoMapper.Internal;
 
 using Sixnet.DependencyInjection;
+using Sixnet.Development.Association;
 using Sixnet.Development.Data;
 using Sixnet.Development.Data.Database;
 using Sixnet.Development.Entity;
@@ -106,28 +107,25 @@ namespace Sixnet.App
 
                 #region Configure app
 
+                var serviceRegex = new Regex($@"^*({string.Join("|", _conventionServicePatterns)})$", RegexOptions.IgnoreCase);
                 foreach (var type in allConventionTypes)
                 {
-                    if (type.IsInterface)
+                    #region DI
+
+                    if (!type.IsInterface && !type.IsAbstract)
                     {
                         var typeName = type.FullName;
-
-                        #region Default service
-
-                        var serviceRegex = new Regex($@"^*({string.Join("|", _conventionServicePatterns)})$", RegexOptions.IgnoreCase);
                         if (serviceRegex.IsMatch(typeName))
                         {
-                            var implementType = allConventionTypes.FirstOrDefault(t => t.FullName != type.FullName && !t.IsInterface && !t.IsAbstract && type.IsAssignableFrom(t));
-                            if (implementType != null)
+                            var typeInterfaces = type.GetInterfaces()
+                                .Except(type.BaseType?.GetInterfaces() ?? Type.EmptyTypes)
+                                .ToArray();
+                            foreach (var typeInterface in typeInterfaces)
                             {
-                                SixnetContainer.AddProjectService(type, implementType);
+                                SixnetContainer.AddProjectService(typeInterface, type);
                             }
                         }
 
-                        #endregion
-                    }
-                    else if (!type.IsAbstract)
-                    {
                         if (IsDirectFromInterface(_initializableContractType, type)) // init model
                         {
                             var initializableModel = Activator.CreateInstance(type) as ISixnetInitializable;
@@ -143,7 +141,11 @@ namespace Sixnet.App
                             var updateRecord = Activator.CreateInstance(type) as ISixnetDatabaseUpdateRecord;
                             SixnetDataManager.AddDatabaseUpdateRecord(updateRecord);
                         }
+
+                        SixnetAssociationManager.SetAssociationConfigurable(type);
                     }
+
+                    #endregion
 
                     #region Event handler
 

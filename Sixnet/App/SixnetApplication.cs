@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
+
 using Sixnet.DependencyInjection;
 using Sixnet.Development.Events;
 using Sixnet.Environments;
@@ -288,19 +289,18 @@ namespace Sixnet.App
             var _eventHandlerContractType = typeof(ISixnetEventHandler);
             foreach (var eventHandlerType in _eventHandlerTypes)
             {
-                var handler = eventHandlerType.IsInterface
-                                ? SixnetContainer.GetInstance(eventHandlerType)
-                                : Activator.CreateInstance(eventHandlerType);
-
                 var classAttributes = eventHandlerType.GetCustomAttributes(false);
                 foreach (var classAttr in classAttributes)
                 {
+                    var eventHandler = eventHandlerType.IsInterface
+                                ? SixnetContainer.GetInstance(eventHandlerType)
+                                : Activator.CreateInstance(eventHandlerType);
                     var classAttrType = classAttr.GetType();
                     if (classAttrType.IsGenericType
                         && classAttrType.GetGenericTypeDefinition() == typeof(SixnetEventHandlerAttribute<>)
                         && classAttr is ISixnetEventHandlerAttribute eventHandlerAttr)
                     {
-                        SixnetEventBus.Subscribe(classAttrType.GenericTypeArguments[0], handler as ISixnetEventHandler, options =>
+                        SixnetEventBus.Subscribe(classAttrType.GenericTypeArguments[0], eventHandler as ISixnetEventHandler, options =>
                         {
                             options.Async = eventHandlerAttr.Async;
                             options.TriggerTime = eventHandlerAttr.TriggerTime;
@@ -319,7 +319,7 @@ namespace Sixnet.App
                             && methodAttrType.GetGenericTypeDefinition() == typeof(SixnetEventHandlerAttribute<>)
                             && methodAttr is ISixnetEventHandlerAttribute eventHandlerAttr)
                         {
-                            SixnetEventBus.Subscribe(methodAttrType.GenericTypeArguments[0], handler as ISixnetEventHandler, options =>
+                            SixnetEventBus.Subscribe(methodAttrType.GenericTypeArguments[0], eventHandlerType, method.Name, options =>
                             {
                                 options.Async = eventHandlerAttr.Async;
                                 options.TriggerTime = eventHandlerAttr.TriggerTime;
@@ -328,6 +328,7 @@ namespace Sixnet.App
                     }
                 }
             }
+            _eventHandlerTypes = null;
         }
 
         #endregion

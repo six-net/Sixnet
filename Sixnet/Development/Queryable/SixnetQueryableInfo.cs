@@ -598,7 +598,7 @@ namespace Sixnet.Development.Queryable
             {
                 return null;
             }
-            var genericLambdaMethod = SixnetReflecter.Expression.LambdaMethod.MakeGenericMethod(funcType);
+            var genericLambdaMethod = SixnetReflecter.Expressions.LambdaMethod.MakeGenericMethod(funcType);
             var lambdaExpression = genericLambdaMethod.Invoke(null, new object[]
             {
                 conditionExpression,parameterArray
@@ -660,10 +660,6 @@ namespace Sixnet.Development.Queryable
         /// <returns>Return query expression</returns>
         Expression GenerateSingleExpression(Expression parameter, SixnetCriterion criterion)
         {
-            //object criteriaValue = criterion.Value;
-            //Expression valueExpression = Expression.Constant(criteriaValue, criteriaValue?.GetType() ?? typeof(object));
-            //Expression property = string.IsNullOrWhiteSpace(criterion.Left?.FieldName) ? null : Expression.PropertyOrField(parameter, criterion.Left.FieldName);
-            //Expression valueExpression = GetValueExpression(property, criterion);
             var leftField = criterion.Left;
             var rightField = criterion.Right;
             var leftExp = GetFieldExpression(parameter, leftField);
@@ -750,15 +746,15 @@ namespace Sixnet.Development.Queryable
                     conditionExp = Expression.LessThanOrEqual(leftExp, rightExp);
                     break;
                 case SixnetCriterionOperator.BeginLike:
-                    var beginLikeExpression = Expression.Call(propertyExp, SixnetReflecter.String.StringIndexOfMethod, valueExp);
+                    var beginLikeExpression = Expression.Call(propertyExp, SixnetReflecter.Strings.StringIndexOfMethod, valueExp);
                     conditionExp = Expression.Equal(beginLikeExpression, Expression.Constant(0));
                     break;
                 case SixnetCriterionOperator.Like:
-                    var likeExpression = Expression.Call(propertyExp, SixnetReflecter.String.StringIndexOfMethod, valueExp);
+                    var likeExpression = Expression.Call(propertyExp, SixnetReflecter.Strings.StringIndexOfMethod, valueExp);
                     conditionExp = Expression.GreaterThanOrEqual(likeExpression, Expression.Constant(0));
                     break;
                 case SixnetCriterionOperator.EndLike:
-                    var endLikeExpression = Expression.Call(propertyExp, SixnetReflecter.String.EndWithMethod, valueExp);
+                    var endLikeExpression = Expression.Call(propertyExp, SixnetReflecter.Strings.EndWithMethod, valueExp);
                     conditionExp = Expression.Equal(endLikeExpression, Expression.Constant(true));
                     break;
                 case SixnetCriterionOperator.In:
@@ -1239,6 +1235,11 @@ namespace Sixnet.Development.Queryable
         internal SixnetVersioningTableType? GetVersioningTableType()
         {
             return _versioningTableType;
+        }
+
+        internal bool IsFromAllVersions()
+        {
+            return _versioningTableType.HasValue && (_versioningTableType.Value & SixnetVersioningTableType.VersionTable) == SixnetVersioningTableType.VersionTable;
         }
 
         void CleanFromInfo()

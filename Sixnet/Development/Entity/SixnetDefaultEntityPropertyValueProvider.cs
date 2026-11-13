@@ -43,11 +43,7 @@ namespace Sixnet.Development.Entity
         {
             if (data is T instance && Setter != null)
             {
-                if (value != null && value.GetType() != DataType)
-                {
-                    value = System.Convert.ChangeType(value, DataType);
-                }
-                Setter(instance, value);
+                Setter(instance, SixnetObjectExtensions.ConvertTo(value, DataType));
             }
         }
     }

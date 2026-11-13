@@ -1,5 +1,7 @@
 ﻿// "Company © 2025. All rights reserved."
 
+using System.Dynamic;
+
 using Sixnet.Development.Data;
 using Sixnet.Development.Data.Client;
 using Sixnet.Development.Data.Database;
@@ -74,7 +76,7 @@ namespace Sixnet.Development.Queryable
             // Init model type
             var currentModelType = queryableInfo.ModelType;
             var thisType = GetType();
-            if (currentModelType == null && thisType.IsGenericType)
+            if ((currentModelType == null || currentModelType == typeof(ExpandoObject)) && thisType.IsGenericType)
             {
                 queryableInfo.SetModelType(thisType.GenericTypeArguments[0]);
             }

@@ -1,5 +1,6 @@
 ﻿// "Company © 2025. All rights reserved."
 
+using Sixnet.Development.Association;
 using Sixnet.Model;
 
 namespace Sixnet.Development.Queryable
@@ -8,7 +9,7 @@ namespace Sixnet.Development.Queryable
     /// Queryable filter
     /// </summary>
     [Serializable]
-    public abstract class SixnetQueryableFilter : SixnetLoadable, ISixnetMappable
+    public abstract class SixnetQueryableFilter : SixnetAssociationLoadable, ISixnetMappable
     {
         /// <summary>
         /// Generate a IQueryable instance 
