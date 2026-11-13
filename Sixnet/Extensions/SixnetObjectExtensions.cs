@@ -121,8 +121,9 @@ namespace System
         /// </summary>
         /// <typeparam name="TTarget">Target data type</typeparam>
         /// <param name="source">Source object</param>
+        /// <param name="associationLoadable">Association loadable</param>
         /// <returns>Return the target object</returns>
-        public static TTarget MapTo<TTarget>(this object source, ISixnetAssociationLoadable associationLoadable = null)
+        public static TTarget MapTo<TTarget>(this object source, ISixnetAssociationLoadable associationLoadable)
         {
             var targetData = SixnetMapper.MapTo<TTarget>(source);
             LoadMapAssociatedDatas(targetData, associationLoadable);
@@ -134,6 +135,7 @@ namespace System
         /// </summary>
         /// <typeparam name="TTarget">Target data type</typeparam>
         /// <param name="source">Source object</param>
+        /// <param name="needLoadedPropertyNames">Need loaded property names</param>
         /// <returns>Return the target object</returns>
         public static TTarget MapTo<TTarget>(this object source, params string[] needLoadedPropertyNames)
         {
@@ -152,8 +154,9 @@ namespace System
         /// </summary>
         /// <typeparam name="TTarget">Target data type</typeparam>
         /// <param name="source">Source object</param>
+        /// <param name="associationLoadable">Association loadable</param>
         /// <returns>Return the target object</returns>
-        public static async Task<TTarget> MapToAsync<TTarget>(this object source, ISixnetAssociationLoadable associationLoadable = null)
+        public static async Task<TTarget> MapToAsync<TTarget>(this object source, ISixnetAssociationLoadable associationLoadable)
         {
             var targetData = SixnetMapper.MapTo<TTarget>(source);
             LoadMapAssociatedDatas(targetData, associationLoadable);
@@ -166,6 +169,7 @@ namespace System
         /// </summary>
         /// <typeparam name="TTarget">Target data type</typeparam>
         /// <param name="source">Source object</param>
+        /// <param name="needLoadedPropertyNames">Need loaded property names</param>
         /// <returns>Return the target object</returns>
         public static async Task<TTarget> MapToAsync<TTarget>(this object source, params string[] needLoadedPropertyNames)
         {

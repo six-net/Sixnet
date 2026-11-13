@@ -1,5 +1,7 @@
 ﻿// "Company © 2025. All rights reserved."
 
+using System.Threading.Tasks;
+using Sixnet.Development.Association;
 using Sixnet.Development.Data;
 
 namespace Sixnet.Model.Paging
@@ -96,10 +98,48 @@ namespace Sixnet.Model.Paging
         /// Converts paging data to a paging object of the specified data type
         /// </summary>
         /// <typeparam name="TTarget">TTarget object type</typeparam>
+        /// <param name="associationLoadable">Association loadable</param>
         /// <returns>Return the target paging object</returns>
-        public SixnetPagingInfo<TTarget> ConvertTo<TTarget>()
+        public SixnetPagingInfo<TTarget> ConvertTo<TTarget>(ISixnetAssociationLoadable associationLoadable)
         {
-            return new SixnetPagingInfo<TTarget>(Page, PageSize, TotalCount, Items.Select(c => c.MapTo<TTarget>()).ToList());
+            var targetDatas = Items.MapTo<List<TTarget>>(associationLoadable);
+            return new SixnetPagingInfo<TTarget>(Page, PageSize, TotalCount, targetDatas);
+        }
+
+        /// <summary>
+        /// Converts paging data to a paging object of the specified data type
+        /// </summary>
+        /// <typeparam name="TTarget">TTarget object type</typeparam>
+        /// <param name="needLoadedPropertyNames">Need loaded property names</param>
+        /// <returns>Return the target paging object</returns>
+        public SixnetPagingInfo<TTarget> ConvertTo<TTarget>(params string[] needLoadedPropertyNames)
+        {
+            var targetDatas = Items.MapTo<List<TTarget>>(needLoadedPropertyNames);
+            return new SixnetPagingInfo<TTarget>(Page, PageSize, TotalCount, targetDatas);
+        }
+
+        /// <summary>
+        /// Converts paging data to a paging object of the specified data type
+        /// </summary>
+        /// <typeparam name="TTarget">TTarget object type</typeparam>
+        /// <param name="associationLoadable">Association loadable</param>
+        /// <returns>Return the target paging object</returns>
+        public async Task<SixnetPagingInfo<TTarget>> ConvertToAsync<TTarget>(ISixnetAssociationLoadable associationLoadable)
+        {
+            var targetDatas = await Items.MapToAsync<List<TTarget>>(associationLoadable).ConfigureAwait(false);
+            return new SixnetPagingInfo<TTarget>(Page, PageSize, TotalCount, targetDatas);
+        }
+
+        /// <summary>
+        /// Converts paging data to a paging object of the specified data type
+        /// </summary>
+        /// <typeparam name="TTarget">TTarget object type</typeparam>
+        /// <param name="needLoadedPropertyNames">Need loaded property names</param>
+        /// <returns>Return the target paging object</returns>
+        public async Task<SixnetPagingInfo<TTarget>> ConvertToAsync<TTarget>(params string[] needLoadedPropertyNames)
+        {
+            var targetDatas = await Items.MapToAsync<List<TTarget>>(needLoadedPropertyNames).ConfigureAwait(false);
+            return new SixnetPagingInfo<TTarget>(Page, PageSize, TotalCount, targetDatas);
         }
 
         #endregion
