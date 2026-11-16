@@ -47,11 +47,11 @@ namespace Sixnet.Development.Domain.Service
 
         #region Record lastest version data
 
-        void RecordLatestVersionData(IEnumerable<T> datas, Action<SixnetDataOperationOptions> configure = null)
+        int RecordLatestVersionData(IEnumerable<T> datas, Action<SixnetDataOperationOptions> configure = null)
         {
             if (datas.IsNullOrEmpty())
             {
-                return;
+                return 0;
             }
 
             var fieldsAssignment = new SixnetFieldsAssignment();
@@ -69,7 +69,7 @@ namespace Sixnet.Development.Domain.Service
                     configure?.Invoke(options);
                 });
 
-                repository.Add(datas, options =>
+                return repository.Add(datas, options =>
                 {
                     options.FromVersionTable();
                     options.EnableInsertIncrementField();
@@ -79,15 +79,15 @@ namespace Sixnet.Development.Domain.Service
             else
             {
                 repository.Update(fieldsAssignment, condition, configure);
-                repository.Add(datas, configure);
+                return repository.Add(datas, configure);
             }
         }
 
-        async Task RecordLatestVersionDataAsync(IEnumerable<T> datas, Action<SixnetDataOperationOptions> configure = null)
+        async Task<int> RecordLatestVersionDataAsync(IEnumerable<T> datas, Action<SixnetDataOperationOptions> configure = null)
         {
             if (datas.IsNullOrEmpty())
             {
-                return;
+                return 0;
             }
 
             var fieldsAssignment = new SixnetFieldsAssignment();
@@ -105,7 +105,7 @@ namespace Sixnet.Development.Domain.Service
                     configure?.Invoke(options);
                 }).ConfigureAwait(false);
 
-                await repository.AddAsync(datas, options =>
+                return await repository.AddAsync(datas, options =>
                 {
                     options.FromVersionTable();
                     options.EnableInsertIncrementField();
@@ -115,7 +115,7 @@ namespace Sixnet.Development.Domain.Service
             else
             {
                 await repository.UpdateAsync(fieldsAssignment, condition, configure).ConfigureAwait(false);
-                await repository.AddAsync(datas, configure).ConfigureAwait(false);
+                return await repository.AddAsync(datas, configure).ConfigureAwait(false);
             }
         }
 
@@ -137,6 +137,7 @@ namespace Sixnet.Development.Domain.Service
             // save before
             SaveDataBefore(parameter, configure);
 
+            T originalCurrentData = default;
             if (newData.IdentityValueIsNull())
             {
                 HandleAdding(parameter);
@@ -168,6 +169,9 @@ namespace Sixnet.Development.Domain.Service
                 var currentData = GetCurrentDatas(GetIdentityQueryable([newData]))?.FirstOrDefault();
                 SixnetThrower.ThrowGetDataFailedIf<T>(currentData == null);
 
+                originalCurrentData = currentData.Clone();
+
+                // update date
                 HandleUpdating(currentData, parameter);
 
                 if (isVersioning)
@@ -195,7 +199,11 @@ namespace Sixnet.Development.Domain.Service
             }
 
             // save data after
-            SaveDataAfter(parameter, configure);
+            SaveDataAfter(new SaveDataAfterContext<T>()
+            {
+                SaveParameter = parameter,
+                OldData = newData,
+            }, configure);
 
             return newData;
         }
@@ -214,6 +222,7 @@ namespace Sixnet.Development.Domain.Service
             // save before
             await SaveDataBeforeAsync(parameter, configure).ConfigureAwait(false);
 
+            T originalCurrentData = default;
             if (newData.IdentityValueIsNull())
             {
                 await HandleAddingAsync(parameter).ConfigureAwait(false);
@@ -245,6 +254,8 @@ namespace Sixnet.Development.Domain.Service
                 var currentData = (await GetCurrentDatasAsync(GetIdentityQueryable([newData])).ConfigureAwait(false))?.FirstOrDefault();
                 SixnetThrower.ThrowGetDataFailedIf<T>(currentData == null);
 
+                originalCurrentData = currentData.Clone();
+
                 await HandleUpdatingAsync(currentData, parameter).ConfigureAwait(false);
 
                 if (isVersioning)
@@ -272,7 +283,11 @@ namespace Sixnet.Development.Domain.Service
             }
 
             // save data after
-            await SaveDataAfterAsync(parameter, configure).ConfigureAwait(false);
+            await SaveDataAfterAsync(new SaveDataAfterContext<T>()
+            {
+                SaveParameter = parameter,
+                OldData = originalCurrentData
+            }, configure).ConfigureAwait(false);
 
             return newData;
         }
@@ -341,18 +356,18 @@ namespace Sixnet.Development.Domain.Service
         /// <summary>
         /// Save data after
         /// </summary>
-        /// <param name="parameter"></param>
+        /// <param name="context"></param>
         /// <param name="configure"></param>
-        protected virtual void SaveDataAfter(SaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null)
+        protected virtual void SaveDataAfter(SaveDataAfterContext<T> context, Action<SixnetDataOperationOptions> configure = null)
         {
         }
 
         /// <summary>
         /// Save data after
         /// </summary>
-        /// <param name="parameter"></param>
+        /// <param name="context"></param>
         /// <param name="configure"></param>
-        protected virtual Task SaveDataAfterAsync(SaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null)
+        protected virtual Task SaveDataAfterAsync(SaveDataAfterContext<T> context, Action<SixnetDataOperationOptions> configure = null)
         {
             return Task.CompletedTask;
         }
@@ -367,12 +382,13 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="fieldsAssignment"></param>
         /// <param name="queryable"></param>
         /// <param name="configure"></param>
-        protected void UpdateData(SixnetFieldsAssignment fieldsAssignment, ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
+        protected int UpdateData(SixnetFieldsAssignment fieldsAssignment, ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
         {
             SixnetThrower.ThrowArgNullIf(fieldsAssignment == null);
 
             if (isVersioning)
             {
+                var affectRows = 0;
                 fieldsAssignment.RemoveNewValue(versionFieldName);
                 fieldsAssignment.RemoveNewValue(historyTagFieldName);
 
@@ -382,7 +398,7 @@ namespace Sixnet.Development.Domain.Service
                     fieldsAssignment.SetNewValue(versionFieldName, addVersionValue);
                     fieldsAssignment.SetNewValue(historyTagFieldName, SixnetConstantField.Create(false));
 
-                    repository.Update(fieldsAssignment, queryable, options =>
+                    affectRows = repository.Update(fieldsAssignment, queryable, options =>
                     {
                         options.FromPrimaryTable();
                         configure?.Invoke(options);
@@ -392,7 +408,7 @@ namespace Sixnet.Development.Domain.Service
                 var currentDatas = GetCurrentDatas(queryable);
                 if (currentDatas.IsNullOrEmpty())
                 {
-                    return;
+                    return affectRows;
                 }
 
                 if (!isSeparateVersioning)
@@ -404,17 +420,18 @@ namespace Sixnet.Development.Domain.Service
                     }
                 }
 
-                RecordLatestVersionData(currentDatas, configure);
+                affectRows = RecordLatestVersionData(currentDatas, configure);
 
                 if (!isSeparateVersioning)
                 {
                     var identityQuery = SixnetConditionExtensions.IncludeEntities(null, currentDatas);
-                    repository.Update(fieldsAssignment, identityQuery, configure);
+                    affectRows = repository.Update(fieldsAssignment, identityQuery, configure);
                 }
+                return affectRows;
             }
             else
             {
-                repository.Update(fieldsAssignment, queryable, configure);
+                return repository.Update(fieldsAssignment, queryable, configure);
             }
         }
 
@@ -424,9 +441,9 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="fieldsAssignment"></param>
         /// <param name="ids"></param>
         /// <param name="configure"></param>
-        protected void UpdateData(SixnetFieldsAssignment fieldsAssignment, IEnumerable<dynamic> ids, Action<SixnetDataOperationOptions> configure = null)
+        protected int UpdateData(SixnetFieldsAssignment fieldsAssignment, IEnumerable<dynamic> ids, Action<SixnetDataOperationOptions> configure = null)
         {
-            UpdateData(fieldsAssignment, GetIdsQueryable(ids), configure);
+            return UpdateData(fieldsAssignment, GetIdsQueryable(ids), configure);
         }
 
         /// <summary>
@@ -435,9 +452,9 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="fieldsAssignmentExpression"></param>
         /// <param name="ids"></param>
         /// <param name="configure"></param>
-        protected void UpdateData(Expression<Func<T, bool>> fieldsAssignmentExpression, IEnumerable<dynamic> ids, Action<SixnetDataOperationOptions> configure = null)
+        protected int UpdateData(Expression<Func<T, bool>> fieldsAssignmentExpression, IEnumerable<dynamic> ids, Action<SixnetDataOperationOptions> configure = null)
         {
-            UpdateData(SixnetExpressionHelper.GetFieldsAssignment(fieldsAssignmentExpression), ids, configure);
+            return UpdateData(SixnetExpressionHelper.GetFieldsAssignment(fieldsAssignmentExpression), ids, configure);
         }
 
         /// <summary>
@@ -446,9 +463,9 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="fieldsAssignmentExpression"></param>
         /// <param name="id"></param>
         /// <param name="configure"></param>
-        protected void UpdateData(Expression<Func<T, bool>> fieldsAssignmentExpression, dynamic id, Action<SixnetDataOperationOptions> configure = null)
+        protected int UpdateData(Expression<Func<T, bool>> fieldsAssignmentExpression, dynamic id, Action<SixnetDataOperationOptions> configure = null)
         {
-            UpdateData(fieldsAssignmentExpression, [id], configure);
+            return UpdateData(fieldsAssignmentExpression, [id], configure);
         }
 
         /// <summary>
@@ -457,9 +474,9 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="fieldsAssignmentExpression"></param>
         /// <param name="condition"></param>
         /// <param name="configure"></param>
-        protected void UpdateData(Expression<Func<T, bool>> fieldsAssignmentExpression, Expression<Func<T, bool>> condition, Action<SixnetDataOperationOptions> configure = null)
+        protected int UpdateData(Expression<Func<T, bool>> fieldsAssignmentExpression, Expression<Func<T, bool>> condition, Action<SixnetDataOperationOptions> configure = null)
         {
-            UpdateData(SixnetExpressionHelper.GetFieldsAssignment(fieldsAssignmentExpression), SixnetQuerier.Create(condition), configure);
+            return UpdateData(SixnetExpressionHelper.GetFieldsAssignment(fieldsAssignmentExpression), SixnetQuerier.Create(condition), configure);
         }
 
         /// <summary>
@@ -468,12 +485,13 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="fieldsAssignment"></param>
         /// <param name="queryable"></param>
         /// <param name="configure"></param>
-        protected async Task UpdateDataAsync(SixnetFieldsAssignment fieldsAssignment, ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
+        protected async Task<int> UpdateDataAsync(SixnetFieldsAssignment fieldsAssignment, ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
         {
             SixnetThrower.ThrowArgNullIf(fieldsAssignment == null);
 
             if (isVersioning)
             {
+                var affectRows = 0;
                 fieldsAssignment.RemoveNewValue(versionFieldName);
                 fieldsAssignment.RemoveNewValue(historyTagFieldName);
 
@@ -483,7 +501,7 @@ namespace Sixnet.Development.Domain.Service
                     fieldsAssignment.SetNewValue(versionFieldName, addVersionValue);
                     fieldsAssignment.SetNewValue(historyTagFieldName, SixnetConstantField.Create(false));
 
-                    await repository.UpdateAsync(fieldsAssignment, queryable, options =>
+                    affectRows = await repository.UpdateAsync(fieldsAssignment, queryable, options =>
                     {
                         options.FromPrimaryTable();
                         configure?.Invoke(options);
@@ -493,7 +511,7 @@ namespace Sixnet.Development.Domain.Service
                 var currentDatas = await GetCurrentDatasAsync(queryable).ConfigureAwait(false);
                 if (currentDatas.IsNullOrEmpty())
                 {
-                    return;
+                    return affectRows;
                 }
 
                 if (!isSeparateVersioning)
@@ -505,17 +523,18 @@ namespace Sixnet.Development.Domain.Service
                     }
                 }
 
-                await RecordLatestVersionDataAsync(currentDatas, configure).ConfigureAwait(false);
+                affectRows = await RecordLatestVersionDataAsync(currentDatas, configure).ConfigureAwait(false);
 
                 if (!isSeparateVersioning)
                 {
                     var identityQuery = SixnetConditionExtensions.IncludeEntities(null, currentDatas);
-                    await repository.UpdateAsync(fieldsAssignment, identityQuery, configure).ConfigureAwait(false);
+                    affectRows = await repository.UpdateAsync(fieldsAssignment, identityQuery, configure).ConfigureAwait(false);
                 }
+                return affectRows;
             }
             else
             {
-                await repository.UpdateAsync(fieldsAssignment, queryable, configure).ConfigureAwait(false);
+                return await repository.UpdateAsync(fieldsAssignment, queryable, configure).ConfigureAwait(false);
             }
         }
 
@@ -525,7 +544,7 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="fieldsAssignment"></param>
         /// <param name="ids"></param>
         /// <param name="configure"></param>
-        protected Task UpdateDataAsync(SixnetFieldsAssignment fieldsAssignment, IEnumerable<dynamic> ids, Action<SixnetDataOperationOptions> configure = null)
+        protected Task<int> UpdateDataAsync(SixnetFieldsAssignment fieldsAssignment, IEnumerable<dynamic> ids, Action<SixnetDataOperationOptions> configure = null)
         {
             return UpdateDataAsync(fieldsAssignment, GetIdsQueryable(ids), configure);
         }
@@ -536,7 +555,7 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="fieldsAssignmentExpression"></param>
         /// <param name="ids"></param>
         /// <param name="configure"></param>
-        protected Task UpdateDataAsync(Expression<Func<T, bool>> fieldsAssignmentExpression, IEnumerable<dynamic> ids, Action<SixnetDataOperationOptions> configure = null)
+        protected Task<int> UpdateDataAsync(Expression<Func<T, bool>> fieldsAssignmentExpression, IEnumerable<dynamic> ids, Action<SixnetDataOperationOptions> configure = null)
         {
             return UpdateDataAsync(SixnetExpressionHelper.GetFieldsAssignment(fieldsAssignmentExpression), ids, configure);
         }
@@ -547,7 +566,7 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="fieldsAssignmentExpression"></param>
         /// <param name="id"></param>
         /// <param name="configure"></param>
-        protected Task UpdateDataAsync(Expression<Func<T, bool>> fieldsAssignmentExpression, dynamic id, Action<SixnetDataOperationOptions> configure = null)
+        protected Task<int> UpdateDataAsync(Expression<Func<T, bool>> fieldsAssignmentExpression, dynamic id, Action<SixnetDataOperationOptions> configure = null)
         {
             return UpdateDataAsync(fieldsAssignmentExpression, [id], configure);
         }
@@ -558,7 +577,7 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="fieldsAssignmentExpression"></param>
         /// <param name="condition"></param>
         /// <param name="configure"></param>
-        protected Task UpdateDataAsync(Expression<Func<T, bool>> fieldsAssignmentExpression, Expression<Func<T, bool>> condition, Action<SixnetDataOperationOptions> configure = null)
+        protected Task<int> UpdateDataAsync(Expression<Func<T, bool>> fieldsAssignmentExpression, Expression<Func<T, bool>> condition, Action<SixnetDataOperationOptions> configure = null)
         {
             return UpdateDataAsync(SixnetExpressionHelper.GetFieldsAssignment(fieldsAssignmentExpression), SixnetQuerier.Create(condition), configure);
         }
@@ -572,7 +591,7 @@ namespace Sixnet.Development.Domain.Service
         /// </summary>
         /// <param name="queryable"></param>
         /// <param name="configure"></param>
-        protected void DeleteData(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
+        protected int DeleteData(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
         {
             var archiveField = SixnetEntityManager.GetFields<T>(SixnetFieldRole.Archive)?.FirstOrDefault();
             if (archiveField != null)
@@ -580,11 +599,11 @@ namespace Sixnet.Development.Domain.Service
                 var fieldsAssignment = new SixnetFieldsAssignment();
                 fieldsAssignment.SetNewValue(archiveField.PropertyName, true);
 
-                UpdateData(fieldsAssignment, queryable, configure);
+                return UpdateData(fieldsAssignment, queryable, configure);
             }
             else
             {
-                repository.Delete(queryable, options =>
+                return repository.Delete(queryable, options =>
                 {
                     options.FromPrimaryTable();
                     configure?.Invoke(options);
@@ -597,9 +616,9 @@ namespace Sixnet.Development.Domain.Service
         /// </summary>
         /// <param name="ids"></param>
         /// <param name="configure"></param>
-        protected void DeleteData(IEnumerable<dynamic> ids, Action<SixnetDataOperationOptions> configure = null)
+        protected int DeleteData(IEnumerable<dynamic> ids, Action<SixnetDataOperationOptions> configure = null)
         {
-            DeleteData(GetIdsQueryable(ids), configure);
+            return DeleteData(GetIdsQueryable(ids), configure);
         }
 
         /// <summary>
@@ -607,9 +626,9 @@ namespace Sixnet.Development.Domain.Service
         /// </summary>
         /// <param name="id"></param>
         /// <param name="configure"></param>
-        protected void DeleteData(dynamic id, Action<SixnetDataOperationOptions> configure = null)
+        protected int DeleteData(dynamic id, Action<SixnetDataOperationOptions> configure = null)
         {
-            DeleteData([id], configure);
+            return DeleteData([id], configure);
         }
 
         /// <summary>
@@ -617,9 +636,9 @@ namespace Sixnet.Development.Domain.Service
         /// </summary>
         /// <param name="condition"></param>
         /// <param name="configure"></param>
-        protected void DeleteData(Expression<Func<T, bool>> condition, Action<SixnetDataOperationOptions> configure = null)
+        protected int DeleteData(Expression<Func<T, bool>> condition, Action<SixnetDataOperationOptions> configure = null)
         {
-            DeleteData(SixnetQuerier.Create(condition), configure);
+            return DeleteData(SixnetQuerier.Create(condition), configure);
         }
 
         /// <summary>
@@ -627,7 +646,7 @@ namespace Sixnet.Development.Domain.Service
         /// </summary>
         /// <param name="queryable"></param>
         /// <param name="configure"></param>
-        protected async Task DeleteDataAsync(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
+        protected async Task<int> DeleteDataAsync(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
         {
             var archiveField = SixnetEntityManager.GetFields<T>(SixnetFieldRole.Archive)?.FirstOrDefault();
             if (archiveField != null)
@@ -635,11 +654,11 @@ namespace Sixnet.Development.Domain.Service
                 var fieldsAssignment = new SixnetFieldsAssignment();
                 fieldsAssignment.SetNewValue(archiveField.PropertyName, true);
 
-                await UpdateDataAsync(fieldsAssignment, queryable, configure).ConfigureAwait(false);
+                return await UpdateDataAsync(fieldsAssignment, queryable, configure).ConfigureAwait(false);
             }
             else
             {
-                await repository.DeleteAsync(queryable, options =>
+                return await repository.DeleteAsync(queryable, options =>
                 {
                     options.FromPrimaryTable();
                     configure?.Invoke(options);
@@ -652,7 +671,7 @@ namespace Sixnet.Development.Domain.Service
         /// </summary>
         /// <param name="ids"></param>
         /// <param name="configure"></param>
-        protected Task DeleteDataAsync(IEnumerable<dynamic> ids, Action<SixnetDataOperationOptions> configure = null)
+        protected Task<int> DeleteDataAsync(IEnumerable<dynamic> ids, Action<SixnetDataOperationOptions> configure = null)
         {
             return DeleteDataAsync(GetIdsQueryable(ids), configure);
         }
@@ -662,7 +681,7 @@ namespace Sixnet.Development.Domain.Service
         /// </summary>
         /// <param name="id"></param>
         /// <param name="configure"></param>
-        protected Task DeleteDataAsync(dynamic id, Action<SixnetDataOperationOptions> configure = null)
+        protected Task<int> DeleteDataAsync(dynamic id, Action<SixnetDataOperationOptions> configure = null)
         {
             return DeleteDataAsync([id], configure);
         }
@@ -672,7 +691,7 @@ namespace Sixnet.Development.Domain.Service
         /// </summary>
         /// <param name="condition"></param>
         /// <param name="configure"></param>
-        protected Task DeleteDataAsync(Expression<Func<T, bool>> condition, Action<SixnetDataOperationOptions> configure = null)
+        protected Task<int> DeleteDataAsync(Expression<Func<T, bool>> condition, Action<SixnetDataOperationOptions> configure = null)
         {
             return DeleteDataAsync(SixnetQuerier.Create(condition), configure);
         }
