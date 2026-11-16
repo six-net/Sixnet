@@ -133,6 +133,9 @@ namespace Sixnet.Development.Domain.Service
             var newData = parameter?.NewData;
             SixnetThrower.ThrowArgNullIf(newData == null, nameof(parameter));
 
+            // save before
+            SaveDataBefore(parameter, configure);
+
             if (newData.IdentityValueIsNull())
             {
                 HandleAdding(parameter);
@@ -158,8 +161,6 @@ namespace Sixnet.Development.Domain.Service
                         configure?.Invoke(options);
                     });
                 }
-
-                return newData;
             }
             else
             {
@@ -189,8 +190,13 @@ namespace Sixnet.Development.Domain.Service
                     repository.Update(currentData, configure);
                 }
 
-                return currentData;
+                newData = currentData;
             }
+
+            // save data after
+            SaveDataAfter(parameter, configure);
+
+            return newData;
         }
 
         /// <summary>
@@ -201,7 +207,10 @@ namespace Sixnet.Development.Domain.Service
         protected async Task<T> SaveDataAsync(SaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null)
         {
             var newData = parameter?.NewData;
-            SixnetThrower.ThrowArgNullIf(newData == null, nameof(parameter));
+            SixnetThrower.ThrowArgNullIf(newData == null, typeof(T).Name);
+
+            // save before
+            await SaveDataBeforeAsync(parameter, configure).ConfigureAwait(false);
 
             if (newData.IdentityValueIsNull())
             {
@@ -228,8 +237,6 @@ namespace Sixnet.Development.Domain.Service
                         configure?.Invoke(options);
                     }).ConfigureAwait(false);
                 }
-
-                return newData;
             }
             else
             {
@@ -259,8 +266,89 @@ namespace Sixnet.Development.Domain.Service
                     await repository.UpdateAsync(currentData, configure).ConfigureAwait(false);
                 }
 
-                return currentData;
+                newData = currentData;
             }
+
+            // save data after
+            await SaveDataAfterAsync(parameter, configure).ConfigureAwait(false);
+
+            return newData;
+        }
+
+        /// <summary>
+        /// Handle adding
+        /// </summary>
+        /// <param name="parameter"></param>
+        protected virtual void HandleAdding(SaveDataParameter<T> parameter)
+        {
+        }
+
+        /// <summary>
+        /// Handle adding
+        /// </summary>
+        /// <param name="parameter"></param>
+        protected virtual Task HandleAddingAsync(SaveDataParameter<T> parameter)
+        {
+            return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Handle updating
+        /// </summary>
+        /// <param name="currentData"></param>
+        /// <param name="parameter"></param>
+        protected virtual void HandleUpdating(T currentData, SaveDataParameter<T> parameter)
+        {
+            currentData.ModifyFrom(parameter.NewData);
+        }
+
+        /// <summary>
+        /// Handle updating
+        /// </summary>
+        /// <param name="currentData"></param>
+        /// <param name="parameter"></param>
+        protected virtual Task HandleUpdatingAsync(T currentData, SaveDataParameter<T> parameter)
+        {
+            currentData.ModifyFrom(parameter.NewData);
+            return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Save data before
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <param name="configure"></param>
+        protected virtual void SaveDataBefore(SaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null)
+        {
+        }
+
+        /// <summary>
+        /// Save data before
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <param name="configure"></param>
+        protected virtual Task SaveDataBeforeAsync(SaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Save data after
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <param name="configure"></param>
+        protected virtual void SaveDataAfter(SaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null)
+        {
+        }
+
+        /// <summary>
+        /// Save data after
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <param name="configure"></param>
+        protected virtual Task SaveDataAfterAsync(SaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return Task.CompletedTask;
         }
 
         #endregion
@@ -643,48 +731,6 @@ namespace Sixnet.Development.Domain.Service
         protected Task<List<T>> GetCurrentDatasAsync(IEnumerable<dynamic> ids)
         {
             return GetCurrentDatasAsync(GetIdsQueryable(ids));
-        }
-
-        #endregion
-
-        #region Handle data
-
-        /// <summary>
-        /// Handle adding
-        /// </summary>
-        /// <param name="parameter"></param>
-        protected virtual void HandleAdding(SaveDataParameter<T> parameter)
-        {
-        }
-
-        /// <summary>
-        /// Handle adding
-        /// </summary>
-        /// <param name="parameter"></param>
-        protected virtual Task HandleAddingAsync(SaveDataParameter<T> parameter)
-        {
-            return Task.CompletedTask;
-        }
-
-        /// <summary>
-        /// Handle updating
-        /// </summary>
-        /// <param name="currentData"></param>
-        /// <param name="parameter"></param>
-        protected virtual void HandleUpdating(T currentData, SaveDataParameter<T> parameter)
-        {
-            currentData.ModifyFrom(parameter.NewData);
-        }
-
-        /// <summary>
-        /// Handle updating
-        /// </summary>
-        /// <param name="currentData"></param>
-        /// <param name="parameter"></param>
-        protected virtual Task HandleUpdatingAsync(T currentData, SaveDataParameter<T> parameter)
-        {
-            currentData.ModifyFrom(parameter.NewData);
-            return Task.CompletedTask;
         }
 
         #endregion
