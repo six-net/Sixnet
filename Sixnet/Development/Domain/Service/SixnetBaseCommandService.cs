@@ -205,7 +205,7 @@ namespace Sixnet.Development.Domain.Service
 
             if (newData.IdentityValueIsNull())
             {
-                HandleAdding(parameter);
+                await HandleAddingAsync(parameter).ConfigureAwait(false);
 
                 if (isVersioning)
                 {
@@ -236,7 +236,7 @@ namespace Sixnet.Development.Domain.Service
                 var currentData = (await GetCurrentDatasAsync(GetIdentityQueryable([newData])).ConfigureAwait(false))?.FirstOrDefault();
                 SixnetThrower.ThrowGetDataFailedIf<T>(currentData == null);
 
-                HandleUpdating(currentData, parameter);
+                await HandleUpdatingAsync(currentData, parameter).ConfigureAwait(false);
 
                 if (isVersioning)
                 {
@@ -652,19 +652,39 @@ namespace Sixnet.Development.Domain.Service
         /// <summary>
         /// Handle adding
         /// </summary>
-        /// <param name="newData"></param>
+        /// <param name="parameter"></param>
         protected virtual void HandleAdding(SaveDataParameter<T> parameter)
         {
+        }
+
+        /// <summary>
+        /// Handle adding
+        /// </summary>
+        /// <param name="parameter"></param>
+        protected virtual Task HandleAddingAsync(SaveDataParameter<T> parameter)
+        {
+            return Task.CompletedTask;
         }
 
         /// <summary>
         /// Handle updating
         /// </summary>
         /// <param name="currentData"></param>
-        /// <param name="newData"></param>
+        /// <param name="parameter"></param>
         protected virtual void HandleUpdating(T currentData, SaveDataParameter<T> parameter)
         {
             currentData.ModifyFrom(parameter.NewData);
+        }
+
+        /// <summary>
+        /// Handle updating
+        /// </summary>
+        /// <param name="currentData"></param>
+        /// <param name="parameter"></param>
+        protected virtual Task HandleUpdatingAsync(T currentData, SaveDataParameter<T> parameter)
+        {
+            currentData.ModifyFrom(parameter.NewData);
+            return Task.CompletedTask;
         }
 
         #endregion
