@@ -127,6 +127,7 @@ namespace Sixnet.Development.Domain.Service
         /// Save data
         /// </summary>
         /// <param name="parameter"></param>
+        /// <param name="configure"></param>
         /// <returns></returns>
         protected T SaveData(SaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null)
         {
@@ -203,6 +204,7 @@ namespace Sixnet.Development.Domain.Service
         /// Save data
         /// </summary>
         /// <param name="parameter"></param>
+        /// <param name="configure"></param>
         /// <returns></returns>
         protected async Task<T> SaveDataAsync(SaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null)
         {
@@ -279,7 +281,8 @@ namespace Sixnet.Development.Domain.Service
         /// Handle adding
         /// </summary>
         /// <param name="parameter"></param>
-        protected virtual void HandleAdding(SaveDataParameter<T> parameter)
+        /// <param name="configure"></param>
+        protected virtual void HandleAdding(SaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null)
         {
         }
 
@@ -287,7 +290,8 @@ namespace Sixnet.Development.Domain.Service
         /// Handle adding
         /// </summary>
         /// <param name="parameter"></param>
-        protected virtual Task HandleAddingAsync(SaveDataParameter<T> parameter)
+        /// <param name="configure"></param>
+        protected virtual Task HandleAddingAsync(SaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null)
         {
             return Task.CompletedTask;
         }
@@ -297,7 +301,8 @@ namespace Sixnet.Development.Domain.Service
         /// </summary>
         /// <param name="currentData"></param>
         /// <param name="parameter"></param>
-        protected virtual void HandleUpdating(T currentData, SaveDataParameter<T> parameter)
+        /// <param name="configure"></param>
+        protected virtual void HandleUpdating(T currentData, SaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null)
         {
             currentData.ModifyFrom(parameter.NewData);
         }
@@ -307,7 +312,8 @@ namespace Sixnet.Development.Domain.Service
         /// </summary>
         /// <param name="currentData"></param>
         /// <param name="parameter"></param>
-        protected virtual Task HandleUpdatingAsync(T currentData, SaveDataParameter<T> parameter)
+        /// <param name="configure"></param>
+        protected virtual Task HandleUpdatingAsync(T currentData, SaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null)
         {
             currentData.ModifyFrom(parameter.NewData);
             return Task.CompletedTask;
