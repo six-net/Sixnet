@@ -16,5 +16,10 @@ namespace Sixnet.Development.Domain.Parameter
         /// Gets or sets the new data
         /// </summary>
         public T NewData { get; set; }
+
+        /// <summary>
+        /// Whether allow editing archived data
+        /// </summary>
+        public bool IncludeArchived {  get; set; }
     }
 }

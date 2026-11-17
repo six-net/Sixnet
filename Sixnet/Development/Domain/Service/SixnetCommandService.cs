@@ -1,20 +1,13 @@
 ﻿// "Company © 2025. All rights reserved."
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-
 using Sixnet.Development.Data;
 using Sixnet.Development.Domain.Parameter;
 using Sixnet.Development.Entity;
-using Sixnet.Development.Queryable;
-using Sixnet.Exceptions;
 
 namespace Sixnet.Development.Domain.Service
 {
-    public class SixnetCommandService<T> : SixnetBaseCommandService<T>, ISixnetCommandService<T>
+    internal class SixnetCommandService<T> : SixnetBaseCommandService<T>, ISixnetCommandService<T>
         where T : SixnetBaseEntity<T>, new()
     {
         #region Save

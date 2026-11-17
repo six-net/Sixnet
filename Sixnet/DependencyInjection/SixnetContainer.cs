@@ -534,7 +534,7 @@ namespace Sixnet.DependencyInjection
             services.AddSingleton(typeof(ISixnetDataAccess<>), typeof(SixnetDefaultDataAccess<>));
             services.AddSingleton(typeof(ISixnetRepository<>), typeof(SixnetDefaultRepository<>));
             services.AddSingleton(typeof(ISixnetCommandService<>), typeof(SixnetCommandService<>));
-            services.AddSingleton(typeof(ISixnetQueryService<>), typeof(SixnetQueryService<>));
+            services.AddSingleton(typeof(ISixnetQueryService<>), typeof(SixnetBaseQueryService<>));
             services.AddSingleton(typeof(ISixnetDefaultAssociatedDataProvider<,>), typeof(SixnetDefaultAssociatedDataProvider<,>));
             services.AddSixnetLocalization(options =>
             {

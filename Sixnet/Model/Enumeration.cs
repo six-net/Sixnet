@@ -25,18 +25,4 @@ namespace Sixnet.Model
     }
 
     #endregion
-
-    #region ObjectCloneMethod
-
-    /// <summary>
-    /// Defines object clone method
-    /// </summary>
-    [Serializable]
-    public enum SixnetObjectCloneMethod
-    {
-        Binary = 2,
-        Json = 4
-    }
-
-    #endregion
 }

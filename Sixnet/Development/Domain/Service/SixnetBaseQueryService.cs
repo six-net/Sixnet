@@ -18,7 +18,7 @@ using Sixnet.Model.Paging;
 
 namespace Sixnet.Development.Domain.Service
 {
-    public class SixnetQueryService<T> : SixnetBaseDomainService<T>, ISixnetQueryService<T> where T : SixnetBaseEntity<T>, new()
+    public class SixnetBaseQueryService<T> : SixnetBaseDomainService<T>, ISixnetQueryService<T> where T : SixnetBaseEntity<T>, new()
     {
         /// <summary>
         /// Handle queryable
@@ -27,7 +27,7 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="version"></param>
         /// <param name="includeArchived"></param>
         /// <returns></returns>
-        ISixnetQueryable HandleQueryable(ISixnetQueryable queryable, bool fromVersionTable = false, long? version = null, bool includeArchived = false)
+        internal protected ISixnetQueryable HandleQueryable(ISixnetQueryable queryable, bool fromVersionTable = false, long? version = null, bool includeArchived = false)
         {
             queryable ??= SixnetQuerier.Create<T>();
 

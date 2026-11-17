@@ -21,8 +21,10 @@ using Sixnet.Expressions.Linq;
 
 namespace Sixnet.Development.Domain.Service
 {
-    public abstract class SixnetBaseCommandService<T> : SixnetBaseDomainService<T> where T : SixnetBaseEntity<T>, new()
+    public abstract class SixnetBaseCommandService<T> : SixnetBaseQueryService<T> where T : SixnetBaseEntity<T>, new()
     {
+        #region Identity queryable
+
         /// <summary>
         /// Get identity queryable 
         /// </summary>
@@ -44,6 +46,8 @@ namespace Sixnet.Development.Domain.Service
                 return SixnetConditionExtensions.IncludeEntities(null, datas, ignorePks);
             }
         }
+
+        #endregion
 
         #region Record lastest version data
 
@@ -166,7 +170,8 @@ namespace Sixnet.Development.Domain.Service
             }
             else
             {
-                var currentData = GetCurrentDatas(GetIdentityQueryable([newData]))?.FirstOrDefault();
+                var identityQueryable = HandleQueryable(GetIdentityQueryable([newData]), false, null, parameter.IncludeArchived);
+                var currentData = GetList(identityQueryable, configure)?.FirstOrDefault();
                 SixnetThrower.ThrowGetDataFailedIf<T>(currentData == null);
 
                 originalCurrentData = currentData.Clone();
@@ -176,7 +181,7 @@ namespace Sixnet.Development.Domain.Service
 
                 if (isVersioning)
                 {
-                    currentData.SetValue(versionFieldName, currentData.GetValue(versionFieldName) + 1);
+                    currentData.SetValue(versionFieldName, originalCurrentData.GetValue(versionFieldName) + 1);
                     currentData.SetValue(historyTagFieldName, false);
 
                     if (isSeparateVersioning)
@@ -202,7 +207,7 @@ namespace Sixnet.Development.Domain.Service
             SaveDataAfter(new SaveDataAfterContext<T>()
             {
                 SaveParameter = parameter,
-                OldData = newData,
+                OldData = originalCurrentData,
             }, configure);
 
             return newData;
@@ -251,7 +256,8 @@ namespace Sixnet.Development.Domain.Service
             }
             else
             {
-                var currentData = (await GetCurrentDatasAsync(GetIdentityQueryable([newData])).ConfigureAwait(false))?.FirstOrDefault();
+                var identityQueryable = HandleQueryable(GetIdentityQueryable([newData]), false, null, parameter.IncludeArchived);
+                var currentData = (await GetListAsync(identityQueryable, configure).ConfigureAwait(false))?.FirstOrDefault();
                 SixnetThrower.ThrowGetDataFailedIf<T>(currentData == null);
 
                 originalCurrentData = currentData.Clone();
@@ -260,7 +266,7 @@ namespace Sixnet.Development.Domain.Service
 
                 if (isVersioning)
                 {
-                    currentData.SetValue(versionFieldName, currentData.GetValue(versionFieldName) + 1);
+                    currentData.SetValue(versionFieldName, originalCurrentData.GetValue(versionFieldName) + 1);
                     currentData.SetValue(historyTagFieldName, false);
 
                     if (isSeparateVersioning)
@@ -405,7 +411,7 @@ namespace Sixnet.Development.Domain.Service
                     });
                 }
 
-                var currentDatas = GetCurrentDatas(queryable);
+                var currentDatas = GetList(HandleQueryable(queryable, false, null, false));
                 if (currentDatas.IsNullOrEmpty())
                 {
                     return affectRows;
@@ -447,6 +453,17 @@ namespace Sixnet.Development.Domain.Service
         }
 
         /// <summary>
+        /// Update
+        /// </summary>
+        /// <param name="fieldsAssignment"></param>
+        /// <param name="condition"></param>
+        /// <param name="configure"></param>
+        protected int UpdateData(SixnetFieldsAssignment fieldsAssignment, Expression<Func<T, bool>> condition, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return UpdateData(fieldsAssignment, SixnetQuerier.Create(condition), configure);
+        }
+
+        /// <summary>
         /// Update data
         /// </summary>
         /// <param name="fieldsAssignmentExpression"></param>
@@ -479,6 +496,7 @@ namespace Sixnet.Development.Domain.Service
             return UpdateData(SixnetExpressionHelper.GetFieldsAssignment(fieldsAssignmentExpression), SixnetQuerier.Create(condition), configure);
         }
 
+
         /// <summary>
         /// Update data
         /// </summary>
@@ -508,7 +526,7 @@ namespace Sixnet.Development.Domain.Service
                     }).ConfigureAwait(false);
                 }
 
-                var currentDatas = await GetCurrentDatasAsync(queryable).ConfigureAwait(false);
+                var currentDatas = await GetListAsync(HandleQueryable(queryable, false, null, false)).ConfigureAwait(false);
                 if (currentDatas.IsNullOrEmpty())
                 {
                     return affectRows;
@@ -547,6 +565,17 @@ namespace Sixnet.Development.Domain.Service
         protected Task<int> UpdateDataAsync(SixnetFieldsAssignment fieldsAssignment, IEnumerable<dynamic> ids, Action<SixnetDataOperationOptions> configure = null)
         {
             return UpdateDataAsync(fieldsAssignment, GetIdsQueryable(ids), configure);
+        }
+
+        /// <summary>
+        /// Update
+        /// </summary>
+        /// <param name="fieldsAssignment"></param>
+        /// <param name="condition"></param>
+        /// <param name="configure"></param>
+        protected Task<int> UpdateDataAsync(SixnetFieldsAssignment fieldsAssignment, Expression<Func<T, bool>> condition, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return UpdateDataAsync(fieldsAssignment, SixnetQuerier.Create(condition), configure);
         }
 
         /// <summary>
@@ -694,68 +723,6 @@ namespace Sixnet.Development.Domain.Service
         protected Task<int> DeleteDataAsync(Expression<Func<T, bool>> condition, Action<SixnetDataOperationOptions> configure = null)
         {
             return DeleteDataAsync(SixnetQuerier.Create(condition), configure);
-        }
-
-        #endregion
-
-        #region Get current data
-
-        /// <summary>
-        /// Get current data
-        /// </summary>
-        /// <param name="ids"></param>
-        /// <returns></returns>
-        protected virtual List<T> GetCurrentDatas(ISixnetQueryable queryable)
-        {
-            queryable ??= SixnetQuerier.Create<T>();
-            if (isVersioning)
-            {
-                var historicalCriterion = GetHistoryTagCriterion(false);
-                queryable.Where(historicalCriterion);
-            }
-            return repository.AsQueryable()
-                .Where(queryable)
-                .IncludeArchived()
-                .ToList();
-        }
-
-        /// <summary>
-        /// Get current data
-        /// </summary>
-        /// <param name="ids"></param>
-        /// <returns></returns>
-        protected List<T> GetCurrentDatas(IEnumerable<dynamic> ids)
-        {
-            return GetCurrentDatas(GetIdsQueryable(ids));
-        }
-
-        /// <summary>
-        /// Get current data
-        /// </summary>
-        /// <param name="ids"></param>
-        /// <returns></returns>
-        protected virtual Task<List<T>> GetCurrentDatasAsync(ISixnetQueryable queryable)
-        {
-            queryable ??= SixnetQuerier.Create<T>();
-            if (isVersioning)
-            {
-                var historicalCriterion = GetHistoryTagCriterion(false);
-                queryable.Where(historicalCriterion);
-            }
-            return repository.AsQueryable()
-                .Where(queryable)
-                .IncludeArchived()
-                .ToListAsync();
-        }
-
-        /// <summary>
-        /// Get current data
-        /// </summary>
-        /// <param name="ids"></param>
-        /// <returns></returns>
-        protected Task<List<T>> GetCurrentDatasAsync(IEnumerable<dynamic> ids)
-        {
-            return GetCurrentDatasAsync(GetIdsQueryable(ids));
         }
 
         #endregion
