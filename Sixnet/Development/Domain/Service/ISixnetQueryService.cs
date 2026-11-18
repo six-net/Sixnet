@@ -25,10 +25,52 @@ namespace Sixnet.Development.Domain.Service
         /// <summary>
         /// Get paging
         /// </summary>
+        /// <param name="queryable">Filter</param>
+        /// <param name="page">Page</param>
+        /// <param name="pageSize">Page size</param>
+        /// <param name="configure">Configure</param>
+        /// <returns></returns>
+        SixnetPagingInfo<T> GetPaging(ISixnetQueryable queryable, int page, int pageSize, Action<SixnetDataOperationOptions> configure = null);
+
+        /// <summary>
+        /// Get paging
+        /// </summary>
+        /// <param name="condition">Filter</param>
+        /// <param name="page">Page</param>
+        /// <param name="pageSize">Page size</param>
+        /// <param name="includeArchived">Include archived</param>
+        /// <param name="configure">Configure</param>
+        /// <returns></returns>
+        SixnetPagingInfo<T> GetPaging(Expression<Func<T, bool>> condition, int page, int pageSize, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null);
+
+        /// <summary>
+        /// Get paging
+        /// </summary>
         /// <param name="filter">Filter</param>
         /// <param name="configure">Configure</param>
         /// <returns></returns>
         Task<SixnetPagingInfo<T>> GetPagingAsync(SixnetPagingFilter filter, Action<SixnetDataOperationOptions> configure = null);
+
+        /// <summary>
+        /// Get paging
+        /// </summary>
+        /// <param name="queryable">Filter</param>
+        /// <param name="page">Page</param>
+        /// <param name="pageSize">Page size</param>
+        /// <param name="configure">Configure</param>
+        /// <returns></returns>
+        Task<SixnetPagingInfo<T>> GetPagingAsync(ISixnetQueryable queryable, int page, int pageSize, Action<SixnetDataOperationOptions> configure = null);
+
+        /// <summary>
+        /// Get paging
+        /// </summary>
+        /// <param name="condition">Filter</param>
+        /// <param name="page">Page</param>
+        /// <param name="pageSize">Page size</param>
+        /// <param name="includeArchived">Include archived</param>
+        /// <param name="configure">Configure</param>
+        /// <returns></returns>
+        Task<SixnetPagingInfo<T>> GetPagingAsync(Expression<Func<T, bool>> condition, int page, int pageSize, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data

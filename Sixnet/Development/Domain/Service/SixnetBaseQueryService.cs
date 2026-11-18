@@ -14,6 +14,7 @@ using Sixnet.Development.Entity;
 using Sixnet.Development.Queryable;
 using Sixnet.Development.Repository;
 using Sixnet.Exceptions;
+using Sixnet.Expressions.Linq;
 using Sixnet.Model.Paging;
 
 namespace Sixnet.Development.Domain.Service
@@ -70,7 +71,37 @@ namespace Sixnet.Development.Domain.Service
         /// <returns></returns>
         public SixnetPagingInfo<T> GetPaging(SixnetPagingFilter filter, Action<SixnetDataOperationOptions> configure = null)
         {
+            filter ??= new SixnetPagingFilter();
             return repository.GetPaging(HandleQueryable(filter.CreateQueryable(true)), filter, configure);
+        }
+
+        /// <summary>
+        /// Get paging
+        /// </summary>
+        /// <param name="queryable">Filter</param>
+        /// <param name="page">Page</param>
+        /// <param name="pageSize">Page size</param>
+        /// <param name="configure">Configure</param>
+        /// <returns></returns>
+        public SixnetPagingInfo<T> GetPaging(ISixnetQueryable queryable, int page, int pageSize, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return repository.GetPaging(HandleQueryable(queryable), page, pageSize, configure);
+        }
+
+        /// <summary>
+        /// Get paging
+        /// </summary>
+        /// <param name="condition">Filter</param>
+        /// <param name="page">Page</param>
+        /// <param name="pageSize">Page size</param>
+        /// <param name="includeArchived">Include archived</param>
+        /// <param name="configure">Configure</param>
+        /// <returns></returns>
+        public SixnetPagingInfo<T> GetPaging(Expression<Func<T, bool>> condition, int page, int pageSize, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null)
+        {
+            var queryable = SixnetExpressionHelper.GetQueryable(condition) ?? SixnetQuerier.Create();
+            queryable.IncludeArchivedIf(includeArchived);
+            return GetPaging(queryable, page, pageSize, configure);
         }
 
         /// <summary>
@@ -81,7 +112,37 @@ namespace Sixnet.Development.Domain.Service
         /// <returns></returns>
         public Task<SixnetPagingInfo<T>> GetPagingAsync(SixnetPagingFilter filter, Action<SixnetDataOperationOptions> configure = null)
         {
+            filter ??= new SixnetPagingFilter();
             return repository.GetPagingAsync(HandleQueryable(filter.CreateQueryable(true)), filter, configure);
+        }
+
+        /// <summary>
+        /// Get paging
+        /// </summary>
+        /// <param name="queryable">Filter</param>
+        /// <param name="page">Page</param>
+        /// <param name="pageSize">Page size</param>
+        /// <param name="configure">Configure</param>
+        /// <returns></returns>
+        public Task<SixnetPagingInfo<T>> GetPagingAsync(ISixnetQueryable queryable, int page, int pageSize, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return repository.GetPagingAsync(HandleQueryable(queryable), page, pageSize, configure);
+        }
+
+        /// <summary>
+        /// Get paging
+        /// </summary>
+        /// <param name="condition">Filter</param>
+        /// <param name="page">Page</param>
+        /// <param name="pageSize">Page size</param>
+        /// <param name="includeArchived">Include archived</param>
+        /// <param name="configure">Configure</param>
+        /// <returns></returns>
+        public Task<SixnetPagingInfo<T>> GetPagingAsync(Expression<Func<T, bool>> condition, int page, int pageSize, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null)
+        {
+            var queryable = SixnetExpressionHelper.GetQueryable(condition) ?? SixnetQuerier.Create();
+            queryable.IncludeArchivedIf(includeArchived);
+            return GetPagingAsync(queryable, page, pageSize, configure);
         }
 
         /// <summary>
@@ -103,7 +164,7 @@ namespace Sixnet.Development.Domain.Service
         /// <returns></returns>
         public T Get(SixnetQueryableFilter filter, Action<SixnetDataOperationOptions> configure = null)
         {
-            return repository.Get(HandleQueryable(filter.CreateQueryable()), configure);
+            return repository.Get(HandleQueryable(filter?.CreateQueryable()), configure);
         }
 
         /// <summary>
@@ -125,7 +186,7 @@ namespace Sixnet.Development.Domain.Service
         /// <returns></returns>
         public Task<T> GetAsync(SixnetQueryableFilter filter, Action<SixnetDataOperationOptions> configure = null)
         {
-            return repository.GetAsync(HandleQueryable(filter.CreateQueryable()), configure);
+            return repository.GetAsync(HandleQueryable(filter?.CreateQueryable()), configure);
         }
 
         /// <summary>
@@ -147,7 +208,7 @@ namespace Sixnet.Development.Domain.Service
         /// <returns></returns>
         public List<T> GetList(SixnetQueryableFilter filter, Action<SixnetDataOperationOptions> configure = null)
         {
-            return repository.GetList(HandleQueryable(filter.CreateQueryable()), configure);
+            return repository.GetList(HandleQueryable(filter?.CreateQueryable()), configure);
         }
 
         /// <summary>
@@ -169,7 +230,7 @@ namespace Sixnet.Development.Domain.Service
         /// <returns></returns>
         public Task<List<T>> GetListAsync(SixnetQueryableFilter filter, Action<SixnetDataOperationOptions> configure = null)
         {
-            return repository.GetListAsync(HandleQueryable(filter.CreateQueryable()), configure);
+            return repository.GetListAsync(HandleQueryable(filter?.CreateQueryable()), configure);
         }
 
         /// <summary>
