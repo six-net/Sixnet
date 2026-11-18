@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -220,6 +221,35 @@ namespace Sixnet.Development.Domain.Service
         /// <summary>
         /// Save data
         /// </summary>
+        /// <param name="newData"></param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        protected T SaveData(T newData, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return SaveData(new SixnetSaveDataInfo<T>() { Data = newData }, configure);
+        }
+
+        /// <summary>
+        /// Save datas
+        /// </summary>
+        /// <param name="newDatas"></param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        protected void SaveDatas(IEnumerable<T> newDatas, Action<SixnetDataOperationOptions> configure = null)
+        {
+            if (newDatas.IsNullOrEmpty())
+            {
+                return;
+            }
+            foreach (var newData in newDatas)
+            {
+                SaveData(new SixnetSaveDataInfo<T>() { Data = newData }, configure);
+            }
+        }
+
+        /// <summary>
+        /// Save data
+        /// </summary>
         /// <param name="parameter"></param>
         /// <param name="configure"></param>
         /// <returns></returns>
@@ -306,6 +336,35 @@ namespace Sixnet.Development.Domain.Service
             await SaveDataAfterAsync(saveContext, configure).ConfigureAwait(false);
 
             return newData;
+        }
+
+        /// <summary>
+        /// Save data
+        /// </summary>
+        /// <param name="newData"></param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        protected Task<T> SaveDataAsync(T newData, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return SaveDataAsync(new SixnetSaveDataInfo<T>() { Data = newData }, configure);
+        }
+
+        /// <summary>
+        /// Save datas
+        /// </summary>
+        /// <param name="newDatas"></param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        protected async Task SaveDatasAsync(IEnumerable<T> newDatas, Action<SixnetDataOperationOptions> configure = null)
+        {
+            if (newDatas.IsNullOrEmpty())
+            {
+                return;
+            }
+            foreach (var newData in newDatas)
+            {
+                await SaveDataAsync(new SixnetSaveDataInfo<T>() { Data = newData }, configure).ConfigureAwait(false);
+            }
         }
 
         /// <summary>
