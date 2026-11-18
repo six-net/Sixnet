@@ -10,7 +10,7 @@ using Sixnet.Development.Entity;
 
 namespace Sixnet.Development.Domain.Model
 {
-    public class SixnetSaveDataParameter<T>
+    public class SixnetSaveDataInfo<T>
     {
         /// <summary>
         /// Gets or sets the data

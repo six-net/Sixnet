@@ -15,7 +15,7 @@ namespace Sixnet.Model
         public TValue Value { get; set; }
 
         /// <summary>
-        /// Gets or sets the current id
+        /// Gets or sets the current data id
         /// </summary>
         public TId CurrentId { get; set; }
     }

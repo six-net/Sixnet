@@ -133,10 +133,10 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="parameter"></param>
         /// <param name="configure"></param>
         /// <returns></returns>
-        protected T SaveData(SixnetSaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null)
+        protected T SaveData(SixnetSaveDataInfo<T> parameter, Action<SixnetDataOperationOptions> configure = null)
         {
             var newData = parameter?.Data?.Clone();
-            SixnetThrower.ThrowArgNullIf(newData == null, nameof(SixnetSaveDataParameter<T>.Data));
+            SixnetThrower.ThrowArgNullIf(newData == null, nameof(SixnetSaveDataInfo<T>.Data));
 
             // save before
             var isAdd = newData.IdentityValueIsNull();
@@ -227,10 +227,10 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="parameter"></param>
         /// <param name="configure"></param>
         /// <returns></returns>
-        protected async Task<T> SaveDataAsync(SixnetSaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null)
+        protected async Task<T> SaveDataAsync(SixnetSaveDataInfo<T> parameter, Action<SixnetDataOperationOptions> configure = null)
         {
             var newData = parameter?.Data?.Clone();
-            SixnetThrower.ThrowArgNullIf(newData == null, nameof(SixnetSaveDataParameter<T>.Data));
+            SixnetThrower.ThrowArgNullIf(newData == null, nameof(SixnetSaveDataInfo<T>.Data));
 
             // save before
             var isAdd = newData.IdentityValueIsNull();

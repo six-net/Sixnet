@@ -9,7 +9,7 @@ namespace Sixnet.Development.Domain.Model
         /// <summary>
         /// Gets or sets the save info
         /// </summary>
-        public SixnetSaveDataParameter<T> SaveInfo { get; set; }
+        public SixnetSaveDataInfo<T> SaveInfo { get; set; }
 
         /// <summary>
         /// Gets or sets the new data

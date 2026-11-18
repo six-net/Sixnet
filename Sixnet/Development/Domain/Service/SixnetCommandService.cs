@@ -17,7 +17,7 @@ namespace Sixnet.Development.Domain.Service
         /// </summary>
         /// <param name="parameter"></param>
         /// <returns></returns>
-        public virtual T Save(SixnetSaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null)
+        public virtual T Save(SixnetSaveDataInfo<T> parameter, Action<SixnetDataOperationOptions> configure = null)
         {
             return SaveData(parameter, configure);
         }
@@ -29,7 +29,7 @@ namespace Sixnet.Development.Domain.Service
         /// <returns></returns>
         public virtual T Save(T newData, Action<SixnetDataOperationOptions> configure = null)
         {
-            return SaveData(new SixnetSaveDataParameter<T>()
+            return SaveData(new SixnetSaveDataInfo<T>()
             {
                 Data = newData
             }, configure);
@@ -40,7 +40,7 @@ namespace Sixnet.Development.Domain.Service
         /// </summary>
         /// <param name="newData"></param>
         /// <returns></returns>
-        public virtual Task<T> SaveAsync(SixnetSaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null)
+        public virtual Task<T> SaveAsync(SixnetSaveDataInfo<T> parameter, Action<SixnetDataOperationOptions> configure = null)
         {
             return SaveDataAsync(parameter, configure);
         }
@@ -52,7 +52,7 @@ namespace Sixnet.Development.Domain.Service
         /// <returns></returns>
         public virtual Task<T> SaveAsync(T newData, Action<SixnetDataOperationOptions> configure = null)
         {
-            return SaveDataAsync(new SixnetSaveDataParameter<T>()
+            return SaveDataAsync(new SixnetSaveDataInfo<T>()
             {
                 Data = newData
             }, configure);

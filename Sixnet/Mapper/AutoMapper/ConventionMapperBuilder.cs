@@ -1,6 +1,7 @@
 ﻿// "Company © 2025. All rights reserved."
 
 using Sixnet.App;
+using Sixnet.Development.Domain.Model;
 using Sixnet.Development.Entity;
 using Sixnet.Mapper;
 using Sixnet.Model;
@@ -47,6 +48,10 @@ namespace AutoMapper
         /// <param name="mapperConfigurationExpression"></param>
         void ConfigureConventionMap(IMapperConfigurationExpression mapperConfigurationExpression)
         {
+            // save parameter
+            mapperConfigurationExpression.CreateMap(typeof(SixnetSaveDataParameter<>), typeof(SixnetSaveDataInfo<>), MemberList.None);
+            mapperConfigurationExpression.CreateMap(typeof(SixnetSaveDataInfo<>), typeof(SixnetSaveDataParameter<>), MemberList.None);
+
             var conventionTypes = SixnetApplication.GetAllConventionTypes();
             if (!conventionTypes.IsNullOrEmpty())
             {

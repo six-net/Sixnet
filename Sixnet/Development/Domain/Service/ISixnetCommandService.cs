@@ -22,7 +22,7 @@ namespace Sixnet.Development.Domain.Service
         /// </summary>
         /// <param name="parameter"></param>
         /// <returns></returns>
-        T Save(SixnetSaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null);
+        T Save(SixnetSaveDataInfo<T> parameter, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Save
@@ -36,7 +36,7 @@ namespace Sixnet.Development.Domain.Service
         /// </summary>
         /// <param name="newData"></param>
         /// <returns></returns>
-        Task<T> SaveAsync(SixnetSaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null);
+        Task<T> SaveAsync(SixnetSaveDataInfo<T> parameter, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Save
