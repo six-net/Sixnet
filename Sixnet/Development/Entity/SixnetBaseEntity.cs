@@ -302,17 +302,21 @@ namespace Sixnet.Development.Entity
         /// </summary>
         /// <param name="newData">New data</param>
         /// <param name="configure">Configure</param>
-        public virtual async Task ModifyFromAsync(T newData, Action<SixnetModifyEntityOptions> configure = null)
+        public virtual async Task<SixnetFieldsAssignment> UpdateFromAsync(T newData, Action<SixnetUpdateEntityOptions> configure = null)
         {
+            var fieldsAssignment = SixnetFieldsAssignment.Create();
             if (newData != null && newData != this)
             {
                 await newData.OnDataUpdatingAsync().ConfigureAwait(false);
-                var modificationValues = GetModificationValues(newData.GetAllValues(), configure, false, out _);
+                var modificationValues = GetModificationValues(newData.GetAllValues(), configure, false, out var oldValues);
                 foreach (var valueItem in modificationValues)
                 {
+                    fieldsAssignment.SetNewValue(valueItem.Key, valueItem.Value);
                     SetValue(valueItem.Key, valueItem.Value);
                 }
+                fieldsAssignment.OldValues = oldValues;
             }
+            return fieldsAssignment;
         }
 
         /// <summary>
@@ -320,17 +324,21 @@ namespace Sixnet.Development.Entity
         /// </summary>
         /// <param name="newData">New data</param>
         /// <param name="configure">Configure</param>
-        public virtual void ModifyFrom(T newData, Action<SixnetModifyEntityOptions> configure = null)
+        public virtual SixnetFieldsAssignment UpdateFrom(T newData, Action<SixnetUpdateEntityOptions> configure = null)
         {
+            var fieldsAssignment = SixnetFieldsAssignment.Create();
             if (newData != null && newData != this)
             {
                 newData.OnDataUpdating();
-                var modificationValues = GetModificationValues(newData.GetAllValues(), configure, false, out _);
+                var modificationValues = GetModificationValues(newData.GetAllValues(), configure, false, out var oldValues);
                 foreach (var valueItem in modificationValues)
                 {
+                    fieldsAssignment.SetNewValue(valueItem.Key, valueItem.Value);
                     SetValue(valueItem.Key, valueItem.Value);
                 }
+                fieldsAssignment.OldValues = oldValues;
             }
+            return fieldsAssignment;
         }
 
         /// <summary>
@@ -338,7 +346,7 @@ namespace Sixnet.Development.Entity
         /// </summary>
         /// <param name="newData">New data</param>
         /// <param name="configure">Configure</param>
-        public virtual async Task<SixnetFieldsAssignment> GetModificationAssignmentAsync(T newData, Action<SixnetModifyEntityOptions> configure = null)
+        public virtual async Task<SixnetFieldsAssignment> GetUpdatedFieldsAsync(T newData, Action<SixnetUpdateEntityOptions> configure = null)
         {
             if (newData != null)
             {
@@ -359,7 +367,7 @@ namespace Sixnet.Development.Entity
         /// </summary>
         /// <param name="newData">New data</param>
         /// <param name="configure">Configure</param>
-        public virtual SixnetFieldsAssignment GetModificationAssignment(T newData, Action<SixnetModifyEntityOptions> configure = null)
+        public virtual SixnetFieldsAssignment GetUpdatedFields(T newData, Action<SixnetUpdateEntityOptions> configure = null)
         {
             newData?.OnDataUpdating();
             var fieldsAssignment = SixnetFieldsAssignment.Create();
@@ -380,7 +388,7 @@ namespace Sixnet.Development.Entity
         /// <param name="selfData"></param>
         /// <param name="oldValues"></param>
         /// <returns></returns>
-        Dictionary<string, dynamic> GetModificationValues(Dictionary<string, dynamic> newValues, Action<SixnetModifyEntityOptions> configure
+        Dictionary<string, dynamic> GetModificationValues(Dictionary<string, dynamic> newValues, Action<SixnetUpdateEntityOptions> configure
             , bool selfData, out Dictionary<string, dynamic> oldValues)
         {
             oldValues = selfData ? newValues : GetAllValues();
@@ -388,13 +396,13 @@ namespace Sixnet.Development.Entity
             {
                 return new Dictionary<string, dynamic>(0);
             }
-            var modifyOptions = new SixnetModifyEntityOptions();
+            var modifyOptions = new SixnetUpdateEntityOptions();
             configure?.Invoke(modifyOptions);
             var modificationValues = new Dictionary<string, dynamic>();
             foreach (var valueItem in newValues)
             {
                 var field = SixnetEntityManager.GetField(entityType, valueItem.Key);
-                if (!modifyOptions.IsIgnoreField(field))
+                if (!modifyOptions.IsIgnoredField(field))
                 {
                     if (selfData)
                     {

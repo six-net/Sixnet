@@ -27,6 +27,19 @@ namespace Sixnet.Session
         /// </summary>
         public object Info { get; set; }
 
+        internal dynamic GetCreateDateValue(Type dataType)
+        {
+            if (dataType == typeof(DateTimeOffset) || dataType == typeof(DateTimeOffset?))
+            {
+                return CreateDate;
+            }
+            if (dataType == typeof(DateTime) || dataType == typeof(DateTime?))
+            {
+                return CreateDate.DateTime;
+            }
+            throw new NotSupportedException(dataType.FullName);
+        }
+
         internal SixnetSession()
         {
             SixnetSessionContext.Current = this;

@@ -198,6 +198,11 @@ namespace Sixnet.Development.Data.Field
         /// </summary>
         public string[] ValidationIgnoreScenarios { get; set; }
 
+        /// <summary>
+        /// Whether is unupdatable
+        /// </summary>
+        public bool Unupdatable { get; set; }
+
         #endregion
 
         #region Methods
@@ -332,10 +337,10 @@ namespace Sixnet.Development.Data.Field
         }
 
         /// <summary>
-        /// Whether is unmodifiable field
+        /// Whether is default unupdatable role field
         /// </summary>
         /// <returns></returns>
-        internal bool IsUnmodifiableField()
+        internal bool IsDefaultUnupdatableRoleField()
         {
             return InRole(SixnetFieldRole.CreateDate)
                 || InRole(SixnetFieldRole.CreateUserId)

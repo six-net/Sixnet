@@ -121,18 +121,19 @@ namespace Sixnet.Development.Data.Intercept
             var updateUserDisplayNameField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & SixnetFieldRole.UpdateUserDisplayName);
             var versionField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & SixnetFieldRole.Revision);
             var isolationField = SixnetEntityManager.GetField(entityType, defaultInterceptorFieldRole & SixnetFieldRole.Isolation);
+
             switch (operationType)
             {
                 case SixnetDataOperationType.Insert:
                     if (AllowSetInterceptorValue(context, createDateField))
                     {
-                        context.SetNewValue(createDateField.PropertyName, createDateField.DataType.GetNowDateTime());
+                        context.SetNewValue(createDateField.PropertyName, SixnetSessionContext.Current?.GetCreateDateValue(createDateField.DataType) ?? createDateField.DataType.GetNowDateTime());
                     }
                     if (AllowSetInterceptorValue(context, updateDateField))
                     {
                         dynamic updateDateValue = createDateField != null && updateDateField.DataType == createDateField.DataType
                             ? context.GetNewValue(createDateField.PropertyName)
-                            : updateDateField.DataType.GetNowDateTime();
+                            : SixnetSessionContext.Current?.GetCreateDateValue(updateDateField.DataType) ?? createDateField.DataType.GetNowDateTime();
                         context.SetNewValue(updateDateField.PropertyName, updateDateValue);
                     }
                     if (AllowSetInterceptorValue(context, versionField))
@@ -186,7 +187,7 @@ namespace Sixnet.Development.Data.Intercept
                     // update field
                     if (AllowSetInterceptorValue(context, updateDateField))
                     {
-                        context.SetNewValue(updateDateField.PropertyName, updateDateField.DataType.GetNowDateTime());
+                        context.SetNewValue(updateDateField.PropertyName, SixnetSessionContext.Current?.GetCreateDateValue(updateDateField.DataType) ?? createDateField.DataType.GetNowDateTime());
                     }
                     if (SixnetSessionContext.Current?.User != null && AllowSetInterceptorValue(context, updateUserIdField))
                     {

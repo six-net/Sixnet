@@ -8,14 +8,14 @@ using System.Threading.Tasks;
 
 using Sixnet.Development.Entity;
 
-namespace Sixnet.Development.Domain.Parameter
+namespace Sixnet.Development.Domain.Model
 {
-    public class SaveDataParameter<T>
+    public class SixnetSaveDataParameter<T>
     {
         /// <summary>
-        /// Gets or sets the new data
+        /// Gets or sets the data
         /// </summary>
-        public T NewData { get; set; }
+        public T Data { get; set; }
 
         /// <summary>
         /// Whether allow editing archived data

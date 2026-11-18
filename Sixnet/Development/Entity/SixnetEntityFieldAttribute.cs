@@ -145,5 +145,10 @@ namespace Sixnet.Development.Entity
         /// Gets or sets ignore scenarios
         /// </summary>
         public string[] ValidationIgnoreScenarios { get; set; }
+
+        /// <summary>
+        /// Whether is unupdatable
+        /// </summary>
+        public bool Unupdatable { get; set; }
     }
 }

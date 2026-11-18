@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Sixnet.Development.Data;
-using Sixnet.Development.Domain.Parameter;
+using Sixnet.Development.Domain.Model;
 using Sixnet.Development.Entity;
 
 namespace Sixnet.Development.Domain.Service
@@ -22,7 +22,7 @@ namespace Sixnet.Development.Domain.Service
         /// </summary>
         /// <param name="parameter"></param>
         /// <returns></returns>
-        T Save(SaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null);
+        T Save(SixnetSaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Save
@@ -36,7 +36,7 @@ namespace Sixnet.Development.Domain.Service
         /// </summary>
         /// <param name="newData"></param>
         /// <returns></returns>
-        Task<T> SaveAsync(SaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null);
+        Task<T> SaveAsync(SixnetSaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Save

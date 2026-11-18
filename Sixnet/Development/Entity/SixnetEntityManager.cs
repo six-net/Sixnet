@@ -168,7 +168,8 @@ namespace Sixnet.Development.Entity
                     ValidationErrorMessage = entityFieldAttribute?.ValidationErrorMessage,
                     ValidationTip = entityFieldAttribute?.ValidationTip ?? false,
                     ValidationCompareType = entityFieldAttribute?.ValidationCompareType ?? SixnetValidationCompareObject.Field,
-                    ValidationIgnoreScenarios = entityFieldAttribute?.ValidationIgnoreScenarios
+                    ValidationIgnoreScenarios = entityFieldAttribute?.ValidationIgnoreScenarios,
+                    Unupdatable = entityFieldAttribute?.Unupdatable ?? false
                 };
                 var fieldStartValue = entityFieldAttribute?.DbStartValue ?? 0;
                 if (propertyField.InRole(SixnetFieldRole.PrimaryKey))

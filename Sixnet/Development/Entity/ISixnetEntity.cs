@@ -101,31 +101,31 @@ namespace Sixnet.Development.Entity
         void OnDataAdding();
 
         /// <summary>
-        /// Modify from new data
+        /// Update from new data
         /// </summary>
         /// <param name="newData">New data</param>
         /// <param name="configure">Configure</param>
-        Task ModifyFromAsync(T newData, Action<SixnetModifyEntityOptions> configure = null);
+        Task<SixnetFieldsAssignment> UpdateFromAsync(T newData, Action<SixnetUpdateEntityOptions> configure = null);
 
         /// <summary>
-        /// Modify from new data
+        /// Update from new data
         /// </summary>
         /// <param name="newData">New data</param>
         /// <param name="configure">Configure</param>
-        void ModifyFrom(T newData, Action<SixnetModifyEntityOptions> configure = null);
+        SixnetFieldsAssignment UpdateFrom(T newData, Action<SixnetUpdateEntityOptions> configure = null);
 
         /// <summary>
-        /// Get modification assignment
+        /// Get updated fields
         /// </summary>
         /// <param name="newData">New data</param>
         /// <param name="configure">Configure</param>
-        Task<SixnetFieldsAssignment> GetModificationAssignmentAsync(T newData, Action<SixnetModifyEntityOptions> configure = null);
+        Task<SixnetFieldsAssignment> GetUpdatedFieldsAsync(T newData, Action<SixnetUpdateEntityOptions> configure = null);
 
         /// <summary>
-        /// Get modification assignment
+        /// Get updated fields
         /// </summary>
         /// <param name="newData">New data</param>
         /// <param name="configure">Configure</param>
-        SixnetFieldsAssignment GetModificationAssignment(T newData, Action<SixnetModifyEntityOptions> configure = null);
+        SixnetFieldsAssignment GetUpdatedFields(T newData, Action<SixnetUpdateEntityOptions> configure = null);
     }
 }

@@ -11,7 +11,7 @@ using Sixnet.DependencyInjection;
 using Sixnet.Development.Data;
 using Sixnet.Development.Data.Field;
 using Sixnet.Development.Data.Field.Formatting;
-using Sixnet.Development.Domain.Parameter;
+using Sixnet.Development.Domain.Model;
 using Sixnet.Development.Entity;
 using Sixnet.Development.Events.Data;
 using Sixnet.Development.Queryable;
@@ -133,18 +133,27 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="parameter"></param>
         /// <param name="configure"></param>
         /// <returns></returns>
-        protected T SaveData(SaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null)
+        protected T SaveData(SixnetSaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null)
         {
-            var newData = parameter?.NewData;
-            SixnetThrower.ThrowArgNullIf(newData == null, nameof(parameter));
+            var newData = parameter?.Data?.Clone();
+            SixnetThrower.ThrowArgNullIf(newData == null, nameof(SixnetSaveDataParameter<T>.Data));
 
             // save before
-            SaveDataBefore(parameter, configure);
-
-            T originalCurrentData = default;
-            if (newData.IdentityValueIsNull())
+            var isAdd = newData.IdentityValueIsNull();
+            var saveContext = new SixnetSaveDataContext<T>()
             {
-                HandleAdding(parameter);
+                NewData = newData,
+                OldData = null,
+                IncludeArchived = parameter.IncludeArchived,
+                IsUpdate = !isAdd,
+                SaveInfo = parameter
+            };
+            SaveDataBefore(saveContext, configure);
+
+            if (isAdd)
+            {
+                HandleAdding(saveContext, configure);
+                newData = saveContext.NewData;
 
                 if (isVersioning)
                 {
@@ -174,19 +183,21 @@ namespace Sixnet.Development.Domain.Service
                 var currentData = GetList(identityQueryable, configure)?.FirstOrDefault();
                 SixnetThrower.ThrowGetDataFailedIf<T>(currentData == null);
 
-                originalCurrentData = currentData.Clone();
+                saveContext.OldData = currentData.Clone();
 
                 // update date
-                HandleUpdating(currentData, parameter);
+                HandleUpdating(saveContext, configure);
+                newData = saveContext.NewData;
 
                 if (isVersioning)
                 {
-                    currentData.SetValue(versionFieldName, originalCurrentData.GetValue(versionFieldName) + 1);
-                    currentData.SetValue(historyTagFieldName, false);
+                    newData.SetValue(versionFieldName, currentData.GetValue(versionFieldName) + 1);
+                    newData.SetValue(historyTagFieldName, false);
 
                     if (isSeparateVersioning)
                     {
-                        repository.Update(currentData, options =>
+                        var updateAssignment = currentData.UpdateFrom(newData, saveContext.UpdateConfigure);
+                        repository.Update(updateAssignment, options =>
                         {
                             options.FromPrimaryTable();
                             configure?.Invoke(options);
@@ -197,18 +208,15 @@ namespace Sixnet.Development.Domain.Service
                 }
                 else
                 {
-                    repository.Update(currentData, configure);
+                    var updateAssignment = currentData.UpdateFrom(newData, saveContext.UpdateConfigure);
+                    repository.Update(updateAssignment, configure);
                 }
 
-                newData = currentData;
+                saveContext.NewData = newData = currentData;
             }
 
             // save data after
-            SaveDataAfter(new SaveDataAfterContext<T>()
-            {
-                SaveParameter = parameter,
-                OldData = originalCurrentData,
-            }, configure);
+            SaveDataAfter(saveContext, configure);
 
             return newData;
         }
@@ -219,18 +227,27 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="parameter"></param>
         /// <param name="configure"></param>
         /// <returns></returns>
-        protected async Task<T> SaveDataAsync(SaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null)
+        protected async Task<T> SaveDataAsync(SixnetSaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null)
         {
-            var newData = parameter?.NewData;
-            SixnetThrower.ThrowArgNullIf(newData == null, typeof(T).Name);
+            var newData = parameter?.Data?.Clone();
+            SixnetThrower.ThrowArgNullIf(newData == null, nameof(SixnetSaveDataParameter<T>.Data));
 
             // save before
-            await SaveDataBeforeAsync(parameter, configure).ConfigureAwait(false);
-
-            T originalCurrentData = default;
-            if (newData.IdentityValueIsNull())
+            var isAdd = newData.IdentityValueIsNull();
+            var saveContext = new SixnetSaveDataContext<T>()
             {
-                await HandleAddingAsync(parameter).ConfigureAwait(false);
+                NewData = newData,
+                OldData = null,
+                IncludeArchived = parameter.IncludeArchived,
+                IsUpdate = !isAdd,
+                SaveInfo = parameter
+            };
+            await SaveDataBeforeAsync(saveContext, configure).ConfigureAwait(false);
+
+            if (isAdd)
+            {
+                await HandleAddingAsync(saveContext, configure).ConfigureAwait(false);
+                newData = saveContext.NewData;
 
                 if (isVersioning)
                 {
@@ -260,18 +277,21 @@ namespace Sixnet.Development.Domain.Service
                 var currentData = (await GetListAsync(identityQueryable, configure).ConfigureAwait(false))?.FirstOrDefault();
                 SixnetThrower.ThrowGetDataFailedIf<T>(currentData == null);
 
-                originalCurrentData = currentData.Clone();
+                saveContext.OldData = currentData.Clone();
 
-                await HandleUpdatingAsync(currentData, parameter).ConfigureAwait(false);
+                // update date
+                await HandleUpdatingAsync(saveContext, configure).ConfigureAwait(false);
+                newData = saveContext.NewData;
 
                 if (isVersioning)
                 {
-                    currentData.SetValue(versionFieldName, originalCurrentData.GetValue(versionFieldName) + 1);
-                    currentData.SetValue(historyTagFieldName, false);
+                    newData.SetValue(versionFieldName, currentData.GetValue(versionFieldName) + 1);
+                    newData.SetValue(historyTagFieldName, false);
 
                     if (isSeparateVersioning)
                     {
-                        await repository.UpdateAsync(currentData, options =>
+                        var updateAssignment = await currentData.UpdateFromAsync(newData, saveContext.UpdateConfigure).ConfigureAwait(false);
+                        await repository.UpdateAsync(updateAssignment, options =>
                         {
                             options.FromPrimaryTable();
                             configure?.Invoke(options);
@@ -282,18 +302,15 @@ namespace Sixnet.Development.Domain.Service
                 }
                 else
                 {
-                    await repository.UpdateAsync(currentData, configure).ConfigureAwait(false);
+                    var updateAssignment = await currentData.UpdateFromAsync(newData, saveContext.UpdateConfigure).ConfigureAwait(false);
+                    await repository.UpdateAsync(updateAssignment, configure).ConfigureAwait(false);
                 }
 
-                newData = currentData;
+                saveContext.NewData = newData = currentData;
             }
 
             // save data after
-            await SaveDataAfterAsync(new SaveDataAfterContext<T>()
-            {
-                SaveParameter = parameter,
-                OldData = originalCurrentData
-            }, configure).ConfigureAwait(false);
+            await SaveDataAfterAsync(saveContext, configure).ConfigureAwait(false);
 
             return newData;
         }
@@ -301,18 +318,18 @@ namespace Sixnet.Development.Domain.Service
         /// <summary>
         /// Handle adding
         /// </summary>
-        /// <param name="parameter"></param>
+        /// <param name="context"></param>
         /// <param name="configure"></param>
-        protected virtual void HandleAdding(SaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null)
+        protected virtual void HandleAdding(SixnetSaveDataContext<T> context, Action<SixnetDataOperationOptions> configure = null)
         {
         }
 
         /// <summary>
         /// Handle adding
         /// </summary>
-        /// <param name="parameter"></param>
+        /// <param name="context"></param>
         /// <param name="configure"></param>
-        protected virtual Task HandleAddingAsync(SaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null)
+        protected virtual Task HandleAddingAsync(SixnetSaveDataContext<T> context, Action<SixnetDataOperationOptions> configure = null)
         {
             return Task.CompletedTask;
         }
@@ -320,41 +337,37 @@ namespace Sixnet.Development.Domain.Service
         /// <summary>
         /// Handle updating
         /// </summary>
-        /// <param name="currentData"></param>
-        /// <param name="parameter"></param>
+        /// <param name="context"></param>
         /// <param name="configure"></param>
-        protected virtual void HandleUpdating(T currentData, SaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null)
+        protected virtual void HandleUpdating(SixnetSaveDataContext<T> context, Action<SixnetDataOperationOptions> configure = null)
         {
-            currentData.ModifyFrom(parameter.NewData);
         }
 
         /// <summary>
         /// Handle updating
         /// </summary>
-        /// <param name="currentData"></param>
-        /// <param name="parameter"></param>
+        /// <param name="context"></param>
         /// <param name="configure"></param>
-        protected virtual Task HandleUpdatingAsync(T currentData, SaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null)
+        protected virtual Task HandleUpdatingAsync(SixnetSaveDataContext<T> context, Action<SixnetDataOperationOptions> configure = null)
         {
-            currentData.ModifyFrom(parameter.NewData);
             return Task.CompletedTask;
         }
 
         /// <summary>
         /// Save data before
         /// </summary>
-        /// <param name="parameter"></param>
+        /// <param name="context"></param>
         /// <param name="configure"></param>
-        protected virtual void SaveDataBefore(SaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null)
+        protected virtual void SaveDataBefore(SixnetSaveDataContext<T> context, Action<SixnetDataOperationOptions> configure = null)
         {
         }
 
         /// <summary>
         /// Save data before
         /// </summary>
-        /// <param name="parameter"></param>
+        /// <param name="context"></param>
         /// <param name="configure"></param>
-        protected virtual Task SaveDataBeforeAsync(SaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null)
+        protected virtual Task SaveDataBeforeAsync(SixnetSaveDataContext<T> context, Action<SixnetDataOperationOptions> configure = null)
         {
             return Task.CompletedTask;
         }
@@ -364,7 +377,7 @@ namespace Sixnet.Development.Domain.Service
         /// </summary>
         /// <param name="context"></param>
         /// <param name="configure"></param>
-        protected virtual void SaveDataAfter(SaveDataAfterContext<T> context, Action<SixnetDataOperationOptions> configure = null)
+        protected virtual void SaveDataAfter(SixnetSaveDataContext<T> context, Action<SixnetDataOperationOptions> configure = null)
         {
         }
 
@@ -373,7 +386,7 @@ namespace Sixnet.Development.Domain.Service
         /// </summary>
         /// <param name="context"></param>
         /// <param name="configure"></param>
-        protected virtual Task SaveDataAfterAsync(SaveDataAfterContext<T> context, Action<SixnetDataOperationOptions> configure = null)
+        protected virtual Task SaveDataAfterAsync(SixnetSaveDataContext<T> context, Action<SixnetDataOperationOptions> configure = null)
         {
             return Task.CompletedTask;
         }

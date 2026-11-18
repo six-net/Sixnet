@@ -2,7 +2,7 @@
 
 using System.Threading.Tasks;
 using Sixnet.Development.Data;
-using Sixnet.Development.Domain.Parameter;
+using Sixnet.Development.Domain.Model;
 using Sixnet.Development.Entity;
 
 namespace Sixnet.Development.Domain.Service
@@ -17,7 +17,7 @@ namespace Sixnet.Development.Domain.Service
         /// </summary>
         /// <param name="parameter"></param>
         /// <returns></returns>
-        public virtual T Save(SaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null)
+        public virtual T Save(SixnetSaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null)
         {
             return SaveData(parameter, configure);
         }
@@ -29,9 +29,9 @@ namespace Sixnet.Development.Domain.Service
         /// <returns></returns>
         public virtual T Save(T newData, Action<SixnetDataOperationOptions> configure = null)
         {
-            return SaveData(new SaveDataParameter<T>()
+            return SaveData(new SixnetSaveDataParameter<T>()
             {
-                NewData = newData
+                Data = newData
             }, configure);
         }
 
@@ -40,7 +40,7 @@ namespace Sixnet.Development.Domain.Service
         /// </summary>
         /// <param name="newData"></param>
         /// <returns></returns>
-        public virtual Task<T> SaveAsync(SaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null)
+        public virtual Task<T> SaveAsync(SixnetSaveDataParameter<T> parameter, Action<SixnetDataOperationOptions> configure = null)
         {
             return SaveDataAsync(parameter, configure);
         }
@@ -52,9 +52,9 @@ namespace Sixnet.Development.Domain.Service
         /// <returns></returns>
         public virtual Task<T> SaveAsync(T newData, Action<SixnetDataOperationOptions> configure = null)
         {
-            return SaveDataAsync(new SaveDataParameter<T>()
+            return SaveDataAsync(new SixnetSaveDataParameter<T>()
             {
-                NewData = newData
+                Data = newData
             }, configure);
         }
 
