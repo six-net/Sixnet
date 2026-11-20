@@ -1701,6 +1701,26 @@ namespace Sixnet.Development.Queryable
             return this;
         }
 
+        /// <summary>
+        /// Include historical
+        /// </summary>
+        /// <returns></returns>
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> IncludeHistorical()
+        {
+            base.IncludeHistorical();
+            return this;
+        }
+
+        /// <summary>
+        /// Include historical
+        /// </summary>
+        /// <returns></returns>
+        public new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> IncludeHistoricalIf(bool predicate)
+        {
+            base.IncludeHistoricalIf(predicate);
+            return this;
+        }
+
         #endregion
 
         #region Negate

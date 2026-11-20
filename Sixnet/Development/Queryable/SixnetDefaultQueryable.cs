@@ -1210,6 +1210,29 @@ namespace Sixnet.Development.Queryable
         }
 
         /// <summary>
+        /// Include historical
+        /// </summary>
+        /// <returns></returns>
+        public ISixnetQueryable IncludeHistorical()
+        {
+            queryableInfo.IgnoreFilter(SixnetFieldRole.HistoryTag);
+            return this;
+        }
+
+        /// <summary>
+        /// Include historical
+        /// </summary>
+        /// <returns></returns>
+        public ISixnetQueryable IncludeHistoricalIf(bool predicate)
+        {
+            if (predicate)
+            {
+                queryableInfo.IgnoreFilter(SixnetFieldRole.HistoryTag);
+            }
+            return this;
+        }
+
+        /// <summary>
         /// Ignore filter
         /// </summary>
         /// <typeparam name="TFilter">Filter type</typeparam>

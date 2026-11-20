@@ -286,6 +286,8 @@ namespace Sixnet.Development.Entity
             entityConfig.SplitTableType = entityAttribute.SplitTableType;
             entityConfig.SplitTableProviderName = entityAttribute.SplitTableProviderName;
             entityConfig.AutoExpansionSplitNum = entityAttribute.AutoExpansionSplitNum;
+            entityConfig.IsSeparateVersioning = entityConfig.InStyle(SixnetEntityStyle.SeparateVersioning);
+            entityConfig.IsVersioning = entityConfig.InStyle(SixnetEntityStyle.Versioning) || entityConfig.IsSeparateVersioning;
             _entityConfigurations[typeGuid] = entityConfig;
         }
 

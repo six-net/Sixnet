@@ -196,6 +196,7 @@ namespace Sixnet.Development.Association
             SixnetReflecter.SetValue(associationInfo, nameof(SixnetAssociationInfo<object>.AssociatedDataProviderType), associationDataProviderType);
             SixnetReflecter.SetValue(associationInfo, nameof(SixnetAssociationInfo<object>.IdentityInfos), identityInfos);
             SixnetReflecter.SetValue(associationInfo, nameof(SixnetAssociationInfo<object>.IncludeArchived), sixnetAssociatingDataAttribute.IncludeArchived);
+            SixnetReflecter.SetValue(associationInfo, nameof(SixnetAssociationInfo<object>.IncludeHistorical), sixnetAssociatingDataAttribute.IncludeHistorical);
 
             if (associatedEntityType != null)
             {

@@ -3,6 +3,7 @@
 using Sixnet.Development.Data;
 using Sixnet.Development.Data.Database;
 using Sixnet.Development.Data.Field;
+using Sixnet.Development.Entity;
 using Sixnet.Expressions.Linq;
 
 namespace Sixnet.Development.Queryable
@@ -1076,6 +1077,26 @@ namespace Sixnet.Development.Queryable
         public new ISixnetQueryable<TFirst> IgnoreFilterIf(bool predicate, Type filterType)
         {
             base.IgnoreFilterIf(predicate, filterType);
+            return this;
+        }
+
+        /// <summary>
+        /// Include historical
+        /// </summary>
+        /// <returns></returns>
+        public new ISixnetQueryable<TFirst> IncludeHistorical()
+        {
+            base.IncludeHistorical();
+            return this;
+        }
+
+        /// <summary>
+        /// Include historical
+        /// </summary>
+        /// <returns></returns>
+        public new ISixnetQueryable<TFirst> IncludeHistoricalIf(bool predicate)
+        {
+            base.IncludeHistoricalIf(predicate);
             return this;
         }
 

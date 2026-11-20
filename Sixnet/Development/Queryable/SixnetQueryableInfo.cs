@@ -1348,6 +1348,12 @@ namespace Sixnet.Development.Queryable
                     IgnoredFilterFieldRole |= fieldRole;
                 }
             }
+
+            if (HasIgnoredFilter(SixnetFieldRole.HistoryTag))
+            {
+                FromAllVersions();
+            }
+
             return this;
         }
 

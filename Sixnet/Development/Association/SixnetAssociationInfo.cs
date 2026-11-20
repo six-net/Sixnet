@@ -50,6 +50,11 @@ namespace Sixnet.Development.Association
         bool IncludeArchived { get; set; }
 
         /// <summary>
+        /// Whether include historical data
+        /// </summary>
+        bool IncludeHistorical {  get; set; }
+
+        /// <summary>
         /// Gets or sets the identity infos
         /// </summary>
         SortedDictionary<string, ISixnetAssociatingIdentityInfo> IdentityInfos { get; set; }
@@ -112,6 +117,11 @@ namespace Sixnet.Development.Association
         /// Whether include archived data
         /// </summary>
         public bool IncludeArchived { get; set; }
+
+        /// <summary>
+        /// Whether include historical data
+        /// </summary>
+        public bool IncludeHistorical { get; set; }
 
         /// <summary>
         /// Gets or sets the identity infos

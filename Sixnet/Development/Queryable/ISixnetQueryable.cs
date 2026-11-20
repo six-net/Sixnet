@@ -351,18 +351,6 @@ namespace Sixnet.Development.Queryable
         /// <returns></returns>
         ISixnetQueryable<TTable> AsTempTable<TTable>();
 
-        /// <summary>
-        /// From all versions
-        /// </summary>
-        /// <returns></returns>
-        ISixnetQueryable FromAllVersions();
-
-        /// <summary>
-        /// From all versions
-        /// </summary>
-        /// <returns></returns>
-        ISixnetQueryable FromAllVersionsIf(bool predicate);
-
         #endregion
 
         #region Split table
@@ -485,6 +473,12 @@ namespace Sixnet.Development.Queryable
         ISixnetQueryable IgnoreIsolation();
 
         /// <summary>
+        /// Include historical data
+        /// </summary>
+        /// <returns></returns>
+        ISixnetQueryable IncludeHistorical();
+
+        /// <summary>
         /// Ignore filter
         /// </summary>
         /// <typeparam name="TFilter">Filter type</typeparam>
@@ -509,6 +503,12 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <returns></returns>
         ISixnetQueryable IgnoreIsolationIf(bool predicate);
+
+        /// <summary>
+        /// Include historical data
+        /// </summary>
+        /// <returns></returns>
+        ISixnetQueryable IncludeHistoricalIf(bool predicate);
 
         /// <summary>
         /// Ignore filter
@@ -1516,18 +1516,6 @@ namespace Sixnet.Development.Queryable
         /// <returns></returns>
         new ISixnetQueryable<TFirst> From(params string[] tableNames);
 
-        /// <summary>
-        /// From all versions
-        /// </summary>
-        /// <returns></returns>
-        new ISixnetQueryable<TFirst> FromAllVersions();
-
-        /// <summary>
-        /// From all versions
-        /// </summary>
-        /// <returns></returns>
-        new ISixnetQueryable<TFirst> FromAllVersionsIf(bool predicate);
-
         #endregion
 
         #region Split table
@@ -1576,6 +1564,18 @@ namespace Sixnet.Development.Queryable
         /// </summary>
         /// <returns></returns>
         new ISixnetQueryable<TFirst> IgnoreIsolation();
+
+        /// <summary>
+        /// Include historical data
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst> IncludeHistorical();
+
+        /// <summary>
+        /// Include historical data
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst> IncludeHistoricalIf(bool predicate);
 
         /// <summary>
         /// Ignore filter
@@ -2307,18 +2307,6 @@ namespace Sixnet.Development.Queryable
         /// <returns></returns>
         new ISixnetQueryable<TFirst, TSecond> From(params string[] tableNames);
 
-        /// <summary>
-        /// From all versions
-        /// </summary>
-        /// <returns></returns>
-        new ISixnetQueryable<TFirst, TSecond> FromAllVersions();
-
-        /// <summary>
-        /// From all versions
-        /// </summary>
-        /// <returns></returns>
-        new ISixnetQueryable<TFirst, TSecond> FromAllVersionsIf(bool predicate);
-
         #endregion
 
         #region Split table
@@ -2355,6 +2343,18 @@ namespace Sixnet.Development.Queryable
         #endregion
 
         #region Filter
+
+        /// <summary>
+        /// Include historical data
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond> IncludeHistorical();
+
+        /// <summary>
+        /// Include historical data
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond> IncludeHistoricalIf(bool predicate);
 
         /// <summary>
         /// Include archived
@@ -3200,18 +3200,6 @@ namespace Sixnet.Development.Queryable
         /// <returns></returns>
         new ISixnetQueryable<TFirst, TSecond, TThird> From(params string[] tableNames);
 
-        /// <summary>
-        /// From all versions
-        /// </summary>
-        /// <returns></returns>
-        new ISixnetQueryable<TFirst, TSecond, TThird> FromAllVersions();
-
-        /// <summary>
-        /// From all versions
-        /// </summary>
-        /// <returns></returns>
-        new ISixnetQueryable<TFirst, TSecond, TThird> FromAllVersionsIf(bool predicate);
-
         #endregion
 
         #region Split table
@@ -3248,6 +3236,18 @@ namespace Sixnet.Development.Queryable
         #endregion
 
         #region Filter
+
+        /// <summary>
+        /// Include historical data
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird> IncludeHistorical();
+
+        /// <summary>
+        /// Include historical data
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird> IncludeHistoricalIf(bool predicate);
 
         /// <summary>
         /// Include archived
@@ -4186,18 +4186,6 @@ namespace Sixnet.Development.Queryable
         /// <returns></returns>
         new ISixnetQueryable<TFirst, TSecond, TThird, TFourth> From(params string[] tableNames);
 
-        /// <summary>
-        /// From all versions
-        /// </summary>
-        /// <returns></returns>
-        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth> FromAllVersions();
-
-        /// <summary>
-        /// From all versions
-        /// </summary>
-        /// <returns></returns>
-        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth> FromAllVersionsIf(bool predicate);
-
         #endregion
 
         #region Split table
@@ -4234,6 +4222,18 @@ namespace Sixnet.Development.Queryable
         #endregion
 
         #region Filter
+
+        /// <summary>
+        /// Include historical data
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth> IncludeHistorical();
+
+        /// <summary>
+        /// Include historical data
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth> IncludeHistoricalIf(bool predicate);
 
         /// <summary>
         /// Include archived
@@ -5261,18 +5261,6 @@ namespace Sixnet.Development.Queryable
         /// <returns></returns>
         new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> From(params string[] tableNames);
 
-        /// <summary>
-        /// From all versions
-        /// </summary>
-        /// <returns></returns>
-        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> FromAllVersions();
-
-        /// <summary>
-        /// From all versions
-        /// </summary>
-        /// <returns></returns>
-        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> FromAllVersionsIf(bool predicate);
-
         #endregion
 
         #region Split table
@@ -5309,6 +5297,18 @@ namespace Sixnet.Development.Queryable
         #endregion
 
         #region Filter
+
+        /// <summary>
+        /// Include historical data
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> IncludeHistorical();
+
+        /// <summary>
+        /// Include historical data
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth> IncludeHistoricalIf(bool predicate);
 
         /// <summary>
         /// Include archived
@@ -6425,18 +6425,6 @@ namespace Sixnet.Development.Queryable
         /// <returns></returns>
         new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> From(params string[] tableNames);
 
-        /// <summary>
-        /// From all versions
-        /// </summary>
-        /// <returns></returns>
-        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> FromAllVersions();
-
-        /// <summary>
-        /// From all versions
-        /// </summary>
-        /// <returns></returns>
-        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> FromAllVersionsIf(bool predicate);
-
         #endregion
 
         #region Split table
@@ -6473,6 +6461,18 @@ namespace Sixnet.Development.Queryable
         #endregion
 
         #region Filter
+
+        /// <summary>
+        /// Include historical data
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> IncludeHistorical();
+
+        /// <summary>
+        /// Include historical data
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> IncludeHistoricalIf(bool predicate);
 
         /// <summary>
         /// Include archived
@@ -7462,18 +7462,6 @@ namespace Sixnet.Development.Queryable
         /// <returns></returns>
         new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> From(params string[] tableNames);
 
-        /// <summary>
-        /// From all versions
-        /// </summary>
-        /// <returns></returns>
-        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> FromAllVersions();
-
-        /// <summary>
-        /// From all versions
-        /// </summary>
-        /// <returns></returns>
-        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> FromAllVersionsIf(bool predicate);
-
         #endregion
 
         #region Split table
@@ -7510,6 +7498,18 @@ namespace Sixnet.Development.Queryable
         #endregion
 
         #region Filter
+
+        /// <summary>
+        /// Include historical data
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> IncludeHistorical();
+
+        /// <summary>
+        /// Include historical data
+        /// </summary>
+        /// <returns></returns>
+        new ISixnetQueryable<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> IncludeHistoricalIf(bool predicate);
 
         /// <summary>
         /// Include archived

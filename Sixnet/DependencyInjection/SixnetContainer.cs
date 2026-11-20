@@ -293,29 +293,6 @@ namespace Sixnet.DependencyInjection
 
         #endregion
 
-        #region Domain service
-
-        /// <summary>
-        /// Get command service
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public static ISixnetCommandService<T> GetCommandService<T>()
-        {
-            return GetInstance<ISixnetCommandService<T>>();
-        }
-
-        /// <summary>
-        /// Get query service
-        /// </summary>
-        /// <returns></returns>
-        public static ISixnetQueryService<T> GetQueryService<T>()
-        {
-            return GetInstance<ISixnetQueryService<T>>();
-        }
-
-        #endregion
-
         #region Service provider
 
         /// <summary>
@@ -533,8 +510,8 @@ namespace Sixnet.DependencyInjection
             services.AddSingleton<ISixnetMessageProvider, SixnetDefaultMessageProvider>();
             services.AddSingleton(typeof(ISixnetDataAccess<>), typeof(SixnetDefaultDataAccess<>));
             services.AddSingleton(typeof(ISixnetRepository<>), typeof(SixnetDefaultRepository<>));
-            services.AddSingleton(typeof(ISixnetCommandService<>), typeof(SixnetCommandService<>));
-            services.AddSingleton(typeof(ISixnetQueryService<>), typeof(SixnetBaseQueryService<>));
+            services.AddSingleton(typeof(ISixnetCommandService<,>), typeof(SixnetBaseCommandService<,>));
+            services.AddSingleton(typeof(ISixnetQueryService<,>), typeof(SixnetBaseQueryService<,>));
             services.AddSingleton(typeof(ISixnetDefaultAssociatedDataProvider<,>), typeof(SixnetDefaultAssociatedDataProvider<,>));
             services.AddSixnetLocalization(options =>
             {

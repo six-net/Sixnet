@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Sixnet.Development.Association
 {
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
-    public class SixnetAssociatingAttribute(string[] identityPropertyNames, bool includeArchived = true, Type associatedType = null, Type associatedEntityType = null) : Attribute
+    public class SixnetAssociatingAttribute(string[] identityPropertyNames, bool includeHistorical = true, bool includeArchived = true, Type associatedType = null, Type associatedEntityType = null) : Attribute
     {
         internal string[] IdentityPropertyNames { get; set; } = identityPropertyNames;
 
@@ -18,5 +18,7 @@ namespace Sixnet.Development.Association
         internal Type AssociatedEntityType { get; set; } = associatedEntityType;
 
         internal bool IncludeArchived { get; set; } = includeArchived;
+
+        internal bool IncludeHistorical {  get; set; } = includeHistorical;
     }
 }

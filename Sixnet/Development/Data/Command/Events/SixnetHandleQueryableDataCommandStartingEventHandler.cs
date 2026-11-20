@@ -1,5 +1,6 @@
 ﻿// "Company © 2025. All rights reserved."
 
+using Microsoft.IdentityModel.Tokens;
 using Sixnet.Development.Data.Field;
 using Sixnet.Development.Entity;
 using Sixnet.Development.Queryable;
@@ -44,7 +45,7 @@ namespace Sixnet.Development.Data.Command.Events
             if (operationType == SixnetDataOperationType.Query)
             {
                 var versionningTableType = queryable?.Info?.GetVersioningTableType();
-                if (versionningTableType.HasValue && (dataCommand.Options ==null || !dataCommand.Options.VersioningTableType.HasValue))
+                if (versionningTableType.HasValue && (dataCommand.Options == null || !dataCommand.Options.VersioningTableType.HasValue))
                 {
                     var options = dataCommand.Options ?? SixnetDataOperationOptions.Create();
                     options.VersioningTableType = versionningTableType.Value;
@@ -325,6 +326,19 @@ namespace Sixnet.Development.Data.Command.Events
                     dataFilter ??= SixnetQuerier.Create().SetModelType(context.ModelType);
                     dataFilter = dataFilter.Where(SixnetCriterion.Create(SixnetCriterionOperator.Equal, SixnetDataField.Create(isolationFieldName, context.ModelType)
                         , SixnetConstantField.Create(isolationDataId.ConvertTo(isolationField.DataType))));
+                }
+            }
+
+            // History
+            var ignoreHistory = originalQueryable.HasIgnoredFilter(SixnetFieldRole.HistoryTag) || options.HasIgnoredRoleFilter(SixnetFieldRole.HistoryTag);
+            if (!ignoreHistory)
+            {
+                var historyTagFieldName = SixnetEntityManager.GetFieldName(context.ModelType, SixnetFieldRole.HistoryTag);
+                if (!string.IsNullOrWhiteSpace(historyTagFieldName))
+                {
+                    dataFilter ??= SixnetQuerier.Create().SetModelType(context.ModelType);
+                    dataFilter = dataFilter.Where(SixnetCriterion.Create(SixnetCriterionOperator.Equal, SixnetDataField.Create(historyTagFieldName, context.ModelType)
+                            , SixnetConstantField.Create(false)));
                 }
             }
 

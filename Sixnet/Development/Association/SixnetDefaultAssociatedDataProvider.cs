@@ -2,14 +2,14 @@
 
 using System.Threading.Tasks;
 using Sixnet.DependencyInjection;
-using Sixnet.Development.Domain.Service;
 using Sixnet.Development.Queryable;
+using Sixnet.Development.Repository;
 
 namespace Sixnet.Development.Association
 {
     internal class SixnetDefaultAssociatedDataProvider<TAssociatedDto, TAssociatedEntity> : ISixnetDefaultAssociatedDataProvider<TAssociatedDto, TAssociatedEntity>
     {
-        readonly ISixnetQueryService<TAssociatedEntity> entityQueryService = SixnetContainer.GetInstance<ISixnetQueryService<TAssociatedEntity>>();
+        readonly ISixnetRepository<TAssociatedEntity> entityRepository = SixnetContainer.GetRepository<TAssociatedEntity>();
 
         public async Task LoadAssociatedDatasAsync(SixnetLoadAssociatedDataContext context)
         {
@@ -17,7 +17,7 @@ namespace Sixnet.Development.Association
             if (queryable != null)
             {
                 queryable = SixnetQuerier.Create<TAssociatedEntity>(queryable);
-                var dataList = (await entityQueryService.GetListAsync(queryable).ConfigureAwait(false))
+                var dataList = (await entityRepository.GetListAsync(queryable).ConfigureAwait(false))
                     .MapTo<List<TAssociatedDto>>();
                 context.SetAssociatedDatas(dataList);
             }

@@ -12,7 +12,7 @@ using Sixnet.Model.Paging;
 
 namespace Sixnet.Development.Domain.Service
 {
-    public interface ISixnetQueryService<T>
+    public interface ISixnetQueryService<TEntity, TId>
     {
         /// <summary>
         /// Get paging
@@ -20,7 +20,7 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="filter">Filter</param>
         /// <param name="configure">Configure</param>
         /// <returns></returns>
-        SixnetPagingInfo<T> GetPaging(SixnetPagingFilter filter, Action<SixnetDataOperationOptions> configure = null);
+        SixnetPagingInfo<TEntity> GetPaging(SixnetPagingFilter filter, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get paging
@@ -30,7 +30,7 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="pageSize">Page size</param>
         /// <param name="configure">Configure</param>
         /// <returns></returns>
-        SixnetPagingInfo<T> GetPaging(ISixnetQueryable queryable, int page, int pageSize, Action<SixnetDataOperationOptions> configure = null);
+        SixnetPagingInfo<TEntity> GetPaging(ISixnetQueryable queryable, int page, int pageSize, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get paging
@@ -41,7 +41,7 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="includeArchived">Include archived</param>
         /// <param name="configure">Configure</param>
         /// <returns></returns>
-        SixnetPagingInfo<T> GetPaging(Expression<Func<T, bool>> condition, int page, int pageSize, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null);
+        SixnetPagingInfo<TEntity> GetPaging(Expression<Func<TEntity, bool>> condition, int page, int pageSize, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get paging
@@ -49,7 +49,7 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="filter">Filter</param>
         /// <param name="configure">Configure</param>
         /// <returns></returns>
-        Task<SixnetPagingInfo<T>> GetPagingAsync(SixnetPagingFilter filter, Action<SixnetDataOperationOptions> configure = null);
+        Task<SixnetPagingInfo<TEntity>> GetPagingAsync(SixnetPagingFilter filter, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get paging
@@ -59,7 +59,7 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="pageSize">Page size</param>
         /// <param name="configure">Configure</param>
         /// <returns></returns>
-        Task<SixnetPagingInfo<T>> GetPagingAsync(ISixnetQueryable queryable, int page, int pageSize, Action<SixnetDataOperationOptions> configure = null);
+        Task<SixnetPagingInfo<TEntity>> GetPagingAsync(ISixnetQueryable queryable, int page, int pageSize, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get paging
@@ -70,7 +70,7 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="includeArchived">Include archived</param>
         /// <param name="configure">Configure</param>
         /// <returns></returns>
-        Task<SixnetPagingInfo<T>> GetPagingAsync(Expression<Func<T, bool>> condition, int page, int pageSize, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null);
+        Task<SixnetPagingInfo<TEntity>> GetPagingAsync(Expression<Func<TEntity, bool>> condition, int page, int pageSize, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data
@@ -78,7 +78,7 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Configure</param>
         /// <returns></returns>
-        T Get(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null);
+        TEntity Get(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data
@@ -86,7 +86,7 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="filter">Filter</param>
         /// <param name="configure">Configure</param>
         /// <returns></returns>
-        T Get(SixnetQueryableFilter filter, Action<SixnetDataOperationOptions> configure = null);
+        TEntity Get(SixnetQueryableFilter filter, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data
@@ -94,7 +94,7 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Configure</param>
         /// <returns></returns>
-        Task<T> GetAsync(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null);
+        Task<TEntity> GetAsync(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data
@@ -102,7 +102,7 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="filter">Filter</param>
         /// <param name="configure">Configure</param>
         /// <returns></returns>
-        Task<T> GetAsync(SixnetQueryableFilter filter, Action<SixnetDataOperationOptions> configure = null);
+        Task<TEntity> GetAsync(SixnetQueryableFilter filter, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data list
@@ -110,7 +110,7 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Configure</param>
         /// <returns></returns>
-        List<T> GetList(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null);
+        List<TEntity> GetList(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data list
@@ -118,7 +118,7 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="filter">Filter</param>
         /// <param name="configure">Configure</param>
         /// <returns></returns>
-        List<T> GetList(SixnetQueryableFilter filter, Action<SixnetDataOperationOptions> configure = null);
+        List<TEntity> GetList(SixnetQueryableFilter filter, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data
@@ -126,7 +126,7 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="queryable">Queryable</param>
         /// <param name="configure">Configure</param>
         /// <returns></returns>
-        Task<List<T>> GetListAsync(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null);
+        Task<List<TEntity>> GetListAsync(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data
@@ -134,7 +134,7 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="filter">Filter</param>
         /// <param name="configure">Configure</param>
         /// <returns></returns>
-        Task<List<T>> GetListAsync(SixnetQueryableFilter filter, Action<SixnetDataOperationOptions> configure = null);
+        Task<List<TEntity>> GetListAsync(SixnetQueryableFilter filter, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data by id
@@ -144,7 +144,7 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="includeArchived">Include archived</param>
         /// <param name="configure">Configure</param>
         /// <returns></returns>
-        T Get(dynamic id, long? version = null, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null);
+        TEntity Get(TId id, long? version = null, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data by id
@@ -154,7 +154,7 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="includeArchived">Include archived</param>
         /// <param name="configure">Configure</param>
         /// <returns></returns>
-        Task<T> GetAsync(dynamic id, long? version = null, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null);
+        Task<TEntity> GetAsync(TId id, long? version = null, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data list by ids
@@ -163,7 +163,7 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="includeArchived">Include archived</param>
         /// <param name="configure">Configure</param>
         /// <returns></returns>
-        List<T> GetList(IEnumerable<dynamic> ids, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null);
+        List<TEntity> GetList(IEnumerable<TId> ids, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data list by ids
@@ -172,7 +172,7 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="includeArchived">Include archived</param>
         /// <param name="configure">Configure</param>
         /// <returns></returns>
-        Task<List<T>> GetListAsync(IEnumerable<dynamic> ids, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null);
+        Task<List<TEntity>> GetListAsync(IEnumerable<TId> ids, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data
@@ -181,7 +181,7 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="includeArchived">Include archived</param>
         /// <param name="configure">Configure</param>
         /// <returns></returns>
-        T Get(Expression<Func<T, bool>> condition, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null);
+        TEntity Get(Expression<Func<TEntity, bool>> condition, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data
@@ -190,7 +190,7 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="includeArchived">Include archived</param>
         /// <param name="configure">Configure</param>
         /// <returns></returns>
-        Task<T> GetAsync(Expression<Func<T, bool>> condition, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null);
+        Task<TEntity> GetAsync(Expression<Func<TEntity, bool>> condition, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data
@@ -199,7 +199,7 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="includeArchived">Include archived</param>
         /// <param name="configure">Configure</param>
         /// <returns></returns>
-        List<T> GetList(Expression<Func<T, bool>> condition, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null);
+        List<TEntity> GetList(Expression<Func<TEntity, bool>> condition, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data
@@ -208,6 +208,6 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="includeArchived">Include archived</param>
         /// <param name="configure">Configure</param>
         /// <returns></returns>
-        Task<List<T>> GetListAsync(Expression<Func<T, bool>> condition, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null);
+        Task<List<TEntity>> GetListAsync(Expression<Func<TEntity, bool>> condition, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null);
     }
 }

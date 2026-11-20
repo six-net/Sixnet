@@ -26,7 +26,7 @@ namespace Sixnet.Development.Association
             , ISixnetAssociationLoadable loadable = null)
         {
             Loadable = loadable;
-            _queryable = associatedDataQueryable?.FromAllVersions().IncludeArchivedIf(associationInfo.IncludeArchived);
+            _queryable = associatedDataQueryable?.IncludeHistoricalIf(associationInfo.IncludeHistorical).IncludeArchivedIf(associationInfo.IncludeArchived);
             _sourceDatas = sourceDatas;
             _sixnetAssociationInfo = associationInfo;
         }

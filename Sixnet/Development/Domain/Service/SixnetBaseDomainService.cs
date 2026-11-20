@@ -1,23 +1,16 @@
 ﻿// "Company © 2025. All rights reserved."
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using Sixnet.DependencyInjection;
 using Sixnet.Development.Data.Field;
 using Sixnet.Development.Entity;
 using Sixnet.Development.Queryable;
 using Sixnet.Development.Repository;
-using Sixnet.Exceptions;
 
 namespace Sixnet.Development.Domain.Service
 {
-    public abstract class SixnetBaseDomainService<T> where T : SixnetBaseEntity<T>, new()
+    public abstract class SixnetBaseDomainService<TEntity, TId> where TEntity : SixnetBaseEntity<TEntity>, new()
     {
-        protected readonly ISixnetRepository<T> repository = SixnetContainer.GetRepository<T>();
+        protected readonly ISixnetRepository<TEntity> repository = SixnetContainer.GetRepository<TEntity>();
 
         protected readonly bool isSeparateVersioning = false;
 
@@ -31,9 +24,9 @@ namespace Sixnet.Development.Domain.Service
 
         public SixnetBaseDomainService()
         {
-            var entityConfig = SixnetEntityManager.GetEntityConfig<T>();
-            isSeparateVersioning = entityConfig.InStyle(SixnetEntityStyle.SeparateVersioning);
-            isVersioning = entityConfig.InStyle(SixnetEntityStyle.Versioning) || isSeparateVersioning;
+            var entityConfig = SixnetEntityManager.GetEntityConfig<TEntity>();
+            isSeparateVersioning = entityConfig.IsSeparateVersioning;
+            isVersioning = entityConfig.IsVersioning;
 
             // version
             if (entityConfig.RoleFields.TryGetValue(SixnetFieldRole.Version, out var versionFields))
@@ -58,32 +51,67 @@ namespace Sixnet.Development.Domain.Service
             }
         }
 
-        protected ISixnetQueryable<T> GetIdQueryable(dynamic id)
-        {
-            var idCriterion = SixnetCriterion.Create(SixnetCriterionOperator.Equal, SixnetDataField.Create(defaultIdFieldName, typeof(T)), SixnetConstantField.Create(id));
-
-            return repository
-                .AsQueryable()
-                .Where(idCriterion);
-        }
-
-        protected ISixnetQueryable<T> GetIdsQueryable(IEnumerable<dynamic> ids)
-        {
-            var idCriterion = SixnetCriterion.Create(SixnetCriterionOperator.In, SixnetDataField.Create(defaultIdFieldName, typeof(T)), SixnetConstantField.Create(ids));
-
-            return repository
-                .AsQueryable()
-                .Where(idCriterion);
-        }
-
         protected SixnetCriterion GetVersionCriterion(long version)
         {
-            return SixnetCriterion.Create(SixnetCriterionOperator.Equal, SixnetDataField.Create(versionFieldName, typeof(T)), SixnetConstantField.Create(version));
+            return SixnetCriterion.Create(SixnetCriterionOperator.Equal, SixnetDataField.Create(versionFieldName, typeof(TEntity)), SixnetConstantField.Create(version));
         }
 
         protected SixnetCriterion GetHistoryTagCriterion(bool isHistorical)
         {
-            return SixnetCriterion.Create(SixnetCriterionOperator.Equal, SixnetDataField.Create(historyTagFieldName, typeof(T)), SixnetConstantField.Create(isHistorical));
+            return SixnetCriterion.Create(SixnetCriterionOperator.Equal, SixnetDataField.Create(historyTagFieldName, typeof(TEntity)), SixnetConstantField.Create(isHistorical));
+        }
+
+        protected ISixnetQueryable<TEntity> GetIdQueryable(TId id)
+        {
+            var idCriterion = SixnetCriterion.Create(SixnetCriterionOperator.Equal, SixnetDataField.Create(defaultIdFieldName, typeof(TEntity)), SixnetConstantField.Create(id));
+
+            return repository
+                .AsQueryable()
+                .Where(idCriterion);
+        }
+
+        protected ISixnetQueryable<TEntity> GetIdsQueryable(IEnumerable<TId> ids)
+        {
+            var idCriterion = SixnetCriterion.Create(SixnetCriterionOperator.In, SixnetDataField.Create(defaultIdFieldName, typeof(TEntity)), SixnetConstantField.Create(ids));
+
+            return repository
+                .AsQueryable()
+                .Where(idCriterion);
+        }
+
+        /// <summary>
+        /// Handle queryable
+        /// </summary>
+        /// <param name="queryable"></param>
+        /// <param name="version"></param>
+        /// <param name="includeArchived"></param>
+        /// <returns></returns>
+        internal protected ISixnetQueryable HandleQueryable(ISixnetQueryable queryable, bool includeHistorical = false, long? version = null, bool includeArchived = false)
+        {
+            queryable ??= SixnetQuerier.Create<TEntity>();
+
+            if (queryable.GetModelType() != typeof(TEntity))
+            {
+                queryable = SixnetQuerier.Create<TEntity>(queryable);
+            }
+
+            if (isVersioning)
+            {
+                var hasVersion = version.HasValue && version.Value > 0;
+                if (hasVersion)
+                {
+                    var versionCriterion = GetVersionCriterion(version.Value);
+                    queryable.Where(versionCriterion);
+                }
+                includeHistorical |= hasVersion;
+                includeHistorical |= queryable.Info.IsFromAllVersions();
+            }
+
+            queryable = queryable
+                .IncludeHistoricalIf(includeHistorical)
+                .IncludeArchivedIf(includeArchived);
+
+            return queryable;
         }
     }
 }

@@ -22,7 +22,7 @@ using Sixnet.Expressions.Linq;
 
 namespace Sixnet.Development.Domain.Service
 {
-    public abstract class SixnetBaseCommandService<T> : SixnetBaseQueryService<T> where T : SixnetBaseEntity<T>, new()
+    public class SixnetBaseCommandService<TEntity, TId> : SixnetBaseDomainService<TEntity, TId>, ISixnetCommandService<TEntity, TId> where TEntity : SixnetBaseEntity<TEntity>, new()
     {
         #region Identity queryable
 
@@ -31,11 +31,11 @@ namespace Sixnet.Development.Domain.Service
         /// </summary>
         /// <param name="datas"></param>
         /// <returns></returns>
-        ISixnetQueryable GetIdentityQueryable(IEnumerable<T> datas, bool withoutVersion = true)
+        ISixnetQueryable GetIdentityQueryable(IEnumerable<TEntity> datas, bool withoutVersion = true)
         {
             if (datas.IsNullOrEmpty())
             {
-                return SixnetQuerier.Create<T>(d => 0 == 1);
+                return SixnetQuerier.Create<TEntity>(d => 0 == 1);
             }
             else
             {
@@ -52,7 +52,7 @@ namespace Sixnet.Development.Domain.Service
 
         #region Record lastest version data
 
-        int RecordLatestVersionData(IEnumerable<T> datas, Action<SixnetDataOperationOptions> configure = null)
+        int RecordLatestVersionData(IEnumerable<TEntity> datas, Action<SixnetDataOperationOptions> configure = null)
         {
             if (datas.IsNullOrEmpty())
             {
@@ -88,7 +88,7 @@ namespace Sixnet.Development.Domain.Service
             }
         }
 
-        async Task<int> RecordLatestVersionDataAsync(IEnumerable<T> datas, Action<SixnetDataOperationOptions> configure = null)
+        async Task<int> RecordLatestVersionDataAsync(IEnumerable<TEntity> datas, Action<SixnetDataOperationOptions> configure = null)
         {
             if (datas.IsNullOrEmpty())
             {
@@ -131,22 +131,22 @@ namespace Sixnet.Development.Domain.Service
         /// <summary>
         /// Save data
         /// </summary>
-        /// <param name="parameter"></param>
+        /// <param name="saveInfo"></param>
         /// <param name="configure"></param>
         /// <returns></returns>
-        protected T SaveData(SixnetSaveDataInfo<T> parameter, Action<SixnetDataOperationOptions> configure = null)
+        public TEntity Save(SixnetSaveDataInfo<TEntity> saveInfo, Action<SixnetDataOperationOptions> configure = null)
         {
-            var newData = parameter?.Data?.Clone();
-            SixnetThrower.ThrowArgNullIf(newData == null, nameof(SixnetSaveDataInfo<T>.Data));
+            var newData = saveInfo?.Data?.Clone();
+            SixnetThrower.ThrowArgNullIf(newData == null, nameof(SixnetSaveDataInfo<TEntity>.Data));
 
             var isAdd = newData.IdentityValueIsNull();
-            var saveContext = new SixnetSaveDataContext<T>()
+            var saveContext = new SixnetSaveDataContext<TEntity>()
             {
                 NewData = newData,
                 OldData = null,
-                IncludeArchived = parameter.IncludeArchived,
+                IncludeArchived = saveInfo.IncludeArchived,
                 IsUpdate = !isAdd,
-                SaveInfo = parameter
+                SaveInfo = saveInfo
             };
 
             if (isAdd)
@@ -178,9 +178,9 @@ namespace Sixnet.Development.Domain.Service
             }
             else
             {
-                var identityQueryable = HandleQueryable(GetIdentityQueryable([newData]), false, null, parameter.IncludeArchived);
-                var currentData = GetList(identityQueryable, configure)?.FirstOrDefault();
-                SixnetThrower.ThrowGetDataFailedIf<T>(currentData == null);
+                var identityQueryable = HandleQueryable(GetIdentityQueryable([newData]), false, null, saveInfo.IncludeArchived);
+                var currentData = repository.Get(identityQueryable, configure);
+                SixnetThrower.ThrowGetDataFailedIf<TEntity>(currentData == null);
 
                 saveContext.OldData = currentData.Clone();
                 SaveDataBefore(saveContext, configure);
@@ -224,9 +224,9 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="newData"></param>
         /// <param name="configure"></param>
         /// <returns></returns>
-        protected T SaveData(T newData, Action<SixnetDataOperationOptions> configure = null)
+        public TEntity Save(TEntity newData, Action<SixnetDataOperationOptions> configure = null)
         {
-            return SaveData(new SixnetSaveDataInfo<T>() { Data = newData }, configure);
+            return Save(new SixnetSaveDataInfo<TEntity>() { Data = newData }, configure);
         }
 
         /// <summary>
@@ -235,38 +235,40 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="newDatas"></param>
         /// <param name="configure"></param>
         /// <returns></returns>
-        protected void SaveDatas(IEnumerable<T> newDatas, Action<SixnetDataOperationOptions> configure = null)
+        public List<TEntity> Save(IEnumerable<TEntity> newDatas, Action<SixnetDataOperationOptions> configure = null)
         {
             if (newDatas.IsNullOrEmpty())
             {
-                return;
+                return new List<TEntity>(0);
             }
+            var savedDatas = new List<TEntity>();
             foreach (var newData in newDatas)
             {
-                SaveData(new SixnetSaveDataInfo<T>() { Data = newData }, configure);
+                savedDatas.Add(Save(new SixnetSaveDataInfo<TEntity>() { Data = newData }, configure));
             }
+            return savedDatas;
         }
 
         /// <summary>
         /// Save data
         /// </summary>
-        /// <param name="parameter"></param>
+        /// <param name="saveInfo"></param>
         /// <param name="configure"></param>
         /// <returns></returns>
-        protected async Task<T> SaveDataAsync(SixnetSaveDataInfo<T> parameter, Action<SixnetDataOperationOptions> configure = null)
+        public async Task<TEntity> SaveAsync(SixnetSaveDataInfo<TEntity> saveInfo, Action<SixnetDataOperationOptions> configure = null)
         {
-            var newData = parameter?.Data?.Clone();
-            SixnetThrower.ThrowArgNullIf(newData == null, nameof(SixnetSaveDataInfo<T>.Data));
+            var newData = saveInfo?.Data?.Clone();
+            SixnetThrower.ThrowArgNullIf(newData == null, nameof(SixnetSaveDataInfo<TEntity>.Data));
 
             // save before
             var isAdd = newData.IdentityValueIsNull();
-            var saveContext = new SixnetSaveDataContext<T>()
+            var saveContext = new SixnetSaveDataContext<TEntity>()
             {
                 NewData = newData,
                 OldData = null,
-                IncludeArchived = parameter.IncludeArchived,
+                IncludeArchived = saveInfo.IncludeArchived,
                 IsUpdate = !isAdd,
-                SaveInfo = parameter
+                SaveInfo = saveInfo
             };
 
             if (isAdd)
@@ -298,9 +300,9 @@ namespace Sixnet.Development.Domain.Service
             }
             else
             {
-                var identityQueryable = HandleQueryable(GetIdentityQueryable([newData]), false, null, parameter.IncludeArchived);
-                var currentData = (await GetListAsync(identityQueryable, configure).ConfigureAwait(false))?.FirstOrDefault();
-                SixnetThrower.ThrowGetDataFailedIf<T>(currentData == null);
+                var identityQueryable = HandleQueryable(GetIdentityQueryable([newData]), false, null, saveInfo.IncludeArchived);
+                var currentData = await repository.GetAsync(identityQueryable, configure).ConfigureAwait(false);
+                SixnetThrower.ThrowGetDataFailedIf<TEntity>(currentData == null);
 
                 saveContext.OldData = currentData.Clone();
                 await SaveDataBeforeAsync(saveContext, configure).ConfigureAwait(false);
@@ -344,9 +346,9 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="newData"></param>
         /// <param name="configure"></param>
         /// <returns></returns>
-        protected Task<T> SaveDataAsync(T newData, Action<SixnetDataOperationOptions> configure = null)
+        public Task<TEntity> SaveAsync(TEntity newData, Action<SixnetDataOperationOptions> configure = null)
         {
-            return SaveDataAsync(new SixnetSaveDataInfo<T>() { Data = newData }, configure);
+            return SaveAsync(new SixnetSaveDataInfo<TEntity>() { Data = newData }, configure);
         }
 
         /// <summary>
@@ -355,16 +357,18 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="newDatas"></param>
         /// <param name="configure"></param>
         /// <returns></returns>
-        protected async Task SaveDatasAsync(IEnumerable<T> newDatas, Action<SixnetDataOperationOptions> configure = null)
+        public async Task<List<TEntity>> SaveAsync(IEnumerable<TEntity> newDatas, Action<SixnetDataOperationOptions> configure = null)
         {
             if (newDatas.IsNullOrEmpty())
             {
-                return;
+                return new List<TEntity>(0);
             }
+            var savedDatas = new List<TEntity>();
             foreach (var newData in newDatas)
             {
-                await SaveDataAsync(new SixnetSaveDataInfo<T>() { Data = newData }, configure).ConfigureAwait(false);
+                savedDatas.Add(await SaveAsync(new SixnetSaveDataInfo<TEntity>() { Data = newData }, configure).ConfigureAwait(false));
             }
+            return savedDatas;
         }
 
         /// <summary>
@@ -372,7 +376,7 @@ namespace Sixnet.Development.Domain.Service
         /// </summary>
         /// <param name="context"></param>
         /// <param name="configure"></param>
-        protected virtual void SaveDataBefore(SixnetSaveDataContext<T> context, Action<SixnetDataOperationOptions> configure = null)
+        protected virtual void SaveDataBefore(SixnetSaveDataContext<TEntity> context, Action<SixnetDataOperationOptions> configure = null)
         {
         }
 
@@ -381,7 +385,7 @@ namespace Sixnet.Development.Domain.Service
         /// </summary>
         /// <param name="context"></param>
         /// <param name="configure"></param>
-        protected virtual Task SaveDataBeforeAsync(SixnetSaveDataContext<T> context, Action<SixnetDataOperationOptions> configure = null)
+        protected virtual Task SaveDataBeforeAsync(SixnetSaveDataContext<TEntity> context, Action<SixnetDataOperationOptions> configure = null)
         {
             return Task.CompletedTask;
         }
@@ -391,7 +395,7 @@ namespace Sixnet.Development.Domain.Service
         /// </summary>
         /// <param name="context"></param>
         /// <param name="configure"></param>
-        protected virtual void SaveDataAfter(SixnetSaveDataContext<T> context, Action<SixnetDataOperationOptions> configure = null)
+        protected virtual void SaveDataAfter(SixnetSaveDataContext<TEntity> context, Action<SixnetDataOperationOptions> configure = null)
         {
         }
 
@@ -400,356 +404,107 @@ namespace Sixnet.Development.Domain.Service
         /// </summary>
         /// <param name="context"></param>
         /// <param name="configure"></param>
-        protected virtual Task SaveDataAfterAsync(SixnetSaveDataContext<T> context, Action<SixnetDataOperationOptions> configure = null)
+        protected virtual Task SaveDataAfterAsync(SixnetSaveDataContext<TEntity> context, Action<SixnetDataOperationOptions> configure = null)
         {
             return Task.CompletedTask;
         }
 
         #endregion
 
-        #region Update
+        #region Delete data
 
         /// <summary>
-        /// Update data
-        /// </summary>
-        /// <param name="fieldsAssignment"></param>
-        /// <param name="queryable"></param>
-        /// <param name="configure"></param>
-        protected int UpdateData(SixnetFieldsAssignment fieldsAssignment, ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
-        {
-            SixnetThrower.ThrowArgNullIf(fieldsAssignment == null);
-
-            if (isVersioning)
-            {
-                var affectRows = 0;
-                fieldsAssignment.RemoveNewValue(versionFieldName);
-                fieldsAssignment.RemoveNewValue(historyTagFieldName);
-
-                if (isSeparateVersioning)
-                {
-                    var addVersionValue = SixnetDataField.Create(versionFieldName, typeof(T), fieldFormatSetting: SixnetFieldFormatSetting.Create(SixnetFieldFormatterNames.ADD, SixnetConstantField.Create(1)));
-                    fieldsAssignment.SetNewValue(versionFieldName, addVersionValue);
-                    fieldsAssignment.SetNewValue(historyTagFieldName, SixnetConstantField.Create(false));
-
-                    affectRows = repository.Update(fieldsAssignment, queryable, options =>
-                    {
-                        options.FromPrimaryTable();
-                        configure?.Invoke(options);
-                    });
-                }
-
-                var currentDatas = GetList(HandleQueryable(queryable, false, null, false));
-                if (currentDatas.IsNullOrEmpty())
-                {
-                    return affectRows;
-                }
-
-                if (!isSeparateVersioning)
-                {
-                    foreach (var currentData in currentDatas)
-                    {
-                        currentData.SetValue(versionFieldName, currentData.GetValue(versionFieldName) + 1);
-                        currentData.SetValue(historyTagFieldName, false);
-                    }
-                }
-
-                affectRows = RecordLatestVersionData(currentDatas, configure);
-
-                if (!isSeparateVersioning)
-                {
-                    var identityQuery = SixnetConditionExtensions.IncludeEntities(null, currentDatas);
-                    affectRows = repository.Update(fieldsAssignment, identityQuery, configure);
-                }
-                return affectRows;
-            }
-            else
-            {
-                return repository.Update(fieldsAssignment, queryable, configure);
-            }
-        }
-
-        /// <summary>
-        /// Update data
-        /// </summary>
-        /// <param name="fieldsAssignment"></param>
-        /// <param name="ids"></param>
-        /// <param name="configure"></param>
-        protected int UpdateData(SixnetFieldsAssignment fieldsAssignment, IEnumerable<dynamic> ids, Action<SixnetDataOperationOptions> configure = null)
-        {
-            return UpdateData(fieldsAssignment, GetIdsQueryable(ids), configure);
-        }
-
-        /// <summary>
-        /// Update
-        /// </summary>
-        /// <param name="fieldsAssignment"></param>
-        /// <param name="condition"></param>
-        /// <param name="configure"></param>
-        protected int UpdateData(SixnetFieldsAssignment fieldsAssignment, Expression<Func<T, bool>> condition, Action<SixnetDataOperationOptions> configure = null)
-        {
-            return UpdateData(fieldsAssignment, SixnetQuerier.Create(condition), configure);
-        }
-
-        /// <summary>
-        /// Update data
-        /// </summary>
-        /// <param name="fieldsAssignmentExpression"></param>
-        /// <param name="ids"></param>
-        /// <param name="configure"></param>
-        protected int UpdateData(Expression<Func<T, bool>> fieldsAssignmentExpression, IEnumerable<dynamic> ids, Action<SixnetDataOperationOptions> configure = null)
-        {
-            return UpdateData(SixnetExpressionHelper.GetFieldsAssignment(fieldsAssignmentExpression), ids, configure);
-        }
-
-        /// <summary>
-        /// Update
-        /// </summary>
-        /// <param name="fieldsAssignmentExpression"></param>
-        /// <param name="id"></param>
-        /// <param name="configure"></param>
-        protected int UpdateData(Expression<Func<T, bool>> fieldsAssignmentExpression, dynamic id, Action<SixnetDataOperationOptions> configure = null)
-        {
-            return UpdateData(fieldsAssignmentExpression, [id], configure);
-        }
-
-        /// <summary>
-        /// Update
-        /// </summary>
-        /// <param name="fieldsAssignmentExpression"></param>
-        /// <param name="condition"></param>
-        /// <param name="configure"></param>
-        protected int UpdateData(Expression<Func<T, bool>> fieldsAssignmentExpression, Expression<Func<T, bool>> condition, Action<SixnetDataOperationOptions> configure = null)
-        {
-            return UpdateData(SixnetExpressionHelper.GetFieldsAssignment(fieldsAssignmentExpression), SixnetQuerier.Create(condition), configure);
-        }
-
-
-        /// <summary>
-        /// Update data
-        /// </summary>
-        /// <param name="fieldsAssignment"></param>
-        /// <param name="queryable"></param>
-        /// <param name="configure"></param>
-        protected async Task<int> UpdateDataAsync(SixnetFieldsAssignment fieldsAssignment, ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
-        {
-            SixnetThrower.ThrowArgNullIf(fieldsAssignment == null);
-
-            if (isVersioning)
-            {
-                var affectRows = 0;
-                fieldsAssignment.RemoveNewValue(versionFieldName);
-                fieldsAssignment.RemoveNewValue(historyTagFieldName);
-
-                if (isSeparateVersioning)
-                {
-                    var addVersionValue = SixnetDataField.Create(versionFieldName, typeof(T), fieldFormatSetting: SixnetFieldFormatSetting.Create(SixnetFieldFormatterNames.ADD, SixnetConstantField.Create(1)));
-                    fieldsAssignment.SetNewValue(versionFieldName, addVersionValue);
-                    fieldsAssignment.SetNewValue(historyTagFieldName, SixnetConstantField.Create(false));
-
-                    affectRows = await repository.UpdateAsync(fieldsAssignment, queryable, options =>
-                    {
-                        options.FromPrimaryTable();
-                        configure?.Invoke(options);
-                    }).ConfigureAwait(false);
-                }
-
-                var currentDatas = await GetListAsync(HandleQueryable(queryable, false, null, false)).ConfigureAwait(false);
-                if (currentDatas.IsNullOrEmpty())
-                {
-                    return affectRows;
-                }
-
-                if (!isSeparateVersioning)
-                {
-                    foreach (var currentData in currentDatas)
-                    {
-                        currentData.SetValue(versionFieldName, currentData.GetValue(versionFieldName) + 1);
-                        currentData.SetValue(historyTagFieldName, false);
-                    }
-                }
-
-                affectRows = await RecordLatestVersionDataAsync(currentDatas, configure).ConfigureAwait(false);
-
-                if (!isSeparateVersioning)
-                {
-                    var identityQuery = SixnetConditionExtensions.IncludeEntities(null, currentDatas);
-                    affectRows = await repository.UpdateAsync(fieldsAssignment, identityQuery, configure).ConfigureAwait(false);
-                }
-                return affectRows;
-            }
-            else
-            {
-                return await repository.UpdateAsync(fieldsAssignment, queryable, configure).ConfigureAwait(false);
-            }
-        }
-
-        /// <summary>
-        /// Update data
-        /// </summary>
-        /// <param name="fieldsAssignment"></param>
-        /// <param name="ids"></param>
-        /// <param name="configure"></param>
-        protected Task<int> UpdateDataAsync(SixnetFieldsAssignment fieldsAssignment, IEnumerable<dynamic> ids, Action<SixnetDataOperationOptions> configure = null)
-        {
-            return UpdateDataAsync(fieldsAssignment, GetIdsQueryable(ids), configure);
-        }
-
-        /// <summary>
-        /// Update
-        /// </summary>
-        /// <param name="fieldsAssignment"></param>
-        /// <param name="condition"></param>
-        /// <param name="configure"></param>
-        protected Task<int> UpdateDataAsync(SixnetFieldsAssignment fieldsAssignment, Expression<Func<T, bool>> condition, Action<SixnetDataOperationOptions> configure = null)
-        {
-            return UpdateDataAsync(fieldsAssignment, SixnetQuerier.Create(condition), configure);
-        }
-
-        /// <summary>
-        /// Update data
-        /// </summary>
-        /// <param name="fieldsAssignmentExpression"></param>
-        /// <param name="ids"></param>
-        /// <param name="configure"></param>
-        protected Task<int> UpdateDataAsync(Expression<Func<T, bool>> fieldsAssignmentExpression, IEnumerable<dynamic> ids, Action<SixnetDataOperationOptions> configure = null)
-        {
-            return UpdateDataAsync(SixnetExpressionHelper.GetFieldsAssignment(fieldsAssignmentExpression), ids, configure);
-        }
-
-        /// <summary>
-        /// Update
-        /// </summary>
-        /// <param name="fieldsAssignmentExpression"></param>
-        /// <param name="id"></param>
-        /// <param name="configure"></param>
-        protected Task<int> UpdateDataAsync(Expression<Func<T, bool>> fieldsAssignmentExpression, dynamic id, Action<SixnetDataOperationOptions> configure = null)
-        {
-            return UpdateDataAsync(fieldsAssignmentExpression, [id], configure);
-        }
-
-        /// <summary>
-        /// Update
-        /// </summary>
-        /// <param name="fieldsAssignmentExpression"></param>
-        /// <param name="condition"></param>
-        /// <param name="configure"></param>
-        protected Task<int> UpdateDataAsync(Expression<Func<T, bool>> fieldsAssignmentExpression, Expression<Func<T, bool>> condition, Action<SixnetDataOperationOptions> configure = null)
-        {
-            return UpdateDataAsync(SixnetExpressionHelper.GetFieldsAssignment(fieldsAssignmentExpression), SixnetQuerier.Create(condition), configure);
-        }
-
-        #endregion
-
-        #region Delete
-
-        /// <summary>
-        /// Delete data
-        /// </summary>
-        /// <param name="queryable"></param>
-        /// <param name="configure"></param>
-        protected int DeleteData(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
-        {
-            var archiveField = SixnetEntityManager.GetFields<T>(SixnetFieldRole.Archive)?.FirstOrDefault();
-            if (archiveField != null)
-            {
-                var fieldsAssignment = new SixnetFieldsAssignment();
-                fieldsAssignment.SetNewValue(archiveField.PropertyName, true);
-
-                return UpdateData(fieldsAssignment, queryable, configure);
-            }
-            else
-            {
-                return repository.Delete(queryable, options =>
-                {
-                    options.FromPrimaryTable();
-                    configure?.Invoke(options);
-                });
-            }
-        }
-
-        /// <summary>
-        /// Delete data
+        /// Delete
         /// </summary>
         /// <param name="ids"></param>
         /// <param name="configure"></param>
-        protected int DeleteData(IEnumerable<dynamic> ids, Action<SixnetDataOperationOptions> configure = null)
+        public virtual int Delete(IEnumerable<TId> ids, Action<SixnetDataOperationOptions> configure)
         {
-            return DeleteData(GetIdsQueryable(ids), configure);
+            if (ids.IsNullOrEmpty())
+            {
+                return 0;
+            }
+            return repository.Delete(GetIdsQueryable(ids), configure);
         }
 
         /// <summary>
-        /// Delete data
+        /// Delete
+        /// </summary>
+        /// <param name="ids"></param>
+        /// <param name="configure"></param>
+        public virtual int Delete(IEnumerable<TId> ids)
+        {
+            if (ids.IsNullOrEmpty())
+            {
+                return 0;
+            }
+            return repository.Delete(GetIdsQueryable(ids));
+        }
+
+        /// <summary>
+        /// Delete
         /// </summary>
         /// <param name="id"></param>
         /// <param name="configure"></param>
-        protected int DeleteData(dynamic id, Action<SixnetDataOperationOptions> configure = null)
+        public virtual int Delete(TId id, Action<SixnetDataOperationOptions> configure)
         {
-            return DeleteData([id], configure);
+            return Delete([id], configure);
         }
 
         /// <summary>
-        /// Delete data
-        /// </summary>
-        /// <param name="condition"></param>
-        /// <param name="configure"></param>
-        protected int DeleteData(Expression<Func<T, bool>> condition, Action<SixnetDataOperationOptions> configure = null)
-        {
-            return DeleteData(SixnetQuerier.Create(condition), configure);
-        }
-
-        /// <summary>
-        /// Delete data
-        /// </summary>
-        /// <param name="queryable"></param>
-        /// <param name="configure"></param>
-        protected async Task<int> DeleteDataAsync(ISixnetQueryable queryable, Action<SixnetDataOperationOptions> configure = null)
-        {
-            var archiveField = SixnetEntityManager.GetFields<T>(SixnetFieldRole.Archive)?.FirstOrDefault();
-            if (archiveField != null)
-            {
-                var fieldsAssignment = new SixnetFieldsAssignment();
-                fieldsAssignment.SetNewValue(archiveField.PropertyName, true);
-
-                return await UpdateDataAsync(fieldsAssignment, queryable, configure).ConfigureAwait(false);
-            }
-            else
-            {
-                return await repository.DeleteAsync(queryable, options =>
-                {
-                    options.FromPrimaryTable();
-                    configure?.Invoke(options);
-                }).ConfigureAwait(false);
-            }
-        }
-
-        /// <summary>
-        /// Delete data
-        /// </summary>
-        /// <param name="ids"></param>
-        /// <param name="configure"></param>
-        protected Task<int> DeleteDataAsync(IEnumerable<dynamic> ids, Action<SixnetDataOperationOptions> configure = null)
-        {
-            return DeleteDataAsync(GetIdsQueryable(ids), configure);
-        }
-
-        /// <summary>
-        /// Delete data
+        /// Delete
         /// </summary>
         /// <param name="id"></param>
         /// <param name="configure"></param>
-        protected Task<int> DeleteDataAsync(dynamic id, Action<SixnetDataOperationOptions> configure = null)
+        public virtual int Delete(TId id)
         {
-            return DeleteDataAsync([id], configure);
+            return Delete([id]);
         }
 
         /// <summary>
-        /// Delete data
+        /// Delete
         /// </summary>
-        /// <param name="condition"></param>
+        /// <param name="ids"></param>
         /// <param name="configure"></param>
-        protected Task<int> DeleteDataAsync(Expression<Func<T, bool>> condition, Action<SixnetDataOperationOptions> configure = null)
+        public virtual async Task<int> DeleteAsync(IEnumerable<TId> ids, Action<SixnetDataOperationOptions> configure)
         {
-            return DeleteDataAsync(SixnetQuerier.Create(condition), configure);
+            if (ids.IsNullOrEmpty())
+            {
+                return 0;
+            }
+            return await repository.DeleteAsync(GetIdsQueryable(ids), configure).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Delete
+        /// </summary>
+        /// <param name="ids"></param>
+        public virtual async Task<int> DeleteAsync(IEnumerable<TId> ids)
+        {
+            if (ids.IsNullOrEmpty())
+            {
+                return 0;
+            }
+            return await repository.DeleteAsync(GetIdsQueryable(ids)).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Delete
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="configure"></param>
+        public virtual Task<int> DeleteAsync(TId id, Action<SixnetDataOperationOptions> configure)
+        {
+            return DeleteAsync([id], configure);
+        }
+
+        /// <summary>
+        /// Delete
+        /// </summary>
+        /// <param name="id"></param>
+        public virtual Task<int> DeleteAsync(TId id)
+        {
+            return DeleteAsync([id]);
         }
 
         #endregion

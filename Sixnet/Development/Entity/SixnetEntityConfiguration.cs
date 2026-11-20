@@ -124,6 +124,16 @@ namespace Sixnet.Development.Entity
         public bool IsSystem { get; set; }
 
         /// <summary>
+        /// Whether is versioning table
+        /// </summary>
+        public bool IsVersioning { get; set; }
+
+        /// <summary>
+        /// Whether is separate versioning
+        /// </summary>
+        public bool IsSeparateVersioning {  get; set; }
+
+        /// <summary>
         /// Whether in style
         /// </summary>
         /// <param name="style"></param>
