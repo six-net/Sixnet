@@ -7,7 +7,7 @@ using Sixnet.Exceptions;
 
 namespace Sixnet.Development.Domain.Service
 {
-    public interface ISixnetCommandService<TEntity, TId>
+    public interface ISixnetCommandService<TEntity>
     {
         #region Save
 
@@ -68,54 +68,54 @@ namespace Sixnet.Development.Domain.Service
         /// </summary>
         /// <param name="ids"></param>
         /// <param name="configure"></param>
-        int Delete(IEnumerable<TId> ids, Action<SixnetDataOperationOptions> configure);
+        int Delete(IEnumerable<dynamic> ids, Action<SixnetDataOperationOptions> configure);
 
         /// <summary>
         /// Delete
         /// </summary>
         /// <param name="ids"></param>
         /// <param name="configure"></param>
-        int Delete(IEnumerable<TId> ids);
+        int Delete(IEnumerable<dynamic> ids);
 
         /// <summary>
         /// Delete
         /// </summary>
         /// <param name="id"></param>
         /// <param name="configure"></param>
-        int Delete(TId id, Action<SixnetDataOperationOptions> configure);
+        int Delete(dynamic id, Action<SixnetDataOperationOptions> configure);
 
         /// <summary>
         /// Delete
         /// </summary>
         /// <param name="id"></param>
         /// <param name="configure"></param>
-        int Delete(TId id);
+        int Delete(dynamic id);
 
         /// <summary>
         /// Delete
         /// </summary>
         /// <param name="ids"></param>
         /// <param name="configure"></param>
-        Task<int> DeleteAsync(IEnumerable<TId> ids, Action<SixnetDataOperationOptions> configure);
+        Task<int> DeleteAsync(IEnumerable<dynamic> ids, Action<SixnetDataOperationOptions> configure);
 
         /// <summary>
         /// Delete
         /// </summary>
         /// <param name="ids"></param>
-        Task<int> DeleteAsync(IEnumerable<TId> ids);
+        Task<int> DeleteAsync(IEnumerable<dynamic> ids);
 
         /// <summary>
         /// Delete
         /// </summary>
         /// <param name="id"></param>
         /// <param name="configure"></param>
-        Task<int> DeleteAsync(TId id, Action<SixnetDataOperationOptions> configure);
+        Task<int> DeleteAsync(dynamic id, Action<SixnetDataOperationOptions> configure);
 
         /// <summary>
         /// Delete
         /// </summary>
         /// <param name="id"></param>
-        Task<int> DeleteAsync(TId id);
+        Task<int> DeleteAsync(dynamic id);
 
         #endregion
     }

@@ -510,8 +510,8 @@ namespace Sixnet.DependencyInjection
             services.AddSingleton<ISixnetMessageProvider, SixnetDefaultMessageProvider>();
             services.AddSingleton(typeof(ISixnetDataAccess<>), typeof(SixnetDefaultDataAccess<>));
             services.AddSingleton(typeof(ISixnetRepository<>), typeof(SixnetDefaultRepository<>));
-            services.AddSingleton(typeof(ISixnetCommandService<,>), typeof(SixnetBaseCommandService<,>));
-            services.AddSingleton(typeof(ISixnetQueryService<,>), typeof(SixnetBaseQueryService<,>));
+            services.AddSingleton(typeof(ISixnetCommandService<>), typeof(SixnetBaseCommandService<>));
+            services.AddSingleton(typeof(ISixnetQueryService<>), typeof(SixnetBaseQueryService<>));
             services.AddSingleton(typeof(ISixnetDefaultAssociatedDataProvider<,>), typeof(SixnetDefaultAssociatedDataProvider<,>));
             services.AddSixnetLocalization(options =>
             {

@@ -12,7 +12,7 @@ using Sixnet.Model.Paging;
 
 namespace Sixnet.Development.Domain.Service
 {
-    public interface ISixnetQueryService<TEntity, TId>
+    public interface ISixnetQueryService<TEntity>
     {
         /// <summary>
         /// Get paging
@@ -144,7 +144,7 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="includeArchived">Include archived</param>
         /// <param name="configure">Configure</param>
         /// <returns></returns>
-        TEntity Get(TId id, long? version = null, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null);
+        TEntity Get(dynamic id, long? version = null, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data by id
@@ -154,7 +154,7 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="includeArchived">Include archived</param>
         /// <param name="configure">Configure</param>
         /// <returns></returns>
-        Task<TEntity> GetAsync(TId id, long? version = null, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null);
+        Task<TEntity> GetAsync(dynamic id, long? version = null, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data list by ids
@@ -163,7 +163,7 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="includeArchived">Include archived</param>
         /// <param name="configure">Configure</param>
         /// <returns></returns>
-        List<TEntity> GetList(IEnumerable<TId> ids, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null);
+        List<TEntity> GetList(IEnumerable<dynamic> ids, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data list by ids
@@ -172,7 +172,7 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="includeArchived">Include archived</param>
         /// <param name="configure">Configure</param>
         /// <returns></returns>
-        Task<List<TEntity>> GetListAsync(IEnumerable<TId> ids, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null);
+        Task<List<TEntity>> GetListAsync(IEnumerable<dynamic> ids, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null);
 
         /// <summary>
         /// Get data

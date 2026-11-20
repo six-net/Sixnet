@@ -22,7 +22,7 @@ using Sixnet.Expressions.Linq;
 
 namespace Sixnet.Development.Domain.Service
 {
-    public class SixnetBaseCommandService<TEntity, TId> : SixnetBaseDomainService<TEntity, TId>, ISixnetCommandService<TEntity, TId> where TEntity : SixnetBaseEntity<TEntity>, new()
+    public class SixnetBaseCommandService<TEntity> : SixnetBaseDomainService<TEntity>, ISixnetCommandService<TEntity> where TEntity : SixnetBaseEntity<TEntity>, new()
     {
         #region Identity queryable
 
@@ -418,7 +418,7 @@ namespace Sixnet.Development.Domain.Service
         /// </summary>
         /// <param name="ids"></param>
         /// <param name="configure"></param>
-        public virtual int Delete(IEnumerable<TId> ids, Action<SixnetDataOperationOptions> configure)
+        public virtual int Delete(IEnumerable<dynamic> ids, Action<SixnetDataOperationOptions> configure)
         {
             if (ids.IsNullOrEmpty())
             {
@@ -432,7 +432,7 @@ namespace Sixnet.Development.Domain.Service
         /// </summary>
         /// <param name="ids"></param>
         /// <param name="configure"></param>
-        public virtual int Delete(IEnumerable<TId> ids)
+        public virtual int Delete(IEnumerable<dynamic> ids)
         {
             if (ids.IsNullOrEmpty())
             {
@@ -446,7 +446,7 @@ namespace Sixnet.Development.Domain.Service
         /// </summary>
         /// <param name="id"></param>
         /// <param name="configure"></param>
-        public virtual int Delete(TId id, Action<SixnetDataOperationOptions> configure)
+        public virtual int Delete(dynamic id, Action<SixnetDataOperationOptions> configure)
         {
             return Delete([id], configure);
         }
@@ -456,7 +456,7 @@ namespace Sixnet.Development.Domain.Service
         /// </summary>
         /// <param name="id"></param>
         /// <param name="configure"></param>
-        public virtual int Delete(TId id)
+        public virtual int Delete(dynamic id)
         {
             return Delete([id]);
         }
@@ -466,7 +466,7 @@ namespace Sixnet.Development.Domain.Service
         /// </summary>
         /// <param name="ids"></param>
         /// <param name="configure"></param>
-        public virtual async Task<int> DeleteAsync(IEnumerable<TId> ids, Action<SixnetDataOperationOptions> configure)
+        public virtual async Task<int> DeleteAsync(IEnumerable<dynamic> ids, Action<SixnetDataOperationOptions> configure)
         {
             if (ids.IsNullOrEmpty())
             {
@@ -479,7 +479,7 @@ namespace Sixnet.Development.Domain.Service
         /// Delete
         /// </summary>
         /// <param name="ids"></param>
-        public virtual async Task<int> DeleteAsync(IEnumerable<TId> ids)
+        public virtual async Task<int> DeleteAsync(IEnumerable<dynamic> ids)
         {
             if (ids.IsNullOrEmpty())
             {
@@ -493,7 +493,7 @@ namespace Sixnet.Development.Domain.Service
         /// </summary>
         /// <param name="id"></param>
         /// <param name="configure"></param>
-        public virtual Task<int> DeleteAsync(TId id, Action<SixnetDataOperationOptions> configure)
+        public virtual Task<int> DeleteAsync(dynamic id, Action<SixnetDataOperationOptions> configure)
         {
             return DeleteAsync([id], configure);
         }
@@ -502,7 +502,7 @@ namespace Sixnet.Development.Domain.Service
         /// Delete
         /// </summary>
         /// <param name="id"></param>
-        public virtual Task<int> DeleteAsync(TId id)
+        public virtual Task<int> DeleteAsync(dynamic id)
         {
             return DeleteAsync([id]);
         }

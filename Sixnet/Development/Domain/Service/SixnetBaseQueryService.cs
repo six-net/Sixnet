@@ -19,7 +19,7 @@ using Sixnet.Model.Paging;
 
 namespace Sixnet.Development.Domain.Service
 {
-    public class SixnetBaseQueryService<TEntity, TId> : SixnetBaseDomainService<TEntity, TId>, ISixnetQueryService<TEntity, TId> where TEntity : SixnetBaseEntity<TEntity>, new()
+    public class SixnetBaseQueryService<TEntity> : SixnetBaseDomainService<TEntity>, ISixnetQueryService<TEntity> where TEntity : SixnetBaseEntity<TEntity>, new()
     {
         /// <summary>
         /// Get paging
@@ -199,7 +199,7 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="includeArchived">Include archived</param>
         /// <param name="configure">Configure</param>
         /// <returns></returns>
-        public TEntity Get(TId id, long? version = null, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null)
+        public TEntity Get(dynamic id, long? version = null, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null)
         {
             return HandleQueryable(GetIdQueryable(id), version > 0, version, includeArchived).First<TEntity>(configure);
         }
@@ -212,7 +212,7 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="includeArchived">Include archived</param>
         /// <param name="configure">Configure</param>
         /// <returns></returns>
-        public Task<TEntity> GetAsync(TId id, long? version = null, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null)
+        public Task<TEntity> GetAsync(dynamic id, long? version = null, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null)
         {
             return HandleQueryable(GetIdQueryable(id), version > 0, version, includeArchived).FirstAsync<TEntity>(configure);
         }
@@ -224,7 +224,7 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="includeArchived">Include archived</param>
         /// <param name="configure">Configure</param>
         /// <returns></returns>
-        public List<TEntity> GetList(IEnumerable<TId> ids, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null)
+        public List<TEntity> GetList(IEnumerable<dynamic> ids, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null)
         {
             return HandleQueryable(GetIdsQueryable(ids), false, null, includeArchived).ToList<TEntity>(configure);
         }
@@ -236,7 +236,7 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="includeArchived">Include archived</param>
         /// <param name="configure">Configure</param>
         /// <returns></returns>
-        public Task<List<TEntity>> GetListAsync(IEnumerable<TId> ids, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null)
+        public Task<List<TEntity>> GetListAsync(IEnumerable<dynamic> ids, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null)
         {
             return HandleQueryable(GetIdsQueryable(ids), false, null, includeArchived).ToListAsync<TEntity>(configure);
         }

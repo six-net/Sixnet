@@ -8,7 +8,7 @@ using Sixnet.Development.Repository;
 
 namespace Sixnet.Development.Domain.Service
 {
-    public abstract class SixnetBaseDomainService<TEntity, TId> where TEntity : SixnetBaseEntity<TEntity>, new()
+    public abstract class SixnetBaseDomainService<TEntity> where TEntity : SixnetBaseEntity<TEntity>, new()
     {
         protected readonly ISixnetRepository<TEntity> repository = SixnetContainer.GetRepository<TEntity>();
 
@@ -61,7 +61,7 @@ namespace Sixnet.Development.Domain.Service
             return SixnetCriterion.Create(SixnetCriterionOperator.Equal, SixnetDataField.Create(historyTagFieldName, typeof(TEntity)), SixnetConstantField.Create(isHistorical));
         }
 
-        protected ISixnetQueryable<TEntity> GetIdQueryable(TId id)
+        protected ISixnetQueryable<TEntity> GetIdQueryable(dynamic id)
         {
             var idCriterion = SixnetCriterion.Create(SixnetCriterionOperator.Equal, SixnetDataField.Create(defaultIdFieldName, typeof(TEntity)), SixnetConstantField.Create(id));
 
@@ -70,7 +70,7 @@ namespace Sixnet.Development.Domain.Service
                 .Where(idCriterion);
         }
 
-        protected ISixnetQueryable<TEntity> GetIdsQueryable(IEnumerable<TId> ids)
+        protected ISixnetQueryable<TEntity> GetIdsQueryable(IEnumerable<dynamic> ids)
         {
             var idCriterion = SixnetCriterion.Create(SixnetCriterionOperator.In, SixnetDataField.Create(defaultIdFieldName, typeof(TEntity)), SixnetConstantField.Create(ids));
 
