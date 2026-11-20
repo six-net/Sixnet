@@ -1752,7 +1752,7 @@ namespace Sixnet.Cache
         /// <returns>Return cache object prefixs</returns>
         internal static List<string> GetObjectPrefixs(SixnetCacheObject cacheObject)
         {
-            return Options?.GetObjectPrefixs(cacheObject);
+            return Options?.GetCacheObjectPrefixs(cacheObject);
         }
 
         #endregion

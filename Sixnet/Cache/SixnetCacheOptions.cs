@@ -21,24 +21,24 @@ namespace Sixnet.Cache
         };
         internal static MemoryProvider _defaultMemoryProvider = new();
 
-        #endregion
-
-        #region Properties
-
         /// <summary>
-        /// Get cache servers operation func
+        /// Get cache servers func
         /// </summary>
-        public Func<ISixnetCacheParameter, SixnetCacheServer> GetCacheServersFunc { get; set; }
+        Func<ISixnetCacheParameter, SixnetCacheServer> _getCacheServersFunc;
 
         /// <summary>
         /// Get global cache key prefixs func
         /// </summary>
-        public Func<List<string>> GetGlobalCacheKeyPrefixsFunc { get; set; }
+        Func<List<string>> _getGlobalCacheKeyPrefixsFunc;
 
         /// <summary>
         /// Get cache object prefixs func
         /// </summary>
-        public Func<SixnetCacheObject, List<string>> GetCacheObjectPrefixsFunc { get; set; }
+        Func<SixnetCacheObject, List<string>> _getCacheObjectPrefixsFunc;
+
+        #endregion
+
+        #region Properties
 
         /// <summary>
         /// Gets or sets the each key name split char
@@ -114,13 +114,22 @@ namespace Sixnet.Cache
         #region Cache server
 
         /// <summary>
+        /// Configure cache server
+        /// </summary>
+        /// <param name="configure">Configure</param>
+        public void ConfigureCacheServer(Func<ISixnetCacheParameter, SixnetCacheServer> configure)
+        {
+            _getCacheServersFunc = configure;
+        }
+
+        /// <summary>
         /// Get cache server
         /// </summary>
         /// <param name="parameter">Cache parameter</param>
         /// <returns>Return cache server</returns>
         public SixnetCacheServer GetCacheServer<T>(SixnetCacheParameter<T> parameter) where T : SixnetCacheResult, new()
         {
-            return GetCacheServersFunc?.Invoke(parameter) ?? Server;
+            return _getCacheServersFunc?.Invoke(parameter) ?? Server;
         }
 
         #endregion
@@ -128,12 +137,30 @@ namespace Sixnet.Cache
         #region Key prefixs
 
         /// <summary>
+        /// Configure global prefixs
+        /// </summary>
+        /// <param name="configure"></param>
+        public void ConfigureGlobalPrefixs(Func<List<string>> configure)
+        {
+            _getGlobalCacheKeyPrefixsFunc = configure;
+        }
+
+        /// <summary>
         /// Get global cache key prefixs
         /// </summary>
         /// <returns>Return global cache key prefixs</returns>
         public List<string> GetGlobalPrefixs()
         {
-            return GetGlobalCacheKeyPrefixsFunc?.Invoke() ?? new List<string>(0);
+            return _getGlobalCacheKeyPrefixsFunc?.Invoke() ?? new List<string>(0);
+        }
+
+        /// <summary>
+        /// Configure cache object prefixs
+        /// </summary>
+        /// <param name="configure"></param>
+        public void ConfigureCacheObjectPrefixs(Func<SixnetCacheObject, List<string>> configure)
+        {
+            _getCacheObjectPrefixsFunc = configure;
         }
 
         /// <summary>
@@ -141,9 +168,9 @@ namespace Sixnet.Cache
         /// </summary>
         /// <param name="cacheObject">Cache object</param>
         /// <returns>Return cache object prefixs</returns>
-        public List<string> GetObjectPrefixs(SixnetCacheObject cacheObject)
+        public List<string> GetCacheObjectPrefixs(SixnetCacheObject cacheObject)
         {
-            return GetCacheObjectPrefixsFunc?.Invoke(cacheObject) ?? new List<string>(0);
+            return _getCacheObjectPrefixsFunc?.Invoke(cacheObject) ?? new List<string>(0);
         }
 
         #endregion
