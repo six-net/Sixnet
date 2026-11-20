@@ -288,5 +288,27 @@ namespace Sixnet.Development.Domain.Service
         {
             return repository.GetListAsync(HandleQueryable(SixnetQuerier.Create(condition), false, null, includeArchived), configure);
         }
+
+        /// <summary>
+        /// Get all data
+        /// </summary>
+        /// <param name="includeArchived"></param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        public List<TEntity> GetAll(bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return repository.GetList(SixnetQuerier.Create<TEntity>().IncludeArchivedIf(includeArchived), configure);
+        }
+
+        /// <summary>
+        /// Get all data
+        /// </summary>
+        /// <param name="includeArchived"></param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        public Task<List<TEntity>> GetAllAsync(bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null)
+        {
+            return repository.GetListAsync(SixnetQuerier.Create<TEntity>().IncludeArchivedIf(includeArchived), configure);
+        }
     }
 }

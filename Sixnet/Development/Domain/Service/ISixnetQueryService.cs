@@ -209,5 +209,21 @@ namespace Sixnet.Development.Domain.Service
         /// <param name="configure">Configure</param>
         /// <returns></returns>
         Task<List<TEntity>> GetListAsync(Expression<Func<TEntity, bool>> condition, bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null);
+
+        /// <summary>
+        /// Get all data
+        /// </summary>
+        /// <param name="includeArchived"></param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        List<TEntity> GetAll(bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null);
+
+        /// <summary>
+        /// Get all data
+        /// </summary>
+        /// <param name="includeArchived"></param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        Task<List<TEntity>> GetAllAsync(bool includeArchived = false, Action<SixnetDataOperationOptions> configure = null);
     }
 }
